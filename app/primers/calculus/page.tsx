@@ -25,9 +25,9 @@ import { SlopePlayground } from "@/components/widgets/SlopePlayground";
 import { GradientDescentPlayground } from "@/components/widgets/GradientDescentPlayground";
 
 export const metadata: Metadata = {
-  title: "Calculus Primer · oop_ml",
+  title: "Calculus Primer · Perceptron Lab",
   description:
-    "If we change a model's setting a little, does its error improve or get worse? Calculus gives us a way to describe that change and use it to decide what to adjust next.",
+    "Calculus describes how one quantity changes as another changes. A derivative measures the rate of that change, helping us understand a function's behavior and decide which adjustments increase or decrease its output.",
 };
 
 export default function CalculusPrimerPage() {
@@ -36,7 +36,7 @@ export default function CalculusPrimerPage() {
       lessonId="calculus"
       technicalStart="7. Deriving the Slope Function"
       title="Calculus Primer"
-      tagline={"If we change a model's setting a little, does its error improve or get worse? Calculus gives us a way to describe that change and use it to decide what to adjust next."}
+      tagline={"Calculus describes how one quantity changes as another changes. A derivative measures the rate of that change, helping us understand a function's behavior and decide which adjustments increase or decrease its output."}
       prerequisites={
         <>
           You only need to know what a function and its graph are, a rule that
@@ -78,10 +78,7 @@ export default function CalculusPrimerPage() {
           positive, negative and zero, are the whole vocabulary, and every later
           section reuses them.
         </p>
-        <p>
-          Rise over run can be dragged. The two points below start at the worked
-          pair, and the triangle between them remeasures as either moves.
-        </p>
+        <p>Drag either point in the activity below. The triangle updates its rise and run, and the readout recalculates their ratio. If the points have the same horizontal coordinate, the run is zero and this slope is undefined.</p>
         <PrimerPlayground>
           <SlopePlayground />
         </PrimerPlayground>
@@ -103,14 +100,7 @@ export default function CalculusPrimerPage() {
             speed.
           </p>
         </WorkedExample>
-        <p>
-          Notice what kind of number that is. It is an average across the whole
-          trip. At no single moment did the speedometer have to read 50, since
-          you may have been stopped at a light for part of it and doing 70 for
-          the rest. An average across a stretch and a reading at an instant are
-          different quantities, and closing the gap between them is the entire
-          subject of the next three sections.
-        </p>
+        <p>The 50 miles per hour is an average over the whole trip. It does not tell us the speed at a particular moment: we may have been stopped at a light, or traveling at 70 elsewhere. With continuously changing speed, the speedometer would pass through 50, but it need not stay there. To describe the rate at an instant, we need a shorter interval than the whole trip.</p>
       </PrimerSection>
 
       <PrimerSection title="3. Measuring a Curve Across an Interval">
@@ -153,21 +143,8 @@ export default function CalculusPrimerPage() {
       </PrimerSection>
 
       <PrimerSection title="4. Shrinking the Interval">
-        <p>
-          An average across a stretch is still not what we set out to find. We
-          wanted the steepness of the curve at a single point, the speedometer
-          reading rather than the trip average. And a single point, on its own,
-          gives us nothing to divide, since one point has no rise and no run. It
-          looks like a dead end.
-        </p>
-        <p>
-          Here is the move everything else is built on. If the average across a
-          stretch is the wrong answer because the stretch is too wide, then
-          shrink the stretch. Keep the base point at x = 3 and pull the second
-          point closer, computing the same rise over run every time. Each average
-          is taken across a shorter piece of curve, so each is a better stand-in
-          for the steepness right at the base.
-        </p>
+        <p>An average rate describes a whole interval. To understand the rate at one point, we can compare averages over increasingly short intervals around it. The question is whether those averages approach a definite value.</p>
+        <p>Keep the base point fixed and move the second point closer. Each rise-over-run calculation now measures a shorter part of the curve. If these average slopes approach one value as the gap shrinks, that value describes the local rate at the base point.</p>
         <WorkedExample title="Move the second point closer and compare the average slope">
           <p>Move the second point from x = 5 in to x = 4, a gap of 1.</p>
           <Equation>{"f(4) = 0.5·16 − 4 + 2.5 = 6.5\naverage slope = (6.5 − 4) / (4 − 3) = 2.5 / 1 = 2.5"}</Equation>
@@ -193,23 +170,16 @@ export default function CalculusPrimerPage() {
           ]}
           caption="Slide the gap down from 2.00 and the average-slope readout walks through these exact numbers."
         />
-        <p>
-          The averages are not wandering. They are settling, and the smaller the
-          gap the closer they settle. 3, then 2.5, then 2.25, then 2.05, then
-          2.01. Nothing here yet says what they settle <em>on</em>, or gives that
-          value a name. What the table shows is only that they are heading
-          somewhere, and that where they are heading does not depend on how we
-          got there.
-        </p>
+        <p>The table shows the average slopes approaching a value as the gap becomes smaller. We have not divided by a zero gap. We are investigating what happens while the two points remain distinct and move closer together.</p>
       </PrimerSection>
 
       <PrimerQuiz
         title="Questions on Sections 1 to 4"
         questions={[
           trueFalse(
-            "A trip of 100 miles in 2 hours has a slope of 50 miles per hour, so the speedometer must have read 50 at some point along the way.",
+            "A trip of 100 miles in 2 hours has an average speed of 50 miles per hour, so the speedometer must have read 50 halfway through the trip.",
             false,
-            "That slope is an average across the whole trip, and an average across a stretch is a different quantity from a reading at an instant. At no single moment did the speedometer have to read 50, since you may have been stopped at a light for part of it and doing 70 for the rest.",
+            "Average speed describes the whole trip. It does not determine the reading halfway through, since time spent stopped or moving faster can occur in different parts of the journey. With continuous speed, a reading equal to the average does occur somewhere; the average alone does not tell us when.",
           ),
           choice(
             "On the curve f(x) = 0.5·x² − x + 2.5 the heights at x = 3 and x = 5 are 4 and 10. What does the straight line through those two points measure?",
@@ -234,7 +204,7 @@ export default function CalculusPrimerPage() {
             "Where the steep part of this curve sits is what decides the direction. Section 4 says the far end of the stretch from 3 to 5 is the steep part, so leaving it out lowers the average, and continuing inward keeps the averages falling.",
           ),
           several(
-            "What does the table of shrinking gaps actually establish?",
+            "For this smooth quadratic, which behavior does the table of shrinking gaps illustrate?",
             [
               "The averages are settling rather than wandering",
               "The smaller the gap, the closer they settle",
@@ -242,7 +212,7 @@ export default function CalculusPrimerPage() {
               "The value they settle on is named in that section",
             ],
             [0, 1, 2],
-            "The table shows three things and deliberately withholds a fourth. It says the averages are settling, that a smaller gap settles them closer, and that the destination does not depend on the route. What it does not say is what they settle on or what that value is called, which is the next section’s job.",
+            "The displayed averages approach a common slope as the gap shrinks. For this quadratic, the later algebra verifies the limit and shows that approaching from either side gives the same value. A finite table illustrates that behavior; it cannot establish every possible limiting path by itself.",
           ),
           choice(
             "A line passes through (2, 3) and (6, 11). What is its slope?",
@@ -253,7 +223,7 @@ export default function CalculusPrimerPage() {
               "4, the run between the two points",
             ],
             0,
-            "Slope is rise over run. Between the two points the line ran 4 across, from 2 to 6, and rose 8, from 3 to 11, so the slope is 8 over 4, two units upward for every one unit across. Dividing the other way round answers how far across the line goes per unit of rise, which is a different question, and the rise and the run on their own are lengths rather than a comparison of the two.",
+            "Slope compares the change in vertical position with the change in horizontal position. The correct result means two units upward per unit across. Reversing the division would instead describe horizontal movement per unit of rise. Either change alone leaves out the comparison the question asks for.",
           ),
         ]}
       />
@@ -273,22 +243,9 @@ export default function CalculusPrimerPage() {
           lim for the approaching, that is
         </p>
         <Equation>{"f'(x) = lim(h → 0)  (f(x + h) − f(x)) / h"}</Equation>
-        <p>
-          The picture of the same process is the two lines in the box above.
-          While the second point slides in, the solid secant rotates, and it
-          settles onto the dashed line, the tangent, the one straight line that
-          grazes the curve at the base point and runs alongside it there. The
-          secant measures an average and the tangent is what the averages become,
-          so the slope of the tangent is the derivative. That is why the two
-          readouts meet as the gap closes.
-        </p>
+        <p>The solid secant passes through two points on the curve. As the second point approaches the base point, its slope approaches the slope of the dashed tangent, when the derivative exists. The tangent describes the local direction of the curve at that point.</p>
         <WhyThisWorks title="About the limit">
-          <p>
-            The definition says h approaches zero, not that h equals zero, and
-            the distinction is the whole reason the notation exists. Setting h to
-            zero outright gives 0 divided by 0, which is not a number, so the
-            expression genuinely has no value there.
-          </p>
+          <p>The gap approaches zero without being set to zero in the quotient. A zero gap would make both the rise and run zero, leaving that quotient undefined. A limit asks what value the quotient approaches through nonzero gaps.</p>
           <p>
             What it has instead is a value it gets arbitrarily close to. Name any
             tolerance you like, a thousandth, a millionth, and there is a gap
@@ -296,38 +253,14 @@ export default function CalculusPrimerPage() {
             that tolerance of 2. That is what lim means, and it is a claim about
             every sufficiently small gap rather than about one impossible one.
           </p>
-          <p>
-            Section 7 makes this concrete for our curve. The average slope across
-            a gap of h works out to x + 0.5·h − 1 exactly, so the distance from
-            x − 1 is 0.5·h, and choosing a small enough h makes that distance as
-            small as anyone asks.
-          </p>
+          <p>Section 7 derives the average-slope formula exactly. Its difference from the local derivative contains a term proportional to the gap h. That term approaches zero as h approaches zero from either side, which is why the average slopes approach one derivative value here.</p>
         </WhyThisWorks>
       </PrimerSection>
 
       <PrimerSection title="6. A Derivative at One Point Versus Every Point">
-        <p>
-          What the shrinking-gap experiment found was one number, the slope at
-          x = 3. Doing that again at x = 4, and again at x = 4.1, would be a
-          miserable way to work, and it would never finish, because a curve has
-          infinitely many points.
-        </p>
-        <p>
-          It matters because of what the slope is for. The walk in section 11
-          reads the slope where it stands, moves, and reads it again somewhere
-          new, at x = 5, then at 3.8, then at 2.96, and none of those places was
-          known before the walk set out. A slope found once at x = 3 answers
-          none of those requests. What the walk needs is an instrument it can
-          point at any x and read on the spot, not a reading taken in advance.
-        </p>
-        <p>
-          The remarkable thing is that the shrinking-gap calculation can be
-          carried out with the gap left as the letter h and the base left as the
-          letter x, which does every point at once. What comes out is not a
-          number but a formula, a rule that returns the slope at whichever point
-          you hand it. That is the next section, and it is ordinary algebra
-          throughout.
-        </p>
+        <p>The experiment found a derivative at one location. A calculation that repeatedly changes its input needs the derivative at each new location, so a formula for the derivative is more useful than a single measured slope.</p>
+        <p>Gradient descent illustrates that need. Each step moves to a new input and uses the derivative there to choose the next adjustment. The derivative function supplies a local rate wherever the procedure currently stands.</p>
+        <p>We can leave the base point and gap as symbols while simplifying the average slope. Taking the limit then gives a formula for the derivative as a function of the base point. The following algebra performs those steps for this curve.</p>
         <p>
           The notation keeps the two apart. f&rsquo;(3) is a number, the 2 that
           the shrinking gaps settled on. f&rsquo;(x), with the x left in, is the
@@ -404,13 +337,7 @@ export default function CalculusPrimerPage() {
             ["3", "2", "rising, and twice as steeply as at x = 0"],
           ]}
         />
-        <p>
-          So the sign gives the direction, negative for falling and positive for
-          rising. The magnitude gives the steepness, so a derivative of 2 is
-          twice as steep as one of 1 regardless of which way either points. And
-          zero marks a flat place, where the curve has stopped doing one and not
-          yet begun the other.
-        </p>
+        <p>For a differentiable function, a positive derivative indicates an increasing local response and a negative derivative a decreasing one. Its magnitude measures the rate relative to the chosen input unit. A zero derivative identifies a stationary point but does not by itself establish a change of direction or a minimum.</p>
         <p>
           The magnitude has a use beyond comparison. A rate multiplied by a run
           predicts a rise, as 50 miles per hour times 2 hours predicts the 100
@@ -442,12 +369,7 @@ export default function CalculusPrimerPage() {
             way and the prediction drifts.
           </p>
           <Equation>{"from x = 3 over a run of 0.5\npredicted rise = 2 × 0.5 = 1.0\nactual rise    = f(3.5) − f(3) = 5.125 − 4 = 1.125"}</Equation>
-          <p>
-            The miss of 0.125 is the h/2 that section 7 finds in the average
-            slope, which is 0.25 for this run, applied across the whole run of
-            0.5. A derivative describes the curve at the point it was taken and
-            nearby, and says nothing about the far side of the drawing.
-          </p>
+          <p>The displayed error of 0.125 comes from treating the starting slope as constant across the interval. The actual curve becomes steeper as we move right. A derivative gives a local approximation, so extending the same straight-line prediction farther from its starting point can increase the error.</p>
         </KeepInMind>
         <p>
           We can use these local slopes to choose a direction that lowers this curve. The following sections work through those steps and explain why their size matters.
@@ -524,14 +446,7 @@ export default function CalculusPrimerPage() {
             A zero derivative marks any flat spot, and the bottom of a valley is
             not the only place a curve lies flat. The top of a hill is flat too.
           </p>
-          <p>
-            What separates the two is the sign on either side. At a floor the
-            curve falls in and rises out, so the derivative runs negative to
-            positive. At a crest it rises in and falls out, so the derivative
-            runs positive to negative. A zero derivative tells you the curve is
-            flat there and nothing more, and you read the signs around it to know
-            which kind of flat you have found.
-          </p>
+          <p>If the derivative changes from negative to positive across a flat point, the curve falls toward it and rises afterward: that identifies a local minimum. The reverse sign change identifies a local maximum. A curve can also keep rising through a flat point, so a zero derivative alone does not classify it.</p>
         </KeepInMind>
       </PrimerSection>
 
@@ -549,12 +464,7 @@ export default function CalculusPrimerPage() {
             guided by the gradient.
           </p>
         </>
-        <p>
-          So we keep the insight, that the bottom is where the slope is zero, and
-          give up on jumping there in one algebraic step. Instead we walk, and we
-          use the derivative the other way, not as an equation to solve but as a
-          direction to follow.
-        </p>
+        <p>When solving the derivative equations directly is impractical, we can use local rates to choose repeated adjustments. Gradient descent takes a step opposite the derivative or gradient. Whether a finite step reduces the value still depends on its size and the function&apos;s behavior nearby.</p>
         <p>
           Picture standing on a hillside in thick fog. You cannot see the valley
           floor, only the ground at your feet, but the slope underfoot still
@@ -564,16 +474,9 @@ export default function CalculusPrimerPage() {
           left, so you want to decrease x. In both cases you move against the
           sign of the slope.
         </p>
-        <p>
-          That is what the rule says, and now it should read as inevitable rather
-          than arbitrary.
-        </p>
+        <p>Subtracting a small positive multiple of the slope gives the required direction in either case.</p>
         <Equation>{"x  ←  x − η · f'(x)"}</Equation>
-        <p>
-          The minus sign is the &ldquo;against&rdquo;. The η, a number you
-          choose, is how boldly to act on what the slope told you, and it has a
-          section of its own shortly.
-        </p>
+        <p>The minus sign makes the update oppose the derivative. The positive number η scales the movement and is called the learning rate. Its size matters because the derivative describes the curve locally, while the update moves a finite distance.</p>
       </PrimerSection>
 
       <PrimerSection title="11. One Complete Gradient-Descent Step">
@@ -620,21 +523,9 @@ export default function CalculusPrimerPage() {
         <p>
           which is row 2, and every later row checks the same way.
         </p>
-        <p>
-          Nothing tells the walk to slow down. It slows because the ground
-          flattens, and the step is sized by the slope it reads.
-        </p>
+        <p>With this update rule, the step becomes smaller as the derivative approaches zero. That behavior follows from the formula for the step; it does not mean the procedure has separately decided that it is near a solution.</p>
         <KeepInMind>
-          <p>
-            The walk never lands on the floor. The distance left after step 5
-            is 0.6723, and each further step removes only a part of what
-            remains, so the location approaches x = 1 without reaching it. A
-            walk like this is stopped rather than finished, either when a
-            movement falls below a size you have decided is too small to
-            matter, or when it has taken as many steps as you were willing to
-            pay for. The second kind of stop is not an arrival, and a walk
-            stopped that way can still be far from the bottom.
-          </p>
+          <p>With these settings, the steps approach the minimum without reaching it exactly in a finite number of iterations. A program therefore needs a stopping condition, such as a small update or an iteration limit. Reaching the iteration limit alone does not establish that the result is close enough.</p>
         </KeepInMind>
       </PrimerSection>
 
@@ -644,7 +535,7 @@ export default function CalculusPrimerPage() {
           trueFalse(
             "A point where the derivative is zero is a minimum of the curve.",
             false,
-            "A zero derivative marks any flat spot, and the top of a hill is flat too. What separates the two is the sign on either side, since at a floor the derivative runs negative to positive and at a crest it runs positive to negative.",
+            "A zero derivative gives a horizontal tangent. That can occur at a minimum, a maximum or a point where the curve keeps moving in the same direction. Check how the function behaves on either side: decreasing then increasing supports a local minimum, while increasing then decreasing supports a local maximum.",
           ),
           choice(
             "What is the lowest point of f(x) = 0.5·x² − x + 2.5, and how is it found?",
@@ -655,7 +546,7 @@ export default function CalculusPrimerPage() {
               "(5, 10), by walking downhill until the slope reaches zero",
             ],
             0,
-            "Setting x − 1 to zero gives x = 1, and the height there is 2, so the lowest point sits at (1, 2) and the drawing was never consulted. The walk in section 11 starts from (5, 10) and approaches the same place without ever landing on it.",
+            "The stationary point is at x = 1, with height 2. This upward-opening quadratic decreases before that point and increases after it, confirming the minimum. The displayed gradient steps approach the same location without needing to solve for it directly.",
           ),
           choice(
             "Why does the update rule subtract the slope rather than add it?",
@@ -666,7 +557,7 @@ export default function CalculusPrimerPage() {
               "Adding would overshoot the bottom",
             ],
             0,
-            "Stand where the slope is negative and the ground falls to your right, so you want x to increase. Stand where the slope is positive and downhill is to the left, so you want x to decrease. The minus sign in the rule is that against.",
+            "At a positive slope, moving left lowers the function locally; at a negative slope, moving right does. Subtracting a positive learning-rate multiple chooses that local downhill direction. Whether a finite step actually lowers the loss also depends on its size, which the later rate experiment investigates.",
           ),
           choice(
             "Starting at x = 5 with a rate of 0.3, the slope is 4 and the step lands at x = 3.8. What happens to the height?",
@@ -688,21 +579,11 @@ export default function CalculusPrimerPage() {
       />
 
       <PrimerSection title="12. The Learning Rate">
-        <p>
-          The one choice left in the walk is η, how far to move on each step. The
-          slope gives a direction and a magnitude, and η decides how boldly to
-          act on them. It is easier to see what it does than to be told, so start
-          with the box below.
-        </p>
+        <p>The learning rate controls how strongly the procedure acts on the derivative at each step. A larger setting can speed progress on one part of a curve and overshoot on another. The activity below keeps the update rule visible while that setting changes.</p>
         <PrimerPlayground>
           <GradientDescentPlayground />
         </PrimerPlayground>
-        <p>
-          Click anywhere on the curve to choose a start and watch the walk come
-          down. Each dot is one step, and the dashed line is the tangent at the
-          start, the very line the earlier sections built. Now move the rate
-          slider and four distinct behaviours appear.
-        </p>
+        <p>Click on the curve to choose a starting point. Each dot shows a subsequent update, and the dashed line is the tangent at the start. Change the learning-rate slider and compare whether the updates approach the minimum or move farther away.</p>
         <NumberTable
           headings={["rate", "what you see"]}
           rows={[
@@ -724,18 +605,9 @@ export default function CalculusPrimerPage() {
             substitute it into the update rule.
           </p>
           <Equation>{"x  ←  x − η·(x − 1)"}</Equation>
-          <p>
-            Subtract 1 from both sides, and the rule becomes a statement about
-            the distance between where we stand and the floor at x = 1.
-          </p>
+          <p>Subtract 1 from both sides to describe the signed offset from the minimum at x = 1. A positive offset is to its right and a negative offset to its left.</p>
           <Equation>{"(x − 1)  ←  (1 − η) · (x − 1)"}</Equation>
-          <p>
-            Every step multiplies the distance from the bottom by the same
-            factor, 1 − η, and the entire behaviour of the walk is in that one
-            number. You can check it against the step table in section 11, where
-            the distances from x = 1 run 4, 2.8, 1.96, 1.372, each exactly 0.7 of
-            the one before it.
-          </p>
+          <p>Every update multiplies that signed offset by 1 − η. Its sign determines the side of the minimum, and its magnitude gives the distance. In section 11, the offsets from x = 1 are 4, 2.8, 1.96 and 1.372, each 0.7 times the previous one.</p>
           <NumberTable
             headings={["η", "factor 1 − η", "what that does"]}
             rows={[
@@ -746,19 +618,8 @@ export default function CalculusPrimerPage() {
               ["2.5", "−1.5", "grows every step, and the walk runs away"],
             ]}
           />
-          <p>
-            So the sign of 1 − η says whether a step crosses the floor, and its
-            magnitude says whether the distance shrinks. Below 2 the magnitude is
-            under one and the walk converges however it looks on the way. At
-            exactly 2 it is one, and the walk neither closes nor escapes. Above 2
-            it exceeds one and every hop is longer than the last.
-          </p>
-          <p>
-            The threshold sits at 2 for this bowl because of its particular
-            steepness. A sharper curve turns unstable at a smaller η and a
-            gentler one tolerates a larger, though the pattern, converge below
-            some threshold and run away above it, is general.
-          </p>
+          <p>For a positive learning rate below 2, the factor’s magnitude is less than one, so the distance to the minimum shrinks. At exactly 2, a nonzero offset changes sign without shrinking. Above 2, its magnitude grows. A start exactly at the minimum stays there because its offset is zero.</p>
+          <p>The threshold is 2 for this quadratic because of how quickly its slope changes. A steeper upward-opening quadratic needs a smaller learning rate, while a gentler one permits a larger rate. More general functions can change steepness from place to place, so a rate that works near one point may fail elsewhere.</p>
         </WhyThisWorks>
         <p>
           That is the trade the learning rate sets. Too small wastes steps, too
@@ -768,13 +629,7 @@ export default function CalculusPrimerPage() {
       </PrimerSection>
 
       <PrimerSection title="13. Local and Global Minima">
-        <p>
-          Switch the box above to the two-valley curve, and the caution from
-          section 9 becomes something you can watch. Start on the left of the
-          central hill and the walk settles in the left valley. Start on the
-          right and it settles in the right one. Same curve, same rule, different
-          answer.
-        </p>
+        <p>Switch the activity to the two-valley curve and choose a small learning rate. Try a start in the left valley, then one in the right. The same update rule can approach different minima because the slope depends on where the updates begin.</p>
         <p>
           With sufficiently small steps, this walk stays in the valley where
           it starts. Its local slope gives it no reason to cross the hill to
@@ -782,32 +637,18 @@ export default function CalculusPrimerPage() {
           the lowest point across the whole curve is the global minimum.
         </p>
         <KeepInMind>
-          <p>
-            Every model that fits itself by walking downhill inherits this. Where
-            it starts can decide where it ends, which is why the same model
-            trained twice can settle in two different places and report two
-            different scores.
-          </p>
-          <p>
-            It is a real limitation rather than a fixable oversight, and the
-            usual response is to run the walk more than once from different
-            starts and keep the best result.
-          </p>
+          <p>On a function with several minima, the starting point can affect which result gradient descent reaches. This is one reason repeated training runs can produce different fitted parameters. The outcome also depends on the update rule and its settings.</p>
+          <p>Trying several starting points can reveal different candidate minima. Comparing those candidates is useful, but repeated starts do not prove that the global minimum has been found.</p>
         </KeepInMind>
       </PrimerSection>
 
       <PrimerSection title="14. From One Setting to Many">
-        <p>
-          Everything so far has had one adjustable value. A model has more, and
-          the step from one to many is the last idea this primer owes you.
-        </p>
+        <p>Many calculations have several adjustable inputs. We need to know how changing each one affects the result while the others stay fixed.</p>
         <>
 <p>
           With one setting there is a loss L(θ), one derivative, and two directions to move, left or right. With two settings there is a loss L(θ₁, θ₂), and the picture becomes a surface rather than a line. There is no single slope on a surface, because the ground can tilt one way as you walk east and another as you walk north.
         </p>
-        <p>
-          What there is instead is one slope per direction, found by asking how the loss changes as you vary one setting while holding the other still. Each of those is called a partial derivative.
-        </p>
+        <p>A partial derivative measures the response to one input with the other inputs held fixed. Calculating one for each adjustable input gives us the components of the gradient.</p>
 </>
         <p>
           Collect them and you have the gradient, written with a nabla.
@@ -820,13 +661,7 @@ export default function CalculusPrimerPage() {
         </p>
         <Equation>{"θ  ←  θ − η·∇L"}</Equation>
         <InAModel>
-          <p>
-            A model may have thousands or millions of adjustable parameters, one
-            partial derivative each. The picture becomes impossible to draw well
-            before that, and the principle does not change. Read how the loss
-            responds to each setting, and move every setting in the direction
-            that is expected to reduce it.
-          </p>
+          <p>The same reasoning extends to many parameters, even when the geometry cannot be drawn. Each gradient component describes a local response to one parameter. An update combines those responses, and its actual effect needs to be checked after the finite step.</p>
           <p>The same small-change questions apply when there are many settings, but the bowl is a particularly simple case. A more complicated loss can have several minima or flat points that are not minima at all. The gradient describes the local response; it does not tell us that a useful setting is nearby or that our next finite step will reach it.</p>
         </InAModel>
       </PrimerSection>
@@ -835,10 +670,10 @@ export default function CalculusPrimerPage() {
         title="Questions on Sections 12 to 14"
         questions={[
           choice(
-            "Every step of the walk multiplies the distance from the bottom by the same factor. What is it?",
+            "For this quadratic, each update multiplies the signed offset from the minimum by which factor?",
             ["1 − η", "η", "−η", "1 / η"],
             0,
-            "Substituting f′(x) = x − 1 into the update rule and subtracting 1 from both sides turns the rule into a statement about the distance from the floor at x = 1, and the factor left standing is 1 − η. The step table in section 11 checks it, where the distances run 4, 2.8, 1.96 and 1.372, each exactly 0.7 of the one before.",
+            "The minimum is at x = 1, so subtracting that reference from the update gives the signed offset after each step. Its multiplier is one minus the learning rate. The distance uses the magnitude of that multiplier: a negative factor crosses the minimum, and a magnitude below one brings the next location closer.",
           ),
           several(
               "At which of these rates does the walk fail to close on the floor of this bowl?",
@@ -849,15 +684,15 @@ export default function CalculusPrimerPage() {
                             "2.5, which grows every step",
                           ],
               [2, 3],
-              "Below 2 the magnitude of 1 − η is under one and the walk converges however alarming it looks on the way, which is why 1.9 zigzags across the bowl and still settles. At exactly 2 the factor is −1, so the walk neither closes nor escapes, and above 2 every hop is longer than the last.",
+              "For this quadratic and a positive learning rate below 2, the signed-offset multiplier has magnitude below one. A rate of 1.9 therefore alternates sides while approaching the minimum. At 2 the magnitude is one and the distance repeats; at 2.5 it exceeds one and the distance grows.",
               {
                 "description": "Use f(x) = ½(x − 1)² and gradient descent x_next = x − η(x − 1), starting from x = 4. The minimum is at x = 1. The question asks about convergence over indefinitely many steps, using exact arithmetic."
               },
             ),
           trueFalse(
-            "A curve sharper than this bowl starts to run away at a learning rate below 2.",
+            "Increasing the curvature of an upward-opening quadratic lowers the positive learning-rate limit for gradient descent to converge.",
             true,
-            "The threshold sits at 2 for this bowl because of its particular steepness, since every step multiplies the distance from the floor by 1 − η and the size of that factor passes one at a rate of 2. A sharper curve turns unstable at a smaller rate and a gentler one tolerates a larger one. What is general is only the pattern, which is to converge below some threshold and run away above it.",
+            "A sharper quadratic changes its slope more quickly with position. The same learning rate therefore makes a larger correction relative to the distance remaining, so instability begins at a smaller rate. This comparison concerns quadratics with constant curvature; a more general loss needs its own convergence analysis.",
           ),
           choice(
             "On the two-valley curve, starting left of the central hill settles in the left valley and starting right settles in the right one. What does that show?",
@@ -868,7 +703,7 @@ export default function CalculusPrimerPage() {
               "The walk settles in the deeper valley whichever side it starts",
             ],
             0,
-            "With sufficiently small steps the walk stays in the valley where it starts, because the local slope gives it no reason to cross the hill and inspect the other one. Every model that fits itself by walking downhill inherits this, which is why the same model trained twice can settle in two places and report two different scores.",
+            "With suitably small steps on this two-valley curve, the local slope leads toward the minimum in the starting valley. It supplies no instruction to cross the intervening hill and compare the other minimum. Losses with several valleys can therefore reach different solutions from different initial settings.",
           ),
           choice(
             "With two settings there is no single slope, because the ground can tilt one way as you walk east and another as you walk north. What takes its place?",
@@ -890,7 +725,7 @@ export default function CalculusPrimerPage() {
         exercises={[
           exercise(
             "Measure a slope with two nearby values",
-            ["The workshop estimated the traveller's rate of movement from two readings. Now use that same change-per-input idea on the primer's loss curve. Before taking a downhill step, check whether two nearby evaluations agree with its derivative.","For each supplied location, evaluate the curve a small step to the left and the same step to the right. Divide the change in height by the distance between those two locations. This centred difference estimates the tangent slope.","Also write the derivative from section 8 and compare it with that estimate. Complete the two functions; the array operations will evaluate all five locations together. Print both slopes, then check whether they agree to within one hundred-millionth."],
+            ["The workshop estimated the traveler's rate of movement from two readings. Now use that same change-per-input idea on the primer's loss curve. Before taking a downhill step, check whether two nearby evaluations agree with its derivative.","For each supplied location, evaluate the curve a small step to the left and the same step to the right. Divide the change in height by the distance between those two locations. This centered difference estimates the tangent slope.","Also write the derivative from section 8 and compare it with that estimate. Complete the two functions; the array operations will evaluate all five locations together. Print both slopes, then check whether they agree to within one hundred-millionth."],
             `import numpy as np
 
 def curve(x):
@@ -1011,7 +846,7 @@ distance from the minimum 0.4706`,
             [
               "A large step can cross the bottom and still make progress. To tell progress from instability, we need to watch the distance from the minimum as well as the side we land on.",
               "Complete walk using the derivative and update from the previous challenge. Return the starting location and each of six new locations. Run it at the five rates below, starting from five every time.",
-              "Calculate the final distance from the minimum at one. The supplied printing shows the entire path and that distance. Compare the alternating paths: one gets closer, one repeats, and one travels farther away. Six steps demonstrate their behaviour on this known quadratic; they are not a general convergence test for arbitrary functions.",
+              "Calculate the final distance from the minimum at one. The supplied printing shows the entire path and that distance. Compare the alternating paths: one gets closer, one repeats, and one travels farther away. Six steps demonstrate their behavior on this known quadratic; they are not a general convergence test for arbitrary functions.",
             ],
             `import numpy as np
 

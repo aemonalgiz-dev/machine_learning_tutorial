@@ -22,11 +22,13 @@ import { journeyFor } from "@/lib/builds/journey";
 export { Equation } from "./Equation";
 
 interface PrimerSectionProps {
+  id?: string;
   title: string;
   children: ReactNode;
 }
 
 interface PrimerQuizProps {
+  id?: string;
   title: string;
   questions: QuizQuestion[];
 }
@@ -70,19 +72,19 @@ export function PrimerPage({
 
   const sections: NavigableSection[] = declared.map((child, index) => {
     if (child.type === PrimerQuiz) {
-      const { title, questions } = child.props as PrimerQuizProps;
-      return { title, id: sectionId(title), quiz: questions };
+      const { id, title, questions } = child.props as PrimerQuizProps;
+      return { title, id: id ?? sectionId(title), quiz: questions };
     }
     if (child.type === PrimerPractice) {
       const { id, title, exercises } = child.props as PrimerPracticeProps;
       return { title, id: id ?? sectionId(title), practice: exercises };
     }
 
-    const { title, children: body } = child.props as PrimerSectionProps;
+    const { id, title, children: body } = child.props as PrimerSectionProps;
     const first = index === opening;
     return {
       title,
-      id: sectionId(title),
+      id: id ?? sectionId(title),
       content:
         first && prerequisites ? (
           <>
@@ -120,9 +122,9 @@ export function PrimerPage({
 // Declares a quiz as a section of a primer, placed among the PrimerSections in
 // the order a reader meets them. Like PrimerSection, its props are read by
 // PrimerPage rather than rendered here.
-export function PrimerQuiz({ title, questions }: PrimerQuizProps) {
+export function PrimerQuiz({ id, title, questions }: PrimerQuizProps) {
   return (
-    <section id={sectionId(title)} data-questions={questions.length} tabIndex={-1}>
+    <section id={id ?? sectionId(title)} data-questions={questions.length} tabIndex={-1}>
       <h2 className="mb-3 text-2xl font-semibold text-foreground">{title}</h2>
     </section>
   );
@@ -139,9 +141,9 @@ export function PrimerPractice({ id, title, exercises }: PrimerPracticeProps) {
 
 // Declares one section of a primer. Its props are read by PrimerPage rather
 // than rendered here, so that the navigator owns the heading and the spacing.
-export function PrimerSection({ title, children }: PrimerSectionProps) {
+export function PrimerSection({ id, title, children }: PrimerSectionProps) {
   return (
-    <section id={sectionId(title)} tabIndex={-1} className="scroll-mt-6">
+    <section id={id ?? sectionId(title)} tabIndex={-1} className="scroll-mt-6">
       <h2 className="mb-3 text-2xl font-semibold text-foreground">{title}</h2>
       <div className="space-y-4 text-slate-700 dark:text-slate-300">{children}</div>
     </section>

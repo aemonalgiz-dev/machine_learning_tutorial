@@ -83,7 +83,7 @@ export function VoteSharingSlide() {
         </div>
         <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-950">
           <p className="mb-1 text-[11px] text-slate-500 dark:text-slate-400">
-            the vote shared between the two nearest centres
+            the vote shared between the two nearest centers
           </p>
           <BucketBars
             weights={step.shared}
@@ -118,7 +118,7 @@ export function VoteSharingSlide() {
 
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         A bucket covers {view.bucket_span_degrees.toFixed(0)} degrees and is
-        centred on the number under its bar. Drag across the boundary at 20
+        centered on the number under its bar. Drag across the boundary at 20
         degrees and watch the left pair jump while the right pair slides; the
         two degrees from {view.before_degrees} to {view.after_degrees} move the
         cell {view.ratio.toFixed(0)} times as far under whole votes.

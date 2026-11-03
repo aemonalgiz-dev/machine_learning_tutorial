@@ -82,10 +82,10 @@ export function WeightDial() {
 
       <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
         Green is a setting at which the search reaches the three stems and the
-        three endings; grey is one at which every word is left whole. The
+        three endings; gray is one at which every word is left whole. The
         answer changes between {stall.threshold_below.toFixed(5)} and{" "}
         {stall.threshold_above.toFixed(5)}, and the two sides of that line are
-        not comparable by their totals, since the total being minimised is a
+        not comparable by their totals, since the total being minimized is a
         different quantity at every setting.
       </p>
     </div>

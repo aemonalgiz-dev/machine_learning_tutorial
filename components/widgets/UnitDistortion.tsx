@@ -25,9 +25,9 @@ const PANEL = { width: 300, height: 190 };
 const PANEL_PAD = { left: 30, right: 10, top: 10, bottom: 24 };
 
 const UNIT_TITLES: Record<HeightUnit, string> = {
-  millimetres: "height in millimetres",
-  centimetres: "height in centimetres",
-  metres: "height in metres",
+  millimetres: "height in millimeters",
+  centimetres: "height in centimeters",
+  metres: "height in meters",
   standardized: "both columns standardized",
 };
 
@@ -91,7 +91,7 @@ export function UnitDistortion() {
     <div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-slate-300">
         <label className="flex flex-1 items-center gap-2">
-          neighbours consulted, k
+          neighbors consulted, k
           <input type="range" min={1} max={7} step={1} value={k} onChange={(event) => setK(Number(event.target.value))} className="flex-1 accent-indigo-600" />
           <span className="w-6 text-right font-mono">{k}</span>
         </label>
@@ -171,7 +171,7 @@ function VotePanel({ vote, query }: { vote: UnitVote; query: Point }) {
           return <circle key={index} cx={px} cy={py} r={chosen ? 5 : 3.5} fill={person.label === 0 ? CHILD : ADULT} opacity={chosen ? 1 : 0.45} stroke="white" strokeWidth={1} />;
         })}
         <circle cx={queryView.px} cy={queryView.py} r={6} fill={QUERY} stroke="white" strokeWidth={1.5} />
-        <text x={PANEL_PAD.left + (PANEL.width - PANEL_PAD.left - PANEL_PAD.right) / 2} y={PANEL.height - 4} textAnchor="middle" className="fill-slate-500 text-[9px] dark:fill-slate-400">drawn in centimetres; the vote was taken in the unit above</text>
+        <text x={PANEL_PAD.left + (PANEL.width - PANEL_PAD.left - PANEL_PAD.right) / 2} y={PANEL.height - 4} textAnchor="middle" className="fill-slate-500 text-[9px] dark:fill-slate-400">drawn in centimeters; the vote was taken in the unit above</text>
       </svg>
       <div className="mt-2 grid grid-cols-3 gap-1.5">
         <Stat label="verdict" value={vote.prediction === 0 ? "child" : "adult"} colour={verdictColour} />

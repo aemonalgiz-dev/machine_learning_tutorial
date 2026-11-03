@@ -20,9 +20,9 @@ import { ImportanceBars } from "@/components/widgets/ImportanceBars";
 import { ScrambleLadder } from "@/components/widgets/ScrambleLadder";
 
 export const metadata: Metadata = {
-  title: "Which Feature Mattered · oop_ml",
+  title: "Which Feature Mattered · Perceptron Lab",
   description:
-    "A prediction alone does not tell us which measurements the model relied on. Feature importance methods give us ways to investigate that question, although their scores need careful interpretation.",
+    "Feature importance investigates how input measurements affect a fitted model's results. Different methods answer different questions, and related measurements can complicate how their scores should be interpreted.",
 };
 
 const link =
@@ -38,7 +38,7 @@ export default function FeatureImportancePage() {
       playgroundTitle="What happens when we disrupt one measurement?"
       playgroundIntro="Compare the two importance rankings, especially for the noise feature. Read each ranking alongside the model's predictive score."
       title="Which Feature Mattered"
-      tagline={"A prediction alone does not tell us which measurements the model relied on. Feature importance methods give us ways to investigate that question, although their scores need careful interpretation."}
+      tagline={"Feature importance investigates how input measurements affect a fitted model's results. Different methods answer different questions, and related measurements can complicate how their scores should be interpreted."}
       prerequisites={
         <>
           The first measure reads the splits of a{" "}
@@ -73,33 +73,20 @@ export default function FeatureImportancePage() {
                   reasonHeading="what answers it"
                   rows={[
                     { expression: "used often", reason: "a count of the decision nodes that asked about the column. Cheap, and blind to how much each question was worth." },
-                    { expression: "removed the most impurity", reason: "the sum over those nodes of the rows that reached the node times the impurity the question removed, normalised to a share. The split reading, and the first measure on this page." },
+                    { expression: "removed the most impurity", reason: "the sum over those nodes of the rows that reached the node times the impurity the question removed, normalized to a share. The split reading, and the first measure on this page." },
                     { expression: "the predictions depend on it", reason: "scramble the column, score the fitted model again, and read the drop as reliance. The scramble reading, and the second measure." },
                   ]}
                 />
                 <InAModel title="On a crowd of two hundred people, one forest, three answers">
                   <>
-<p>
-                    This page draws a crowd of two hundred people with heights and weights, where the rule that assigns adult reads height alone and weight follows height only through overall body size, and grows a forest of thirty trees on it, each split offered one of the two columns. Asked which column it used more often, the forest answers weight, 272 splits to 240.
-                  </p>
-                  <p>
-                    Asked which removed the most impurity, it answers weight again, 0.521 to 0.479. Asked which its predictions depend on, scored on two hundred people it never saw, it answers height, 0.957 to 0.043, and the third answer is the one that agrees with how the crowd was made.
-                  </p>
+<p>The example contains two hundred height and weight pairs. Its labels are generated from height alone; weight is related to height and therefore carries some indirect information about those labels. We fit thirty trees, offering one randomly chosen feature at each split. The forest uses weight in 272 splits and height in 240. A split count has favored the indirectly related measurement, so we need to ask what that count actually measures.</p>
+                  <p>The split-based importance also favors weight, with shares 0.521 and 0.479. On two hundred held-out people, permutation importance instead gives height 0.957 and weight 0.043. The latter ranking agrees with the variable used by this data generator, but it still describes the fitted model&rsquo;s dependence under a particular scoring experiment.</p>
 </>
                 </InAModel>
                 <ArrangementBars arrangements={["measurements"]} showModelToggle={false} />
-                <p>
-                  The four rows of bars are the four readings on that forest,
-                  and the column with the most bars is not the column with the
-                  most credit. Switching the widgets further down to the lone
-                  tree shows the same crowd read from a model that memorised
-                  it.
-                </p>
+                <p>The displayed bars compare split counts, impurity credit and permutation scores from training and held-out rows. They all describe this forest, but they measure different behavior. The model switch below also lets us inspect the lone tree fitted to the same observations.</p>
                 <KeepInMind>
-                  Importance is a word for at least three questions. Before
-                  reading a number, find out which one it answers, because on
-                  this forest two of the three name the wrong column.
-                </KeepInMind>
+                  Before comparing importance values, identify the question they answer. A split count, an impurity share and a permutation score can rank the same features differently without any calculation being wrong.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. Two sets of people, and a puzzle">
@@ -107,34 +94,22 @@ export default function FeatureImportancePage() {
 <p>
                   Two datasets carry the page. The first is the tangled crowd of twenty-five people that the bagging and forests pages fit, children and adults by height and weight, on which a tree grows eight splits to reach pure leaves, and that is where the split reading is assembled by hand. The second is the larger drawn crowd from the box above, which has two columns added to it that a careful reader should distrust.
                 </p>
-                <p>
-                  One is a raffle ticket number, drawn without reference to anything and different for every one of the two hundred people. The other is height read a second time with a little measurement error, correlated with the first reading at 0.996. Weight is correlated with height at 0.898 and the ticket at −0.131, which is what chance looks like on two hundred rows.
-                </p>
+                <p>One added column is a random raffle number, different for each of the two hundred people and generated independently of their measurements. The other is height plus a small measurement error; its correlation with height is 0.996. Weight has correlation 0.898 with height, and the raffle number has correlation −0.131 in this draw. Independent variables can have nonzero sample correlation.</p>
 </>
                 <>
 <p>
                   Beside those sits the puzzle in the box at the top of the page, built to defeat the trees page&rsquo;s search. Two columns are coin flips, and the class is 1 exactly when the two flips disagree. Ask about either coin alone and both sides of the split come back half and half, no better than the node was before, so no single question helps.
                 </p>
-                <p>
-                  A third column is pure noise, drawn without any reference to the class, and with three hundred distinct values it hands the search a threshold between every adjacent pair, and among hundreds of tries one always lines up with a few rows by chance. It is the ticket column&rsquo;s trick in a setting where the real columns cannot defend themselves.
-                </p>
+                <p>The third column contains independent noise with three hundred distinct values. It offers many threshold candidates, while either coin alone gives no impurity improvement in this constructed puzzle. Searching many noise thresholds can find a chance reduction in training impurity. That gives the tree a reason to choose noise before it discovers the coins&rsquo; interaction.</p>
 </>
                 <KeepInMind>
-                  The ticket and the noise column are the same idea, a column
-                  offering the search many places to cut and nothing to find.
-                  The crowd is where that idea meets real columns; the puzzle
-                  is where it meets columns that cannot win a single question.
-                </KeepInMind>
+                  Both noise examples offer many candidate cut points without a population relationship to the target. Their chance training gains can compete with useful measurements, especially when the useful information requires several questions together.</KeepInMind>
               </SubSection>
 
               <SubSection title="3. Shares of an explanation, not measurements of the world">
                 <>
-<p>
-                  Whichever question is asked, the answer comes back the same way, as one non-negative number per column that the model was fitted on, scaled so that the numbers sum to one. Every column is included, a column that earned nothing at zero, because a zero is a finding rather than an absence. The scaling is what lets a reader say that a column accounts for a fifth of the explanation without first working out the total, and it is also the sharpest limit on what the numbers mean.
-                </p>
-                <p>
-                  They are shares of this fitted model&rsquo;s explanation, so two columns carrying one signal divide a share between them and each looks half as important as either would alone, which is a fact about the fit and not about the columns.
-                </p>
+<p>These reports return one non-negative value for each fitted column and normalize the values to sum to one. A column with no credit remains explicitly present at zero. Each share is relative to the other credits in this report. It is not a percentage of everything that explains the outcome.</p>
+                <p>Related columns can divide the fitted model’s credit in different ways. Adding a second measurement of the same underlying quantity may reduce the first column’s share even when its information remains useful. The shares describe this fitted model with this available set of inputs.</p>
 </>
                 <Equation>{"share(feature) = raw score(feature) / Σ raw score over every feature"}</Equation>
                 <p>
@@ -145,11 +120,7 @@ export default function FeatureImportancePage() {
                   refused, in words the last Part quotes.
                 </p>
                 <KeepInMind>
-                  A share of 0.52 does not say a column explains half of
-                  anything in the world. It says that of what this model did
-                  with its columns, by this measure, half was done with this
-                  one.
-                </KeepInMind>
+                  A share of 0.52 means 52 percent of the credit assigned by this particular report. It is not 52 percent of an outcome&rsquo;s causes or of all information available about it. The meaning of the underlying credit still matters.</KeepInMind>
               </SubSection>
             </>
 </>),
@@ -159,23 +130,15 @@ export default function FeatureImportancePage() {
           content: (
             <>
               <SubSection title="4. What one question removes">
-                <p>
-                  Start with the trees page&rsquo;s gain. A node holds some
-                  people with some mixture of children and adults, and that
-                  mixture has an impurity. Asking a question sends the people
-                  to two children, each with its own impurity, and the gain is
-                  the parent&rsquo;s impurity minus the two children&rsquo;s
-                  impurities weighted by how many people went each way. It is
-                  the number the split search maximised when it chose the
-                  question, and the tree recorded it at the time.
-                </p>
+                <p>A node contains observations with a mixture of class labels. A candidate question divides them into child nodes. Its impurity gain is the parent’s impurity minus the weighted impurity remaining in those children. The weights reflect how many observations enter each group. The tree records that gain when it chooses the split.</p>
                 <Equation>{"gain = I(parent) − (n_left / n)·I(left) − (n_right / n)·I(right)"}</Equation>
                 <WorkedExample title="The root of the tangled crowd">
                   <p>
+
                     Twenty-five people, thirteen adults and twelve children,
                     with a Gini impurity of 0.4992, which is almost as mixed as
                     a node can be. The best question is whether height is
-                    under 147.5 centimetres, and it removes 0.1881 of that
+                    under 147.5 centimeters, and it removes 0.1881 of that
                     impurity. Every other question the search considered, on
                     either column at any threshold, removed less.
                   </p>
@@ -188,15 +151,7 @@ export default function FeatureImportancePage() {
               </SubSection>
 
               <SubSection title="5. Weighting a question by the people it was asked of">
-                <p>
-                  So the credit a question earns for its column is its gain
-                  times the number of people that reached the node. A question
-                  asked of every person decides where every person goes; a
-                  question asked of three people near a leaf decides where
-                  three go, and an unweighted sum of gains would call those
-                  equal. The tangled crowd has the clearest case of the
-                  difference I have found.
-                </p>
+                <p>A feature receives the split’s gain multiplied by the number of observations that reached the node. This distinguishes a useful question asked of the whole dataset from an equally large gain affecting only three people. The following comparison shows why both the improvement and the size of the group matter.</p>
                 <Equation>{"credit(node) = rows at node × gain at node"}</Equation>
                 <WorkedExample title="The largest gain in the tree earns the fourth largest credit">
                   <>
@@ -214,7 +169,7 @@ export default function FeatureImportancePage() {
                     </p>
                   </>
                 </WorkedExample>
-                <WhyThisWorks title="Why the weighting is not a choice">
+                <WhyThisWorks title="How node weighting measures the tree’s total impurity reduction">
                   <>
 <p>
                     Ask how much impurity the whole tree removed. Write N for the people at the root and n for the people at some node. That node&rsquo;s contribution to the tree&rsquo;s total is its gain scaled by the fraction n / N of people who reached it, so the total is a sum of (n / N) × gain over every decision node.
@@ -243,8 +198,9 @@ export default function FeatureImportancePage() {
                   </p>
                   <Equation>{"second split credit ≈ 9 × 0.0494 ≈ 0.444"}</Equation>
                   <p>
+
                     Weight’s share is now about 0.086. The fourth split lifts it to
-                    0.232, the closest the two columns come. Later splits favour height,
+                    0.232, the closest the two columns come. Later splits favor height,
                     including two questions worth 1.5 apiece. The final ledger is:
                   </p>
                   <Equation>{"height credit ≈ 9.702\nweight credit ≈ 2.778\ntotal credit ≈ 9.702 + 2.778 = 12.480"}</Equation>
@@ -254,7 +210,7 @@ export default function FeatureImportancePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="7. Normalising, and a column that never won">
+              <SubSection title="7. Normalizing, and a column that never won" id="7-normalising-and-a-column-that-never-won">
                 <>
                   <p>
                     Divide each feature’s accumulated credit by the total credit to
@@ -279,17 +235,7 @@ export default function FeatureImportancePage() {
               </SubSection>
 
               <SubSection title="8. Averaging across a forest's members">
-                <p>
-                  A single tree&rsquo;s ledger is as unstable as the tree.
-                  Change a few people and the root changes, and a column
-                  carrying three quarters of the explanation can fall to
-                  nothing. A forest holds twenty-five ledgers, one per member,
-                  each grown on its own resample under its own feature draws,
-                  and the forest&rsquo;s reading is the average of the
-                  members&rsquo; shares. Shares rather than raw totals, because
-                  a deeper member removed more impurity in absolute terms
-                  without that meaning its columns mattered more.
-                </p>
+                <p>The credit can change when the fitted tree changes. A feature used near the root can lose much of its credit after a small change in the sample. The forest here averages the normalized shares from twenty-five member trees. Averaging shares gives each member equal weight, rather than allowing a tree with a larger raw impurity reduction to dominate the report.</p>
                 <NumberTable
                   headings={["the seed-7 committee on the tangled crowd", "height", "weight", "roots on height"]}
                   rows={[
@@ -299,20 +245,9 @@ export default function FeatureImportancePage() {
                   ]}
                   caption="The forest and the bagged committee are the random-forests page's own, refitted here. Under the forest the members' height shares run from 0.179 to 1.000, and their mean is the 0.527 reported."
                 />
-                <p>
-                  The forest&rsquo;s figure is close to even because the
-                  feature lottery made it so. A member denied height at a node
-                  spends that node on weight and the ledger credits weight for
-                  it, so the forest&rsquo;s reading describes how these
-                  twenty-five trees used their columns, which the lottery
-                  decided as much as the crowd did. The bagged committee, with
-                  no lottery, leans on height nearly as hard as the lone tree.
-                </p>
+                <p>Random feature availability changes which measurements these trees can use. When height is unavailable at a node, a tree may split on weight instead, assigning it the corresponding impurity credit. The forest&rsquo;s height and weight shares are therefore closer than the lone tree&rsquo;s. Bagging offers both columns at every node and assigns more credit to height in this example.</p>
                 <KeepInMind>
-                  Averaging steadies the reading. It does not change what the
-                  reading is a reading of, and Part 3 shows it cannot correct
-                  a bias every member shares.
-                </KeepInMind>
+                  Averaging can reduce variation between tree-specific reports. It does not remove a systematic preference shared by their split searches, such as the preference for features offering many thresholds.</KeepInMind>
               </SubSection>
 
               <SubSection title="9. Why the split reading is free">
@@ -344,74 +279,28 @@ export default function FeatureImportancePage() {
                   asks about it at three of its four nodes, for a share of
                   0.807 on a column that carries nothing.
                 </p>
-                <p>
-                  On the drawn crowd the same trick meets real columns, and I
-                  expected the ticket to win a few splits deep in the lone
-                  tree. It won none. Height and weight bring the tree to pure
-                  leaves in sixteen questions and the ticket is never the best
-                  option at any of them, so the bias needs the search to be
-                  short of better options before it shows. The forest arranges
-                  exactly that, because offering one column per split means a
-                  third of its nodes see the ticket alone.
-                </p>
+                <p>In the larger drawn dataset, the lone tree makes sixteen splits using height and weight and never selects the raffle number. This particular fit therefore gives the identifier zero credit. The forest offers only one of the three columns at each split, so some nodes must consider the raffle number without either useful measurement beside it.</p>
                 <ArrangementBars arrangements={["with_ticket"]} initialModel="forest" readings={["counts", "impurity"]} />
-                <p>
-                  Offered the ticket by itself at a node, a member must ask
-                  about it, and with two hundred distinct values some threshold
-                  always lines up with a few people by chance. The forest asks
-                  about the ticket at 196 of its 559 splits, more than it asks
-                  about height, and the ledger credits it with 0.107 of the
-                  impurity removed. Switch to the lone tree and the ticket
-                  drops to zero of sixteen.
-                </p>
+                <p>When offered only the raffle number at a mixed-label node, a tree can select a chance threshold improvement without comparing it with height. Across this forest, 196 of 559 splits use the identifier, more than use height. It receives an impurity share of 0.107. The lone tree, which always considers the other columns too, uses it in none of its sixteen splits.</p>
                 <KeepInMind>
-                  The preference is for columns offering many candidate
-                  thresholds, and it shows wherever the search is short of a
-                  better question, which a forest&rsquo;s lottery guarantees
-                  at some nodes and a puzzle without single-question structure
-                  guarantees at all of them.
-                </KeepInMind>
+                  More candidate thresholds give a noise feature more chances to obtain a training gain. Random feature selection can expose that feature without its stronger alternatives. This is one reason split-based importance may give a high-cardinality feature substantial credit.</KeepInMind>
               </SubSection>
 
               <SubSection title="11. Two columns carrying one signal split the credit">
-                <p>
-                  Read height twice with a little error and the two readings
-                  are correlated at 0.996, so at nearly every node the best
-                  question on one is almost exactly the best question on the
-                  other. Whichever wins by a hair takes the whole credit for
-                  that node. Across a tree the credit lands on both, in shares
-                  that depend on tie-breaking and on which of the two the
-                  lottery happened to offer, and not on anything about the
-                  crowd.
-                </p>
+                <p>The two height readings are strongly correlated, so they often offer similar splits. A node credits only the feature actually selected, even when the other could have supplied much the same division. Measurement error, sampled rows, available features and tie rules can all affect how their credit is divided.</p>
                 <ArrangementBars arrangements={["measurements", "with_twin"]} initialArrangement="with_twin" readings={["impurity"]} />
                 <>
 <p>
                   With height alone the lone tree credits it 0.897; with the second reading beside it the two split the same work 0.860 to 0.101. The forest is the sharper case. Height alone earns 0.479 of the forest&rsquo;s impurity; with its twin present the twin leads at 0.510 and height falls to 0.257, and weight, which did not change, moves from 0.521 to 0.233 because the twin took the nodes weight used to be offered.
                 </p>
-                <p>
-                  The second reading of height is height plus measurement error, so by construction it cannot matter more than the first, and the ledger says it does.
-                </p>
+                <p>The second reading was constructed by adding measurement error to height. A larger share for it therefore does not establish that it contains more underlying information. It tells us which of the available readings this fitted model happened to use.</p>
 </>
                 <KeepInMind>
-                  Correlated columns divide the split credit between them in
-                  proportions the data does not determine. The reading for a
-                  group of such columns is the sum of their shares, and the
-                  individual shares should not be ranked against each other.
-                </KeepInMind>
+                  For related features, inspect both their individual shares and their combined credit. A group sum summarizes the credit assigned to that group, but it does not establish a causal effect. Individual rankings can be unstable when the features provide similar information.</KeepInMind>
               </SubSection>
 
-              <SubSection title="12. The ledger was written while the model memorised">
-                <p>
-                  Every entry in the ledger was made during growth, on the
-                  rows the model was fitted to, so the reading has no held-out
-                  version at all. A tree grown until its leaves are pure has
-                  memorised its rows, and the ledger credits whatever columns it
-                  memorised them with. On the drawn crowd the lone tree reaches
-                  an accuracy of 1.0 on its own rows and 0.845 on rows it never
-                  saw, and the ledger cannot tell which of its sixteen
-                  questions were the ones that generalise.
-                </p>
+              <SubSection title="12. The ledger was written while the model memorized" id="12-the-ledger-was-written-while-the-model-memorised">
+                <p>Split-based importance is calculated from the gains recorded on training rows. Re-evaluating new rows does not change that stored split ledger. In this draw, the fully grown tree has training accuracy 1.0 and held-out accuracy 0.845. Its importance report describes the training impurity reductions; it does not separately identify which splits generalize.</p>
                 <NumberTable
                   headings={["the lone tree fitted on the ticket alone", "reading"]}
                   rows={[
@@ -421,37 +310,20 @@ export default function FeatureImportancePage() {
                   ]}
                   caption="Two hundred people and one column of raffle numbers. The tree separates every person by ticket number and the ledger records every question as productive."
                 />
-                <p>
-                  That is the extreme, and it is the honest one. A tree handed
-                  only the ticket grows 109 questions to depth 21, reaches an
-                  accuracy of 1.0 on its rows and exactly 0.5 held out, and
-                  the split reading hands the ticket all of the credit, as it
-                  must, since the ticket removed every unit of impurity the
-                  tree removed. The reading describes the growth accurately,
-                  and nothing in it says whether the growth generalised, which
-                  the held-out 0.5 says on its behalf.
-                </p>
+                <p>A tree given only the ticket identifier grows 109 splits to depth 21. It reaches training accuracy 1.0 and held-out accuracy 0.5. The split-based calculation assigns the ticket all the credit because it accounts for all the impurity reduction in that tree. That calculation correctly describes the training splits. The held-out score answers the separate question of whether those splits helped predict new labels.</p>
                 <KeepInMind>
-                  The split reading is a fact about training. Held-out
-                  accuracy is the number that says whether the training was
-                  worth reading about, and the two have to be quoted together.
-                </KeepInMind>
+                  Read split-based importance alongside an evaluation on new observations. The report explains the fitted tree&rsquo;s training splits; the predictive score checks how well that tree performed on the chosen evaluation data.</KeepInMind>
               </SubSection>
 
               <SubSection title="13. Averaging steadies the reading without correcting it">
                 <>
-<p>
-                  A forest averages twenty or thirty ledgers, and averaging removes the part of the error that differs from member to member. It cannot remove a bias every member shares, and every member&rsquo;s search prefers columns with many places to cut. On the parity puzzle the forest recovers the two-coin rule, 0.993 on its rows and 0.960 held out, and its averaged ledger still hands the noise column 0.519, more than the two real columns combined.
-                </p>
+<p>Averaging many trees can reduce tree-to-tree variability, but a shared preference for many-threshold features can remain. The parity forest scores 0.993 on training rows and 0.960 held out, yet its averaged impurity report gives noise a share of 0.519. Good predictions do not make every split-based importance share a reliable measure of predictive reliance.</p>
                 <p>
                   On the drawn crowd with all four columns and two offered per split, the ticket keeps 0.043 of the forest&rsquo;s impurity across thirty members, at 77 of the 418 splits.
                 </p>
 </>
                 <KeepInMind>
-                  A forest&rsquo;s split reading is the same ledger, steadied.
-                  A column the search prefers on chance alone is preferred by
-                  every member, and the average preserves it.
-                </KeepInMind>
+                  The forest averages reports from its fitted members. That can stabilize the values without correcting a bias in the feature-selection procedure they share. It does not mean every member selects the same feature.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -476,7 +348,7 @@ export default function FeatureImportancePage() {
                 "Because a large improvement on a small node would otherwise count as much as a smaller improvement on the whole crowd",
                 "Because impurity is not comparable between nodes at different depths",
                 "Because the shares would not sum to one without it",
-                "Because deeper nodes are the ones most likely to have memorised their rows",
+                "Because deeper nodes are the ones most likely to have memorized their rows",
               ],
               0,
               "On the tangled crowd the fourth split asks about weight in a node of three people and removes more impurity than the root does, yet its credit is about 1.333 against the root’s 4.702. The weighting is not a convention imposed afterwards either, since it falls out of asking what fraction of the whole tree’s impurity reduction each node contributed.",
@@ -484,23 +356,23 @@ export default function FeatureImportancePage() {
             trueFalse(
               "A column whose reported share is zero carries no information about the label.",
               false,
-              "A zero says the search never chose that column, at any node, against the alternatives it was offered. On the drawn crowd, weight sits at exactly zero in the lone tree’s held-out scramble and still carries a forest of its own to 0.760 when height is withheld, so a zero is a statement about one fitted model and its other columns rather than about the column itself.",
+              "Zero split importance means this tree gave the feature no credited impurity reduction. Zero normalized permutation importance can also mean its mean score change was zero or negative before clamping. Neither establishes that the column contains no useful information: another model or a different set of available inputs may use it. Weight alone still supports a held-out accuracy of 0.760 in the supplied example.",
             ),
             several(
               "The forest asks about the raffle ticket at 196 of its 559 splits, while the lone tree never asks about it across sixteen questions. Which of these are part of the reason?",
               [
-                "With two hundred distinct values the ticket offers a threshold between every adjacent pair, so one of them always lines up with a few people by chance",
-                "Offering one column per split leaves a third of the forest’s nodes seeing the ticket alone, and a member offered it must ask about it",
+                "The ticket offers many candidate thresholds, giving the search many opportunities to find chance label imbalances",
+                "Offering one of three columns per split can leave the forest searching only ticket thresholds at that node",
                 "Height and weight bring the lone tree to pure leaves without the ticket ever being the best option at any node",
-                "Resampling makes the ticket genuinely correlated with the label on some members’ rows",
+                "Bootstrap resampling creates a population-level relationship between ticket number and class",
               ],
               [0, 1, 2],
-              "The preference is for columns offering many candidate thresholds, and it shows only where the search is short of a better question, which the feature lottery guarantees at some nodes. The ledger credits the ticket 0.107 of that forest’s impurity and zero of the lone tree’s sixteen questions.",
+              "A high-cardinality distractor provides many candidate partitions and can receive impurity credit from chance training imbalances. Feature subsampling sometimes leaves it as the only available candidate column. The tree still requires an admissible improving split; it is not forced to ask a useless question. These effects explain training credit without creating a predictive relationship in the data-generating population.",
             ),
             trueFalse(
               "Averaging thirty ledgers steadies the split reading, and it still cannot remove a preference that every member’s search shares.",
               true,
-              "Averaging removes the part of the error that differs from member to member, and a preference for columns with many places to cut is in every member’s search. On the parity puzzle the forest recovers the two-coin rule, 0.993 on its rows and 0.960 held out, and its averaged ledger still hands the noise column 0.519, more than the two real columns combined.",
+              "Averaging can reduce variability among feature-credit estimates, but it does not automatically remove a shared split-selection preference for many candidate thresholds. The parity forest predicts well on held-out rows while still assigning the distractor more than half its normalized impurity credit. That disagreement is a reason to examine what each importance procedure measures.",
             ),
         ],
         },
@@ -509,64 +381,25 @@ export default function FeatureImportancePage() {
           content: (
             <>
               <SubSection title="14. The experiment">
-                <p>
-                  The second measure never looks inside the model. Score the
-                  fitted model once with every column intact. Then, for each
-                  column in turn, shuffle that column&rsquo;s values among the
-                  people, leaving every other column and every label where it
-                  was, and score again. The shuffle keeps the column&rsquo;s
-                  values exactly and destroys its pairing with the label, so
-                  whatever the score lost is attributable to that pairing and
-                  to nothing else, and the loss is the column&rsquo;s raw score.
-                </p>
+                <p>Permutation importance starts with a baseline score from the fitted model. Shuffle one feature among the observations, keep the other columns and labels in place, then score again. The score change measures how much the model’s predictions relied on the original arrangement of that feature. Shuffling breaks its relationships with both the label and the other inputs, which matters when features are related.</p>
                 <Equation>{"drop(feature) = intact score − score with that column shuffled"}</Equation>
                 <WorkedExample title="The parity forest, scrambled on its own rows">
-                  <p>
-                    Intact, the forest scores 0.993 on the three hundred rows
-                    it learned. Shuffle the first coin and it falls to 0.538,
-                    shuffle the second and it falls to 0.515, shuffle the noise
-                    column and it barely moves, to 0.977. The drops are 0.4553,
-                    0.4787 and 0.0167, they sum to 0.9507, and dividing gives
-                    shares of 0.479, 0.504 and 0.018. Either coin scrambled
-                    takes a model that works to a coin toss; the column the
-                    ledger credited with half the explanation is worth almost
-                    nothing to it.
-                  </p>
+                  <p>The parity forest scores 0.993 on its training rows. After shuffling, its scores are 0.538 for the first coin, 0.515 for the second and 0.977 for noise. The corresponding mean drops are 0.4553, 0.4787 and 0.0167, giving normalized shares 0.479, 0.504 and 0.018. Disrupting either coin greatly reduces accuracy; disrupting noise has little effect on this score despite its large impurity share.</p>
                 </WorkedExample>
                 <KeepInMind>
-                  The scramble asks what the fitted model would lose without
-                  the column&rsquo;s pairing with the label. It reads
-                  reliance, and it reads it from the model&rsquo;s answers
-                  rather than from its growth.
-                </KeepInMind>
+                  Permutation importance tests how the score changes when one column&rsquo;s values are reassigned among rows. This disrupts its relationship with both the target and other inputs. It measures the fitted model under that perturbation, rather than reading its recorded splits.</KeepInMind>
               </SubSection>
 
               <SubSection title="15. Why shuffle rather than replace">
-                <p>
-                  It would be simpler to overwrite the column with zeros or
-                  with fresh noise, and it would measure the wrong thing.
-                  Replacing the column changes two things at once, its pairing
-                  with the label and its own distribution, and a model that
-                  had never seen a height of zero would fail for the second
-                  reason as much as the first. Shuffling keeps every value the
-                  column had, in the same proportions, and moves only which
-                  person has which, so the drop is the pairing&rsquo;s and
-                  nothing else&rsquo;s.
-                </p>
+                <p>Replacing the column with zeros would also change the values the model receives. Shuffling keeps its observed distribution while changing which row receives each value. That isolates a different experiment from replacement, although it can still create combinations of features that are unusual in the original data. The score drop needs to be interpreted with that limitation in mind.</p>
                 <KeepInMind>
-                  A permutation preserves the column&rsquo;s distribution
-                  exactly. That is the whole reason the drop is attributable.
-                </KeepInMind>
+                  Shuffling preserves the observed values and their frequencies within that column. It changes their row assignments and their relationships with other columns, so the result describes this specific perturbation rather than a causal intervention.</KeepInMind>
               </SubSection>
 
               <SubSection title="16. Repeats, averaged and then clamped">
                 <>
-<p>
-                  One shuffle is one draw from a noisy quantity, and a column that happens to shuffle into nearly its original order will understate itself. The measure here shuffles each column five times from one seeded generator and averages the drops. A drop can come out negative, when the model was slightly better off without the column, and the average is clamped to zero after it is taken rather than each draw before, because the five drops are five estimates of one number and a negative one should be allowed to cancel a positive one.
-                </p>
-                <p>
-                  Clamping each draw would push a useless column&rsquo;s score upward.
-                </p>
+<p>Different permutations can produce different score changes. This implementation uses one seeded generator to shuffle each column five times and averages the drops. A negative mean drop means the perturbed data scored better in this experiment. The reporting convention then clamps that mean to zero before converting contributions into nonnegative shares.</p>
+                <p>Clamping each draw separately would discard negative fluctuations while keeping positive ones, pushing the reported importance upward. Averaging first lets the repeated estimates offset one another before the implementation applies its non-negative reporting rule.</p>
 </>
                 <Equation>{"drop_j = s − (1 / R) · Σ over R shuffles of s(column j shuffled)\nshare_j = max(0, drop_j) / Σ_k max(0, drop_k)"}</Equation>
                 <WorkedExample title="A negative drop on the lone parity tree, held out">
@@ -589,21 +422,10 @@ export default function FeatureImportancePage() {
               </SubSection>
 
               <SubSection title="17. Which rows to scramble">
-                <p>
-                  Everything so far scrambled the rows the model learned, and
-                  that makes the question a precise one, which columns did the
-                  model lean on while it learned. Scrambling rows it never saw
-                  asks which columns it leans on when it is being useful, and
-                  the two answers part company exactly on the models where the
-                  question matters, the ones that memorised. The ladder below
-                  is the scramble on the worked draw, both models, and the
-                  switch changes which rows are scrambled.
-                </p>
+                <p>Permutation scores depend on which observations we evaluate. Shuffling the training rows measures reliance on the examples already fitted. Shuffling held-out rows measures reliance when predicting those new cases. A model that memorized its training rows can give quite different answers to those questions. The switch below changes the rows used in the experiment.</p>
                 <ScrambleLadder />
                 <>
-<p>
-                  On its own rows the forest gives the noise column 0.018; held out its drop is −0.004 and its share exactly zero, with the coins at 0.510 and 0.490. The lone tree is at chance held out, 0.497, so there is nothing to lose, and its dots stay within 0.012 of the line. Breiman&rsquo;s recipe scrambles each member&rsquo;s own out-of-bag rows, which costs no held-out set at all.
-                </p>
+<p>On training rows the forest gives noise a share of 0.018. On held-out rows its mean drop is −0.004 and its clamped share is zero, while the coin shares are 0.510 and 0.490. The lone tree scores about 0.497 held out, and its measured score changes remain within 0.012. Breiman&rsquo;s forest approach instead permutes each member&rsquo;s own out-of-bag rows, using observations excluded from that tree&rsquo;s fit without reserving a separate dataset.</p>
                 <p>
                   The scramble here takes whichever rows it is handed and has no per-member out-of-bag variant, so this page uses held-out rows where the forests page would have used the rows each member left out.
                 </p>
@@ -616,12 +438,13 @@ export default function FeatureImportancePage() {
                     ["ticket's drop, scrambled held out", "−0.004"],
                     ["ticket's share, scrambled held out", "refused, no column earned anything"],
                   ]}
-                  caption="Thirty trees on two hundred raffle numbers. On the rows it memorised the scramble credits the ticket with everything; on rows it never saw no column's scramble lowers the score, and shares are refused rather than reported."
+                  caption="Thirty trees on two hundred raffle numbers. On the rows it memorized the scramble credits the ticket with everything; on rows it never saw no column's scramble lowers the score, and shares are refused rather than reported."
                 />
                 <KeepInMind>
+
                   Which rows are scrambled is part of the measurement. A
-                  reading taken on the training rows of a model that memorised
-                  them reports what it memorised with, and can hand a column
+                  reading taken on the training rows of a model that memorized
+                  them reports what it memorized with, and can hand a column
                   of raffle numbers a share of one.
                 </KeepInMind>
               </SubSection>
@@ -663,28 +486,14 @@ export default function FeatureImportancePage() {
                 <p>
                   Read from its splits, the noise column gets 0.807. Scramble that column and the tree falls from 0.537 to 0.504, most of the little it had above chance, while scrambling the second coin takes it only to 0.523 and scrambling the first changes nothing, so the scramble hands the noise column 0.710. Both readings name the noise column, and both are right.
                 </p>
-                <p>
-                  That tree built itself out of noise, and it genuinely relies on it.
-                </p>
+                <p>The tree really does use the noise feature. That reliance is a property of the fitted model, even though the feature has no useful role in the process that generated the labels.</p>
 </>
                 <KeepInMind>
-                  The scramble measures reliance, which is a fact about the
-                  fitted model rather than about the world. It is not a lie
-                  detector for columns with many places to cut, and on a model
-                  that leans on such a column it reports the lean.
-                </KeepInMind>
+                  Permutation importance describes the fitted model&rsquo;s score dependence under a shuffle. A model can rely on a noise feature, so this measure cannot certify that a highly ranked feature contains a genuine population relationship.</KeepInMind>
               </SubSection>
 
               <SubSection title="20. A model that works, on which they part">
-                <p>
-                  The disagreement needs a model that works, because only a
-                  model that found the real structure can be leaning on the
-                  coins while its ledger still credits the noise. The parity
-                  forest is that model, at 0.993 on its rows and 0.960 held
-                  out, and it is exactly there that the ledger, biased by the
-                  hundreds of thresholds it was offered in every member, keeps
-                  crediting a column the model no longer needs.
-                </p>
+                <p>The parity forest shows a large disagreement: it predicts well at 0.960 held-out accuracy, yet gives noise an impurity share of 0.519 and very little permutation importance. In this fit, many noise splits receive training credit without being essential to the final predictions. Such disagreement is possible in other fits too; it does not require a generally accurate model.</p>
                 <NumberTable
                   headings={["the worked draw", "lone tree", "forest"]}
                   rows={[
@@ -695,60 +504,35 @@ export default function FeatureImportancePage() {
                     ["leads by the splits", "noise", "noise"],
                     ["leads by scrambling", "noise", "a coin"],
                   ]}
-                  caption="The same three hundred rows, seed 4. The lone tree's held-out share of 1.000 is one clamped drop of 0.0113 divided by itself, on a model at chance."
+                  caption="The same three hundred rows, seed 4. The lone tree’s held-out share of 1.000 is based on a raw drop of only 0.0113; inspect that small magnitude alongside the near-chance baseline."
                 />
                 <KeepInMind>
-                  Where the two measures disagree on a model that works, the
-                  column they disagree about is one the search liked and the
-                  model does not need, and that is worth more than either
-                  reading on its own.
-                </KeepInMind>
+                  When split credit and permutation scores disagree, inspect the model and data before assigning a reason. Training-only gains, correlated features, the chosen score and the shuffle itself can all contribute. The two reports provide different evidence rather than a universal rule for identifying unnecessary columns.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. The same story on the crowd">
                 <p>
+
                   The drawn crowd&rsquo;s forest with the ticket among its
                   columns tells the story on people rather than coins. The
                   ledger credits the ticket 0.107 and the scramble on the
-                  training rows still gives it 0.084, since thirty memorising
-                  trees do lean a little on the raffle numbers they memorised
+                  training rows still gives it 0.084, since thirty memorizing
+                  trees do lean a little on the raffle numbers they memorized
                   with. Held out, the ticket&rsquo;s drop is −0.012 and its
                   share exactly zero, while height takes all of it.
                 </p>
                 <ArrangementBars arrangements={["with_ticket"]} initialModel="forest" readings={["impurity", "training", "held_out"]} showModelToggle={false} />
-                <p>
-                  The three rows of bars are the three readings of one fitted
-                  forest, and the ticket&rsquo;s bar shrinks from the first to
-                  the second to the third. The first row describes the growth,
-                  the second what the forest leans on when it is asked about
-                  the very rows it grew on, and the third what it leans on
-                  when asked about people it has never seen, which is the only
-                  one of the three that agrees with how the crowd was made.
-                </p>
+                <p>The first row of bars describes impurity reduction during training. The second measures permutation effects on training accuracy, and the third measures them on held-out accuracy. Only the held-out permutation report assigns the identifier zero share here. Agreement with the known generator helps interpret this example, but is not a general guarantee of causal importance.</p>
                 <KeepInMind>
-                  A column with credit in the ledger and none held out is the
-                  signature of a column the search preferred for its cut
-                  points. Both readings are needed to see it.
-                </KeepInMind>
+                  Training impurity credit with little held-out permutation effect can indicate chance-fitting. It is a clue to investigate, not a unique signature: related features and limited sensitivity of the chosen score can produce similar patterns.</KeepInMind>
               </SubSection>
 
               <SubSection title="22. Correlated columns hide each other from the scramble">
-                <p>
-                  The scramble has a failure of its own, and it is the mirror
-                  of the ledger&rsquo;s. Scramble one of two columns carrying
-                  the same signal and the model leans on the other, so the
-                  drop is small and both look unimportant, where the ledger at
-                  least divided the credit between them. The drawn
-                  crowd&rsquo;s second reading of height is the test.
-                </p>
+                <p>Correlated inputs complicate permutation importance too. If the model can obtain similar information from another column, shuffling just one may cause a small score change. Small individual drops do not establish that the shared information is unimportant. The second height reading lets us examine that case.</p>
                 <ArrangementBars arrangements={["measurements", "with_twin"]} initialArrangement="with_twin" initialModel="forest" readings={["held_out"]} showModelToggle={false} />
                 <>
-<p>
-                  With height alone, scrambling it held out costs the forest 0.360 of its accuracy. With the second reading beside it, scrambling height costs 0.148 and scrambling the second reading costs 0.184, and the two together, 0.332, come to less than the one column cost by itself, because whichever is scrambled the model still has the other.
-                </p>
-                <p>
-                  The shares say the twin matters more than height, 0.540 to 0.434, which is a fact about which of two nearly identical columns the lottery handed the members more often. The lone tree does the opposite thing and is no more informative, since it won five splits on the twin and held out the twin&rsquo;s drop is −0.001, because the tree leans on the first reading wherever it counts.
-                </p>
+<p>With height and weight available, shuffling height reduces held-out accuracy by 0.360. With the second height reading added, the separate drops are 0.148 for height and 0.184 for the second reading. Their sum, 0.332, is not a joint-shuffle measurement. Each separate experiment leaves the other reading intact, which can reduce the observed effect.</p>
+                <p>The normalized shares favor the second reading, 0.540 versus 0.434. That describes how this forest uses the two available measurements, influenced by both the sampled data and random feature availability. The lone tree uses them differently: it selects the second reading at five splits, yet shuffling it held out gives a mean drop of −0.001. A selected split need not cause a measurable decrease in this held-out accuracy score.</p>
 </>
                 <KeepInMind>
                   Under the scramble, correlated columns substitute for one
@@ -769,10 +553,7 @@ export default function FeatureImportancePage() {
                 </p>
 </>
                 <KeepInMind>
-                  A zero says this model did not use, or did not need, the
-                  column against the alternatives it had. Refit with different
-                  alternatives and the zero can become the whole explanation.
-                </KeepInMind>
+                  A zero impurity share means no positive credit was assigned by that split report. A zero permutation share can also come from a negative mean drop clamped to zero or from a score insensitive to the changed predictions. Neither proves that the feature lacks information in another model or dataset.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -786,41 +567,16 @@ export default function FeatureImportancePage() {
 <p>
                   The drawn crowd&rsquo;s rule assigns adult by height alone, with a little noise, and weight follows height only because both follow overall body size. Fit a model on weight and nothing else and it predicts adulthood usefully, the lone tree at 0.755 held out and the forest at 0.760, and every reading gives weight a share of one, because it is the only column there is.
                 </p>
-                <p>
-                  Nothing in that report is wrong, and nothing in it says weight has any role in who is an adult. The model relies on a proxy, and reliance is what the scramble measures.
-                </p>
+                <p>Weight is a useful proxy in this constructed dataset because it is associated with height. A model using weight can predict the supplied labels without identifying the rule that generated them. Reliance on a predictive measurement does not establish that changing that measurement would change the outcome.</p>
 </>
                 <ArrangementBars arrangements={["weight_only", "measurements"]} initialArrangement="weight_only" initialModel="forest" readings={["held_out"]} showModelToggle={false} />
-                <p>
-                  Offer height beside weight and the same forest&rsquo;s
-                  held-out share for weight falls to 0.043, from a drop of
-                  0.016, which is closer to the rule. Neither number is a
-                  finding about what makes a person an adult. The second
-                  reading of height in section 22 is the same lesson from the
-                  other side, since a column that is height plus measurement
-                  error cannot cause anything height does not, and the forest
-                  leaned on it more than on height.
-                </p>
+                <p>With height also available, weight&rsquo;s held-out permutation share is 0.043, based on a mean accuracy drop of 0.016. The model relies less on that proxy when it can use the variable that generated the labels. The second height measurement offers a similar caution: a larger importance share for a noisy reading does not identify an additional cause of the target.</p>
                 <KeepInMind>
-                  No importance measure establishes causation. Every number on
-                  this page is about what a fitted model did with a column,
-                  and a proxy the model can use serves it as well as a cause
-                  would.
-                </KeepInMind>
+                  These importance reports do not establish causation. A proxy can support useful prediction without being a cause of the outcome. Testing what changes an outcome requires additional assumptions or evidence beyond a fitted model&rsquo;s feature ranking.</KeepInMind>
               </SubSection>
 
               <SubSection title="25. Importance is not a verdict on the column">
-                <p>
-                  A third way to ask the question is to refit without the
-                  column and see what the held-out accuracy loses, and the
-                  drawn crowd&rsquo;s arrangements are those refits. Take the
-                  ticket away from the forest and its held-out accuracy moves
-                  from 0.870 to 0.880, so the ticket was worth nothing and
-                  slightly less than nothing; take it from the lone tree and
-                  the accuracy stays at 0.845 exactly, since the tree never
-                  used it. That agrees with the scramble held out and
-                  disagrees with the ledger, which credited the ticket 0.107.
-                </p>
+                <p>Another comparison refits the model without a feature and evaluates the new fit. Removing the raffle number changes this forest&rsquo;s held-out accuracy from 0.870 to 0.880. The lone tree stays at 0.845 because it never selected the identifier. This draw provides no measured benefit from keeping the ticket, but a small difference from one refit is not an intrinsic value for the column.</p>
                 <NumberTable
                   headings={["held-out accuracy of the forest", "reading"]}
                   rows={[
@@ -831,15 +587,9 @@ export default function FeatureImportancePage() {
                     ["weight alone", "0.760"],
                     ["the ticket alone", "0.505"],
                   ]}
-                  caption="Thirty trees, seed 0, two hundred people held out in every row. Refitting is the most expensive answer and the one least tied to a particular model's habits."
+                  caption="Thirty trees, seed 0, with two hundred held-out people for every configuration. These comparisons require new fits and measure the selected training procedure as well as the available features."
                 />
-                <p>
-                  The refit also shows the limit of every reading here. Weight
-                  scores 0.043 held out beside height and a refit that drops it
-                  would lose little, and weight alone still reaches 0.760. A
-                  column&rsquo;s share is not its value; it is its value to
-                  this model given the other columns it had.
-                </p>
+                <p>The effect of a column depends on which other information is available. Weight has a held-out share of 0.043 beside height, while a model using weight alone reaches 0.760 accuracy. Both results can be correct. Neither report assigns weight an intrinsic value independent of the model and its other inputs.</p>
                 <KeepInMind>
                   None of the three measures is a verdict on the column.
                   Weight scores 0.043 in a model that had height available,
@@ -849,23 +599,13 @@ export default function FeatureImportancePage() {
               </SubSection>
 
               <SubSection title="26. Reading a report of shares">
-                <p>
-                  So a report of importances should say which question it
-                  answered, which model it answered it for, which rows were
-                  scrambled if any were, how many repeats under which seed,
-                  and how correlated the columns are, because without those
-                  the shares are a bar chart with no scale. On this page the
-                  same forest reports 0.107 for the ticket by the ledger,
-                  0.084 by the scramble on its rows and 0.000 by the scramble
-                  held out, and the three are all correct answers to three
-                  questions.
-                </p>
+                <p>An importance report needs its method and model. For permutation results, also record the evaluated rows, score, repeats and seed. Inspect relationships between inputs before interpreting their individual shares. This forest assigns the ticket 0.107 by impurity reduction, 0.084 by training-row permutation and 0.000 by held-out permutation. Those values answer different questions and should be labeled accordingly.</p>
                 <DerivationTable
                   expressionHeading="if the shares are"
                   reasonHeading="then ask"
                   rows={[
                     { expression: "from the splits", reason: "whether a highly ranked column offers many cut points, whether two ranked columns are correlated, and what the model scored held out." },
-                    { expression: "from scrambling the training rows", reason: "whether the model memorised, since a memorising model leans on whatever it memorised with." },
+                    { expression: "from scrambling the training rows", reason: "whether the model memorized, since a memorizing model leans on whatever it memorized with." },
                     { expression: "from scrambling held-out rows", reason: "whether correlated columns are hiding each other, and whether a zero is a column the model had a substitute for." },
                     { expression: "from any of the three", reason: "nothing about causation, since a proxy the model can use serves it as well as a cause would, and weight alone reached 0.760." },
                   ]}
@@ -886,13 +626,13 @@ export default function FeatureImportancePage() {
             choice(
               "Why is a column shuffled rather than overwritten with zeros or with fresh noise?",
               [
-                "A permutation keeps every value the column had, in the same proportions, so the drop belongs to the pairing with the label and nothing else",
+                "A permutation preserves the column's observed marginal values while disrupting their pairing with the target and other inputs",
                 "Overwriting would change how many rows there are to score",
                 "A shuffle is cheaper than generating replacement values",
                 "A shuffle leaves the other columns’ correlations with this one intact",
               ],
               0,
-              "Replacing a column changes two things at once, its pairing with the label and its own distribution, and a model that had never seen a height of zero would fail for the second reason as much as the first. A shuffle moves only which person has which value, which is the whole reason the drop is attributable.",
+              "Replacing a column with zeros or fresh noise changes its marginal values as well as its relationships. Permutation preserves the observed value multiset but changes which row receives each value, disrupting associations with both the target and other columns. The score change is specific to that perturbation. With correlated inputs, the shuffled combinations may be implausible, which matters when interpreting the result.",
             ),
             trueFalse(
               "A negative drop is clamped to zero on each of the five shuffles, before they are averaged.",
@@ -908,7 +648,7 @@ export default function FeatureImportancePage() {
                 "The two measures always agree on a tree grown until its leaves are pure",
               ],
               1,
-              "That tree rooted on noise and never found the two-question structure, so the little it holds above chance really was built out of that column. The scramble measures reliance, which is a fact about the fitted model rather than about the world, and the disagreement between the two measures needs a model that works, which is the parity forest at 0.960 held out.",
+              "The fitted tree uses the distractor, so shuffling it changes that model's training predictions. That is model reliance, not evidence that the distractor predicts the population label. Its near-chance held-out accuracy is essential context. Importance measurements can disagree even for weak models, but interpreting any ranking requires checking whether the model performs usefully on the evaluation rows.",
             ),
             several(
               "Height is read a second time with a little measurement error, correlated with the first reading at 0.996. Which of these were measured on the drawn crowd?",
@@ -919,7 +659,7 @@ export default function FeatureImportancePage() {
                 "The twin’s share rises because it carries information the first reading of height does not",
               ],
               [0, 1],
-              "The twin is height plus measurement error, so by construction it cannot matter more than the first reading, and the ledger still puts it ahead, because credit between correlated columns is divided in proportions the data does not determine. Under the scramble the two substitute for one another instead. With height alone, scrambling it held out costs the forest 0.360; with the twin beside it, scrambling height costs 0.148 and scrambling the twin 0.184, and the two together, 0.332, come to less than the one column cost by itself.",
+              "The second height reading is generated from the first plus noise, so it adds no new label information conditional on the original height in this setup. A fitted forest can still rely more on one copy or assign it more split credit. The individual permutation drops are 0.148 and 0.184 with both copies present, versus 0.360 for height in the model without the copy. Their sum is not a joint-permutation measurement; correlated features require care when attributing group reliance.",
             ),
             trueFalse(
               "Fitted on weight and nothing else, the forest predicts adulthood at 0.760 held out and every reading gives weight a share of one, and nothing in that report says weight has any role in who is an adult.",
@@ -935,18 +675,14 @@ export default function FeatureImportancePage() {
               <SubSection title="27. Specify the scoring experiment before comparing importance" id="27-what-a-complete-implementation-states">
                 <>
 <p>To compare split-based importance reports, first check what earned the credit. Here a split contributes its gain multiplied by the number of rows that reached it. The impurity measure matters, as does whether stand-in splits receive credit as they did in the 1984 treatment.</p>
-                <p>A forest can average member shares or add the underlying credits before normalising. Those procedures need not agree. Every fitted feature should still appear in the report, including a feature that earned zero credit.</p>
+                <p>A forest can average member shares or add the underlying credits before normalizing. Those procedures need not agree. Every fitted feature should still appear in the report, including a feature that earned zero credit.</p>
                 <p>Permutation importance describes an experiment, so its report needs the score, rows, repeat count and random seed. The selected column is shuffled among those rows; it is not replaced with invented values. In this implementation, negative credit is clamped after averaging the repeated score changes.</p>
-                <p>Check whether each forest member uses its own out-of-bag rows, and what happens if shuffling no column lowers the score. Both importance reports expose their raw quantities beside shares normalised to sum to one, so the share can be traced back to what was measured.</p>
+                <p>Check whether each forest member uses its own out-of-bag rows, and what happens if shuffling no column lowers the score. Both importance reports expose their raw quantities beside shares normalized to sum to one, so the share can be traced back to what was measured.</p>
 </>
               </SubSection>
 
               <SubSection title="28. Unused features, invalid permutations and undefined scores" id="28-the-edges-tried-rather-than-remembered">
-                <p>
-                  Every row below was run before it was written down, and the
-                  words in the right column are the refusal&rsquo;s own where
-                  the edge was refused.
-                </p>
+                <p>The table records the SDK’s responses to these cases, including the named error when a report cannot be computed. Accepted output still needs its raw values and evaluation context to be interpreted correctly.</p>
                 <DerivationTable
                   expressionHeading="Data or permutation condition"
                   reasonHeading="Effect on the importance estimate"
@@ -967,18 +703,11 @@ export default function FeatureImportancePage() {
                     { expression: "more features per split than there are features", reason: "accepted; every split is offered every column, which is bagging, and the shares are reported as usual." },
                     { expression: "a committee whose members have no splits to read", reason: "refused; a bagged ridge model cannot report impurity shares and is told to use the scramble instead." },
                     { expression: "a forest member that grew no split", reason: "the refusal underneath speaks about one member; this page checks first and refuses in a sentence about the draw, which four of one hundred and eighty draws needed." },
-                    { expression: "a negative drop", reason: "clamped to zero after the average, documented rather than defended, with the raw drop reported beside the share." },
-                    { expression: "a border of tie-breaking between correlated columns", reason: "documented rather than defended; which of two near-identical columns takes a node is settled by the split search's tie rule and the lottery, and the shares say so by moving." },
+                    { expression: "a negative drop", reason: "clamped to zero after averaging, following this SDK’s nonnegative reporting convention. The raw drop remains available because a negative estimate differs from an exactly zero effect." },
+                    { expression: "a border of tie-breaking between correlated columns", reason: "the available data, candidate features and tie rules affect which column receives each split’s credit. Small perturbations can change their individual shares even when the shared information remains useful." },
                   ]}
                 />
-                <p>
-                  The refusal worth remembering is the one for a model that
-                  never used its columns. A vector of zeros would type-check
-                  and sum to nothing, and a reader would take it for an
-                  answer; it is refused with a reason instead, and the
-                  ticket-only forest in section 17 is that refusal on
-                  real rows.
-                </p>
+                <p>If all raw contributions are zero after this reporting rule, they cannot be normalized into shares summing to one. The SDK raises an error explaining that condition. This does not always mean the model ignored every column: effects can be absent under the chosen score or negative and then clamped. The ticket-only forest in section 17 demonstrates that distinction.</p>
               </SubSection>
             </>
           ),
@@ -986,7 +715,7 @@ export default function FeatureImportancePage() {
         {
           title: "Practice. Asking a Fitted Model Both Questions With the Library",
           practice: [
-            exercise("Read the ledger off the tangled crowd’s tree",["Part 2 keeps a ledger for the lone tree grown on the tangled crowd of twenty-five people and ends with height at 0.777 and weight at 0.223. Fit that tree with DecisionTreeClassifier, with no depth limit so that it grows until every leaf is pure, and read the same two shares off feature_importances.", "The tree should take eight splits to reach nine pure leaves, which its root reports as n_leaves. Print each column’s share to four places and compare it with the ledger’s 9.702 over 12.480."],`from oop_ml import DecisionTreeClassifier, Feature
+            exercise("Read the ledger off the tangled crowd’s tree",["Fit an unrestricted DecisionTreeClassifier to the twenty-five people below. Print the fitted leaf count, split count and depth, followed by each feature_importances share to four decimal places.", "Compare each share with the sample-weighted impurity reductions calculated earlier. A feature receives credit for splits this fitted tree used; the shares do not establish the feature's intrinsic usefulness or causal effect."],`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145,
            151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143]
@@ -1017,7 +746,7 @@ for share in tree.feature_importances:
     print(f"{share.name} {share.value:.4f}")`,`8 splits to 9 pure leaves, depth 5
 height 0.7774
 weight 0.2226`,{...{ hints: ["The split reading is a property of the fitted tree, feature_importances, and it is iterable, one entry per column with a name and a value.", "A share can also be read by name, as tree.feature_importances[\"height\"]. Every column the tree was fitted on is present, at zero if it never won a split.", "The root is tree.root, and a node reports its depth and the number of leaves beneath it as depth and n_leaves."], check: numberCheck("What share does the split reading give height, to four places?", 0.7774, 0.0005, "This share is the tree's height-credit total divided by all credited impurity reduction. It records how that fitted tree used height while growing, rather than an intrinsic importance of height.") },question:"How much of this tree's impurity reduction is credited to each feature?"}),
-            exercise("Grow the seed-7 forest beside it",["Part 2 says the forest’s split reading is close to even because the feature lottery made it so, and that the bagged committee, with no lottery, leans on height nearly as hard as the lone tree. Grow both on the same twenty-five people with RandomForestClassifier, 25 members under seed 7, once offered one column per split and once offered both, which is bagging.", "Print each committee’s two shares beside the lone tree’s, and each committee’s out-of-bag accuracy, which this lesson does not quote. The lottery changes which column a member is allowed to ask about at a node, and the ledger credits whatever it asked."],`from oop_ml import DecisionTreeClassifier, Feature, RandomForestClassifier
+            exercise("Grow the seed-7 forest beside it",["Fit two twenty-five-member RandomForestClassifier models under seed 7: one with max_features=1 and one with max_features=2. With both inputs offered at every split, the latter uses the same full-feature search as bagged trees under matching settings.", "Print the two importance shares for each ensemble beside the single tree's shares. Also print both out-of-bag accuracies. Compare changes in feature credit with changes in predictive performance."],`from oop_ml import DecisionTreeClassifier, Feature, RandomForestClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145,
            151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143]
@@ -1056,7 +785,7 @@ forest: height 0.5271, weight 0.4729
 bagged: height 0.7111, weight 0.2889
 forest out of bag 0.52
 bagged out of bag 0.64`,{...{ hints: ["A committee is configured at construction, with n_members, max_features and random_seed, and fitted exactly as the tree is.", "max_features is how many columns a split is offered. With two columns, 1 is the lottery and 2 offers every column at every split, which is bagging.", "out_of_bag_score takes no arguments. It scores each person by the members whose resample left that person out, so it is a held-out score that cost no held-out rows."], check: numberCheck("What share does the bagged committee’s split reading give height, to four places?", 0.7111, 0.0005, "Restricting the available features changes which splits the trees can choose and therefore where their impurity credit goes. Compare that credit with predictive performance before treating the more even shares as an improvement.") },question:"Does restricting the available features change the forest's importance scores?"}),
-            exercise("Ask the parity puzzle both questions",["The puzzle in Part 1 is three hundred rows from seed 4. Two coin flips, a column of standard normal noise, and a class that is 1 exactly when the flips disagree, drawn in that order from one generator. Fit the lone tree at depth 3 and the forest of twenty members, one column per split, depth 3, seed 0, exactly as the page does, and ask both models the split question and the forest the scramble question on the rows it learned.", "Part 3 gives the lone tree’s ledger 0.807 for the noise column and the forest’s 0.519. Part 4 scrambles the forest on its own rows and gets 0.479, 0.504 and 0.018. Print each model’s accuracy on these rows, each ledger, and the forest’s scramble, all shares to four places."],`import numpy as np
+            exercise("Ask the parity puzzle both questions",["Use the starter's seeded parity data: two binary coin columns, a standard-normal distractor, and class 1 when the coins differ. Fit the depth-three tree and twenty-member depth-three forest with one candidate feature per split. Print their training accuracies and impurity importances.", "Measure the forest with PermutationImportance(n_repeats=5, random_seed=0) on those same training rows. Print its normalized shares to four decimal places. Compare which features receive split credit with which features the fitted predictions depend on under shuffling."],`import numpy as np
 from oop_ml import DecisionTreeClassifier, Feature, PermutationImportance, RandomForestClassifier
 
 generator = np.random.default_rng(4)
@@ -1099,8 +828,8 @@ forest: accuracy 0.993
   ledger distractor 0.5187
 forest scramble first 0.4790
 forest scramble second 0.5035
-forest scramble distractor 0.0175`,{...{ hints: ["score takes the columns and the target and answers the accuracy as a float. max_depth=3 is enough for parity, which takes two questions, and far short of memorising three hundred rows.", "feature_importances is the split reading on a tree and on a forest alike. The forest averages its members’ shares, so the noise column keeps credit that every member’s search gave it.", "PermutationImportance is configured with n_repeats and random_seed, and its measure method takes the fitted model, the columns and the target. It refits nothing, and the model and rows it is handed are what decide the reading."], check: numberCheck("What share does the scramble on the forest’s own rows give the noise column, to four places?", 0.0175, 0.0005, "The fitted forest depends strongly on the two coin columns even though the noise column received substantial split credit. Shuffling asks about prediction dependence, while the ledger asks about credited training splits.") },question:"Can a feature earn split credit without helping the model's predictions?"}),
-            exercise("Scramble the rows the models never saw",["Part 4 says which rows are scrambled is part of the measurement. The page’s held-out rows are the next three hundred from the same generator, drawn after the training rows, which the draw function below reproduces. Score both models on them, then scramble each on them.", "Part 4 reports the forest’s held-out coins at 0.510 and 0.490 with the noise column at exactly zero, and the lone tree at chance, 0.497, with the noise column’s share at exactly 1.0. Print both held-out accuracies to three places and every held-out share to four."],`import numpy as np
+forest scramble distractor 0.0175`,{...{ hints: ["score takes the columns and the target and answers the accuracy as a float. max_depth=3 is enough for parity, which takes two questions, and far short of memorizing three hundred rows.", "feature_importances is the split reading on a tree and on a forest alike. The forest averages its members’ shares, so the noise column keeps credit that every member’s search gave it.", "PermutationImportance is configured with n_repeats and random_seed, and its measure method takes the fitted model, the columns and the target. It refits nothing, and the model and rows it is handed are what decide the reading."], check: numberCheck("What share does the scramble on the forest’s own rows give the noise column, to four places?", 0.0175, 0.0005, "The fitted forest depends strongly on the two coin columns even though the noise column received substantial split credit. Shuffling asks about prediction dependence, while the ledger asks about credited training splits.") },question:"Can a feature earn split credit without helping the model's predictions?"}),
+            exercise("Scramble the rows the models never saw",["Use draw to generate the training rows and then three hundred held-out rows from the same generator. Fit both models on training rows only. Print each held-out accuracy, then measure permutation importance using the held-out inputs and labels.", "Print each returned share to four decimal places. Compare the shares with the model's accuracy: normalizing a tiny accidental score change can give a large relative share even when the model predicts poorly."],`import numpy as np
 from oop_ml import DecisionTreeClassifier, Feature, PermutationImportance, RandomForestClassifier
 
 generator = np.random.default_rng(4)
@@ -1145,7 +874,7 @@ for name, model in [("lone tree", tree), ("forest", forest)]:
 forest: held-out accuracy 0.960
   first 0.5102
   second 0.4898
-  distractor 0.0000`,{...{ hints: ["The held-out rows come from the same generator object after the training rows, so the two draws have to happen in that order and from one generator.", "score and measure both take the held-out columns and the held-out target. Neither refits the model; only the rows it is asked about change.", "A share of exactly 0.0000 or 1.0000 is the clamp at work. The library reports the clamped shares only, so a drop below nothing and a drop of exactly nothing both come back as zero."], check: numberCheck("What held-out share does the scramble give the first coin on the forest, to four places?", 0.5102, 0.0005, "A held-out score drop is noisy, and this implementation clamps a negative mean drop to zero before normalising shares. A weak model can assign a large relative share to a tiny accidental drop, so inspect the score and unnormalised drops too.") },question:"Do the importance scores tell the same story on held-out people?"}),
+  distractor 0.0000`,{...{ hints: ["The held-out rows come from the same generator object after the training rows, so the two draws have to happen in that order and from one generator.", "score and measure both take the held-out columns and the held-out target. Neither refits the model; only the rows it is asked about change.", "A share of exactly 0.0000 or 1.0000 is the clamp at work. The library reports the clamped shares only, so a drop below nothing and a drop of exactly nothing both come back as zero."], check: numberCheck("What held-out share does the scramble give the first coin on the forest, to four places?", 0.5102, 0.0005, "A held-out score drop is noisy, and this implementation clamps a negative mean drop to zero before normalizing shares. A weak model can assign a large relative share to a tiny accidental drop, so inspect the score and unnormalized drops too.") },question:"How do the same fitted models' importance measurements change on held-out parity rows?"}),
           ],
         },
       ]}

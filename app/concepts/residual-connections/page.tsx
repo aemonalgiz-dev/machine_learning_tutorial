@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { ResidualExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Residual Connections · oop_ml", description: "A new layer may only need to improve a representation we already have. A residual connection carries the input forward so the layer can learn a correction rather than having to recreate the entire representation." };
+export const metadata: Metadata = { title: "Residual Connections · Perceptron Lab", description: "A residual connection adds a layer's learned transformation to its input. This gives information a direct route forward and allows the layer to represent an adjustment to an existing representation." };
 
 export default function ResidualConnectionsPage() {
   return <ConceptPage
       lessonId="residual-connections"
-      intuition={lessonIntuitions["residual-connections"]} title="Residual Connections" tagline={"A new layer may only need to improve a representation we already have. A residual connection carries the input forward so the layer can learn a correction rather than having to recreate the entire representation."}
+      intuition={lessonIntuitions["residual-connections"]} title="Residual Connections" tagline={"A residual connection adds a layer's learned transformation to its input. This gives information a direct route forward and allows the layer to represent an adjustment to an existing representation."}
     openingTitle="Do We Need to Rebuild a Useful Representation?"
     technicalStart="Part 2. The Two Routes Through the Calculation"
     prerequisites={<>Read <Link href="/concepts/dense-layers">dense layers</Link> for forward transformations and <Link href="/concepts/backpropagation">backpropagation</Link> for derivatives through a network.</>}
@@ -25,7 +25,7 @@ export default function ResidualConnectionsPage() {
     sections={[
       { title: "Part 1. Learn an Adjustment", defaultOpen: true, content: <>
         <SubSection title="1. Keep the input available">
-          <p>Call the original input x and the branch&apos;s transformation F. The residual output is their sum:</p>
+          <p>{"The shortcut carries the original input forward while a separate branch calculates a transformation of it. We call the input x and that transformation F. Adding the branch's result to the original gives the residual output:"}</p>
           <Equation>{`y = x + F(x)`}</Equation>
           <p>The branch can increase, decrease, or otherwise modify coordinates. It is not limited to making a small change. &quot;Residual&quot; describes how we express the desired result relative to the input, not a constraint on the branch&apos;s magnitude.</p>
         </SubSection>
@@ -45,11 +45,11 @@ export default function ResidualConnectionsPage() {
           <p>A change to the input affects the result through the branch and through the shortcut. Backpropagation must include both contributions. For a scalar input:</p>
           <Equation>{`dy/dx = 1 + F′(x)\n\nFor F(x) = tanh(w x):\nF′(x) = w × (1 − tanh²(w x))\n\nAt x = 1 and w = 0.5:\nF′(1) ≈ 0.5 × (1 − 0.4621²) ≈ 0.3932\ndy/dx ≈ 1 + 0.3932 = 1.3932`}</Equation>
           <WorkedExample title="Both routes, measured on the playground branch">
-            <p>Send a slope of one back into the playground&rsquo;s branch on its own and it hands down 0.3932, the branch derivative above. Wrap the same branch in the shortcut, send the same slope of one, and what arrives at the input is 1.3932.</p>
+            <p>To compare the two routes, hold the arriving loss derivative at one. The branch alone passes an input derivative of 0.3932 backward. The residual block adds the shortcut’s derivative, so it passes back 1.3932.</p>
             <Equation>{`slope handed down by the branch alone        ≈ 0.3932\nslope handed down by branch and shortcut   ≈ 1 + 0.3932 = 1.3932`}</Equation>
             <p>The difference between the two is exactly the one the shortcut contributes. Nothing about the branch changed between the two measurements, which is the point of the wrapper. It leaves the branch as it was and adds a route beside it.</p>
           </WorkedExample>
-          <p>The shortcut contributes a derivative of one. It provides a direct route around the branch&apos;s transformations. For vectors, the corresponding expression uses the identity matrix and the branch&apos;s Jacobian.</p>
+          <p>The shortcut contributes a derivative of one, giving a direct route around the branch’s transformations. For a vector input, we track how each output coordinate changes with each input coordinate. Those derivatives form a matrix called the Jacobian. The identity shortcut contributes ones on its diagonal and zeros elsewhere, added to the branch’s Jacobian.</p>
         </SubSection>
         <SubSection title="4. Keep parameter learning inside the branch">
           <p>The direct shortcut has no parameters. Its gradient contribution concerns the input. The branch still calculates the derivatives of its own weights and biases, just as it would without the wrapper.</p>
@@ -109,20 +109,24 @@ export default function ResidualConnectionsPage() {
             trueFalse(
               "With a slope of one arriving at the output, the playground branch’s weight comes back with the same slope, 0.7864, whether or not the branch is wrapped in the shortcut.",
               true,
-              "The shortcut carries the input, and the input does not depend on the weight, so moving the weight moves the result through the branch alone and the shortcut takes no part. What the wrapper changes is what the layers beneath receive, 1.3932 against 0.3932, not how the branch’s own parameters are corrected. The direct shortcut has no parameters of its own, and the implementation rebuilds the wrapper around the updated branch after a training step.",
+              "For the same fixed upstream derivative, the shortcut adds no direct weight or bias derivative because it has no dependence on those branch parameters. It does add an input-gradient contribution. If the residual wrapper changes the prediction of a larger loss calculation, the upstream derivative can also change, so equal local parameter gradients are not a claim about every training situation.",
             ),
         ],
         },
       { title: "Part 3. Why Deep Networks Use Shortcuts", content: <>
-        <p>A long chain asks its derivative to pass through every transformation. Residual connections introduce additional routes through the chain and make it straightforward for a block to preserve its input. This helps explain their usefulness in deep networks, including image models and transformers.</p>
+        <p>In a long chain, the gradient to an early layer passes through every later transformation. Residual connections add routes around individual branches and let a block preserve its input when its branch output is zero. These properties help explain why residual blocks are useful in deep networks, including image models and transformers.</p>
         <p>Suppose many successive layers each reduce the arriving gradient. Their reductions multiply, and an early layer can receive a very small signal. This is called a vanishing gradient. A residual block has an extra route that carries the input directly. Its derivative includes that route as well as the learned branch, which can help an early layer receive a useful signal. The complete derivative still combines both contributions, so cancellation or amplification remains possible.</p>
         <WorkedExample title="The playground neuron, stacked thirty deep">
-          <p>Take the playground&rsquo;s branch at its default weight of 0.5, stack copies of it so that each reads what the one before answered, and hand the chain an input of one. The derivative at the bottom of the plain chain is one factor per layer multiplied together, and each factor is a tanh slope times 0.5, so no factor exceeds a half. In the residual chain each block adds its input back, so each factor is one plus a branch derivative instead.</p>
+          <p>{"Stack copies of the playground's branch, each reading the preceding result, and supply an input of one. Keep its default weight of 0.5. In the plain chain, each layer contributes a tanh slope multiplied by 0.5 to the derivative, so each factor is at most one half. In the residual chain, the shortcut adds a direct input contribution at every block. Each derivative factor therefore includes one as well as the branch derivative."}</p>
           <Equation>{`depth    plain chain dy/dx     residual chain dy/dx\n  1      0.3932                 1.3932\n  2      0.1865                 1.8188\n  5      0.0229                 2.5053\n 10      0.0007                 2.5763\n 30      6.8 × 10⁻¹⁰            2.5768`}</Equation>
           <p>At these fixed settings, the thirty-layer plain chain passes back less than a billionth of the arriving derivative. The residual chain passes back 2.5768. This measures sensitivity through the chosen chains; it is not a complete training run or a guarantee about how long learning would take. The residual output also grows to about 29.68. As the tanh branch approaches its flat upper range, each block contributes nearly one to the output and passes back a derivative close to one.</p>
         </WorkedExample>
-        <p>If the learned branch outputs zero, the shortcut lets this block return its input unchanged. The playground demonstrates that case at a branch weight of zero. An untrained branch with arbitrary initial weights need not output zero. Residual parameterisation makes an identity mapping easy to express; it does not make every newly added block harmless.</p>
-        <KeepInMind><p>The complete derivative is a sum. A negative branch derivative can cancel the shortcut&apos;s contribution, and repeated residual blocks can still amplify or reduce gradients. A shortcut improves the structure of the learning problem; it does not promise that every gradient or every training run will behave well.</p><p>The playground can show the cancellation, though not at every input. At an input of one the branch derivative never falls below −0.4477, which it reaches at a weight of about −0.77, so the combined derivative never falls below 0.5523 there. At an input of zero the branch derivative is simply the weight, so a weight of −1 gives a combined derivative of exactly 0 and a weight of −2 gives −1, a branch pulling against its own shortcut.</p></KeepInMind>
+        <p>If the learned branch outputs zero, the shortcut lets this block return its input unchanged. The playground demonstrates that case at a branch weight of zero. An untrained branch with arbitrary initial weights need not output zero. Residual parameterization makes an identity mapping easy to express; it does not make every newly added block harmless.</p>
+        <KeepInMind><p>The complete derivative is a sum. A negative branch derivative can cancel the shortcut&apos;s contribution, and repeated residual blocks can still amplify or reduce gradients. A shortcut improves the structure of the learning problem; it does not promise that every gradient or every training run will behave well.</p><p>The playground can demonstrate cancellation, but the result depends on the input. At input one, the branch derivative reaches a minimum of about −0.4477 near weight −0.77. The shortcut still leaves a positive combined derivative of at least about 0.5523. At input zero, tanh is evaluated at zero, so the branch derivative equals its weight. Negative weights can then cancel the shortcut completely or reverse the sign of the combined derivative.</p>
+<Equation>{`At input 0:
+weight = −1: combined derivative = 1 + (−1) = 0
+weight = −2: combined derivative = 1 + (−2) = −1`}</Equation>
+<p>The second setting reverses the direction in which the output changes with its input.</p></KeepInMind>
         <p>The residual formulation is developed in <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a>. The skip connections on the <Link href="/concepts/u-net">U-Net</Link> page serve a related purpose of preserving information, but that model concatenates selected feature maps rather than applying this elementwise addition.</p>
       </> },
         {
@@ -158,7 +162,7 @@ export default function ResidualConnectionsPage() {
                 "It guarantees that every training run behaves well",
               ],
               0,
-              "A long chain asks its derivative to pass through every transformation, and the shortcut adds a route around each branch. A block whose branch has learned nothing yet answers its input, so a network can be made deeper without first being made worse. A shortcut improves the structure of the learning problem; it does not promise that every gradient or every training run will behave well.",
+              "An identity shortcut provides a direct input-to-output route around the branch. If the branch outputs zero, the block reproduces its input, so an identity mapping is easy to represent with that setting. An untrained branch is not automatically zero. The extra route can help optimization without guaranteeing identical predictions, nonvanishing gradients or successful training.",
             ),
             choice(
               "At an input of zero, which branch weight makes the combined derivative exactly zero?",

@@ -166,9 +166,10 @@ export function ActivationSlopeChart() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The factor a gradient keeps on its way back through one neuron, for
-        each of the four activation functions. Where a curve runs along the floor, the neurons
-        below stop learning.
+        Each curve shows an activation function&apos;s derivative at a given score.
+        Backpropagation multiplies the arriving gradient by this value. If it is
+        zero, this example sends no gradient through that activation to the
+        parameters that produced its score.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -125,7 +125,7 @@ function RulerRow({ ruler, scaling, typoIndex }: { ruler: Ruler; scaling: Method
       <div className="text-sm">
         <div className="font-medium text-slate-700 dark:text-slate-200">{ruler.label}</div>
         <div className="font-mono text-xs text-slate-500 dark:text-slate-400">
-          centre {scaling.centre.toFixed(1)} · spread {scaling.spread.toFixed(1)}
+          center {scaling.centre.toFixed(1)} · spread {scaling.spread.toFixed(1)}
         </div>
       </div>
       <svg viewBox={`0 0 ${VIEW.width} ${VIEW.height}`} className="w-full select-none rounded-lg bg-slate-50 dark:bg-slate-950">

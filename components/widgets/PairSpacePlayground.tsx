@@ -343,7 +343,7 @@ export function PairSpacePlayground() {
         Both spaces come from networks trained on crosses, squares and discs
         only, from weight seed {answer.seed}. The held-out half of each of the
         four kinds and 60 rings make 300 pictures, and a picture&rsquo;s nearest
-        neighbours are searched among all of them by straight-line distance.
+        neighbors are searched among all of them by straight-line distance.
       </p>
     </div>
   );

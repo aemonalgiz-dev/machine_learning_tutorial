@@ -9,6 +9,8 @@ import { resultFeedback } from '../lib/builds/coaching';
 import { greenhousePrediction } from '../lib/gp-example';
 import { initialVae, tinyVaeObjective } from '../lib/tiny-vae';
 import { expandedLessonById } from '../lib/lessons';
+import { displayExerciseTitle } from '../lib/exercises';
+import { americanEnglish } from '../lib/american-english';
 
 test('workshop cases reject constants, the wrong gradient direction and omitted activation',()=>{
   const gradient=buildById['gradient-descent-regression'];
@@ -130,7 +132,7 @@ test('function checks reject copied output and a project exports the actual run 
   });
   await page.goto('/concepts/project-demand-forecast#practice-work-through-the-problem-with-numpy');
   const exercise=expandedLessonById['project-demand-forecast'].practice.find(item=>item.exports?.[0]?.filename==='greenhouse-forecast-report.json')!;
-  await page.getByRole('button',{name:`Challenge 4: ${exercise.title}`,exact:true}).click();
+  await page.getByRole('button',{name:`Challenge 4: ${americanEnglish(displayExerciseTitle(exercise))}`,exact:true}).click();
   await page.locator('.cm-content').fill(`print(${JSON.stringify(exercise.output)})`);
   await page.getByRole('button',{name:'Run tests',exact:true}).click();
   await expect(page.getByText('Some tests need another look',{exact:true})).toBeVisible({timeout:120000});

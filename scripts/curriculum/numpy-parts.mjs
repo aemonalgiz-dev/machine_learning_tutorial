@@ -25,7 +25,7 @@ export const numpyStructureQuestions = {
 export const numpyParts = {
   "numpy-arrays": [
     part("1. A Value, a Name, and a Collection",
-      "Suppose we only had one thermometer. We could keep its reading under one name and use that name whenever we needed the temperature. Now suppose Botie has a hundred thermometers. Giving every reading its own variable would make even a simple calculation tedious. We need a way to keep related readings together.\n\nA data structure is a way of organising information so that we can find it and work with it. Python gives us several choices. We will start with a list, which keeps items in a sequence. The position of an item is called its index.",
+      "Suppose we only had one thermometer. We could keep its reading under one name and use that name whenever we needed the temperature. Now suppose Botie has a hundred thermometers. Giving every reading its own variable would make even a simple calculation tedious. We need a way to keep related readings together.\n\nA data structure is a way of organizing information so that we can find it and work with it. Python gives us several choices. We will start with a list, which keeps items in a sequence. The position of an item is called its index.",
       "Position:      0    1    2\nGreenhouse: North Middle South\nCelsius:      12   18   24",
       "Positions start at zero. Position zero identifies the first reading; it does not mean that the temperature is zero. We have decided that the first position belongs to the north greenhouse.", [
         example("Start with one reading, then keep three together",
@@ -66,7 +66,7 @@ print(fahrenheit)`,
           "The scaled value is only an intermediate result. We must also shift the zero point before reporting Fahrenheit. Both variables here refer to single numbers, not lists.")
       ]),
     part("3. Tell the Computer Which Kind of Number We Need",
-      "Our list keeps the readings together, but Python does not interpret every list operation as arithmetic on its entries. We need a numerical collection whose operations have that meaning. NumPy supplies one: the array, whose Python type is called ndarray.\n\nFor the ordinary numerical arrays in these lessons, every entry uses the same data type, or dtype. Integers store whole numbers. Floating-point numbers allow fractional readings, although many decimals are represented approximately. The data type describes how values are stored; it does not record their units.",
+      "Keeping readings together is useful, but we also need to know what an operation on that collection means. Multiplying a Python list repeats the sequence; it does not multiply each temperature. For a numerical calculation, we want the operation to act on the entries themselves. NumPy provides an array for that purpose. Its Python type is called ndarray, and we will use it to keep one numerical position per greenhouse.\n\nFor the ordinary numerical arrays in these lessons, every entry uses the same data type, or dtype. Integers store whole numbers. Floating-point numbers allow fractional readings, although many decimals are represented approximately. The data type describes how values are stored; it does not record their units.",
       null,
       "We will explicitly request floating-point storage because temperatures and their conversions may contain fractions.", [
         example("Turn the list into a numerical array",
@@ -90,7 +90,7 @@ celsius = np.array(readings)
 print(readings * 2)
 print((celsius * 2).tolist())`,
           "[12, 18, 24, 12, 18, 24]\n[24, 36, 48]",
-          "Repeating the list gives six entries. Multiplying the array gives three doubled values. If we want to calculate a new temperature for each greenhouse, we need the second behaviour."),
+          "Repeating the list gives six entries. Multiplying the array gives three doubled values. If we want to calculate a new temperature for each greenhouse, we need the second behavior."),
         example("Convert the collection and prepare it for display",
           "Now we can apply the two conversion steps to the array. NumPy performs the arithmetic for each entry. NumPy's round function takes the result and a number of decimal places. We keep that rounded result separately, then turn it into a list for printing.",
           `import numpy as np
@@ -106,7 +106,7 @@ print(celsius.tolist())`,
           "We have one converted value per greenhouse. These arithmetic expressions produce new arrays, so the original Celsius readings are still available. Rounding is a display choice; it does not make floating-point arithmetic exact.")
       ]),
     part("4. Check the Meaning as Well as the Numbers",
-      "A plausible number is not enough. We need the right units, the right order, and the right number of results. A familiar reference temperature helps us check the conversion.",
+      "After the conversion, each answer should still belong to the same greenhouse. A correct-looking Fahrenheit value in the wrong position would make a misleading report. We also need to know that the conversion used Celsius inputs. Checking a familiar reference temperature helps test the numerical rule, while keeping the greenhouse order and units tests whether we used it as intended.",
       "Freezing point: (0 × 1.8) + 32 = 32\nBoiling point at standard atmospheric pressure: (100 × 1.8) + 32 = 212",
       "There is another question our array cannot answer on its own: which entry belongs to which greenhouse? We must keep that information with the report.", [
         example("Use a dictionary when the name is how we find the reading",
@@ -130,7 +130,7 @@ print(ordered_readings)`,
   ],
   "numpy-axes": [
     part("1. Give Each Axis a Job",
-      "One list was enough for one morning. With several mornings, a flat list would make us remember where each day begins and ends. Instead, let's keep one list per day and put those lists inside another list. This is a nested list.\n\nWe can use this arrangement to create a two-dimensional NumPy array. Its first axis follows the days and its second follows the greenhouses. An axis is a direction in the organisation of an array.",
+      "One list was enough for one morning. With several mornings, a flat list would make us remember where each day begins and ends. Instead, let's keep one list per day and put those lists inside another list. This is a nested list.\n\nWe can use this arrangement to create a two-dimensional NumPy array. Its first axis follows the days and its second follows the greenhouses. An axis is a direction in the organization of an array.",
       "                  North  Middle  South\nMonday              10      20     30\nTuesday             14      22     36",
       "A scalar is one value. A one-dimensional array is a sequence of values. Our two-dimensional array is a table of values, which we can also interpret as a matrix. The number of axes is different from the number of entries.", [
         example("Build the table one row at a time",
@@ -181,7 +181,7 @@ print(temperatures[:, 1].tolist())`,
           "The first result is Tuesday's middle greenhouse reading. The second is all of Monday. The third follows the middle greenhouse across both days. Selecting one row or one column this way leaves a one-dimensional array.")
       ]),
     part("2. Remove the Direction We Combine",
-      "To find one mean per greenhouse, we need to combine the days while keeping the greenhouses separate. The days occupy axis zero, so that is the axis we reduce. A reduction combines several entries into a summary.",
+      "Imagine following the north greenhouse's column from Monday to Tuesday. Those are the readings that contribute to its average. We repeat that calculation separately for each greenhouse, so the result needs three entries. NumPy calls combining entries into a summary a reduction. The axis argument identifies the direction being combined: here it is the days, which occupy axis zero.",
       "North:  (10 + 14) / 2 = 12\nMiddle: (20 + 22) / 2 = 21\nSouth:  (30 + 36) / 2 = 33\nResult shape: (3,)",
       "The day axis disappears because its readings have been combined. The remaining entries belong to the three greenhouses.", [
         example("Keep one answer per greenhouse",
@@ -220,7 +220,7 @@ print(temperatures.mean())`,
           "The list has two daily means. The final number averages all six readings. Before writing a reduction, say what one answer should represent and how many answers you need.")
       ]),
     part("4. Predict the Shape Before Running the Code",
-      "We now have a way to check whether an operation left us the right kind of result: inspect its shape. That check is useful before reading any particular number. The right shape does not prove the numbers are correct, but the wrong shape can reveal that we answered a different question.\n\nThere is one more detail to understand before editing a selected row. A NumPy slice can be a view, meaning it refers to part of the original array's storage. Giving that view a new variable name does not give it independent data.",
+      "Before inspecting the answers, we can check how many there should be and what each represents. A greenhouse report needs one result per greenhouse; a daily report needs one per day. The array's shape makes that distinction visible. A matching shape does not establish numerical correctness, but an unexpected shape can reveal that our calculation combined the wrong direction.\n\nThere is one more detail to understand before editing a selected row. A NumPy slice can be a view, meaning it refers to part of the original array's storage. Giving that view a new variable name does not give it independent data.",
       null,
       "If Botie wants to try a correction without altering the saved readings, we need a copy.", [
         example("A view shares readings; a copy keeps its own",
@@ -240,7 +240,7 @@ monday_copy[0] = 99
 print(temperatures[0, :].tolist())
 print(monday_copy.tolist())`,
           "[11, 20, 30]\n[99, 20, 30]",
-          "Changing the view changed Monday in the original table. Changing the copy did not. The workshop will summarise the readings, and the challenges will calculate both kinds of mean without modifying their inputs.")
+          "Changing the view changed Monday in the original table. Changing the copy did not. The workshop will summarize the readings, and the challenges will calculate both kinds of mean without modifying their inputs.")
       ])
   ],
   "numpy-broadcasting": [
@@ -285,7 +285,7 @@ print(differences.shape)`,
           "The two day rows and three greenhouse columns survive. Broadcasting has reused a reference, not combined observations into a summary.")
       ]),
     part("3. Read the Shape Rule From the Right",
-      "NumPy compares axis lengths starting from the right of each shape. Two lengths can work together if they match or if one is one. A missing leading axis acts like an axis of length one. This lets our three targets apply to both day rows.\n\nNow suppose the reference is the outside temperature for each day. Each reference must apply across a whole row. We therefore need two rows with one entry each. A flat two-entry array would instead try to align with our three greenhouse columns.",
+      "Our target row needs to be reused for each day, rather than matched to the days themselves. NumPy decides whether that reuse is possible by comparing shape lengths from the right. Matching lengths can align directly; a length of one can be reused along the larger direction. A missing leading axis acts as a length of one. These are the rules called broadcasting, and they check sizes rather than greenhouse meanings.\n\nNow suppose the reference is the outside temperature for each day. Each reference must apply across a whole row. We therefore need two rows with one entry each. A flat two-entry array would instead try to align with our three greenhouse columns.",
       "Greenhouse targets: (2, 3) with    (3,) → (2, 3)\nDay references:     (2, 3) with (2, 1) → (2, 3)\nWrong alignment:    (2, 3) with    (2,) → incompatible",
       "The computer checks the lengths, not the meaning. A square table can conceal an alignment mistake because its row and column counts happen to match.", [
         example("Give each day's reference a column axis",
@@ -307,7 +307,7 @@ print((readings - outside_column).tolist())`,
           "The first outside temperature now aligns with Monday and the second with Tuesday. Adding the axis gives a new view of the same two stored values. It does not copy either temperature three times.")
       ]),
     part("4. Keep Reuse Separate From Reduction",
-      "Subtracting a target and averaging the resulting differences answer two different questions. The subtraction asks how far each reading is from its target. The average asks for a summary across several readings.\n\nFollow the shapes as well as the values. Broadcasting can preserve our table, whereas a reduction combines entries along the axis we name.",
+      "After subtraction, every position still describes one reading's difference from its greenhouse target. We have not yet combined days or greenhouses. An average would be a further operation that discards some of that detail. Whether to take it depends on the requested report, which is why the workshop keeps the complete table of differences.\n\nFollow the shapes as well as the values. Broadcasting can preserve our table, whereas a reduction combines entries along the axis we name.",
       null,
       "The workshop asks for the full table of differences. This next example goes a step further to show what would happen if Botie also requested one summary per greenhouse.", [
         example("One table of differences, then one summary per column",
@@ -346,7 +346,7 @@ print(mask.shape)`,
           "The mask has four entries because there are four readings to decide about. We have only created the decisions so far. The original temperatures are still in readings.")
       ]),
     part("2. Use the Decisions to Select Values",
-      "We now have two aligned collections: the temperatures and the decisions. Putting the Boolean mask inside the readings' square brackets tells NumPy to keep the positions marked True. For this one-dimensional selection, the mask must have one decision per reading.\n\nA Boolean mask and an array of integer indices are different structures for making a selection. The Boolean array asks yes or no at each position. The integer array names the positions to retrieve, in the order requested.",
+      "Each temperature now has a True or False decision in the same position. Placing that Boolean array inside the readings' square brackets keeps the entries marked True. This is why the decisions must stay aligned with the data: a correct decision beside the wrong greenhouse would select the wrong observation. For our one-dimensional report, the mask therefore needs one decision per reading.\n\nA Boolean mask and an array of integer indices are different structures for making a selection. The Boolean array asks yes or no at each position. The integer array names the positions to retrieve, in the order requested.",
       null,
       "The workshop displays decisions as zero and one. In NumPy we must actually use Boolean values for a mask. A numerical array containing zeros and ones would instead be interpreted as positions.", [
         example("Decisions are different from numbered positions",
@@ -362,8 +362,8 @@ print(readings[positions].tolist())`,
           "[27, 25]\n[20, 27, 27, 20]",
           "The mask selects two readings. The index array retrieves four entries, including repeats. Using the right values with the wrong data type can therefore ask an entirely different question.")
       ]),
-    part("3. Summarise the Selected Group",
-      "After selecting the readings, we can count them or calculate their average. Both the total and the count must come from the selected group. The original report's count would give us the wrong denominator.",
+    part("3. Summarize the Selected Group",
+      "Once we keep only the alert readings, we have a new population to describe. Its average must use contributions and a count from that same selected group. Using the original report's count would dilute the answer with observations we excluded. We also need to handle the case where no reading meets the condition, since an empty group has no temperature to average.",
       "Selected total = 27 + 25 = 52\nSelected count = 2\nSelected mean = 52 / 2 = 26",
       "An empty selection still has a count of zero, but it has no mean. There are no temperatures to average, so a displayed zero would wrongly suggest an observed temperature.", [
         example("The selection is another numerical array",
@@ -377,7 +377,7 @@ print(selected.tolist())
 print(selected.size)
 print(f"{selected.mean():.1f}")`,
           "[27, 25]\n2\n26.0",
-          "The list shows which observations contributed. The next line counts them, and the last summarises them. Boolean selection here creates a copy, so changing this selected array later would not edit readings."),
+          "The list shows which observations contributed. The next line counts them, and the last summarizes them. Boolean selection here creates a copy, so changing this selected array later would not edit readings."),
         example("Keep an empty result distinguishable from a measured zero",
           "On this cooler day, no reading meets the rule. The result is still an array, just one with no entries. The if statement chooses what to do when the count is zero. The double equals sign compares two values; it does not assign a value to a name.",
           `import numpy as np
@@ -413,7 +413,7 @@ print(27 in distinct_temperatures)`,
   ],
   "reproducible-sampling": [
     part("1. A Seed Starts a Sequence",
-      "We have stored readings in arrays and named readings in dictionaries. Generating random choices requires a different kind of object. A random generator contains a changing internal state and provides methods that use it to produce values. It is not itself the list of values it produces.\n\nA seed gives us a repeatable way to initialise that state. Each draw advances it. Another call to the same generator continues the sequence; creating a new generator with the same setup starts a replay.",
+      "We want to make random choices and later repeat those same choices while investigating a result. A generator supports that by keeping an internal state that changes as it produces values. The generator is a separate object from the array of draws it returns. Keeping it available lets the next request continue from that state instead of quietly starting a new sequence.\n\nA seed gives us a repeatable way to initialize that state. Each draw advances it. Another call to the same generator continues the sequence; creating a new generator with the same setup starts a replay.",
       null,
       "We will create the generator in separate steps so that each piece has a clear purpose.", [
         example("Separate the seed, the generator, and the drawn array",
@@ -430,7 +430,7 @@ print(positions.shape)`,
           "[0, 3, 2]\n(3,)",
           "The result is an integer array containing three positions. The generator remains a separate object, ready for another request. This output is from the Python environment used by the site's challenges; record the library version and generator when preserving an experiment."),
         example("A new draw and a replay are different requests",
-          "First we draw twice from one generator. Then we initialise another with the same algorithm and seed. Passing the PCG64 object directly into Generator combines the two construction steps from the previous example.\n\nThe array_equal function compares two arrays' shapes and entries and returns one Boolean result.",
+          "First we draw twice from one generator. Then we initialize another with the same algorithm and seed. Passing the PCG64 object directly into Generator combines the two construction steps from the previous example.\n\nThe array_equal function compares two arrays' shapes and entries and returns one Boolean result.",
           `import numpy as np
 
 rng = np.random.Generator(np.random.PCG64(42))
@@ -467,7 +467,7 @@ print(np.round(selected.mean(), 4))`,
     part("3. Keep a Fair Comparison Repeatable",
       "If Botie compares two methods, both should see the same recorded draws before we attribute a changed result to the method. We can keep several draws in one two-dimensional index array: one row per draw, one position per selected observation.\n\nIndexing a one-dimensional readings array with this index table produces a table of readings in the same arrangement. Each index is replaced by the value it selects.",
       null,
-      "The two rows below are illustrative draws. The coding challenge will ask you to summarise a different pair.", [
+      "The two rows below are illustrative draws. The coding challenge will ask you to summarize a different pair.", [
         example("An index table becomes a table of selected readings",
           "The integer table has two draws with three selections each. After retrieval, averaging along axis one combines the selections within each draw. It leaves one mean per draw.",
           `import numpy as np
@@ -489,6 +489,6 @@ print(selected.mean(axis=1).tolist())`,
     part("4. Do Not Select the Seed That Flatters the Model",
       "Trying many seeds and reporting only the best score includes the luck of choosing that run. Decide how to evaluate a method before inspecting those outcomes, and keep final test data separate from development choices.\n\nA reproducible experiment needs more than a seed. Preserve the input data, its ordering, the generator and library version, and the sequence of requests. Keeping the actual selected indices also makes the experiment easier to inspect.",
       "Seed: one starting value\nGenerator: an object with changing state\nIndices: an array of selected positions\nSelected readings: the values at those positions",
-      "Those four things play different roles. In practice, we will first replay a draw, then summarise saved selections. A successful replay confirms that we repeated the calculation; it does not establish that the selection represents all the situations our method will face.")
+      "Saving a seed records where a generator starts, but the data and sequence of requests determine how its draws become observations. Saving the selected positions makes that link inspectable. Replaying them confirms that we repeated the calculation; it leaves the separate question of whether those observations represent the situations we care about.")
   ]
 };

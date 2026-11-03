@@ -171,7 +171,7 @@ export function TreeGrowthPlayground({
               </g>
             );
           })}
-          <text x={TREE.width / 2} y={TREE.height - 6} textAnchor="middle" className="fill-slate-500 text-[10px] dark:fill-slate-400">the tree, questions as boxes, leaves as circles labelled children/adults</text>
+          <text x={TREE.width / 2} y={TREE.height - 6} textAnchor="middle" className="fill-slate-500 text-[10px] dark:fill-slate-400">the tree, questions as boxes, leaves as circles labeled children/adults</text>
         </svg>
 
         <svg viewBox={`0 0 ${MAP.width} ${MAP.height}`} className="w-full select-none rounded-lg bg-slate-50 dark:bg-slate-950">

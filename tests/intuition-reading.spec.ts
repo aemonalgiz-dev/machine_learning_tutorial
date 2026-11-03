@@ -50,14 +50,14 @@ test("the forecast boundary advances without leaking its target and scores align
     { value: 5 }, { value: 7 }, { value: 6 }, { value: 9, role: "known" }, { role: "target" },
   ] });
   expect(scenes[2]).toMatchObject({ kind: "table", records: [
-    { label: "Day 4", cells: ["9 litres", "6 litres", "6.5 litres", "3 / 2.5 litres"] },
-    { label: "Day 5", cells: ["8 litres", "9 litres", "7.5 litres", "1 / 0.5 litres"] },
+    { label: "Day 4", cells: ["9 liters", "6 liters", "6.5 liters", "3 / 2.5 liters"] },
+    { label: "Day 5", cells: ["8 liters", "9 liters", "7.5 liters", "1 / 0.5 liters"] },
   ] });
 });
 
 test("paired records retain their original identities and custom authored scenes win", () => {
   const statistics = presentIntuition("statistics", lessons.statistics).steps[0].scene;
-  expect(statistics).toMatchObject({ kind:"table", columns:["Heights, centimetres", "Weights, kilograms"], records:[
+  expect(statistics).toMatchObject({ kind:"table", columns:["Heights, centimeters", "Weights, kilograms"], records:[
     {label:"Person 1",cells:["160","58"]}, {label:"Person 2",cells:["165","66"]},
     {label:"Person 3",cells:["170","68"]}, {label:"Person 4",cells:["175","74"]}, {label:"Person 5",cells:["180","74"]},
   ] });
@@ -112,7 +112,7 @@ test("forecast examples read continuously and retain accessible step controls", 
   await expect(example.getByRole("heading", { name: "Move the origin" })).toBeFocused();
   await example.getByLabel("Follow the example").selectOption("2");
   await expect(example.getByRole("button", { name: "Next step" })).toBeDisabled();
-  await expect(example.getByRole("row", { name: /Day 4/ })).toContainText("6.5 litres");
+  await expect(example.getByRole("row", { name: /Day 4/ })).toContainText("6.5 liters");
   await example.getByRole("button", { name: "Read through", exact: true }).click();
   await expect(example.locator("[data-walkthrough-step]")).toHaveCount(3);
   await example.screenshot({ path: ".practice-checks/intuition-forecast-desktop.png" });

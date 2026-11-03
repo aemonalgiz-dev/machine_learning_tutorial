@@ -253,7 +253,7 @@ export function SearchCurveChart() {
           textAnchor="middle"
           className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
         >
-          Neighbours asked for. Indigo is the cross-validated score, grey the
+          Neighbors asked for. Indigo is the cross-validated score, gray the
           score on the fitted rows, dashed the held-out quarter
         </text>
       </svg>

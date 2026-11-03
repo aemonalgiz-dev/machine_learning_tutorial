@@ -1,4 +1,6 @@
 "use client";
+import { americanEnglish } from "@/lib/american-english";
+
 
 import Link from "next/link";
 import { LEARNING_AREAS, learningAreaHref, learningAreaSections } from "@/lib/learning-areas";
@@ -55,10 +57,10 @@ export function LessonTrailCard({ href, title, description, number }: { href: st
   return <div className={`trail-card ${active ? "is-current" : ""} ${complete ? "is-earned" : ""}`}>
     <span className="trail-node" aria-label={`Lesson ${number}${complete ? ", milestones completed" : ""}`}>{complete ? "✓" : String(number).padStart(2, "0")}</span>
     <div className="min-w-0">
-      <div className="mb-2 flex flex-wrap gap-3 text-xs text-muted">{active ? <span className="current-label">You are here</span> : <span>{complete ? "Milestones completed" : state.started ? "In progress" : "Ready to explore"}</span>}</div>
-      <Link href={href} className="text-lg font-semibold hover:text-accent">{title}</Link>
+      {(active || complete || state.started) && <div className="mb-2 flex flex-wrap gap-3 text-xs text-muted">{active ? <span className="current-label">You are here</span> : <span>{complete ? "Milestones completed" : "In progress"}</span>}</div>}
+      <Link href={href} className="text-lg font-semibold hover:text-accent">{americanEnglish(title)}</Link>
       <p className="mt-2 text-sm leading-6 text-muted">{description}</p>
-      <ul className="milestone-tags" aria-label={`${title} milestones`}>
+      <ul className="milestone-tags" aria-label={`${americanEnglish(title)} milestones`}>
         {([["built", "Built"], ["varied", "Changed inputs"], ["exercises", "Exercises"]] as const).map(([key, label]) => <li key={key} data-earned={state[key]}><span aria-hidden="true">{state[key] ? "✓" : "○"}</span> {label}<span className="sr-only">{state[key] ? ": completed" : ": not completed"}</span></li>)}
       </ul>
       {active && <div className="mt-4"><Link href={workshopHref(href)} className="game-button">Continue building →</Link></div>}

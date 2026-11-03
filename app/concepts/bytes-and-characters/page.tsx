@@ -22,9 +22,9 @@ import { PartialByteRun } from "@/components/widgets/PartialByteRun";
 import { ScriptCostChart } from "@/components/widgets/ScriptCostChart";
 
 export const metadata: Metadata = {
-  title: "Bytes and Characters · oop_ml",
+  title: "Bytes and Characters · Perceptron Lab",
   description:
-    "A visible character and the bytes used to store it are not always the same unit. That distinction affects how much text a model receives and whether its representation can handle unfamiliar writing.",
+    "Text has several units of representation. A visible character can involve multiple code points or bytes, affecting how text is stored and how much input a model has to process.",
 };
 
 const link =
@@ -42,7 +42,7 @@ export default function BytesAndCharactersPage() {
       playgroundTitle="How many bytes does one character need?"
       playgroundIntro="Compare the number of characters with the number of bytes. Inspect a character represented by multiple bytes and check the decoded result."
       title="Bytes and Characters"
-      tagline={"A visible character and the bytes used to store it are not always the same unit. That distinction affects how much text a model receives and whether its representation can handle unfamiliar writing."}
+      tagline={"Text has several units of representation. A visible character can involve multiple code points or bytes, affecting how text is stored and how much input a model has to process."}
       prerequisites={
         <>
           Two things from earlier in this section. The page on{" "}
@@ -74,22 +74,11 @@ export default function BytesAndCharactersPage() {
                 </p>
                 <Equation>{SENTENCE}</Equation>
                 <p>
-                  Merging pairs over those eighteen sentences until no pair is
-                  left that occurs twice gives a table of 137 entries after 85
-                  merges, and it reads the sentence above as 25 numbers. That is
-                  a good vocabulary doing exactly what it was fitted to do, and
-                  25 is roughly half of what either reading on this page will
-                  need for the same sentence. We are going to spend this Part on
-                  what it cannot do, and then the rest of the page on the answer
-                  that gives up the 25 in exchange.
+
+                  The fitted merging vocabulary has 137 entries after 85 merges and represents the held-out sentence with 25 IDs. That is a compact result for this text. Character and byte readings will use more positions for the same sentence, but they make different promises about unfamiliar input. We will compare those promises without treating a shorter sequence as sufficient evidence of better model behavior.
                 </p>
                 <KeepInMind>
-                  Everything measured here uses one corpus of eighteen English
-                  sentences and one sentence held out of them, which is small
-                  enough that every number can be checked by hand. The two
-                  failures in the next two sections, a symbol never seen in that
-                  position and a script never seen at all, do not go away at any
-                  size of corpus.
+                  {"The examples use eighteen English fitting sentences and a held-out sentence. They expose missing word-final symbols and unfamiliar scripts in this fitted vocabulary. A larger corpus can repair particular gaps; the byte method instead provides coverage independently of which texts were fitted."}
                 </KeepInMind>
               </SubSection>
 
@@ -105,20 +94,8 @@ export default function BytesAndCharactersPage() {
                   {"Dr. Alvarez didn't expect the low-cost re-analysis.\n" +
                     "Dr. Alvare[UNK]didn't expect the low-cost re-analysis."}
                 </Equation>
-                <p>
-                  The reason is worth having in full, because it is not the
-                  reason it looks like. The corpus does contain the letter z, in
-                  the word size, so the letter is not missing from the alphabet.
-                  What is missing is the letter z <em>at the end of a word</em>,
-                  which is a different symbol in a scheme that marks where words
-                  end, and no word in those eighteen sentences finishes with one.
-                  So one of the 25 numbers is the stand-in entry, meaning
-                  &ldquo;something was here&rdquo;, and a stand-in carries no
-                  word boundary because it carries nothing at all. Losing the
-                  letter costs one character; losing the boundary means
-                  everything after it is read as part of the word in front, which
-                  is why the surname and the contraction come back joined.
-                </p>
+                <p>The training corpus contains z inside size, but no word ending in z. This tokenizer distinguishes an interior character from its word-final form, so the needed final symbol is absent even though the visible letter occurred in training.</p>
+                <p>The unknown-symbol ID cannot restore that missing letter or its word boundary. Decoding therefore joins the following word to the incomplete surname. Alphabet coverage must include the symbol variants the encoding scheme actually uses.</p>
                 <KeepInMind>
                   A vocabulary learned from a corpus can fail on a text spelled
                   entirely in letters that corpus used, because what it holds are
@@ -137,15 +114,7 @@ export default function BytesAndCharactersPage() {
                 </p>
                 <LearnedReadingFailures />
                 <p>
-                  The third block is where the method stops working rather than
-                  works badly. Twenty-one characters of Greek become 18 numbers,
-                  seventeen of which are the same stand-in, and what returns is
-                  seventeen copies of that stand-in with the spaces gone and a
-                  full stop at the end. A model shown this is not shown a
-                  degraded sentence. It is shown the fact that something it could
-                  not read was there, seventeen times over, and nothing in those
-                  numbers distinguishes the sentence from any other Greek
-                  sentence with the same count of letters.
+                  {"The Greek input has 21 characters and becomes 18 IDs, seventeen of them the unknown ID. Decoding returns those stand-ins and a final period, with the spaces lost. The IDs no longer distinguish many of the original letters or boundaries. Another input that produces the same unknown pattern is indistinguishable to a model receiving only those IDs."}
                 </p>
                 <KeepInMind>
                   The stand-in destroys the difference between everything it
@@ -158,14 +127,7 @@ export default function BytesAndCharactersPage() {
 
               <SubSection title="4. Two ways out, and the one this page takes">
                 <p>
-                  There are two directions out of this. One is to keep learning a
-                  vocabulary and to make it a better one, wider, fitted to more
-                  languages, refitted when it ages. That helps, and it never
-                  finishes, because whatever corpus it was fitted to is finite
-                  and the set of things people write is not. The other is to stop
-                  learning a vocabulary at all and to read the text as the units
-                  it is already made of, so that the question of an unfamiliar
-                  piece has no way of arising.
+                  {"We can improve coverage by fitting on more representative text, or guarantee base coverage by including all permitted units. Those approaches can be combined: a learned vocabulary can retain complete byte fallback. Here we first examine characters and bytes without learned merges so their coverage and length are easy to compare."}
                 </p>
                 <p>
                   The second direction has two versions and they are not the same
@@ -176,10 +138,7 @@ export default function BytesAndCharactersPage() {
                   Part 4 is about exactly where they come apart.
                 </p>
                 <KeepInMind>
-                  This page is about the second direction. It buys away the
-                  unfamiliar piece completely under one of its two versions, and
-                  what it spends is sequence length, which is what everything
-                  downstream is charged in.
+                  {"Character and byte inputs expose the difference between a fitted alphabet and a complete base inventory. Byte coverage prevents missing-byte lookups, often at the cost of more positions. The resulting runtime depends on how the model processes those positions."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -220,22 +179,13 @@ export default function BytesAndCharactersPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  A character table is still learned from a corpus, and it still
-                  reserves an entry for what the corpus did not contain. It is
-                  smaller and less surprised than a merged one, and it is the
-                  same kind of object.
+                  {"This character table is fitted to the corpus and includes an unknown entry. It has fewer entries than the merged table in this example. Unlike the byte inventory below, its coverage can change when new text uses characters absent from the fitting corpus."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="6. Every byte there is">
                 <p>
-                  The second version goes one level down and stops needing a
-                  corpus. A text stored on a computer is a run of bytes, a byte
-                  holds one of exactly 256 values, and so a table with one entry
-                  per byte value spells every text that can be stored, in any
-                  script, whether or not anybody has ever written it. Nothing is
-                  fitted. The table is complete before the first text is read and
-                  it is the same table for everyone.
+                  {"Encode text as UTF-8 and treat each resulting byte as a unit. There are exactly 256 byte values, so a fixed inventory can cover all of them without fitting. Every successfully encoded input then has a byte sequence this inventory can represent. This guarantee does not include malformed input rejected by the UTF-8 encoder."}
                 </p>
                 <Equation>
                   {"a byte value  =  a whole number from 0 to 255\n" +
@@ -259,10 +209,7 @@ export default function BytesAndCharactersPage() {
 
               <SubSection title="7. The Alvarez sentence as characters and bytes" id="7-the-running-sentence-taken-all-the-way-through">
                 <p>
-                  Here is the whole of it on our sentence, which is 51 characters
-                  long and happens to be 51 bytes long as well. The first four
-                  numbers under each reading are below, and they are the same
-                  four numbers for a different reason in each case.
+                  {"The running sentence contains 51 code points and 51 UTF-8 bytes. Its boundaries agree under both readings, but its IDs differ. The first four pieces below show how the fitted character positions differ from fixed byte values."}
                 </p>
                 <WorkedExample title="The first four pieces of the sentence, twice">
                   <Equation>
@@ -290,10 +237,7 @@ export default function BytesAndCharactersPage() {
                   reached one and lost a space.
                 </p>
                 <KeepInMind>
-                  On this sentence the two readings are the same length and both
-                  are exact. That agreement is a fact about English rather than
-                  about the readings, and Part 4 is what happens to it as soon as
-                  the writing is not English.
+                  {"Both readings reproduce this ASCII sentence with 51 positions. Non-ASCII characters can appear in English too. The agreement follows from this text’s encoded characters, rather than its language label."}
                 </KeepInMind>
               </SubSection>
 
@@ -330,12 +274,7 @@ export default function BytesAndCharactersPage() {
                   caption="The first two are fitted to the eighteen sentences; the last two are the same whatever has been read."
                 />
                 <KeepInMind>
-                  A table with a row for every codepoint would be complete, and
-                  at 855,638,016 numbers it would cost more than many whole
-                  models, which is why the complete table on this page is the
-                  byte one. Making the character case affordable means giving up
-                  on storing a table at all, which is what the page after this one
-                  is about.
+                  {"A separate 768-value row for every code-point slot would require the large table above. Byte inputs give complete base coverage with only 256 rows. Other designs can reduce storage through hashing, shared parameters or smaller representations; they need not abandon tables entirely."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -353,12 +292,12 @@ export default function BytesAndCharactersPage() {
                 "The table was fitted to too few merges",
               ],
               1,
-              "Losing the letter costs one character. Losing the word boundary costs more, because a stand-in carries no boundary, so everything after it reads as part of the word in front and the surname and the contraction come back joined. What a vocabulary holds are the pieces its corpus happened to form, not the letters it happened to contain.",
+              "The held-out surname contains a character absent from the fitted vocabulary. Its unknown stand-in also loses the boundary information needed by this decoder, so the reconstructed surname and following contraction join together. The shorter sequence therefore fails two checks: preserving the original spelling and preserving its spacing. Inspect decoded text as well as token count.",
             ),
             trueFalse(
-              "The merged table turns the 21 characters of the Greek sentence into 18 numbers, and nothing in those numbers tells it from any other Greek sentence with the same count of letters.",
+              "This Greek probe becomes seventeen unknown stand-ins followed by a period. Another probe with that same sequence cannot be distinguished from it by these IDs alone.",
               true,
-              "Seventeen of the 18 are the same stand-in and the last is a full stop. The stand-in destroys the difference between everything it covers, so a model shown this is not shown a degraded sentence. What arrives is the fact that something unreadable was there, seventeen times over, with the spaces gone as well.",
+              "All seventeen unseen Greek pieces map to the same reserved ID, while the final period keeps its own ID. Whitespace boundaries are also absent from this merged sequence. The IDs preserve very little of the original distinctions, and the model cannot reconstruct those distinctions from them alone.",
             ),
             choice(
               "The first piece of the sentence is D, which goes in as 68 under the byte reading and as 7 under the character reading. What could a different corpus change?",
@@ -385,7 +324,7 @@ export default function BytesAndCharactersPage() {
                 "A codepoint table cannot give an exact round trip",
               ],
               1,
-              "A codepoint table really would be complete, and that is not the objection. The byte table at the same width is 196,608 values, a ratio of 4,352, and many of the codepoint rows would be for characters no text ever uses. Making the character case affordable means giving up on storing a table at all.",
+              "A table covering the entire Unicode code-point range would be much larger than a 256-entry byte table. A learned character table stays small by including only observed characters, but then needs a policy for unseen ones. Byte encoding uses a compact complete byte alphabet and represents some characters with several IDs. These are different coverage/storage tradeoffs, not proof that character tables are unaffordable in every design.",
             ),
         ],
         },
@@ -395,13 +334,7 @@ export default function BytesAndCharactersPage() {
             <>
               <SubSection title="9. Nothing can be unfamiliar, and what that sentence means exactly">
                 <p>
-                  The guarantee is worth stating carefully, because it is
-                  narrower than it sounds and it is genuinely absolute inside its
-                  own boundary. Every text that can be stored is a run of bytes;
-                  every byte holds one of 256 values; the table holds all 256. So
-                  for any text at all, in any script, in any language, every
-                  piece the reading produces is in the table, and the lookup
-                  cannot fail.
+                  A byte table contains all 256 possible byte values. Once text has been encoded successfully into bytes, every value in that encoded sequence has an entry; there is no missing-byte vocabulary case. The guarantee is about representing that byte sequence. The choice of text encoding and the handling of invalid input remain separate parts of the interface.
                 </p>
                 <Equation>
                   {"text  →  bytes  →  numbers  →  bytes  →  text"}
@@ -416,11 +349,7 @@ export default function BytesAndCharactersPage() {
                   it because there is nothing left to improve.
                 </p>
                 <KeepInMind>
-                  Every one of the twelve sentences in Part 5 comes back exactly
-                  under the byte reading, whatever writing system it is in. That
-                  is what the construction forces rather than a good result on a
-                  hard test, and a result of anything else would mean the byte
-                  mapping had gone wrong.
+                  {"All twelve example sentences round trip under the byte reading. Given successful UTF-8 encoding and the matching correct decoder, preserving every byte guarantees reconstruction. A failure should prompt us to inspect the full encoding and decoding pipeline."}
                 </KeepInMind>
               </SubSection>
 
@@ -444,49 +373,23 @@ export default function BytesAndCharactersPage() {
                   256 at every point on the chart, including at the left edge
                   before any of the twelve arrived.
                 </p>
-                <p>
-                  The green line is the honest qualification. Only 103 byte values
-                  are ever touched by all thirty texts together, so 153 entries of
-                  the byte table have never been used and are being carried
-                  anyway. That is what the guarantee costs when it is paid in
-                  entries rather than in coverage.
-                </p>
+                <p>Across these thirty texts, 103 byte values are used. The complete byte vocabulary still reserves 256 entries, leaving 153 unused in this collection. That extra coverage lets the same vocabulary represent other encoded text, although it costs entries that this particular collection does not use.</p>
                 <KeepInMind>
-                  A character table is finished when the writing stops
-                  surprising it, and the writing does not stop. A byte table is
-                  finished before it starts, and pays for that by holding entries
-                  most texts never reach.
+                  {"A fitted character inventory grows when new text introduces new code points. The fixed byte inventory remains at 256 entries, including byte values this collection never uses. That is a storage choice in exchange for corpus-independent base coverage."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. What the guarantee does not buy">
                 <p>
-                  It is easy to over-read what has been bought, so here is the
-                  boundary drawn plainly. The guarantee says every text can be
-                  turned into numbers and turned back again. It says nothing
-                  whatever about those numbers being useful to a model that has
-                  never met writing of that kind before.
+                  {"The byte inventory guarantees coverage of successfully encoded bytes. It does not establish that a model understands the text or has learned useful patterns for a new language. Tokenization and model competence need separate tests."}
                 </p>
                 <p>
-                  The Chinese sentence in Part 5 is the sharpest instance. The
-                  byte reading turns it into 18 numbers and gives it back
-                  exactly, and a model trained only on English has seen those
-                  particular byte values in almost no context and knows nothing
-                  whatever about what they spell. Representable and learnable are
-                  separate questions, and only the first has been settled here.
+                  {"The Chinese example becomes 18 byte IDs and decodes exactly. That successful conversion does not tell us how a model trained on different text will use it. The model’s training and task performance, rather than byte coverage alone, determine whether those inputs support a useful answer."}
                 </p>
                 <InAModel>
                   <p>
-                    The difference shows up as where the failure moves rather
-                    than as whether there is one. Under a learned vocabulary an
-                    unfamiliar text fails at the tokenizer, before the model is
-                    reached, and there is nothing the model can do about it.
-                    Under a byte reading the same text arrives intact and fails,
-                    if it fails, inside the model, where more training data can
-                    still change the answer. That is the case for the method,
-                    and it is a weaker case than &ldquo;nothing is
-                    unfamiliar&rdquo; sounds.
-                  </p>
+                  {"The fitted merging example loses unfamiliar pieces before the model receives them. Byte coverage preserves those pieces for a model to process. That removes one representational failure, while leaving the learning problem unresolved. A learned tokenizer with complete byte fallback can also preserve them."}
+                </p>
                 </InAModel>
                 <KeepInMind>
                   What the fixed alphabet removes is one specific failure, the
@@ -555,13 +458,7 @@ export default function BytesAndCharactersPage() {
                   caption="The character table was fitted to eighteen English sentences, so the last column is a fact about those sentences rather than about characters."
                 />
                 <p>
-                  Both columns move at once and they move for different reasons.
-                  The byte count rises because those characters need more than one
-                  byte, which is a fact about the encoding and would be the same
-                  for any corpus. The last column rises because the corpus never
-                  met those characters, which is a fact about the eighteen
-                  sentences and would fall to zero if they had. Only the first of
-                  those two goes away with more data.
+                  {"The columns change for different reasons. Multi-byte characters raise the byte count under UTF-8 regardless of the fitting corpus. Missing-character substitutions depend on which characters the fitted alphabet contains. More representative fitting text can fix those substitutions; it does not change the UTF-8 byte lengths."}
                 </p>
                 <KeepInMind>
                   Wherever a text uses a character that needs more than one byte,
@@ -573,36 +470,23 @@ export default function BytesAndCharactersPage() {
 
               <SubSection title="14. The round trip, each way">
                 <p>
-                  The sharpest test of any of this is to encode a text, decode
-                  the numbers immediately with no model in between, and compare
-                  what returns against what went in. Anything the reading
-                  discarded shows up, and nothing else does. Here are the same
-                  three texts under both readings.
+                  {"Encode each text and decode it immediately, without a model. Compare the returned string with the input. If they differ, inspect the tokenizer and decoder to see whether a rule discarded information, an unknown entry substituted it, or the implementation failed to reproduce it."}
                 </p>
                 <ByteCharacterRoundTrip />
                 <p>
-                  The byte reading is exact three times out of three and would be exact on any text put to it. The character reading is exact on the first and loses two characters on the second and seventeen on the third, and what it gives back in place of them is the stand-in&rsquo;s own spelling, so the two Scandinavian letters come back as a word with two square-bracketed markers embedded in it.
+                  The byte round trip succeeds on all three tested inputs. The character vocabulary succeeds on the first, but replaces two characters in the second and seventeen in the third with its stand-in spelling. That is why the Scandinavian letters reappear as bracketed markers. The byte scheme avoids that vocabulary loss for successfully encoded input; exact text reconstruction also depends on using the matching decoding rules.
                 </p>
                 <p>
-                  The failure is the same shape as the merged vocabulary&rsquo;s in Part 1, and it is smaller only because a character table is surprised less often than a table of merged pieces.
+                  {"Both the character and merged examples lose spellings through unknown substitution. The character inventory covers more of these particular inputs. That is a result for the fitted alphabets and symbol rules here, rather than a guarantee for every character tokenizer."}
                 </p>
                 <KeepInMind>
-                  Reading a text as its characters gives an exact round trip on
-                  text spelled in characters the corpus met, which is a
-                  conditional promise. Reading it as its bytes gives an exact
-                  round trip, with no condition attached.
+                  {"The fitted character reading reconstructs inputs whose code points it covers. The byte reading reconstructs every successfully UTF-8-encoded input when decoded with its matching rules. Generated byte sequences can still be malformed, as the next example shows."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. A run of numbers that is not text">
                 <p>
-                  There is one place where the byte reading can produce something
-                  the character reading cannot, and it is the price of the same
-                  design that made the guarantee possible. A character takes
-                  between one and four bytes, so a run of byte numbers can stop
-                  part way through a character, and such a run does not stand for
-                  any text at all. It is not an unfamiliar piece and it is not a
-                  refusal. It is a run of numbers with no reading.
+                  A Unicode code point uses between one and four bytes in UTF-8. A generated byte sequence may stop inside that encoding or contain another invalid arrangement. Every byte still has a table entry, but that fact alone does not make the sequence valid encoded text. The decoder needs an explicit policy for invalid sequences rather than treating vocabulary coverage as a decoding guarantee.
                 </p>
                 <Equation>
                   {"é          =  195  169\n" +
@@ -610,7 +494,7 @@ export default function BytesAndCharactersPage() {
                     "169 alone  =  �"}
                 </Equation>
                 <p>
-                  What comes back in place of a broken position is the mark above, which means that a character stood here and could not be read. The two halves of the letter fail for different reasons. The 195 opens a two-byte character and means nothing until the number after it arrives, and the 169 finishes a character and means nothing without the number that opened it.
+                  {"The replacement mark indicates that the decoder could not read a valid character sequence at that point. Byte 195 starts a two-byte sequence and needs a continuation; byte 169 is a continuation and cannot start a character by itself. An incremental decoder can buffer an unfinished prefix instead of immediately replacing it."}
                 </p>
                 <p>
                   Values from 0 to 127 are complete one-byte UTF-8 sequences, including ASCII letters and control characters. The remaining byte values do not decode as single characters on their own. Some continue a multi-byte sequence; some can begin one. Others, including 192 and 193 and values above 244, are forbidden in well-formed UTF-8.
@@ -619,24 +503,14 @@ export default function BytesAndCharactersPage() {
                   A vocabulary entry for every byte therefore does not make every possible run of those entries valid text. The decoder must still interpret their sequence under the encoding rules.
                 </p>
                 <p>
-                  That is not an edge case reached by malformed input. It is what a model generating numbers one at a time walks into every time it is interrupted, and the widget below shows how often. The Greek sentence has 38 numbers and 17 of its 38 stopping points land in the middle of a letter; the English sentence has 24 numbers and none of them do.
+                  {"Stopping a byte sequence can leave an unfinished character. For the Greek sentence, 17 of its 38 byte stopping points fall inside a letter. The 24-byte English example has none. A model interrupted after a complete character does not have this problem, so the stopping position matters."}
                 </p>
                 <PartialByteRun />
                 <p>
-                  How narrow this is can be measured directly. Drawing runs of
-                  numbers uniformly at random, 546 of 2000 runs of length two are
-                  text, 209 of 2000 at length four, 24 at length eight, and none
-                  at all of the two thousand runs of length sixteen. Almost every
-                  run of byte numbers is not writing, so a model reading bytes
-                  spends part of its capacity learning which runs are, before it
-                  can learn anything about what they say.
+                  {"For uniformly random byte runs, 546 of 2000 length-two samples are valid UTF-8, 209 at length four and 24 at length eight; none of the 2000 length-sixteen samples are valid. These counts concern uniform random bytes, not a trained model’s distribution. A generative model must learn useful sequence patterns, and a decoder still needs a malformed-output policy."}
                 </p>
                 <KeepInMind>
-                  The honest answer at a broken run is a mark saying a character
-                  stood here and could not be read, one per broken position,
-                  rather than a refusal. A decoder that refused would refuse most
-                  of a half-finished generation, and 17 of the 38 stopping points
-                  in the Greek reading above are exactly that case.
+                  {"This SDK uses replacement characters for malformed final byte sequences. Rejecting the sequence or buffering an incomplete prefix are other interface choices. The Greek prefix test has 17 unfinished stopping points out of 38, so choose the behavior deliberately when displaying partial generation."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -659,7 +533,7 @@ export default function BytesAndCharactersPage() {
             trueFalse(
               "Because every byte value is in the table, a model that has only ever read English can read a Chinese sentence.",
               false,
-              "Representable and learnable are separate questions and only the first is settled by the guarantee. What changes is where the failure happens. Under a learned vocabulary an unfamiliar text fails at the tokenizer, before the model is reached, and under a byte reading it arrives intact and fails inside the model, where more training data can still change the answer.",
+              "The byte tokenizer can encode the Chinese text without unknown pieces. That guarantees representation at this boundary, not that an English-trained model understands its language or performs the task. Model capability still depends on training and evaluation. A vocabulary failure and a model-capability failure occur at different stages.",
             ),
             choice(
               "Why did the sentence about Dr. Alvarez come to 51 numbers under both readings?",
@@ -670,12 +544,12 @@ export default function BytesAndCharactersPage() {
                 "Both readings drop the spaces",
               ],
               1,
-              "The encoding uses one byte for basic English, two for most accented Latin letters and for Greek, Cyrillic, Hebrew and Arabic, three for the Indic scripts and for Chinese, Japanese and Korean, and four for the rest. An English sentence cannot show the difference between the two methods, so a measurement taken only on English will report that there is none.",
+              "Every code point in this particular sentence belongs to ASCII, whose UTF-8 representation uses one byte each. Its byte and code-point counts therefore agree. English text can still contain accented names, typographic punctuation or emoji, so English alone does not guarantee equal counts. UTF-8 length depends on the code points actually present.",
             ),
             trueFalse(
-              "The character reading gives an exact round trip only on text spelled in characters its corpus met, where the byte reading gives one on any text.",
+              "The learned character tokenizer preserves this text exactly when all its characters are in the vocabulary; the byte tokenizer covers every UTF-8-encodable input string.",
               true,
-              "The character reading’s promise is conditional and the byte reading’s has no condition attached. On the three texts of Part 4 the character reading is exact on the sentence about Dr. Alvarez, loses two characters on the accented one and seventeen on the Greek, handing back the stand-in’s own spelling in their place. The byte reading is exact on all three.",
+              "On these probes, the character tokenizer preserves the familiar sentence but substitutes unknown entries for unfamiliar accented and Greek characters. The byte tokenizer preserves each complete UTF-8 encoding exactly. That guarantee concerns the complete encoded input; arbitrary generated byte sequences or prefixes can still be invalid UTF-8.",
             ),
             several(
               "A run of byte numbers can stop part way through a character. Which of these hold of such a run?",
@@ -686,7 +560,7 @@ export default function BytesAndCharactersPage() {
                 "It arises only when the input was malformed",
               ],
               [0, 1],
-              "The other 128 numbers are never a character alone, as with the 195 and 169 that spell é together and each come back as the broken-character mark apart. Such a run is not an unfamiliar piece and not a refusal, since the byte table has no stand-in to give. It is also no edge case, because it is what a model generating one number at a time walks into whenever it is interrupted.",
+              "ASCII bytes each form a complete character, while bytes above that range cannot stand alone as valid UTF-8 characters. A prefix ending inside a multibyte sequence is incomplete. This decoder replaces such incomplete sequences when each prefix is decoded separately. A streaming decoder could instead buffer them until more bytes arrive or the stream ends.",
             ),
         ],
         },
@@ -696,12 +570,7 @@ export default function BytesAndCharactersPage() {
             <>
               <SubSection title="16. Length against a vocabulary that was learned">
                 <p>
-                  Now the bill. The merged vocabulary from Part 1 reads the
-                  running sentence as 25 numbers and the byte reading takes 51, a
-                  little over twice as many. Across the whole eighteen-sentence
-                  corpus the merged reading takes 263 and the byte reading takes
-                  763, which is 2.90 times as many on writing that is entirely
-                  English.
+                  {"Compare the lengths on familiar text. The merged vocabulary uses 25 IDs for the running sentence; byte reading uses 51. Across the eighteen-sentence corpus, the totals are 263 and 763, giving the displayed length ratio of 2.90. These counts describe the supplied corpus, rather than English text in general."}
                 </p>
                 <NumberTable
                   headings={["reading", "the sentence", "the corpus", "entries"]}
@@ -714,22 +583,20 @@ export default function BytesAndCharactersPage() {
                 />
                 <InAModel>
                   <p>
-                    A model that lets every position read every other position does a piece of work for each pair of positions, so its cost grows with the square of the sequence length. The ratio of the two corpus readings is the ratio of lengths, and squaring it gives the ratio of work.
-                  </p>
+                  {"Suppose we concatenate each complete corpus reading into one sequence and apply an operation that compares every position with every other position. Its pair count grows with the square of sequence length, so the squared length ratio below estimates that operation’s work ratio. Processing sentences separately would instead require summing their individual pair counts."}
+                </p>
                   <Equation>
                     {"763 / 263    ≈  2.90\n" + "2.90 × 2.90  ≈  8.4"}
                   </Equation>
                   <p>
-                    Nearly three times the numbers is therefore around eight times the work on the same writing, and any fixed limit on how much a model can hold at once holds a third as much of it.
-                  </p>
+                  {"Under that combined-sequence assumption, the roughly threefold length increase gives roughly eight times as many position pairs. A fixed token context budget would also fit less of this text under byte reading. Other operations and batching choices can have different costs."}
+                </p>
                   <p>
                     That is why reading bytes is expensive rather than merely long, and why it is usually paired with a step that groups the bytes back into larger units before the expensive part of the model sees them.
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  Two to three times the sequence length is the standing price of
-                  refusing to learn a vocabulary, measured here on English, where
-                  the byte reading is at its cheapest.
+                  {"Byte reading takes about two to three times as many positions as this fitted merging vocabulary on the supplied examples. This is a measured length comparison, not a fixed multiplier for every text or byte-based model."}
                 </KeepInMind>
               </SubSection>
 
@@ -738,7 +605,8 @@ export default function BytesAndCharactersPage() {
                   Compare table size with sequence length. On these examples, the byte table has 256 entries and ties for the longest sequences. The character table has 37 entries and gives sequences of the same length. The merged table lies between them in entry count and gives the shortest sequences. There is no single ordering that makes one representation smallest in both respects.
                 </p>
                 <p>
-                  On this corpus, the byte reading carries nearly seven times the entries for the same sequence length and exact round trip. Those measurements favour the fitted character table on these examples. They do not settle English writing in general, because a new accented name can exceed the fitted alphabet. Coverage on new text remains part of the comparison.
+
+                  On this corpus, the byte reading carries nearly seven times the entries for the same sequence length and exact round trip. Those measurements favor the fitted character table on these examples. They do not settle English writing in general, because a new accented name can exceed the fitted alphabet. Coverage on new text remains part of the comparison.
                 </p>
                 <KeepInMind>
                   On this basic-English example, byte encoding does not shorten the sequence. Its fixed alphabet becomes more useful when the input contains characters absent from the training corpus. We should test that case before judging the representation from familiar English text alone.
@@ -779,31 +647,17 @@ export default function BytesAndCharactersPage() {
                       "bytes per character  38 / 21  ≈  1.81"}
                   </Equation>
                   <p>
-                    A sentence of two-byte letters never reaches 2.00, because
-                    the characters that separate its words are still the
-                    one-byte ones. The more spaces and punctuation a sentence
-                    has for its length, the further below two its ratio falls,
-                    which is all that separates the Greek, Russian and Arabic
-                    figures from one another.
-                  </p>
+                  {"In the Greek, Russian and Arabic examples, letters take two bytes while the spaces and final period take one. Those separators bring each sentence’s average below two bytes per code point. A sequence containing only two-byte code points would reach two; other punctuation can have different byte lengths."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
-                  A reader of English pays nothing for the guarantee and a reader
-                  of Chinese pays three times over on this measure, and neither
-                  of them chose their writing system. That is the fairness
-                  question, and section 19 is what happened when I measured the
-                  quantity a model is actually charged for instead.
+                  {"Bytes per code point differ across these examples. English is at 1.00 and Chinese at 3.00, but that ratio alone does not compare the total input positions for an equivalent message. The next table counts those totals."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. The bill measured per sentence, which is a different answer">
                 <p>
-                  I expected the per-character ratios to settle it and they do
-                  not, and the reason is worth more than the ratios were. A model
-                  is charged for the numbers a text becomes, not for the numbers
-                  per character, and the same meaning takes a different number of
-                  characters in different writing systems. Measure the twelve
-                  sentences by what they actually cost and the ordering changes.
+                  {"The same message can use different numbers of code points in different writing systems. Compare the total byte IDs per supplied sentence as well as the bytes per code point. The ordering changes because those are different measurements."}
                 </p>
                 <NumberTable
                   headings={["language", "characters", "bytes", "bytes per character"]}
@@ -827,7 +681,7 @@ export default function BytesAndCharactersPage() {
                   The Chinese sentence is the cheapest of the twelve. It pays the worst multiplier on the page and still costs 18 numbers against English&rsquo;s 24, because it says the same thing in six characters where English takes twenty-four. Hindi is the most expensive at 48, twice the English figure, and it gets there with fewer characters than English uses.
                 </p>
                 <p>
-                  So the textbook statement that a byte reading charges non-Latin scripts three times as much did not hold when I measured the thing a model is actually charged for, and the language it is worst for on this list is not one of the three-byte ones.
+                  {"Bytes per code point and tokens per message measure different costs. Chinese and Japanese have the largest ratios here, while Hindi has the largest total byte count. One short translation per language cannot establish a general language multiplier. The supplied text and tokenizer both matter."}
                 </p>
                 <WhyThisWorks title="Why a shorter reading can still be an empty one">
                   <p>
@@ -842,10 +696,7 @@ export default function BytesAndCharactersPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  Quote the ratio and the total together or neither. The ratio
-                  says what the writing system costs per character and the total
-                  says what the model is charged, and on these twelve sentences
-                  they disagree about which language is worst off.
+                  {"Report both the ratio and the total, with the input text. They answer different cost questions. A broader comparison between languages would need representative collections rather than one translation each."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -880,11 +731,12 @@ export default function BytesAndCharactersPage() {
                   which operation was applied before interpreting the result.
                 </p>
                 <p>
+
                   A displayed emoji can also contain several code points. The
                   tinted thumb, family and Welsh flag used in the table below
                   contain two, five and seven respectively. Other family emoji
                   sequences can have different lengths. A reader can still
-                  recognise each displayed example as one mark.
+                  recognize each displayed example as one mark.
                 </p>
                 <NumberTable
                   headings={["one thing a reader would point at", "characters", "bytes"]}
@@ -926,33 +778,19 @@ export default function BytesAndCharactersPage() {
 
               <SubSection title="21. A byte carries no meaning, and no notion of how often it occurs">
                 <p>
-                  The deeper limit here is no degenerate input at all. It is the
-                  method working exactly as designed. A byte is a unit of
-                  storage, it was never a unit of meaning, and nothing in either
-                  reading makes it one. A model reading bytes therefore has to
-                  learn that a particular run of them is a word before it can
-                  learn anything about the word, and it has to learn that afresh
-                  for every spelling, every inflection and every script.
+                  {"A byte value is a storage unit, not a predefined word or meaning. The model has to learn patterns across byte sequences, including spellings and their uses. Shared patterns can transfer across words and languages; nothing here requires learning every form entirely from scratch or finishing spelling before learning meaning."}
                 </p>
                 <p>
-                  The distance it must look across grows in the same proportion
-                  as the sequence. A paragraph that fitted in a thousand numbers
-                  under the merged vocabulary takes 2,900 under the byte reading,
-                  so anything the model has to relate across that paragraph is
-                  nearly three times further away than it was. That is the 2.90
-                  from section 16 read as a distance rather than as a cost.
+                  {"Longer token sequences can also separate related passages by more positions. If a passage followed this corpus’s 2.90 length ratio, a thousand merged-token positions would become about 2,900 byte positions. That is a hypothetical use of the measured ratio; the ratio for a particular paragraph must be counted."}
                 </p>
                 <p>
-                  And there is nothing here that knows a piece is common. The whole of what a learned vocabulary buys is that frequent things become cheap, since the merging spends its entries on what recurs and leaves the rest to be spelled out. Both readings on this page charge for every character alike, so the three-letter word the costs three numbers every time it appears and would still cost three if it were the only word in the language.
+                  {"This fixed byte inventory does not allocate a shorter code just because a word is common. The word “the” still requires three byte IDs for its three ASCII letters. Learned merging can give recurring sequences their own entries. That can shorten them, though frequency is not the only design choice a learned tokenizer can make."}
                 </p>
                 <p>
-                  Giving that up is what buys the coverage guarantee, and putting it back is the job of whatever groups the bytes into larger units afterwards.
+                  The longer sequence is the cost of using a complete byte alphabet here. A later grouping stage can reduce the number of positions processed together, but it needs its own rule for choosing groups. We should keep that grouping decision separate from the byte table&apos;s coverage guarantee.
                 </p>
                 <KeepInMind>
-                  These two methods have no model of the writing beyond how it is
-                  stored. Everything a learned vocabulary knew about which pieces
-                  matter has been handed to the model, along with a sequence three
-                  times as long to find it in.
+                  {"Character and byte readings supply small units without learned multi-character pieces. The model or a later grouping stage must handle larger patterns. Their sequence-length cost depends on the text; the nearly threefold corpus ratio above is one example."}
                 </KeepInMind>
               </SubSection>
 
@@ -965,7 +803,7 @@ export default function BytesAndCharactersPage() {
                     {
                       expression: "a character the corpus never used",
                       reason:
-                        "undefined for a character reading and unreachable for a byte one. A set of characters gathered from any finite text is missing the next text’s characters, so the case arises forever; a table of all 256 byte values cannot meet it, since every text is a run of byte values by construction.",
+                        "This fitted character vocabulary uses its unknown entry for an absent code point. A fixed byte vocabulary covers all successfully encoded byte values. A finite fitting corpus may miss a later character, but not every later text must introduce one.",
                     },
                     {
                       expression: "what counts as one character",
@@ -975,7 +813,7 @@ export default function BytesAndCharactersPage() {
                     {
                       expression: "a run of numbers that stops mid-character",
                       reason:
-                        "not text, and the encoding says so rather than leaving it open. Of the 256 numbers, 128 are never a character on their own, so 17 of the 38 stopping points in the Greek reading stand for nothing. Refusing such a run and marking each broken position are both defensible; refusing means refusing most of a half-finished generation.",
+                        "A final incomplete UTF-8 sequence is malformed. Of 256 byte values, 128 do not form complete single-byte characters. In the Greek example, 17 of 38 byte stopping points are unfinished. A decoder can replace or reject malformed final input; an incremental decoder can buffer a valid but unfinished prefix.",
                     },
                     {
                       expression: "a number outside the table",
@@ -1000,21 +838,17 @@ export default function BytesAndCharactersPage() {
                     {
                       expression: "how often a piece occurs",
                       reason:
-                        "outside the method entirely, in both readings. Neither has any notion of frequency, so a common word and a rare one cost in proportion to their spelling and nothing else. That is exactly what a learned vocabulary is for, and giving it up is what makes the coverage guarantee possible.",
+                        "Neither fixed reading shortens a sequence because it is frequent. Character count and UTF-8 byte length determine these positions. Learned merges can compress recurring patterns while retaining complete byte fallback, so frequency compression and coverage can coexist.",
                     },
                     {
                       expression: "whether the sequence length is affordable",
                       reason:
-                        "not a question about the method, and the method cannot answer it. Two to three times the numbers is around eight times the work for a model that compares every pair of positions, so the readings here are usually paired with something that groups the bytes back together before the expensive part of the model. Where to put that grouping is a separate design and not a repair to this one.",
+                        "Count positions on the target text, then measure the model’s cost. Dense pairwise attention grows quadratically in one sequence’s length, while other operations scale differently. Grouping bytes into larger units can reduce later work without changing the base inventory’s coverage.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Two of these are worth carrying. What counts as one character is
-                  a decision, not a fact, so any character count has to say which
-                  decision it made. And the coverage guarantee is about text
-                  specifically, which is why it can be absolute and why it stops
-                  where text stops.
+                  {"Specify the input encoding, the unit being counted and the malformed-input policy. Complete byte coverage prevents missing-byte vocabulary entries; it does not make every arbitrary byte sequence valid UTF-8 or decide what a reader perceives as one character."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1032,18 +866,18 @@ export default function BytesAndCharactersPage() {
                 "The exact round trip",
               ],
               [0, 1, 2],
-              "The round trip is the one thing the byte reading keeps unconditionally, so giving up the exact round trip is the opposite of the trade. Both readings here charge for every character alike, which is exactly what a learned vocabulary buys back by spending its entries on what recurs.",
+              "The byte tokenizer guarantees coverage using a fixed 256-entry table, but gives every UTF-8 byte its own ID. The character tokenizer gives each known code point one ID. Neither combines recurring multi-character pieces, which is the sequence-length saving the later learned vocabularies pursue. The cost differs across the actual characters and text being encoded.",
             ),
             trueFalse(
-              "On English the byte reading is worse than the character reading on both of the two numbers a reading is judged on.",
+              "For the supplied ASCII English probe, byte tokenization uses more vocabulary entries without reducing sequence length compared with the fitted character tokenizer.",
               true,
-              "It carries nearly seven times the entries, 256 against 37, for exactly the same sequence length and the same exact round trip. Anybody measuring the two on English alone should conclude the byte reading is strictly worse, and on English alone they would be right, which is the argument for measuring it on something else before choosing.",
+              "The byte table has 256 entries versus 37, while both encode this probe in 51 IDs and recover it exactly. The character table therefore uses less vocabulary storage for this example at the same sequence length. The byte table’s extra entries provide broader coverage, which the ASCII probe does not exercise.",
             ),
             choice(
               "Measured by the numbers a model is actually charged for, which of the twelve sentences is cheapest?",
               ["English, at 24", "Chinese, at 18", "Greek, at 38", "Hindi, at 48"],
               1,
-              "Chinese pays the worst multiplier on the page, exactly 3.00 per character, and is still the cheapest of the twelve, because it says the same thing in six characters where English takes twenty-four. Hindi is the most expensive at 48 and gets there with fewer characters than English uses, so the textbook claim about three-byte scripts did not survive the measurement.",
+              "The supplied Chinese sentence has the smallest total byte count despite needing three bytes per code point. Its wording uses fewer code points than the English translation. Hindi has the largest byte count in this small collection. Writing-system encoding and translation length both contribute, so one example per language cannot establish a universal ranking.",
             ),
             trueFalse(
               "A shorter reading of a text is the better reading of it.",
@@ -1059,7 +893,7 @@ export default function BytesAndCharactersPage() {
                 "The byte reading can tell them apart and the character reading cannot",
               ],
               1,
-              "They are also 5 bytes and 6 bytes, and a model reads them as two different words. Rewriting every text into one preferred spelling does make them the same word, and it makes the round trip inexact, which is a real loss for anything that has to reproduce its input. A character count is only defined once somebody says which of the three readings of character they meant.",
+              "A precomposed accented letter and a base letter followed by a combining mark can look identical while having different code points and UTF-8 bytes. A tokenizer initially receives different strings; whether a model treats them similarly depends on its processing and training. Normalizing both to one representation removes that source distinction unless it is recorded separately. State whether character counts mean code points, user-perceived characters or bytes.",
             ),
         ],
         },
@@ -1283,7 +1117,7 @@ question: "What happens if a byte stream stops in the middle of a character?",
   "Convert encoding.ids to a list, then slice it at cut positions from 1 through its full length.",
   "The byte decoder replaces an incomplete UTF-8 sequence with the character �. Test whether that character occurs in each decoded prefix.",
   "A stopping position between characters is complete even when the next character would need several bytes."
-], check: numberCheck("At how many of its 18 stopping points is the Chinese sentence not text?", 12, 0.0, "Twelve Chinese prefixes end inside a multibyte character. The complete eighteen-byte sequence still decodes correctly; the failures concern stopping positions, not the ability to represent the complete message.") },
+], check: numberCheck("How many of the Chinese probe’s 18 byte prefixes end inside a UTF-8 character?", 12, 0.0, "Twelve Chinese prefixes end inside a multibyte character. The complete eighteen-byte sequence still decodes correctly; the failures concern stopping positions, not the ability to represent the complete message.") },
             ),
             exercise(
               "Price the byte reading against a vocabulary that was learned",

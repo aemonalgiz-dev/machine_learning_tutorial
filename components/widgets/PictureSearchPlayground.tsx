@@ -153,7 +153,7 @@ export function PictureSearchPlayground() {
 
       <div className="grid gap-3 sm:grid-cols-3">
         <label className="text-xs text-slate-600 dark:text-slate-400">
-          neighbours wanted, k = {k}
+          neighbors wanted, k = {k}
           <input type="range" min={1} max={20} value={k} onChange={(event) => setK(Number(event.target.value))} className="mt-1 w-full accent-indigo-600" />
         </label>
         <div className="text-xs text-slate-600 dark:text-slate-400">
@@ -183,7 +183,7 @@ export function PictureSearchPlayground() {
           <Stat label="exact: pictures measured" value={String(result.exact_distances)} />
           <Stat label="index: distances computed" value={String(result.index_distances)} />
           <Stat label="share of the collection read" value={`${(result.touched_share * 100).toFixed(1)}%`} />
-          <Stat label="neighbours sharing its kind" value={result.exact_precision.toFixed(2)} />
+          <Stat label="neighbors sharing its kind" value={result.exact_precision.toFixed(2)} />
           <Stat label="recall of the true k nearest" value={result.recall.toFixed(2)} />
           <Stat label={`k-th and next distance`} value={`${result.kth_distance.toFixed(3)}, ${result.next_distance.toFixed(3)}`} />
         </div>
@@ -191,7 +191,7 @@ export function PictureSearchPlayground() {
 
       <div>
         <p className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-400">
-          The exact {result.k} nearest, nearest first, each framed in the colour of its kind
+          The exact {result.k} nearest, nearest first, each framed in the color of its kind
         </p>
         <div className="flex flex-wrap gap-1">
           {result.exact.map((found) => (
@@ -241,7 +241,7 @@ export function PictureSearchPlayground() {
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <KindKey />
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            star the query, rings its true neighbours, open circles the cell centres
+            star the query, rings its true neighbors, open circles the cell centers
           </span>
         </div>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">

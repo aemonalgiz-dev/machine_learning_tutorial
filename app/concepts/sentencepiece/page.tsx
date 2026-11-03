@@ -25,9 +25,9 @@ import { WhichMark } from "@/components/widgets/WhichMark";
 import { WithoutSpaces } from "@/components/widgets/WithoutSpaces";
 
 export const metadata: Metadata = {
-  title: "SentencePiece · oop_ml",
+  title: "SentencePiece · Perceptron Lab",
   description:
-    "Requiring text to be split into words first makes tokenization depend on another set of boundary rules. SentencePiece can learn pieces from a text stream that explicitly represents whitespace, reducing that dependence on predefined words.",
+    "SentencePiece learns text pieces without requiring a separate word-splitting step first. Its explicit representation of whitespace affects how pieces join and how encoded text can be reconstructed.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -41,9 +41,9 @@ export default function SentencePiecePage() {
       technicalStart="Part 2. The Space as a Symbol"
       openingTitle="Learn the Pieces Before Deciding Where the Words Are"
       playgroundTitle="Make spaces part of the text the tokenizer learns"
-      playgroundIntro="Follow the space markers through encoding and decoding. Compare the reconstructed text with the input and check which normalisation rules were applied."
+      playgroundIntro="Follow the space markers through encoding and decoding. Compare the reconstructed text with the input and check which normalization rules were applied."
       title="SentencePiece"
-      tagline={"Requiring text to be split into words first makes tokenization depend on another set of boundary rules. SentencePiece can learn pieces from a text stream that explicitly represents whitespace, reducing that dependence on predefined words."}
+      tagline={"SentencePiece learns text pieces without requiring a separate word-splitting step first. Its explicit representation of whitespace affects how pieces join and how encoded text can be reconstructed."}
       prerequisites={
         <>
           One thing from earlier in this section is assumed, which is a scheme
@@ -83,10 +83,7 @@ export default function SentencePiecePage() {
                 </p>
                 </>
                 <KeepInMind>
-                  There are two questions here and they are usually asked
-                  together. Where do the words end, and what pieces should a
-                  word be made of? Everything on this page is about refusing to
-                  ask the first one.
+                  {"We can learn subword pieces without first labeling linguistic words. A preliminary whitespace policy may still divide the input into chunks. Keep that formatting choice separate from discovering word boundaries."}
                 </KeepInMind>
               </SubSection>
 
@@ -100,17 +97,8 @@ export default function SentencePiecePage() {
                     formatting boundary with a language boundary.
                   </p>
                   <p>
-                    To make that concrete, this page carries five short sentences of
-                    Chinese beside the English corpus, written the way Chinese is
-                    written, with nothing between the words. Between them they use
-                    seven words, the words for research, life, origin, student,
-                    very, many and good, and several of those words turn up in more
-                    than one sentence. A whitespace split finds five chunks in them,
-                    one per line, and reports nothing unusual. The repetition a
-                    learner needs is there, and it is inside the chunks, where a
-                    rule about spaces cannot see it. Part 5 fits both schemes on
-                    these five lines and measures what each finds.
-                  </p>
+                  {"The five Chinese examples use recurring combinations corresponding to research, life, origin, student, very, many and good. A whitespace splitter gives one chunk per unspaced line. A subword learner can still count repetition inside those chunks. Part 5 compares two symbol conventions on these same inputs."}
+                </p>
                 </>
                 <>
                   <p>
@@ -133,13 +121,7 @@ export default function SentencePiecePage() {
 
               <SubSection title="3. And what the boundary marker costs">
                 <p>
-                  There is a second cost, and it is the one that shows up on our
-                  own English sentence. A scheme that cuts on spaces has to
-                  record somewhere that a word ended, or gluing the pieces back
-                  gives one long run of letters, and the usual place to record
-                  it is on the last character of each word. That makes the w
-                  that ends low a different symbol from the w inside lower, which
-                  is a real distinction and is bought at a real price.
+                  {"The earlier end-marked representation attaches boundary information to each word’s last character. That creates distinct internal and final forms for some letters. A separate boundary symbol is another choice; the initial whitespace split alone does not require attaching it to a letter."}
                 </p>
                 <p>
                   Counted on our eighteen sentences the corpus uses 36 distinct
@@ -158,41 +140,22 @@ export default function SentencePiecePage() {
                   ends in z. Alvarez does.
                 </p>
                 <KeepInMind>
-                  Marking the end of a word doubles part of the alphabet and
-                  leaves gaps in it, and the gaps are exactly where the unusual
-                  text is. Both of those are consequences of having cut on
-                  spaces, not of the merging loop.
+                  {"These extra forms and missing endings follow from the corpus-derived end-marker convention. They are not unavoidable consequences of splitting on whitespace. A different alphabet or boundary representation can change both."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="4. SentencePiece, stated">
                 <p>
-                  SentencePiece removes the first question by refusing to answer
-                  it. Every run of whitespace in the text is replaced by an
-                  ordinary character, one is put at the front, and from then on
-                  the text is a single stream of symbols with nothing special
-                  about any of them. The learner counts pairs over that stream
-                  exactly as before. Decoding joins the pieces and turns every
-                  such character back into a space.
+                  {"Represent the preceding whitespace with a reserved marker, then let that marker participate in vocabulary learning. The teaching implementation prefixes a marker to each whitespace-delimited unit. Decoding joins its pieces and replaces markers with spaces, removing the dummy initial space. The normalization details determine which original spacing survives."}
                 </p>
                 <p>
-                  Two things follow immediately and both are worth stating
-                  before any detail. Nothing in the procedure refers to a
-                  language, so the same code runs on English and on Chinese and
-                  gets a defensible answer for both. And nothing was thrown away
-                  on the way in, so the pieces carry the spaces along with the
-                  letters and putting them back is concatenation rather than
-                  guesswork.
+                  {"The same marker procedure can run on English and Chinese without a language-specific word segmenter. Its usefulness still depends on the data and configuration. It preserves the normalized spacing representation, not necessarily the original characters and whitespace."}
                 </p>
                 <p>
                   SentencePiece supports learners such as BPE and unigram; it is not a competing merge score. In this lesson we focus on how it prepares text, especially how it represents spaces, before the learner runs. Section 13 compares both learners on the same four words. The implementation details here describe the site&apos;s teaching version, rather than every option in the external library.
                 </p>
                 <KeepInMind>
-                  The whole idea is that the space stops being a separator and
-                  becomes a character the learner counts like any other.
-                  Everything else on this page follows from that, the three
-                  pieces it costs on our sentence in section 17 and the strange
-                  half of the vocabulary in section 11 along with the rest.
+                  {"The key change is making a space marker available as a learnable symbol. That changes the alphabet, eligible pieces and decoding rule. The later measurements show the effects for this corpus."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -204,23 +167,14 @@ export default function SentencePiecePage() {
             <>
               <SubSection title="5. One mark, in front of every word">
                 <p>
-                  The character chosen is {MARK}, which Unicode calls lower one
-                  eighth block and numbers 9601. It was picked for two
-                  properties. It looks like a space, so a marked text is still
-                  readable, and it does not turn up in ordinary writing, so
-                  nothing is being overloaded. Any character meeting the second
-                  of those would serve, and section 21 measures what changes
-                  when a different one is used.
+                  {"The usual marker is ▁, Unicode’s lower one eighth block at code point 9601. It makes a space visible in a piece listing. It is also a real character that can appear in input, so a tokenizer must specify how literal occurrences are distinguished or normalized. Section 21 changes the marker to inspect this implementation’s tie-breaking."}
                 </p>
                 <p>
                   Here the marker goes before a word to represent a preceding space. We also insert a dummy initial marker so the first word follows the same convention; the original text need not actually begin with a space. Because the marker is its own symbol, an ordinary letter does not need a separate identity merely because it ends a word.
                 </p>
                 <Equation>{`hello  world   →   ${MARK}hello${MARK}world`}</Equation>
                 <KeepInMind>
-                  Every whitespace run becomes exactly one mark and one is put at
-                  the front. That is the whole of the transformation, and it is
-                  written down here in full because everything that follows
-                  depends on there being nothing else to it.
+                  {"In the teaching version, whitespace-delimited chunks receive a leading marker. Runs of whitespace collapse and leading or trailing whitespace is discarded. This transformation is simple, but it already makes choices about the text that decoding cannot undo."}
                 </KeepInMind>
               </SubSection>
 
@@ -255,10 +209,7 @@ export default function SentencePiecePage() {
                   37 upward.
                 </p>
                 <KeepInMind>
-                  Recording the boundary in front costs one symbol whatever the
-                  corpus is. Recording it behind costs one extra symbol for every
-                  character that can end a word, which is a number the corpus
-                  decides and which nobody chose.
+                  {"A separate leading marker adds one symbol to this alphabet. The attached-final-marker convention instead introduces distinct final forms for characters observed at word ends. These are counts for the selected representations, not a requirement that every tokenizer use either alphabet."}
                 </KeepInMind>
               </SubSection>
 
@@ -273,58 +224,32 @@ export default function SentencePiecePage() {
                 </p>
                 <MarkedSentence />
                 <p>
-                  Notice what did not have to be decided. The full stop after Dr.
-                  stayed attached to Dr. and the full stop after analysis stayed
-                  attached to analysis, and no rule looked at either of them, so
-                  the question of whether an abbreviation keeps its stop never
-                  came up. The apostrophe in didn&rsquo;t is an ordinary
-                  character in an ordinary unit, and so is the hyphen in
-                  low-cost. Whether the pieces should divide at any of those
-                  places is left entirely to the counting that comes next.
+                  {"Neither example applied an abbreviation or contraction rule before learning. The periods, apostrophe and hyphen remain ordinary symbols within their whitespace chunks. The learned pieces may later split at those characters, but that is a different operation from a linguistic word-boundary decision."}
                 </p>
                 <KeepInMind>
-                  Nothing in this step is learned and nothing in it is about
-                  English. Applied to the Chinese sentences of section 2 the same
-                  transformation puts one mark at the front of each line and
-                  changes nothing else.
+                  {"No parameters are learned during this transformation. On the five unspaced Chinese lines it adds one marker per line. The later subword learner still needs corpus evidence to choose useful entries."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="8. Cutting at the marks, and why that is a separate decision">
                 <p>
-                  Once the text is one stream, a merge could in principle join
-                  any adjacent pair, including a pair with a mark between the two
-                  halves. The framework does not allow that. Having marked the
-                  text it cuts it at every mark, so each unit is one mark
-                  followed by one word, and a piece is never allowed to reach out
-                  of its unit.
+                  {"The site’s teaching implementation learns within marker-prefixed whitespace units, so a learned piece cannot cross between them. That is a restriction in addition to representing spaces as symbols. Other configurations can permit cross-whitespace pieces."}
                 </p>
                 <>
 <p>
                   That second step is a separate design choice. Together, these steps resemble splitting on whitespace and placing a marker at the start of each resulting piece. Later we will disable the restriction and measure how it changes the learned vocabulary, so we can distinguish the effect of marking spaces from the effect of restricting merges.
                 </p>
                 <p>
-                  It has not, and the difference is precise. The mark is inside the unit, so it is a symbol the learner counts, merges and stores, and it comes back out at the other end. A separator is none of those things.
+                  {"The marker remains inside each unit. It can be counted, merged and stored, then converted back to a space. This gives a different symbol representation from discarding spaces, even though both preparations can initially use the same whitespace boundaries."}
                 </p>
 </>
                 <WhyThisWorks title="Why cutting at the marks is not the same as cutting on spaces">
                   <p>
-                    A separator is deleted and remembered elsewhere. A mark is
-                    kept, so it takes part in the arithmetic and appears in the
-                    finished rows. On our corpus that makes the alphabet one
-                    symbol larger where annotating the letters made it sixteen
-                    larger. And the cutting rule is the same rule for every
-                    writing system, since a language with no whitespace has one
-                    unit per line and everything downstream carries on as
-                    normal, which is the case section 19 measures.
-                  </p>
+                  {"A deleted separator needs some other convention or retained information to reconstruct it. Here the marker carries that information in the piece sequence. This uses one separate alphabet symbol instead of boundary-specific letter forms. On unspaced lines, the marker only records the start; it does not discover linguistic words."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  There are two steps and the paper&rsquo;s own defaults set
-                  both. Mark every whitespace run, then cut at the marks. The
-                  first is what makes the method language-independent and
-                  reversible; the second is a convention with a measurable cost,
-                  and section 20 measures it.
+                  {"Space marking and restricting cross-space pieces are separate choices. The teaching defaults use both. Reversibility additionally depends on normalization, literal-marker handling and character coverage, which Part 4 checks."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -353,7 +278,7 @@ export default function SentencePiecePage() {
                 "A mark in front is what the merging learner requires",
               ],
               0,
-              "A mark in front says a space preceded this, and a space preceded the first word too, so one is prepended to the whole text. Recording the boundary in front costs one symbol whatever the corpus is. Recording it behind costs one extra symbol for every character that can end a word, which is a number the corpus decides and nobody chose.",
+              "A leading marker records that a word starts after a boundary. This implementation also inserts a dummy boundary before the first word, even when the input has no leading space. One separate marker symbol is sufficient. The end-marked scheme instead distinguishes each ordinary character from its word-final form, so the extra inventory depends on which characters end words in the corpus.",
             ),
             several(
               "Marking every whitespace run and then cutting at every mark amounts to splitting on whitespace and marking each piece. Which of these are the differences the page draws?",
@@ -364,12 +289,12 @@ export default function SentencePiecePage() {
                 "Cutting at the marks follows from marking, so it is not a separate decision",
               ],
               [0, 1],
-              "There are two steps and they are not the same kind of thing. Marking is what makes the method language-independent and reversible, since nothing is thrown away on the way in. Cutting at the marks is a convention added afterwards, with a measurable cost that the closing part measures. Keeping the mark as a symbol is also cheap, since on this corpus it makes the alphabet one symbol larger where annotating the letters made it sixteen larger.",
+              "Representing spaces with a separate marker and restricting where pieces may cross are different operations. The marker can retain boundaries in the normalized text; splitting at it imposes a later boundary policy on vocabulary learning. On this corpus, the separate marker adds one alphabet symbol, while word-final variants add sixteen. Exact recovery still depends on coverage and on what the earlier normalization retained.",
             ),
             trueFalse(
               "SentencePiece is a third way of choosing pieces, alongside merging and shrinking.",
               false,
-              "It is a treatment of the text that either of those can be run on, and the page runs both on the same four words. The contribution is the step before the learner, which is why neither learner has to know what a mark is; both take units already spelled in symbols with counts.",
+              "SentencePiece provides a way to prepare text and train a subword model. The learner can use BPE or the unigram algorithm; those remain different vocabulary-learning procedures. Here the comparison changes the spacing representation while using either learner, so a front marker should not be mistaken for a third pair-selection objective.",
             ),
         ],
         },
@@ -389,11 +314,7 @@ export default function SentencePiecePage() {
                 </p>
                 <Equation>{`low  =  ${MARK}  l  o  w`}</Equation>
                 <p>
-                  Now run the loop. Count every adjacent pair, weighted by how
-                  often the word occurs, take the largest count, join it
-                  everywhere, and repeat. Fifteen merges later every word is a
-                  single piece and the corpus is 16 pieces, one per occurrence.
-                  Drag the control and watch the mark wait.
+                  {"Apply the weighted pair-merging loop to these marked units. After fifteen merges, each of the four word types is a single marked piece and the corpus has sixteen pieces. The control lets us inspect how the leading marker participates in that particular merge order."}
                 </p>
                 <MarkLadder />
                 <KeepInMind>
@@ -424,53 +345,22 @@ export default function SentencePiecePage() {
                   caption="Three merges in a row score exactly 7, and at two of them a pair beginning with the mark was among the candidates and was not taken."
                 />
                 <p>
-                  That is not the counting deciding. At merge 2 the pairs l
-                  followed by o, o followed by w, and the mark followed by l all
-                  occur exactly 7 times, so the objective is indifferent between
-                  them and something outside the objective has to choose. The
-                  rule in force is that the earlier-sorting pair wins, and the
-                  mark is codepoint 9601 where l is 108, so any pair beginning
-                  with the mark sorts after every pair beginning with a letter
-                  and loses every tie it enters.
+                  {"At the third merge, l with o, o with w and the marker with l all score seven. The SDK breaks the tie lexically. The marker’s code point 9601 sorts after l at 108, so the pair starting with l wins. That ordering concerns these characters, rather than every letter in Unicode."}
                 </p>
                 <p>
-                  Across the whole run of fifteen merges a pair beginning with
-                  the mark was among the tied candidates eleven times, and it was
-                  taken three times, each of those being a step where it was the
-                  only candidate left at that count. So the mark attaches to a
-                  word only once nothing else can be built, which is why the
-                  vocabulary ends up holding {MARK}low and {MARK}newest rather
-                  than {MARK}l and {MARK}n. A mark that sorted before the letters
-                  would produce the opposite, and section 21 runs that fit.
+                  {"In this fifteen-merge run, a marker-starting pair appears among top candidates eleven times and is selected three times, each without a tied alternative. The alphabetic tie rule helps explain why words assemble internally before the marker attaches in this example. The larger corpus need not follow that order."}
                 </p>
                 <KeepInMind>
-                  A tie means the counting has no preference, so whatever breaks
-                  it is arbitrary by definition. Here the arbitrary rule and the
-                  mark&rsquo;s codepoint together decide that words assemble
-                  before their spaces attach, and on these four words that
-                  difference is nine of the 27 finished rows, which section 21
-                  counts.
+                  {"Equal immediate counts leave the tie rule to choose a pair. Here the chosen marker and lexical order affect intermediate vocabulary entries. Section 21 measures nine differing rows out of 27 after changing the marker on the same four-word corpus."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. A piece that begins with a space is not a word">
                 <p>
-                  Look at the finished table on the four words and something odd
-                  is there. It holds low, and it also holds {MARK}low, and those
-                  are two different rows with two different numbers. The same for
-                  newest and {MARK}newest, widest and {MARK}widest. A reader who
-                  opens such a vocabulary expecting a list of words finds it half
-                  full of things that are a word with a space stuck to the front,
-                  which is not a word in any ordinary sense.
+                  {"The table contains both low and ▁low, as well as analogous forms for newest and widest. They represent different text substrings: one has a leading space marker and one does not. A piece vocabulary is therefore not a list of linguistic words."}
                 </p>
                 <p>
-                  It is the right answer, though. The two really are different
-                  things and the model reading them should know which it has. The
-                  low in low-cost has no space before it and the low in the low
-                  readings does, and a scheme that gave them one row could not put
-                  the space back afterwards. What looks like duplication is the
-                  boundary information, stored in the only place it can be stored
-                  once the space is a character.
+                  {"The low substring inside low-cost and the ▁low substring after a space contain different boundary information. Separate entries make those contexts available in the piece sequence. This is one way to retain spacing; a separate marker piece can also carry the boundary instead of joining the word."}
                 </p>
                 <KeepInMind>
                   A vocabulary here is a list of pieces of text and not a list of
@@ -483,41 +373,26 @@ export default function SentencePiecePage() {
 
               <SubSection title="12. The same, on eighteen sentences">
                 <p>
+
                   On the larger corpus the mark stops waiting. The first merge
                   joins h to e at a count of 32, and the second joins the mark to
                   t at 25, so by the third merge the word the with a space in
                   front of it is a single row. That happens because the is so
                   common that the pair of a space and a t outnumbers almost
-                  everything else, which is exactly the behaviour the four words
+                  everything else, which is exactly the behavior the four words
                   were too small to show.
                 </p>
                 <MarkedVocabulary />
                 <p>
-                  Two numbers there are worth carrying away. Of the 99 merges the
-                  corpus supports, 42 extend a piece that already begins with the
-                  mark, so nearly half the learned table is about where words
-                  start. And 17 of the finished rows are a
-                  row the table already holds with a space in front of it,
-                  {MARK}cost beside cost and {MARK}re beside re among them, so 17
-                  rows out of 136 go on keeping the distinction section 11
-                  described.
+                  {"Of the 99 learned merges, 42 extend a marker-prefixed piece. Seventeen vocabulary entries have counterparts consisting of the same text without the leading marker, including cost and re. Those counts describe recurring space-prefixed fragments, not evidence that every such merge identifies a complete word."}
                 </p>
                 <InAModel>
                   <p>
-                    At the scale a language model works at the same pattern holds
-                    and is much more visible, since almost every common word
-                    appears in the table twice, once with a leading space and
-                    once without. It is why a piece printed from such a
-                    vocabulary so often looks like it has a stray space in front
-                    of it, and why cutting a word off the front of a sentence can
-                    change how the rest of it is read.
-                  </p>
+                  {"The dummy prefix gives the beginning of text the same marker form as a word after normalized whitespace. An unmarked internal substring is different: low inside low-cost lacks that leading marker. The vocabulary may retain both marked and unmarked entries when the learned combinations support them."}
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  Nearly half the merges go on word beginnings and 17 rows go on
-                  holding a word twice, and none of that is waste. It is what
-                  storing the spaces inside the pieces costs, and section 17
-                  prices the same thing in pieces of text rather than in rows.
+                  {"The marker-prefixed entries encode boundary context as well as letters. They can be useful, but they also use vocabulary rows. Assess whether that allocation improves coverage, sequence length or a downstream task rather than declaring all duplication either wasteful or necessary."}
                 </KeepInMind>
               </SubSection>
 
@@ -541,21 +416,11 @@ export default function SentencePiecePage() {
                 </p>
                 <WorkedExample title="The same two learners on the eighteen sentences">
                   <p>
-                    The difference shows up when the table is larger. Asked for
-                    136 rows, the merging fit reads its own corpus in 261 pieces
-                    and the held-out sentence in 28. The shrinking fit reads the
-                    corpus in 133 pieces, which is one piece per word occurrence,
-                    and the same sentence in 37. It has spent its rows learning
-                    the corpus by heart, which costs nothing on the corpus and a
-                    third more pieces on anything else.
-                  </p>
+                  {"At 136 requested rows, BPE uses 261 pieces for the training corpus and 28 for the probe. The unigram version uses one piece per training word occurrence, or 133 pieces, but 37 for the probe. That is a comparison of these two inputs, not a guarantee of a one-third penalty on every unfamiliar text."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
-                  The treatment of the text and the choice of learner are
-                  separate decisions. Every claim on this page is about the
-                  first, and the numbers were taken with the merging learner
-                  because that is the one the earlier pages in this section
-                  built.
+                  {"Text preparation and the learning algorithm are separate settings. Most measurements here use BPE; this section also compares the unigram learner. Keep the reported algorithm and normalization policy with the resulting vocabulary."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -576,18 +441,10 @@ export default function SentencePiecePage() {
                 </p>
                 <Equation>{`${MARK}the  ${MARK}low  ${MARK}cost   →   ${MARK}the${MARK}low${MARK}cost   →   the low cost`}</Equation>
                 <p>
-                  Compare that with what a scheme built on a rule-based front end
-                  has to do. Its tokenizer deleted the whitespace and produced
-                  words, so its detokenizer has to decide where a space goes back
-                  in, and the decision is a language-specific rule again. A full
-                  stop takes no space before it in English, a French quotation
-                  mark does, and neither of those facts is in the pieces.
+                  {"A pre-tokenizer can instead retain source offsets, separator strings or explicit boundary markers. Its detokenizer may use that information, or may apply a language-specific spacing convention. SentencePiece’s marker representation avoids needing to infer the normalized spaces from punctuation alone, but other tokenizers are not inherently unable to preserve them."}
                 </p>
                 <KeepInMind>
-                  Decoding is a string operation with no parameters and nothing
-                  learned in it. That is the property being bought, and section
-                  15 checks that it really holds on a sentence the corpus never
-                  contained.
+                  {"With this marker convention, decoding joins pieces, replaces markers and removes the dummy prefix. It uses configured marker behavior without learning a separate punctuation-spacing model. Successful recovery still depends on symbol coverage and normalization."}
                 </KeepInMind>
               </SubSection>
 
@@ -627,23 +484,15 @@ export default function SentencePiecePage() {
                   row cannot apply and the fit falls back to an, aly and sis.
                 </p>
                 <KeepInMind>
-                  The round trip on this sentence is character-for-character
-                  identical, all 51 of them, and it is identical because nothing
-                  about the input was discarded when the marks went in. Section
-                  17 shows the same fit at 45 rows, where it is a good deal
-                  worse at reading the sentence and still returns it whole.
+                  {"This particular 51-character sentence reconstructs exactly because its characters are covered and its six single spaces match the normalization policy. The same fit at 45 rows retains the sentence too, despite using more pieces. Those checks do not establish preservation of arbitrary original whitespace."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. What the exactness rests on">
                 <p>
-                  It rests on one thing, which is that the transformation into
-                  marks is reversible. The moment anything is normalised on the
-                  way in, the round trip recovers the normalised text and not the
-                  text. The framework&rsquo;s own defaults already normalise
-                  three things, and rather than call the round trip exact and
-                  leave those unsaid, here they are.
+                  {"The round trip recovers the representation retained by normalization and the vocabulary. The teaching version collapses whitespace runs and discards edge whitespace. The external SentencePiece library also supports configurable character normalization, with an NFKC-based default; it should not be described as only these small whitespace rules."}
                 </p>
+                <p className="text-sm"><a className="underline underline-offset-4" href="https://github.com/google/sentencepiece/blob/master/doc/normalization.md">SentencePiece normalization and whitespace options</a></p>
                 <ExactUpToThis />
                 <p>
                   There are three. A run of whitespace of any length and of any
@@ -656,12 +505,7 @@ export default function SentencePiecePage() {
                   three spaces.
                 </p>
                 <KeepInMind>
-                  The honest statement is that the round trip is exact up to a
-                  normalisation somebody chose, and that the normalisation is
-                  small and written down. It costs nothing on the running
-                  sentence, where the only whitespace is six single spaces
-                  between words, and it would cost every level of indentation in
-                  a page of code.
+                  {"For the probe sentence, normalization leaves the original text unchanged. For indented code, collapsing whitespace would remove information. The external library exposes normalization and whitespace options; this simplified teaching interface does not implement all of them."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -701,10 +545,10 @@ export default function SentencePiecePage() {
                 "The front-marked fit returned the sentence exactly, all 51 characters of it",
               ],
               [0, 1, 2, 3],
-              "One missing symbol cost the marked-behind fit a letter and a word boundary at once, and what came back reads Alvare, a stand-in, and didn’t run together. The front-marked fit is exact because nothing about the input was discarded when the marks went in, so gluing back is concatenate, replace every mark with a space, drop the one at the front. Its fallback inside re-analysis costs pieces and not characters, which is the price the next Part measures.",
+              "The end-marked vocabulary lacks the final-z symbol needed by Alvarez. Decoding loses that letter and its following boundary. The front-marked fit represents this sentence completely and reconstructs it exactly. Its longer fallback inside re-analysis costs more pieces while retaining the characters. This particular sentence has ordinary single spaces, so whitespace normalization does not change it; the later layout probes show where exact recovery stops.",
             ),
             several(
-              "The round trip is exact up to a normalisation the defaults chose. Which of these does that normalisation do?",
+              "The round trip is exact up to a normalization the defaults chose. Which of these does that normalization do?",
               [
                 "A run of whitespace of any length and any kind becomes one mark, so two spaces come back as one and so does a tab",
                 "Whitespace at the two ends of the text is dropped entirely",
@@ -712,7 +556,7 @@ export default function SentencePiecePage() {
                 "A full stop ending an abbreviation is separated from the word in front of it",
               ],
               [0, 1, 2],
-              "No rule looked at either full stop on the sentence about Dr. Alvarez, which is why the question of whether an abbreviation keeps its stop never came up. The normalisation costs nothing there, where the only whitespace is six single spaces between words, and it would cost every level of indentation in a page of code.",
+              "No rule looked at either full stop on the sentence about Dr. Alvarez, which is why the question of whether an abbreviation keeps its stop never came up. The normalization costs nothing there, where the only whitespace is six single spaces between words, and it would cost every level of indentation in a page of code.",
             ),
         ],
         },
@@ -722,12 +566,7 @@ export default function SentencePiecePage() {
             <>
               <SubSection title="17. Pieces, at the same size">
                 <p>
-                  The exactness and the language-independence are worth
-                  something; the question is what they are worth in the currency
-                  everything downstream actually pays in, which is the number of
-                  pieces a text becomes. So both schemes were fitted on the same
-                  corpus at fourteen sizes and asked for two numbers each, what
-                  the whole corpus costs and what the held-out sentence costs.
+                  {"At matched requested sizes, compare encoded length on training text and the probe separately. The marker representation also changes required alphabet size and coverage, so equal row budgets do not isolate a single causal factor. Sequence length is useful evidence, rather than the only cost downstream."}
                 </p>
                 <SizeAgainstPieces />
                 <p>
@@ -761,11 +600,7 @@ export default function SentencePiecePage() {
                   caption="Every row is two fits of the same corpus at the same requested size. Only the front-marked column ever gives the sentence back unchanged."
                 />
                 <KeepInMind>
-                  Three pieces in 25 on this sentence, or about twelve per cent,
-                  is what the exact round trip cost at the largest size, and six
-                  pieces in 28 is what it cost at 80 rows. Those are the figures
-                  to weigh the guarantee against, and they are only figures about
-                  this corpus and this sentence.
+                  {"At the largest fits, the front-marked probe uses three more pieces than the lossy no-fallback end-marked encoding’s 25. At 80 rows the difference is six against 28. The intact round trip matters, but other alphabet or fallback choices could change this comparison; space marking is not the only route to retaining the text."}
                 </KeepInMind>
               </SubSection>
 
@@ -774,38 +609,19 @@ export default function SentencePiecePage() {
                   In this run, 42 of the 99 merges create pieces beginning with the space marker. Those entries apply at word starts and cannot be reused as ordinary internal pieces. That helps explain the comparison with the earlier representation. A marker can preserve useful boundary information while also limiting where a learned piece matches.
                 </p>
                 <p>
-                  The stem expect is the cleanest case. The corpus holds expected
-                  and not expect, so neither fit has a row for the shorter word.
-                  The marked-behind fit reads it as exp, ec and a marked t, three
-                  pieces built from interior merges that apply anywhere. The
-                  front-marked fit reads it as {MARK}e, x, p, e and ct, five
-                  pieces, because its early merges all went into building
-                  {MARK}expected and {MARK}e and there is nothing in the table
-                  for the middle of a word beginning with ex.
+                  {"For expect, the end-marked encoding uses exp, ec and marked t. The front-marked version uses ▁e, x, p, e and ct. Its learned word-start entries help other spellings but leave this probe stem longer. Inspecting the entries explains the difference without implying every domain shift has the same effect."}
                 </p>
                 <p>
-                  So the trade is between where the rows are spent. Marking the
-                  end lets a piece be reused anywhere inside a word and pays for
-                  it with a doubled alphabet and unspellable endings. Marking the
-                  front keeps the alphabet small and spends the merges on word
-                  beginnings, which is excellent on text like the corpus and
-                  poorer on text that is not.
+                  {"The conventions make different pieces available and allocate their budgets differently. This front-marked fit is shorter on its training corpus and longer on the held-out sentence at the larger listed sizes. Neither outcome proves a universal property of familiar or unfamiliar text."}
                 </p>
                 <KeepInMind>
-                  The front-marked fit is shorter on its own corpus and longer on
-                  the held-out sentence, from 70 rows up. Those two come from
-                  one cause, which is that 42 of its rows only apply where a word
-                  starts, and the corpus is made of words it has seen start.
+                  {"From 70 rows upward, the displayed corpus and probe lengths favor different fits. Many marker-prefixed entries apply only at word starts, but other differences include alphabet size and merge history. These measurements do not isolate one exclusive cause."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. Text with no spaces at all">
                 <p>
-                  Now the case the whole method exists for. Take the five short
-                  Chinese sentences from section 2 and fit both schemes on them,
-                  each asked for 40 rows. Then read back a sentence those five
-                  never contain, made of words they do, which is student,
-                  research, life and origin run together.
+                  {"For an unspaced example, fit both representations to five short Chinese lines at a requested size of 40. The probe combines characters and familiar word sequences into a line absent from training. This tests how the representations reuse pieces without supplied word segmentation."}
                 </p>
                 <WithoutSpaces />
                 <p>
@@ -819,39 +635,22 @@ export default function SentencePiecePage() {
                   and life together, then origin.
                 </p>
                 <p>
-                  The clearest sign of the mismatch is where the first
-                  scheme&rsquo;s rows went. Three of its 17 are a character it
-                  already holds, kept apart because that character once fell at
-                  the end of a line. There are no word boundaries in this writing
-                  for a boundary marker to record, so those three rows record the
-                  ends of lines, and a piece carrying one puts a space into the
-                  decoded text at a place no space belongs.
+                  {"Three of the end-marked vocabulary’s seventeen rows are character-final forms. In these inputs they record line ends, because the training splitter found no spaces within a line. That uses rows on a boundary convention different from Chinese linguistic word boundaries; decoding behavior must be checked against the original text."}
                 </p>
                 <KeepInMind>
-                  The comparison here is not close and it was not arranged to be.
-                  Nothing refused, nothing warned, and the scheme that needed to
-                  be told where the words are came back with 17 rows, three of
-                  them recording the ends of lines, and read an eight-character
-                  sentence in five pieces where the other read it in three.
+                  {"Both fits return usable encodings on this finite example. The end-marked fit uses five pieces on the eight-character probe; the front-marked fit uses three. The difference follows the particular corpus and representation, rather than showing that a whitespace-based subword learner cannot process Chinese."}
                 </KeepInMind>
               </SubSection>
             </>
           ),
         },
         {
-          title: "Part 6. When Merges Cross Spaces and Normalisation Changes the Text" , id: "part-6-where-the-method-stops-being-defined",
+          title: "Part 6. When Merges Cross Spaces and Normalization Changes the Text" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="20. Whether a piece may cross a space">
                 <p>
-                  Section 8 flagged this and here it is. Once the space is an
-                  ordinary character, nothing in the method forbids a merge from
-                  joining a pair with a space between its halves. The counting
-                  rule says take the commonest adjacent pair and a pair straddling
-                  a space is adjacent like any other. So the question of whether a
-                  piece may cross a word boundary has to be answered from
-                  outside, and the framework answers it by cutting at every mark,
-                  which is a choice rather than a consequence.
+                  {"Treating spaces as symbols permits candidate pieces that include them, unless another rule excludes those candidates. The teaching version restricts learning to marker-prefixed units. This section measures an unrestricted alternative, separating boundary eligibility from the pair-frequency score."}
                 </p>
                 <p>
                   What the other answer produces can be measured rather than
@@ -865,16 +664,11 @@ export default function SentencePiecePage() {
                   Thirteen of the first forty merges produce a piece holding a space somewhere other than at its front. By rank 3 the piece is the whole of the word the with a space behind it, by rank 17 it is a space, the, and another space, and by rank 20 it is the ending of one word joined to the whole of the next.
                 </p>
                 <p>
-                  The loop is answering exactly the question it was asked, which is which pair is commonest, and early on the commonest pairs are letters sitting either side of a gap. Forty merges in, thirteen of them have gone on pieces that straddle a boundary.
+                  {"Thirteen of the first forty learned entries include a marker away from their beginning. This reflects frequent fragments crossing whitespace in this corpus. Other unrestricted corpora can choose different early merges."}
                 </p>
 </>
                 <KeepInMind>
-                  Both answers are defensible and they buy different things.
-                  Cutting at the marks guarantees every row is a piece of one
-                  word; not cutting lets a common phrase become one row, at the
-                  price of spending the early merges on fragments that span two
-                  words. Nothing in the counting prefers either, and a scheme
-                  that wants both has to state where it switches over.
+                  {"Restricting cross-space pieces keeps each learned entry within a whitespace unit. Allowing them can create common phrases or smaller fragments across spaces. Either can be configured as one policy; a two-stage switch is another possible design rather than a requirement for combining useful pieces."}
                 </KeepInMind>
               </SubSection>
 
@@ -897,31 +691,15 @@ export default function SentencePiecePage() {
                   Under the early-sorting one they are the mark with l, that with o, and that with w, so the word is built outward from the space one letter at a time and the table fills with the mark followed by l, then by lo, then by low, rather than with lo and low.
                 </p>
 </>
-                <p>
-                  What did not change is the unseen word, which both fits cut as
-                  the marked low followed by est. So the effect is real and it is
-                  not catastrophic, and the honest summary is that nine rows of
-                  the 27 depend on which character was picked to stand for a
-                  space, for a reason that is arithmetic about codepoints and has
-                  nothing to do with language.
-                </p>
+                <p>Both fits encode the unseen word as marked low followed by est. Elsewhere, nine of the 27 vocabulary rows change when we replace the space marker. Those changes arise from the implementation’s code-point tie-break. The marker’s visual resemblance to a space does not make that numerical ordering neutral.</p>
                 <KeepInMind>
-                  The mark has to be a character no text contains, and there the
-                  requirements stop. Every character meeting that requirement
-                  gives a different vocabulary, nine rows of 27 different on this
-                  small corpus, and nothing in the method says which of them to
-                  use.
+                  {"The marker needs a policy that distinguishes it from literal input, or documents their normalization together. Changing its code point can alter lexical ties, as the nine differing rows show here. Different marker choices need not change every corpus’s learned vocabulary."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="22. Language-independent is a claim about the procedure">
                 <p>
-                  The strongest thing the method can say is that no step in it
-                  refers to a language. That is true and it is checkable, and it
-                  is much weaker than saying the result is language-independent.
-                  A vocabulary is learned from a corpus and carries that
-                  corpus&rsquo;s habits permanently, and the corpus is written in
-                  some language.
+                  {"The procedure does not require a language-specific word segmenter. Its fitted vocabulary still depends on the languages and spellings in the training text. Using one general algorithm does not make every resulting vocabulary equally effective for every language."}
                 </p>
                 <p>
                   Handed the Chinese sentence of section 19, the fit learned from
@@ -933,24 +711,15 @@ export default function SentencePiecePage() {
                   nothing about English at any point.
                 </p>
                 <p>
-                  The fix, where one is wanted, is not in this method. Starting
-                  from the 256 byte values rather than from the characters a
-                  corpus used closes the hole, at the cost of longer sequences,
-                  and it composes with everything on this page rather than
-                  replacing any of it. The marking removed the rule about where
-                  English words end; it left the corpus in place, and the corpus
-                  is where the alphabet of 36 symbols came from.
+                  The marker removes the need to supply an English-style word split before vocabulary learning. It does not make the starting alphabet independent of the corpus: this fitted version still has 36 symbols. Starting from all 256 byte values is a separate way to cover encoded unfamiliar characters, with a potential sequence-length cost. That change can be combined with the marking convention instead of replacing it.
                 </p>
                 <KeepInMind>
-                  One procedure for every language does not give one vocabulary
-                  for every language. It gives the same fair procedure for
-                  building a vocabulary per corpus, and our English fit answers
-                  eight stand-in rows for an eight-character Chinese sentence.
+                  {"The same training procedure can build vocabularies from different languages. Coverage and efficiency still need to be measured. This English-trained example cannot retain the eight Chinese characters without a wider alphabet or fallback, so the shared procedure alone does not establish fairness."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="23. Boundaries, unknown symbols and reversible decoding" id="23-where-the-method-has-nothing-to-say">
-                <p>Treating spaces as symbols changes which merges are possible. Normalisation and unknown-symbol handling can also affect whether decoding recovers the original text. Check these promises separately from the vocabulary size.</p>
+                <p>Treating spaces as symbols changes which merges are possible. Normalization and unknown-symbol handling can also affect whether decoding recovers the original text. Check these promises separately from the vocabulary size.</p>
                 <DerivationTable
                   expressionHeading="Space marker or merge choice"
                   reasonHeading="Effect on segmentation and recovery"
@@ -973,7 +742,7 @@ export default function SentencePiecePage() {
                     {
                       expression: "what a run of whitespace meant",
                       reason:
-                        "decided, and decided by discarding it. Every run becomes one mark, so two spaces come back as one and so does a tab, and the round trip is exact only up to that. On the sentence about Dr. Alvarez nothing is lost, since its only whitespace is six single spaces; for anything where whitespace carries meaning, indented code most obviously, the text cannot be recovered and the method offers no way to keep it.",
+                        "This teaching version collapses each whitespace run, so tabs or repeated spaces cannot be recovered exactly. That matters for indented code. The external library has configurable normalization and whitespace behavior; the restriction here belongs to the selected interface and settings.",
                     },
                     {
                       expression: "a text containing the mark itself",
@@ -983,7 +752,7 @@ export default function SentencePiecePage() {
                     {
                       expression: "whitespace at the very ends of a text",
                       reason:
-                        "dropped, which is a decision and not an oversight. Keeping it would need a mark for a trailing space with nothing after it, and that mark would then be a row of the vocabulary earning almost no counts. Cheap to keep and cheap to lose, and the framework loses it.",
+                        "Leading and trailing whitespace is discarded by this teaching preparation. Retaining it would require a different preparation policy, not necessarily new vocabulary rows: the existing marker could represent a trailing space. The external library provides a whitespace-normalization option.",
                     },
                     {
                       expression: "a character the corpus never used",
@@ -998,7 +767,7 @@ export default function SentencePiecePage() {
                     {
                       expression: "a language written without spaces",
                       reason:
-                        "defined and well behaved, since one mark goes at the front of each line and everything after is unchanged. This is the case the method was built for, and the comparison is not close. On five short Chinese sentences it learns six merges and reads a held-out sentence in three pieces, where a scheme splitting on whitespace learns three merges and reads it in five.",
+                        "An unspaced line becomes one marker-prefixed unit. The subword learner can find repetition inside it without a supplied word segmenter. On these five lines, the front-marked fit uses three pieces on the probe versus five for the compared end-marked fit.",
                     },
                     {
                       expression: "a text with no whitespace and no repetition",
@@ -1008,13 +777,7 @@ export default function SentencePiecePage() {
                   ]}
                 />
                 <KeepInMind>
-                  Four of these are decisions rather than limits, namely which
-                  character marks a space, how a tie is broken, whether a piece
-                  may cross one, and what a run of whitespace collapses to. Each
-                  has defensible answers on both sides and each changes what the
-                  finished vocabulary holds, so each belongs in whatever
-                  describes a tokenizer rather than being left to whoever
-                  implements it.
+                  {"Document the marker, lexical tie rule, cross-space constraints and normalization policy. Each can affect what the vocabulary learns or what decoding preserves. Those settings belong with the saved tokenizer so another environment can reproduce its behavior."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1032,7 +795,7 @@ export default function SentencePiecePage() {
                 "Neither can spell it at all, since the corpus holds expected and not expect",
               ],
               0,
-              "Interior merges apply anywhere inside a word, where the front-marked fit’s early merges went into building the marked expected and there is nothing in its table for the middle of a word beginning with ex. 42 of its 99 rows only apply where a word starts, and a word the corpus never contained is usually met somewhere other than at its start.",
+              "The end-marked fit represents expect with reusable internal fragments. The front-marked fit devoted early merges to marked expected, and those pieces cannot simply be reused in the middle of another word. In this fitted vocabulary, 42 of 99 learned entries are restricted to word starts. Their usefulness depends on which new words and positions the test text contains.",
             ),
             several(
               "Both schemes were fitted at fourteen sizes on the same corpus. Which of these did that comparison report?",
@@ -1043,7 +806,7 @@ export default function SentencePiecePage() {
                 "Below 52 rows neither scheme can be fitted at all",
               ],
               [0, 1],
-              "Those two outcomes come from one cause, which is that 42 of its rows only apply where a word starts and the corpus is made of words it has seen start. At the largest fit the sentence costs 28 pieces against 25, three more and not three fewer, about twelve per cent, and that is what the exact round trip has to be weighed against. Below 52 rows only the marked-behind scheme is impossible. The front-marked one runs from 37 rows, where the corpus costs 781 pieces.",
+              "The front-marked fit is shorter on the displayed training corpus, while the probe ordering reverses above sixty rows. At the largest fits, the probe lengths are 28 and 25, and only the front-marked one retains the original sentence under these no-fallback policies. Marker-restricted entries, required alphabet size and merge history all differ, so this comparison does not isolate one cause. The front-marked alphabet supports a request of 37 rows, where the corpus uses 781 pieces.",
             ),
             choice(
               "The five short Chinese sentences, both schemes asked for 40 rows. What did the marked-behind scheme do?",
@@ -1054,7 +817,7 @@ export default function SentencePiecePage() {
                 "It reached all 40 rows and read the five lines in 15 pieces",
               ],
               0,
-              "Finding one word per line leaves it five very long words to merge inside and almost no repetition across them, so it reads the five lines in 18 pieces and the new sentence in five where the front-marked scheme reads it in three. A piece carrying one of those three line-end rows puts a space into the decoded text at a place no space belongs, and nothing refused and nothing warned.",
+              "The end-marked fit learns three merges and has seventeen rows, including three character-final forms. Those forms record ends of the supplied unspaced lines rather than annotated Chinese word boundaries. It uses eighteen pieces on the training lines and five on the probe, compared with three on the probe for the front-marked fit. Both procedures can learn repeated pieces inside a line.",
             ),
             trueFalse(
               "Run with nothing cut, the very first merge on the eighteen sentences joins the letter e to the space that follows it, at a count of 39.",
@@ -1070,7 +833,7 @@ export default function SentencePiecePage() {
                 "What a run of whitespace collapses to",
               ],
               [0, 1, 2, 3],
-              "All four have defensible answers on both sides and each changes what the finished vocabulary holds. The mark’s identity alone is worth nine of the 27 rows on the four words, for a reason that is arithmetic about codepoints and has nothing to do with language. What the page does not count as a decision is the alphabet, which is whatever the corpus happened to use. That is why the English fit answers a mark and eight stand-in rows for an eight-character Chinese sentence, and why the repair is to start from the 256 byte values and not any setting here.",
+              "The marker, normalization policy, learner and boundary restrictions are configurable choices in this comparison. Changing the marker alone changes nine of the 27 rows in the small case because tied merges use code-point ordering. The character-based trainer's starting alphabet is limited to the characters observed in its corpus. Handling an eight-character Chinese sentence with eight unknown entries shows that limit. A complete byte alphabet is another representation choice; increasing this character vocabulary's budget cannot create missing initial symbols by itself.",
             ),
         ],
         },
@@ -1140,7 +903,7 @@ question: "Can changing a boundary marker change which merge wins a tie?",
  hints: [
   "Set algorithm=SubwordAlgorithm.BYTE_PAIR and whitespace_marker at construction.",
   "Read the actual vocabulary size after fitting; a requested ceiling need not be reached.",
-  "Keep the marker-normalised row sets for the final intersection. The comparison deliberately treats the two marker spellings as equivalent."
+  "Keep the marker-normalized row sets for the final intersection. The comparison deliberately treats the two marker spellings as equivalent."
 ], check: numberCheck("How many of the 27 rows begin with the mark when the mark is an underscore?", 14, 0, "With an underscore marker, fourteen rows begin with that mark. Its different code-point ordering changes tied merge choices in this implementation, although both fits segment lowest identically here.") },
             ),
             exercise(
@@ -1237,7 +1000,7 @@ question: "Which boundary convention shortens familiar text, and which preserves
               [
   "Fit the supplied four-word corpus with the front-marked BYTE_PAIR learner. Encode and decode all five probe strings, including repeated spaces, a tab and indented lines.",
   "For each probe print its escaped original text and length, token count, escaped decoded text and length, and exact-equality result.",
-  "The default normalisation collapses whitespace runs and trims outer whitespace. An exact comparison against the original layout will reveal that loss even when every word survives."
+  "The default normalization collapses whitespace runs and trims outer whitespace. An exact comparison against the original layout will reveal that loss even when every word survives."
 ],
               `from oop_ml import SentencePiece, SubwordAlgorithm
 
@@ -1287,11 +1050,11 @@ for text in texts:
 'low\\tlower' (9) -> 2 pieces -> 'low lower' (9), exact False
 'low\\n    lower\\n        lowest' (28) -> 4 pieces -> 'low lower lowest' (16), exact False`,
               {
-question: "What layout information disappears during whitespace normalisation?",
+question: "What layout information disappears during whitespace normalization?",
  hints: [
   "Use repr or an f-string’s !r conversion so tabs, line breaks and indentation are visible.",
-  "Compare decode(encode(text).ids) with the original input, not with an already normalised copy."
-], check: numberCheck("How many characters come back from the indented text of 28?", 16, 0, "Sixteen characters return from the indented input. The words remain but the distinct line breaks and indentation have collapsed into ordinary spaces.") },
+  "Compare decode(encode(text).ids) with the original input, not with an already normalized copy."
+], check: numberCheck("How many characters are in the decoded version of the supplied 28-character indented text?", 16, 0, "Sixteen characters return from the indented input. The words remain but the distinct line breaks and indentation have collapsed into ordinary spaces.") },
             ),
           ],
         },

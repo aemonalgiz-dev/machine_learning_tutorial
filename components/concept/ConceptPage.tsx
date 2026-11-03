@@ -41,6 +41,9 @@ interface ConceptPageProps {
   title: string;
   tagline: string;
   openingTitle: string;
+  openingId?: string;
+  openingBeforeHistory?: boolean;
+  bookmarkRedirects?: Record<string, string>;
   technicalStart: string;
   history?: ReactNode;
   intuition?: LessonIntuition;
@@ -55,6 +58,9 @@ export function ConceptPage({
   lessonId,
   title,
   openingTitle,
+  openingId,
+  openingBeforeHistory = false,
+  bookmarkRedirects,
   history,
   intuition,
   playgroundIntro,
@@ -66,7 +72,7 @@ export function ConceptPage({
   const sections = addLessonSupplement(lessonId, authoredSections);
   const opening: NavigableSection = {
     title: openingTitle,
-    id: sectionId(openingTitle),
+    id: openingId ?? sectionId(openingTitle),
     content: (
       <>
         {intuition
@@ -107,13 +113,13 @@ export function ConceptPage({
     ),
   };
 
+  const historySection: NavigableSection = {
+    title: lessonHistories[lessonId].title,
+    id: "history",
+    content: <HistoricalContext lesson={lessonHistories[lessonId]} />,
+  };
   const all: NavigableSection[] = [
-    {
-      title: lessonHistories[lessonId].title,
-      id: "history",
-      content: <HistoricalContext lesson={lessonHistories[lessonId]} />,
-    },
-    opening,
+    ...(openingBeforeHistory ? [opening, historySection] : [historySection, opening]),
     workedExample,
     ...sections.map((section) => ({
       title: section.title,
@@ -132,7 +138,7 @@ export function ConceptPage({
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{title}</h1>
       </header>
 
-      <SectionNavigator sections={all} />
+      <SectionNavigator sections={all} bookmarkRedirects={bookmarkRedirects} />
     </article>
   );
 }

@@ -121,7 +121,7 @@ export function KMeansPlayground() {
           Two small clumps
         </button>
         <button onClick={() => setPoints(CROWD)} className={BUTTON}>
-          The crowd, unlabelled
+          The crowd, unlabeled
         </button>
         <button onClick={() => setPoints(randomClumps())} className={BUTTON}>
           Random clumps
@@ -196,7 +196,7 @@ export function KMeansPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The colours are the groups the fit found, and each X is a group&rsquo;s resting centre. No dot carried a label to begin with.
+        The colors are the groups the fit found, and each X is a group&rsquo;s resting center. No dot carried a label to begin with.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">

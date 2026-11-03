@@ -81,7 +81,7 @@ export function AbsorbedInterceptTable() {
         </table>
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Amber readings are labelled 0 and indigo 1. The green marks are where
+        Amber readings are labeled 0 and indigo 1. The green marks are where
         the fitted decision value crosses zero at each capacity; the widest
         corridor between the readings at 2 and 3 crosses at 2.5.
       </p>

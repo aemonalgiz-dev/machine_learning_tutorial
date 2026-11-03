@@ -214,7 +214,7 @@ export function GloveCooccurrenceTable() {
       </div>
 
       <Legend>
-        Under the first distance rule a neighbour {window > 1 ? "two positions away counts a half and one three away a third" : "next door counts one"}
+        Under the first distance rule a neighbor {window > 1 ? "two positions away counts a half and one three away a third" : "next door counts one"}
         , so the counts are not whole numbers; under the second every position
         inside the reach counts one full time. Shading runs from the smallest
         count to the largest, and an outlined cell is a pair that never occurred

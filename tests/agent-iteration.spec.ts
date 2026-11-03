@@ -67,9 +67,9 @@ test('unknown failure locations and absent release measurements stay unresolved'
 });
 
 test('the agent improvement section is discoverable and its lessons remain readable on mobile', async ({ page }) => {
-  await page.goto('/learn/machine-learning');
-  await page.getByRole('link', { name: /^Prompting, Evaluation and Iteration/ }).click();
-  await expect(page.getByRole('heading', { name: 'Prompting, Evaluation and Iteration', exact: true })).toBeVisible();
+  await page.goto('/learn/ai-agents-and-applications');
+  await page.getByRole('link', { name: /^Agent Prompting and Evaluation/ }).click();
+  await expect(page.getByRole('heading', { name: 'Agent Prompting and Evaluation', exact: true })).toBeVisible();
   for (const lesson of expandedLessons.filter(l => l.section === 'Prompting, Evaluation and Iteration')) {
     await expect(page.locator(`a[href="/concepts/${lesson.id}"]`).first()).toBeVisible();
   }

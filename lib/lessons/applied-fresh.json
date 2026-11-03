@@ -29,7 +29,7 @@
   },
   "software-fitted-state": {
     "name": "Negative readings on a new device",
-    "prompt": "The fitted device saw negative readings. Predict the transformed request without centring it on its own mean.",
+    "prompt": "The fitted device saw negative readings. Predict the transformed request without centering it on its own mean.",
     "data": {
       "training": [
         -6,
@@ -150,7 +150,7 @@
   },
   "software-semantic-contracts": {
     "name": "A different Fahrenheit batch and fitted coefficient",
-    "prompt": "The incoming readings are 32 F and 77 F. The model has a 10 C centre and coefficient 0.5. Predict the two scores before testing.",
+    "prompt": "The incoming readings are 32 F and 77 F. The model has a 10 C center and coefficient 0.5. Predict the two scores before testing.",
     "data": {
       "values": [
         32,
@@ -168,7 +168,7 @@
   },
   "software-tool-errors": {
     "name": "A new code arrives beside an uncertain outcome",
-    "prompt": "The service adds an unrecognised code. Predict both actions with no remaining retry budget.",
+    "prompt": "The service adds an unrecognized code. Predict both actions with no remaining retry budget.",
     "data": {
       "outcomes": [
         "future_error",
@@ -188,7 +188,7 @@
   },
   "software-contract-tests": {
     "name": "A different first reading shares the busy batch",
-    "prompt": "The new first reading is 6, followed by 100 and 2. The stored centre remains 4, and the independent first-result expectation is 2. Predict both outputs.",
+    "prompt": "The new first reading is 6, followed by 100 and 2. The stored center remains 4, and the independent first-result expectation is 2. Predict both outputs.",
     "data": {
       "values": [
         6,
@@ -207,7 +207,7 @@
       ],
       true
     ],
-    "why": "The first example has changed along with its expected result. Reusing the saved centre should still work without remembering which reading came first in an earlier batch."
+    "why": "The first example has changed along with its expected result. Reusing the saved center should still work without remembering which reading came first in an earlier batch."
   },
   "data-partition-statistics": {
     "name": "Three workers, including an empty one",
@@ -313,6 +313,325 @@
     },
     "expected": false,
     "why": "The combined check must preserve simultaneous mismatches rather than treating a single changed field as the only possible case."
+  },
+  "what-is-databricks": {
+    "name": "The Same Name Points to the Current Directory Entry",
+    "prompt": "The request reads lab.raw.readings, but its configured location is now archive/readings/. Return that current input beside clean_v3 and the separate output lab.prepared.readings_v3.",
+    "data": {
+      "requestedInput": "lab.raw.readings",
+      "registeredDatasets": [
+        {
+          "name": "lab.raw.inspections",
+          "location": "archive/reports/"
+        },
+        {
+          "name": "lab.raw.readings",
+          "location": "archive/readings/"
+        }
+      ],
+      "program": "clean_v3",
+      "outputName": "lab.prepared.readings_v3"
+    },
+    "expected": {
+      "program": "clean_v3",
+      "input": {
+        "name": "lab.raw.readings",
+        "location": "archive/readings/"
+      },
+      "output": {
+        "name": "lab.prepared.readings_v3"
+      }
+    },
+    "why": "A copied location would describe an earlier request. Resolve the current directory entry while preserving the requested identity."
+  },
+  "databricks-data-lakes": {
+    "name": "A new committed file order and another pending object",
+    "prompt": "Version 5 names evening.parquet before morning.parquet. A pending file is also stored. Return only version 5’s rows in its declared file order.",
+    "data": {
+      "manifests": [
+        {
+          "version": 5,
+          "files": [
+            "evening.parquet",
+            "morning.parquet"
+          ]
+        }
+      ],
+      "version": 5,
+      "files": [
+        {
+          "key": "morning.parquet",
+          "rows": [
+            {
+              "pump": "P1",
+              "temperature_c": 11
+            }
+          ]
+        },
+        {
+          "key": "pending.parquet",
+          "rows": [
+            {
+              "pump": "P9",
+              "temperature_c": 99
+            }
+          ]
+        },
+        {
+          "key": "evening.parquet",
+          "rows": [
+            {
+              "pump": "P2",
+              "temperature_c": 17
+            }
+          ]
+        }
+      ]
+    },
+    "expected": [
+      {
+        "pump": "P2",
+        "temperature_c": 17
+      },
+      {
+        "pump": "P1",
+        "temperature_c": 11
+      }
+    ],
+    "why": "Changing the keys and their order checks that the manifest drives the read rather than a stored answer or a directory listing."
+  },
+  "databricks-workspaces-compute": {
+    "name": "A Fresh Batch Replaces the Earlier Result",
+    "prompt": "The saved table contains a reading from last week. Today’s program returns the supplied two different records. Save that current preview before restarting, then return the saved rows with preview set to null.",
+    "data": {
+      "savedRows": [
+        {
+          "id": "last-week",
+          "temperature": 20
+        }
+      ],
+      "calculatedRows": [
+        {
+          "id": "today-1",
+          "temperature": 8
+        },
+        {
+          "id": "today-2",
+          "temperature": 13
+        }
+      ]
+    },
+    "expected": {
+      "saved": [
+        {
+          "id": "today-1",
+          "temperature": 8
+        },
+        {
+          "id": "today-2",
+          "temperature": 13
+        }
+      ],
+      "preview": null
+    },
+    "why": "A copied earlier answer would leave the wrong records behind. The saved result must follow the current program output before temporary memory is cleared."
+  },
+  "databricks-table-names": {
+    "name": "A different catalog has the same schema and table names",
+    "prompt": "The current catalog is research. Resolve maintenance.readings there rather than borrowing operations’ table. Keep the resolved identity beside its empty rows.",
+    "data": {
+      "parts": [
+        "maintenance",
+        "readings"
+      ],
+      "currentCatalog": "research",
+      "currentSchema": "other",
+      "principal": "botie",
+      "registry": [
+        {
+          "name": "operations.maintenance.readings",
+          "readers": [
+            "botie"
+          ],
+          "rows": [
+            {
+              "pump": "P7",
+              "temperature_c": 12
+            }
+          ]
+        },
+        {
+          "name": "research.maintenance.readings",
+          "readers": [
+            "botie"
+          ],
+          "rows": []
+        }
+      ]
+    },
+    "expected": {
+      "name": "research.maintenance.readings",
+      "rows": []
+    },
+    "why": "Changing the catalog checks whether the resolver treats a two-part request correctly without copying an earlier full name."
+  },
+  "databricks-basics": {
+    "name": "The Same Four Readings Are Repartitioned Again",
+    "prompt": "The original four readings now occupy four partitions: one reading, two readings, no readings, and one reading. Return all four partial counts and the total.",
+    "data": {
+      "partitions": [
+        [
+          {
+            "id": "r0",
+            "pump": "P7",
+            "temperature": 12
+          }
+        ],
+        [
+          {
+            "id": "r1",
+            "pump": "P7",
+            "temperature": 9
+          },
+          {
+            "id": "r2",
+            "pump": "P7",
+            "temperature": -3
+          }
+        ],
+        [],
+        [
+          {
+            "id": "r3",
+            "pump": "P7",
+            "temperature": 14
+          }
+        ]
+      ]
+    },
+    "expected": [
+      [
+        1,
+        2,
+        0,
+        1
+      ],
+      4
+    ],
+    "why": "The arrangement has changed again. The construction must count its current records rather than return an earlier list of partial counts."
+  },
+  "databricks-notebooks-jobs": {
+    "name": "One of Two Checks Is Still Waiting",
+    "prompt": "The values check succeeded after cleaning, but the count check has not run. Which task may start next?",
+    "data": {
+      "tasks": [
+        {
+          "id": "read",
+          "dependsOn": []
+        },
+        {
+          "id": "clean",
+          "dependsOn": [
+            "read"
+          ]
+        },
+        {
+          "id": "check-values",
+          "dependsOn": [
+            "clean"
+          ]
+        },
+        {
+          "id": "check-count",
+          "dependsOn": [
+            "clean"
+          ]
+        },
+        {
+          "id": "publish",
+          "dependsOn": [
+            "check-values",
+            "check-count"
+          ]
+        }
+      ],
+      "completed": [
+        "read",
+        "clean",
+        "check-values"
+      ]
+    },
+    "expected": [
+      "check-count"
+    ],
+    "why": "Publish still needs both checks. A partially completed branch cannot be treated as permission to publish."
+  },
+  "databricks-mlflow-basics": {
+    "name": "A Familiar Filename Belongs to Another Attempt",
+    "prompt": "Inspect attempt D. Other attempts also have model.json. Return only D’s output paths and preserve its different input table identity.",
+    "data": {
+      "runs": [
+        {
+          "runId": "B",
+          "parameters": {
+            "limit": 20
+          },
+          "metrics": {
+            "mae": 1.8
+          },
+          "dataset": {
+            "table": "maintenance.prepared.readings",
+            "version": 4
+          }
+        },
+        {
+          "runId": "D",
+          "parameters": {
+            "limit": 8
+          },
+          "metrics": {
+            "mae": 3.1
+          },
+          "dataset": {
+            "table": "maintenance.calibrated.readings",
+            "version": 2
+          }
+        }
+      ],
+      "requestedRunId": "D",
+      "artifacts": [
+        {
+          "runId": "B",
+          "path": "model.json"
+        },
+        {
+          "runId": "D",
+          "path": "model.json"
+        },
+        {
+          "runId": "D",
+          "path": "plot.png"
+        }
+      ]
+    },
+    "expected": {
+      "runId": "D",
+      "parameters": {
+        "limit": 8
+      },
+      "metrics": {
+        "mae": 3.1
+      },
+      "dataset": {
+        "table": "maintenance.calibrated.readings",
+        "version": 2
+      },
+      "artifacts": [
+        "model.json",
+        "plot.png"
+      ]
+    },
+    "why": "The filename stayed familiar while the owner and input changed. The result must follow the requested identity."
   },
   "databricks-lazy-dataframes": {
     "name": "The valid boundary moves to a different column",
@@ -933,7 +1252,7 @@
       1,
       1
     ],
-    "why": "Changed rotation direction and offset expose memorised coordinates and incorrect operation order."
+    "why": "Changed rotation direction and offset expose memorized coordinates and incorrect operation order."
   },
   "robot-observation-latency": {
     "name": "Motion on both axes during a shorter delay",
@@ -1094,7 +1413,7 @@
     "expected": [
       "b"
     ],
-    "why": "Authorisation belongs to the current request and current grants, not a cached global relevance result."
+    "why": "Authorization belongs to the current request and current grants, not a cached global relevance result."
   },
   "security-private-aggregates": {
     "name": "A narrower public range with four people",

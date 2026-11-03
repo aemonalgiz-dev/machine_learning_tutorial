@@ -88,13 +88,13 @@ export function CompanyShift() {
       </div>
 
       <Legend>
-        One row per word of the text. The indigo bar is how far that word leans
-        along the direction taken out when the whole collection is the company,
-        and the grey bar is the same word against the direction taken out when
-        only the second half is. In the whole collection the three words carrying
-        no subject lead; in the half, sail leads instead, because a word every
-        document of that half uses is now doing what those three did. The two
-        directions themselves agree to{" "}
+        Each row shows a word&apos;s projection onto the direction removed from
+        the document vectors. Indigo uses the direction learned from the whole
+        collection; gray uses the direction learned from its second half.
+        The common words contribute most in the whole collection. In the second
+        half, &ldquo;sail&rdquo; occurs in every document and contributes most
+        instead. The choice of documents therefore changes which information
+        this removal treats as common. The similarity between the two directions is{" "}
         {company.component_similarity.toFixed(4)}.
       </Legend>
       {message && (

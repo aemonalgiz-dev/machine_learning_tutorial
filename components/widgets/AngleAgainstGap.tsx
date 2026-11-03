@@ -109,7 +109,7 @@ export function AngleAgainstGap({
 
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         A row shown in pink changed place between the two columns, and the
-        length column is why, since the gap grows with a neighbour&rsquo;s own
+        length column is why, since the gap grows with a neighbor&rsquo;s own
         length even when the direction is unchanged.
       </p>
 

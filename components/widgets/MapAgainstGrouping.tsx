@@ -195,8 +195,8 @@ export function MapAgainstGrouping({
           </div>
 
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
-            The two panels colour the same people by their own labels, so a
-            colour on the left need not be the colour on the right; what matters
+            The two panels color the same people by their own labels, so a
+            color on the left need not be the color on the right; what matters
             is whether the same people share one.
           </p>
 

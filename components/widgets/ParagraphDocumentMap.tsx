@@ -129,11 +129,10 @@ export function ParagraphDocumentMap() {
 
       <Legend>
         Darker is more alike, and the two blocks on the diagonal are the two
-        subjects. Nothing was told which document belonged to which. The number
-        to distrust is the last tile, where the least alike pair inside one
-        subject is <span style={{ color: SAILING }}>below</span> the most alike
-        pair across the two, so the blocks overlap even though their averages are
-        far apart.
+        subjects. Training did not receive those subject labels. Compare the
+        average scores with the last tile: the least similar within-topic pair
+        scores <span style={{ color: SAILING }}>below</span> the most similar
+        across-topic pair. The averages differ, but some individual pairs overlap.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>

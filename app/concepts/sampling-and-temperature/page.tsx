@@ -9,15 +9,15 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Sampling and Temperature · oop_ml",
-  description: "The highest-scoring token is not the only token a model could produce. Sampling and temperature control how we choose from its predictions, changing the output without changing the learned weights.",
+  title: "Sampling and Temperature · Perceptron Lab",
+  description: "A language model assigns probabilities to possible next tokens. Sampling chooses among them, while temperature changes how concentrated those probabilities are without retraining the model.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="sampling-and-temperature"
     title="Sampling and Temperature"
-    tagline={"The highest-scoring token is not the only token a model could produce. Sampling and temperature control how we choose from its predictions, changing the output without changing the learned weights."}
+    tagline={"A language model assigns probabilities to possible next tokens. Sampling chooses among them, while temperature changes how concentrated those probabilities are without retraining the model."}
     openingTitle="Must a Model Always Choose Its Favorite Word?"
     intuition={lessonIntuitions["sampling-and-temperature"]}
     technicalStart="Part 2. Calculate Temperature and Nucleus Filtering"
@@ -35,9 +35,13 @@ export default function Page() {
 <p>{"Only the gaps between the scores matter. Add 1,000 to every logit and the four probabilities come out the same, because each candidate is exactly as far from the others as before."}</p>
 <p>{"Sampling uses these shares to make a random selection. One draw can select a relatively unlikely token. Over many independent draws from an unchanged distribution, selection frequencies approach the assigned probabilities. In text generation, the distribution normally changes after every appended token."}</p>
 <WorkedExample title="Ten draws, then ten thousand">
-<p>{"Drawing from the four shares above with one seeded random stream, the first ten selections were sat, sat, sat, sat, slept, ran, sat, slept, sat, ran. The candidate ran was drawn twice in ten with a share under nine percent, and sang was not drawn at all. Keep drawing from the same stream and the counts settle."}</p>
-<NumberTable headings={["draws", "sat", "slept", "ran", "sang"]} rows={[["10", "6", "2", "2", "0"], ["100", "57", "24", "14", "5"], ["1,000", "620", "261", "86", "33"], ["10,000", "6,404", "2,436", "838", "322"], ["shares × 10,000", "6,439", "2,369", "871", "321"]]} caption="Counts of each candidate as the draws accumulate. The last row is what the shares predict for 10,000 draws." />
-<p>{"A probability describes the long run of this table and promises nothing about its first row. Text generation rarely gets beyond the first row with any one distribution, because the next token is drawn from a new one."}</p>
+<p>
+                  {"Drawing from the four shares above with one seeded random stream, the first ten selections were sat, sat, sat, sat, slept, ran, sat, slept, sat, ran. The candidate ran was drawn twice in ten with a share under nine percent, and sang was not drawn at all. The later rows show counts from larger samples of the same stream."}
+                </p>
+<NumberTable headings={["draws", "sat", "slept", "ran", "sang"]} rows={[["10", "6", "2", "2", "0"], ["100", "57", "24", "14", "5"], ["1,000", "620", "261", "86", "33"], ["10,000", "6,404", "2,436", "838", "322"], ["shares × 10,000", "6,439", "2,369", "871", "321"]]} caption="Observed counts from one seeded sequence of draws. The final row gives rounded expected counts for 10,000 independent draws, not counts the sample must match." />
+<p>
+                  {"Each draw follows the stated probabilities, but a sample of ten can look different from their long-run proportions. During generation we usually draw only once from each distribution, then append the token and calculate a new distribution for the changed context."}
+                </p>
 </WorkedExample>
 
 </SubSection>
@@ -46,7 +50,9 @@ export default function Page() {
 <NumberTable headings={["temperature", "sat", "slept", "ran", "sang"]} rows={[["0.1", "1.0000", "0.0000", "0.0000", "0.0000"], ["0.5", "0.8650", "0.1171", "0.0158", "0.0021"], ["1", "0.6439", "0.2369", "0.0871", "0.0321"], ["2", "0.4551", "0.2760", "0.1674", "0.1015"], ["3", "0.3849", "0.2758", "0.1976", "0.1416"]]} caption="The same four logits at five temperatures, from the lowest setting the control offers to the highest. Every row is in the same order." />
 <p>{"Reading down a column shows what the control does. The favorite, sat, holds 0.8650 at a temperature of 0.5 and 0.3849 at 3. The least likely candidate, sang, moves the other way, from 0.0021 to 0.1416. The scores are the same in every row. What changes is how strongly the preference they express is acted on."}</p>
 <p>{"For finite logits, positive temperature preserves ranking. At very low temperature, sampling concentrates on the maximum-score choices. Greedy decoding is implemented separately here, so there is no division by zero."}</p>
-<p>{"Both statements are visible in the table. No row changes the order of the four candidates. And at 0.1 the favorite has everything to four decimal places, so sampling at that setting behaves like always taking the largest share, without a temperature of zero ever being needed."}</p>
+<p>
+                  {"Every row preserves the candidates’ ranking. At temperature 0.1, the displayed probability of sat rounds to 1.0000; the alternatives still have small positive probabilities. Sampling is highly concentrated but remains a random choice. The separate greedy setting always selects a maximum-score token."}
+                </p>
 
 </SubSection>
 
@@ -60,12 +66,17 @@ export default function Page() {
 <p>{"The shifted scores are divided by the temperature, each result is exponentiated into a weight, and each weight is divided by the sum of the four."}</p>
 <Equation>{"T = 1:    shifted scores / T = [0, −1, −2, −3]\n          weights ≈ [1, 0.3679, 0.1353, 0.0498],  sum ≈ 1.5530\n          probabilities ≈ [0.6439, 0.2369, 0.0871, 0.0321]\n\nT = 0.5:  shifted scores / T = [0, −2, −4, −6]\n          weights ≈ [1, 0.1353, 0.0183, 0.0025],  sum ≈ 1.1561\n          probabilities ≈ [0.8650, 0.1171, 0.0158, 0.0021]\n\nT = 2:    shifted scores / T = [0, −0.5, −1, −1.5]\n          weights ≈ [1, 0.6065, 0.3679, 0.2231],  sum ≈ 2.1975\n          probabilities ≈ [0.4551, 0.2760, 0.1674, 0.1015]"}</Equation>
 <p>{"Dividing by a temperature below one stretches the gaps between the shifted scores, and dividing by a temperature above one shrinks them. The largest score always shifts to zero and keeps a weight of exactly one, so what temperature sets is how small the other weights are beside it."}</p>
-<p>{"The logits of sat and slept are one apart, so the ratio of their probabilities is exp(1 / T). That is about 7.39 at a temperature of 0.5, 2.72 at 1 and 1.65 at 2. It stays above one at every positive temperature, which is the ranking being preserved."}</p>
-<p>{"The subtraction earns its place when scores are large. With every logit raised by 1,000, exponentiating directly overflows and the division has nothing finite to work with. The shifted calculation returns the same four probabilities as before."}</p>
+<p>
+                  {"The logits of sat and slept differ by one. The probability ratio below stays above one at every positive temperature, so sat remains ahead of slept."}
+                </p>
+                <Equation>{"probability(sat) / probability(slept) = exp(1 / T)\n\nT = 0.5: ratio ≈ 7.39\nT = 1:   ratio ≈ 2.72\nT = 2:   ratio ≈ 1.65"}</Equation>
+<p>
+                  {"Subtracting the maximum prevents overflow in this example. Raising every logit by 1,000 makes direct exponentiation overflow. The shifted scores stay unchanged, so the stable calculation returns the original probabilities."}
+                </p>
 </WorkedExample>
 </SubSection>
 <SubSection title="4. Retain enough candidates to reach the threshold">
-<p>{"Top-p, also called nucleus sampling, orders tokens by probability. Keep the smallest prefix whose cumulative probability reaches the threshold. Retain the token that crosses it, remove later tokens, and normalize again."}</p>
+<p>{"Top-p sampling, also called nucleus sampling, keeps the most probable candidates whose combined probability reaches the chosen threshold. The token that first reaches or crosses it remains in the set. The retained probabilities are then rescaled to total one, giving the sampler a distribution over just those candidates."}</p>
 <p>{"Using the assigned distribution from the guided illustration gives a simple calculation:"}</p>
 <Equation>{"Sorted probabilities = [0.50, 0.30, 0.15, 0.05]\nTop-p threshold = 0.80\n\nFirst candidate:   cumulative probability = 0.50\nSecond candidate:  cumulative probability = 0.50 + 0.30 = 0.80\nRetained shares = [0.50, 0.30]\n\nFinal distribution = [0.50 / 0.80, 0.30 / 0.80, 0, 0]\n                   = [0.625, 0.375, 0, 0]"}</Equation>
 <p>{"These illustrative shares differ from the live table's softmax values. They show the filtering arithmetic without rounding ambiguity. A fixed top-p threshold can retain many tokens for an uncertain distribution and very few for a concentrated one."}</p>
@@ -140,7 +151,7 @@ export default function Page() {
 <p>{"Suppose that for some prompt slept is the suitable continuation, and the model’s scores are the four on this page. Its favorite, sat, is then the mistake. The table follows the mistake, the suitable token and the two weakest candidates as the temperature moves."}</p>
 <NumberTable headings={["temperature", "sat, the favored mistake", "slept, the suitable token", "ran or sang"]} rows={[["0.1", "1.0000", "0.0000", "0.0000"], ["0.5", "0.8650", "0.1171", "0.0180"], ["1", "0.6439", "0.2369", "0.1192"], ["2", "0.4551", "0.2760", "0.2689"], ["3", "0.3849", "0.2758", "0.3392"]]} caption="The last column is the combined share of the two weakest candidates." />
 <p>{"Lowering the temperature makes the output steadier and makes it steadily wrong. At 0.1 the mistake is selected essentially every time. Raising it does give slept more room, from 0.2369 to 0.2760 at a temperature of 2, and it gives the two weakest candidates far more, from 0.1192 to 0.2689. At 3 they are together more likely than slept."}</p>
-<p>{"At no setting does slept overtake sat, because temperature preserves ranking. Top-p cannot help either. It removes candidates from the bottom of the order, and this mistake sits at the top. Changing which token the model prefers takes a change to the scores, which means different context or different parameters."}</p>
+<p>{"Temperature preserves the ordering of these scores, so no setting makes slept rank above sat. Top-p removes candidates from the bottom of that ordering; it cannot remove this highest-ranked mistake while retaining slept. Changing which token ranks first requires different scores, through changed context or model parameters."}</p>
 </WorkedExample>
 <p>{"A model's reported next-token probability, the probability after sampling adjustments, and the probability that an answer is factually correct are different quantities. Choose a policy by evaluating complete responses for the task."}</p>
 
@@ -266,7 +277,7 @@ temperature 1.0: 2 retained, final [0.7311, 0.2689, 0.0000, 0.0000]
 temperature 2.0: 3 retained, final [0.5065, 0.3072, 0.1863, 0.0000]
 temperature 3.0: 3 retained, final [0.4484, 0.3213, 0.2302, 0.0000]
 sat at a temperature of 3: 0.4484`,
-              { hints: ["top_p is the third argument of from_logits. Temperature is applied before it, so the threshold is measured on the scaled distribution.", "retained is an array of booleans, one per candidate. Summing it counts the candidates that survived.", "The probabilities on the returned object are the final ones, already rescaled to total one over the retained candidates."], check: numberCheck("What final share does sat hold at a temperature of 3 with top-p at 0.80, to four places?", 0.4484, 0.0005, "Temperature is applied before the cumulative top-p selection. A flatter distribution may need more candidates to reach the same threshold. After selection, the retained probabilities are renormalised, so the printed final share differs from that token’s share before truncation.") , question: "How many candidates survive the same top-p threshold as temperature changes?" },
+              { hints: ["top_p is the third argument of from_logits. Temperature is applied before it, so the threshold is measured on the scaled distribution.", "retained is an array of booleans, one per candidate. Summing it counts the candidates that survived.", "The probabilities on the returned object are the final ones, already rescaled to total one over the retained candidates."], check: numberCheck("What final share does sat hold at a temperature of 3 with top-p at 0.80, to four places?", 0.4484, 0.0005, "Temperature is applied before the cumulative top-p selection. A flatter distribution may need more candidates to reach the same threshold. After selection, the retained probabilities are renormalized, so the printed final share differs from that token’s share before truncation.") , question: "How many candidates survive the same top-p threshold as temperature changes?" },
             ),
             exercise(
               "Draw ten thousand times from a filtered policy",
@@ -310,7 +321,7 @@ slept was drawn 2237 times`,
             ),
             exercise(
               "Ask for a temperature of zero",
-              ["Part 1 says greedy selection is implemented separately, so there is no division by zero. Ask from_logits for a temperature of 0 on the page’s logits, catch what the library raises, and print the name of the refusal and its message. Then get the greedy choice the supported way and print which candidate it is.", "There is no number to check here. A temperature of zero would divide every shifted score by zero, and the library declines to guess what was meant."],
+              ["Request a distribution from the supplied logits with temperature=0. Catch the library exception and print its class name and message. Then build a valid distribution at temperature=1 and call greedy() to print the selected candidate. This compares an invalid scaling request with the supported greedy-selection method.", "There is no number to check here. A temperature of zero would divide every shifted score by zero, and the library declines to guess what was meant."],
               `import numpy as np
 from oop_ml import MLLibError
 from oop_ml.numpy.modern import TokenDistribution

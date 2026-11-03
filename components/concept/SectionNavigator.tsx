@@ -112,9 +112,11 @@ function sourcesOf(sections: NavigableSection[], index: number): number[] {
 export function SectionNavigator({
   sections,
   initial = 0,
+  bookmarkRedirects,
 }: {
   sections: NavigableSection[];
   initial?: number;
+  bookmarkRedirects?: Record<string, string>;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const shownPage = useRef<number | null>(null);
@@ -136,6 +138,12 @@ export function SectionNavigator({
   // fragment of the bare lesson URL, falls back to the section it starts on.
   const named = hash === "last-page" ? sections.length - 1 : hash === "practice" ? sections.findIndex(section => kindOf(section) === "practice") : sections.findIndex((section) => section.id === hash);
   const current = named >= 0 ? named : Math.min(Math.max(initial, 0), sections.length - 1);
+  const movedPage = bookmarkRedirects?.[hash];
+  // When a topic moves to its own lesson, its old fragment should still open
+  // that topic. New pages retain their own bookmarks and reading positions.
+  useBeforePaint(() => {
+    if (movedPage && /^\/concepts\/[a-z0-9-]+(?:#[a-z0-9-]+)?$/.test(movedPage)) router.replace(movedPage);
+  }, [movedPage, router]);
 
   const previous = useMemo<LessonDestination | undefined>(() => current > 0
     ? { title: sections[current - 1].title, href: `#${sections[current - 1].id}`, kind: "page" }

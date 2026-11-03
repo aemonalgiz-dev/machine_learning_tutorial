@@ -22,9 +22,9 @@ import { ShorteningCurve } from "@/components/widgets/ShorteningCurve";
 import { WordPiecePlayground } from "@/components/widgets/WordPiecePlayground";
 
 export const metadata: Metadata = {
-  title: "WordPiece · oop_ml",
+  title: "WordPiece · Perceptron Lab",
   description:
-    "A tokenizer needs reusable word parts and a consistent way to find them in new text. We will look at the pair-scoring rule used here to build a WordPiece vocabulary, then its longest-match encoding rule.",
+    "WordPiece represents text through reusable pieces and a longest-match encoding rule. The teaching implementation builds its vocabulary using pair scores, making the distinction between vocabulary learning and later encoding explicit.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -39,7 +39,7 @@ export default function WordPiecePage() {
       playgroundTitle="Which pair earns a place in the vocabulary?"
       playgroundIntro="Compare candidate pairs under raw counts and the relative-frequency score. Then inspect how continuation markers affect the longest-match encoding."
       title="WordPiece"
-      tagline={"A tokenizer needs reusable word parts and a consistent way to find them in new text. We will look at the pair-scoring rule used here to build a WordPiece vocabulary, then its longest-match encoding rule."}
+      tagline={"WordPiece represents text through reusable pieces and a longest-match encoding rule. The teaching implementation builds its vocabulary using pair scores, making the distinction between vocabulary learning and later encoding explicit."}
       prerequisites={
         <>
           You need the merging loop from the previous page, which is the whole
@@ -63,7 +63,8 @@ export default function WordPiecePage() {
 <>
               <SubSection title="1. Where this starts, and the one thing that changes">
                 <p>
-                  Start with the merge loop from the previous lesson. Write each word in single symbols, count adjacent pairs across the corpus, then join the pair selected by the scoring rule. Repeat until the vocabulary reaches the requested size.
+
+                  The earlier merge loop chose a neighboring pair from counts in the corpus. We can keep that loop while changing the reason one pair is preferred. This teaching trainer still builds words from small symbols and adds selected combinations until it reaches the requested vocabulary size; its selection score is the part we now need to understand.
                 </p>
                 <p>
                   We now have a separate question to ask of that scoring rule: did a pair occur often because its halves belong together, or because both halves occur almost everywhere? The next example compares those possibilities before giving the relative-frequency calculation.
@@ -83,29 +84,21 @@ export default function WordPiecePage() {
                 </>
                 <Equation>{SENTENCE}</Equation>
                 <KeepInMind>
-                  Nothing about the loop changes. The same corpus, the same
-                  spelling into symbols, the same greedy join repeated until the
-                  vocabulary is full. What changes is which pair wins each turn,
-                  and that turns out to change the vocabulary from the first
-                  turn onwards.
+                  {"This comparison keeps the corpus and starting symbols fixed while changing the pair-selection score. The first chosen pair differs on both displayed corpora. Later, we separately change the boundary markers and encoding rule."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. The commonest pair is common because its halves are">
                 <>
 <p>
-                  Take the eighteen sentences and count every adjacent pair once, before any merging. There are 87 pairs that occur at least twice, and the commonest of them is h followed by e, at 32 occurrences, which comes almost entirely from the word the. That looks like a discovery until you look at the two halves on their own.
+                  {"Before merging, the eighteen sentences have 87 adjacent pairs occurring at least twice. The most common is h followed by e, with 32 occurrences, largely inside the. We can compare that count with the frequency of each component."}
                 </p>
                 <p>
-                  The letter h occurs 36 times in the corpus and the letter e occurs 98 times, so nearly every h in the corpus is followed by an e, and the pair is frequent chiefly because e is everywhere.
+                  {"The h symbol appears 36 times and e appears 98 times. Most h occurrences are followed by e, while many e occurrences appear elsewhere. Raw frequency and the association ratio describe different properties; these counts alone do not establish why the pair occurs."}
                 </p>
 </>
                 <p>
-                  Put every candidate on a chart, with how often it occurs
-                  across the bottom and, up the side, how often it occurs
-                  compared with what its halves alone would lead you to expect.
-                  If the two figures said the same thing the points would form a
-                  rising line and there would be nothing to argue about.
+                  {"Plot each candidate’s pair count horizontally and its association ratio vertically. This lets us compare common combinations with combinations whose parts occur together relative to their separate frequencies. The rankings need not agree."}
                 </p>
                 <PairScoreScatter />
                 <p>
@@ -120,11 +113,7 @@ export default function WordPiecePage() {
                   lower half.
                 </p>
                 <KeepInMind>
-                  A large count answers the question &ldquo;how often do these
-                  two turn up next to each other&rdquo;, and that is not the
-                  question. Two very common symbols will turn up next to each
-                  other often whether or not they have anything to do with one
-                  another.
+                  {"A large count measures repeated adjacency. The ratio measures a different feature of the same corpus: how that count compares with the individual component counts. Either can define a merge objective; neither identifies linguistic structure by itself."}
                 </KeepInMind>
               </SubSection>
 
@@ -133,16 +122,10 @@ export default function WordPiecePage() {
                   A frequent pair may simply contain two individually frequent symbols. To distinguish that case, this implementation compares the pair count with the counts of its components. A pair that occurs more often than those separate frequencies would suggest receives a stronger association score. This is a rule for choosing merges, not proof that a joined piece has a linguistic meaning or will help every downstream model.
                 </p>
                 <p>
-                  Written out that way the fix is almost forced. We already have
-                  how often the pair occurs. We can get how often each half
-                  occurs anywhere, which is one more pass over the same counts.
-                  The comparison is a division.
+                  {"The pair count supplies the numerator. Multiplying the two component counts supplies the denominator. That gives the association ratio below. This is a chosen scoring rule, rather than the only possible way to use these counts."}
                 </p>
                 <KeepInMind>
-                  A count answers how often two symbols are adjacent, which is a
-                  perfectly good question and not the one a vocabulary row is for.
-                  Everything below is one way of asking the intended question with
-                  the counts already to hand.
+                  {"Choose the score according to what the vocabulary is intended to support, then evaluate the result. Here we can inspect how an association preference changes the selected entries compared with raw frequency."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -210,11 +193,7 @@ export default function WordPiecePage() {
                   </>
                 </WorkedExample>
                 <p>
-                  Ordered by the count, e followed by s is at the top and i
-                  followed by d is near the bottom. Ordered by the score they
-                  swap ends. That is not a small perturbation of one ordering
-                  into another; it is a different question producing a different
-                  answer on the same eleven rows.
+                  {"The count ranking puts e followed by s near the top. The ratio puts i followed by d above it. The table makes that difference visible on the same candidates, without treating either ordering as a complete measure of vocabulary quality."}
                 </p>
                 <KeepInMind>
                   We need both symbol counts and pair counts. Once we have those, evaluating a candidate adds a multiplication and a division. That gives a similar counting workflow to BPE, with some extra work for the association score.
@@ -223,11 +202,7 @@ export default function WordPiecePage() {
 
               <SubSection title="6. Where the two orders part">
                 <p>
-                  Run both rules over the same spelling of the same corpus and
-                  put the results side by side. Each column is a full run, since
-                  every turn counts the corpus the turn before it left, so a
-                  disagreement at one step carries forward into every step after
-                  it.
+                  {"Run both selection rules from the same starting symbols. Each merge changes the sequences that will be counted next, so later columns compare evolving candidate sets rather than two permanent rankings of the original pairs."}
                 </p>
                 <MergeOrderColumns />
                 <>
@@ -235,17 +210,11 @@ export default function WordPiecePage() {
                   On the four words the two part at the very first merge, counting taking e followed by s and the score taking i followed by d. On the eighteen sentences they part at the first merge too, counting taking h followed by e at 32 occurrences and the score taking o followed by f at three.
                 </p>
                 <p>
-                  There is no corpus on this page where the two agree for even one turn, which is worth saying because a change of one word in the rule sounds like a refinement and here it produces a different vocabulary from the first row onwards.
+                  {"Both displayed corpora choose different first merges under the two scores. They can still learn some of the same pieces later. The claim is about these runs, not proof that the rules never agree on a step."}
                 </p>
 </>
                 <InAModel>
-                  At the scale a real vocabulary is built at, thirty thousand
-                  rows over billions of words, the divergence is the same but the
-                  effect is diluted, since both rules eventually buy most of the
-                  frequent words whole. What differs is the order they are bought
-                  in and therefore which of them fits inside the budget, and what
-                  the leftover rows are spent on when the frequent words have all
-                  been bought.
+                  {"At a larger vocabulary budget, both rules may eventually include many common words, but their selected entries and order can still differ. This page does not measure a large production vocabulary, so the small runs cannot establish how much that difference is diluted at scale."}
                 </InAModel>
                 <KeepInMind>
                   Because the corpus is respelled after every turn, the choice at
@@ -258,27 +227,19 @@ export default function WordPiecePage() {
 
               <SubSection title="7. What the score prefers, and what it refuses to buy">
                 <p>
-                  Read the formula for what it favours and one sentence covers
-                  it. A pair of rare symbols that are only ever seen beside each
-                  other beats a pair of common symbols that are merely adjacent a
-                  great deal. On the four words that is i and d, which occur three
-                  times each and always together inside widest, beating e and s,
-                  which occur seventeen and nine times and are adjacent nine of
-                  those times.
+                  {"On the four-word corpus, i and d occur three times each and always together. Their ratio exceeds that of e and s, which occur seventeen and nine times and are adjacent nine times. More generally, the rule favors a high ratio, rather than guaranteeing every rare bound pair beats every common pair."}
                 </p>
                 <>
 <p>
-                  What it will not buy is the row that a count-driven run buys first, which is the frequent pairing of two frequent symbols. On the eighteen sentences the count rule spends its first six turns assembling he, the, st, re, ed and The, every one of them a very common fragment of a very common word.
+                  {"In the eighteen-sentence example, count scoring spends its first six merges on he, the, st, re, ed and The. Those pieces reflect repeated combinations in common words. Ratio scoring may learn them later; it does not forbid them."}
                 </p>
                 <p>
-                  The score rule spends its first six turns on of, ex, exp, ly, Dr and Dr., of which of and Dr. are whole words of the corpus and ex and exp are the front of expect and expected. Those are recognisably different kinds of thing.
+
+                  The score rule spends its first six turns on of, ex, exp, ly, Dr and Dr., of which of and Dr. are whole words of the corpus and ex and exp are the front of expect and expected. Those are recognizably different kinds of thing.
                 </p>
 </>
                 <KeepInMind>
-                  Preferring rare-but-bound pairs is the intended behaviour and
-                  also the cost, since a row spent on a rare pair shortens the
-                  corpus less than a row spent on a common one. Part 4 measures
-                  how much less.
+                  {"An association-based choice can save fewer immediate pieces than a more frequent pair. Part 4 measures that cost on these corpora. A different ordering can also leave different later opportunities, so the initial preference does not determine every final compression result."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -288,15 +249,15 @@ export default function WordPiecePage() {
           title: "Questions on Parts 1 and 2",
           quiz: [
             choice(
-              "The commonest adjacent pair in the eighteen sentences is h followed by e, at 32 occurrences. Why is that not a discovery?",
+              "Why compare an adjacent pair’s count with the individual counts of its two pieces?",
               [
-                "h occurs 36 times and e occurs 98, so nearly every h is followed by an e and the pair is frequent chiefly because e is everywhere",
+                "h occurs 36 times and e occurs 98; the ratio accounts for those component frequencies instead of using the pair count alone.",
                 "32 occurrences is too few to rely on",
                 "The pair spans the gap between two words",
                 "A pair of single letters cannot be a vocabulary row",
               ],
               0,
-              "Two very common symbols will turn up next to each other often whether or not they have anything to do with one another. What a vocabulary row is worth is whether its halves belong together, which is a comparison against chance rather than a count.",
+              "Common pieces can have a large adjacent-pair count simply because each occurs often. Comparing their joint count with their individual counts helps distinguish frequent co-occurrence from unusually concentrated association. This is the local score used by the teaching implementation; it does not prove the pieces form a meaningful linguistic unit.",
             ),
             choice(
               "What does the score divide the pair count by?",
@@ -307,7 +268,7 @@ export default function WordPiecePage() {
                 "The count of the commoner of the two halves",
               ],
               0,
-              "The denominator is the product of the component counts. Large counts reduce the ratio unless the pair count grows enough to compensate. This can favour rare, tightly associated pairs over more frequent ones.",
+              "The denominator is the product of the component counts. Large counts reduce the ratio unless the pair count grows enough to compensate. This can favor rare, tightly associated pairs over more frequent ones.",
             ),
             trueFalse(
               "At fixed shares, dropping the common corpus total and the increasing logarithm preserves the ranking of the local comparison, leaving the ratio score.",
@@ -344,13 +305,7 @@ export default function WordPiecePage() {
             <>
               <SubSection title="8. A letter is two symbols, depending on where it sits">
                 <p>
-                  A vocabulary of pieces has to record where the spaces were, or
-                  the pieces cannot be glued back into a sentence. The previous
-                  page did that by marking the last symbol of each word, so that
-                  the w ending low is a different symbol from the w inside lower.
-                  WordPiece marks the other end. A piece that continues a word is
-                  written with two leading hashes and a piece that starts one is
-                  written plainly, so low is l, then ##o, then ##w.
+                  {"This WordPiece convention distinguishes a word’s first piece from its continuations. A continuation uses the prefix ##, so low begins as l, ##o and ##w. Decoding can join the marked pieces into words and separate the unmarked starts with spaces. This records word grouping under the pre-tokenizer’s convention, not every original whitespace character."}
                 </p>
                 <WorkedExample title="Eleven symbols for ten letters">
                   <p>
@@ -375,29 +330,13 @@ export default function WordPiecePage() {
 
               <SubSection title="9. Why the mark sits on the continuation and not between words">
                 <p>
-                  A separate symbol standing for the space would be one more
-                  thing for the loop to merge, and it would merge with whatever
-                  sits beside it, so a piece could span the gap between two words
-                  before any word had been assembled. Marking a symbol instead
-                  keeps every merge inside one word by construction, since the
-                  words are counted separately and no pair ever spans two of
-                  them.
+                  {"Merges stay within words because words are counted separately. A separate space or boundary symbol would not by itself lift that constraint. The continuation marker is instead a convention for representing a piece’s position and reconstructing word grouping."}
                 </p>
                 <p>
-                  Given that, the choice is which end to mark, and both work.
-                  What has to be watched is that joining two marked symbols
-                  produces something sensible. Marking word starts, joining is
-                  always safe, since a word-initial symbol is only ever the left
-                  half of a merge and a mark at the far left of the left half
-                  stays at the far left of the result. Marking continuations, the
-                  arithmetic has to strip the mark from the right half at every
-                  join, or two hashes end up in the middle of a piece.
+                  {"The implementation trains with an internal marker on each word’s first symbol, then translates learned entries into the visible ## continuation form. Keeping these two spellings separate avoids leaving a continuation prefix inside a joined piece. That internal spelling also affects the lexical tie rule discussed later."}
                 </p>
                 <KeepInMind>
-                  The two markings are the same fact written on different pieces,
-                  and a vocabulary in one form can be rewritten into the other
-                  symbol by symbol. What cannot be rewritten is which words the
-                  vocabulary can spell, which is section 12.
+                  {"Both marker conventions retain word-position information. An arbitrary learned piece set cannot always be converted one entry at a time into an equivalent vocabulary using the other convention: an entry may need different forms depending on where it is allowed. Section 12 compares their coverage on this corpus."}
                 </KeepInMind>
               </SubSection>
 
@@ -450,49 +389,24 @@ export default function WordPiecePage() {
                   </p>
                 </WorkedExample>
                 <KeepInMind>
-                  Because the merges are not consulted, they are not part of what
-                  a fitted scheme has to carry. The vocabulary is the model, and
-                  the order the rows were learned in is only the history of how
-                  it was built.
+                  {"Encoding consults the final vocabulary and longest-match rule, without replaying merge ranks. The tokenizer must still carry its continuation convention, pre-tokenizer, unknown-word policy and length limit. Learned row order is not the segmentation priority used by this decoder."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. Where WordPiece splits the Alvarez sentence" id="11-the-running-sentence-and-where-the-marks-fall">
                 <p>
-                  Fitted on the eighteen sentences, here is the sentence about Dr. Alvarez
-                  cut at four vocabulary sizes. Watch the marks rather than the
-                  pieces. Exactly one piece per word carries no mark, and it is
-                  always the first, so a reader can find the word boundaries by
-                  eye without knowing anything about the corpus.
+                  The four vocabulary sizes give different divisions of the Dr. Alvarez sentence. In each displayed word, its first piece has no continuation mark and later pieces do. That convention makes the retained word boundaries visible independently of how much of the word was merged into each entry. It describes these encoded words rather than a separate claim about their grammatical structure.
                 </p>
                 <ContinuationCuts />
-                <p>
-                  At the largest size the sentence is 29 pieces for seven words.
-                  Two of the words come out whole, Dr. with its full stop and the
-                  word the, and low arrives as one piece with the hyphen after it
-                  marked as a continuation, which is the pre-tokenizer&rsquo;s
-                  doing rather than the vocabulary&rsquo;s, since nothing split
-                  low-cost into two words. The name Alvarez costs six pieces,
-                  which is the honest price of a word the corpus never held.
-                </p>
+                <p>At the largest tested vocabulary size, the seven-word sentence uses 29 pieces. Dr. and the are complete vocabulary entries; low is followed by a continuation piece for the hyphen. The pre-tokenizer kept low-cost together, so that internal boundary came from vocabulary encoding. Alvarez uses six pieces because the complete name was absent from the training corpus.</p>
                 <KeepInMind>
-                  Marks fall on continuations, so the count of unmarked pieces in
-                  any cut is the number of words. That is a useful property to
-                  have by construction rather than by convention, and it is what
-                  makes gluing the pieces back a matter of stripping marks and
-                  joining.
+                  {"For successfully represented words under this convention, the first piece is unmarked and later pieces carry ##. An unknown word also returns one unmarked stand-in. Counting those starts therefore counts pre-tokenized words, without implying that every word was recovered faithfully."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="12. The mark decides which words cannot be spelled at all">
                 <p>
-                  Now the part that is not cosmetic. Marking continuations means
-                  the first character of a word must have been seen starting some
-                  word of the corpus, and the rest must have been seen inside
-                  one. Marking ends means the last character must have been seen
-                  ending some word. Those are different requirements and the
-                  corpus satisfies them in different places, so the two spellings
-                  fail on different words.
+                  {"The retained starting symbols differ under the two marker conventions. A continuation-marked fit needs an opening form at the beginning and continuation forms later. An end-marked fit needs the appropriate final form. Learned pieces inherit these position constraints, so the two vocabularies can cover different new words."}
                 </p>
                 <MarkedAgainstEnded />
                 <p>
@@ -506,19 +420,10 @@ export default function WordPiecePage() {
                   with y or ends with u.
                 </p>
                 <InAModel>
-                  At real scale this hole is smaller but not gone, and it is why
-                  a real vocabulary usually adds every single character of the
-                  script in both forms whether the corpus used them that way or
-                  not. The cost is a few hundred rows and the benefit is that no
-                  word is ever lost for a reason as arbitrary as which end of it
-                  a rare letter sits at.
+                  {"We can supply additional single-character forms to improve coverage rather than relying only on positions observed in this corpus. The required number depends on the alphabet. An alternative is byte fallback. No finite character selection should be described as covering every possible script without stating what it includes."}
                 </InAModel>
                 <KeepInMind>
-                  Whichever end is marked, the vocabulary needs the corpus to
-                  have used each character in that position, and a character used
-                  only in the other position is no help at all. This is not a
-                  failure of the scoring rule; it is the price of recording the
-                  word boundary inside a symbol.
+                  {"In this corpus-derived alphabet, a letter seen in one position is not automatically supplied in every other form. That coverage policy is separate from the pair score. Additional alphabet entries or fallback can change it."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -530,30 +435,14 @@ export default function WordPiecePage() {
             <>
               <SubSection title="13. The same corpus, the same merges, two rules">
                 <p>
-                  Something downstream will read these pieces, and it spends work
-                  per piece, so the length of a text in pieces is the currency
-                  everything is bought with. To price the scoring rule on its own
-                  we hold everything else fixed. The same corpus, the same
-                  spelling into symbols, the same number of merges, and only the
-                  choice of which pair to take at each turn differs.
+                  {"To isolate the score, hold the corpus, symbol spelling and merge budget fixed. Then compare encoded length after each run. Length matters to a downstream model’s work, though it is not the only vocabulary property worth evaluating."}
                 </p>
                 <ShorteningCurve />
                 <p>
-                  The score-driven line is above the count-driven one at every
-                  budget on both corpora, which is what a rule that deliberately
-                  buys rare pairs must produce. On the eighteen sentences, ten
-                  merges take the corpus from 648 pieces to 504 under counting
-                  and to 614 under the score, and sixty merges reach 302 against
-                  411. The count-driven run then runs out of pairs occurring
-                  twice after 84 merges, at 254 pieces, and the score-driven run
-                  needs 107 merges to reach 256.
+                  {"Ratio scoring uses more corpus pieces than count scoring at the displayed intermediate budgets. At ten merges the lengths are 614 and 504; at sixty they are 411 and 302. The count run exhausts eligible pairs after 84 merges at 254 pieces, while the ratio run takes 107 merges to reach 256. These measurements concern this controlled representation, not a universal ordering."}
                 </p>
                 <KeepInMind>
-                  Choosing by the score costs pieces at every budget short of
-                  exhaustion, on both corpora, and the two rules end up at
-                  practically the same place once there is nothing left to merge.
-                  What is bought with those pieces is a different set of rows
-                  along the way.
+                  {"In the shown runs, association scoring exchanges shorter intermediate encodings for different vocabulary entries. At exhaustion the lengths are close. The table measures that trade-off without establishing a general winner on other data."}
                 </KeepInMind>
               </SubSection>
 
@@ -585,34 +474,16 @@ export default function WordPiecePage() {
                   ]}
                   caption="Both schemes fitted on the same eighteen sentences at each size, then made to read the same held-out sentence. At 150 and 200 the end-marked fit has run out of pairs and learned 137 rows either way."
                 />
-                <p>
-                  The middle of the table is the honest headline. At a vocabulary
-                  of 130 the count-scored scheme reads the corpus in 277 pieces
-                  and the sentence in 25, where this one needs 343 and 31, which
-                  is 24 per cent more on the corpus and six pieces more on seven
-                  words. The two columns cross only at the very end, where the
-                  count-scored fit has exhausted its pairs at 137 rows and this
-                  one keeps merging to 157, at which point the corpus figures are
-                  254 against 263 and the sentence figures are still 29 against
-                  25.
-                </p>
+                <p>At vocabulary size 130, count-based merging uses 277 pieces for the corpus and 25 for the held-out sentence. This relative-frequency trainer uses 343 and 31. The selection score has therefore not produced the shortest representation in this comparison.</p>
+                <p>The count-based trainer stops at 137 rows after exhausting eligible pairs. This trainer continues to 157. At those different endpoints, the corpus counts are 263 and 254 respectively, while the held-out counts are 25 and 29. Comparing endpoints alone would mix the effect of the scoring rule with the effect of vocabulary size.</p>
                 <KeepInMind>
-                  On this corpus, at every size a reader would actually choose,
-                  the older scheme gives shorter text. That is worth stating
-                  plainly, because the usual presentation of this method skips it
-                  and the number is not small.
+                  {"At most displayed budgets, count-based encoding is shorter on this corpus and probe. At the smallest budget, the initial alphabets differ, and at the largest budget the corpus ordering changes. Read the rows rather than assuming the same scheme wins at every size."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. Where it is worse, where it is better, and the crossing">
                 <p>
-                  So why use it at all? Two things in that table point the other
-                  way, and one of them is not about length. The first is the
-                  crossing at the end. The count-scored run stops learning at 137
-                  rows because nothing occurs twice any more, and 254 against 263
-                  says that when both are allowed to finish, the score-driven one
-                  ends up marginally shorter on the corpus it was built from. It
-                  simply takes twenty more rows to get there.
+                  {"At the final exhausted fits, the association-trained vocabulary uses 254 corpus pieces versus 263 for the end-marked count fit. It also has twenty more learned rows. That endpoint comparison combines different vocabulary sizes and marker conventions, so it does not isolate the association score alone."}
                 </p>
                 <p>
                   The second thing that table does not show is what happened to
@@ -625,41 +496,21 @@ export default function WordPiecePage() {
                   obviously the better reading.
                 </p>
                 <KeepInMind>
-                  The comparison is not one number. The end-marked scheme wins on
-                  length at every practical size here, and loses on coverage of
-                  this particular sentence at every size, and which of those
-                  matters depends entirely on what the text is going to be used
-                  for.
+                  {"Length and coverage describe different outcomes. The no-fallback end-marked fit is shorter at most listed budgets but loses a symbol in this probe. The continuation fit retains this sentence. A choice between them should account for both the encoding contract and the intended downstream use."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. A word is lost whole, or not at all">
                 <p>
-                  One more consequence of cutting by longest match rather than by
-                  replaying merges. When the cut fails partway through a word,
-                  there is no sensible way to continue, since the pieces already
-                  chosen were chosen on the assumption that the rest would work
-                  out. So the whole word is thrown away and replaced by a single
-                  stand-in token.
+                  {"If the greedy search cannot cover a word, this decoder replaces the whole word with one unknown entry. It also does so for words above its configured length limit. Retaining a partial prefix or using fallback would be alternative policies; whole-word replacement is not logically required by longest match."}
                 </p>
                 <WorkedExample title="Two schemes meeting the same impossible word">
                   <p>
-                    Fitted on the four words, both schemes are asked to read lox,
-                    whose x the corpus never contained. The count-scored one
-                    answers lo and then a stand-in, keeping two of the three
-                    letters. This one answers a single stand-in for the whole
-                    word. Neither can spell it, and they differ in how much of
-                    the wreckage they hand on.
-                  </p>
+                  {"With lox, the missing x produces different results. The no-fallback BPE fit retains lo and emits an unknown entry for the remainder. WordPiece emits one unknown entry for the entire word. Neither reconstructs lox exactly."}
+                </p>
                 </WorkedExample>
                 <p>
-                  Which of those is better is genuinely open. Handing on lo tells
-                  a model something, and it also tells it something false, since
-                  lo now appears in a context it never appears in. Handing on one
-                  stand-in tells the model only that a word was here, which is
-                  less information and no misinformation. What is not open is
-                  that the two are different, and a count of unspellable pieces
-                  means different things under the two schemes.
+                  {"A retained prefix conveys part of the spelling; a whole-word unknown conveys only that a word was present. Neither guarantees how the model will interpret it. The distinction matters when comparing unknown-token counts, because one policy discards a symbol and the other can discard many characters."}
                 </p>
                 <KeepInMind>
                   Under this scheme an unspellable word costs exactly one piece,
@@ -683,15 +534,15 @@ export default function WordPiecePage() {
                 "A space cannot be written with two leading hashes",
               ],
               0,
-              "Marking a symbol keeps every merge inside one word by construction, since the words are counted separately and no pair ever spans two of them. Marking continuations does cost something at each join, because the mark has to be stripped from the right half or two hashes end up in the middle of a piece.",
+              "This learner counts and merges pieces within pre-tokenized words, so no candidate pair crosses those regions. Continuation markers distinguish the start of a word from its later pieces and guide encoding/decoding. The marker alone is not the boundary enforcement: the permitted merge regions are part of the tokenizer’s specification too.",
             ),
             trueFalse(
               "The two markings are the same fact written on different pieces, so the two vocabularies can spell the same words.",
               false,
-              "A vocabulary in one form can be rewritten into the other symbol by symbol, and what cannot be rewritten is which words it can spell. Of the 35 characters these sentences use, thirteen never open a word and eighteen never end one, so Alvarez defeats the end-marked spelling, zebra defeats the continuation-marked one, and you defeats both.",
+              "The boundary markings distinguish different positional forms of a character. These fitted vocabularies need not contain every form, so their coverage differs even when the corpus contains the same underlying letters. Here Alvarez lacks a required BPE ending, zebra lacks a WordPiece opening, and you cannot be fully encoded by either fit.",
             ),
             trueFalse(
-              "Under longest match the vocabulary is the model, and the order the rows were learned in is only the history of how it was built.",
+              "With tokenizer settings fixed, longest-match WordPiece encoding uses the vocabulary entries rather than replaying their learned merge order.",
               true,
               "The cut takes the longest opening piece that fits and then the longest continuation that fits the rest, and never consults the merges, so lowest becomes low and ##est and widest becomes wid and ##est. The count-scored scheme replays its merges instead and arrives at lo, w and est with its marker for the same word. One consequence is that exactly one piece per word carries no mark, so the count of unmarked pieces in any cut is the number of words.",
             ),
@@ -704,7 +555,7 @@ export default function WordPiecePage() {
                 "The end-marked fit gives the sentence back exactly and this one does not",
               ],
               [0, 1],
-              "The older scheme gives shorter text at every size a reader would actually choose, 24 per cent more on the corpus here, and the two columns cross only at the very end, where the count-scored fit has run out of pairs at 137 rows and this one keeps merging to 157. Coverage runs the other way, since at every size the continuation-marked fit gives the sentence back exactly and the end-marked one leaves one piece unspellable because of the z at the end of Alvarez. A shorter reading that has lost a character is not obviously the better reading, which is why length and coverage are reported together.",
+              "At the requested size of 130, BPE encodes the training corpus in fewer pieces than this WordPiece fit. The continuation-marked fit, however, preserves the supplied probe exactly while the end-marked BPE fit substitutes one position. These measurements compare compression and coverage separately. They do not establish a universally best vocabulary size or tokenizer.",
             ),
             choice(
               "Both schemes are asked to read lox, whose x the corpus never contained. What is the difference?",
@@ -715,7 +566,7 @@ export default function WordPiecePage() {
                 "Both answer a single stand-in, and only the reported length differs",
               ],
               0,
-              "When a longest-match cut fails partway through a word there is no sensible way to continue, because the pieces already chosen were chosen on the assumption that the rest would work out. Handing on lo tells a model something and also something false, and handing on one stand-in is less information and no misinformation.",
+              "This WordPiece policy replaces the entire unspellable word with one unknown token. The BPE comparison retains known pieces around an unknown position. Neither policy recovers the missing x, but retaining lo is not inherently false information. The choice controls how partial spelling information and unknown-word boundaries are presented to the downstream model.",
             ),
         ],
         },
@@ -725,13 +576,7 @@ export default function WordPiecePage() {
             <>
               <SubSection title="17. Two candidates the score cannot separate">
                 <p>
-                  Go back to the very first merge on the four words. The pair i
-                  followed by d scores one third, and so does the pair w followed
-                  by i, and for the same reason, since i, d and the word-initial
-                  w each occur three times and each of those pairs occurs three
-                  times. The rule says take the largest score and there are two
-                  largest scores, so at this point the method has run out of
-                  instructions.
+                  {"The initial ratio scores tie at one third for i followed by d and word-initial w followed by i. Each symbol count and pair count is three. The scoring formula therefore needs a tie rule before training can choose its next merge."}
                 </p>
                 <NumberTable
                   headings={["pair", "together", "each half", "the score"]}
@@ -750,11 +595,7 @@ export default function WordPiecePage() {
                 </p>
 </>
                 <KeepInMind>
-                  A codepoint is deciding which of two equally good rows the
-                  vocabulary gets, and every later turn is downstream of that.
-                  There is nothing to defend here beyond repeatability; a tie
-                  means the rule is indifferent and any answer is as correct as
-                  any other.
+                  {"The internal marker’s code point settles this lexical tie. It provides repeatability, not evidence that the chosen entry is linguistically better. Equal immediate scores can still lead to different later entries or evaluations."}
                 </KeepInMind>
               </SubSection>
 
@@ -787,13 +628,7 @@ export default function WordPiecePage() {
                   caption="The same corpus and the same minimum of three, read the two ways."
                 />
                 <p>
-                  The second reading stops at five merges, on a candidate seen
-                  twice, and leaves ##est, ##ew, new, newest and widest unlearned
-                  although each of them comes from a pair occurring three times or
-                  more. So the rule that was meant to keep coincidences out of the
-                  vocabulary instead threw away most of the vocabulary, and it did
-                  so quietly, since the run reports itself finished. Filtering the
-                  candidates gets all ten.
+                  {"Ranking every pair first would stop after five merges when the winner fails the minimum count. Filtering first instead continues to ten and learns ##est, ##ew, new, newest and widest from eligible pairs. The example shows why an apparently minor ordering of filtering and ranking belongs in the algorithm’s contract."}
                 </p>
                 <KeepInMind>
                   A stopping rule that worked with counts can behave differently after we change the score. This example gives us a specific condition to test when reusing a merge loop.
@@ -845,7 +680,7 @@ export default function WordPiecePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="20. What the ratio is not maximising">
+              <SubSection title="20. What the ratio is not maximizing" id="20-what-the-ratio-is-not-maximising">
                 <p>
                   The local comparison in section 4 describes one occurrence using fixed shares. Multiplying it by the pair count gives a count-weighted proxy. That proxy can rank candidates differently from the ratio alone. Neither calculation is the exact corpus likelihood change after all vocabulary probabilities are refitted.
                 </p>
@@ -857,7 +692,8 @@ export default function WordPiecePage() {
                 </p>
                 <WhyThisWorks title="Why the multiplication is left out">
                   <p>
-                    The count multiplier gives frequent pairs more influence when we estimate a total change. Our teaching implementation instead ranks the per-occurrence association score. That choice favours association over raw frequency. It is not a calculation of the full change in corpus likelihood after refitting the vocabulary probabilities, and should not be presented as one.
+
+                    The count multiplier gives frequent pairs more influence when we estimate a total change. Our teaching implementation instead ranks the per-occurrence association score. That choice favors association over raw frequency. It is not a calculation of the full change in corpus likelihood after refitting the vocabulary probabilities, and should not be presented as one.
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
@@ -870,14 +706,7 @@ export default function WordPiecePage() {
                   Could taking the longest available piece prevent us from completing a word? It can: the chosen prefix may leave a suffix that the continuation vocabulary cannot represent, even though a shorter prefix would have allowed a complete split. Let&apos;s examine which vocabulary entries make that possible.
                 </p>
                 <p>
-                  Every merged continuation piece is built out of continuation
-                  symbols that are themselves in the vocabulary, so at any
-                  position after the first there is always a single-character
-                  piece available as a fallback. That means the cut can only fail
-                  after the first character if some character has no continuation
-                  form at all, and in that case no division of the word succeeds
-                  either. The greedy rule therefore refuses nothing that a search
-                  would have found.
+                  {"For this learned vocabulary, every continuation piece retains its single-character components as vocabulary entries. If a character lacks a continuation form, no learned continuation can hide that absence. Within the supported length and marker policies, greedy decoding therefore succeeds whenever a valid split exists. The general greedy counterexample above applies to vocabularies that do not retain this component coverage."}
                 </p>
                 <NumberTable
                   headings={["over every word up to four letters", "count"]}
@@ -891,47 +720,22 @@ export default function WordPiecePage() {
                   caption="Every word of one to four letters over the small corpus's alphabet, cut by the ten-merge vocabulary, with every refusal checked against an exhaustive search for any division at all."
                 />
                 <p>
-                  All 1,578 of the later refusals are words containing an l or an
-                  n after the first character, and those two letters open words in
-                  this corpus without ever appearing inside one, so they have no
-                  continuation form. What each of those refusals reports is the
-                  missing symbol rather than a division the rule failed to find.
-                  Where a real vocabulary caps its alphabet and drops rare single
-                  characters, that guarantee is gone and the greedy failure
-                  becomes reachable, which is an argument for keeping the alphabet
-                  complete rather than for searching over divisions.
+                  {"All 1,578 later failures in this finite enumeration contain l or n after the first character. Neither has a continuation form in this corpus. An exhaustive search finds no alternate split for those cases. Removing base entries from another vocabulary can break that component-coverage property; adding suitable single-character forms can restore it."}
                 </p>
                 <KeepInMind>
-                  With every symbol of the corpus in the vocabulary in both forms,
-                  a greedy left-to-right cut is not an approximation to anything;
-                  it succeeds exactly when success is possible. Drop symbols from
-                  the alphabet and that stops being true.
+                  {"Keeping the required single-character forms guarantees a complete greedy split for inputs using those forms, subject to the decoder’s length and reserved-marker policies. It does not guarantee the minimum possible token count. A vocabulary missing base forms can admit a split that greedy longest match overlooks."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="22. The vocabulary still carries its corpus">
                 <p>
-                  Changing what makes a pair worth merging does not change where
-                  the counts came from. The rows are a summary of one corpus, and
-                  whatever that corpus over-represented is cheap forever after,
-                  because the vocabulary is fixed before anything that reads it is
-                  trained.
+                  {"The vocabulary still reflects its training corpus. While that vocabulary remains fixed, later model training does not automatically change its entries or segmentation. Adapting the tokenizer is possible, but requires keeping its token IDs and the consuming model compatible."}
                 </p>
                 <p>
-                  Fitted to exhaustion on the eighteen sentences the vocabulary
-                  reaches 157 rows and reads its own corpus at 1.91 pieces per
-                  word, since analysis, expected and costing are all single rows
-                  and so is estimate with its full stop attached. A sentence in
-                  the same register but not in the corpus, &ldquo;The dial was set
-                  and the diode tested.&rdquo;, costs 2.38 pieces per word. The
-                  running sentence, which is about the same subject in the same
-                  language, costs 4.14.
+                  The exhausted training vocabulary contains 157 rows and uses 1.91 pieces per word on its own eighteen-sentence corpus. The held-out dial-and-diode sentence uses 2.38, while the running sentence uses 4.14. Reading those measurements together shows how a familiar subject can still produce a different segmentation cost when its spellings and combinations were not represented by the fitted entries.
                 </p>
                 <KeepInMind>
-                  Two corpora of the same language give two different
-                  vocabularies, and neither is wrong. What can be faulted is how
-                  badly a vocabulary degrades on text it was not built from, and
-                  that is not something the scoring rule can repair.
+                  {"Evaluate the vocabulary on representative inputs beyond its training corpus. Both corpus choice and scoring rule can affect the resulting lengths and coverage. Neither the association ratio nor a familiar language label guarantees graceful behavior on a new domain."}
                 </KeepInMind>
               </SubSection>
 
@@ -949,12 +753,12 @@ export default function WordPiecePage() {
                     {
                       expression: "a pair whose halves never occur apart",
                       reason:
-                        "The score becomes the reciprocal of the pair count when the components occur only together. This favours rarer perfectly bound pairs. A minimum count removes candidates below its threshold, but does not remove that preference among the remaining candidates.",
+                        "The score becomes the reciprocal of the pair count when the components occur only together. This favors rarer perfectly bound pairs. A minimum count removes candidates below its threshold, but does not remove that preference among the remaining candidates.",
                     },
                     {
                       expression: "a pair seen exactly once",
                       reason:
-                        "a decision rather than a fact. Its score is computed from one word, so merging it memorises that word; refusing it means a corpus of entirely distinct words learns nothing. And the refusal has to be a filter on the candidates rather than a test on the winner, or under this score the run ends early with common pairs unmerged.",
+                        "A minimum count controls which candidates are eligible. Distinct whole words can still share repeated internal pairs. If the intended policy is to exclude rare pairs, apply that filter before ranking; stopping on an ineligible winner can discard other eligible pairs.",
                     },
                     {
                       expression: "the pair that most raises the likelihood",
@@ -980,7 +784,7 @@ export default function WordPiecePage() {
                     {
                       expression: "a word one piece short of spellable",
                       reason:
-                        "lost whole rather than in part, because a cut that fails partway has already committed to pieces chosen on the assumption the rest would work. Keeping the successful prefix would hand on a piece in a context it never occurs in; discarding it hands on less and asserts nothing. Both are defensible and they measure differently, since an unspellable word costs one piece here and several under the other scheme.",
+                        "This decoder returns one unknown entry for the whole word. Keeping a partial prefix or applying fallback would be other policies. Compare recovered spelling as well as token count, since whole-word substitution can make a lossy encoding appear short.",
                     },
                     {
                       expression: "the shortest reading of a word",
@@ -990,19 +794,12 @@ export default function WordPiecePage() {
                     {
                       expression: "which of two schemes is better",
                       reason:
-                        "not a question the method answers. On the eighteen sentences the count-scored fit is shorter at every practical size, by 66 pieces on the corpus and 6 on the held-out sentence at a vocabulary of 130, and cannot spell that sentence at any size. Length and coverage are separate axes and nothing here combines them.",
+                        "At vocabulary size 130, the count-based fit uses 66 fewer corpus pieces and six fewer probe pieces, but the no-fallback version loses a symbol. The smallest and exhausted endpoints have different length relationships. Compare the actual budget, coverage and length rather than assigning a universal winner.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Four of these are decisions rather than limits, namely the
-                  tie-break, the count below which a pair is ignored and how that
-                  count is applied, which end of a word carries the mark, and what
-                  to hand on when a word cannot be spelled. Each has defensible
-                  answers on both sides and each changes what the finished
-                  vocabulary can and cannot read, so each belongs in whatever
-                  describes a tokenizer rather than being left to whoever writes
-                  the loop.
+                  {"Record how ties, minimum counts, word-position forms and encoding failures are handled. These settings work together with the vocabulary and longest-match decoder. A pair score alone is not a complete tokenizer specification."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1036,7 +833,7 @@ export default function WordPiecePage() {
                 "Nothing, since the division is undefined when the halves never occur apart",
               ],
               0,
-              "The numerator and both parts of the denominator are counting the same occurrences, so the score is c divided by its own square. Among perfectly bound pairs the rule therefore prefers the rarest, and the division is where that comes from rather than any choice an implementation made.",
+              "For two pieces that occur only together c times, the score becomes:\n\n```math\nc / (c × c) = 1 / c\n```\n\nWithin that special class of perfectly associated pairs, smaller counts receive larger ratio scores. That is a property of the scoring rule; a minimum-count policy can separately restrict which rare pairs are eligible.",
             ),
             several(
               "Which statements hold for the pair with the largest count-weighted proxy in the four-word example?",
@@ -1047,13 +844,13 @@ export default function WordPiecePage() {
                 "It is the pair the score takes at the first turn",
               ],
               [0, 1, 2],
-              "Multiplying the local log-score difference by the number of occurrences changes the ranking. The proxy selects s followed by t at 19.55, while the ratio selects i followed by d at 9.81. This comparison uses fixed shares; it does not claim these are exact refitted corpus likelihood gains.",
+              "The count-weighted fixed-share proxy favors s followed by t, with proxy value 19.55. The ratio rule favors i followed by d, whose count-weighted proxy value is 9.81. Those latter numbers are proxy values, not the ratio scores themselves. Neither comparison is an exact corpus likelihood gain after refitting all symbol probabilities.",
               { description: "Compare the measured candidates from the four-word corpus. A score rank of one is best; equal counts are ordered alphabetically.", data: "Pair    Count-weighted proxy    Score rank    Count rank\ns + t   19.55                   4             joint 1\ni + d    9.81                   1             below 1\ne + s   13.83                   below 1       joint 1" },
             ),
             trueFalse(
-              "With every symbol of the corpus in the vocabulary in both forms, the greedy left-to-right cut succeeds exactly when some division of the word into vocabulary pieces exists.",
+              "For this learner’s unpruned merge-built vocabulary, greedy WordPiece succeeds exactly when an allowed vocabulary segmentation exists.",
               true,
-              "Every merged continuation piece is built out of continuation symbols that are themselves in the vocabulary, so after the first character there is always a single-character fallback, and the cut can only fail where a character has no continuation form at all, in which case no division succeeds either. All 1,578 of the later refusals on the four words contain an l or an n after the first character, two letters that open words there without ever appearing inside one. Where a real vocabulary caps its alphabet and drops rare single characters that guarantee is gone, which is an argument for keeping the alphabet complete rather than for searching over divisions.",
+              "Every merged continuation entry is built from single-character continuation entries retained by this learner. If a successful alternative division exists, those base entries can spell the remainder after the longest opening match. That is why greedy failure and unspellability coincide under this unpruned inventory. Pruning required base entries or importing a different vocabulary can remove that guarantee.",
             ),
         ],
         },
@@ -1203,7 +1000,7 @@ question: "How do two vocabularies of the same requested size behave on new text
               "Fit to exhaustion and price three texts per word",
               [
   "Fit WordPiece on the eighteen supplied sentences with vocabulary_size=600, allowing it to stop when no eligible repeated pair remains.",
-  "Print actual vocabulary and merge counts. For the joined corpus, supplied neighbour sentence and Dr. Alvarez sentence, print tokens, whitespace-delimited word count and tokens per word to two decimal places.",
+  "Print actual vocabulary and merge counts. For the joined corpus, supplied neighbor sentence and Dr. Alvarez sentence, print tokens, whitespace-delimited word count and tokens per word to two decimal places.",
   "Finally print how many distinct whitespace-delimited corpus words already exist as complete vocabulary rows. This describes the fitted inventory, not a promise about future words."
 ],
               `from oop_ml import WordPiece
@@ -1279,7 +1076,7 @@ neighbour: 19 pieces over 8 words, 2.38 per word
 running: 29 pieces over 7 words, 4.14 per word
 24 of 72 distinct words are single rows`,
               {
-question: "How far does a vocabulary specialised to one corpus transfer to nearby text?",
+question: "How far does a vocabulary specialized to one corpus transfer to nearby text?",
  hints: [
   "Read vocabulary.n_tokens after fitting instead of assuming the requested ceiling was reached.",
   "Use the same whitespace word definition for every denominator.",

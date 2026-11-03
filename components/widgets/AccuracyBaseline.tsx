@@ -108,7 +108,7 @@ export function AccuracyBaseline() {
           );
         })}
         <text x={PAD.left + (VIEW.width - PAD.left - PAD.right) / 2} y={VIEW.height - 8} textAnchor="middle" className="fill-slate-500 text-xs font-medium dark:fill-slate-400">
-          Thirty people, the four adults drawn larger and labelled with their chance, coloured by the call at 0.5
+          Thirty people, the four adults drawn larger and labeled with their chance, colored by the call at 0.5
         </text>
       </svg>
 

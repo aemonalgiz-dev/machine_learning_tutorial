@@ -22,9 +22,9 @@ import { RecallTradeOffChart } from "@/components/widgets/RecallTradeOffChart";
 import { SearchSeedTable } from "@/components/widgets/SearchSeedTable";
 
 export const metadata: Metadata = {
-  title: "Searching a Collection of Pictures · oop_ml",
+  title: "Searching a Collection of Pictures · Perceptron Lab",
   description:
-    "Once pictures have numerical representations, we can search for nearby ones. Comparing every picture works for a small collection, but a larger collection gives us a reason to consider search indexes and their compromises.",
+    "Image vectors allow pictures to be searched by similarity. Comparing every vector provides a reference result, while approximate indexes reduce search work by accepting some missed neighbors.",
 };
 
 const link =
@@ -38,9 +38,9 @@ export default function SearchingACollectionOfPicturesPage() {
       technicalStart="Part 2. What the Exact Answer Costs"
       openingTitle="A Useful Similarity Measure Still Has to Search the Collection"
       playgroundTitle="Which pictures does this query retrieve?"
-      playgroundIntro="Compare each indexed result with the exact neighbours. Read the number of comparisons together with recall, the share of exact neighbours recovered."
+      playgroundIntro="Compare each indexed result with the exact neighbors. Read the number of comparisons together with recall, the share of exact neighbors recovered."
       title="Searching a Collection of Pictures"
-      tagline={"Once pictures have numerical representations, we can search for nearby ones. Comparing every picture works for a small collection, but a larger collection gives us a reason to consider search indexes and their compromises."}
+      tagline={"Image vectors allow pictures to be searched by similarity. Comparing every vector provides a reference result, while approximate indexes reduce search work by accepting some missed neighbors."}
       prerequisites={
         <>
           The sixteen numbers every picture is searched by are the hidden layer
@@ -58,7 +58,8 @@ export default function SearchingACollectionOfPicturesPage() {
           </Link>{" "}
           treats it, the search is the one{" "}
           <Link href="/concepts/k-nearest-neighbours" className={link}>
-            k-nearest neighbours
+
+            k-nearest neighbors
           </Link>{" "}
           votes with, and the cells of Part 3 are cut by{" "}
           <Link href="/concepts/k-means" className={link}>
@@ -81,12 +82,8 @@ export default function SearchingACollectionOfPicturesPage() {
 <>
               <SubSection title="1. Four thousand pictures, each sixteen numbers">
                 <>
-<p>
-                  Every picture on this page is sixteen pixels a side and holds one of four shapes, a cross, a square outline, a filled disc or a diagonal bar, drawn at a random place, size and brightness with a little noise over every pixel. The network from the page on a vector for a picture reads each one and, one layer before it names the shape, answers with sixteen numbers, and those sixteen numbers are the picture&rsquo;s position.
-                </p>
-                <p>
-                  Finding the pictures most like a given one becomes finding the positions nearest its position, and no pixel is compared again.
-                </p>
+<p>We will search sixteen-by-sixteen images of crosses, square outlines, filled discs and diagonal bars. As before, their positions, sizes and brightness vary. The trained classifier supplies a vector of sixteen values from its layer before the final shape prediction. We store that vector as the image’s search representation.</p>
+                <p>To retrieve similar images, we compare the query vector with the stored vectors and rank them by distance. The search no longer compares every pixel directly. Its usefulness now depends on whether the learned vectors place the kinds of images we want together.</p>
 </>
                 <Equation>{"picture  →  network  →  v  =  (v₁, v₂, …, v₁₆),     each vᵢ between −1 and 1"}</Equation>
                 <>
@@ -94,42 +91,30 @@ export default function SearchingACollectionOfPicturesPage() {
                   We will search a collection of 4000 generated pictures, 1000 of each shape, using seed 11. The trained network can encode each new picture with a forward pass. Our queries are its 240 held-out pictures, sixty of each kind. Those queries were excluded from training and are separate from the search collection, so the task is to find similar pictures rather than retrieve an identical entry.
                 </p>
                 <p>
-                  Each of the sixteen numbers comes out of a hyperbolic tangent and so lies between −1 and 1, and the collection&rsquo;s vectors average a length of 3.03, against the 4 a vector sitting in a corner of that range would have, so most pictures push most of their sixteen numbers close to one end or the other.
+                  {"Each feature comes from a hyperbolic tangent, whose mathematical output lies between −1 and 1. The collection vectors have mean length 3.03; the maximum possible length in that sixteen-coordinate range is 4. Many coordinates therefore have substantial magnitudes. The length alone does not tell us which coordinates carry useful distinctions."}
                 </p>
 </>
                 <KeepInMind>
-                  A search here never looks at a pixel. It compares sixteen
-                  numbers the network produced, so alike means alike to a
-                  network trained to tell four kinds apart, and to nothing else.
+                  {"The search compares learned vectors rather than pixels directly. Training asked the network to distinguish four kinds of shape. Whether its distances also reflect size, position or another property needs a separate test."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. What a search returns">
                 <p>
+
                   Ask for the pictures nearest held-out picture 0, a cross, and
                   the answer is a list, the k pictures of the collection whose
                   positions are closest to its position, nearest first. The
                   playground shows that list for any question, each picture
-                  framed in the colour of its kind, and for picture 0 all ten of
+                  framed in the color of its kind, and for picture 0 all ten of
                   the nearest are crosses. The nearest is 0.5278 away and the
                   tenth 0.7691 away, while the farthest picture in the
                   collection is 5.3240 away.
                 </p>
                 <Equation>{"d(q, x)  =  √( Σᵢ (qᵢ − xᵢ)² )\n\nanswer(q, k)  =  the k pictures x of the collection with the smallest d(q, x), nearest first"}</Equation>
-                <p>
-                  This is the search the k-nearest neighbours page votes with,
-                  with the vote taken away, since here the neighbours are the
-                  answer. Straight-line distance is the choice made throughout,
-                  because the network&rsquo;s sixteen numbers are all on one
-                  scale and a picture&rsquo;s length carries something, how hard
-                  the network committed to it. Part 4 measures by angle instead,
-                  for a reason that belongs to that route.
-                </p>
+                <p>This retrieves the neighbors that k-nearest neighbors would ordinarily use for a vote; here the returned pictures are the answer. The main experiment uses Euclidean distance, which retains differences in vector magnitude as well as direction. The hashing route later uses angular similarity. Those choices need separate exact reference results rather than an assumption that they rank every picture identically.</p>
                 <KeepInMind>
-                  The exact answer is fixed by one distance and one k. Change
-                  either and it is a different question with a different answer,
-                  and every index on this page is scored against the answer to
-                  the question as asked.
+                  {"An exact reference uses a specified distance, neighbor count and tie policy. Changing any of those can change the returned list. Each approximate route is compared with the exact reference for its own distance."}
                 </KeepInMind>
               </SubSection>
 
@@ -144,13 +129,8 @@ export default function SearchingACollectionOfPicturesPage() {
                 <WorkedExample title="Picture 0 against its nearest picture">
                   <PictureDistanceLedger />
                   <p>
-                    The squares add to 0.278769 and its square root is 0.5280
-                    from the rounded coordinates, against the exact 0.5278 the
-                    search used. Three of the sixteen gaps, the seventh, the
-                    twelfth and the second, carry 0.072361, 0.069169 and
-                    0.058564, which is 0.200094 of the 0.278769, or 72% of the
-                    whole distance from three numbers.
-                  </p>
+                  {"The squared coordinate differences total 0.278769. Their square root gives 0.5280 using the rounded displayed coordinates, compared with 0.5278 from the full-precision search. The seventh, twelfth and second coordinates contribute 0.072361, 0.069169 and 0.058564: together 0.200094, about 72 percent of the squared distance. That percentage describes the squared sum, rather than 72 percent of the final Euclidean distance."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
                   A distance between two pictures here is sixteen subtractions,
@@ -159,15 +139,9 @@ export default function SearchingACollectionOfPicturesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="4. How often the neighbours share the kind">
+              <SubSection title="4. How often the neighbors share the kind" id="4-how-often-the-neighbours-share-the-kind">
                 <p>
-                  There is no person on hand to say whether the pictures a
-                  search returns look like the question, so the page judges them
-                  by the one thing every picture carries, its kind. For each
-                  question we count how many of its k nearest are of the same
-                  kind, divide by k, and average over the 240 questions, which is
-                  called precision at k. If the positions carried nothing, a
-                  neighbour would share the kind a quarter of the time.
+                  {"We need a way to judge whether retrieved pictures match the query. Here each picture has a known shape label. Count the returned neighbors with the query’s label, divide by k, and average across the 240 queries. This is precision at k under our label-based definition of relevance. A uniformly random collection picture would match the query’s shape one quarter of the time."}
                 </p>
                 <Equation>{"precision at k  =  (1 / 240)  Σ over questions q of  (how many of q’s k nearest share q’s kind) / k"}</Equation>
                 <NumberTable
@@ -182,11 +156,10 @@ export default function SearchingACollectionOfPicturesPage() {
                 />
                 <>
 <p>
-                  Precision falls a little as k grows, since the twentieth nearest picture is further out than the fifth and further out is where the kinds begin to meet. By kind, at ten neighbours, crosses score 0.9683, squares 0.9800, discs 0.9767 and bars 0.9850. Let the ten vote and the majority kind is the question&rsquo;s own for 0.9875 of the 240, which is higher than the 0.9708 the network scores naming the same 240 pictures with its own last layer, a layer that reads exactly these sixteen numbers.
+
+                  Precision falls a little as k grows, since the twentieth nearest picture is further out than the fifth and further out is where the kinds begin to meet. By kind, at ten neighbors, crosses score 0.9683, squares 0.9800, discs 0.9767 and bars 0.9850. Let the ten vote and the majority kind is the question&rsquo;s own for 0.9875 of the 240, which is higher than the 0.9708 the network scores naming the same 240 pictures with its own last layer, a layer that reads exactly these sixteen numbers.
                 </p>
-                <p>
-                  I had expected the vote to do no better than that layer, and section 6 checks whether the difference survives a retrain.
-                </p>
+                <p>The neighbor vote and final classifier layer use the same learned features but different decision rules. Their difference on one fit is a measured observation; the retraining comparison below checks whether it persists under the two additional starting seeds.</p>
 </>
                 <KeepInMind>
                   Precision at k measures agreement with a label, and the kind is
@@ -203,21 +176,14 @@ export default function SearchingACollectionOfPicturesPage() {
                   Four of the 240 questions have a nearest picture of another kind. Held-out picture 16, a cross, has a disc nearest at 0.7969 and only three crosses among its ten; picture 35, a bar, has a disc at 1.0619 and two bars among its ten; picture 140, a cross, has a disc at 0.7080 and six crosses; and picture 185, a square, has a bar at 1.0721 and not one square among its ten.
                 </p>
                 <p>
-                  Use the playground button to inspect each query beside its returned neighbours. All four nearest distances exceed picture zero&apos;s 0.5278. That suggests these query representations have less nearby support in this particular collection, which is useful context when judging the matches.
+
+                  Use the playground button to inspect each query beside its returned neighbors. All four nearest distances exceed picture zero&apos;s 0.5278. That suggests these query representations have less nearby support in this particular collection, which is useful context when judging the matches.
                 </p>
 </>
-                <p>
-                  None of the four is a mistake by the search. Each answer is
-                  exactly the nearest position in the collection, measured
-                  against every picture there is, so the disagreement is between
-                  the network&rsquo;s arrangement and the label, and no index can
-                  do better on this measure than the exact answer does. That is
-                  why the rest of the page scores an index by recall, how much of
-                  the exact answer it finds, and never by precision, which would
-                  mix what the index lost with what the network got wrong.
-                </p>
+                <p>These are exact nearest neighbors under the chosen vectors and distance. A wrong shape label therefore exposes a limitation of that representation or comparison, rather than a missed geometric neighbor. We will measure an approximate index by recall against the exact neighbor list, while keeping semantic agreement with the query&apos;s kind as a separate measure of the complete retrieval system.</p>
                 <KeepInMind>
-                  A neighbour of the wrong kind in the exact answer is a fact
+
+                  A neighbor of the wrong kind in the exact answer is a fact
                   about the positions. An index is judged against the exact
                   answer, wrong kinds included.
                 </KeepInMind>
@@ -234,7 +200,7 @@ export default function SearchingACollectionOfPicturesPage() {
                 <SearchSeedTable />
                 <>
 <p>
-                  The ten nearest share the question&rsquo;s kind 0.9775, 0.9646 and 0.9779 of the time across the three seeds, and two cells of the inverted file recover 0.9583, 0.9404 and 0.9450 of the true ten, so neither headline figure belongs to one lucky network. The comparison from section 4 held on all three seeds and grew on one of them.
+                  {"Across the three seeds, precision at ten is 0.9775, 0.9646 and 0.9779. Opening two of 32 cells recovers 0.9583, 0.9404 and 0.9450 of the exact ten neighbors. These repeat fits show the variation for three starts; they do not establish how every retraining will behave. The neighbor-vote comparison from section 4 holds in all three."}
                 </p>
                 <p>
                   Seed 1&rsquo;s network names only 0.9208 of the held-out pictures correctly with its own last layer, while the single nearest picture in its sixteen numbers shares the kind 0.9917 of the time, so a network whose own answer is its weakest of the three still arranged its pictures as well as the others did.
@@ -255,16 +221,7 @@ export default function SearchingACollectionOfPicturesPage() {
           content: (
             <>
               <SubSection title="7. Every picture, for every question">
-                <p>
-                  To be sure which picture is nearest, the search has to measure
-                  every picture, since the one it skips could have been the
-                  nearest. For one question that is 4000 distances of sixteen
-                  numbers each, 64000 multiply-adds, and for the 240 questions
-                  it is 960000 distances. None of that is slow at this size. What
-                  matters is how it grows, one full pass over the collection for
-                  every question, so the cost of a question rises in step with
-                  the collection and never falls.
-                </p>
+                <p>An exhaustive scan measures all 4000 collection vectors for one query. At sixteen coordinates each, the stated operation-count model charges 64000 coordinate contributions, and 240 queries require 960000 distances. Those counts describe this scan rather than a lower bound for every exact search: an index with valid distance bounds can sometimes skip candidates safely. The scan still provides our straightforward exact reference.</p>
                 <Equation>{"cost of one question  =  N × d  =  4000 × 16  =  64 000 multiply-adds\ncost of Q questions   =  Q × N × d  =  240 × 4000 × 16  =  15 360 000"}</Equation>
                 <InAModel title="A collection of a million pictures">
                   <p>
@@ -278,9 +235,7 @@ export default function SearchingACollectionOfPicturesPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  The exact answer costs one distance per picture per question.
-                  Doubling the collection doubles what every question costs, and
-                  nothing about the pictures can lower it without more structure.
+                  {"The exhaustive reference computes one distance per collection picture for each query. Doubling the collection doubles that scan count. An exact index can sometimes skip candidates using additional bounds; approximation is another way to reduce the work."}
                 </KeepInMind>
               </SubSection>
 
@@ -296,8 +251,9 @@ export default function SearchingACollectionOfPicturesPage() {
                   carries no such thing.
                 </p>
                 <p>
+
                   The something is usually a stored distance to a landmark. If a
-                  picture x is known to be a distance d(c, x) from a centre c,
+                  picture x is known to be a distance d(c, x) from a center c,
                   then once the question&rsquo;s distance to c is measured, the
                   triangle inequality puts a floor under d(q, x) without
                   computing it, and every picture whose floor is already beyond
@@ -305,8 +261,9 @@ export default function SearchingACollectionOfPicturesPage() {
                 </p>
                 <Equation>{"d(q, x)  ≥  d(q, c) − d(c, x)\n\nskip x whenever  d(q, c) − d(c, x)  >  the k-th best distance found so far"}</Equation>
                 <p>
+
                   Bentley&rsquo;s k-d tree uses boxes as its landmarks and the
-                  inverted file uses k-means centres, and no tree is built on
+                  inverted file uses k-means centers, and no tree is built on
                   this page. There is one difference worth holding on to before
                   Part 3. A search that skips only what the bound rules out is
                   still exact. The inverted file as it is used in practice, and
@@ -323,15 +280,7 @@ export default function SearchingACollectionOfPicturesPage() {
               </SubSection>
 
               <SubSection title="9. Choosing the k nearest once every distance is in">
-                <p>
-                  With all 4000 distances measured, the k smallest still have to
-                  be picked out. Sorting all 4000 would put every picture in
-                  order, which is more than the question asks, since only the
-                  first k matter. The search behind this page splits the
-                  distances around the k-th smallest, which takes one pass of a
-                  few comparisons per picture, and then sorts only the k in front
-                  of it.
-                </p>
+                <p>After computing the 4000 distances, we need only the smallest k, not a full ordering of the collection. A partition algorithm separates the selected prefix from the remaining distances, then the implementation sorts that prefix. Partitioning need not literally inspect the data in one pass, and equal-distance candidates still need the tie policy discussed below.</p>
                 <Equation>{"sort everything     ≈  N log₂ N  =  4000 × 12  ≈  48 000 comparisons\nsplit at the k-th   ≈  a few × N,  then k log₂ k  to order the k"}</Equation>
                 <p>
                   The split also shows how sharp the answer is. For picture 0
@@ -342,9 +291,7 @@ export default function SearchingACollectionOfPicturesPage() {
                   is one of the cases Part 6 takes up.
                 </p>
                 <KeepInMind>
-                  Once the 4000 distances are in, picking the ten smallest takes
-                  one pass and a sort of ten, so every index on this page saves
-                  distances and leaves the choosing as it was.
+                  {"After distances are available, partitioning selects a candidate prefix and sorting orders its k results. This avoids sorting all 4000 distances. Approximate indexes reduce the candidates whose distances must be ranked; the partition need not take literally one pass."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -354,9 +301,9 @@ export default function SearchingACollectionOfPicturesPage() {
           title: "Questions on Parts 1 and 2",
           quiz: [
             trueFalse(
-              "Every index on this page is scored by recall, the share of the exact answer it also found, and never by precision at k.",
+              "The index comparisons measure how many exact nearest-neighbor IDs are recovered, separately from how many returned pictures share the query’s class.",
               true,
-              "Precision would mix what the index lost with what the network got wrong, and an index that returned ten pictures of the right kind but not the right ten would score well on it. Recall scores the index against the exact answer, wrong kinds included, since a neighbour of the wrong kind in the exact answer is a fact about the positions and no index can do better on that measure than the exact answer does.",
+              "Index recall uses the complete distance scan as its reference. Same-class retrieval is a different test of the representation. If both the returned list and reference contain k IDs, precision and recall against that exact-ID set have the same denominator and value. Class-based precision instead uses class relevance, which can give a different result. State which reference is being measured.",
             ),
             choice(
               "Four of the 240 questions have a nearest picture of another kind. What does that tell you?",
@@ -364,10 +311,10 @@ export default function SearchingACollectionOfPicturesPage() {
                 "The network’s arrangement disagrees with the label there, since each answer really is the nearest position in the collection",
                 "The search made a mistake on four questions where the collection is thin",
                 "An index would do better on those four, since it skips some of the wrong pictures",
-                "The network had memorised those four questions during training",
+                "The network had memorized those four questions during training",
               ],
               0,
-              "Each of the four answers was measured against every picture there is, so no index can do better on that measure than the exact answer does. All four of those nearest distances are larger than picture 0’s 0.5278, which puts the questions where the collection is thin, and a neighbour of the wrong kind in the exact answer is a fact about the positions rather than a fault to be fixed.",
+              "The exact scan really does place a different-class picture nearest for those queries. An approximate index is judged on recovering that distance-based answer, even when its class is unhelpful. Improving class retrieval would require changing the representation, distance or ranking criterion. An approximation could happen to return a same-class item, but that would not make it a more accurate nearest-neighbor search.",
             ),
             several(
               "The same 240 questions were asked of the same 4000 pictures under three networks trained from different starting weights. Which of these did that report?",
@@ -375,7 +322,7 @@ export default function SearchingACollectionOfPicturesPage() {
                               "The ten nearest share the question’s kind 0.9775, 0.9646 and 0.9779 of the time across the three",
                               "Seed 1’s network names only 0.9208 of the held-out pictures correctly with its own last layer, while its single nearest picture shares the kind 0.9917 of the time",
                               "Two cells of the inverted file recover the same 0.9583 of the true ten under every seed",
-                              "Seed 1 has the lowest same-kind nearest-neighbour rate of the three networks",
+                              "Seed 1 has the lowest same-kind nearest-neighbor rate of the three networks",
                             ],
               [0, 1],
               "A network trained from different starting weights gives every picture a different position, which is exactly why the three seeds are worth running. Two cells of the inverted file recover 0.9583, 0.9404 and 0.9450 of the true ten across them, three different figures that agree closely rather than one repeated, so neither headline figure belongs to one lucky network. Seed 1 names only 0.9208 with its own last layer and its nearest picture still shares the kind 0.9917 of the time, as often as under any of the three, so the weakest namer arranged its pictures as well as the others did.",
@@ -398,7 +345,7 @@ export default function SearchingACollectionOfPicturesPage() {
             trueFalse(
               "The inverted file as it is built here is still an exact search, since it skips only what a bound has ruled out.",
               false,
-              "It does not check the bound at all. It opens a fixed number of cells and stops, which is why it can miss, and it is also what lets it set its cost in advance. A search that skips only what a bound rules out would stay exact, and no tree of that kind is built on this page.",
+              "This index opens a fixed number of nearest-center cells without proving that all other cells are too far away. It can therefore miss exact neighbors. Fixing the cell count controls one part of its work, but candidate counts still vary with cell occupancy and the selected query cells. A valid lower-bound pruning rule could preserve exactness; that is not the search built here.",
             ),
         ],
         },
@@ -407,40 +354,33 @@ export default function SearchingACollectionOfPicturesPage() {
           content: (
             <>
               <SubSection title="10. Cutting the collection into cells with k-means">
-                <p>
-                  The inverted file does some of the work once, before any
-                  question arrives. It runs k-means over the 4000 positions to
-                  find 32 centres, puts every picture in the cell of the centre it
-                  is nearest, and keeps, for each cell, the list of pictures in
-                  it. That list is the inverted list the method is named after,
-                  and each cell stands for a region of the space, every point of
-                  which is nearer its centre than any other centre, so a question
-                  that was never in the collection still falls in exactly one
-                  cell.
-                </p>
+                <p>The inverted file first fits 32 k-means centers to the 4000 vectors. Each vector is assigned to a nearest center, and each cell stores the IDs assigned to it: its inverted list. A new query can use the same nearest-center rule. On an equal-distance boundary, a tie rule is needed to select one cell; the geometry alone need not make that assignment unique.</p>
                 <Equation>{"cell(x)  =  the c among the centres μ₁ … μ₃₂ that makes  ‖x − μ_c‖  smallest"}</Equation>
                 <p>
+
                   Here k-means runs from three seedings and keeps the best, which
                   settled in 46 rounds, and the 32 cells hold between 44 and 356
                   pictures each, none of them empty. The map under the playground
                   draws every picture on the two directions of greatest spread,
-                  which keep 70.8% of it, with the cell centres as open circles.
+                  which keep 70.8% of it, with the cell centers as open circles.
                   The cells follow the pictures, several to each kind, since
-                  k-means puts centres where the pictures are dense and knows
+                  k-means puts centers where the pictures are dense and knows
                   nothing about kinds.
                 </p>
                 <KeepInMind>
+
                   The cells are fixed before any question is asked, and they cost
                   one k-means fit over the whole collection. A picture added
-                  later goes into the cell of its nearest centre, and the centres
+                  later goes into the cell of its nearest center, and the centers
                   stay where they were.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. Searching only the nearest cells">
                 <p>
-                  A question is first measured against the 32 centres, which
-                  ranks the cells by how near their centres are. The search then
+
+                  A question is first measured against the 32 centers, which
+                  ranks the cells by how near their centers are. The search then
                   opens the nearest few cells, measures only the pictures listed
                   in them, and returns the k nearest of those. How many cells it
                   opens is the one setting it has, and the playground slider
@@ -448,8 +388,9 @@ export default function SearchingACollectionOfPicturesPage() {
                 </p>
                 <WorkedExample title="Picture 0 with one cell of 32">
                   <p>
-                    Picture 0&rsquo;s nearest centre is 0.6667 away and its cell
-                    lists 80 pictures. The search measures 32 centres and then
+
+                    Picture 0&rsquo;s nearest center is 0.6667 away and its cell
+                    lists 80 pictures. The search measures 32 centers and then
                     those 80 pictures, and all ten of the true nearest are among
                     them.
                   </p>
@@ -463,7 +404,8 @@ export default function SearchingACollectionOfPicturesPage() {
                   zero even if they are all of the right kind.
                 </p>
                 <KeepInMind>
-                  The inverted file costs one distance per centre plus one per
+
+                  The inverted file costs one distance per center plus one per
                   picture in the opened cells. For picture 0 that was 112
                   distances where the exact answer took 4000, and it lost nothing.
                 </KeepInMind>
@@ -471,11 +413,7 @@ export default function SearchingACollectionOfPicturesPage() {
 
               <SubSection title="12. Recall against the share read">
                 <p>
-                  Picture 0 was an easy question. Averaged over all 240, opening
-                  the nearest cell recovers 0.8329 of the true ten while reading
-                  4.2% of the collection, and 121 questions get all ten. Each
-                  further cell buys less than the one before it, and by six cells
-                  every question gets every one of its ten.
+                  {"For picture 0, one cell contains every exact neighbor requested. Across all 240 queries, one cell recovers 0.8329 of the exact ten while reading 4.2% of the collection; 121 queries recover all ten. Recall improves as more cells are opened in this sweep, reaching every requested neighbor for every query at six cells."}
                 </p>
                 <NumberTable
                   headings={["cells opened, of 32", "recall at 10", "questions given all ten", "share read", "distances per question"]}
@@ -486,7 +424,7 @@ export default function SearchingACollectionOfPicturesPage() {
                     ["4", "0.9958", "234", "14.7%", "618.8"],
                     ["6", "1.0000", "240", "20.1%", "834.1"],
                   ]}
-                  caption="Averaged over the 240 held-out questions. Distances include the 32 centres."
+                  caption="Averaged over the 240 held-out questions. Distances include the 32 centers."
                 />
                 <RecallTradeOffChart />
                 <p>
@@ -506,35 +444,25 @@ export default function SearchingACollectionOfPicturesPage() {
               <SubSection title="13. Why the nearest cell is not enough">
                 <>
 <p>
-                  The average hides a question for which one cell recovers nothing at all. Held-out picture 46, a disc, is nearest the centre of a cell of 181 pictures, 0.8160 away, and not one of its ten true nearest is in that cell. Five of them are in a cell whose centre is 0.8877 away and five in one whose centre is 0.8929 away, so its three nearest centres are within 0.0769 of one another, and the question sits close to where all three cells meet.
+
+                  The average hides a question for which one cell recovers nothing at all. Held-out picture 46, a disc, is nearest the center of a cell of 181 pictures, 0.8160 away, and not one of its ten true nearest is in that cell. Five of them are in a cell whose center is 0.8877 away and five in one whose center is 0.8929 away, so its three nearest centers are within 0.0769 of one another, and the question sits close to where all three cells meet.
                 </p>
                 <p>
                   The playground&rsquo;s button for the question one cell serves worst loads it.
                 </p>
 </>
-                <Equation>{"the k nearest all lie within  r_k  of q      (for picture 46,  r₁₀ = 0.4853)\n\none cell is enough only if that ball lies inside q’s own cell"}</Equation>
+                <Equation>{"the k nearest all lie within  r_k  of q      (for picture 46,  r₁₀ = 0.4853)\n\none cell is guaranteed enough if that ball lies inside q’s own cell"}</Equation>
                 <p>
-                  A second cell recovers half of its ten and a third recovers all
-                  of them. Nearness to a centre and nearness to the pictures a
-                  cell holds are different things, and they part company exactly
-                  where a question sits near a boundary, since the ball holding
-                  its ten nearest then reaches over into cells whose centres are
-                  a little further off.
+                  {"A second cell recovers half of this query’s ten exact neighbors, and a third recovers all of them. A nearby center does not guarantee that its cell contains the nearest pictures. When the neighborhood crosses a cell boundary, additional cells may contain useful candidates even though their centers rank later."}
                 </p>
                 <KeepInMind>
-                  A question near the edge of its cell has neighbours on the
-                  other side of the edge. Held-out picture 46 recovers none of
-                  its ten from one cell, half from two and all from three, while
-                  the average over the 240 questions at one cell reads 0.8329.
+                  {"Picture 46 recovers none of its exact ten from one cell, half from two and all from three. The average one-cell recall is 0.8329, so the average hides this complete miss. Inspect difficult individual queries as well as the curve."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="14. How many cells">
                 <p>
-                  The number of cells is set when the index is built. More,
-                  smaller cells follow the pictures more closely, so for the same
-                  share read a finer cut recovers more, and the table sets the
-                  three cuts side by side at roughly 8% of the collection read.
+                  {"The cell count is chosen when building the index. More cells can give a finer grouping, while also adding center comparisons. In these three fits, the finer grouping recovers more exact neighbors at roughly 8% of the collection read."}
                 </p>
                 <NumberTable
                   headings={["cells", "opened", "share read", "recall at 10", "distances per question"]}
@@ -543,33 +471,29 @@ export default function SearchingACollectionOfPicturesPage() {
                     ["32", "2", "8.1%", "0.9583", "357.7"],
                     ["64", "4", "8.1%", "0.9842", "388.8"],
                   ]}
-                  caption="The three cuts at about the same share read. The distances include the centres, 16, 32 or 64 of them."
+                  caption="The three cuts at about the same share read. The distances include the centers, 16, 32 or 64 of them."
                 />
                 <p>
+
                   The finer cut costs in two other places. Every question
-                  measures every centre, so 64 cells add 48 distances a question
+                  measures every center, so 64 cells add 48 distances a question
                   to what 16 cells charge, and the k-means fit that builds the
-                  cells has more centres to place, though at 64 cells it settled
+                  cells has more centers to place, though at 64 cells it settled
                   in 26 rounds against 50 for 16. The smallest of the 64 cells
                   holds 16 pictures, which matters once k is larger than a cell,
                   as Part 6 says.
                 </p>
                 <KeepInMind>
+
                   At about 8% read, 16 cells recover 0.8742, 32 cells 0.9583 and
-                  64 cells 0.9842. The finer cut pays for that in centres, which
+                  64 cells 0.9842. The finer cut pays for that in centers, which
                   every question measures.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. The cells are uneven, and questions land in the large ones">
                 <p>
-                  If 32 cells held 125 pictures each, one cell would be 3.1% of
-                  the collection, and yet opening one cell reads 4.2% on average.
-                  The cells are uneven, from 44 pictures to 356, and a question
-                  drawn the way the collection was drawn falls into a cell in
-                  proportion to how many pictures that cell holds, so the large
-                  cells are opened more often than the small ones and each time
-                  they are opened they cost more.
+                  {"If the 32 cells each held 125 pictures, one cell would contain 3.1 percent of the collection. One-cell queries here read 4.2 percent on average instead. Actual cells range from 44 to 356 pictures. Larger cells cost more when opened and may be selected more frequently. The occupancy-proportional model below explains that combined effect under an explicit assumption about where queries arrive."}
                 </p>
                 <Equation>{"share read with one cell, expected  =  Σ over cells c of (n_c / N) × (n_c / N)  =  Σ n_c² / N²"}</Equation>
                 <NumberTable
@@ -583,17 +507,11 @@ export default function SearchingACollectionOfPicturesPage() {
                 />
                 <WhyThisWorks title="Why uneven cells always read more">
                   <p>
-                    For C cells holding n_c pictures that add to N, the
-                    Cauchy&ndash;Schwarz inequality gives Σ n_c² ≥ N² / C, with
-                    equality only when every cell holds N / C. So the expected
-                    reading of one cell is at least one over the number of cells,
-                    and it exceeds that by more the more uneven the cells are.
-                  </p>
+                  {"Under the model that a query selects a cell in proportion to its occupancy, the expected read share is the sum of squared cell shares above. The Cauchy–Schwarz inequality makes it smallest when occupancies are equal. Uneven cells increase that modeled expectation; a different query distribution can give a different measured cost."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The cost of opening a cell is not the same for every question.
-                  The busy regions of the collection are both where questions
-                  arrive and where the cells are largest.
+                  {"Cell sizes and query frequency jointly determine reading cost. A large cell matters most when queries often cause it to be opened. The occupancy model is one assumption about that frequency, not a guarantee about every deployment."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -607,16 +525,16 @@ export default function SearchingACollectionOfPicturesPage() {
               [
                 "0.8329 of the true ten, while reading 4.2% of the collection",
                 "0.9583 of the true ten, while reading 8.1% of the collection",
-                "All ten, since a question always falls in the cell holding its neighbours",
+                "All ten, since a question always falls in the cell holding its neighbors",
                 "0.4583 of the true ten, while reading 2.2% of the collection",
               ],
               0,
-              "121 of the 240 questions get all ten from one cell, and each further cell buys less than the one before it, with every question getting every one of its ten by six cells. Picture 0 was one of the easy ones, since its cell of 80 held all ten of its true nearest, 112 distances with the 32 centres against 4000 for the exact answer. Two cells are what recover 0.9583 while reading 8.1%, so the last few percent of recall cost more reading than the first ninety.",
+              "121 of the 240 questions get all ten from one cell, and each further cell buys less than the one before it, with every question getting every one of its ten by six cells. Picture 0 was one of the easy ones, since its cell of 80 held all ten of its true nearest, 112 distances with the 32 centers against 4000 for the exact answer. Two cells are what recover 0.9583 while reading 8.1%, so the last few percent of recall cost more reading than the first ninety.",
             ),
             trueFalse(
-              "Held-out picture 46 sits in the cell of the centre it is nearest and still recovers none of its ten from that one cell.",
+              "Held-out picture 46 sits in the cell of the center it is nearest and still recovers none of its ten from that one cell.",
               true,
-              "The rule was followed exactly, its nearest centre is 0.8160 away, and not one of its ten true nearest is in that cell. Its three nearest centres sit within 0.0769 of one another, so it is close to where all three cells meet, and the ball holding its ten nearest, 0.4853 in radius, reaches over into cells whose centres are a little further off. A second cell recovers half of its ten and a third recovers all of them.",
+              "The rule was followed exactly, its nearest center is 0.8160 away, and not one of its ten true nearest is in that cell. Its three nearest centers sit within 0.0769 of one another, so it is close to where all three cells meet, and the ball holding its ten nearest, 0.4853 in radius, reaches over into cells whose centers are a little further off. A second cell recovers half of its ten and a third recovers all of them.",
             ),
             choice(
               "At about 8% of the collection read, how do cuts of 16, 32 and 64 cells compare on recall at ten?",
@@ -627,31 +545,31 @@ export default function SearchingACollectionOfPicturesPage() {
                 "16 cells recover 0.9842, 32 cells 0.9583 and 64 cells 0.8742",
               ],
               0,
-              "More, smaller cells follow the pictures more closely, so for the same share read a finer cut recovers more. The finer cut pays for it in two other places. Every question measures every centre, so 64 cells add 48 distances a question to what 16 charge, and the smallest of the 64 cells holds 16 pictures, which starts to matter once k is larger than a cell.",
+              "At the measured candidate share, the finer partitions recover more exact neighbors in this comparison. They also require more center comparisons and can produce small candidate cells. That is a tradeoff observed for these fitted indexes, not a guarantee that adding more cells always improves recall at fixed work.",
             ),
             choice(
               "If the 32 cells held 125 pictures each, one cell would be 3.1% of the collection, and opening one reads 4.2% on average. Why the gap?",
               [
                 "The cells are uneven, from 44 pictures to 356, and a question falls into a cell in proportion to how many pictures that cell holds, so the large cells are opened more often and cost more each time",
-                "The 32 centres are counted into the share read",
+                "The 32 centers are counted into the share read",
                 "Some questions open more than one cell before answering",
                 "Empty cells are skipped, which raises the average size of the rest",
               ],
               0,
-              "None of the 32 cells is empty, so that is not where the gap comes from. Summing the squared cell sizes over the squared total is the expected reading of one cell, and Cauchy-Schwarz puts it at no less than one over the number of cells, with equality only when every cell holds the same number. The busy regions of the collection are both where questions arrive and where the cells are largest.",
+              "The cells have unequal sizes. If a collection row is chosen uniformly and its own cell is opened, larger cells are selected more often; the expected candidate share is the sum of squared cell sizes divided by squared collection size. That statistic is at least the equal-size share. Actual independent queries can select cells at different rates, so their measured candidate share need not equal this occupancy statistic.",
             ),
             several(
               "Which of these hold of the cells as they are built here?",
               [
                               "They are fixed before any question is asked, and cost one k-means fit over the whole collection",
-                              "A picture added later goes into the cell of its nearest centre, and the centres stay where they were",
+                              "A picture added later goes into the cell of its nearest center, and the centers stay where they were",
                               "A question that was never in the collection still falls in exactly one cell",
-                              "The 32 centres were placed using the four kinds, so each kind has its own group of cells",
+                              "The 32 centers were placed using the four kinds, so each kind has its own group of cells",
                             ],
               [0, 1, 2],
-              "k-means uses positions rather than class labels. Assignment to the nearest fixed centre defines the cells, and the stated tie rule makes assignment unique even on a boundary. Later pictures can be inserted using these centres without refitting, although changing distributions may eventually make the index less effective.",
+              "k-means uses positions rather than class labels. Assignment to the nearest fixed center defines the cells, and the stated tie rule makes assignment unique even on a boundary. Later pictures can be inserted using these centers without refitting, although changing distributions may eventually make the index less effective.",
               {
-                "description": "Build a 32-centre k-means index without class labels. Keep these centres fixed for later inserts and queries. Assign each point to a nearest centre; resolve exact distance ties by choosing the lowest centre index. A query need not already be in the collection."
+                "description": "Build a 32-center k-means index without class labels. Keep these centers fixed for later inserts and queries. Assign each point to a nearest center; resolve exact distance ties by choosing the lowest center index. A query need not already be in the collection."
               },
             ),
         ],
@@ -674,13 +592,7 @@ export default function SearchingACollectionOfPicturesPage() {
                 <Equation>{"bitⱼ(v)  =  1 if rⱼ · v > 0,  else 0,        rⱼ drawn from a standard normal in each of the 16 numbers\n\nP( bitⱼ(u) = bitⱼ(v) )  =  1 − θ(u, v) / π"}</Equation>
                 <HyperplaneCodes />
                 <p>
-                  The nearest picture to picture 0 by angle is again picture
-                  2072, 10.1° away, and its code agrees with picture 0&rsquo;s on
-                  11 of the 12 bits, where the formula expects 11.33. A square at
-                  80.0° agrees on 6, with 6.66 expected, and a bar at 118.3°
-                  agrees on 4, with 4.11 expected. Each count is twelve coin
-                  flips, so the counts land near the expectation rather than on
-                  it.
+                  {"For picture 0, the nearest picture by angle is again picture 2072, at 10.1°. Their codes agree on 11 of 12 bits, compared with an expected count of 11.33. A square at 80.0° agrees on 6 bits, with 6.66 expected; a bar at 118.3° agrees on 4, with 4.11 expected. The twelve independent plane draws produce a random count, which need not equal its expectation."}
                 </p>
                 <WhyThisWorks title="Why one plane separates two vectors with probability θ / π">
                   <p>
@@ -709,11 +621,7 @@ export default function SearchingACollectionOfPicturesPage() {
                 </p>
                 <Equation>{"spread of a share of 2000 fair coin flips  ≤  √(0.25 / 2000)  =  0.0112"}</Equation>
                 <p>
-                  The mean gap is about half of that spread and the largest of
-                  the 200 gaps about twice it, which is where the largest of two
-                  hundred such shares ought to land, so the formula holds on these
-                  pictures to within the noise the finite count of planes puts on
-                  it.
+                  {"The stated spread is an upper bound on one sampled agreement fraction’s standard error. The observed mean gap is about half that bound, and the largest of the 200 gaps is about twice it. These differences are consistent with finite sampling; this check illustrates the formula rather than proving a simultaneous error guarantee for every pair."}
                 </p>
                 <KeepInMind>
                   Over 200 pairs and 2000 planes each, the measured agreement
@@ -747,51 +655,33 @@ export default function SearchingACollectionOfPicturesPage() {
                   caption="Averaged over the 240 questions, against the exact ten nearest by angle."
                 />
                 <p>
+
                   More planes make each bucket smaller and more alike, and they
-                  make the neighbourhood of a code larger. At sixteen planes a
+                  make the neighborhood of a code larger. At sixteen planes a
                   search within four bits looks in 2517 buckets, when only 659
                   of the 65536 possible codes are used by any picture at all, so
                   most of the looking finds nothing.
                 </p>
                 <KeepInMind>
-                  The bucket count to search grows like a binomial sum in the
-                  radius. Past a radius of two or three the looking costs more
-                  than the pictures it finds.
+                  {"Increasing the search radius opens a binomially growing number of possible codes. Many may be empty. Bucket lookups, candidate distances and recall are separate costs to measure; a bucket count alone does not establish runtime."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. Against the inverted file">
                 <p>
-                  Switch the chart in section 12 to both routes and the dashed
-                  lines sit below the solid ones at every share read. Four cells
-                  of 32 read 14.7% of the collection and recover 0.9958 of the
-                  true ten, twelve planes searched within two bits read 14.6%
-                  and recover 0.9408, and sixteen planes within three bits read
-                  14.1% and recover 0.9612. On these pictures the hashing is the
-                  worse bargain at every share the chart shows.
+                  {"The plotted inverted-file settings recover more of their exact reference neighbors at similar read shares. Four of 32 cells read 14.7% and recover 0.9958; twelve planes within two bits read 14.6% and recover 0.9408; sixteen planes within three bits read 14.1% and recover 0.9612. Remember that the inverted file targets Euclidean neighbors and the hashing route targets angular neighbors. These are comparisons of each method against its own task, not identical returned lists."}
                 </p>
                 <>
 <p>
-                  The cells were placed by k-means where the pictures are, and the planes were drawn without looking. The collection does not sit around the origin, since 11 of the 16 numbers average above zero across it, so a random plane through the origin often passes to one side of most of the pictures and gives nearly all of them the same bit, which spends a bit on no distinction.
+                  {"K-means fits its cells to the collection; the random planes do not use the collection when choosing directions. Eleven of the sixteen feature means are positive, so this collection is not centered at the origin. A plane through the origin can put many pictures on the same side. Such an unbalanced bit may distinguish fewer candidates, but the coordinate means alone do not prove the cause of the recall gap."}
                 </p>
                 <p>
                   At eight planes the busiest bucket holds 481 pictures, 12% of the collection. The two routes are also scored against two exact answers, the nearest by distance and the nearest by angle, and those share 0.8017 of their ten, so the comparison is between two methods each doing its own job.
                 </p>
 </>
-                <p>
-                  The hashing has what the cells lack elsewhere. It needs no fit
-                  over the collection, a new picture&rsquo;s code is twelve dot
-                  products, and the probability of a shared bit holds for any
-                  pair of vectors whatever the collection looks like, which is
-                  what made it the first route with a guarantee in high
-                  dimension. None of that shows as recall at this size.
-                </p>
+                <p>Random hyperplanes need no fit over the collection, and twelve plane tests give a new picture its twelve-bit code. For nonzero vectors, the shared-bit probability follows their angle under the stated random-direction model. That property is independent of the collection, but it does not by itself establish the recall or runtime of a finite bucket search.</p>
                 <KeepInMind>
-                  Reading about a seventh of the collection, four cells of 32
-                  recover 0.9958 of the true ten and twelve hyperplanes 0.9408,
-                  since k-means placed the cells among the pictures while the
-                  planes were drawn through an origin the pictures sit well away
-                  from.
+                  {"At roughly one seventh of the collection read, four of 32 cells recover 0.9958 of their exact Euclidean neighbors and twelve-plane hashing recovers 0.9408 of its exact angular neighbors. Fitted cells and random planes use different partitions and different comparison tasks."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -802,15 +692,7 @@ export default function SearchingACollectionOfPicturesPage() {
           content: (
             <>
               <SubSection title="20. The nearest against the farthest">
-                <p>
-                  An index skips pictures because it can tell that they are far
-                  from the question. That only works if far and near are very
-                  different distances, so the thing to measure is how much nearer
-                  the nearest picture is than the farthest. For each question we
-                  divide one by the other, and a ratio near zero means the
-                  nearest is much nearer than the rest, while a ratio near one
-                  means every picture is about as far away as every other.
-                </p>
+                <p>When distances to many candidates become similar, geometric bounds can become less selective. The nearest-to-farthest distance ratio is one diagnostic of that concentration. A ratio near one means those extreme distances are close together; a small ratio means they differ substantially. It is evidence about this geometry, rather than a complete prediction of every index&apos;s performance.</p>
                 <Equation>{"ratio(q)  =  min over x of d(q, x)  /  max over x of d(q, x)"}</Equation>
                 <ConcentrationChart />
                 <p>
@@ -831,13 +713,7 @@ export default function SearchingACollectionOfPicturesPage() {
               </SubSection>
 
               <SubSection title="21. The same inverted file on random vectors">
-                <p>
-                  The ratio predicts what an index will do, and the right-hand
-                  panel of the chart tests the prediction. The same inverted file
-                  of 32 cells, fitted the same way, is run on the pictures and on
-                  4000 random vectors of 16 and of 64 numbers, and asked the same
-                  question, how much of the true ten a number of cells recovers.
-                </p>
+                <p>The right-hand panel compares the same 32-cell index on the picture vectors and on 4000 random vectors with 16 or 64 coordinates. It measures how opening more cells changes recall of the exact ten. This tests the index under those distributions, rather than deriving its recall from the distance ratio alone.</p>
                 <NumberTable
                   headings={["cells opened, of 32", "picture vectors, 16", "random, 16", "random, 64"]}
                   rows={[
@@ -851,18 +727,13 @@ export default function SearchingACollectionOfPicturesPage() {
                   caption="Recall of the true ten, averaged over 240 questions each. Each cell opened reads about the same share of the collection in all three columns."
                 />
                 <p>
-                  On random vectors of 64 numbers, recovering 0.96 of the true ten
-                  takes 24 of the 32 cells, which reads 75.3% of the collection
-                  and costs 3045.8 distances a question with the centres. The
-                  exact scan costs 4000 and is certain, so for a saving of about
-                  a quarter the index gives up about a twenty-sixth of the
-                  answer, and in that setting the plain scan is the better
-                  method.
+                  {"For the random vectors with 64 coordinates, recall 0.96 requires opening 24 of 32 cells and reading 75.3 percent of the collection. Including center comparisons gives 3045.8 distances per query versus 4000 for the exact scan. That is a smaller count at the cost of missed neighbors; deciding whether it is worthwhile also requires the application’s accuracy requirements and measured runtime."}
                 </p>
                 <KeepInMind>
+
                   The same index that recovers 0.9583 of the pictures&rsquo;
-                  neighbours from two cells recovers 0.4837 of random
-                  sixteen-number neighbours and 0.2408 of random sixty-four-number
+                  neighbors from two cells recovers 0.4837 of random
+                  sixteen-number neighbors and 0.2408 of random sixty-four-number
                   ones, while each cell opened reads about the same share of the
                   collection in all three.
                 </KeepInMind>
@@ -870,29 +741,16 @@ export default function SearchingACollectionOfPicturesPage() {
 
               <SubSection title="22. The dimension that counts is the data’s own">
                 <p>
-                  The picture vectors and the first random set both have sixteen
-                  numbers, and they behave like different spaces. The difference
-                  is in how the sixteen numbers are spread. Six directions hold
-                  90% of the pictures&rsquo; spread, and the widest holds 48.7%
-                  on its own, while random vectors need fifteen of their sixteen
-                  directions for the same 90% and their widest holds 7.0%. The
-                  pictures fill a thin, clumped part of their space, four kinds
-                  each gathered in its own region, and the random vectors fill
-                  all of it.
+                  {"Both the picture vectors and the first random set have sixteen coordinates, but their variation is distributed differently. Six principal directions account for 90% of the picture vectors’ variance, and the first accounts for 48.7%. The random vectors need fifteen directions for 90%, with 7.0% in the first. These summaries show more concentrated variation for the learned features. They do not, by themselves, prove four separated clusters or describe every detail of the geometry."}
                 </p>
                 <>
-<p>
-                  The rule of thumb that indexes stop helping past ten or twenty dimensions held here for the random vectors and did not hold for the pictures, which have sixteen numbers and an index that works well. The raw pixels make the same point from the other side, with 256 numbers and a ratio of 0.2243, lower than random vectors of sixteen.
-                </p>
+<p>Coordinate count alone does not supply a reliable cutoff for index usefulness. The sixteen-coordinate picture vectors have a useful index in this experiment, while the random controls behave differently. The 256-coordinate raw pixels also have distance ratio 0.2243, below the sixteen-coordinate random baseline. Distribution and representation matter alongside dimension.</p>
                 <p>
                   Beyer and his colleagues stated their result under conditions on how the points are drawn, of which independent, identically spread coordinates are the plainest case, and a network&rsquo;s positions for four kinds of shape are nothing like that.
                 </p>
 </>
                 <KeepInMind>
-                  What decides whether an index helps is how concentrated the
-                  collection is, which the count of coordinates does not tell
-                  you. Measure the nearest against the farthest before trusting
-                  either the index or the rule of thumb.
+                  {"Coordinate count does not determine index performance on its own. Inspect distance concentration and measure the index’s recall, work and runtime on representative queries. The random controls show why a rule based on dimensions alone can mislead."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -904,63 +762,47 @@ export default function SearchingACollectionOfPicturesPage() {
             <>
               <SubSection title="23. Where the exact answer stops being one answer">
                 <p>
-                  The exact search is a minimum taken over the collection, k
-                  times over, and a minimum needs something to take it over and
-                  a way of telling two candidates apart. Each case below removes
-                  one of those, and the table says what the mathematics then
-                  says.
+                  {"Retrieval needs a collection, a requested count and a distance definition. Some cases below have no requested neighbor set; others have several equally valid sets or need a policy for how many results to return. Keeping those cases separate makes the interface behavior clearer."}
                 </p>
                 <DerivationTable
-                  expressionHeading="Collection or neighbour request"
+                  expressionHeading="Collection or neighbor request"
                   reasonHeading="What the retrieval can return"
                   rows={[
                     { expression: "an empty collection", reason: "the nearest of nothing does not exist. A minimum over an empty set is undefined, and any answer returned would be a convention rather than a nearest picture." },
-                    { expression: "k of zero", reason: "the answer is the empty list, which is defined and useless, and precision at k and recall at k both divide by k, so each is a zero over a zero." },
+                    { expression: "k of zero", reason: "Returning no neighbors can be a valid request. The displayed precision-at-k and recall-at-k formulas divide by k, so at zero they require an explicit convention rather than ordinary division." },
                     { expression: "k larger than the collection", reason: "the k nearest of fewer than k pictures names a set that is not there. Returning every picture and saying so is one choice and refusing is the other, and the first quietly changes what precision at k means, since the denominator is no longer the number returned." },
                     { expression: "two pictures at exactly the same distance, across the k-th place", reason: "the set of the k nearest is not unique. Any tie rule, earlier in the collection first for instance, picks one of the sets arbitrarily, and recall against that set then depends on the rule rather than on the pictures. For picture 0 the tenth and eleventh are 0.0417 apart and there is nothing to decide." },
-                    { expression: "the same picture twice in the collection", reason: "every question meets the tie above for that pair, since both copies are at one distance, and a k of ten can hold a picture twice, which the answer then counts as two neighbours." },
-                    { expression: "a question that is itself in the collection", reason: "its nearest picture is itself at a distance of zero. That is correct and says nothing, so a search asked about a picture it holds usually leaves the picture out and asks for the k after it." },
+                    { expression: "the same picture twice in the collection", reason: "every question meets the tie above for that pair, since both copies are at one distance, and a k of ten can hold a picture twice, which the answer then counts as two neighbors." },
+                    { expression: "a question that is itself in the collection", reason: "Its own stored vector has distance zero, possibly tied with a duplicate. For leave-one-out evaluation, exclude that entry by identity. Other applications may intentionally retain it." },
                     { expression: "a question with a different number of coordinates", reason: "the sum of squared gaps pairs the i-th number of one vector with the i-th of the other, so a sixteen-number question against fifteen-number pictures has no distance at all." },
-                    { expression: "a vector of length zero, searched by angle", reason: "a vector with no length has no direction, and the cosine divides by the length, so the angle to anything is a zero over a zero. A picture whose sixteen numbers all came out as zero would have no place in Part 4’s search." },
+                    { expression: "a vector of length zero, searched by angle", reason: "A zero vector has no defined angle under the cosine formula. The bit rule can still assign it an all-zero code, but that convention does not give angular similarity a defined value. Validate or separately handle such vectors before angular retrieval." },
                   ]}
                 />
                 <KeepInMind>
-                  The exact search needs pictures to search, a k no larger than
-                  their number, and distances that can tell the k-th from the one
-                  after it. Without the last of these the answer is still exact,
-                  and it is one of several.
+                  {"An exact result requires a valid distance and enough candidates for the requested count, unless the API explicitly returns fewer. Equal distances can leave several valid sets of k neighbors. A consistent tie policy selects one for reference comparisons."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. Which coarse cells will the index search?" id="24-where-the-index-stops-being-defined">
                 <p>
-                  The inverted file adds two decisions to the exact search, which
-                  cell a question belongs to and which cells to open, and the
-                  hashing adds one, which side of a plane a vector is on. Each can
-                  fail to have an answer, and each has a case where the index
-                  stops saving anything.
+                  {"The inverted file chooses and orders cells before ranking their candidates. Hashing assigns bits before choosing buckets. Ties and boundary points need deterministic conventions, while some settings remove all distance savings. The table separates those interface decisions from missing candidates."}
                 </p>
                 <DerivationTable
                   expressionHeading="Query or coarse-cell condition"
                   reasonHeading="Effect on which pictures are searched"
                   rows={[
-                    { expression: "a question equally near two cell centres", reason: "which cell is nearest is undefined. If the tie falls inside the cells opened nothing turns on it; if it falls at the last cell opened, which cell is searched is a choice, and the recall can differ between the two choices." },
-                    { expression: "a question equally near every cell centre", reason: "the order of the cells is undefined from the first place on, so which cells a search of p cells opens is entirely the tie rule’s decision, and the index is no longer choosing by nearness at all." },
-                    { expression: "a cell with no pictures in it", reason: "k-means can leave a centre that no picture is nearest. Opening it costs the centre’s distance and finds nothing, so a search of p cells has really searched p minus one. None of the 16, 32 or 64 cells here came out empty." },
+                    { expression: "a question equally near two cell centers", reason: "There are two equally nearest centers. This API uses stable center order to choose between them. If the tie crosses the probe cutoff, that choice can change the candidate set and recall; if both tied cells are opened, it does not." },
+                    { expression: "a question equally near every cell center", reason: "the order of the cells is undefined from the first place on, so which cells a search of p cells opens is entirely the tie rule’s decision, and the index is no longer choosing by nearness at all." },
+                    { expression: "a cell with no pictures in it", reason: "k-means can leave a center that no picture is nearest. Opening it costs the center’s distance and finds nothing, so a search of p cells has really searched p minus one. None of the 16, 32 or 64 cells here came out empty." },
                     { expression: "fewer pictures in the opened cells than k", reason: "the index cannot return k pictures, and recall has a ceiling of the number read over k. The smallest of the 64 cells holds 16 pictures, so a question landing there with one cell opened cannot answer a k of 20." },
-                    { expression: "every cell opened", reason: "the index is the exact search plus one distance per centre, 4032 distances where the scan takes 4000, and its recall is one. Nothing is saved, and a little is spent." },
-                    { expression: "as many cells as pictures", reason: "each cell holds one picture and its centre is that picture, so measuring the centres is already the exact scan and the cells add nothing to it." },
-                    { expression: "a vector lying exactly on a hyperplane", reason: "the sign of zero is neither side, so the bit is undefined and a rule has to assign one. Drawn from a continuous distribution this happens with probability zero, and on vectors with exact zeros in them it happens often." },
+                    { expression: "every cell opened", reason: "the index is the exact search plus one distance per center, 4032 distances where the scan takes 4000, and its recall is one. Nothing is saved, and a little is spent." },
+                    { expression: "as many cells as pictures", reason: "In the ideal arrangement with one center at each distinct picture vector, center comparisons already perform an exact scan. Duplicate vectors or an unfinished fit need separate handling; a cell count alone does not guarantee one occupied cell per picture." },
+                    { expression: "a vector lying exactly on a hyperplane", reason: "A point on the plane needs a bit convention. This implementation assigns zero because its rule tests whether the dot product is strictly positive. For a fixed nonzero vector and a continuously drawn random plane, exact orthogonality has probability zero; having some zero coordinates does not change that. The all-zero vector lies on every plane." },
                     { expression: "a search radius as large as the code", reason: "every bucket is searched, which is the exact scan by angle plus one lookup for each of the 2 to the b codes, most of them empty." },
                   ]}
                 />
                 <KeepInMind>
-                  Every line above has the same shape, a decision the index adds
-                  that the data can leave without an answer, or a setting at which
-                  the index reads everything and costs more than the scan it was
-                  meant to replace. The one worth carrying away is the question
-                  near a boundary, since it breaks no rule at all, and held-out
-                  picture 46 still recovered none of its ten from one cell.
+                  {"A boundary query can lose neighbors even when every index operation is well defined. Picture 46 retrieves none of its exact ten from one cell. Other rows show ties that need a consistent rule or settings that spend index overhead while scanning the whole collection."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -983,7 +825,7 @@ export default function SearchingACollectionOfPicturesPage() {
                 "The formula describes the angle rather than the bits",
               ],
               0,
-              "Checked over 200 pairs on 2000 fresh planes each, the measured share of planes agreeing stays within 0.0232 of one minus the angle over pi, and within 0.0059 on average, where the spread of a share of 2000 fair coin flips is at most 0.0112. So the formula holds on these pictures to within the noise a finite count of planes puts on it.",
+              "A finite collection of random planes gives a sampled bit-agreement count rather than its exact expectation. The angular formula predicts the mean over independent isotropic plane draws for nonzero vectors. The reported agreement errors are consistent with finite sampling. The single-pair standard-error reference is not a bound on the largest error across all tested pairs.",
             ),
             choice(
               "Reading about a seventh of the collection, four cells of 32 recover 0.9958 of the true ten and twelve planes within two bits recover 0.9408. Why is the hashing the worse bargain here?",
@@ -1020,7 +862,7 @@ export default function SearchingACollectionOfPicturesPage() {
                 "It could not be tested, since the pictures carry only sixteen numbers",
               ],
               0,
-              "Six directions hold 90% of the pictures’ spread and the widest holds 48.7% on its own, where random vectors need fifteen of their sixteen for the same 90% and their widest holds 7.0%. The same inverted file that recovers 0.9583 of the pictures’ neighbours from two cells recovers 0.4837 of random sixteen-number neighbours, and on random vectors of 64 numbers reaching 0.96 takes 24 of the 32 cells and reads 75.3% of the collection, where the plain scan is the better method. What decides is how concentrated the collection is, which the count of coordinates does not tell you.",
+              "Six directions hold 90% of the pictures’ spread and the widest holds 48.7% on its own, where random vectors need fifteen of their sixteen for the same 90% and their widest holds 7.0%. The same inverted file that recovers 0.9583 of the pictures’ neighbors from two cells recovers 0.4837 of random sixteen-number neighbors, and on random vectors of 64 numbers reaching 0.96 takes 24 of the 32 cells and reads 75.3% of the collection, where the plain scan is the better method. What decides is how concentrated the collection is, which the count of coordinates does not tell you.",
             ),
         ],
         },
@@ -1030,18 +872,18 @@ export default function SearchingACollectionOfPicturesPage() {
             choice(
               "The inverted file of 32 cells is told to open all 32. What does one question cost, and what is its recall?",
               [
-                "4032 distances, the scan’s 4000 and one more per centre, at a recall of one",
+                "4032 distances, the scan’s 4000 and one more per center, at a recall of one",
                 "4000 distances at a recall of one, exactly what the scan costs",
-                "32 distances, since only the centres are measured",
+                "32 distances, since only the centers are measured",
                 "4032 distances at a recall below one, since the cells still skip by position",
               ],
               0,
-              "With every cell opened every picture is measured, so nothing can be missed, and the 32 centres were measured on top of that. Nothing is saved and a little is spent. The other end has the same shape, since with as many cells as pictures each centre is a picture and measuring the centres is already the exact scan.",
+              "With every cell opened every picture is measured, so nothing can be missed, and the 32 centers were measured on top of that. Nothing is saved and a little is spent. The other end has the same shape, since with as many cells as pictures each center is a picture and measuring the centers is already the exact scan.",
             ),
             trueFalse(
               "When two pictures sit at exactly the same distance across the tenth place, the exact answer is still exact, and it is one of several.",
               true,
-              "The set of the ten nearest is then not unique. Any tie rule picks one of the sets arbitrarily, and recall against that set depends on the rule and not on the pictures. For picture 0 the tenth and eleventh nearest are 0.0417 apart, so there was nothing to decide, while a picture stored twice in the collection brings the tie to every question, since both copies sit at one distance.",
+              "When a distance tie crosses the kth position, several top-k ID sets are equally valid by distance. A fixed tie rule makes the reference reproducible, but another valid choice can lower ID-based recall against it. Duplicated vectors create equal distances; they affect the selected set only when such a tie crosses its cutoff. The displayed query has a nonzero tenth-to-eleventh gap, so its cutoff is unambiguous.",
             ),
             several(
               "Which of these leave the search with no defined answer, or leave an index unable to return k pictures?",
@@ -1109,13 +951,13 @@ multiply-adds for one question 64000`,
               { hints: [
   "Keep synthetic collection IDs as row indices and exclude no collection row unless the supplied query contract says so.",
   "Partial selection finds the candidate set; sort that set for ordered output. The complete distance scan remains the reference for later approximation."
-], check: numberCheck("How far away is the nearest vector to question 0, to four places?", 1.6156, 0.0005, "The nearest synthetic vector is 1.6156 away. The independent coordinate-difference calculation verifies the exact-scan reference used by later approximate searches."), question: "Can a complete scan establish the exact nearest-neighbour reference?" },
+], check: numberCheck("How far away is the nearest vector to question 0, to four places?", 1.6156, 0.0005, "The nearest synthetic vector is 1.6156 away. The independent coordinate-difference calculation verifies the exact-scan reference used by later approximate searches."), question: "Can a complete scan establish the exact nearest-neighbor reference?" },
             ),
             exercise(
               "Build the inverted file and sweep the cells opened",
               [
-  "Fit the synthetic collection’s k-means index with thirty-two cells, three initialisations and seed zero. Keep the starter’s exact ten neighbours for every query as ground truth.",
-  "Print smallest/largest cell sizes and the supplied size-weighted one-cell occupancy statistic. Then open 1, 2, 4, 8, 16 and 24 nearest-centre cells, reporting mean exact-ten recall, fraction of collection candidates read and mean distance evaluations including centre comparisons. The occupancy statistic and query-measured candidate share are different measurements."
+  "Fit the synthetic collection’s k-means index with thirty-two cells, three initializations and seed zero. Keep the starter’s exact ten neighbors for every query as ground truth.",
+  "Print smallest/largest cell sizes and the supplied size-weighted one-cell occupancy statistic. Then open 1, 2, 4, 8, 16 and 24 nearest-center cells, reporting mean exact-ten recall, fraction of collection candidates read and mean distance evaluations including center comparisons. The occupancy statistic and query-measured candidate share are different measurements."
 ],
               `import numpy as np
 from oop_ml import EuclideanDistance, Feature, KMeans, RowBlock
@@ -1177,8 +1019,8 @@ for opened in (1, 2, 4, 8, 16, 24):
 24 cells: recall 0.9983, share read 0.7519, distances 3039.5`,
               { hints: [
   "Build candidate IDs from the union of selected cells, then rank actual candidates by their query distance.",
-  "Recall compares returned IDs with the exact-ten set. Count centre comparisons separately before adding candidate comparisons."
-], check: numberCheck("What share of the collection do 24 of the 32 cells read on these vectors, to four places?", 0.7519, 0.0005, "The query-measured candidate fraction is 0.7519 at twenty-four cells. This empirical fraction differs from the separately reported size-weighted occupancy statistic."), question: "How much exact-neighbour recall is lost when only a few index cells are searched?" },
+  "Recall compares returned IDs with the exact-ten set. Count center comparisons separately before adding candidate comparisons."
+], check: numberCheck("What share of the collection do 24 of the 32 cells read on these vectors, to four places?", 0.7519, 0.0005, "The query-measured candidate fraction is 0.7519 at twenty-four cells. This empirical fraction differs from the separately reported size-weighted occupancy statistic."), question: "How much exact-neighbor recall is lost when only a few index cells are searched?" },
             ),
             exercise(
               "Measure the nearest against the farthest as the vectors widen",

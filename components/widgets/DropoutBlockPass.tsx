@@ -184,7 +184,7 @@ export function DropoutBlockPass({
       )}
 
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Indigo is kept and grey is silenced, read from the mask the layer
+        Indigo is kept and gray is silenced, read from the mask the layer
         carried. A rose outline marks an entry that reading the mask back off
         the outputs would have got wrong, a zero that survived.
       </p>

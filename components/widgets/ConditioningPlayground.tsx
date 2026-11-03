@@ -26,8 +26,8 @@ const WORKED_THREE: Point[] = [
 
 const MODES: { key: Parameterisation; label: string }[] = [
   { key: "raw", label: "raw heights" },
-  { key: "centred", label: "centred" },
-  { key: "scaled", label: "centred and scaled" },
+  { key: "centred", label: "centered" },
+  { key: "scaled", label: "centered and scaled" },
 ];
 const PASSES = 200;
 
@@ -110,7 +110,11 @@ export function ConditioningPlayground() {
         </div>
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The lattice is centred on the optimum and wide enough to hold the start at zero. The contours cannot show a valley fifty million to one at this resolution, which is itself the point about raw heights.
+        The grid includes the optimum and the starting coefficients at zero.
+        With unscaled heights, the loss changes much faster in one direction
+        than the other. Its narrow contours are too thin to distinguish at this
+        resolution. Compare the scaled view to see how changing the units
+        affects the gradient steps.
       </p>
       {message && (
         <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">{message}</p>

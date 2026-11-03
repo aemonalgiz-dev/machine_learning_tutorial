@@ -87,7 +87,7 @@ export function SeedDirections({ left = "four", right = "circle" }: { left?: Peo
         {panel(right, answers[1])}
       </div>
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The dashed grey line is the eigensolver&rsquo;s first direction; each coloured line is where one of five seeds sent the rule&rsquo;s first unit after two hundred epochs.
+        The dashed gray line is the eigensolver&rsquo;s first direction; each colored line is where one of five seeds sent the rule&rsquo;s first unit after two hundred epochs.
       </p>
       {message && <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>}
     </div>

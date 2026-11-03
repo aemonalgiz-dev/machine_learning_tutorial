@@ -20,7 +20,7 @@ export const agentGuardrailTools: Record<string, Tool> = {
     run: ([screen]) => isRecord(screen) && ["pass", "flag"].includes(String(screen.status)) && typeof screen.status === "string" ? screen.status : "unavailable",
   },
   agScreenRoute: {
-    title: "Keep permission ahead of screening", why: "A favourable classifier result cannot authorise a tool. Allowed calls still wait when this policy requires a screen and its result is flagged or unavailable.", inputs: ["Tool granted?", "Screen status"],
+    title: "Keep permission ahead of screening", why: "A favorable classifier result cannot authorize a tool. Allowed calls still wait when this policy requires a screen and its result is flagged or unavailable.", inputs: ["Tool granted?", "Screen status"],
     run: ([permitted, status]) => {
       requireBooleans([permitted]);
       if (typeof status !== "string" || !["pass", "flag", "unavailable"].includes(status)) throw Error("Connect the screening status here.");
@@ -52,7 +52,7 @@ export const agentGuardrailTools: Record<string, Tool> = {
     },
   },
   agFieldRelease: {
-    title: "Check each field's release label", why: "Each selected field needs the application's approved release label. Unlabelled fields stay withheld.", inputs: ["Projected payload", "Server field classifications"],
+    title: "Check each field's release label", why: "Each selected field needs the application's approved release label. Unlabeled fields stay withheld.", inputs: ["Projected payload", "Server field classifications"],
     run: ([payload, labels]) => isRecord(payload) && isRecord(labels) && Object.keys(payload).length > 0 && Object.keys(payload).every(key => own(labels, key) && labels[key] === "approved"),
   },
   agDestinationGrant: {

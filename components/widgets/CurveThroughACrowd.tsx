@@ -168,7 +168,7 @@ export function CurveThroughACrowd() {
           textAnchor="end"
           className="fill-slate-500 text-[11px] dark:fill-slate-400"
         >
-          height in centimetres
+          height in centimeters
         </text>
         <text
           x={PAD.left - 6}

@@ -118,9 +118,11 @@ export function CoercedNumbers() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        A negative position and a value that is not whole both go straight
-        through, and the last two rows were told apart by the request and are
-        not told apart by the layer.
+        The layer converts its inputs to floating-point numbers. It accepts the
+        negative and non-integer positions shown here because those values are
+        finite. The last two large positions become the same floating-point
+        value, so the layer can no longer distinguish them. A position or ID
+        needs checks beyond whether its value is finite.
       </p>
     </div>
   );

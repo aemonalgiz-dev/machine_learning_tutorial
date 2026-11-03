@@ -1,4 +1,5 @@
 "use client";
+import { FeedbackExplanation } from "./FeedbackExplanation";
 
 // A quiz section, worked one card at a time.
 //
@@ -20,6 +21,8 @@ import { QuizQuestion, answersOf, arranged, isCorrect } from "@/lib/quizzes";
 import { BotieSays } from "@/components/site/Botie";
 import { PythonCode } from "./PythonCode";
 import { Equation } from "./Equation";
+import { reportLearningActivity } from "@/lib/learning-activity";
+import { useProgressAccount } from "@/lib/progress";
 
 interface Attempt {
   // Indices as written, not as shown.
@@ -56,6 +59,8 @@ export function QuizDeck({
   const [card, setCard] = useLearnerField(saved, "card");
   const [attempts, setAttempts] = useLearnerField(saved, "attempts");
   const reported = useRef(false);
+  const account = useProgressAccount();
+  const answeredThisVisit = useRef<{ account: string | null } | null>(null);
 
   const finished = card >= questions.length;
   const question = finished ? null : questions[card];
@@ -80,6 +85,7 @@ export function QuizDeck({
   ).length;
 
   const restart = () => {
+    answeredThisVisit.current = null;
     setAttempts(questions.map(() => ({ picked: [], answered: false })));
     setCard(0);
   };
@@ -129,6 +135,7 @@ export function QuizDeck({
       return;
     }
     // One answer, so choosing it is the whole act. Mark it now.
+    answeredThisVisit.current = { account };
     update({ picked: [written], answered: true });
   };
 
@@ -192,7 +199,7 @@ export function QuizDeck({
             >
               {right ? "That is right." : "Not quite. Let’s look at why."}
             </p>
-            <p className="mt-1 text-foreground">{current.because}</p>
+            <FeedbackExplanation text={current.because} className="mt-1 text-foreground" />
             {!right && revisit.length > 0 && (
               <p className="mt-2 text-muted">
                 Let’s revisit:{" "}
@@ -218,14 +225,20 @@ export function QuizDeck({
         {card > 0 && <Quiet onClick={() => setCard(card - 1)}>Back a question</Quiet>}
 
         {several && !given.answered && (
-          <Solid onClick={() => update({ answered: true })} disabled={given.picked.length === 0}>
+          <Solid onClick={() => { answeredThisVisit.current = { account }; update({ answered: true }); }} disabled={given.picked.length === 0}>
             Submit this answer
           </Solid>
         )}
 
         {given.answered && (
           <>
-            <Solid onClick={() => setCard(card + 1)}>
+            <Solid onClick={() => {
+              if (card === questions.length - 1 && answeredThisVisit.current?.account === account && attempts.every(entry => entry.answered)) {
+                reportLearningActivity("quiz", `quiz:${lesson}:${section}`, account);
+                answeredThisVisit.current = null;
+              }
+              setCard(card + 1);
+            }}>
               {card === questions.length - 1 ? "See how you did" : "Next question"}
             </Solid>
             <Quiet onClick={() => update({ picked: [], answered: false })}>

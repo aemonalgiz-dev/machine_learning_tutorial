@@ -295,7 +295,7 @@ function Counted({ view, onDraw }: { view: FitView; onDraw: () => void }) {
       <div>
         <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">
           Where the chain settles, in indigo, against how often each state
-          occurs in the text it was counted on, in grey
+          occurs in the text it was counted on, in gray
         </p>
         {view.stationary_note && (
           <p className="mb-2 text-sm text-slate-600 dark:text-slate-400">

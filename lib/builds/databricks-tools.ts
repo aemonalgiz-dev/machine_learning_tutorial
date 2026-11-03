@@ -41,7 +41,7 @@ export const databricksTools: Record<string, Tool> = {
     for (const row of rows(input)) { let hash = 0; for (const character of text(row.routingKey)) hash += character.codePointAt(0)!; result[hash % n].push(clone(row)); }
     return result;
   }),
-  dbxPartitionSizes: tool("Count each worker's records", "Keep one count for every worker, including empty workers. An idle worker cannot finish a different worker's unsplit hot group.", ["Worker partitions"], ([partitions]) => array(partitions).map(part => array(part).length)),
+  dbxPartitionSizes: tool("Count records in each partition", "Return one record count for every input partition, including empty partitions. A partition is a portion of data; one worker can process several partitions.", ["Partitions of records"], ([partitions]) => array(partitions).map(part => array(part).length)),
   dbxSnapshot: tool("Open a committed table version", "Read the exact saved table version requested. A missing or repeated version stops the read. This workshop stores complete copies; Delta reconstructs a table version from its transaction log.", ["Table history", "Required version"], ([history, version]) => {
     const requested = integer(version), found = rows(history).filter(commit => integer(commit.version) === requested);
     if (found.length !== 1) throw Error("The requested version must exist exactly once in the retained history.");

@@ -224,14 +224,14 @@ export function CutLandingChart() {
             className="inline-block h-2 w-4 rounded-sm"
             style={{ backgroundColor: FIXED_COLOUR }}
           />
-          a fixed number of bytes, labelled with that number
+          a fixed number of bytes, labeled with that number
         </span>
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block h-2 w-4 rounded-sm"
             style={{ backgroundColor: ENTROPY_COLOUR }}
           />
-          cut by uncertainty, labelled with the threshold in bits
+          cut by uncertainty, labeled with the threshold in bits
         </span>
       </div>
 

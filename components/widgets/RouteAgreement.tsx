@@ -177,7 +177,7 @@ export function RouteAgreement() {
         </div>
       )}
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
-        A score printed in amber differs from its neighbour in the last digit
+        A score printed in amber differs from its neighbor in the last digit
         or two. The gap is the order the products were summed in and nothing
         else.
       </p>

@@ -204,7 +204,7 @@ function Walks({
         </text>
       </svg>
       <Caption>
-        Indigo starts at a vowel and grey at a consonant. The dashed amber line
+        Indigo starts at a vowel and gray at a consonant. The dashed amber line
         is {settled.toFixed(4)}, the chance of a vowel the chain settles at,
         and both walks reach it by overshooting in turn.
       </Caption>

@@ -102,7 +102,7 @@ export function Word2vecPairStep() {
                   className="text-[10px] font-medium"
                   fill={colour}
                 >
-                  {scored.label === 1 ? "the true neighbour" : "a drawn word"}
+                  {scored.label === 1 ? "the true neighbor" : "a drawn word"}
                 </text>
               </g>
             );
@@ -137,7 +137,7 @@ export function Word2vecPairStep() {
         <Legend>
           Solid lines are the vectors as they stand and dashed lines the step
           each is about to take, before the step size shrinks it. The true
-          neighbour is pulled towards the word and both drawn words away.
+          neighbor is pulled towards the word and both drawn words away.
         </Legend>
       </div>
 

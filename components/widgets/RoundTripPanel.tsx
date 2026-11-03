@@ -111,10 +111,10 @@ export function RoundTripPanel() {
       </div>
 
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The last two readouts are the honest half. Joining the pieces back in
-        order recovers every character that is not spacing, and it does not
-        recover the spacing, so something downstream still has to decide where
-        the spaces go.
+        The last two readouts check what the pieces preserve. Joining them in
+        order recovers the non-spacing characters, but the original spaces are
+        missing. Recovering the full text therefore requires either retaining
+        that spacing information or choosing a new spacing rule.
       </p>
     </div>
   );

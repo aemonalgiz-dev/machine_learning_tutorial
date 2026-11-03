@@ -210,7 +210,7 @@ export function ChainTrace() {
 
       <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat
-          label="Training centre for height"
+          label="Training center for height"
           value={scaler ? `${scaler.learned[0].mean.toFixed(2)} cm` : "…"}
         />
         <Stat
@@ -226,7 +226,7 @@ export function ChainTrace() {
           Standardizing the first held-out person on their own is refused,{" "}
           <span className="font-mono">{anatomy.alone.error}</span>, {anatomy.alone.detail}.
           One height has no spread to divide by, which is why the training
-          people&rsquo;s centre and spread are reused on them instead.
+          people&rsquo;s center and spread are reused on them instead.
         </p>
       )}
 

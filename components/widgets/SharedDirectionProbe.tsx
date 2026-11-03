@@ -136,7 +136,7 @@ export function SharedDirectionProbe({
 
       <Legend>
         One bar per word, longest lean first, amber for a word of the first half,
-        indigo for one of the second and grey for a word carrying no subject at
+        indigo for one of the second and gray for a word carrying no subject at
         all. The dashed line stands where the furthest word carrying a subject
         reaches, so a bar past it belongs to a word that leans along this
         direction further than anything about either subject does.

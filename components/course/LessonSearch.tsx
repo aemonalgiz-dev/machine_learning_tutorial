@@ -1,4 +1,6 @@
 "use client";
+import { americanEnglish } from "@/lib/american-english";
+
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -40,8 +42,8 @@ function SearchResults({ entries, areas, initialQuery, initialArea }: Props & { 
     {!matches.length && <div className="rounded-xl border border-line bg-surface p-6"><p>No lessons or sections match this search. Try a broader term or another learning area.</p><Link href="/#course" className="mt-3 inline-flex min-h-11 items-center text-sm text-accent hover:underline">Browse the learning areas →</Link></div>}
     <ul className="space-y-3">{visible.map(entry => <li key={entry.href}>
       <Link href={entry.href} className="group block rounded-xl border border-line bg-surface p-5 hover:border-accent-fill/60 hover:bg-raised">
-        <p className="text-xs leading-5 text-muted">{entry.areaTitle} · {entry.kind}{entry.kind === "Lesson" ? ` · ${entry.sectionTitle}` : ""}</p>
-        <h2 className="mt-2 text-lg font-semibold group-hover:text-accent">{entry.title}</h2>
+        <p className="text-xs leading-5 text-muted">{entry.areaTitle} · {entry.kind}{entry.kind === "Lesson" ? ` · ${americanEnglish(entry.sectionTitle)}` : ""}</p>
+        <h2 className="mt-2 text-lg font-semibold group-hover:text-accent">{americanEnglish(entry.title)}</h2>
         <p className="mt-2 text-sm leading-6 text-muted">{entry.description}</p>
       </Link>
     </li>)}</ul>

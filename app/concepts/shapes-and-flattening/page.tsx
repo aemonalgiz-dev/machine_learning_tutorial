@@ -23,9 +23,9 @@ import { SharedLayerStep } from "@/components/widgets/SharedLayerStep";
 import { WindowPositions } from "@/components/widgets/WindowPositions";
 
 export const metadata: Metadata = {
-  title: "The Shape Guarantee · oop_ml",
+  title: "The Shape Guarantee · Perceptron Lab",
   description:
-    "A layer needs to know which numbers belong to which example and how they are arranged. We will follow those dimensions through a network and see what changes when an image is flattened.",
+    "An array's shape records how values are arranged and which belong to the same example. Flattening puts each example's values into a vector, so the original spatial organization is no longer explicit.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function ShapesAndFlatteningPage() {
       playgroundTitle="Which layer outputs can the next layer read?"
       playgroundIntro="Compare each layer's output shape with the next layer's expected input. Look for cases with equal value counts but different arrangements."
       title="The Shape Guarantee"
-      tagline={"A layer needs to know which numbers belong to which example and how they are arranged. We will follow those dimensions through a network and see what changes when an image is flattened."}
+      tagline={"An array's shape records how values are arranged and which belong to the same example. Flattening puts each example's values into a vector, so the original spatial organization is no longer explicit."}
       prerequisites={
         <>
           The layers joined here are the{" "}
@@ -70,58 +70,16 @@ export default function ShapesAndFlatteningPage() {
           content: (<>
 <>
               <SubSection title="1. A chain that cannot work">
-                <p>
-                  Build a network for the digit picture and you write down a
-                  list of layers in order. A convolution that sweeps eight
-                  small kernels across the picture, a pooling layer that
-                  shrinks what it found, another convolution, another pooling
-                  layer, and then dense layers that read everything at once and
-                  answer with ten numbers, one per digit. Nothing about that
-                  list mentions data. It is a description of what each step
-                  reads and what it hands upward.
-                </p>
-                <p>
-                  Two of those steps can disagree. A convolution hands upward
-                  something with channels, rows and columns, and a dense layer
-                  reads a single row of numbers, so putting one straight above
-                  the other asks a layer to read something it has no idea how
-                  to read. In the box above, load the missing flatten preset
-                  and the seam between the two cards turns red. Load the digit
-                  chain and every seam is green.
-                </p>
-                <p>
-                  Notice what happened in between. Nothing was trained, no
-                  picture was sent, and no array was reserved for one. The
-                  verdict on each seam is a comparison of two short tuples of
-                  whole numbers, and the digit chain holds six of those seams,
-                  so the answer for the whole network is six such comparisons.
-                </p>
+                <p>{"A digit-classification network can be described as an ordered list of layers before we pass it any images. In this chain, eight convolution kernels produce response maps, pooling reduces them, and another convolution and pooling stage prepare the representation for dense layers. The final output has ten entries, one per digit. Each connection still needs a precise agreement about the shape it receives and produces."}</p>
+                <p>{"Adjacent layers need to agree on the arrangement of their inputs and outputs. A convolution returns channels with rows and columns; the dense layer here expects one row of values. A flattening step preserves those values while arranging them in the form the dense layer accepts. Load the missing flatten preset to see the mismatch marked red, then the digit chain to see the compatible connections in green."}</p>
+                <p>This check compares the shapes declared by neighboring layers. It does not train the network or pass an image through it. The digit chain has six connections to check. A compatible shape is necessary for those connections to run, although it does not establish that the numerical operations or learned predictions are correct.</p>
                 <KeepInMind>
-                  A network is refused for the shape it describes, not for what
-                  happens when data reaches it. Everything on this page is
-                  decided by counting.
-                </KeepInMind>
+                  This page checks whether the declared layer shapes are compatible before running a batch. Passing that check does not establish that the data values are valid or that the network will learn useful predictions.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. Why the refusal comes before the data">
-                <p>
-                  Suppose the check happened later instead, at the moment the
-                  first block of pictures reached the offending layer. The
-                  network would already have been constructed, the weights
-                  already drawn at random, an optimiser already built around
-                  them, and the training loop already started. The failure
-                  would arrive somewhere inside a matrix multiplication, and
-                  what it could say is that one array had a certain number of
-                  columns and another had a different number, which is a true
-                  statement about arrays and says nothing about which seam of
-                  which network the writer got wrong.
-                </p>
-                <p>
-                  Checking first costs nothing worth measuring. The digit chain
-                  above holds seven layers, which is six seams, which is six
-                  comparisons of tuples that are at most three long. No memory
-                  is reserved for a batch and no epoch begins.
-                </p>
+                <p>If we wait until a batch reaches an incompatible layer, the failure occurs during execution. An array error may report mismatched dimensions without identifying the intended connection between layers. Checking the declared shapes first lets this SDK name the adjacent layers and both arrangements before training starts.</p>
+                <p>The digit chain has seven layers and six adjacent joins. Checking those joins compares tuples with at most three entries each. It needs no batch and performs none of the network’s forward calculations.</p>
                 <InAModel>
                   Deeper networks make the argument stronger rather than
                   weaker. Every seam a chain adds is one more comparison at
@@ -148,19 +106,9 @@ export default function ShapesAndFlatteningPage() {
                   by whoever wrote the network, and settled among the layers
                   themselves.
                 </p>
-                <p>
-                  The digit chain in the box reports that it reads (1, 28, 28)
-                  and answers (10,), and those are the only two figures a
-                  reader has to reconcile against the world. The 5408 numbers
-                  the first convolution hands upward, the 1352 the first
-                  pooling layer leaves, the 400 that arrive at the bridge, are
-                  facts about the chain and about nothing else.
-                </p>
+                <p>{"The digit chain declares an input shape of (1, 28, 28) and an output shape of (10,). Those describe the image supplied by the caller and the prediction it receives. The intermediate counts, 5408 after the first convolution, 1352 after the first pooling layer and 400 at the bridge, describe internal representations. They belong to the architecture rather than requiring additional measurements from the caller."}</p>
                 <KeepInMind>
-                  Two facts come from outside and every other extent in the
-                  chain is a consequence, which is why the chain can be checked
-                  without asking the world anything.
-                </KeepInMind>
+                  The caller supplies the input representation and chooses the required output. Once the intermediate layers and their settings are declared, their shapes can be derived and compared without running the data through them.</KeepInMind>
               </SubSection>
             </>
 </>),
@@ -170,14 +118,7 @@ export default function ShapesAndFlatteningPage() {
           content: (
             <>
               <SubSection title="4. What a layer says about its two sides">
-                <p>
-                  Every layer carries a shape, and a shape here is a pair. One
-                  side is what one input to the layer looks like and the other
-                  is what one output looks like. Each side is written as a
-                  tuple of extents, one number per side of the arrangement, so
-                  the digit picture is (1, 28, 28) and a row of thirty-six
-                  numbers is (36,).
-                </p>
+                <p>A layer declares the shape of one input example and the shape of one output example. Each is a tuple containing the size of every axis. A digit image has one channel, twenty-eight rows and twenty-eight columns, written (1, 28, 28). A feature row with thirty-six entries has one axis, written (36,). An axis size is also called an extent.</p>
                 <p>
                   A dense layer is not a special case, only the case where the
                   arrangement happens to have one side. Ten neurons reading a
@@ -186,29 +127,13 @@ export default function ShapesAndFlatteningPage() {
                   (8, 26, 26) with shorter tuples in it.
                 </p>
                 <Equation>{"reads    (1, 28, 28)\nanswers  (8, 26, 26)"}</Equation>
-                <p>
-                  The alternative would be to describe each side with a single
-                  number, how many values it holds. That works perfectly for a
-                  dense layer, whose neurons hold one weight per arriving
-                  number and have no notion of a row or a column, and it
-                  destroys the only thing a convolution cares about.
-                </p>
+                <p>An element count alone would report 784 for the input image. It would not identify the channel, row and column axes. A dense layer needs a feature row, while a convolution uses the spatial arrangement to choose neighboring pixels. Keeping the complete shape lets the connection check distinguish those representations.</p>
                 <KeepInMind>
-                  Reading and answering are two different facts and are kept as
-                  one object rather than two loose values, because a pair whose
-                  meaning depends on which came first is a thing waiting to be
-                  passed in the wrong order.
-                </KeepInMind>
+                  The input and output shapes have different roles. Keeping them in named fields makes it clear which arrangement a layer accepts and which it produces.</KeepInMind>
               </SubSection>
 
               <SubSection title="5. Eight numbers, arranged two ways">
-                <p>
-                  Take the smallest example that shows the difference at all.
-                  Eight numbers arranged as two channels of two rows by two
-                  columns, written (2, 2, 2), and the same eight numbers laid
-                  out in a single row, written (8,). Those are different
-                  arrangements of an identical amount of data.
-                </p>
+                <p>Arrange eight numbers as two channels, each with two rows and two columns: shape (2, 2, 2). The same values can be written as a feature row of shape (8,). The amount of data is equal, but the axes are different.</p>
                 <p>
                   The first arrangement has shape (2, 2, 2); the flattened arrangement has shape (8,). Both contain eight values. Flattening changes how we address those values, so the receiving layer needs to know which arrangement it will get.
                 </p>
@@ -265,14 +190,7 @@ export default function ShapesAndFlatteningPage() {
                     },
                   ]}
                 />
-                <p>
-                  Zero is worth dwelling on, since it looks like the harmless
-                  edge and is the dangerous one. A layer of height zero is not
-                  a degenerate layer that happens to do nothing; it is an
-                  absent layer, and its shape would agree with whatever sat
-                  above it for free, since a product with a zero in it is zero
-                  and a tuple with a zero in it matches nothing anyone meant.
-                </p>
+                <p>This SDK requires every declared extent to be positive, so it rejects a zero-height layer. That is an interface rule for these network layers. Arrays with a zero-length axis are valid in NumPy, and tuple equality would still distinguish their shapes; they do not automatically match every other arrangement.</p>
                 <KeepInMind>
                   An extent of zero is refused at the point where it is
                   written, so no layer downstream ever has to carry a branch
@@ -322,7 +240,7 @@ export default function ShapesAndFlatteningPage() {
             trueFalse(
               "Deciding whether the seven-layer digit chain is well formed costs six comparisons of tuples that are at most three numbers long.",
               true,
-              "Seven layers make six seams, and each seam is settled by comparing two short tuples of whole numbers. Nothing is trained, no picture is sent, and no memory is reserved for a batch, which is why checking first costs nothing worth measuring.",
+              "Each neighboring pair contributes one shape comparison, so seven layers require six comparisons. These checks use only the declared dimensions. They can find an incompatible connection before a batch is evaluated or training begins.",
             ),
             choice(
               "The digit chain reports that it reads (1, 28, 28) and answers (10,). Which figures in the chain does a reader have to reconcile against the world?",
@@ -333,7 +251,7 @@ export default function ShapesAndFlatteningPage() {
                 "The window size and the stride of each convolution",
               ],
               0,
-              "Only the two ends of a chain have anything to do with the data. Everything between them is internal, chosen by whoever wrote the network and settled among the layers themselves, so the 5408, the 1352 and the 400 are facts about the chain and about nothing else.",
+              "The input shape must match how each example is represented, and the output shape must match the answers the application needs. Intermediate shapes describe representations chosen within the network. They still affect computation and capacity, but a caller supplies the input at one end and reads the result at the other.",
             ),
             choice(
               "Why is each side of a shape written as a tuple of extents rather than as a single count of how many numbers it holds?",
@@ -344,7 +262,7 @@ export default function ShapesAndFlatteningPage() {
                 "The count cannot be worked out from the extents",
               ],
               0,
-              "A dense layer’s neurons hold one weight per arriving number and have no notion of a row or a column, so a count tells them everything. A convolution’s whole subject is neighbourhood, so collapsing (8, 26, 26) to 5408 throws away what it exists to exploit. The count is the extents multiplied together, so it is derived from the arrangement and never the other way round.",
+              "A dense layer’s neurons hold one weight per arriving number and have no notion of a row or a column, so a count tells them everything. A convolution’s whole subject is neighborhood, so collapsing (8, 26, 26) to 5408 throws away what it exists to exploit. The count is the extents multiplied together, so it is derived from the arrangement and never the other way round.",
             ),
             several(
               "This SDK’s shape type requires a nonempty tuple of positive integer extents. Which requests are rejected when constructing that shape?",
@@ -400,15 +318,7 @@ export default function ShapesAndFlatteningPage() {
                   by hand computes as eight times twenty-six times twenty-six,
                   and the dense layer reads (5408,).
                 </p>
-                <p>
-                  Both sides hold 5408 numbers. A check comparing counts passes
-                  it. Nothing crashes, the network trains, and it trains on a
-                  picture whose rows have been run end to end into one long
-                  strip, which throws away exactly the neighbourhood structure
-                  the convolution beneath it existed to exploit. The result is
-                  a model that works, converges, and is worse than it should
-                  be, for a reason nothing anywhere reported.
-                </p>
+                <p>A count-only check would accept this connection because both sides contain 5408 values. The dense layer still expects a feature row, so passing the unchanged feature maps to it fails its arrangement check. If we explicitly flatten the maps, the connection becomes valid. Flattening preserves the values and can be reversed when the original shape and reading order are known; it does not by itself prove that a trained model will perform worse.</p>
                 <SeamChecker />
                 <p>
                   The seam is refused, and the refusal says so in as many
@@ -422,14 +332,7 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
 
               <SubSection title="10. Three rearrangements a count would have let through">
-                <p>
-                  The (5408,) reading is not the only thing that slips past a
-                  count comparison. Two of the three extents swapped, so the
-                  rows become the channels, gives (26, 8, 26). One extent
-                  halved and another doubled gives (4, 52, 26). Both hold 5408
-                  numbers, both are refused, and neither is the harmless
-                  relabelling that a flat row at least is.
-                </p>
+                <p>Other arrangements can also contain 5408 values. Swapping the channel and row axes gives (26, 8, 26). Another possible arrangement is (4, 52, 26). Neither matches the convolution’s declared (8, 26, 26) output. Such conversions need explicit operations; equal counts do not perform or justify them.</p>
                 <NumberTable
                   headings={[
                     "what the upper layer reads",
@@ -446,14 +349,7 @@ export default function ShapesAndFlatteningPage() {
                   ]}
                   caption="Every row sits above a convolution answering (8, 26, 26). Four of the five agree on the count and one of the five holds."
                 />
-                <p>
-                  Read down the count column and the four numbers are the same.
-                  Read down the verdict column and one of those four is
-                  different. That is the gap a count comparison cannot see
-                  into, and three of the four things inside it are arrangement
-                  errors of the kind that produce a model reading the picture
-                  sideways.
-                </p>
+                <p>Four entries in the count column are 5408, but only the exact (8, 26, 26) arrangement matches the convolution’s output. The other three require a conversion before they can describe what the next layer receives. Comparing counts alone cannot identify which conversion is intended.</p>
                 <KeepInMind>
                   Equal counts is a far weaker statement than equal
                   arrangement, and the weaker statement admits mistakes that do
@@ -471,12 +367,7 @@ export default function ShapesAndFlatteningPage() {
                   the two arrangements.
                 </p>
                 <Equation>{"layer 0 answers with (8, 26, 26) and layer 1 reads (784,)"}</Equation>
-                <p>
-                  There is nothing surprising left to explain in that case. A
-                  reader looking at 5408 on one side and 784 on the other
-                  already knows the two do not match, and a clause telling them
-                  the arrangement is at fault would be noise.
-                </p>
+                <p>Here the element counts differ as well: 5408 values are produced and the dense layer expects 784. The message reports both complete arrangements. It does not add the equal-count explanation used in the previous case.</p>
                 <KeepInMind>
                   The extra clause appears only when the counts agree, which is
                   the one situation where a reader would otherwise think the
@@ -485,30 +376,10 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
 
               <SubSection title="12. Why the refusal names both arrangements">
-                <p>
-                  An earlier version of that message reported the two element
-                  counts rather than the two arrangements, and on the case this
-                  whole check exists to catch it printed that layer 0 answered
-                  with 5408 numbers and layer 1 read 5408. That is a refusal
-                  whose own text says the two sides agree.
-                </p>
-                <p>
-                  A reader meeting that message goes looking for a fault in the
-                  checking rather than for the missing layer in their own
-                  network, which is the opposite of what an early refusal is
-                  for. The message now names both arrangements, and adds the
-                  clause about the counts only when they really do agree.
-                </p>
+                <p>Suppose an error reported only that layer 0 produces 5408 values and layer 1 expects 5408. The counts agree, so the message would hide the reason for rejection: one side has three axes and the other has one.</p>
+                <p>The error therefore reports the complete input and output shapes. When the counts agree, it also states that their arrangements differ. That gives us enough information to decide whether an explicit flattening or another conversion belongs between the layers.</p>
                 <WhyThisWorks title="Why matching element counts do not guarantee matching shapes">
-                  <p>
-                    The join was always checked correctly. It compared extents,
-                    and the extents disagreed, so the answer was right. What
-                    was wrong was only how the answer described itself, which
-                    is why nothing failed and nothing was slower and a test of
-                    the verdict would have passed. A refusal is read by a
-                    person, and a refusal that contradicts itself costs that
-                    person more time than the mistake it is reporting.
-                  </p>
+                  <p>A connection test should check both the decision and the explanation returned to the caller. In this example, rejecting the incompatible tuples is correct. Reporting only their equal counts would leave the cause unclear. Testing the displayed shapes catches that separate reporting error.</p>
                 </WhyThisWorks>
                 <KeepInMind>
                   Naming both arrangements is what turns the refusal into an
@@ -524,14 +395,8 @@ export default function ShapesAndFlatteningPage() {
           title: "Part 4. Where the Picture Becomes a Row",
           content: (
             <>
-              <SubSection title="13. The bridge, said out loud as a layer">
-                <p>
-                  There is one place where a picture and a row genuinely are
-                  interchangeable, and the tempting repair is to weaken the
-                  seam check until it lets that one place through. That would
-                  mean comparing counts, and Part 3 is what comparing counts
-                  costs.
-                </p>
+              <SubSection title="13. Adding a Flattening Layer" id="13-the-bridge-said-out-loud-as-a-layer">
+                <p>To connect these convolution outputs to a dense layer, we need a row containing every feature-map value. That requires a stated conversion from (8, 26, 26) to (5408,). A count-only connection check would conceal the conversion rather than perform it.</p>
                 <p>
                   So the extents keep having to match exactly, and the one
                   legitimate conversion is written down as a layer of its own.
@@ -548,10 +413,7 @@ export default function ShapesAndFlatteningPage() {
                   decision.
                 </p>
                 <KeepInMind>
-                  The conversion is a layer because a layer can be checked. A
-                  looser rule cannot be checked, since by construction it
-                  admits three wrong arrangements for every right one.
-                </KeepInMind>
+                  An explicit flattening layer declares the conversion and lets both adjacent joins use the same shape comparison as the rest of the network. A count-only rule cannot distinguish this intended conversion from other rearrangements.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. Counting the numbers at every step">
@@ -586,16 +448,14 @@ export default function ShapesAndFlatteningPage() {
                   caption="The chain reads (1, 28, 28) and answers (10,). The bridge is the one step whose count is the same on both sides."
                 />
                 <p>
+
                   The bridge is the only row in that table where the two counts
                   are equal, and that is not a coincidence about this
-                  particular chain. Flattening is a relabelling of the numbers
+                  particular chain. Flattening is a relabeling of the numbers
                   it was handed, so it cannot change how many there are.
                 </p>
                 <KeepInMind>
-                  The count peaks early and falls for the rest of the chain.
-                  Where the picture becomes a row is not where the data gets
-                  smaller; the pooling layers did that.
-                </KeepInMind>
+                  The largest representation in this chain appears after the first convolution. The count then falls, rises at the second convolution and falls again. Flattening changes the arrangement while preserving the count; pooling is what reduces it at the preceding step.</KeepInMind>
               </SubSection>
 
               <SubSection title="15. Taking the bridge out">
@@ -643,23 +503,8 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
 
               <SubSection title="17. The way back down">
-                <p>
-                  When a network learns, blame travels down the chain in the
-                  opposite direction, and the bridge has to send it back to
-                  where it came from. That step is the forward reshape read
-                  backwards and nothing more, since the number at position k of
-                  the row is the number that was at position k of the picture,
-                  so the slope of the loss at one of them is the slope at the
-                  other.
-                </p>
-                <p>
-                  What has to hold is that the two reshapes agree about which
-                  position is which, which is why both use the same ordering,
-                  with the last extent varying fastest. Choose differently in
-                  one of the two directions and the layer would still run, the
-                  shapes would still all agree, and the blame would arrive at
-                  the wrong pixels.
-                </p>
+                <p>{"Flattening changes the arrangement of entries without changing their values. Its backward pass restores the original arrangement of the arriving derivatives using the inverse reshape. The loss derivative associated with one flat-row position belongs to the same entry that occupied that position in the image's declared reading order."}</p>
+                <p>{"Forward and backward reshaping must use the same reading order, with the last extent varying fastest here. A different order on the way back would still produce an array of the expected shape, but its derivatives would refer to the wrong pixels. Shape agreement alone cannot detect that mistaken correspondence."}</p>
                 <WorkedExample title="Where one number lands">
                   <>
                     <p>
@@ -672,28 +517,12 @@ export default function ShapesAndFlatteningPage() {
                       zero.
                     </p>
                     <Equation>{"position = c × (h × w) + i × w + j\n\nchannel 1, row 0, column 1 of (2, 2, 2)\nposition = 1 × (2 × 2) + 0 × 2 + 1 = 5"}</Equation>
-                    <p>
-                      I put a single nonzero number at that place and it came out at
-                      position 5 of the row. Sending blame back down at position 5
-                      alone returned it to channel 1, row 0, column 1 and to nowhere
-                      else, and the layer reported no gradient.
-                    </p>
+                    <p>{"A single nonzero entry at that location appears at position 5 of the flattened row. Sending an input derivative only to position 5 restores it to channel 1, row 0, column 1. No other position receives it. The layer reports no parameter gradient because reshaping has no trainable parameters."}</p>
                   </>
                 </WorkedExample>
-                <p>
-                  The bridge also has no parameters, so it produces no gradient
-                  at all rather than a gradient full of zeros. A block of zeros
-                  would be a small false claim about having something to learn,
-                  and the honest answer is that there is nothing here for a
-                  step to move.
-                </p>
+                <p>Flattening has no trainable parameters. Its backward operation rearranges the incoming gradient to the original input shape; there is no parameter gradient or optimizer update for this layer. A zero-filled parameter array would imply parameters that this operation does not have.</p>
                 <KeepInMind>
-                  The layer computes nothing in either direction, and it
-                  reshapes rather than copies wherever the numbers are already
-                  laid out contiguously, so the largest intermediate a
-                  convolutional chain holds is not duplicated to cross the
-                  bridge.
-                </KeepInMind>
+                  Flattening performs a reshape in each direction, with no learned parameters or numerical transformation of the entries. Within the reshape, NumPy can reuse the same storage when the layout permits a view. The SDK’s input conversion may still make a copy, so this does not establish that the complete layer call allocates no new storage.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -704,7 +533,7 @@ export default function ShapesAndFlatteningPage() {
             trueFalse(
               "A seam check that compared counts would fail loudly on a dense layer written to read (5408,) placed straight above a convolution answering (8, 26, 26).",
               false,
-              "It passes, which is the whole reason arrangements are compared instead. Nothing crashes and the network trains, on a picture whose rows have been run end to end into one long strip, so the result is a model that works, converges and is worse than it should be for a reason nothing anywhere reported.",
+              "A count-only check would accept this connection because both shapes contain 5,408 values. It would miss the difference between spatial axes and a flat feature axis. What happens at evaluation then depends on the implementation: it might fail or interpret the values incorrectly. Passing a count check is no evidence that training will work or converge.",
             ),
             several(
               "A convolution answers (8, 26, 26). Which of these readings, placed straight above it, are refused?",
@@ -729,7 +558,7 @@ export default function ShapesAndFlatteningPage() {
                 "Only on the seam nearest the picture",
               ],
               0,
-              "With 5408 on one side and 784 on the other, a reader already knows the two do not match and the clause would be noise, so the sentence stops after the two arrangements. The clause appears only where a reader would otherwise think the refusal was itself a mistake. An earlier message reported the two counts instead, and on the case the check exists for its own text said that 5408 met 5408.",
+              "The extra clause appears when the element counts agree but the shape tuples differ. It explains why two arrangements containing 5,408 values can still be incompatible. When the counts also differ, the displayed input and output shapes already show that mismatch.",
             ),
             choice(
               "Along the digit chain the count of numbers runs 784, 5408, 1352, 1936, 400, 400, 32 and 10. Which step leaves the count where it was, and why?",
@@ -763,14 +592,7 @@ export default function ShapesAndFlatteningPage() {
           content: (
             <>
               <SubSection title="18. Sliding a window along a side">
-                <p>
-                  Every extent a convolution or a pooling layer answers with
-                  comes from one counting argument. Lay a window of width k
-                  along a side of width n and slide it s at a time. The first
-                  position is at the left edge, and after that there is one
-                  more position for every whole stride that fits in what is
-                  left over.
-                </p>
+                <p>For these undilated convolution and pooling layers, the number of window positions determines each spatial output extent. Start with a side of length n, a window of width k and a stride of s. Place the first window at the left edge, then count how many additional full strides still leave the entire window inside the input.</p>
                 <Equation>{"positions  =  (n − k) // s  +  1"}</Equation>
                 <p>
                   Set the window and the stride below and count the green bars.
@@ -786,9 +608,10 @@ export default function ShapesAndFlatteningPage() {
                   eight starts in exactly one place and leaves the side at one.
                 </p>
                 <KeepInMind>
+
                   Nothing in this rule depends on what the window computes,
                   which is why a convolution and a pooling layer share it
-                  exactly and differ only in what each window is summarised
+                  exactly and differ only in what each window is summarized
                   down to.
                 </KeepInMind>
               </SubSection>
@@ -813,15 +636,9 @@ export default function ShapesAndFlatteningPage() {
                     ["1", "1", "0", "8"],
                     ["8", "1", "0", "1"],
                   ]}
-                  caption="A convolution reading (1, 8, 8), so n is 8 in every row. The two rows answering 8 are the settings that leave the picture the size it was."
+                  caption="A convolution reading (1, 8, 8), so n is 8 in every row. Rows answering 8 preserve the input side length."
                 />
-                <p>
-                  Read the second and sixth rows together. A window of three
-                  with one row of padding and a window of five with two both
-                  leave the side at eight, which is the pairing worth
-                  remembering, since a window of width 2m + 1 with m of padding
-                  always does.
-                </p>
+                <p>With stride one, a window of three and one cell of padding on each side preserves the input side length. So does a window of five with two cells of padding. More generally, an odd window of width 2m + 1 and padding m preserves that length when the stride is one.</p>
                 <WorkedExample>
                   <>
                     <p>
@@ -855,13 +672,7 @@ export default function ShapesAndFlatteningPage() {
                       every channel are never inside a window.
                     </p>
                     <Equation>{"numbers arriving    16 × 11 × 11 = 1936\nnumbers covered     16 × 10 × 10 = 1600\nnever read          1936 − 1600  = 336"}</Equation>
-                    <p>
-                      I moved those 336 numbers by a hundred each and the pooling
-                      layer&rsquo;s answer did not change at any position. Moving one
-                      covered number changed it. Nothing was refused and nothing was
-                      reported, which is the sense in which the layer says nothing
-                      about the positions it never reaches.
-                    </p>
+                    <p>Changing the 336 uncovered entries cannot affect these pooling outputs, because no window reads them. A covered entry can affect an output if it is selected by max pooling. Changing a covered value that remains below the window’s maximum may leave the output unchanged.</p>
                   </>
                 </InAModel>
                 <KeepInMind>
@@ -872,13 +683,7 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
 
               <SubSection title="20. When the window does not fit">
-                <p>
-                  Push the window wider than what it reads and the sum would go
-                  to zero or below, and a layer of extent zero is not a layer.
-                  Both kinds refuse it, and the two refusals are phrased
-                  differently because the two layers reach the failure
-                  differently.
-                </p>
+                <p>With no padding, a window wider than the input has no complete position to occupy. These layer constructors reject a configuration whose spatial output extent would be zero or negative. A convolution with padding must compare the window against the padded side length.</p>
                 <DerivationTable
                   expressionHeading="what was asked for"
                   reasonHeading="what came back"
@@ -906,10 +711,7 @@ export default function ShapesAndFlatteningPage() {
                   so the sentence can name the two numbers and stop.
                 </p>
                 <KeepInMind>
-                  A window exactly as wide as the side is allowed and answers
-                  with one position. It is one wider that is refused, which is
-                  the boundary worth checking when reading either message.
-                </KeepInMind>
+                  Without padding, a window exactly as wide as the input fits in one position. A wider window has no complete position and is rejected. Padding changes the available side length, so it must be included when checking a convolution.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. What the other two kinds of layer answer">
@@ -989,20 +791,8 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
 
               <SubSection title="24. A chain that refuses to exist">
-                <p>
-                  So the chain is the object. It takes the layers in order and
-                  walks up them, and it will not come into existence unless
-                  every seam holds. There is no way to be holding a badly
-                  joined chain, because the constructor either hands one back
-                  or raises.
-                </p>
-                <p>
-                  That is what makes every later pass cheap. A forward pass
-                  through the chain re-establishes nothing, since the interior
-                  seams were settled when it was built, and the only width
-                  anything checks is the first layer&rsquo;s, which that layer
-                  checks for itself against the block it was handed.
-                </p>
+                <p>{"The chain object validates the layers' interfaces when it is constructed. It follows their declared shapes in order and returns a chain only if each output fits the next input. A mismatch raises an error at construction, so later calls do not have to discover the same incompatible connection during prediction."}</p>
+                <p>The stack checks the configured joins once at construction. During a forward pass, each layer still validates the actual block it receives. Those runtime checks cover shape and valid incoming values; the constructor does not replace them.</p>
                 <WhyThisWorks title="Why the editor can show a connection that execution rejects">
                   <p>
                     The builder at the top of this page can show you a red seam
@@ -1028,24 +818,8 @@ export default function ShapesAndFlatteningPage() {
                   be in the same vocabulary its layers use. The digit chain
                   says it reads (1, 28, 28) and answers (10,).
                 </p>
-                <p>
-                  It said something else once. An earlier version built its own
-                  report out of the counts rather than the arrangements, so a
-                  chain beginning with a convolution over (1, 28, 28)
-                  cheerfully reported that it read (784,). Every seam inside it
-                  was still checked correctly, since the seam comparison never
-                  consulted the collapsed figure, and only the chain&rsquo;s
-                  description of itself was wrong.
-                </p>
-                <p>
-                  That is the quiet half of it. A caller sizing a block of
-                  input from what the chain said it read would build a row of
-                  784 numbers and be refused by the chain&rsquo;s own first
-                  layer, which is a confusing place to be. Every test that
-                  existed was built out of dense layers, where the arrangement
-                  and the count are the same number and so cannot be told
-                  apart, which is precisely why nothing caught it.
-                </p>
+                <p>If the stack reported only its input count, it would describe this image input as (784,). That would lose the declared (1, 28, 28) arrangement even if every internal join had been checked correctly. The stack’s own input description must therefore retain the first layer’s complete shape.</p>
+                <p>A caller using a reported (784,) input shape would build rows that the first convolution rejects. A test using only dense layers would not reveal that reporting mistake, because each example already has one feature axis. An image-shaped fixture is needed to check that the stack retains multiple input axes.</p>
                 <KeepInMind>
                   A test suite written entirely in the case where two facts
                   coincide cannot notice an implementation that confuses them.
@@ -1055,28 +829,9 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
 
               <SubSection title="26. The seam a chain still cannot check">
-                <p>
-                  One thing is left open and is documented rather than
-                  defended. Two different pooling layers can carry the identical
-                  shape. A window of three at stride one over (1, 4, 4) answers
-                  (1, 2, 2), and so does a window of two at stride two, and the
-                  two reach that answer by covering different positions.
-                </p>
-                <p>
-                  On the way back down, either of them would accept the
-                  other&rsquo;s slopes without complaint, since all a layer can
-                  check is that the block it was handed matches its own shape,
-                  and blame would be routed to positions that never won a
-                  window. Closing that would need a response carrying which
-                  layer produced it.
-                </p>
-                <p>
-                  No chain can reach the case, because a chain pairs each layer
-                  with its own response by construction, so this is a hole in
-                  what a layer can verify on its own rather than a hole in the
-                  guarantee. It is written down in the implementation instead
-                  of being guarded against.
-                </p>
+                <p>Shape alone cannot identify which layer produced a saved response. For example, pooling with a window of three at stride one over (1, 4, 4) outputs (1, 2, 2). A window of two at stride two gives the same output shape while covering different input positions.</p>
+                <p>{"On the backward pass, either layer would accept the other's derivative block if the shape matched. That check cannot establish which forward response produced the block, so it could route derivatives to positions that never won a pooling window. Detecting that mismatch would require retaining the producing layer's identity with its response."}</p>
+                <p>The stack’s normal backward pass pairs each layer with the response recorded at that position during its own forward pass. A caller using the layer API directly must preserve that association. Matching shapes alone cannot establish that a response came from the correct operation.</p>
                 <KeepInMind>
                   The guarantee is about chains, and a layer handed a block
                   from nowhere in particular has less to go on. Saying which of
@@ -1091,8 +846,8 @@ export default function ShapesAndFlatteningPage() {
           content: (
             <>
               <SubSection title="27. The dimensions and window conventions a shape must record" id="27-what-a-complete-implementation-must-specify">
-                <p>Two neighbouring layers need to agree on what their dimensions mean. Define the allowed extents and whether compatibility requires the same arrangement or only the same count. A windowed layer must also specify how it computes output extents, handles a remainder and applies padding.</p>
-                <p>Flattening needs a fixed ordering and a backward pass that reverses that ordering. State whether that layer returns a gradient or no gradient, and which input and output shapes a chain reports.</p>
+                <p>Two neighboring layers need to agree on what their dimensions mean. Define the allowed extents and whether compatibility requires the same arrangement or only the same count. A windowed layer must also specify how it computes output extents, handles a remainder and applies padding.</p>
+                <p>Flattening needs a fixed reading order and a backward pass that restores the corresponding input arrangement. Distinguish the gradient passed to the preceding layer from a parameter gradient: flattening passes input gradients backward but has no trainable parameters. Also specify which complete input and output shapes the stack reports.</p>
                 <p>Finally, decide whether a chain may contain one layer or no layers. If the same layer appears at several positions, make clear how an update treats that shared object. These choices affect execution even when every displayed shape looks compatible.</p>
                 <p>
                   The last two on that list are where this implementation is
@@ -1102,40 +857,11 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
 
               <SubSection title="28. One layer standing at two positions">
-                <p>
-                  Weight tying is putting the same layer object at two places
-                  in one chain, so that whatever one of them learns the other
-                  learns as well. It is how a pair of towers is made to read
-                  two inputs the same way, and it is written by simply passing
-                  the same object twice.
-                </p>
-                <p>
-                  This chain accepts that, runs forward through it, scores it
-                  and walks the blame back down without a word. Then a step
-                  rebuilds every position from that position&rsquo;s own
-                  gradient, and the two positions come back as two different
-                  layers.
-                </p>
+                <p>Weight tying means reusing the same parameters at more than one position or branch. Each use contributes to the gradient for that shared parameter set, and an update must keep the parameters shared. Passing the same layer object twice expresses that intent here, but the next example tests whether the SDK’s update preserves it.</p>
+                <p>{"This chain accepts the shared object, runs the forward calculation, evaluates the loss and computes the backward derivatives. Its update then rebuilds each position from that position's gradient, producing two distinct layer objects. Reusing an object in the input list therefore does not preserve parameter sharing after this implementation's update."}</p>
                 <SharedLayerStep />
-                <p>
-                  One object went in and two came out. On the small square
-                  layer above, one step at a rate of 0.1 leaves the two
-                  positions 1.54375 apart at their furthest, and a rate a
-                  hundred times smaller leaves them 0.0154375 apart, so
-                  shrinking the step narrows the gap in proportion and never
-                  closes it.
-                  Nothing anywhere raised, and a network written this way would
-                  train perfectly happily while quietly not doing the thing it
-                  was written to do.
-                </p>
-                <p>
-                  Nothing here does this today, and it is recorded
-                  rather than repaired because the repair is a real piece of
-                  design. Gradients would have to be grouped by which set of
-                  parameters they describe rather than by which position they
-                  came from, and that is a change to what a step is, not a
-                  patch to how one is applied.
-                </p>
+                <p>The forward pass starts with one shared object, but the update returns two separate layers. In this example, a learning rate of 0.1 leaves corresponding parameters up to 1.54375 apart. A rate one hundred times smaller leaves a largest difference of 0.0154375. Reducing the step reduces this observed separation; it does not restore parameter sharing. The update raises no error for the loss of sharing.</p>
+                <p>Preserving weight tying would require combining the gradients from every use of the shared parameter set before applying one update. The current step method instead updates each list position independently. Callers who need tied weights must use an update implementation that retains that shared identity.</p>
                 <KeepInMind>
                   A chain here is a list of positions, and a step rebuilds
                   positions. Two positions holding one object is a fact the
@@ -1144,39 +870,12 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
 
               <SubSection title="29. Whole numbers handed to a layer">
-                <p>
-                  Every block a layer reads goes through the same boundary. It
-                  is turned into floating point and scanned for values that are
-                  not finite, and those two things are all that happens to it.
-                  For measurements that is exactly right, since a height and a
-                  weight are quantities and being off in the last bit is
-                  meaningless.
-                </p>
-                <p>
-                  For anything meant as a position it is wrong twice over. A
-                  value of 2.9999999999999996 goes through as itself and would
-                  be truncated to 2 by anything using it as a position, and a
-                  value of &minus;1 goes through as itself and would wrap
-                  around to the last row of whatever table it indexed. Neither
-                  is checked, because the two checks a position wants are that
-                  it is whole and that it is in range, and neither of those is
-                  the check being made.
-                </p>
+                <p>The base input boundary converts values to float64 and checks that they are finite. Those checks suit the real-valued measurements used by these layers. They do not validate integer positions or preserve every possible large integer exactly.</p>
+                <p>An index needs different checks. The value 2.9999999999999996 is finite but is not an integer; explicitly converting it to an integer would truncate it to 2. Python and NumPy do not generally accept that float as an array index. A negative integer such as −1 can select the final entry under ordinary indexing rules. An index-taking API must therefore check both whole-number type and allowed range before lookup.</p>
                 <CoercedNumbers />
-                <p>
-                  The third failure is the one that cannot be argued away. Ask
-                  for five distinct whole numbers including 9007199254740992
-                  and the number one above it, and four distinct values come
-                  back, because floating point stops being able to tell
-                  consecutive whole numbers apart at that size. The finiteness
-                  scan passes every one of them.
-                </p>
+                <p>Float64 also cannot distinguish every pair of consecutive integers at large magnitudes. In the displayed input, five distinct integers include 9007199254740992 and the next integer. Conversion leaves only four distinct floating-point values. Every result is finite, so a finiteness check cannot detect the lost distinction.</p>
                 <KeepInMind>
-                  Nothing is broken today, since no layer here takes positions.
-                  It is what a layer looking words up in a table would have to
-                  change first, and it is the same hole that stops anything
-                  spectral being handed complex values.
-                </KeepInMind>
+                  These network layers currently consume real-valued measurements. An embedding lookup layer would need an integer-preserving input path with range checks. An operation accepting complex values would likewise need a representation that keeps both components instead of this real float64 conversion.</KeepInMind>
               </SubSection>
 
               <SubSection title="30. Equal counts, different arrangements and invalid extents" id="30-the-edges-probed">
@@ -1192,7 +891,7 @@ export default function ShapesAndFlatteningPage() {
                     {
                       expression: "an extent of zero",
                       reason:
-                        "refused where the shape is made, since a side of zero is an absent layer rather than a small one and would agree with anything above it.",
+                        "refused by this SDK’s positive-extent requirement when the shape is constructed.",
                     },
                     {
                       expression: "a negative extent",
@@ -1212,7 +911,7 @@ export default function ShapesAndFlatteningPage() {
                     {
                       expression: "neither the counts nor the arrangements agree",
                       reason:
-                        "refused, with the clause about counts dropped, since nothing there is surprising.",
+                        "refused with both arrangements reported; no equal-count explanation is needed.",
                     },
                     {
                       expression: "a chain of one layer",
@@ -1242,26 +941,16 @@ export default function ShapesAndFlatteningPage() {
                     {
                       expression: "one layer at two positions of one chain",
                       reason:
-                        "accepted, and one step leaves two layers where there was one. Documented rather than defended; nothing raises.",
+                        "accepted for the forward pass; the current update creates separate layers for the two positions and does not preserve parameter sharing.",
                     },
                     {
                       expression: "whole numbers meant as positions",
                       reason:
-                        "accepted, coerced to floating point, never checked for being whole or in range, and two consecutive large ones arrive as one. Documented rather than defended.",
+                        "converted to floating point without index-specific integer or range checks; sufficiently large consecutive integers can lose their distinct values.",
                     },
                   ]}
                 />
-                <p>
-                  Two of those twelve rows are the ones to carry away. Eight
-                  of the twelve are refusals, and two are ordinary acceptances,
-                  a chain of one layer and a bridge over a row, which do
-                  exactly what was asked. The last two are accepted and then
-                  do something the caller did not ask for. A step
-                  unties tied weights and a layer cannot be handed a position,
-                  and in both cases the implementation says so instead of
-                  pretending otherwise or quietly substituting something
-                  plausible.
-                </p>
+                <p>The final two cases need checks beyond matching shape tuples. Reusing a layer object does not preserve weight tying under this update method. Passing finite floats does not establish that values are valid integer indices. Shape compatibility answers one question about execution; parameter sharing and input meaning need their own contracts.</p>
               </SubSection>
             </>
           ),
@@ -1270,15 +959,15 @@ export default function ShapesAndFlatteningPage() {
           title: "Questions on Parts 5 to 7",
           quiz: [
             choice(
-              "A three-wide window walks an eight-wide side two steps at a time, with one row of padding at each edge. How many sides does the layer answer with?",
+              "An eight-wide input has one padded cell on each edge. A three-wide window moves at stride two. How many output positions fit along this axis?",
               ["Three", "Four", "Six", "Eight"],
               1,
-              "Padding widens the side the window walks along by two, so the sum is (8 − 3 + 2) // 2 + 1, which is 7 // 2 + 1 = 4 with the remainder dropped. Three is the same window and stride with no padding, six is the same window one step at a time with no padding, and eight is what one row of padding gives at a stride of one, the setting that leaves the picture the size it was.",
+              "Four complete window positions fit. Padding extends the available side before the window starts moving, and a stride of two skips every other possible starting position. A partial window at the far edge does not add another output position.",
             ),
             trueFalse(
               "A window exactly as wide as the side it reads is allowed, and the layer answers with a side of one.",
               true,
-              "A window of eight over a side of eight starts in exactly one place. It is one wider that is refused, since the sum would then go to zero and a layer of extent zero is not a layer. The convolution writes that sum out in full, (8 − 9 + 2 * 0) // 1 + 1 = 0, because padding and stride are both in it and a reader needs to see which term they got wrong.",
+              "Without padding, a window of eight covers an eight-wide side in exactly one position. A window of nine cannot fit at all. This SDK rejects the resulting zero output extent. The error includes the window, stride and padding settings so the caller can identify why no complete window fits.",
             ),
             choice(
               "Why is the whole question decidable when the network is written rather than merely convenient to check there?",
@@ -1294,7 +983,7 @@ export default function ShapesAndFlatteningPage() {
             trueFalse(
               "The chain that cheerfully reported it read (784,) while beginning with a convolution over (1, 28, 28) was also checking its interior seams wrongly.",
               false,
-              "Every seam inside it was still checked correctly, because the seam comparison never consulted the collapsed figure. Only the chain’s description of itself was wrong, which is the quiet half, since a caller sizing a block from that report builds a row of 784 numbers and is refused by the chain’s own first layer. Every test that existed was built out of dense layers, where the arrangement and the count are written with the same number, which is precisely why nothing caught it.",
+              "The internal connection check and the stack’s reported input shape are separate pieces of behavior. Internal connections can pass while an incorrect public shape leads the caller to prepare the wrong input arrangement. Testing only flat dense layers would miss that distinction; a spatial-input test checks that the public shape preserves every axis.",
             ),
             several(
               "Of the twelve edges Part 7 probes, two are accepted and then do something the caller did not ask for. Which two?",
@@ -1305,7 +994,7 @@ export default function ShapesAndFlatteningPage() {
                 "A window wider than the side it reads is accepted and answers with an extent of zero",
               ],
               [0, 1],
-              "In both of those the implementation says so rather than pretending otherwise. One step at a rate of 0.1 leaves two tied positions 1.54375 apart at their furthest and a rate a hundred times smaller leaves them 0.0154375 apart, so shrinking the step never closes the gap. The pooling ambiguity is documented rather than guarded against, and no chain can reach it, since a chain pairs each layer with its own response by construction. A window wider than its side is one of the eight refusals.",
+              "Reusing one layer object at two positions does not make this stack combine their gradients into a shared-parameter update. The two positions receive separate updated objects; a smaller nonzero rate reduces their numerical difference without preserving identity. The other accepted case is a pooling response from a different layer with compatible dimensions. An ordinary stack uses each layer’s own response, so that mismatch arises when the backward API is used directly.",
             ),
         ],
         },
@@ -1316,7 +1005,7 @@ export default function ShapesAndFlatteningPage() {
               "Build the digit chain and read every extent",
               [
   "Build the supplied two convolution/pooling rounds, Flatten and dense layers of widths thirty-two and ten. Propagate each preceding output shape into the next layer’s input.",
-  "For grayscale (1,28,28) and colour (3,32,32) inputs, print every layer’s input shape, output shape and output-value count, then the stack endpoints and width entering Flatten. Parameter values may be zero here because the exercise inspects shape contracts."
+  "For grayscale (1,28,28) and color (3,32,32) inputs, print every layer’s input shape, output shape and output-value count, then the stack endpoints and width entering Flatten. Parameter values may be zero here because the exercise inspects shape contracts."
 ],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear
@@ -1372,7 +1061,7 @@ numbers arriving at the bridge 576`,
               { hints: [
   "A spatial output keeps channel, height and width axes until Flatten.",
   "The dense input width is the product of the immediately preceding spatial dimensions; recompute it for each image layout."
-], check: numberCheck("With the same seven layers over a picture of (3, 32, 32), how many numbers arrive at the bridge?", 576, 0.5, "There are 576 values before Flatten for the colour-image setting. Their channels and spatial dimensions determine the dense input width, not the earlier grayscale case."), question: "Which dimensions reach the dense layer after the image stack?" },
+], check: numberCheck("With the same seven layers over a picture of (3, 32, 32), how many numbers arrive at the bridge?", 576, 0.5, "There are 576 values before Flatten for the color-image setting. Their channels and spatial dimensions determine the dense input width, not the earlier grayscale case."), question: "Which dimensions reach the dense layer after the image stack?" },
             ),
             exercise(
               "Leave the bridge out, then ask each seam yourself",

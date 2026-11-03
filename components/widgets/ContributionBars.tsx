@@ -108,7 +108,7 @@ export function ContributionBars({
         One bar per distinct word, longest first, and a word used twice carries
         both of its uses in one bar. The shares add to exactly one, so a bar
         wider than the equal share above means that word supplied more of the
-        answer than its count of tokens would suggest. Grey is a word carrying no
+        answer than its count of tokens would suggest. Gray is a word carrying no
         subject.
       </Legend>
       {message && (

@@ -24,7 +24,7 @@ export const lessonOrder: string[] = CURRICULUM.flatMap(lessonHrefs);
 
 // The lesson a reader would sensibly start on: the first one after the
 // primers, which are there to be returned to rather than read first.
-export const firstLesson: string = lessonHrefs(CURRICULUM.find(part => part.title === "Start with a Prediction") ?? CURRICULUM[0])[0] ?? lessonOrder[0];
+export const firstLesson: string = lessonHrefs(CURRICULUM.find(part => part.id === "start-with-a-prediction") ?? CURRICULUM[0])[0] ?? lessonOrder[0];
 
 export interface LessonLink {
   title: string;

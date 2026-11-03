@@ -99,7 +99,7 @@ export function SplitInspector() {
         <input type="range" min={0} max={Math.max(0, candidates.length - 1)} step={1} value={candidateIndex} onChange={(event) => setThreshold(candidates[Number(event.target.value)])} className="flex-1 accent-indigo-600" disabled={candidates.length === 0} />
         <span className="w-14 text-right font-mono">{threshold}</span>
       </label>
-      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">The slider snaps to the {candidates.length} candidates the search tries for this feature, each halfway between two neighbouring distinct values.</p>
+      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">The slider snaps to the {candidates.length} candidates the search tries for this feature, each halfway between two neighboring distinct values.</p>
 
       <svg viewBox={`0 0 ${VIEW.width} ${VIEW.height}`} className="mt-3 w-full select-none rounded-lg bg-slate-50 dark:bg-slate-950">
         {feature === "height" ? (

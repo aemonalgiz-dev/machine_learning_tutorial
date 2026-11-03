@@ -40,7 +40,7 @@ async function connect(context: BrowserContext, remote: Service) {
 
 async function ready(page: Page) {
   await page.goto("/account");
-  await expect(page.getByText("All work synced", { exact: true })).toBeVisible();
+  await expect(page.getByText("All work saved", { exact: true })).toBeVisible();
 }
 
 async function learningStorageKeys(page: Page) {
@@ -153,7 +153,8 @@ test("offline edits retry in memory while unsaved edits reset on reload", async 
   await expect(page.getByTestId("account-sync")).toHaveAttribute("data-sync-status", "saved");
   remote.fail = true;
   await page.getByLabel("My prediction", { exact: true }).fill("Offline prediction");
-  await expect(page.getByRole("link", { name: "Work needs syncing" })).toBeVisible();
+  await expect(page.getByTestId("account-sync")).toHaveAttribute("data-sync-status", "error");
+  await expect(page.getByTestId("account-sync")).toHaveAccessibleName(/Your work has not saved yet/);
   expect(await learningStorageKeys(page)).toEqual([]);
   remote.fail = false;
   await page.evaluate(() => window.dispatchEvent(new Event("online")));
@@ -161,7 +162,8 @@ test("offline edits retry in memory while unsaved edits reset on reload", async 
   await expect(page.getByTestId("account-sync")).toHaveAttribute("data-sync-status", "saved");
   remote.fail = true;
   await page.getByLabel("My prediction", { exact: true }).fill("Unsaved prediction must not survive reload");
-  await expect(page.getByRole("link", { name: "Work needs syncing" })).toBeVisible();
+  await expect(page.getByTestId("account-sync")).toHaveAttribute("data-sync-status", "error");
+  await expect(page.getByTestId("account-sync")).toHaveAccessibleName(/Your work has not saved yet/);
   await page.reload();
   remote.fail = false;
   await page.evaluate(() => window.dispatchEvent(new Event("online")));
@@ -180,16 +182,16 @@ test("device edits sync into one current state with a recoverable previous copy"
   await page.getByRole("button", { name: "Switch to the dark theme" }).click();
   const other = { ...remote.records.alice["preferences:theme"], revision: 2, mutationId: "other-device", value: "light" };
   remote.records.alice["preferences:theme"] = other;
-  await expect(page.getByText(/Sync will retry/)).toBeVisible();
+  await expect(page.getByText(/Saving will retry/)).toBeVisible();
   remote.fail = false; await page.getByRole("button", { name: "Sync now" }).click();
-  await expect(page.getByText("All work synced", { exact: true })).toBeVisible();
+  await expect(page.getByText("All work saved", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Choose the work to keep" })).toHaveCount(0);
   const local = await page.evaluate(() => JSON.parse(localStorage.getItem("fitlab.learning.v1:alice:preferences:theme")!));
   expect(local.recovery).toEqual(other);
   expect(remote.records.alice["preferences:theme"].value).toBe("dark");
   expect(remote.records.alice["preferences:theme"].revision).toBe(3);
   await page.reload();
-  await expect(page.getByText("All work synced", { exact: true })).toBeVisible();
+  await expect(page.getByText("All work saved", { exact: true })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
@@ -396,6 +398,6 @@ test("repeated page cursors stop sync instead of looping or uploading partial st
     pages++;return route.fulfill({json:{records:[],nextCursor:"bank:last:v1"}});
   });
   await page.goto("/account");
-  await expect(page.getByText(/Sync will retry/)).toBeVisible();
+  await expect(page.getByText(/Saving will retry/)).toBeVisible();
   expect(pages).toBe(2);expect(remote.writes).toHaveLength(0);
 });

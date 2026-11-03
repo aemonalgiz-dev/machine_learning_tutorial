@@ -76,7 +76,7 @@ export function ScaleShiftUndo() {
         ))}
         <span className="ml-auto flex items-center gap-2">
           <button onClick={standardiseOnly} className={BUTTON_CLASS}>
-            Standardise only
+            Standardize only
           </button>
           <button onClick={undo} className={BUTTON_CLASS} disabled={!answer}>
             Undo exactly
@@ -119,8 +119,8 @@ export function ScaleShiftUndo() {
             <tr className="border-b border-slate-200 text-left dark:border-slate-800">
               <th className="py-1.5 pr-4 font-semibold text-slate-600 dark:text-slate-400">row</th>
               <th className="py-1.5 pr-4 font-semibold text-slate-600 dark:text-slate-400">raw</th>
-              <th className="py-1.5 pr-4 font-semibold text-slate-600 dark:text-slate-400">standardised</th>
-              <th className="py-1.5 font-semibold text-slate-600 dark:text-slate-400">scale · standardised + shift</th>
+              <th className="py-1.5 pr-4 font-semibold text-slate-600 dark:text-slate-400">standardized</th>
+              <th className="py-1.5 font-semibold text-slate-600 dark:text-slate-400">scale · standardized + shift</th>
             </tr>
           </thead>
           <tbody>

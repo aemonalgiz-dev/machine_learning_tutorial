@@ -11,6 +11,7 @@ function journey(value: unknown): value is JourneyProgress {
   if (!value || typeof value !== "object") return false;
   const row = value as JourneyProgress;
   return typeof row.id === "string" && (row.built === null || evidence(row.built)) && (row.transferred === null || evidence(row.transferred)) &&
+    (row.connected === undefined || row.connected === null || evidence(row.connected)) &&
     (row.exploredAt === null || typeof row.exploredAt === "number" && Number.isFinite(row.exploredAt)) &&
     (row.attempts === undefined || Array.isArray(row.attempts) && row.attempts.every(attempt => evidence(attempt) &&
       typeof attempt.attemptId === "string" && (attempt.kind === "built" || attempt.kind === "transferred")));
@@ -31,6 +32,10 @@ export function reconcileLearnerValue(key: string, local: unknown, remote: unkno
       attempts.set(id, { ...attempt, at: Math.max(attempt.at, previous?.at ?? 0), supported: attempt.supported || Boolean(previous?.supported) });
     }
   }
-  return { ...local, exploredAt: local.exploredAt ?? remote.exploredAt, built: local.built ?? remote.built,
+  const connected = local.connected ?? remote.connected;
+  return { ...local, ...(connected ? { connected: { ...connected,
+    at: Math.min(local.connected?.at ?? connected.at, remote.connected?.at ?? connected.at),
+    supported: Boolean(local.connected?.supported || remote.connected?.supported),
+  } } : {}), exploredAt: local.exploredAt ?? remote.exploredAt, built: local.built ?? remote.built,
     transferred: local.transferred ?? remote.transferred, attempts: [...attempts.values()].sort((a, b) => a.at - b.at) };
 }

@@ -22,9 +22,9 @@ import { UphillSplits } from "@/components/widgets/UphillSplits";
 import { WeightDial } from "@/components/widgets/WeightDial";
 
 export const metadata: Metadata = {
-  title: "Morfessor · oop_ml",
+  title: "Morfessor · Perceptron Lab",
   description:
-    "Words often share stems and endings, such as walk in walked and walking. Morfessor looks for reusable parts by balancing the cost of storing a vocabulary against the cost of describing the observed words.",
+    "Related words often reuse stems and endings. Morfessor searches for such reusable parts by balancing the cost of a stored vocabulary against the cost of describing the words with it.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -39,10 +39,11 @@ export default function MorfessorPage() {
       playgroundTitle="When is a word part worth storing?"
       playgroundIntro="Compare the inventory cost and corpus cost for alternative cuts. Check which familiar word parts emerge and which cuts follow frequency instead."
       title="Morfessor"
-      tagline={"Words often share stems and endings, such as walk in walked and walking. Morfessor looks for reusable parts by balancing the cost of storing a vocabulary against the cost of describing the observed words."}
+      tagline={"Related words often reuse stems and endings. Morfessor searches for such reusable parts by balancing the cost of a stored vocabulary against the cost of describing the words with it."}
       prerequisites={
         <>
-          We will work inside words that have already been separated at spaces. Earlier methods selected pieces using corpus counts. Here we will ask a more specific question: can a compact description of the corpus favour recurring stems and endings? The first example compares learned pieces with familiar word forms. We will introduce the logarithms and the binomial coefficient when we need them for the description cost.
+
+          We will work inside words that have already been separated at spaces. Earlier methods selected pieces using corpus counts. Here we will ask a more specific question: can a compact description of the corpus favor recurring stems and endings? The first example compares learned pieces with familiar word forms. We will introduce the logarithms and the binomial coefficient when we need them for the description cost.
         </>
       }
 
@@ -53,9 +54,10 @@ export default function MorfessorPage() {
           defaultOpen: true,
           content: (<>
 <>
-              <SubSection title="1. Twelve words whose joints nobody disputes">
+              <SubSection title="1. Familiar Stems and Endings" id="1-twelve-words-whose-joints-nobody-disputes">
                 <p>
-                  We can recognise walk inside walking before calculating any score. Will a method that rewards a short description of the training data choose that same split? Those are different questions, and a small corpus lets us compare their answers.
+
+                  We can recognize walk inside walking before calculating any score. Will a method that rewards a short description of the training data choose that same split? Those are different questions, and a small corpus lets us compare their answers.
                 </p>
                 <p>
                   Use walk, talk and play, each in its bare form and with s, ed and ing endings. That gives twelve words, each occurring three times. The familiar forms supply a linguistic reference; the compression calculation must still earn its own choices.
@@ -94,20 +96,18 @@ export default function MorfessorPage() {
                   The first selected pieces are al, alk, la and pla. They divide familiar stems internally. For example, a and l are adjacent in walk, talk and all their forms, which covers eight of the twelve words. A frequency-based rule has a good reason to select that pair, even though its objective does not require it to respect a stem boundary.
                 </p>
                 <p>
-                  So a joins l, and then al joins k, and by the third row the play forms have contributed la. Nothing in the counting has any way of preferring the boundary between walk and ing to the boundary between w and alk.
+                  {"The merge rule selects a with l, then al with k; the play forms later contribute la. These choices reduce the number of references under the pair-count objective. They do not directly reward a linguistic boundary such as the one between walk and ing."}
                 </p>
 </>
                 <KeepInMind>
-                  The three stems arrive as the eighth, ninth and tenth rows
-                  bought, behind seven rows that cut across them. A vocabulary
-                  that is stopped anywhere before that has spent every row it
-                  had on pieces which straddle a joint.
+                  {"The three complete stems appear as the eighth, ninth and tenth new merge entries. Earlier entries include fragments inside those stems. Stopping sooner can therefore leave a familiar stem split across several tokens."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="3. The same cut on ordinary English">
                 <p>
-                  That could be an artefact of twelve made-up words, so here is
+
+                  That could be an artifact of twelve made-up words, so here is
                   the same thing on eighteen sentences of ordinary English about
                   reports and costs and analyses, 72 distinct words across 133
                   occurrences, grown to the point where no adjacent pair occurs
@@ -130,35 +130,25 @@ export default function MorfessorPage() {
                   caption="Both tables hold 135 rows and were fitted to the same eighteen sentences. The left column is the method this page is about, and it is what Part 2 onwards builds."
                 />
                 <p>
-                  Two of those are worth pausing on. The merge-grown table cuts
-                  lowest into lowe and st, which puts the cut one letter to the
-                  left of the joint, and costs into co and sts, which puts it
-                  two letters to the left. Both are frequent substrings of that
-                  corpus and neither is a part of anything. On the running
-                  sentence the same table reads analysis with its full stop as
-                  analysi followed by s with the stop attached, and reads the
-                  first half of low-cost as lo followed by w.
+                  {"The merge-grown table splits lowest as lowe and st, one letter after the familiar low–est boundary. It splits costs as co and sts, two letters before the cost–s boundary. These pieces are frequent substrings in this corpus, but the cuts differ from that linguistic analysis. In the running sentence, the same vocabulary divides analysis before its final s and splits the beginning of low-cost as lo followed by w."}
                 </p>
                 <KeepInMind>
-                  A frequent substring and a part of a word are different
-                  things, and on any real corpus they disagree often. The
-                  question this page answers is what could be asked for instead,
-                  given that nobody is going to label the joints.
+                  {"A frequent substring is not necessarily a linguistic morpheme. We want to compare a different objective using the same unlabeled words, rather than assuming that frequency alone must recover the familiar boundaries."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="4. What is missing is a reason to prefer a joint">
                 <>
 <p>
-                  It would be easy to conclude that counting is simply the wrong rule, and that is not it. The rule is doing exactly what it promises, which is to buy the row that removes the most pieces from the corpus right now. What it lacks is any notion that a set of pieces has a price of its own.
+                  {"Pair counting selects the largest weighted adjacent-pair count as a proxy for immediate compression. That can leave stems divided. A fixed vocabulary-entry budget does not separately price how the chosen piece strings are spelled."}
                 </p>
                 <p>
-                  Every row costs the same as every other row, one, so the only thing left to compare is the saving, and a piece that spans a joint saves just as readily as one that respects it.
+                  {"Each new merge uses one vocabulary entry regardless of the resulting string’s length. Under that budget, a merge crossing a morphological boundary can be just as useful as one preserving it if it removes as many references."}
                 </p>
 </>
                 <>
 <p>
-                  Suppose instead that a set of pieces had a price which depended on what the pieces were. A short list of pieces that recur all over the corpus would then be cheap, and a long list of pieces each used once would be dear, and the arithmetic itself would have a reason to prefer walk and ing over w and alk, since alk turns up in eight words but leaves a stray w or t outside it in every one of them, and those strays have to be paid for too.
+                  {"Suppose we also charge for recording the pieces themselves. Reusing walk across several word types can then avoid spelling it repeatedly in the inventory. A candidate such as w plus alk has a different inventory and reference-frequency cost. We must price the complete alternatives to see which one wins."}
                 </p>
                 <p>
                   That is the idea the rest of this page works out, and the work is in making &ldquo;price&rdquo; mean something exact.
@@ -191,19 +181,10 @@ export default function MorfessorPage() {
                   once, and walking is two references.
                 </p>
                 <p>
-                  Neither is obviously better, and which one wins depends on
-                  numbers. The list has to be paid for, and every reference has
-                  to be paid for, and a piece that is used once has cost us a
-                  place in the list to save nothing. Creutz and Lagus took that
-                  arithmetic seriously and made it the definition. The best set
-                  of pieces is the one for which the list plus the text, added
-                  together, is shortest.
+                  {"Sending an inventory has a cost, and so does encoding references to it. Repeated use can repay the inventory cost; a rarely used entry may not. Creutz and Lagus used this tradeoff to define the segmentation objective: prefer the inventory and corpus encoding with the lowest combined description cost."}
                 </p>
                 <KeepInMind>
-                  The two parts are not two objectives to be balanced by taste.
-                  They are two halves of one message, and the thing being
-                  minimised is the length of that message, which is a single
-                  number.
+                  {"At corpus weight one, the inventory and corpus terms are added under the coding scheme defined below. The SDK also permits a multiplier on the corpus term. That changes the objective, so we will state the weight when comparing costs."}
                 </KeepInMind>
               </SubSection>
 
@@ -213,16 +194,12 @@ export default function MorfessorPage() {
                   Before writing the cost formula, let&apos;s describe what the encoded message must contain. It first spells each vocabulary piece, including a marker for the end of its spelling. It also records how often each piece is used, so a decoder can interpret the references that follow.
                 </p>
                 <p>
-                  The third is the corpus itself, written as a run of references, where a piece that is used often is cheap per use and a piece that is used once is dear every single time.
+                  {"The final term encodes the corpus as references to those pieces. Under the frequency model used here, a frequent piece has a lower cost per reference than a rare one."}
                 </p>
 </>
                 <Equation>{`description  =  spelling the list  +  writing the counts  +  writing the text`}</Equation>
                 <p>
-                  The first two together are the price of the list, and they fall
-                  as the list gets shorter. The third is the price of the text,
-                  and it rises as the pieces get smaller, because smaller pieces
-                  mean more references. Section 8 prices both of them on the
-                  twelve forms and watches the two move against each other.
+                  {"The first two terms describe the inventory, and the third describes its uses in the corpus. Smaller pieces usually require more references, but their encoded cost also depends on the piece frequencies. We need to recalculate all three terms to decide whether a proposed split shortens the complete description. Section 8 compares that balance for the twelve forms."}
                 </p>
                 <KeepInMind>
                   All the logarithms here are natural, so the amounts are in
@@ -233,83 +210,51 @@ export default function MorfessorPage() {
 
               <SubSection title="7. Two words, small enough to check by hand">
                 <p>
-                  The smallest corpus with a real decision in it is two words,
-                  walk and walks, once each. Left whole the list holds two
-                  pieces and the text is two references. Split, the list holds
-                  walk and s, the text is three references, and walk is now used
-                  twice.
+                  {"Start with the two-word corpus walk and walks, once each. Leaving the words whole uses two inventory entries and two references. Splitting walks gives the entries walk and s, with three references because walk is reused."}
                 </p>
                 <WorkedExample title="walk and walks, both ways">
                   <p>
-                    Left whole, the list is walk and walks, which is nine
-                    characters with two end markers, eleven symbols in all.
-                    Spelling that costs 19.4454. There is only one way to deal
-                    two references between two pieces, so saying how often each
-                    is used costs nothing at all. Writing the text costs 1.3863,
-                    since each of the two references is worth one of two equally
-                    likely pieces. The three add to 20.8317.
-                  </p>
+                  {"For whole words, the inventory contains nine letters and two end markers. The count term is zero because the two pieces must each occur once. The remaining terms give the total below."}
+                </p>
+                <Equation>{"Inventory symbols = 9 + 2 = 11\nSpelling cost ≈ 19.4454\nCount cost = ln C(1, 1) = 0\nCorpus cost ≈ 1.3863\nTotal ≈ 19.4454 + 0 + 1.3863 = 20.8317"}</Equation>
                   <p>
-                    Split into walk and s, the list is five characters with two
-                    end markers, seven symbols, and spelling it costs 12.2351.
-                    Now there are two ways to deal three references between two
-                    pieces, so the counts cost 0.6931. Writing the text costs
-                    1.9095, since there are three references and one of the two
-                    pieces is rarer than the other. The three add to 14.8378,
-                    which is 5.9939 shorter.
-                  </p>
+                  {"For the split inventory, walk and s contain five letters and two end markers. There are now two possible positive count assignments across the two entries. Compare its complete cost with the whole-word version."}
+                </p>
+                <Equation>{"Inventory symbols = 5 + 2 = 7\nSpelling cost ≈ 12.2351\nCount cost = ln C(2, 1) = ln 2 ≈ 0.6931\nCorpus cost ≈ 1.9095\nTotal ≈ 12.2351 + 0.6931 + 1.9095 ≈ 14.8378\nSaving ≈ 20.8317 - 14.8378 = 5.9939"}</Equation>
                 </WorkedExample>
                 <p>
-                  Look at which part paid for which. Splitting made the text
-                  dearer, by 0.5232, and made the counts dearer, by 0.6931. It
-                  made the spelling cheaper by 7.2103, because walk stopped being
-                  written down twice. On a corpus of two words the shared stem
-                  already pays for the split, and it pays out of the spelling.
+                  {"The split increases the encoded corpus and count costs, but reduces inventory spelling enough to lower the complete total. The reused spelling, rather than a reduction in the number of references, supplies the saving in this example."}
                 </p>
                 <KeepInMind>
-                  A split always makes the text longer, since it turns one
-                  reference into two. It can only be worth making if the list
-                  gets shorter by more, and the list gets shorter exactly when
-                  the piece it removes was being spelled out inside several
-                  words.
+                  {"Splitting one occurrence into two pieces adds a reference. It also changes the piece frequencies used to price all references, so the encoded corpus cost can rise or fall. In the walk-and-walks example the corpus cost rises, while the saving in lexicon spelling makes the complete split description cheaper."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="8. Why the middle is a minimum">
                 <>
 <p>
-                  With twelve words rather than two we can price the two extremes and something in between, and see the shape. Give every word a piece of its own and the text is as short as it can be, 36 references for 36 word occurrences, while the list is as long to write out as it can be, 78 symbols.
+                  {"For the twelve-word corpus, first give every word its own entry. That uses 36 references for 36 occurrences and an inventory spelling of 78 symbols. We will compare it with character pieces and with the familiar stems and endings."}
                 </p>
                 <p>
-                  Give every character a piece of its own and the list is as cheap to spell as it gets, since each of its 13 pieces is one character, while the text has swollen to 198 references. Between them sit the three stems and the three endings.
+                  {"Using individual characters gives 13 inventory entries and 198 corpus references. Each entry is short to spell, but there are many more references to encode. The complete costs, not either count alone, determine the comparison."}
                 </p>
 </>
                 <DescriptionCostBars />
                 <p>
-                  Spelling the list falls all the way across the panel, from
-                  191.7754 to 51.3662, and writing the text rises all the way,
-                  from 89.4566 to 474.8646. A quantity whose two components move
-                  monotonically in opposite directions has its smallest value
-                  somewhere in the middle, and here that is the middle bar, at
-                  185.4634 against 301.0812 for one piece per word and 569.3002
-                  for one piece per character.
+                  {"Across the candidates shown, lexicon spelling cost falls from 191.7754 to 51.3662, while corpus cost rises from 89.4566 to 474.8646. The stem-and-ending candidate has the lowest measured total: 185.4634, compared with 301.0812 for whole words and 569.3002 for characters. Opposing trends alone do not prove that a sum has an interior minimum; these actual totals establish the comparison."}
                 </p>
                 <WhyThisWorks title="Why the character extreme is so much dearer">
                   <>
 <p>
-                    The list of 13 characters is genuinely cheap to write down, 51.3662 against 191.7754. What ruins it is the other two parts. The text needs 198 references rather than 36, and each one is worth about the logarithm of 198 minus the logarithm of how often that character occurs, so the whole third part comes to 474.8646, more than five times what it was.
-                  </p>
+                  {"The character inventory has lower spelling cost, 51.3662 rather than 191.7754, but a much larger corpus term. Its 198 references have different empirical frequencies, producing corpus cost 474.8646. Reference count and the distribution of those references both contribute."}
+                </p>
                   <p>
-                    Saying how often each of 13 pieces is used across 198 references also costs 43.0695, against 19.8491 for twelve pieces across 36, because there are far more ways to deal 198 references into 13 piles than 36 into 12. So the 140.4092 saved on the spelling is spent several times over by the other two parts.
-                  </p>
+                  {"The count-description term is also larger for the character candidate: 43.0695 rather than 19.8491. Together these terms outweigh the reduced spelling cost. The table below preserves all three candidates’ complete totals."}
+                </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  There is a genuine minimum somewhere between one piece per word
-                  and one piece per character, and it is a fact about the
-                  arithmetic rather than a hope. Whether the minimum falls on
-                  anything a linguist would recognise is a separate question, and
-                  Part 7 is where it is answered honestly.
+                  {"The stem-and-ending inventory is the cheapest of these tested candidates. That result does not prove it is the globally shortest description, and a low description cost does not establish that the pieces are linguistic morphemes. Part 7 compares the statistical objective with that linguistic interpretation."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -321,14 +266,7 @@ export default function MorfessorPage() {
             <>
               <SubSection title="9. Spelling the list">
                 <p>
-                  Writing the list out means writing its characters, and the
-                  cheapest way to write a stream of symbols whose frequencies are
-                  known is to give a symbol that occurs often a short code and a
-                  symbol that occurs rarely a long one. The length that comes out
-                  of doing that as well as it can be done is fixed by the
-                  frequencies alone, and it is the expression below, where L is
-                  how many symbols the whole list contains and each n is how many
-                  times one symbol occurs in it.
+                  {"The spelling term uses an idealized frequency code. Symbols frequent in the inventory receive shorter ideal code lengths than rare symbols. Summing those lengths gives the expression below, where L is the total symbol count and n is each symbol’s count. This entropy-based cost is not a claim that a finite binary code reaches every fractional length exactly or that all model-description overhead is included."}
                 </p>
                 <Equation>{"spelling  =  L log L  −  Σ over symbols  n log n"}</Equation>
                 <p>
@@ -361,60 +299,35 @@ export default function MorfessorPage() {
 
               <SubSection title="10. Writing down how often each piece is used">
                 <p>
-                  A reader who has the list still cannot decode a reference
-                  without knowing what the pieces are worth, so the counts have
-                  to be sent as well. There are N references in the corpus
-                  altogether and M pieces, and every piece is used at least once,
-                  so the counts are one particular way of dealing N things into M
-                  non-empty piles. There are exactly as many such ways as the
-                  binomial coefficient below, and saying which one it is costs its
-                  logarithm.
+                  {"The decoder also needs the piece frequencies used by the reference model. In this scheme, N references are allocated among M labeled entries, each with a positive count. The binomial coefficient below counts those positive count assignments; its logarithm is the ideal cost of identifying one under this choice of code."}
                 </p>
                 <Equation>{"counts  =  log C(N − 1, M − 1)"}</Equation>
                 <p>
-                  It is the smallest of the three parts on every lexicon this
-                  page prices, 15.6828 out of 185.4634 for the three stems and
-                  three endings, and it is not decoration. It is what stops a
-                  list of many rarely used pieces from looking free, since the
-                  number of ways to deal the references grows with the number of
-                  piles.
+                  {"For the stem-and-ending candidate, this term contributes 15.6828 of the total 185.4634. It describes the frequency table separately from spelling the pieces and encoding their uses. Its binomial formula is a modeling choice; it does not simply increase whenever more entries are added."}
                 </p>
                 <WorkedExample title="The two-word example, both ways">
                   <p>
-                    Left whole there are two references and two pieces, so N and
-                    M are both 2 and there is exactly one way to deal them, one
-                    each. The logarithm of one is zero, so this part costs
-                    nothing. Split, there are three references and two pieces, so
-                    the deals are two and one or one and two, and the cost is the
-                    logarithm of 2, which is 0.6931.
-                  </p>
+                  {"With walk and walks left whole, each of the two entries must be used once. After splitting, the three references can be allocated as two and one or one and two. These count assignments give the costs below."}
+                </p>
+                <Equation>{"Whole: ln C(2 - 1, 2 - 1) = ln 1 = 0\nSplit: ln C(3 - 1, 2 - 1) = ln 2 ≈ 0.6931"}</Equation>
                 </WorkedExample>
                 <KeepInMind>
-                  Every piece is used at least once by construction, since a
-                  piece nothing uses would never have been in the list. That is
-                  why the count is over non-empty piles, and it is why the
-                  expression has N minus one and M minus one in it rather than N
-                  and M.
+                  {"This inventory retains only pieces with positive usage counts. That is why its count code considers nonempty groups. An implementation that also stored unused entries would need to specify a different count model."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. Writing the corpus as a run of references">
                 <p>
-                  The last part is the corpus itself. Each of the N references is
-                  written under the simplest possible model, which is that the
-                  chance of a piece is how often it occurs divided by N, with no
-                  attention paid to what came before it. Writing one reference to
-                  a piece used c times then costs the logarithm of N minus the
-                  logarithm of c, and summing that over every reference gives the
-                  expression below.
+                  {"The corpus term uses a unigram model: each reference has probability equal to its piece count divided by the total number of references. It ignores preceding pieces. Summing the negative log probabilities gives the expression below."}
                 </p>
                 <Equation>{"text  =  N log N  −  Σ over pieces  c log c"}</Equation>
                 <>
 <p>
-                  So a piece used 12 times out of 63 costs 1.6582 every time it is used, and a piece used once out of 63 costs 4.1431 every time, which is to say once. The model behind this is the crudest one available, since it says that a piece is as likely after ing as after walk, which is plainly false about language.
+                  {"A piece used twelve times among 63 references has lower reference cost than a piece used only once. The calculation treats each occurrence independently of the preceding piece. It therefore ignores language patterns such as which endings tend to follow which stems."}
                 </p>
+                <Equation>{"Frequent piece: -ln(12 / 63) ≈ 1.6582 nats\nOnce-used piece: -ln(1 / 63) ≈ 4.1431 nats"}</Equation>
                 <p>
-                  It is the part of the arithmetic most obviously open to improvement and the part this family of methods leaves alone, because a model with memory makes the search inside it much harder.
+                  {"A context-dependent model could capture some of those patterns, but would add parameters and change the segmentation search. The baseline implementation here keeps the unigram assumption. Other morphology models need not make the same choice."}
                 </p>
 </>
                 <NumberTable
@@ -434,10 +347,7 @@ export default function MorfessorPage() {
                   caption="The twelve forms at three occurrences each, in nats. The list column is spelling plus counts, and every figure here is the one drawn in the panel above."
                 />
                 <KeepInMind>
-                  Going from twelve pieces to six costs 22.7791 more in the text
-                  and saves 138.3969 on the list. The saving is not close, which
-                  is why this corpus is one the method gets right, and Part 5 is
-                  what happens when it is close.
+                  {"The stem-and-ending candidate has a higher corpus term but a sufficiently lower inventory term to win this comparison. That explains its lower total on these twelve forms; it does not prove that every corpus favors linguistic boundaries."}
                 </KeepInMind>
               </SubSection>
 
@@ -446,20 +356,10 @@ export default function MorfessorPage() {
                   We now have a total description cost for a proposed set of pieces and its encoding of the corpus. That lets us compare proposals with different vocabulary sizes using the same objective. A smaller cost means a shorter description under this coding scheme. It does not directly establish a better linguistic analysis.
                 </p>
                 <p>
-                  What has not been defined is any way of finding the best set.
-                  The number of ways to cut twelve words into pieces is the
-                  product over words of two raised to the number of positions
-                  between characters, which is two to the fifty-fourth power for
-                  these twelve, and there is no known way to search it exactly.
-                  So the criterion and the search are two
-                  separate things, and everything true about one of them can be
-                  false about the other.
+                  {"The objective does not specify how to find its best segmentation. These twelve words have 54 possible internal boundary positions, giving two-to-the-fifty-fourth boundary assignments. Exhaustive search is possible in principle but expensive. The trainer below considers restricted local changes instead."}
                 </p>
                 <KeepInMind>
-                  Minimum description length names the criterion. It does not
-                  name what any program returns, and the gap between the two is
-                  measurable rather than theoretical, which is what Part 5
-                  measures.
+                  {"Minimum description length supplies an objective under a chosen coding scheme. The search supplies a candidate, which may fail to minimize it. Part 5 shows a cheaper segmentation than the trainer returns."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -477,12 +377,12 @@ export default function MorfessorPage() {
                 "The rule starts from whole words, so it has to cut a stem before it can reach one",
               ],
               0,
-              "The counting is doing exactly what it promises, which is to buy the row that removes the most pieces from the corpus right now. Nothing in it prefers the boundary between walk and ing to the boundary between w and alk, because every row costs the same as every other row and only the saving is left to compare. The three stems arrive as the eighth, ninth and tenth rows bought.",
+              "BPE chooses the pair that makes the most current joins. That score does not identify a stem boundary, so intermediate entries can be al, alk, la and pla. The complete stems appear only as the eighth, ninth and tenth learned entries in this run. A count-based merge and a grammatical analysis optimize different things.",
             ),
             trueFalse(
-              "Splitting a word always makes the text part of the description longer.",
+              "Splitting one occurrence of a word into two pieces increases the number of piece references used for that occurrence.",
               true,
-              "A split turns one reference into two, so the text can only grow. It is worth making when the list gets shorter by more, and the list gets shorter exactly when the piece it removes was being spelled out inside several words. On walk and walks the split costs 0.5232 more in the text and 0.6931 more in the counts, and saves 7.2103 on the spelling.",
+              "One reference becomes two for that occurrence, so the reference count increases. The encoded corpus cost also depends on the fitted piece frequencies and must be recalculated; it is not guaranteed to increase in every corpus. In the walk-and-walks example, the corpus term rises by 0.5232 nats and the count term by 0.6931, while the lexicon-spelling term falls by 7.2103. The complete objective decides whether that particular split helps.",
             ),
             trueFalse(
               "Giving every character a piece of its own gives the shortest description, since the list is then as cheap to spell as it can be.",
@@ -498,18 +398,18 @@ export default function MorfessorPage() {
                 "Every piece in the list is used at least once, which is why the counts are dealt into non-empty piles",
               ],
               [0, 1, 2, 3],
-              "All four hold. A piece appears in the list once however often the corpus uses it, which is the saving a split is after. The counts are 15.6828 out of 185.4634 for the three stems and three endings, and they are what stops a list of many rarely used pieces from looking free. A piece nothing uses would never have been in the list, so the deal is over non-empty piles and the expression has N minus one and M minus one in it rather than N and M. What the three parts do not say is how to find the best set, since the twelve words admit two to the fifty-fourth arrangements and no exact search over them is known.",
+              "The inventory stores each distinct piece once, while the corpus records repeated uses. The count term describes how references are allocated across used pieces, which is why the nonempty-count formula uses the corresponding adjusted totals. For the six-piece inventory, that term contributes 15.6828 of the total 185.4634 nats. These costs define the objective; they do not supply a global search over all possible boundary assignments.",
             ),
             choice(
-              "Sending the twelve forms costs the list plus the text. What happens to those two as the pieces get smaller?",
+              "For the candidate segmentations priced in this example, how do lexicon spelling cost and corpus cost compare as the pieces become smaller?",
               [
                 "Both fall, which is why the smallest pieces give the shortest description",
                 "The list rises and the text falls, so the minimum is one piece per word",
-                "The list falls and the text rises, so the minimum sits somewhere in between",
+                "Lexicon spelling cost falls while corpus cost rises; the tested stem-and-ending inventory has a smaller total than either extreme",
                 "Neither moves, since the same characters are being sent either way",
               ],
               2,
-              "Spelling the list falls all the way across the panel and writing the text rises all the way, and a quantity whose two components move monotonically in opposite directions has its smallest value somewhere in the middle. That there is a genuine minimum between one piece per word and one piece per character is a fact about the arithmetic. Whether it falls on anything a linguist would recognise is a separate question.",
+              "Among the inventories shown, single characters make the lexicon inexpensive to spell but require many corpus references. Whole words have the opposite balance. The tested stem-and-ending inventory has the lowest combined cost of these candidates. This is an observed comparison, not a theorem that two opposing trends must have their minimum between the endpoints.",
             ),
         ],
         },
@@ -519,13 +419,7 @@ export default function MorfessorPage() {
             <>
               <SubSection title="13. Start with every word whole, then reconsider one at a time">
                 <p>
-                  The search Creutz and Lagus proposed is about as simple as a
-                  search can be. Begin with every distinct word as a piece of its
-                  own, which is one of the two extremes Part 2 priced. Then take
-                  the words one at a time, in a shuffled order, and for each one
-                  ask whether the description would be shorter with that word cut
-                  somewhere. Keep going in passes until a pass barely changes the
-                  total.
+                  {"Begin with every distinct word stored whole. Visit words in a seeded shuffled order, reconsider their splits, and repeat passes until the cost changes little or the epoch limit is reached. This is the baseline local search used here."}
                 </p>
                 <p>
                   The important detail is that a word is reconsidered with
@@ -538,22 +432,13 @@ export default function MorfessorPage() {
                   from a seed and the seed is part of the fit.
                 </p>
                 <KeepInMind>
-                  The books are the list of pieces with their counts and the
-                  characters those pieces are spelled in. Every price on this page
-                  is computed from those two tables as they stand at that moment,
-                  so nothing is ever estimated or carried over.
+                  {"The current piece counts and inventory-character counts determine each proposal’s objective value. The search updates those tables while testing a change and restores rejected proposals. These are exact calculations from empirical counts, not a claim that the underlying language probabilities are known without estimation."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="14. The recursion on one word">
                 <p>
-                  Asking whether one word should be cut is a small procedure with
-                  one recursive step. Price the description with the word left
-                  whole. Then, for each of the positions between its characters,
-                  price the description with the word replaced by the two halves
-                  that position makes, and keep the cheapest. If no split is
-                  strictly cheaper, the word stays whole and we are done with it.
-                  If one is, take it, and then ask the same question of each half.
+                  For a proposed word, compare the cost of leaving it whole with the costs of splitting it at each internal position. Keep a split only if it is strictly cheaper under the complete description objective. If a split wins, apply the same comparison to each resulting part. This recursive procedure makes the chosen inventory depend on what reuse saves in the corpus, rather than on a supplied list of grammatical endings.
                 </p>
                 <DerivationTable
                   expressionHeading="the step"
@@ -586,22 +471,13 @@ export default function MorfessorPage() {
                   be stated somewhere or two runs of the same procedure disagree.
                 </p>
                 <KeepInMind>
-                  The recursion only ever cuts. It never joins two pieces back
-                  together within a word, and it never proposes a piece that is
-                  not a contiguous run of some word&rsquo;s characters. Both of
-                  those bound what the search can reach.
+                  {"Within one recursive call, the procedure proposes splits rather than joins. At the next visit to a word, however, the outer loop restores that word to its whole form before reconsidering it, so earlier boundaries can disappear between passes. Pieces remain contiguous substrings of training words."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. Twelve forms, six pieces, two passes">
                 <p>
-                  Run that on the twelve inflected forms and it works. The
-                  description goes from 301.0812, which is every word whole, to
-                  185.4634, and the pieces it settles on are exactly walk, talk
-                  and play, used 12 times each, with s, ed and ing used 9 times
-                  each. Every training word comes out as a bare stem or as a stem
-                  followed by an ending, and 63 references replace 36 much longer
-                  spellings.
+                  {"On the twelve forms at three occurrences each, the cost falls from 301.0812 to 185.4634. The learned inventory is walk, talk and play, each used twelve times, and s, ed and ing, each used nine times. The corpus then uses 63 references rather than 36 whole-word references. Those extra references are offset by the smaller inventory cost."}
                 </p>
                 <NumberTable
                   headings={["the word", "read as"]}
@@ -622,7 +498,8 @@ export default function MorfessorPage() {
                   Every seeded visiting order tried reaches the same six.
                 </p>
                 <KeepInMind>
-                  The learned pieces match the familiar stems and endings in this example. The setup is favourable: twelve words deliberately share three stems and three endings. In the next part we change the treatment of those same words to see how dependent the result is on the chosen objective.
+
+                  The learned pieces match the familiar stems and endings in this example. The setup is favorable: twelve words deliberately share three stems and three endings. In the next part we change the treatment of those same words to see how dependent the result is on the chosen objective.
                 </KeepInMind>
               </SubSection>
 
@@ -632,8 +509,9 @@ export default function MorfessorPage() {
                 </p>
                 <SearchEpochs />
                 <p>
+
                   The churn is the part worth seeing. The second pass gives up
-                  carries, dropped, first and greed in favour of carrie, dropp,
+                  carries, dropped, first and greed in favor of carrie, dropp,
                   fir and gre, which is what cutting one word does to the pieces
                   of another, since taking a word&rsquo;s spelling out of the
                   books changes the price of every spelling that is left. The
@@ -642,21 +520,13 @@ export default function MorfessorPage() {
                   has enough short pieces to spell them from.
                 </p>
                 <KeepInMind>
-                  Passes stop when one of them changes the total by less than a
-                  set fraction of it, which is a stopping rule rather than a
-                  proof of anything. It says the walk has slowed down. It does
-                  not say the walk had anywhere better to go.
+                  {"The stopping rule checks whether a pass changed the total cost by less than the configured relative threshold. A small change does not certify a global minimum or rule out an improvement that requires several boundaries to change together."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="17. Cutting a word the corpus never held">
                 <p>
-                  A fitted list has to read words it never saw, and the rule for
-                  that is separate from the rule that learned it. Take the word,
-                  consider every way of cutting it into pieces the list holds, and
-                  take the way whose total price under the same reference cost is
-                  lowest. That is a shortest-path problem over the positions in
-                  the word and is solved exactly rather than greedily.
+                  {"After fitting, segmentation uses the fixed inventory and its reference costs. Dynamic programming finds a lowest-cost path through the word’s character positions, with permitted unknown-character fallbacks. This is exact for those fixed per-piece costs, rather than a new optimization of the whole training objective."}
                 </p>
                 <NumberTable
                   headings={["the word", "read as", "price", "stand-ins"]}
@@ -670,14 +540,7 @@ export default function MorfessorPage() {
                   caption="Read by the six pieces the twelve forms taught, with the price in nats."
                 />
                 <p>
-                  A character no piece covers is allowed through as a piece of
-                  its own, at a price deliberately set higher than any reading
-                  made entirely of known pieces could reach, which is the length
-                  of the word times the logarithm of the number of references,
-                  plus one. That guarantees a known reading always wins where one
-                  exists, and it is why jumping costs 121.9537 where walkings
-                  costs 5.5500. The four unknown characters are what the price is
-                  reporting.
+                  {"An uncovered character can pass through as a single-character fallback with a deliberately high cost. The SDK sets that cost above the maximum total for any all-known segmentation of this word, so a fully known path wins when one exists. Jumping needs four such fallbacks and costs 121.9537; walkings needs none and costs 5.5500. The values include the chosen fallback penalty as well as known-piece costs."}
                 </p>
                 <KeepInMind>
                   Look at stalking and splay. Both are read using the piece s,
@@ -693,13 +556,9 @@ export default function MorfessorPage() {
           title: "Part 5. The Same Corpus, Five Times Over",
           content: (
             <>
-              <SubSection title="18. More of the same data, a worse answer">
+              <SubSection title="18. Repeated Counts Can Stall the Search" id="18-more-of-the-same-data-a-worse-answer">
                 <p>
-                  Here is the finding that changed how I read this method. Take
-                  the same twelve inflected forms, change nothing about them, and
-                  write each one five times instead of three. More data, in the
-                  ordinary sense, of exactly the same kind. The search now leaves
-                  every single word whole and finds no pieces at all.
+                  {"Repeat each of the same twelve forms five times instead of three. This adds occurrences without adding new word types or boundaries. At that count, the local search leaves all twelve words whole rather than recovering the six stem-and-ending pieces."}
                 </p>
                 <NumberTable
                   headings={["each word occurs", "pieces found", "best first move"]}
@@ -724,32 +583,23 @@ export default function MorfessorPage() {
                   two.
                 </p>
                 <KeepInMind>
-                  Hand this fit the six-piece list and its own arithmetic says
-                  that list is 104.2861 nats better, and it still returns the
-                  twelve whole words. What the method is defined to want and
-                  what the procedure returns are two different things here, and
-                  the reason turns out to sit in the arithmetic of Part 3 rather
-                  than in the search.
+                  {"The six-piece candidate costs 104.2861 nats less than the returned twelve-word candidate. The objective therefore prefers that supplied alternative, but the local search does not reach it. We need to examine both the cost of the first move and the restrictions on the moves the search proposes."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. Why more of the same turns a saving into a cost">
                 <p>
-                  Go back to what a split does to each of the three parts. It
-                  makes the list cheaper, because a piece stops being spelled
-                  inside several words. It makes the text dearer, because one
-                  reference becomes two. Now ask what happens to each of those
-                  when every word occurs more often.
+                  {"For the first proposed splits in this example, inventory spelling becomes cheaper while corpus encoding becomes more expensive. Repeating all word types preserves each fixed segmentation’s relative piece frequencies, but multiplies its corpus cost. The count-description term must still be recomputed."}
                 </p>
                 <>
 <p>
-                  The saving on the list does not move at all. A piece is spelled in the list once, whatever its count, so removing a duplicated spelling saves the same number of nats whether the words occurred three times or three thousand. The extra cost on the text grows with the counts, since every occurrence of the word now pays for one more reference than it did.
+                  {"The inventory spelling term depends on which pieces are present, not how often the corpus uses them. Uniformly repeating the corpus therefore leaves that term unchanged. For a fixed segmentation, the unigram corpus term scales with the repetition count, while the separate count-description term changes through its binomial formula."}
                 </p>
                 <p>
-                  One side of the trade is flat in the counts and the other side is linear in them, so there is a count above which the trade stops paying.
+                  {"These terms can change the sign of an individual split’s cost. In this fixture, the first split stops being favorable between four and five occurrences per word. That is a measured crossing for these proposals, not a universal threshold for every corpus."}
                 </p>
 </>
-                <Equation>{"list saving   fixed in the counts\ntext cost     grows with the counts"}</Equation>
+                <Equation>{"spelling saving   fixed for a given inventory\ncorpus cost       scales with repeated counts\ncount-table cost  recomputed from N and M"}</Equation>
                 <p>
                   On these twelve words that crossing point sits between four
                   occurrences each and five. At four, the best available cut is
@@ -758,10 +608,7 @@ export default function MorfessorPage() {
                   really would make the description longer.
                 </p>
                 <KeepInMind>
-                  The undersegmentation of frequent words is not a bug in a
-                  search. It follows from the shape of the criterion, and it is
-                  why the family of methods built on this criterion all offer
-                  some way of damping the counts.
+                  {"The five-occurrence result exposes an interaction between the objective and local search. The first single split increases cost, although several coordinated splits produce a cheaper inventory. Altering the corpus weight changes those barriers; changing the search strategy could address them in another way."}
                 </KeepInMind>
               </SubSection>
 
@@ -791,12 +638,7 @@ export default function MorfessorPage() {
                   among equally cheap positions.
                 </p>
                 <p>
-                  The dearest move at three occurrences is worth looking at too.
-                  Cutting walks into wa and lks costs 14.2842 nats, which is far
-                  more than the cheapest move saves, and it is dear for the
-                  reason the whole method rests on. Neither wa nor lks is shared
-                  with anything, so the list gets no shorter, and the text gets a
-                  reference longer for nothing.
+                  {"The most expensive first proposal at three occurrences is walks split as wa and lks, increasing the cost by 14.2842 nats. Neither fragment is reused in the other words, so this proposal does not obtain the shared-spelling benefit of the familiar stem-and-ending split. Its complete cost, including count changes, is higher."}
                 </p>
                 <KeepInMind>
                   A search that can only take a step which improves the total,
@@ -807,37 +649,25 @@ export default function MorfessorPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="21. The dial that lets it through">
+              <SubSection title="21. Weighting the Corpus Cost" id="21-the-dial-that-lets-it-through">
                 <p>
-                  Since the problem is that the text half of the cost grows too
-                  fast, the repair offered by every implementation of this method
-                  is to multiply that half by something. Set the multiplier below
-                  one and the text counts for less, so splits stay worth making
-                  at higher counts. Set it above one and the fit splits less.
+                  {"The SDK exposes a multiplier on the corpus term. Reducing it makes corpus-reference cost less influential relative to inventory cost; increasing it gives corpus-reference cost more influence. This changes which splits are favorable, while leaving the local search procedure itself in place."}
                 </p>
                 <Equation>{"total  =  list  +  weight × text"}</Equation>
                 <WeightDial />
                 <p>
-                  On the five-occurrence corpus the answer changes between
-                  0.83794 and 0.83795. Anywhere below that the search finds the
-                  three stems and the three endings; anywhere above, every word
-                  stays whole. At half, which is a setting somebody might well
-                  choose without knowing any of this, the fit lands on the six
-                  pieces and reports 169.4115.
+                  {"For this five-occurrence fixture, the transition near weight 0.83794 changes the returned result from six pieces to twelve whole words. At weight 0.5 the fit returns the six pieces with weighted objective 169.4115. Other weights or corpora can produce other segmentations; this single transition is not a general two-outcome rule."}
                 </p>
                 <>
 <p>
-                  It has to be said plainly what that number is and is not. It is not comparable with 262.9413, because a different quantity is being minimised once the multiplier is not one. The multiplier is not part of the principle at all, and turning it is admitting that the two-part code, as written, prices frequent words wrongly for this purpose.
+                  {"The weighted total 169.4115 cannot be compared directly with the unweighted six-piece cost 262.9413. They assign different weight to the corpus term. Report the multiplier so readers know which objective produced a result, and evaluate whether that preference suits the intended segmentation task."}
                 </p>
                 <p>
-                  Set at half it recovers walk, talk, play, s, ed and ing from a corpus where the plain code recovers nothing, and it does that by declaring that a reference costs half what writing it down actually costs, which is a statement nobody can defend from the coding argument that produced the criterion.
+                  {"At weight 0.5, the altered objective lets this search reach walk, talk, play, s, ed and ing. It discounts corpus-reference cost relative to inventory cost; it does not show that those references literally require half as much information to encode."}
                 </p>
 </>
                 <KeepInMind>
-                  The multiplier is the honest place to put a preference for
-                  smaller pieces. It does not repair the search, which is still
-                  greedy and still stalls, and there is a setting for every corpus
-                  above which the same corpus stalls again.
+                  {"Corpus weighting adjusts the preference used to compare proposals. It does not guarantee that the greedy search finds a global minimum, or that its pieces match linguistic morphemes. Both the reached cost and the linguistic result still need checking."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -847,31 +677,31 @@ export default function MorfessorPage() {
           title: "Questions on Parts 4 and 5",
           quiz: [
             choice(
-              "Write each of the same twelve forms five times instead of three and the search finds no pieces at all. What causes that?",
+              "Repeating each of the same twelve forms five times makes this search retain twelve whole-word pieces instead of six stems and endings. What changes in the cost comparison?",
               [
                 "The shuffled visiting order happens to start on a word that cannot be cut",
-                "The saving on the list is flat in the counts while the added text cost grows with them, so above some count the trade stops paying",
+                "The inventory-spelling term stays fixed for a chosen segmentation, its corpus term scales with repetition, and its separate count-description term is recomputed",
                 "The stopping rule fires early because the total is larger to begin with",
                 "More occurrences make the counts part dominate, and the counts part has no notion of shared spellings",
               ],
               1,
-              "A piece is spelled in the list once whatever its count, so removing a duplicated spelling saves the same number of nats at any corpus size, while every occurrence of a split word pays for one more reference. On these twelve words the crossing sits between four occurrences each and five, where the best available cut goes from being worth 0.3771 nats to costing 1.7333.",
+              "For a fixed segmentation, uniform repetition leaves the inventory-spelling term unchanged and scales the corpus-reference term. The count-description term must also be recalculated. Here the best initial local cut improves cost by 0.3771 nats at four occurrences but worsens it by 1.7333 at five. That can stall the local search even though the supplied six-piece segmentation has lower total cost.",
             ),
             trueFalse(
               "Handed the six-piece list on the five-occurrence corpus, the fit reports it, since its own arithmetic says that list is 104.2861 nats better.",
               false,
-              "It still returns the twelve whole words. What the method is defined to want and what the procedure returns are two different things here, and the reason sits in the arithmetic rather than in the search. At five occurrences none of the 54 single cuts lowers the description, where at three occurrences 9 of them do, so the first pass changes nothing and the stopping rule notices.",
+              "The six-piece inventory has lower complete cost, but the search starts from whole words and tests local changes. At five repetitions, none of its 54 initial single cuts lowers the objective, so it keeps the twelve whole words. At three repetitions, nine cuts improve it. A better combined segmentation can therefore exist even when this greedy first step cannot reach it.",
             ),
             choice(
               "Multiplying the text half of the cost by a half recovers walk, talk, play, s, ed and ing on the five-occurrence corpus and reports 169.4115. What is that number?",
               [
                 "The description length of the six-piece list, directly comparable with the 262.9413 reported earlier",
-                "The minimum of a different quantity, so it is not comparable with 262.9413 at all",
+                "A locally obtained value of a differently weighted objective, so it is not a directly comparable unweighted description length",
                 "A lower bound on the description length, since the multiplier can only shrink the total",
                 "The description length of the corpus under the twelve whole words at the new weighting",
               ],
               1,
-              "Once the multiplier is not one a different quantity is being minimised, and the multiplier is not part of the principle at all. It recovers the six pieces by declaring that a reference costs half what writing it down actually costs, which nobody can defend from the coding argument that produced the criterion. It is the honest place to put a preference for smaller pieces, and it does not repair the search.",
+              "The reported 169.4115 is the weighted objective with corpus_weight 0.5, not the unweighted description length. Reducing that multiplier changes the relative cost of corpus references and lexicon storage, and the search then finds the six pieces in this example. This is a deliberate change of objective. It does not establish that the original search found the best solution to the original objective.",
             ),
             choice(
               "A fitted list reads jumping at a price of 121.9537 where walkings costs 5.5500. What is the large number reporting?",
@@ -887,7 +717,7 @@ export default function MorfessorPage() {
             trueFalse(
               "Cutting one word can change what the search decides about another, because each word is reconsidered against the list as the other words have left it.",
               true,
-              "A word’s current pieces are taken out of the books, the word is put back whole, and the question is asked against the list as it stands at that moment, so an early decision about walked changes what the arithmetic says about walking. That is why the visiting order is a real input, drawn from a seed that is part of the fit. On the eighteen sentences the second pass gives up carries, dropped, first and greed in favour of carrie, dropp, fir and gre, which is what cutting one word does to the pieces of another.",
+              "A word’s current pieces are taken out of the books, the word is put back whole, and the question is asked against the list as it stands at that moment, so an early decision about walked changes what the arithmetic says about walking. That is why the visiting order is a real input, drawn from a seed that is part of the fit. On the eighteen sentences the second pass gives up carries, dropped, first and greed in favor of carrie, dropp, fir and gre, which is what cutting one word does to the pieces of another.",
             ),
         ],
         },
@@ -897,11 +727,7 @@ export default function MorfessorPage() {
             <>
               <SubSection title="22. Sequence length against a table of the same size">
                 <p>
-                  Everything downstream of a tokenizer pays in pieces, so that is
-                  the currency to compare in. On the twelve forms the six pieces
-                  and their marked twins make a table of 13 rows, and that table
-                  reads the corpus in 63 pieces. A merge-grown table needs 30 rows
-                  to reach the same 63.
+                  {"The learned six pieces and their word-ending variants produce a 13-row vocabulary including the unknown entry. It encodes this corpus in 63 pieces. The merge-grown vocabulary reaches the same sequence count at 30 rows. These counts describe different vocabulary designs as well as different training objectives."}
                 </p>
                 <NumberTable
                   headings={["how the pieces were chosen", "rows", "the corpus, in pieces"]}
@@ -921,10 +747,7 @@ export default function MorfessorPage() {
                   the next section is what that costs.
                 </p>
                 <KeepInMind>
-                  On its own corpus a description chosen to be short is short.
-                  That is close to a tautology, since shortening the description
-                  of that corpus is the whole objective, and it says nothing yet
-                  about any other text.
+                  {"The objective minimizes a combined inventory and corpus cost, not sequence length alone. A shorter training sequence is therefore a result to measure, not a tautology. Performance on other text also depends on coverage and decoding behavior."}
                 </KeepInMind>
               </SubSection>
 
@@ -944,29 +767,15 @@ export default function MorfessorPage() {
                   back does not give the sentence back.
                 </p>
                 <p>
-                  Turning the multiplier down to a quarter fixes it, and the way
-                  it fixes it says what was wrong. At a quarter the text half
-                  counts for so little that keeping single characters becomes
-                  affordable, the list holds 34 of the 35 characters, the sentence
-                  comes out in 31 pieces with no stand-ins at all, and gluing them
-                  back gives exactly what went in. The price is that the eighteen
-                  sentences now take 338 pieces rather than 167.
+                  {"At weight one quarter, this fit retains 34 of the 35 characters and reads the held-out sentence in 31 pieces with no stand-ins, allowing exact reconstruction. Its training corpus now uses 338 pieces rather than 167. This setting improves coverage on the measured sentence; it is not a guarantee of complete character coverage on all future text."}
                 </p>
                 <KeepInMind>
-                  A vocabulary is judged on text it was not fitted to, and a
-                  criterion that measures only how well a corpus is described has
-                  no term for that at all. Anybody using this in earnest reserves
-                  rows for the alphabet whatever the criterion says, which is a
-                  patch on the objective rather than a consequence of it.
+                  {"Check vocabulary coverage on text excluded from fitting. If exact reconstruction is required, reserving character or byte fallbacks can make that a design constraint rather than hoping the segmentation objective retains them. The objective by itself does not enforce such a constraint."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. Where each method is ahead">
-                <p>
-                  Setting the two side by side on the eighteen sentences, at 135
-                  rows each, the honest summary is that they are ahead in
-                  different places and neither dominates.
-                </p>
+                <p>At 135 vocabulary rows each, neither method has the smaller representation in every comparison on the eighteen sentences. One performs better on some measurements and the other on others. The results need to be read against the particular objective and text being compared.</p>
                 <NumberTable
                   headings={[
                     "how the pieces were chosen",
@@ -984,21 +793,15 @@ export default function MorfessorPage() {
                 <InAModel>
                   <>
 <p>
-                    At the scale a language model works at, the reasons a held-out sentence matters shift. A vocabulary is fitted to hundreds of billions of words, so the long tail is deep enough that most characters survive on their own however the pieces were chosen, and the failure of section 23 stops being automatic. What does not shift is the finding of Part 5, since a web-scale corpus is exactly where the commonest words occur millions of times, which is the regime where this criterion undersegments hardest unless a multiplier holds it back.
-                  </p>
+                  {"A larger corpus changes the available word types and counts, but does not guarantee that every character remains a standalone piece or that unseen text is covered. Evaluate the actual fitted vocabulary. Repeating frequent words can also change the local cost barriers described in Part 5; their effect depends on the objective, weight and search."}
+                </p>
                   <p>
-                    Pieces chosen this way are used in practice on agglutinative languages, where a particular inflected form may occur once in a corpus or not at all, so a count-driven vocabulary has very little to count.
-                  </p>
+                  {"These methods are useful for languages with many productive word forms. In an agglutinative language, words can contain several successive grammatical parts, so individual full forms may be rare even when their components recur. Shared pieces can provide evidence that whole-word counts alone miss."}
+                </p>
 </>
                 </InAModel>
                 <KeepInMind>
-                  Neither table is wrong on its own terms. Asked to describe
-                  those eighteen sentences in as few symbols as it can, the
-                  first one wins by a hundred pieces; asked to read a sentence
-                  written outside them, it hands back 18 stand-ins where the
-                  second hands back one. Which of those matters depends on what
-                  reads the pieces afterwards, and nothing on this page measures
-                  that.
+                  {"Both vocabularies were fitted to the same eighteen sentences, but they optimize different criteria. The displayed description-based fit uses 167 training pieces, while the merge-grown fit uses 267. On the held-out sentence, their unknown stand-ins are 18 and one respectively. Those coverage and length results still do not measure the quality of a downstream language model."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1010,102 +813,44 @@ export default function MorfessorPage() {
             <>
               <SubSection title="25. What the search finds is not what the method is named for">
                 <p>
-                  The name says minimum description length, and the search
-                  returns a local minimum of a function over a space it can only
-                  move through one cut at a time. Those are different objects,
-                  and Part 5 measured the difference on a corpus small enough to
-                  hand the better answer to, where it came to 104.2861 nats.
+                  {"Minimum description length names the objective. The search returns a segmentation found through restricted local changes, which need not minimize that objective globally. Part 5 supplies a better candidate than the five-occurrence run found, with a measured cost gap of 104.2861 nats."}
                 </p>
                 <p>
-                  Nothing about that is peculiar to the corpus. The space of ways
-                  to cut a word list into pieces is astronomically large, no exact
-                  search over it is known, and the greedy walk has the property
-                  every greedy walk has, which is that it stops the moment no
-                  single move improves the total. A description that needs two
-                  cuts made together to become cheaper is unreachable, and there
-                  is no way to know from inside the walk whether such a
-                  description exists.
+                  {"A finite word list has finitely many boundary assignments, so exhaustive enumeration is possible in principle. It becomes impractical quickly. This greedy search evaluates a restricted set of local changes, and several changes may need to work together before their combined saving becomes visible. A stopping threshold can also end a run with small improvements still possible."}
                 </p>
                 <p>
-                  Which is also why the answer to &ldquo;what is the shortest
-                  description of this corpus&rdquo; is unknown even here. The
-                  three stems and three endings are shorter than what the search
-                  returned at five occurrences; whether anything is shorter still
-                  is a question nobody on this page has answered, and answering it
-                  means enumerating the two-to-the-fifty-fourth arrangements of
-                  those twelve words.
+                  {"The three stems and three endings improve on the five-occurrence search result. This page has not established whether another segmentation is cheaper still. Exhaustively checking all two-to-the-fifty-fourth boundary assignments would be one way to settle that finite example, but it is not what this trainer does."}
                 </p>
                 <KeepInMind>
-                  A fit reports the description it reached and how many passes it
-                  took. Neither of those is evidence about the minimum, and the
-                  only honest reading of a converged fit is that no single further
-                  cut would have helped.
+                  {"A fit reports its reached cost and number of passes. In this SDK, converged means the last epoch's cost change fell below the configured relative threshold. It does not certify the global minimum or prove that every remaining local improvement is exactly zero."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="26. The cost function is a set of choices about how one would write a list down">
                 <>
 <p>
-                  The three parts of Part 3 look like facts and several of them are decisions. Spelling the list character by character under the frequencies of characters within the list is one way of writing a list of strings down, and it is why a piece made of common letters is cheaper than one made of rare letters, which is a statement about spelling rather than about morphology.
+                  {"The description cost depends on a coding scheme. Here the inventory uses empirical character frequencies, so equal-length strings can have different spelling costs. That preference concerns their encoded characters; it does not directly identify grammatical meaning or a morpheme boundary."}
                 </p>
                 <p>
-                  Charging for the counts by the number of ways to deal references into non-empty piles is another. Writing the text under a model with no memory is a third, and it is the one that is most obviously false about language.
+                  {"The count term chooses a code over positive frequency assignments. The corpus term uses independent piece probabilities. These assumptions make the cost manageable, while omitting contextual relationships in language. A different scheme would define a different objective."}
                 </p>
 </>
                 <DerivationTable
                   expressionHeading="the choice"
                   reasonHeading="what turns on it"
-                  rows={[
-                    {
-                      expression: "characters, under the list’s own frequencies",
-                      reason: "makes a piece spelled in common letters cheaper than one spelled in rare letters, so the criterion has a mild preference between two pieces of equal length and equal usefulness. Nothing about morphology says it should.",
-                    },
-                    {
-                      expression: "one end marker per piece",
-                      reason: "required, since without it the list is one undivided run of characters. It also makes the list cost grow with the number of pieces independently of their length, which is part of why a long list of short pieces is dear.",
-                    },
-                    {
-                      expression: "log C(N − 1, M − 1) for the counts",
-                      reason: "one of several defensible codes for a table of counts. A different code changes every total on this page by a different amount, and could move where the crossing point of Part 5 falls.",
-                    },
-                    {
-                      expression: "a text model with no memory",
-                      reason: "prices ing after walk exactly as it prices ing after ing. A model with memory would describe the corpus in fewer nats and would make the search inside it much harder, which is the trade nobody in this family takes.",
-                    },
-                    {
-                      expression: "a multiplier on the text half",
-                      reason: "not part of the criterion at all, and the thing that decides the answer whenever the counts are large. Setting it is choosing how much segmentation is wanted, which is the judgement the criterion was supposed to remove.",
-                    },
-                  ]}
+                  rows={[{"expression":"characters, under the list’s own frequencies","reason":"Under this character-frequency model, spelling cost depends on both length and symbol counts. A morphological analysis need not share that preference."},{"expression":"one end marker per piece","reason":"This scheme separates inventory spellings with end markers. Other self-delimiting representations, such as explicit lengths, are possible. The chosen markers contribute to the cost."},{"expression":"log C(N − 1, M − 1) for the counts","reason":"one of several defensible codes for a table of counts. A different code changes every total on this page by a different amount, and could move where the crossing point of Part 5 falls."},{"expression":"a text model with no memory","reason":"The unigram model gives ing the same probability after walk as after ing. Context-dependent alternatives can capture more structure, but change the parameters and search work. They are outside this baseline implementation."},{"expression":"a multiplier on the text half","reason":"The multiplier changes the relative contribution of corpus cost. It can change segmentation and local-search barriers. State it as part of the objective rather than interpreting weighted totals as unaltered message lengths."}]}
                 />
                 <KeepInMind>
-                  There is no such thing as the description length of a corpus.
-                  There is only its length under some scheme for writing it down,
-                  and the scheme is written by whoever wrote the method. That is
-                  the general form of the caveat, and the multiplier is the place
-                  where it becomes impossible to overlook.
+                  {"A description length is always relative to a representation and coding scheme. State those choices and any corpus multiplier before interpreting the score. A lower value under one scheme does not establish a shorter real transmission under every other scheme."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="27. A cheap piece is not a morpheme">
                 <p>
-                  The criterion has no notion of meaning, of position, or of what
-                  a language is built from, and two measurements on this page show
-                  it rather than argue it. The first is that the piece s, learned
-                  from the endings of walks, talks and plays, is used in front of
-                  a stem when the fitted list reads splay as s followed by play
-                  and stalking as s, talk and ing. Both readings are cheaper than
-                  any alternative the list allows, and both are wrong about the
-                  words.
+                  {"The learned inventory has no grammatical-position labels. It can therefore use s before play in splay or before talk in stalking, even though s was learned from plural or inflected endings. Those are low-cost readings under this inventory, but they do not match the familiar morphological analyses of the words."}
                 </p>
                 <p>
-                  The second is sharper, because there the criterion is not being
-                  fooled, it is disagreeing. Take undo, untie, redo and retie, ten
-                  times each, where the prefixes are as clear as anything in
-                  English. Left whole, that corpus has a description length of
-                  111.7806. Cut into un, re, do and tie, it has a description
-                  length of 148.5946. The morphological answer is 36.8140 nats
-                  worse, and the fit therefore leaves all four words whole.
+                  {"Consider undo, untie, redo and retie, each occurring ten times. Their familiar prefixes and stems define a linguistic comparison. Whole words cost 111.7806 under this scheme, while un, re, do and tie cost 148.5946. The supplied morphological candidate is therefore more expensive, and this fit leaves the words whole."}
                 </p>
                 <WhyThisWorks title="Why the prefixes lose">
                   <>
@@ -1113,26 +858,15 @@ export default function MorfessorPage() {
                     Splitting all four words doubles the references, from 40 to 80, and the text cost is exactly doubled with them, from 55.4518 to 110.9035, since both lists hold four pieces used equally often. Spelling the list does get cheaper, from 47.2085 to 26.4129, because un and re and do and tie come to nine characters where the four whole words come to eighteen.
                   </p>
                   <p>
-                    But 20.7956 saved there, against 55.4517 added to the text and 2.1579 added to the counts, leaves the split 36.8140 behind. The words are too short, and there are too few of them, for the shared spellings to pay.
-                  </p>
+                  In this example, the 20.7956 saving in inventory spelling is outweighed by the 55.4517 extra text cost and 2.1579 extra count cost. The split ends 36.8140 behind overall. Sharing the familiar spellings is therefore insufficient under this objective and corpus; the comparison has to include the longer sequence of references as well as the shorter inventory.
+                </p>
 </>
                 </WhyThisWorks>
                 <p>
-                  So the pieces this method finds are the ones that make a
-                  particular corpus cheap to describe under a particular coding
-                  scheme, and their agreement with morphology is a happy
-                  consequence on some corpora and absent on others. Creutz and
-                  Lagus chose the word morph rather than morpheme for exactly
-                  that reason, and undo and untie are where the distinction
-                  stops being a hedge and becomes the actual answer.
+                  {"The selected pieces aim to reduce description cost under the stated scheme; the local search does not certify a global minimum. Recurring grammatical parts can be useful for compression, but the objective does not require a morpheme analysis. The prefix example shows that a recognizable shared part can still make the complete description more expensive."}
                 </p>
                 <KeepInMind>
-                  Where the pieces do land on the joints, it is because a language
-                  reuses its stems and endings often enough that spelling them
-                  once pays. Where a language does not, or where the corpus is too
-                  small or the counts too large for the trade to work, the
-                  criterion says so plainly and the answer it gives is not
-                  morphology.
+                  {"Reuse across different word types can make a shared stem economical to store. Token repetition, context assumptions and vocabulary coverage can favor different decisions. Treat the output as a statistical segmentation and compare it with linguistic analysis when that is the task."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1150,7 +884,7 @@ export default function MorfessorPage() {
                 "It is ahead of the merge-grown table on its own corpus and on the unseen sentence alike",
               ],
               [0, 1, 2],
-              "They are ahead in different places and neither dominates. On its own corpus a description chosen to be short is short, which is close to a tautology since that is the whole objective. Nothing in the criterion rewards keeping a piece for a character no word needs on its own, so gluing the pieces back does not give the unseen sentence back.",
+              "The two fitted inventories perform differently across the measurements. A description-length fit favors its stated combination of inventory and corpus cost; that is not the same objective as minimizing tokens in unseen text. Its unknown-character behavior also needs a separate check. A compact training description does not by itself establish exact reconstruction of the held-out sentence.",
             ),
             choice(
               "Turning the multiplier down to a quarter puts 34 of the 35 characters in the list and reads the unseen sentence in 31 pieces with no stand-ins. What does it cost?",
@@ -1161,7 +895,7 @@ export default function MorfessorPage() {
                 "Nothing, which is why a quarter is the setting the page recommends",
               ],
               0,
-              "At a quarter the text half counts for so little that keeping single characters becomes affordable, and gluing the pieces back then gives exactly what went in. Anybody using this in earnest reserves rows for the alphabet whatever the criterion says, which is a patch on the objective rather than a consequence of it.",
+              "At weight 0.25, single-character pieces become more affordable under the changed objective, and this fitted inventory reconstructs the held-out sentence exactly. Protecting the complete starting alphabet is another way to specify a coverage requirement. That requirement changes what inventories the trainer may choose; it does not follow automatically from the unconstrained description-length score.",
             ),
             choice(
               "On undo, untie, redo and retie at ten occurrences each, the whole words price at 111.7806 and the split into un, re, do and tie at 148.5946. What does that show?",
@@ -1172,17 +906,17 @@ export default function MorfessorPage() {
                 "The multiplier was left at one, and at any setting below one the split wins",
               ],
               1,
-              "Splitting all four words doubles the references and doubles the text cost with them, and the spelling only saves 20.7956, because un and re and do and tie come to nine characters where the four whole words come to eighteen. The words are too short, and there are too few of them, for the shared spellings to pay. Creutz and Lagus chose the word morph rather than morpheme for exactly this reason.",
+              "For these short repeated words, the shared spelling saves 20.7956 nats, while the extra references make the split inventory more expensive overall: 148.5946 versus 111.7806. A linguistically familiar division can therefore lose under this statistical storage objective. The selected pieces need not coincide with linguistic morphemes.",
             ),
             trueFalse(
               "A converged fit has found the shortest description of its corpus.",
               false,
-              "The only honest reading of a converged fit is that no single further cut would have helped. The search returns a local minimum of a function over a space it can move through one cut at a time, and a description needing two cuts made together is unreachable. Even on these twelve words the shortest description is unknown, since answering that means enumerating two to the fifty-fourth arrangements.",
+              "The SDK's converged flag means the last epoch changed the cost by less than the configured relative threshold. It does not certify the globally shortest description, or even prove that every remaining local improvement is exactly zero. The search evaluates restricted local changes and can stop without reaching a better combined segmentation.",
             ),
             trueFalse(
               "On the eighteen sentences the letter k never survives as a piece of its own, because every word that uses it can be spelled from longer pieces.",
               true,
-              "Nothing in the criterion rewards keeping a piece for a character no word needs on its own, and at the settings that give the most compact description the same is true of almost every letter, which is how the fitted list comes to hold 4 of the corpus’s 35 characters. The cost arrives on text the list was not fitted to, where the unseen sentence comes back with 18 stand-ins out of 28 pieces, and the usual repair is to reserve rows for the alphabet whatever the criterion says.",
+              "The objective can omit a single-character piece when the training words can be represented using longer entries. At the compact setting here, only four of the corpus's 35 characters remain as standalone pieces. The held-out sentence then uses 18 unknown entries among 28 tokens. Protecting alphabet entries would add a coverage constraint, with a corresponding effect on the fitted inventory and its cost.",
             ),
         ],
         },
@@ -1194,7 +928,7 @@ export default function MorfessorPage() {
               [
   "The starter lists twelve inflected forms, each occurring three times. Fit the description-length learner with random_seed=0 and inspect whether it can reuse their repeated parts.",
   "Print the fitted description length in nats, passes run and convergence flag. Then print each learned piece with its count, the total piece references used to encode the corpus, and walking’s segmentation.",
-  "Description length includes both the stored piece inventory and its use in the corpus. A smaller number is preferred under this teaching objective; it is not a judgement of grammatical correctness."
+  "Description length includes both the stored piece inventory and its use in the corpus. A smaller number is preferred under this teaching objective; it is not a judgment of grammatical correctness."
 ],
               `from oop_ml import MorfessorBaseline
 
@@ -1235,7 +969,7 @@ question: "Which reusable stems and endings does the small corpus support?",
               [
   "Keep the twelve forms fixed, but change how often they appear. Fit corpora with three, four and five repeats per form at corpus_weight=1.0. Also fit five repeats at corpus_weight=0.5.",
   "For each setting print the learned-piece count, description length to four decimal places and passes run. Compare which fits retain whole words and which reuse stems and endings.",
-  "Changing corpus_weight changes the objective being minimised. It is a separate intervention from changing the corpus counts, so label both settings in the report."
+  "Changing corpus_weight changes the objective being minimized. It is a separate intervention from changing the corpus counts, so label both settings in the report."
 ],
               `from oop_ml import MorfessorBaseline
 
@@ -1308,7 +1042,7 @@ question: "How does a learned piece inventory handle an unfamiliar word?",
   "best_segmentation(word) returns morphs and cost for a single word.",
   "Pass that result’s morphs to cost_of_segmentation. It should reproduce the reported search score.",
   "Inspect which pieces are known before interpreting a large cost. An unfamiliar single character uses the fallback penalty."
-], check: numberCheck("What does the model charge to read jumping, in nats?", 121.9537, 0.0005, "Jumping costs 121.9537 nats in this fit. Ing is known, while its other characters use the fallback penalty. By contrast, a low-cost reuse of known pieces does not guarantee a sensible morphological reading.") },
+], check: numberCheck("What segmentation cost does the fitted model report for jumping, in nats?", 121.9537, 0.0005, "Jumping costs 121.9537 nats in this fit. Ing is known, while its other characters use the fallback penalty. By contrast, a low-cost reuse of known pieces does not guarantee a sensible morphological reading.") },
             ),
             exercise(
               "Fit the two-word corpus, and the four prefixed words",

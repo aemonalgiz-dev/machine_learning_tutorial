@@ -123,9 +123,10 @@ export function Word2vecCombinations({ word: initialWord = "walked" }: { word?: 
       <Legend>
         The red dot is how alike two words from different lists are on average
         and the green dot how alike two from the same list; a long bar is a fit
-        that separated them. Nearest words are coloured by which list they came
-        from, so an <span style={{ color: MONEY }}>amber</span> word beside a
-        verb form is a mistake.
+        that separated them. Nearest words are colored by their source list.
+        An <span style={{ color: MONEY }}>amber</span> neighbor of a verb form
+        crosses those groups, which helps us check how well this representation
+        preserves the distinction in the example.
       </Legend>
       {message && <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>}
     </div>

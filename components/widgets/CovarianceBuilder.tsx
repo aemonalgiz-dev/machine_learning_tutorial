@@ -117,8 +117,8 @@ export function CovarianceBuilder() {
             <text x={plotX(deviation.x) + 8} y={plotY(deviation.y) - 6} className="fill-slate-600 text-[9px] dark:fill-slate-300">{index + 1}</text>
           </g>
         ))}
-        <text x={PLOT.width / 2} y={PLOT.height - 6} textAnchor="middle" className="fill-slate-500 text-[10px] dark:fill-slate-400">centred height</text>
-        <text x={10} y={PLOT.height / 2} textAnchor="middle" transform={`rotate(-90 10 ${PLOT.height / 2})`} className="fill-slate-500 text-[10px] dark:fill-slate-400">centred weight</text>
+        <text x={PLOT.width / 2} y={PLOT.height - 6} textAnchor="middle" className="fill-slate-500 text-[10px] dark:fill-slate-400">centered height</text>
+        <text x={10} y={PLOT.height / 2} textAnchor="middle" transform={`rotate(-90 10 ${PLOT.height / 2})`} className="fill-slate-500 text-[10px] dark:fill-slate-400">centered weight</text>
       </svg>
     </div>
   );

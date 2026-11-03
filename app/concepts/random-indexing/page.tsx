@@ -24,9 +24,9 @@ import { ThreeReadingsOfOneCount } from "@/components/widgets/ThreeReadingsOfOne
 import { WidthAgainstTheTable } from "@/components/widgets/WidthAgainstTheTable";
 
 export const metadata: Metadata = {
-  title: "Random Indexing · oop_ml",
+  title: "Random Indexing · Perceptron Lab",
   description:
-    "Counting every possible word-context pair can require a very large table. Random indexing gives contexts small random vectors and accumulates them, keeping the representation a fixed size as new examples arrive.",
+    "Random indexing accumulates fixed-size context vectors as word occurrences arrive. It summarizes relationships without storing every word-context count, with random projection affecting how precisely those relationships are preserved.",
 };
 
 const link =
@@ -40,23 +40,21 @@ export default function RandomIndexingPage() {
       technicalStart="Part 2. A Direction For Every Word"
       openingTitle="Keep a Sketch Instead of the Whole Count Table"
       playgroundTitle="Build context vectors by adding sparse directions"
-      playgroundIntro="Follow which context vectors are added for one word. Compare the resulting neighbours at different widths and random seeds."
+      playgroundIntro="Follow which context vectors are added for one word. Compare the resulting neighbors at different widths and random seeds."
       title="Random Indexing"
-      tagline={"Counting every possible word-context pair can require a very large table. Random indexing gives contexts small random vectors and accumulates them, keeping the representation a fixed size as new examples arrive."}
+      tagline={"Random indexing accumulates fixed-size context vectors as word occurrences arrive. It summarizes relationships without storing every word-context count, with random projection affecting how precisely those relationships are preserved."}
       prerequisites={
         <>
-          Every answer on this page is an angle between two lists of numbers,
-          which is the{" "}
+          {"We compare the resulting vectors using "}{" "}
           <Link href="/concepts/a-vector-for-a-word" className={link}>
             cosine
           </Link>{" "}
-          rather than a distance, and the reason two words can be alike without
-          either being large. The thing random indexing is a shortcut past is
-          the build-a-table-then-squeeze-it shape that{" "}
+          {" similarity, which measures directional alignment while ignoring magnitude. Random indexing provides an alternative to building a wide count table and then reducing its dimensions, as in "}{" "}
           <Link href="/concepts/latent-semantic-analysis" className={link}>
             latent semantic analysis
           </Link>{" "}
-          uses, so a reader who has met that will recognise the problem in Part
+
+          uses, so a reader who has met that will recognize the problem in Part
           1 immediately, though nothing later depends on having read it.
         </>
       }
@@ -73,19 +71,9 @@ export default function RandomIndexingPage() {
 <p>
                   We will reuse twenty-four documents with two controlled topics. The cooking half uses flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan. The sailing half uses sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew. A smaller collection later lets us calculate individual updates by hand.
                 </p>
-                <p>
-                  No subject word appears in both halves. What the halves share is three words carrying no subject at all, and, the and we, and each document uses exactly one of them.
-                </p>
+                <p>The content-word lists are separate. Both use and, the and we, with one such word in each document. Their shared presence does not identify the subject in this constructed collection.</p>
 </>
-                <p>
-                  Each document is six words long, five consecutive words of its
-                  own half taken in a cycle and one of the three shared words,
-                  which comes to 144 word occurrences over 23 distinct words.
-                  The arrangement is deliberate, since it makes every word of a
-                  half keep the same company as every other word of that half,
-                  and so makes the two numbers this page keeps reporting mean
-                  something.
-                </p>
+                <p>Each document contains five successive topic words and one shared word, giving 144 occurrences over 23 vocabulary entries. Rotating the topic words creates a controlled pattern of shared contexts. The later similarity measurements test how well the shorter representations preserve that pattern.</p>
                 <p>
                   The smaller collection is three sentences of three words each,
                   the cat sat, the dog sat and the cat ran. Five distinct words,
@@ -93,25 +81,12 @@ export default function RandomIndexingPage() {
                   what Part 2 uses it for.
                 </p>
                 <KeepInMind>
-                  Nobody tells a fit that a collection has two halves. The two
-                  numbers reported throughout, how alike two words of one half
-                  come out and how alike a word of each comes out, are the whole
-                  score, and both are read off positions that were built without
-                  the halves ever being mentioned.
+                  {"The fit receives the documents without topic labels. We use the known groups to measure within-topic and cross-topic similarities. These are useful checks on this example, rather than a complete evaluation of the representation."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. Counting which word turned up beside which">
-                <p>
-                  The starting point for every counting method is the same
-                  table. Write down one row for each distinct word and one
-                  column for each distinct word, and in the cell where a row and
-                  a column meet, put how often those two words turned up within
-                  a few positions of each other. How few is the window, and five
-                  positions on each side is the usual choice; a sentence
-                  boundary stops the reach, so nothing outside a document is
-                  ever company for anything inside it.
-                </p>
+                <p>A full co-occurrence table records how often each word appears near each context word. The window size and document-boundary rule define what near means. This experiment uses the stated window within each document; a different choice would change the evidence being summarized.</p>
                 <p>
                   Every pair is counted from both ends, so the table is the same
                   read either way round, and a word&rsquo;s row and its column
@@ -151,22 +126,13 @@ export default function RandomIndexingPage() {
                   beside.
                 </p>
                 <KeepInMind>
-                  This is what makes the table worth reading and also what makes
-                  it awkward. The answer wanted from it is never a cell, it is
-                  always an angle between two whole rows, so the table has to
-                  exist in full before the first question can be asked of it.
+                  {"A context profile can be useful even when a particular pair never co-occurs. Computing that profile does not require the entire matrix to exist first: rows can be stored sparsely, accumulated selectively, or projected as events arrive. Random indexing uses the last option."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="4. The widest thing in the calculation is the thing nobody wants">
                 <p>
-                  A row per word and a column per word means the table has as
-                  many numbers as the square of the vocabulary. On the
-                  twenty-four documents that is 23 by 23, or 529 numbers. But
-                  nobody wants 23 numbers a word. The whole family of counting
-                  methods squeezes that row down to a handful of coordinates
-                  before anybody uses it, and at 16 numbers a word the answer
-                  holds 368.
+                  {"A dense vocabulary-by-vocabulary table has 529 cells here. A 16-coordinate vector for each of 23 words has 368 values. Count-based methods need not always reduce their rows, and sparse storage can avoid allocating every possible cell. Random indexing lets us accumulate the smaller projected rows directly."}
                 </p>
                 <Equation>{"numbers in the table = V × V"}</Equation>
                 <Equation>{"numbers in the answer = V × d"}</Equation>
@@ -185,12 +151,9 @@ export default function RandomIndexingPage() {
                   At this scale, forming 529 entries to retain 368 is inexpensive. The concern becomes practical with larger vocabularies: building the full co-occurrence table can require much more storage than the representation we keep. Random indexing lets us investigate a way to accumulate a smaller representation directly.
                 </InAModel>
                 <KeepInMind>
-                  There is a second cost hidden in the order, which is that the
-                  squeeze is not incremental. A new document changes counts all
-                  over the table, and the narrowing has to be redone from the
-                  changed table rather than nudged. That is the complaint random
-                  indexing was written against.
+                  {"A full batch decomposition may need substantial work when the table changes. Incremental decompositions also exist. Random indexing takes another approach: keep a fixed random map and update the accumulated vectors as new context events arrive. Sahlgren’s 2005 introduction presents it as an incremental way to build context representations without first retaining the full wide matrix."}
                 </KeepInMind>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://www.diva-portal.org/smash/get/diva2%3A1041127/FULLTEXT01.pdf">{"Sahlgren: An Introduction to Random Indexing (2005)"}</Link></p>
               </SubSection>
             </>
 </>),
@@ -210,21 +173,13 @@ export default function RandomIndexingPage() {
                   to +1 and the other half to −1.
                 </p>
                 <p>
-                  At the width this page works in, that is 16 numbers of which 4
-                  are anything at all. The direction drawn for flour is non-zero
-                  at positions 5, 7, 8 and 9 and zero at the other twelve. Draw
-                  again with a different starting point and every one of those
-                  numbers changes, and nothing about the collection has moved.
+                  {"Here each index vector has 16 coordinates, with four nonzero entries. Flour’s occupied positions are 5,7,8 and 9. A different seed changes the draw, although individual coordinates or even complete index vectors can coincide."}
                 </p>
                 <DrawnDirections
                   words={["flour", "sugar", "bake", "anchor", "the"]}
                 />
                 <KeepInMind>
-                  These directions are not the answer and they are not a small
-                  version of it. They carry identity and nothing else, in the
-                  way a name carries identity, so flour and sugar are as
-                  unrelated here as flour and anchor and are meant to be. What
-                  they are is the raw material a position gets summed out of.
+                  {"The random index vectors are assigned independently of the words’ contexts. They are identifiers used to construct the representation, not learned meanings. At limited width, some index vectors can overlap or even coincide, so their numerical comparisons need not all be equal."}
                 </KeepInMind>
               </SubSection>
 
@@ -244,22 +199,18 @@ export default function RandomIndexingPage() {
                   }
                 </Equation>
                 <p>
-                  Two words that keep the same company add up the same
-                  directions and land near each other, and neither of them ever
-                  needed a row of its own in anything. That is the whole of the
-                  method, and the rest of this page is spent on why the sum does
-                  not turn into a smear and on how far its answer falls from the
-                  one the table of counts would have given.
+                  {"Words with identical weighted context profiles accumulate identical vectors. Similar profiles may produce similar directions, with distortion from the random map. Each word still needs a stored accumulated row; the storage saving comes from that row’s smaller width."}
                 </p>
                 <PositionBuildUp />
                 <WorkedExample title="Cat, over three sentences">
                   <>
 <p>
-                    Cat appears twice, in the cat sat and in the cat ran, and with a window of two positions it has four neighbours in all. Adding the direction of the gives 0, 0, 1, −1, −1, 0, 1, 0. Adding sat next cancels the −1 in the fifth position and leaves 0, 0, 1, −1, 0, 1, 0, −1.
+
+                    Cat appears twice, in the cat sat and in the cat ran, and with a window of two positions it has four neighbors in all. Adding the direction of the gives 0, 0, 1, −1, −1, 0, 1, 0. Adding sat next cancels the −1 in the fifth position and leaves 0, 0, 1, −1, 0, 1, 0, −1.
                   </p>
                   <p>
-                    The second sentence contributes the again and then ran, and the total finishes at 0, 1, 2, −3, 0, 0, 1, −1, which is exactly what the fit reports as the position of cat. Four additions of eight numbers each, and no table of any kind was written down.
-                  </p>
+                  {"The second sentence contributes the again and then ran. The final vector is [0, 1, 2, −3, 0, 0, 1, −1], matching the fitted result. This hand calculation accumulates four context vectors directly. It does not need a full count matrix, although the SDK uses that matrix in its implementation."}
+                </p>
 </>
                 </WorkedExample>
                 <KeepInMind>
@@ -272,29 +223,16 @@ export default function RandomIndexingPage() {
 
               <SubSection title="7. Nothing is fitted and nothing is decomposed">
                 <p>
-                  These updates accumulate context vectors directly. They do not minimize a loss by gradient descent, so there is no learning rate or convergence loop to tune. We also avoid decomposing a full co-occurrence table. One pass can build the representation, with later observations contributing further updates.
+                  {"Direct accumulation builds a word vector by adding its neighbors' fixed index vectors. It needs no gradient-descent learning rate or convergence loop and can be organized as a streaming pass. The SDK takes the equivalent matrix route below: it first builds and stores co-occurrence counts, then multiplies by the index-vector table. Neither route requires a singular-value decomposition."}
                 </p>
                 <p>
-                  The only randomness in the whole procedure is the draw of the
-                  directions, and that happens before the first word is read.
-                  Fix the draw and the answer is fixed, exactly, down to the
-                  last bit, however many times it is run.
+                  {"Once the vocabulary assignment, random map, event order and numeric implementation are fixed, the accumulation is reproducible. Changing floating-point summation order can change the last few bits, even with the same random seed."}
                 </p>
                 <p>
-                  The work is easy to count. On the twenty-four documents there
-                  are 144 word occurrences, and at a window of five positions
-                  each side there are 720 occasions where one word is inside
-                  another&rsquo;s window. Each of those adds a direction with 4
-                  non-zero entries, so the whole reading is 2,880 updates to a
-                  single number, and nothing else happens.
+                  {"For a sparse accumulation implementation, the twenty-four documents contain 144 word occurrences and 720 selected word-context events. Each event contributes four nonzero entries, giving 2,880 coordinate additions. This count excludes vocabulary construction, vector allocation and later comparisons. It describes the direct-accumulation route, not the dense matrix multiplication used by this SDK."}
                 </p>
                 <InAModel>
-                  The reason those numbers matter is what they do not depend on.
-                  The work in one pass grows with how long the collection is and
-                  with how many non-zero entries a direction carries, and not at
-                  all with how large the vocabulary is or how wide the positions
-                  are. Building the table instead grows with the square of the
-                  vocabulary whatever the collection says.
+                  {"With a fixed number of nonzero entries per index vector, each direct context update touches a fixed number of coordinates. The number of such updates grows with the text and window size. Storing one learned vector per word still costs vocabulary size times output width, and allocating a dense co-occurrence table costs the square of the vocabulary size. These are separate update and storage costs."}
                 </InAModel>
               </SubSection>
 
@@ -320,23 +258,19 @@ export default function RandomIndexingPage() {
                 </p>
                 <OnePassOrOneProduct />
                 <p>
+
                   Measured on the three sentences, and on the twenty-four
                   documents as well, the two routes agree exactly and the largest
                   disagreement anywhere in the answer is 0, since every weight
                   involved is a number binary holds exactly. Move to the
-                  twenty-four documents and let a neighbour further away count
+                  twenty-four documents and let a neighbor further away count
                   less, so that a weight of a third appears, and the largest
                   disagreement becomes 8.88 × 10⁻¹⁶ in a table whose largest
                   entry is 11.25, which is rounding and not a difference of
                   method.
                 </p>
                 <KeepInMind>
-                  Nothing forces anybody to take the second route, and in
-                  practice nobody does. It matters because it is the statement
-                  of what the first route computes, and because a claim about
-                  random projections is a claim about a multiplication by a
-                  random block, which is a thing the accumulating pass does not
-                  look like until this is pointed out.
+                  {"The SDK uses this count-matrix product, which exposes the relation between full context rows and their projected vectors. A streaming implementation can accumulate the same contributions without storing the dense table. In exact arithmetic they compute the same representation; their storage and computation costs differ."}
                 </KeepInMind>
               </SubSection>
 
@@ -380,18 +314,18 @@ export default function RandomIndexingPage() {
             choice(
               "What does the direction drawn for a word carry?",
               [
-                "Identity and nothing else, since it is drawn before any text is read",
+                "A fixed random index code, assigned without learning semantic or context information",
                 "A small version of the word’s final position, refined as the reading proceeds",
                 "The word’s own row of the table of counts, already squeezed",
                 "How often the word turned up in the collection",
               ],
               0,
-              "A direction is drawn at random and has nothing whatever to do with what the word means or where it appeared, which is why flour and sugar are as unrelated there as flour and anchor. It is the raw material a position gets summed out of rather than a first guess at one.",
+              "The index vector is assigned independently of the word's meaning and observed contexts. It provides a fixed signed code whose contributions can be accumulated. Two drawn vectors may overlap by chance; they are not promised to be orthogonal. The fitted context vector becomes informative through the observations that are added to it.",
             ),
             trueFalse(
-              "Fixing the draw of the directions fixes the answer exactly, however many times the reading is run.",
+              "With the corpus and context settings fixed, fixing the random index draw makes repeated runs deterministic.",
               true,
-              "The draw is the only randomness in the procedure and it happens before the first word is read. There is no objective being minimised, so no learning rate and no question of convergence, and there is no second pass over the collection.",
+              "With the corpus, tokenization, context rule and index draw fixed, the resulting representation is deterministic. There is no gradient-descent objective or convergence loop. This SDK constructs the context-count matrix and multiplies it by the index-vector matrix. A streaming implementation can accumulate the same contributions directly, but that is not a claim that this teaching implementation avoids the full table.",
             ),
             choice(
               "Why does the second route, multiplying the table of counts by the stacked directions, matter?",
@@ -402,10 +336,10 @@ export default function RandomIndexingPage() {
                 "It is the route implementations actually take",
               ],
               0,
-              "Nothing forces anybody to take it and in practice nobody does. It matters because a word’s position is then visibly its row of the table projected down by a random map, and a claim about random projections is a claim about a multiplication by a random block. The two routes agree exactly where every weight is held exactly, and a weight of a third moves them apart by 8.88 × 10⁻¹⁶ in a table whose largest entry is 11.25.",
+              "The matrix product makes the method's meaning explicit: each full context row is multiplied by the same random map. This is the route the SDK actually uses. Summing context contributions directly gives the same result in exact arithmetic. With fractional weights, a different addition order can produce rounding differences; the reported comparison differs by 8.88e−16 on entries whose largest value is 11.25.",
             ),
             choice(
-              "Reading the twenty-four documents once costs 2,880 updates to a single number. What does that figure grow with?",
+              "In a sparse streaming implementation,720 context occurrences each update four nonzero index entries. What determines the number of accumulation updates?",
               [
                 "How long the collection is and how many non-zero entries a direction carries, and not at all with the vocabulary or the width",
                 "The square of the vocabulary, since every word has a direction and every direction is added to every other",
@@ -413,7 +347,7 @@ export default function RandomIndexingPage() {
                 "The number of distinct words, since a wider vocabulary means more directions to draw",
               ],
               0,
-              "There are 144 word occurrences, and at a window of five positions each side there are 720 occasions where one word is inside another’s window. Each adds a direction with 4 non-zero entries, so the reading is 720 times 4 updates. Making the positions wider changes nothing, because a sparse direction still touches four numbers whatever the width is, which is why a dense direction at 2048 numbers a word would cost five hundred times as much. Building the table instead grows with the square of the vocabulary whatever the collection says.",
+              "The count follows context occurrences and the number of nonzero entries added for each one.\n\n```math\nsparse accumulation updates = 720 × 4 = 2,880\n```\n\nIncreasing width alone does not increase that sparse addition count, but it can increase storage and comparison work. The SDK here instead builds a dense count matrix and multiplies it by the drawn vectors. A sparse count representation need not reserve every possible word-pair cell.",
             ),
         ],
         },
@@ -430,14 +364,7 @@ export default function RandomIndexingPage() {
                   to end up as a smear of everything.
                 </p>
                 <p>
-                  The reason it does not is a fact about high-dimensional space
-                  that is hard to believe from low-dimensional experience. Two
-                  directions drawn at random are nearly at right angles to each
-                  other almost all of the time, and the more numbers they have
-                  the more nearly. Being at a right angle is exactly the
-                  condition for one to contribute nothing to a reading of the
-                  other, so adding a great many of them together leaves each one
-                  still recoverable, up to a little interference.
+                  {"Sparse random index vectors often have disjoint occupied positions and therefore zero dot product. With sufficient width, overlaps are less common. This limits interference in the accumulated representation, but does not make every original context contribution uniquely recoverable from a lower-dimensional sum."}
                 </p>
                 <p>
                   Drawing two hundred directions at once and measuring all
@@ -460,11 +387,7 @@ export default function RandomIndexingPage() {
 
               <SubSection title="11. The rule that predicts it, and where it stops predicting">
                 <p>
-                  The rule behind those numbers is short. Two directions with n
-                  non-zero entries scattered over d positions share about n
-                  squared over d positions on average. Each shared position
-                  contributes plus or minus one to a reading whose natural size
-                  is n, so the expected size of the overlap is about n over d.
+                  {"If each index vector occupies n randomly selected positions out of d, two supports share n²/d positions on average. Ignoring sign cancellation and dividing by the common squared length gives n/d. Treat that as an overlap-based heuristic for absolute normalized interference when collisions are rare, not a general exact expectation."}
                 </p>
                 <Equation>{"expected overlap ≈ n / d"}</Equation>
                 <p>
@@ -474,32 +397,21 @@ export default function RandomIndexingPage() {
                   enough that the rule is worth carrying around.
                 </p>
                 <p>
-                  It stops being worth carrying at both ends, and I would rather
-                  report where than let it be quoted where it fails. At eight
-                  positions it predicts 0.5000 and the measurement is 0.2994,
-                  which is a ratio of 0.5988, so it overstates the interference
-                  by nearly half at the narrow end. And if the directions are
-                  allowed to fill up instead of staying sparse, it collapses
-                  entirely. At fifty positions with all fifty filled it predicts
-                  1.0000, meaning every pair should lie on top of every other,
-                  and the measurement is 0.1162.
+                  {"At narrow or dense settings, several shared positions can contribute opposite signs and cancel. The n/d heuristic then overestimates absolute interference. The measured examples below show that limit rather than a contradiction of the actual signed-dot-product calculation."}
                 </p>
                 <PerpendicularityCurve />
                 <p>
+
                   The reason for both failures is the same. The rule counts the
                   shared positions and then treats each one as contributing its
                   full weight, when in fact the sign of a shared position is a
                   coin toss and the shared positions cancel each other. Once
-                  there are many of them the cancelling dominates, which is why
+                  there are many of them the canceling dominates, which is why
                   the measurement falls further and further below the prediction
                   as the directions fill.
                 </p>
                 <KeepInMind>
-                  Use n over d where the directions are sparse relative to the
-                  width and there are few enough shared positions for the
-                  cancelling not to matter, which is the case every practical
-                  choice belongs to. Outside that it is not a loose guide, it is
-                  wrong by a factor of more than eight.
+                  {"Use the heuristic only when shared positions are rare enough that cancellation is small. For other sparsities, measure signed inner products or use a result proved for the chosen random-map distribution."}
                 </KeepInMind>
               </SubSection>
 
@@ -509,7 +421,7 @@ export default function RandomIndexingPage() {
                   Consider an ideal comparison first. If the context directions were mutually orthogonal and all had the same length, mapping count rows onto them would preserve angles, up to a common scale in lengths. That would preserve the comparisons exactly. Random indexing uses approximately orthogonal directions in a smaller space, so we need to measure the resulting distortion.
                 </p>
                 <p>
-                  Every question anybody wanted to ask of the table would come back identical, and the narrowing would have cost nothing at all.
+                  {"Under exact equal-length orthogonality, pairwise angles of count rows would be preserved. A smaller random map approximates those comparisons; it does not preserve every possible query or every original coordinate."}
                 </p>
 </>
                 <WhyThisWorks title="What exact orthogonality would preserve, and why we approximate it">
@@ -518,42 +430,35 @@ export default function RandomIndexingPage() {
                     A d-dimensional space can contain at most d mutually orthogonal nonzero directions, fewer than the number of words in many vocabularies. The Johnson-Lindenstrauss result gives a related reason to consider random projections: for a fixed finite set of points, suitable random maps can preserve distances approximately with high probability using a dimension proportional to the logarithm of the point count divided by the squared error tolerance. That bound need not depend on the original dimension. It does not guarantee that every sparse projection or small draw used here preserves every comparison.
                   </p>
                   <p>
-                    Achlioptas showed in 2001 that a sparse map with entries only −1, 0 and +1 satisfies the same bound as one drawn from a bell curve.
-                  </p>
+                  {"Achlioptas showed that particular binary and ternary random-map distributions can give Johnson–Lindenstrauss guarantees. The theorem’s distribution and scaling matter; it is not a guarantee for any sparse map with entries drawn from the same three values."}
+                </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://doi.org/10.1145/375551.375608">{"Achlioptas: Database-friendly Random Projections (2001)"}</Link></p>
 </>
                   <>
 <p>
-                    The claim is checkable here rather than only citable, and the check produces a result I did not expect. At 2048 numbers a word, one draw happened to give all twenty-three words non-zero entries that never once landed in the same position, so the directions really were exactly at right angles, and every angle in the table came through the projection with a largest change of 3.8 × 10⁻¹⁷, which is the rounding of the arithmetic and nothing else.
-                  </p>
+                  {"One 2048-coordinate draw gives all 23 index vectors disjoint occupied positions. In that case their equal-length orthogonality preserves the count-row cosines up to the measured rounding difference of 3.8×10⁻¹⁷. Another draw at the same width can have overlaps."}
+                </p>
                   <p>
                     At the same width, another draw left two pairs sharing a position, and the angles moved by 0.0109. Exactness is a property of the draw rather than of the width.
                   </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  So the interference is entirely the pairs of directions that
-                  happen to share a position, and everything else about the
-                  method is exact. That is the sentence the last Part of this
-                  page returns to, because a pair sharing a position is settled
-                  before any text is read and no amount of text will unsettle
-                  it.
+                  {"The Gram matrix of the drawn index vectors determines how the projection changes inner products. Shared positions can create nonzero cross terms, but signed contributions can cancel. The observed distortion also depends on the context rows being projected."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="13. Sparse and ternary is a choice about cost, and it turns out to be free">
                 <>
 <p>
-                  Nothing so far said the directions had to be mostly zeros. The original statements of this geometry drew every entry from a bell curve, and that works. The reason for four non-zero entries and nothing else is arithmetic in the inner loop. Adding a direction with four non-zero entries touches four numbers, and it touches four whatever the width is, so the reading of the collection does not get more expensive when the positions get wider.
+                  {"A sparse direct accumulator touches only the occupied positions in each index vector. Keeping that count fixed makes each context update independent of the output width. Wider output vectors still increase allocation, storage and the work of later comparisons."}
                 </p>
                 <p>
                   A dense direction touches every position, so the same reading at 2048 numbers a word would cost five hundred times what it costs at four.
                 </p>
 </>
                 <p>
-                  The entries being only −1, 0 and +1 removes the multiplication
-                  as well. Adding a direction becomes adding and subtracting
-                  ones at a handful of addresses, with no floating-point
-                  multiply anywhere in the reading.
+                  {"For unweighted context events, a direct sparse implementation can add or subtract values without multiplying by an arbitrary index entry. Distance-weighted contexts still require applying their weights. The SDK's dense matrix route does not obtain all the arithmetic savings of a specialized sparse accumulator."}
                 </p>
                 <p>
                   The question that decides whether this is a compromise is what
@@ -574,24 +479,11 @@ export default function RandomIndexingPage() {
                     ["64", "0.0811", "0.0670", "0.0752", "0.0832", "0.0834"],
                     ["256", "0.0364", "0.0393", "0.0378", "0.0338", "0.0357"],
                   ]}
-                  caption="How far the angles between two subject words moved away from the whole table’s answer, averaged over twelve draws. Across a row the numbers barely move; down a column they fall by roughly a factor of five."
+                  caption="Mean absolute cosine changes over twelve draws. Sparsity has a smaller effect than width in these comparisons; the amount of improvement varies by row and column."
                 />
-                <p>
-                  Reading across a row, the widest and narrowest settings differ
-                  by 0.0056 at 16 numbers and by 0.0055 at 256, which is inside
-                  the swing one draw makes. Reading down a column, the same
-                  setting goes from 0.1714 to 0.0393 as the width grows. The
-                  width is doing all the work, so two non-zero entries can be
-                  chosen for the two slot updates they cost per neighbour
-                  rather than defended as a compromise.
-                </p>
+                <p>In this experiment, changing the number of nonzero index entries has a small effect compared with the effect of increasing the vector width. The reported differences are 0.0056 at width 16 and 0.0055 at width 256, while the error for the compared setting falls from 0.1714 to 0.0393 as width grows. That supports the inexpensive two-entry choice here, without establishing it as best for every corpus or random draw.</p>
                 <KeepInMind>
-                  A single draw does not show this and will mislead anybody who
-                  looks at one. At 16 numbers, the draw the rest of this page
-                  uses puts four non-zero entries ahead of two by 0.0610, and at
-                  256 numbers the same draw puts two ahead of four by 0.0255.
-                  The ordering there is settled by the draw, which is why the table
-                  above is an average and says how many draws it averaged.
+                  {"Single draws can reverse the ordering of two settings. The table therefore reports an average over twelve draws. When a particular word pair matters, inspect its variability as well as the aggregate error."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -601,35 +493,13 @@ export default function RandomIndexingPage() {
           title: "Part 4. What The Shortcut Costs",
           content: (
             <>
-              <SubSection title="14. The neighbours are reordered rather than replaced">
+              <SubSection title="14. The neighbors are reordered rather than replaced" id="14-the-neighbours-are-reordered-rather-than-replaced">
+                <p>We can measure the approximation by comparing the random-indexing representation with the full context table it replaces. For flour, five of the six nearest words agree, but their order differs. Random indexing places eggs first while the full table ranks it third; the full table places bake first while random indexing ranks it third. The shortcut preserves much of this neighborhood without reproducing its ranking exactly.</p>
                 <p>
-                  The honest way to price the shortcut is to build the table it
-                  avoids, ask it the same questions, and report the difference.
-                  Ask both which words are nearest to flour and the two answers
-                  hold the same words in a different order. Five of the
-                  fit&rsquo;s six nearest are among the table&rsquo;s six
-                  nearest, and the two
-                  disagree about which is first. The fit says eggs, which the
-                  table ranks third; the table says bake, which the fit ranks
-                  third.
-                </p>
-                <p>
-                  That is the typical damage and it is mild. The sharper case is
-                  a pair the two readings disagree about in kind rather than in
-                  degree. Flour and anchor come out at 0.1208 in the table, a small
-                  positive number saying the two have a little in common through
-                  the words both halves share. In the fit they come out at −0.2437.
-                  Nothing about the collection made anchor the opposite of
-                  flour; the interference from a few directions that happened to
-                  share positions did.
+                  {"Flour–anchor changes from positive 0.1208 in the count rows to negative 0.2437 after this projection. Negative cosine indicates opposing projected directions, not opposite meanings. This example shows how projection distortion can change even the sign of a low-similarity pair."}
                 </p>
                 <KeepInMind>
-                  A number near zero is where the interference does its worst
-                  damage, because the signal that would have held the answer in
-                  place is smallest exactly there. Flour and sugar, genuinely
-                  alike, move from 0.6991 to 0.6270 under the same fit that sent
-                  flour and anchor from 0.1208 to −0.2437, so the pair with
-                  almost nothing in common moved five times as far.
+                  {"Low baseline similarity can be sensitive to projection error. Compare the observed changes for flour–sugar and flour–anchor, then inspect other pairs rather than treating these two as a universal worst-case rule."}
                 </KeepInMind>
               </SubSection>
 
@@ -670,10 +540,11 @@ export default function RandomIndexingPage() {
 
               <SubSection title="16. Where a method that builds the table wins">
                 <p>
+
                   There is a place where the shortcut is plainly worse than the
                   alternative, and it is not about the projection at all. It is
                   about what gets projected. The sum in Part 2 adds a
-                  neighbour&rsquo;s direction once per occurrence, so a word that
+                  neighbor&rsquo;s direction once per occurrence, so a word that
                   turns up beside everything contributes its direction to
                   everything, and the positions of two words that share nothing
                   but their function-word company are pulled together.
@@ -690,30 +561,16 @@ export default function RandomIndexingPage() {
                 </p>
                 <ThreeReadingsOfOneCount />
                 <p>
-                  The fit inherits the raw table&rsquo;s number almost exactly,
-                  which is what a faithful projection of the raw table should do.
-                  The method that builds the table has somewhere to put a repair
-                  and this one does not, because there is no moment at which the
-                  counts exist as counts to be reweighted. The usual answer is to
-                  discard the frequent words before reading, or to let a
-                  neighbour further away count less, and both are decisions taken
-                  before the reading rather than corrections applied after it.
+                  {"A direct sum of raw context directions inherits raw-frequency weighting. Fixed event weights can be applied during accumulation. If a later adjustment depends nonlinearly on individual pair counts, the projected sums alone may not retain enough information to apply it exactly. Keep counts, richer summaries or a way to reprocess the text when such changes are needed."}
                 </p>
                 <KeepInMind>
-                  Read that comparison as being about the weighting rather than
-                  about the projection. Adding up random directions is a way of
-                  getting a narrow answer out of a table of counts, and its
-                  0.5064 against the table&rsquo;s own 0.5173 is the projection
-                  reporting those counts faithfully. Any repair has to reach the
-                  counting rule itself, before a single direction is added up.
+                  {"The 0.5064 versus 0.5173 comparison concerns approximation of raw counts. Changing which associations are emphasized is a separate representation decision, potentially requiring additional retained data."}
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="17. The work, counted honestly">
+              <SubSection title="17. Update work and storage" id="17-the-work-counted-honestly">
                 <p>
-                  It would be easy to leave the impression that the shortcut is
-                  always the cheap route. On this collection it is not, and the
-                  numbers say so.
+                  {"Compare the direct sparse accumulator with the dense matrix route used by this SDK. Count update operations and storage separately; they grow with different aspects of the input."}
                 </p>
                 <NumberTable
                   headings={["what is done", "how much of it"]}
@@ -731,22 +588,10 @@ export default function RandomIndexingPage() {
                   caption="The two routes to the same positions, on twenty-four documents of six words each with a window of five positions on either side."
                 />
                 <p>
-                  Building the table needs 529 numbers to exist at once, and the
-                  answer needs 368, so the saving in memory is a factor of 1.44
-                  and not worth the trouble. What decides it is how each figure
-                  grows. The 2,880 grows with how long the collection is and with
-                  how many non-zero entries a direction carries, and stops there.
-                  The 529 grows with the square of the vocabulary and the 8,464
-                  grows with the square of the vocabulary times the width, and
-                  neither depends on how much or how little text there was.
+                  {"The dense count table has 529 values and the final output has 368. A complete memory comparison also includes index vectors and any working arrays. Direct updates grow with the number of context events and occupied index entries; the dense projection’s product count grows with vocabulary size and width. Building the counts still requires reading the text."}
                 </p>
                 <InAModel>
-                  So the scale at which this method is the right one is the scale
-                  at which the square of the vocabulary is the problem, which is
-                  every real collection and none of the ones on this page. The
-                  measurements here are honest about a small case and the
-                  argument is about the shape of the growth, which is exactly the
-                  distinction the original proposal was making.
+                  {"Random indexing is useful when an incrementally accumulated narrow representation fits the application better than retaining full context profiles. Sparse count storage, batch factorization and indexed retrieval are other options. Choose from their actual storage, update and comparison costs."}
                 </InAModel>
               </SubSection>
             </>
@@ -758,33 +603,21 @@ export default function RandomIndexingPage() {
             <>
               <SubSection title="18. Nearly perpendicular is not perpendicular, and more text does not help">
                 <p>
-                  Part 3 said the interference is exactly the pairs of directions
-                  that share a position. That has a consequence worth stating on
-                  its own, because it makes this error a different kind of thing
-                  from most of the errors on this site.
+                  {"The random map is fixed before these context events are processed. That fixes the projection operator, but the distortion measured on a particular dataset also depends on the context profiles supplied to it."}
                 </p>
                 <>
 <p>
-                  Which pairs share a position is settled by the draw, before any text is read. So the error it causes is not an error of estimation and does not shrink as the evidence accumulates. Write the same twenty-four documents out twice, and every count doubles; the positions all double with them; and an angle between two positions is unchanged by a common scale.
+                  {"The draw fixes which index vectors share coordinates. Repeating the same twenty-four documents doubles every count and every accumulated vector without supplying new context patterns. Cosine is unchanged by that common positive scale, so this repeat experiment cannot reduce the measured projection discrepancy. Different new observations need not preserve that discrepancy."}
                 </p>
                 <p>
                   Measured, the gap against the whole table is 0.14412102749793634 with the collection written once, and at 0.14412102749793634 with it written eight times, and one pair of words comes out at 0.6270095706410385 in both, identical to the last bit.
                 </p>
 </>
                 <p>
-                  Reading more text of course changes the counts, and better
-                  counts do give better answers. What does not change is the
-                  distortion the projection adds on top of whatever those counts
-                  say. That is a fixed function of the draw and the width, and
-                  the only two things that move it are drawing again and asking
-                  for more numbers.
+                  {"A fixed random map still acts on whichever context counts are supplied. Repeating the identical corpus scales both the full and projected vectors, leaving their cosine comparisons unchanged. New and different text can change the count directions and therefore the observed projection distortion. More data may improve the count estimates without eliminating the approximation introduced by a limited-width random map."}
                 </p>
                 <KeepInMind>
-                  So there is a floor, and only the width lowers it. Wanting the
-                  angles within 0.05 of the table&rsquo;s own on this collection
-                  means paying for 128 numbers a word before the reading starts,
-                  since sixteen leaves 0.1441 there however much text is fed
-                  through it.
+                  {"In this repeated-corpus experiment, sixteen coordinates leave a reported cosine discrepancy of 0.1441. The tested width of 128 brings the chosen error measure below 0.05. That is evidence for these data and draws, not a universal width requirement. Increasing width or changing the random draw changes the approximation; repeating the same evidence does not remove it."}
                 </KeepInMind>
               </SubSection>
 
@@ -813,21 +646,13 @@ export default function RandomIndexingPage() {
                   of the collection.
                 </p>
                 <KeepInMind>
-                  A consequence follows for the coordinates themselves. In a
-                  squeeze, the first coordinate means the strongest direction in
-                  the collection and is comparable across two fits of the same
-                  data. Here the fifth coordinate is the total of whichever words
-                  happened to be handed a non-zero entry in position five, so it
-                  means nothing on its own and nothing across two draws.
+                  {"SVD directions have ordered singular values, but their signs can flip and tied subspaces can rotate across fits. Random-index coordinates instead depend on the assigned index vectors. In either case, align or retain the coordinate system before comparing raw coordinates from separate runs."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="20. The answer depends on the draw">
                 <p>
-                  Two fits of one collection at one width, differing in nothing
-                  but which positions the draw picked, are two different answers.
-                  How different is a measurable quantity and it is larger than it
-                  is comfortable to admit at the narrow end.
+                  {"Changing the random map can change the projected comparisons. Measure the variation over draws when choosing a width, especially if the application depends on an individual neighbor rather than a broad average."}
                 </p>
                 <DrawToDrawSpread />
                 <p>
@@ -847,95 +672,19 @@ export default function RandomIndexingPage() {
                   right way round.
                 </p>
                 <KeepInMind>
-                  So a single number read off a single fit is a weaker claim than
-                  it looks, and at a narrow width it is close to no claim at all.
-                  An average over many pairs is far steadier than any of the
-                  pairs in it, which is the difference between quoting a
-                  particular pair of words and quoting how well the two halves
-                  came apart.
+                  {"At the narrow widths tested, individual pair scores vary substantially across draws. Topic averages are steadier in this experiment. Report both when the application uses both, without treating one aggregate result as a guarantee for each query."}
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="21. Words without neighbours and vectors with no direction" id="21-the-cases-with-nothing-to-compute">
-                <p>A word can receive a random index without ever receiving a useful accumulated context vector. Look for missing neighbours and a zero accumulated direction before asking for similarity.</p>
+              <SubSection title="21. Words without neighbors and vectors with no direction" id="21-the-cases-with-nothing-to-compute">
+                <p>A word can receive a random index without ever receiving a useful accumulated context vector. Look for missing neighbors and a zero accumulated direction before asking for similarity.</p>
                 <DerivationTable
                   expressionHeading="Context or index-vector condition"
                   reasonHeading="What the accumulated vector retains"
-                  rows={[
-                    {
-                      expression: "a word with no company at all",
-                      reason:
-                        "its position is a sum over nothing, which is the origin rather than a small number. The origin has no direction, so the angle between it and anything else is a zero divided by a zero and is undefined; a ranking of what such a word resembles does not exist rather than being empty.",
-                    },
-                    {
-                      expression: "two words whose company is identical",
-                      reason:
-                        "the same position exactly, whatever was drawn, since both sums are over the same collection of directions, and a sum is settled by what goes into it and by nothing else. That is correct rather than a failure, and it says the method can never tell such words apart, at any width and under any draw.",
-                    },
-                    {
-                      expression: "positions only two numbers wide",
-                      reason:
-                        "defined, and useless. With two non-zero entries in two positions only two directions exist at all, +1 then −1 and −1 then +1, so every word is handed one of two and every pair of positions comes out at exactly +1 or exactly −1. The measured answer for the whole collection is exactly those two values and nothing between them.",
-                    },
-                    {
-                      expression: "an odd number of non-zero entries",
-                      reason:
-                        "no draw satisfies it, since the construction asks for as many entries of +1 as of −1. There is a real choice attached, which is to allow the imbalance, and it costs the property that a direction sums to zero, so a long sum of directions would drift in one direction rather than staying centred.",
-                    },
-                    {
-                      expression: "more non-zero entries than there are positions",
-                      reason:
-                        "undefined. The positions are drawn without repeating, so asking for eight distinct slots in a direction four numbers long names a set that is not there.",
-                    },
-                    {
-                      expression: "how many numbers to give a word",
-                      reason:
-                        "a real choice with nothing inside the reading to settle it. Measured here, the gap against the whole table falls from 0.3959 at eight numbers to 0.0109 at two thousand and forty-eight, monotonically and without an elbow, so no quantity the fit produces turns over as the width passes a good value.",
-                    },
-                    {
-                      expression: "which draw was used",
-                      reason:
-                        "part of the answer rather than a detail of it. Two fits differing in nothing else gave one pair of words 0.0189 and 0.9646 at eight numbers a word, and spreads of 0.4032, 0.2853 and 0.1182 at sixteen, fifty and two hundred over twenty draws.",
-                    },
-                    {
-                      expression: "the value of a single coordinate",
-                      reason:
-                        "means nothing on its own and nothing across two draws. Position five of a word’s answer is the total of whichever words happened to be handed a non-zero entry in that slot, and a redraw hands them elsewhere. An angle between two words survives a redraw approximately; a coordinate does not survive it at all.",
-                    },
-                    {
-                      expression: "a pair of directions at exactly a right angle",
-                      reason:
-                        "that pair’s contribution is preserved exactly, and a draw in which no two directions share a position preserves every angle exactly. Measured at two thousand and forty-eight numbers, such a draw reproduced the whole table’s angles with a largest change of 3.8 × 10⁻¹⁷, and another draw at the same width, with two pairs sharing, moved them by 0.0109.",
-                    },
-                    {
-                      expression: "more text",
-                      reason:
-                        "changes the counts and does not touch the distortion. Which directions share a position is settled before any reading, and an angle is unmoved by a scale, so writing the collection out eight times leaves the gap at 0.14412102749793634 exactly as one copy did.",
-                    },
-                    {
-                      expression: "a word too rare to be given a position",
-                      reason:
-                        "a choice about the sentence it sat in rather than about the word. Dropping it makes the words on either side of it neighbours, which is what the published implementations do; leaving a gap instead makes the window’s reach depend on how many rare words happened to fall inside it. Neither is obviously right and the two give different counts.",
-                    },
-                    {
-                      expression: "which of two words stood first",
-                      reason:
-                        "outside what is represented. A position is a sum, and addition does not remember an order, so a sentence and its reverse produce the same positions for every word in it.",
-                    },
-                    {
-                      expression: "which sense of a word is meant",
-                      reason:
-                        "outside what is represented. One direction per spelling, so a word used for two unrelated things adds both sets of company into one position and settles between them, and there is no second position for the second sense to occupy.",
-                    },
-                  ]}
+                  rows={[{"expression":"a word with no company at all","reason":"its position is a sum over nothing, which is the origin rather than a small number. The origin has no direction, so the angle between it and anything else is a zero divided by a zero and is undefined; a ranking of what such a word resembles does not exist rather than being empty."},{"expression":"two words whose company is identical","reason":"the same position exactly, whatever was drawn, since both sums are over the same collection of directions, and a sum is settled by what goes into it and by nothing else. That is correct rather than a failure, and it says the method can never tell such words apart, at any width and under any draw."},{"expression":"positions only two numbers wide","reason":"With balanced two-entry index vectors in two dimensions, all accumulated vectors lie on one line. Nonzero pair cosines are then+1 or−1; cancellations can also produce a zero vector needing separate handling."},{"expression":"an odd number of non-zero entries","reason":"This balanced construction requires equal counts of+1 and−1, so it rejects odd sparsity. Other random-map constructions can allow it with an appropriate distribution; imbalance does not automatically force a deterministic drift."},{"expression":"more non-zero entries than there are positions","reason":"undefined. The positions are drawn without repeating, so asking for eight distinct slots in a direction four numbers long names a set that is not there."},{"expression":"how many numbers to give a word","reason":"a real choice with nothing inside the reading to settle it. Measured here, the gap against the whole table falls from 0.3959 at eight numbers to 0.0109 at two thousand and forty-eight, monotonically and without an elbow, so no quantity the fit produces turns over as the width passes a good value."},{"expression":"which draw was used","reason":"part of the answer rather than a detail of it. Two fits differing in nothing else gave one pair of words 0.0189 and 0.9646 at eight numbers a word, and spreads of 0.4032, 0.2853 and 0.1182 at sixteen, fifty and two hundred over twenty draws."},{"expression":"the value of a single coordinate","reason":"Each coordinate is a signed sum specified by the retained random map. It is interpretable in that coordinate system but need not align with the same numbered coordinate after a redraw."},{"expression":"a pair of directions at exactly a right angle","reason":"Equal-length mutually orthogonal index vectors preserve inner products up to a common scale. One orthogonal pair alone does not guarantee preservation of every accumulated word comparison, since other context vectors also contribute."},{"expression":"more text","reason":"Repeating identical text scales the count and projected rows equally and preserves their cosine discrepancy. Different new contexts can change it even though the random map stays fixed."},{"expression":"a word too rare to be given a position","reason":"Filtering rare words before forming windows can close their gaps; preserving original token positions gives a different context rule. Record which rule is used rather than assuming every implementation does the same thing."},{"expression":"which of two words stood first","reason":"outside what is represented. A position is a sum, and addition does not remember an order, so a sentence and its reverse produce the same positions for every word in it."},{"expression":"which sense of a word is meant","reason":"One accumulated context vector combines all occurrences of the spelling. It does not select a sense per occurrence, and its position is not generally forced to a midpoint."}]}
                 />
                 <KeepInMind>
-                  Two of those lines carry most of the weight in practice. The
-                  distortion is fixed by the draw rather than estimated from the
-                  text, so more text will not reduce it and only more numbers a
-                  word will; and the width has to be chosen before the reading
-                  with nothing produced during the reading to say whether the
-                  choice was right.
+                  {"Choose the width and random-map construction with the intended queries in mind. Repeated identical evidence does not change cosine distortion, while new contexts can. Comparing draws and held-out task behavior helps assess whether the approximation is adequate."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -953,12 +702,12 @@ export default function RandomIndexingPage() {
                 "The rule was derived for dense directions and these are sparse",
               ],
               0,
-              "The rule counts the shared positions and then treats each as contributing its full weight. Once there are many of them the cancelling dominates, which is the same failure that makes it predict 1.0000 at fifty positions all filled where the measurement is 0.1162.",
+              "The rule counts the shared positions and then treats each as contributing its full weight. Once there are many of them the canceling dominates, which is the same failure that makes it predict 1.0000 at fifty positions all filled where the measurement is 0.1162.",
             ),
             trueFalse(
               "Writing the same twenty-four documents out eight times lowers the gap between the fit’s angles and the table’s.",
               false,
-              "Every count doubles, every position doubles with it, and an angle is unchanged by a common scale. Measured, the gap is 0.14412102749793634 with the collection written once and 0.14412102749793634 with it written eight times, and one pair of words comes back at 0.6270095706410385 in both. More text gives better counts; it does nothing to the distortion the projection adds on top of them.",
+              "Repeating the same collection eight times multiplies all its counts and accumulated vectors by eight while retaining the same random map. Cosine removes that common positive scale, so the comparison error remains 0.14412102749793634 and the displayed pair remains 0.6270095706410385. Repetition supplies no new independent context evidence. New, varied text can change the source count rows, which is a different experiment.",
             ),
             several(
               "Which statements agree with this random-indexing sweep?",
@@ -969,7 +718,7 @@ export default function RandomIndexingPage() {
                 "The gap against the table turns at a definite width, which says where to cut"
               ],
               [0, 1, 2],
-              "The sweep shows decreasing average error, but these sampled points do not identify a universally sufficient width. At width 529, storing one vector per word takes 23 × 529 numbers, compared with 529 for the whole count matrix, so this setting does not compress it. Recovering flour’s complete neighbour list happens at a particular tested width; a different query or random draw can need another.",
+              "Error decreases over the sampled widths, but those points do not identify a universally sufficient width. At width 529, this representation stores more values than the dense count table:\n\n```math\ncontext-vector values = 23 × 529 = 12,167\ndense count cells     = 23 × 23  = 529\n```\n\nRecovering one query's complete neighbor list at a tested width also does not guarantee another query or draw will behave identically.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "Vocabulary: 23 words; count matrix: 23 × 23 = 529 numbers.\nRandom-indexed output stores 23 × width numbers.\n\nwidth  mean cosine error  pairs of sparse directions sharing a coordinate\n8      0.3959             not shown\n16     0.1441             155 of 253\n64     0.0542             not shown\n529    0.0181             8 of 253\n2048   0.0109             2 of 253\n\nFlour’s six exact-table nearest neighbours are all recovered first at width 64 in this sweep."
@@ -978,7 +727,7 @@ export default function RandomIndexingPage() {
             trueFalse(
               "A word carrying no subject coming out 0.5064 alike to a word that does is damage the projection did.",
               false,
-              "The whole table of raw counts answers 0.5173 to the same question, so the fit is reporting those counts faithfully, which is what a projection of the raw table should do. The 0.2207 that a reading which first divides out what frequency alone would explain gives is the measure of the problem, and any repair has to reach the counting rule before a single direction is added up.",
+              "The full count table gives 0.5173 for the same comparison, close to the projected 0.5064. The projection is therefore preserving a relationship already present in its input. The frequency-adjusted representation gives 0.2207 instead. A more accurate projection would not by itself remove the original frequency pattern; any change to the representation needs its own evaluation.",
             ),
             choice(
               "At a narrow width, which claim read off a single fit is the steadier one?",
@@ -989,7 +738,7 @@ export default function RandomIndexingPage() {
                 "Which single word is nearest to flour",
               ],
               0,
-              "An average over many pairs is far steadier than any of the pairs in it. Over twenty draws at 8 numbers a word one pair of cooking words came back anywhere between 0.0189 and 0.9646, while at 16 numbers every one of the twenty draws had the two halves the right way round, with the separation between 0.1735 and 0.8430. A single coordinate means nothing on its own, since the fifth is the total of whichever words happened to be handed a non-zero entry in position five.",
+              "Across the recorded width-eight draws, one pair's cosine ranges from 0.0189 to 0.9646. At width sixteen, all twenty draws separate the two group means in the intended order, with gaps from 0.1735 to 0.8430. These are reasons to inspect both individual comparisons and summaries across draws. A coordinate is an arbitrary signed context sum, not a fixed named topic axis; group summaries also need a stability check.",
             ),
         ],
         },
@@ -1050,13 +799,13 @@ agree: True`,
               { hints: [
   "A word’s random index vector differs from the context sum learned for that word.",
   "Count context occurrences, including repeated words; use the same window and sentence boundaries as the fit."
-], check: numberCheck("What does the fourth number of cat's position come to?", -3, 0.5, "The fourth accumulated coordinate is -3. Index-vector contributions can cancel as well as reinforce because their nonzero entries have both signs."), question: "Can summing context index vectors reproduce cat’s learned representation?" },
+], check: numberCheck("What value is in cat's fourth accumulated coordinate?", -3, 0.5, "The fourth accumulated coordinate is -3. Index-vector contributions can cancel as well as reinforce because their nonzero entries have both signs."), question: "Can summing context index vectors reproduce cat’s learned representation?" },
             ),
             exercise(
               "Reproduce the sixteen-number fit",
               [
   "Fit the supplied twenty-four documents at width sixteen with four nonzero index entries and seed zero.",
-  "Print flour’s nonzero index positions, six neighbours, same-topic/cross-topic mean cosines, flour/sugar and flour/anchor cosines, then anchor’s six neighbours."
+  "Print flour’s nonzero index positions, six neighbors, same-topic/cross-topic mean cosines, flour/sugar and flour/anchor cosines, then anchor’s six neighbors."
 ],
               `from statistics import mean
 
@@ -1135,7 +884,7 @@ nearest to anchor boat tide wind crew harbour we`,
               { hints: [
   "Distinguish sparse assigned index vectors from the accumulated embedding vectors used for similarity.",
   "Keep the supplied topic-word groups unchanged when averaging pairs."
-], check: numberCheck("What does the fit put flour and anchor at?", -0.2437, 0.0001, "Flour/anchor cosine is -0.2437 for this draw. A finite random projection can distort the original context-table geometry in either direction."), question: "Can a short random representation preserve useful topic neighbours?" },
+], check: numberCheck("What cosine similarity does this draw give flour and anchor?", -0.2437, 0.0001, "Flour/anchor cosine is -0.2437 for this draw. A finite random projection can distort the original context-table geometry in either direction."), question: "Can a short random representation preserve useful topic neighbors?" },
             ),
             exercise(
               "Price the width against the table it avoids",

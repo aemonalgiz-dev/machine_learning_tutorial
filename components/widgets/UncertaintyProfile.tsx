@@ -223,7 +223,7 @@ export function UncertaintyProfile() {
         {view.n_bytes} bytes, {view.entropy.n_patches} blocks. {atTheTop} of the
         bars stand at the very top of the scale, which is the height a byte
         reaches when the model has never seen the stretch in front of it, and{" "}
-        {missed} of the green ticks have a grey bar over them, meaning a word
+        {missed} of the green ticks have a gray bar over them, meaning a word
         began there and no block did.
       </p>
     </div>

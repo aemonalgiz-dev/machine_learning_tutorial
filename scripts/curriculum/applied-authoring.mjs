@@ -1,3 +1,4 @@
+import { originalAmericanPrompt } from './american-bookmarks.mjs';
 import { part, example, history, source, before, construction, sample, s, op, c, configured } from './authoring.mjs';
 import { table, flow, challenge } from './design-authoring.mjs';
 import { question as q, claim as tf } from './gap-authoring.mjs';
@@ -10,7 +11,7 @@ export function lesson(record) {
   const questions = authoredQuestions.map(question => {
     if (question.kind !== 'choice') return question;
     const size = question.options.length;
-    const offset = [...question.prompt].reduce((total, character) => total + character.charCodeAt(0), 0) % size;
+    const offset = [...(originalAmericanPrompt[question.prompt] ?? question.prompt)].reduce((total, character) => total + character.charCodeAt(0), 0) % size;
     return { ...question, options: question.options.map((_, index) => question.options[(index - offset + size) % size]), answer: (question.answer + offset) % size };
   });
   const parts = record.parts.map((part, index) => ({ ...part, title: `${index + 1}. ${part.title}` }));

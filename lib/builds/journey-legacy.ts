@@ -21,8 +21,8 @@ export function earlierJourneyBuilds(original: Build): { construction: Build; va
   const keys = expressionTools(recipe).filter(key => key.startsWith("source:")).map(key => key.slice(7));
   const graph = assemble(recipe, TOOLS);
   return { construction, variation, preparation: { ...construction, recipe,
-    title: "Your earlier component calculation",
-    challenge: "This is the intermediate calculation from the previous journey. Its saved pieces and original checks remain here.",
+    title: "Earlier calculation",
+    challenge: "The saved pieces and original checks for your earlier calculation remain available here.",
     sources: Object.fromEntries(keys.map(key => [key, original.sources[key]])),
     cases: construction.cases.map(sample => ({ ...sample, data: Object.fromEntries(keys.map(key => [key, sample.data[key]])), expected: evaluate(graph, sample.data, TOOLS).output! })),
   } };

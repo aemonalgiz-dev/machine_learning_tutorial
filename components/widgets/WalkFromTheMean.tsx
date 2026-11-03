@@ -53,7 +53,7 @@ export function WalkFromTheMean() {
       .join(" ");
 
   const colour = (walk: WalkReport) => (walk.reading === "raw" ? RAW : CENTRED);
-  const title = (walk: WalkReport) => (walk.reading === "raw" ? "recorded heights" : "centred heights");
+  const title = (walk: WalkReport) => (walk.reading === "raw" ? "recorded heights" : "centered heights");
 
   return (
     <div>

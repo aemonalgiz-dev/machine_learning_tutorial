@@ -65,7 +65,7 @@ export function NestedSearchTable() {
           An Ideal Case
         </button>
         <span className="ml-1">
-          four outer folds, three inner folds, one to five neighbours
+          four outer folds, three inner folds, one to five neighbors
         </span>
       </div>
 

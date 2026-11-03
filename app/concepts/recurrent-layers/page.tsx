@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, NumberTable, SubSection, WorkedExample, WhyThisWorks } from "@/components/concept/Treatments";
 import { RecurrentExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Recurrent Layers · oop_ml", description: "A measurement in a sequence may only make sense in light of what came before it. Recurrent layers carry a state between steps, and gates give us more control over what information is kept." };
+export const metadata: Metadata = { title: "Recurrent Layers · Perceptron Lab", description: "A recurrent layer retains a state as it processes a sequence, allowing earlier observations to affect later outputs. Gated variants control how information is kept or replaced." };
 
 export default function RecurrentLayersPage() {
   return <ConceptPage
       lessonId="recurrent-layers"
-      intuition={lessonIntuitions["recurrent-layers"]} title="Recurrent Layers" tagline={"A measurement in a sequence may only make sense in light of what came before it. Recurrent layers carry a state between steps, and gates give us more control over what information is kept."}
+      intuition={lessonIntuitions["recurrent-layers"]} title="Recurrent Layers" tagline={"A recurrent layer retains a state as it processes a sequence, allowing earlier observations to affect later outputs. Gated variants control how information is kept or replaced."}
     openingTitle="How Do We Remember What Came Before?"
     technicalStart="Part 2. Controlling What the State Retains"
     prerequisites={<>The <Link href="/concepts/neurons-and-activations">neuron</Link> lesson introduces weights, biases, and activation functions. <Link href="/concepts/backpropagation">Backpropagation</Link> explains the gradients used later in this lesson.</>}
@@ -27,9 +27,9 @@ export default function RecurrentLayersPage() {
         <SubSection title="1. Reuse one update rule">
           <p>Suppose a dense layer receives a week&apos;s temperatures one reading at a time. Each call sees the current reading alone. By Thursday it has no record of what happened on Monday. If earlier readings matter to the prediction, we need a way for information to survive between calls. The same need arises when we read a sentence word by word.</p>
           <p>What is missing is something carried from one step to the next. A recurrent layer keeps a small vector called the hidden state. At every step it reads the current input together with its own previous state, calculates a new state, and hands that state to the next step.</p>
-          <p>At the first step, the SDK starts the hidden state at zero. We concatenate the current input with that state, calculate a weighted sum and bias, then apply tanh. The result becomes the next hidden state. The same weights are reused at every step.</p>
+          <p>At the first step, the SDK starts the hidden state at zero. It joins the current input and previous state into one vector, an operation called concatenation. The cell calculates a weighted sum, adds a bias and applies tanh. The result becomes the next hidden state. The same weights are reused at every step.</p>
           <Equation>{`combined_t = concatenate(input_t, hidden_(t−1))\nhidden_t = tanh(W combined_t + b)`}</Equation>
-          <p>W holds one weight for every input value and one for every state value, and b is a bias. The weights on the input decide how strongly a new reading enters the state. The weights on the previous state, called the recurrent weights, decide how much of what was already there carries on. The tanh function then keeps every state value between minus one and one, so the state cannot grow without limit however long the sequence runs.</p>
+          <p>Each new state coordinate has weights on the current input values and on the previous state values, collected in W, plus a bias from b. The input weights control how a new reading affects that coordinate. The recurrent weights control how the previous state affects it. Tanh keeps each resulting state value between minus one and one, although the weighted sum before tanh can be much larger.</p>
           <p>The state has a fixed width. It is a learned summary, not a copy of all earlier readings. A model can use the final state to predict something about the sequence, or produce an output at every step.</p>
         </SubSection>
         <WorkedExample title="One signal, followed by zeros">
@@ -38,7 +38,7 @@ export default function RecurrentLayersPage() {
           <p>The first reading still influences the second state even though the new input is zero. With these chosen weights, its influence becomes smaller as we continue. Different weights can produce different behavior.</p>
           <p>Carry the same rule through all six steps of the playground&rsquo;s default sequence, with every later input at zero.</p>
           <NumberTable headings={["Step", "Input", "Hidden state"]} rows={[["1", "1", "0.7616"], ["2", "0", "0.3634"], ["3", "0", "0.1797"], ["4", "0", "0.0896"], ["5", "0", "0.0448"], ["6", "0", "0.0224"]]} caption="The simple cell over six steps, as the playground’s first table shows it." />
-          <p>Each state is a little under half the one before it. The half is the recurrent weight, and the little under is tanh, which returns slightly less than it is given. After six steps the state is 0.0224, so the cell still records that something arrived, though only faintly.</p>
+          <p>With these positive inputs and weights, each later state is a little under half the previous one. Multiplication by the recurrent weight first halves the value, and tanh reduces its positive magnitude slightly further. After six steps the state is 0.0224. The initial signal still affects the state, but the effect has become small.</p>
         </WorkedExample>
         <SubSection title="2. Understand why learning through many steps can be difficult">
           <p>To learn from an early input, the final prediction error must influence the weights used at that early step. Backpropagation passes through every intervening state update. Multiplying many small derivatives can make the resulting gradient very small; other weights can make it grow excessively.</p>
@@ -48,14 +48,14 @@ export default function RecurrentLayersPage() {
             <Equation>{`derivative for input 6 = 1 − 0.0224² ≈ 0.9995\nderivative for input 5 ≈ 0.9995 × 0.5 × (1 − 0.0448²) ≈ 0.4987\nderivative for input 4 ≈ 0.4987 × 0.5 × (1 − 0.0896²) ≈ 0.2474\n...\nderivative for input 1 ≈ 0.0519 × 0.5 × (1 − 0.7616²) ≈ 0.0109`}</Equation>
             <NumberTable headings={["Input step", "Derivative of the final state"]} rows={[["1", "0.0109"], ["2", "0.0519"], ["3", "0.1197"], ["4", "0.2474"], ["5", "0.4987"], ["6", "0.9995"]]} caption="The simple cell over six steps. Each row is how far the sixth state moves for a small change to that input." />
             <p>The last input moves the final state almost one for one, and the first moves it about ninety times less. The step from input 2 back to input 1 costs more than the others, because the first state is 0.7616, where tanh is flatter and its slope is about 0.42. Set the playground to twelve steps and the derivative for the first input is about 0.0002.</p>
-            <p>Nothing fails when this happens. The cell runs and an error can still be measured on its final state. But the early inputs have almost no say in that state, so the error can teach the weights very little about them.</p>
+            <p>The cell still produces an output and a measurable error. The difficulty is learning a dependence on the early readings: along this route, changes at an early step have little effect on the final state, so the final error sends a weak gradient back to that step.</p>
           </WorkedExample>
           <p>This gives us a reason to change the update rule. We want a controllable route for keeping information, instead of repeatedly transforming all of it in the same way.</p>
         </SubSection>
       </> },
       { title: "Part 2. Controlling What the State Retains", content: <>
         <SubSection title="3. Give an LSTM a separate memory">
-          <p>An LSTM, or long short-term memory cell, carries a cell memory as well as a hidden state. A gate is a learned number between zero and one that controls how much of a quantity passes through. There are three gates and one candidate to understand:</p>
+          <p>An LSTM, or long short-term memory cell, carries a cell memory as well as a hidden state. It uses learned controls called gates to decide what to retain and what to add. Each gate has one value between zero and one for each memory coordinate. There are three gates and a proposed memory update, called the candidate:</p>
           <ol className="list-decimal space-y-2 pl-6">
             <li>The <strong>forget gate</strong> controls how much previous cell memory remains.</li>
             <li>The <strong>input gate</strong> controls how much new candidate information is added.</li>
@@ -64,7 +64,7 @@ export default function RecurrentLayersPage() {
           </ol>
           <p>Each is calculated from the current input and previous hidden state. Sigmoid produces the gate values; tanh produces the candidate. The SDK calls the input gate &quot;keep&quot; and the output gate &quot;show.&quot;</p>
           <Equation>{`c_t = f_t ⊙ c_(t−1) + i_t ⊙ candidate_t\nh_t = o_t ⊙ tanh(c_t)`}</Equation>
-          <p>The multiplication symbol denotes matching-coordinate products. The memory update adds retained information and new information. Along its direct memory route, the derivative is controlled by the forget gate.</p>
+          <p>The multiplication symbol means multiplying matching coordinates. The update retains part of the previous memory and adds part of the candidate. If we hold the gates and candidate fixed, the derivative along this direct memory connection is the forget gate. In a general LSTM there are also indirect routes through the hidden state and gate calculations.</p>
         </SubSection>
         <WorkedExample title="Choose what to retain and what to add">
           <p>Suppose the previous memory is two, the forget gate is eight tenths, the input gate is one quarter, and the candidate is four tenths.</p>
@@ -72,12 +72,12 @@ export default function RecurrentLayersPage() {
           <p>We have kept some existing information while adding a smaller new contribution. These are illustrative values. In a trained LSTM, the gates are calculated separately for each step and coordinate.</p>
         </WorkedExample>
         <WorkedExample title="The playground’s LSTM, two steps by hand">
-          <p>The playground&rsquo;s cell has one memory value and deliberately simple weights. The candidate reads the input with a weight of one and ignores the previous hidden state. Every gate has zero weights, so each gate is the sigmoid of its bias and takes the same value at every step. The input gate and the output gate have a bias of zero, which gives one half. The forget gate has the bias the slider sets, which is one by default.</p>
+          <p>For the playground’s LSTM, all gate weights are zero. The input and output gates therefore remain one half, while the forget gate depends only on its bias. The candidate has an input weight of one and a recurrent weight of zero. These fixed choices let us calculate two steps without having the gates change along with the state.</p>
           <Equation>{`forget gate = sigmoid(1) ≈ 0.7311\ninput gate = output gate = sigmoid(0) = 0.5\n\nStep 1, input 1, previous memory 0:\ncandidate = tanh(1) ≈ 0.7616\nmemory = (0.7311 × 0) + (0.5 × 0.7616) ≈ 0.3808\nhidden state = 0.5 × tanh(0.3808) ≈ 0.1817\n\nStep 2, input 0, previous memory 0.3808:\ncandidate = tanh(0) = 0\nmemory = (0.7311 × 0.3808) + (0.5 × 0) ≈ 0.2784\nhidden state = 0.5 × tanh(0.2784) ≈ 0.1357`}</Equation>
-          <p>After the first step nothing new arrives, so each step multiplies the memory by the forget gate and does nothing else to it. The memory runs 0.3808, 0.2784, 0.2035, 0.1488, 0.1088 and 0.0795 across the six steps. The hidden state is a second, smaller number read off the memory through the output gate. Unlike the simple cell&rsquo;s state, the memory does not pass through tanh on its way to the next step.</p>
+          <p>In this configured example, every input after the first is zero and the candidate has no recurrent contribution, so every later candidate is zero. Each update therefore multiplies the memory by the fixed forget gate. The memory runs 0.3808, 0.2784, 0.2035, 0.1488, 0.1088 and 0.0795 across the six steps. The hidden state is read from the memory through tanh and the output gate. The carried memory itself does not pass through tanh between steps.</p>
           <NumberTable headings={["Forget gate bias", "Forget gate", "Memory after step 2", "Memory after step 6"]} rows={[["−3", "0.0474", "0.0181", "0.0000"], ["0", "0.5000", "0.1904", "0.0119"], ["1", "0.7311", "0.2784", "0.0795"], ["3", "0.9526", "0.3627", "0.2987"]]} caption="The same first input of one at four settings of the playground’s forget gate bias." />
           <p>The memory after the first step is 0.3808 at every setting, because the forget gate multiplies the previous memory and at the first step that is zero. What the gate decides is how much of it is still there later. At a bias of three, 0.2987 of the 0.3808 remains after six steps. At minus three, 0.0181 remains after two.</p>
-          <p>A trained cell calculates each gate afresh from the input and the previous hidden state, so it can hold a gate near one for one stretch of a sequence and let it drop for another. The playground fixes the gates so that one slider moves one gate.</p>
+          <p>A trained cell calculates each gate from the current input and previous hidden state. It can learn to retain a memory over one stretch of a sequence and reduce it over another. Here the gate weights are fixed at zero so the slider isolates the effect of the forget-gate bias.</p>
         </WorkedExample>
         <SubSection title="4. A GRU uses one carried state">
           <p>A gated recurrent unit, or GRU, combines memory and hidden state into one vector. Its reset gate controls how much previous state is used to construct the candidate. Its update gate controls the mixture of previous state and candidate.</p>
@@ -86,7 +86,7 @@ export default function RecurrentLayersPage() {
           <WorkedExample title="The playground’s GRU, two steps by hand">
             <p>The playground&rsquo;s GRU has one state value. Its reset gate and its update gate have zero weights and zero biases, so both are one half at every step. Its candidate reads the input with a weight of one and the reset previous state with a weight of one half.</p>
             <Equation>{`reset gate = update gate = sigmoid(0) = 0.5\n\nStep 1, input 1, previous state 0:\ncandidate = tanh((1 × 1) + (0.5 × 0.5 × 0)) = tanh(1) ≈ 0.7616\nstate = (0.5 × 0.7616) + (0.5 × 0) ≈ 0.3808\n\nStep 2, input 0, previous state 0.3808:\ncandidate = tanh((1 × 0) + (0.5 × 0.5 × 0.3808)) ≈ tanh(0.0952) ≈ 0.0949\nstate = (0.5 × 0.0949) + (0.5 × 0.3808) ≈ 0.2379`}</Equation>
-            <p>The last line of each step is the mixture. Half of the new state is the candidate and half is the previous state carried over unchanged, because the update gate is one half. That carried half does the job the forget gate did in the LSTM, without a separate memory to hold it. Across the six steps the state runs 0.3808, 0.2379, 0.1486, 0.0929, 0.0580 and 0.0363.</p>
+            <p>The final line mixes equal contributions from the candidate and previous state because the update gate is one half. This gives the GRU a direct route for carrying state forward, similar to the LSTM’s retained-memory route. The architectures still differ: the GRU has one carried state rather than separate cell memory and hidden state. Across six steps its state runs 0.3808, 0.2379, 0.1486, 0.0929, 0.0580 and 0.0363.</p>
           </WorkedExample>
         </SubSection>
       </> },
@@ -146,12 +146,12 @@ export default function RecurrentLayersPage() {
         },
       { title: "Part 3. Learning Across Time", content: <>
         <p>Parts 1 and 2 ran the cells forward. Training runs them backward. An error is measured on the output, and each weight is moved according to the derivative of that error with respect to it. A recurrent layer uses the same weights at every step, so the backward pass has to visit every step, from the last to the first, and collect what each one contributes.</p>
-        <p>Two things are handed back from each step to the one before it. One is the derivative with respect to the hidden state. In an LSTM the other is the derivative with respect to the cell memory, which travels by its own route. How much of a derivative survives the journey decides how much an early input can teach the weights, and the playground measures it.</p>
+        <p>{"Each backward step passes the derivative with respect to its earlier hidden state to the preceding step. An LSTM also passes a separate derivative through its cell memory. Those routes determine how strongly an early input can affect the final result. The playground measures their sensitivities so we can see what remains after several steps."}</p>
         <WorkedExample title="The route back through the LSTM memory, measured">
-          <p>Select the LSTM in the playground with the forget gate bias at one, and open the gates and the gradient. The second table there is the derivative of the final hidden state with respect to each input. Start at the last input and work backward.</p>
+          <p>Return to the LSTM with forget-gate bias one. Its gates are constant, and the candidate depends only on the current input. An earlier input can therefore affect the final hidden state only through the carried cell memory. We can follow that route backward from the sixth output.</p>
           <Equation>{`derivative for input 6 = 0.5 × (1 − tanh²(0.0795)) × 0.5 ≈ 0.2484\nderivative for input 5 ≈ 0.2484 × 0.7311 ≈ 0.1816\nderivative for input 4 ≈ 0.1816 × 0.7311 ≈ 0.1328\nderivative for input 3 ≈ 0.1328 × 0.7311 ≈ 0.0971\nderivative for input 2 ≈ 0.0971 × 0.7311 ≈ 0.0710\nderivative for input 1 ≈ 0.0710 × 0.7311 × (1 − 0.7616²) ≈ 0.0218`}</Equation>
-          <p>The first line is the output gate, the slope of tanh at the final memory, and the input gate. After that, each step further back multiplies by the forget gate and by nothing else, because in this cell the only way an early input reaches the final state is through the memory. The first input pays one more factor, the slope of tanh at its own candidate of 0.7616. The later candidates sit at zero, where that slope is one.</p>
-          <p>Now move the forget gate bias. At three the gate is 0.9526 and the derivative for the first input rises from 0.0218 to 0.0754. At zero the gate is one half and it falls to 0.0033. In the simple cell of Part 1 the factor paid at each step was the recurrent weight times the slope of tanh, and the cell had no way to set that factor apart from the state it was calculating. Here the factor is a gate, a number the cell can learn to hold near one where something is worth keeping.</p>
+          <p>The first line multiplies the output gate, the slope of tanh at the final memory, and the input gate. Each earlier step adds a factor from the forget gate. At the first input, the candidate is tanh(1), so its derivative contributes one minus the square of 0.7616. Later candidate inputs are zero, where the tanh derivative is one. These are the complete input sensitivities for this fixed-gate example.</p>
+          <p>Changing the forget-gate bias changes how much of the derivative survives each memory update. At bias three the gate is 0.9526 and the first-input derivative rises to 0.0754. At bias zero the gate is one half and the derivative falls to 0.0033. A trained LSTM can vary that retention factor with the sequence, rather than using only the simple cell’s recurrent weight and tanh transformation.</p>
         </WorkedExample>
         <WhyThisWorks title="Backpropagation through the repeated rule">
           <p>Start at the final step and work backward. Each step receives a derivative from its output and from the state it supplied to the next step. It calculates input derivatives, parameter derivatives, and the derivatives to pass to the preceding state.</p>
@@ -200,7 +200,7 @@ export default function RecurrentLayersPage() {
                 "Zero, since input 5 was zero",
               ],
               0,
-              "Along the memory route one step back multiplies the derivative by the forget gate and by nothing else, so 0.2484 becomes 0.1816, then 0.1328, 0.0971 and 0.0710. Halving is roughly what the simple cell of Part 1 did, where the factor was the recurrent weight times the slope of tanh. An input of zero still has a derivative, because the derivative says what a small change to that input would do.",
+              "In this fixed-weight LSTM example, the gate values do not depend on the changing hidden state. Along its cell-memory route, each earlier step contributes another forget-gate factor. That gives input 5 a derivative of about 0.1816. A general trained LSTM can have additional derivative routes through its gates and candidate. A zero-valued input can still have a nonzero derivative because we are asking what a small change to it would do.",
             ),
             trueFalse(
               "Raising the forget gate bias from one to three raises the derivative that reaches the first input.",

@@ -50,7 +50,7 @@ export function GramRouteTable({ cloud = "four", panels = ["eigenvalues"] }: { c
       {has("matrices") && people <= 6 && (
         <div className="grid gap-4 sm:grid-cols-2">
           <Matrix title="Every pair's dot product, as measured" values={route.uncentred_gram} digits={0} />
-          <Matrix title="The same table, centred" values={route.centred_gram} digits={0} />
+          <Matrix title="The same table, centered" values={route.centred_gram} digits={0} />
         </div>
       )}
       {has("matrices") && people > 6 && (
@@ -77,7 +77,7 @@ export function GramRouteTable({ cloud = "four", panels = ["eigenvalues"] }: { c
               </tr>
               <tr>
                 <td className="py-1 pr-4 font-sans text-slate-700 dark:text-slate-300">Gram</td>
-                <td className="py-1 pr-4">{people} by {people} centred</td>
+                <td className="py-1 pr-4">{people} by {people} centered</td>
                 <td className="py-1">{route.gram_eigenvalues.slice(0, Math.min(people, 6)).map((value) => tidy(value, 2)).join("   ")}{people > 6 ? "   …" : ""}</td>
               </tr>
             </tbody>

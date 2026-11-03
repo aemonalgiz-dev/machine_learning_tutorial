@@ -73,7 +73,7 @@ export function ShapeGallery({ initial = "bands" }: { initial?: Scenario }) {
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div>
               <ClusterMap points={points} labels={answer.k_means.labels} centres={answer.k_means.centres} regions={answer.k_means.regions} width={220} height={180} />
-              <p className="mt-1 text-center text-[11px] text-slate-600 dark:text-slate-300">nearest centre, k = {k}</p>
+              <p className="mt-1 text-center text-[11px] text-slate-600 dark:text-slate-300">nearest center, k = {k}</p>
               <p className="text-center font-mono text-[10px] text-slate-500 dark:text-slate-400">sizes {answer.k_means.sizes.join(", ")}</p>
             </div>
             <div>
@@ -95,8 +95,8 @@ export function ShapeGallery({ initial = "bands" }: { initial?: Scenario }) {
             </div>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <Stat label="nearest-centre inertia" value={answer.k_means.inertia.toFixed(1)} />
-            <Stat label="nearest-centre passes to rest" value={String(answer.k_means.iterations_run)} />
+            <Stat label="nearest-center inertia" value={answer.k_means.inertia.toFixed(1)} />
+            <Stat label="nearest-center passes to rest" value={String(answer.k_means.iterations_run)} />
             <Stat label="people the density rule leaves in no group" value={String(answer.density.n_noise)} />
           </div>
         </>

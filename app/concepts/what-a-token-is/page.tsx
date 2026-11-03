@@ -20,9 +20,9 @@ import { UnknownAnswerTable } from "@/components/widgets/UnknownAnswerTable";
 import { VocabularyGrowthChart } from "@/components/widgets/VocabularyGrowthChart";
 
 export const metadata: Metadata = {
-  title: "What a Token Is · oop_ml",
+  title: "What a Token Is · Perceptron Lab",
   description:
-    "We can read the word cat, but a numerical model needs a representation it can process. A tokenizer divides text into pieces and maps those pieces to IDs, giving us a starting point for working with language.",
+    "A token is a piece of text represented by an ID from a vocabulary. The piece may be a word or part of one; the ID identifies it without expressing its meaning or similarity to other pieces.",
 };
 
 const link =
@@ -38,7 +38,7 @@ export default function WhatATokenIsPage() {
       playgroundTitle="Turn a sentence into IDs and read it back"
       playgroundIntro="Compare the text pieces with their IDs, then inspect the decoded text. An exact round trip depends on which information the scheme retained."
       title="What a Token Is"
-      tagline={"We can read the word cat, but a numerical model needs a representation it can process. A tokenizer divides text into pieces and maps those pieces to IDs, giving us a starting point for working with language."}
+      tagline={"A token is a piece of text represented by an ID from a vocabulary. The piece may be a word or part of one; the ID identifies it without expressing its meaning or similarity to other pieces."}
       prerequisites={
         <>
           You do not need an earlier lesson. We will begin with ordinary text
@@ -132,11 +132,8 @@ export default function WhatATokenIsPage() {
                       "re-analysis.  32"}
                   </Equation>
                   <p>
-                    Notice that the full stop stayed attached to the last piece
-                    and that the contraction was left whole. Both of those are
-                    consequences of cutting at spaces and nowhere else, and both
-                    will be argued with later in the section.
-                  </p>
+                  {"The final period remains attached to the last piece, and the contraction stays whole. A rule that splits only at spaces does not inspect either boundary. Later lessons compare rules that handle those cases differently."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
                   The playground displays both the text piece and its ID.
@@ -147,24 +144,20 @@ export default function WhatATokenIsPage() {
 
               <SubSection title="3. The number says which piece, and nothing else">
                 <p>
-                  It is tempting to read those seven numbers as measurements,
-                  since every other number on this site is one. They are not. A
-                  token number is a position in a list, and the only question it
-                  answers is which entry of the list this piece is. Nothing
-                  follows from one number being larger than another, and nothing
-                  follows from two numbers being close.
+                  {"These IDs are labels, rather than measurements of the pieces. In this vocabulary, an ID is a position in a list. A larger ID does not mean a larger word, and nearby IDs do not establish similar meanings."}
                 </p>
                 <p>
+
                   The list this page builds is in alphabetical order, so
-                  neighbouring numbers hold pieces that happen to share a first
+                  neighboring numbers hold pieces that happen to share a first
                   letter. That produces both kinds of accident at once. The
                   pieces at 29 and 30 are <span className="font-mono">not</span>{" "}
                   and <span className="font-mono">notes</span>, which share three
                   letters and nothing else, and they are as close as two
                   numbers can be. The word{" "}
                   <span className="font-mono">The</span> is at 6 and the
-                  word <span className="font-mono">the</span> is at 43, the same
-                  word with one letter capitalised, at a different position in
+                  word <span className="font-mono">the</span>  is at 43, the same
+                  word with one letter capitalized, at a different position in
                   the vocabulary.
                 </p>
                 <WhyThisWorks title="Why the ordering can be anything at all">
@@ -218,22 +211,13 @@ export default function WhatATokenIsPage() {
                   caption="Both counts are over the same six sentences, so the only thing that differs is what counts as a piece."
                 />
                 <KeepInMind>
-                  Fixed means fixed. Adding an entry, removing one, or
-                  reordering the list after anything has been trained against
-                  it changes what every number means, and there is no signal
-                  that this has happened beyond the answers quietly getting
-                  worse.
+                  {"Keep the token-to-ID mapping consistent with the model. Reordering or inserting entries can change existing IDs; appending entries can preserve them, but still requires compatible model rows. Changing one side without the other can cause errors or incorrect lookups."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="5. The same piece gets the same number every time">
                 <p>
-                  The first promise is the one that makes learning possible at
-                  all. Whenever the same piece appears, in whatever sentence and
-                  in whatever position, the same number comes out. If that were
-                  not so, a model that had learned something about a word in one
-                  sentence would have learned nothing about the same word in the
-                  next, and every occurrence would be a fresh start.
+                  {"With this fixed vocabulary, an identical piece gets the same ID wherever it occurs. That lets different occurrences use the same learned row. The surrounding sequence can still give each occurrence a different contextual meaning."}
                 </p>
                 <p>
                   Encoding the sentence about Dr. Alvarez and a second sentence from the
@@ -284,14 +268,7 @@ export default function WhatATokenIsPage() {
                     "decode    numbers  →  text"}
                 </Equation>
                 <p>
-                  Decoding is the shorter half, since it has nothing to decide.
-                  Look each number up, refuse any number no entry owns, glue.
-                  What varies between schemes is only the glue, and for the
-                  whole-word scheme here the glue is a single space, which turns
-                  out in Part 5 to be the thing that stops the round trip being
-                  exact. Running both halves on the sentence about Dr. Alvarez gives back
-                  the sentence character for character, under both cutting
-                  rules.
+                  {"To decode these IDs, retrieve their pieces and combine them according to the tokenizer’s rule. Reject an ID outside the vocabulary. This whole-word scheme inserts one space between pieces; the character scheme joins them directly. Both reproduce the running sentence exactly, but the spacing example in Part 5 will show what the whole-word rule discarded."}
                 </p>
                 <KeepInMind>
                   The two promises are separate, and a scheme can keep the first
@@ -303,11 +280,7 @@ export default function WhatATokenIsPage() {
 
               <SubSection title="7. What the size of the table costs">
                 <p>
-                  The number of entries is not free, because a model gives every
-                  entry a row of its own. Whatever a model learns about a piece
-                  lives in that row, the rows are learned from the text, and a
-                  row belonging to a piece that turns up twice in the training
-                  text is learned from two occurrences.
+                  {"An embedding table gives each vocabulary entry a parameter row. Occurrences of a token can train that row, so rare tokens provide fewer direct examples for their entries. A model also learns shared parameters across the sequence; a token’s row is not the only place information about its use can reside."}
                 </p>
                 <p>
                   Take a row of 768 numbers, which is an ordinary width. The
@@ -331,14 +304,8 @@ export default function WhatATokenIsPage() {
                 </p>
                 <InAModel>
                   <p>
-                    The count of entries is a choice nothing later can revise.
-                    It fixes how many rows of parameters the model carries
-                    before it has read a word, and it fixes the width of the
-                    final layer that has to pick one entry out of all of them,
-                    so a model over the 48-entry table here would carry roughly
-                    a quarter more of both than one over the 38-entry table, on
-                    the same six sentences.
-                  </p>
+                  The vocabulary size determines how many token rows this model needs and how many alternatives its output layer scores. For the same six sentences, the 48-entry table would require roughly a quarter more of those rows and output alternatives than the 38-entry table. Those counts describe this fixed vocabulary design; changing a trained vocabulary later requires an explicit change to the model&apos;s table and output mapping.
+                </p>
                 </InAModel>
                 <KeepInMind>
                   Every entry costs a row of parameters, and a rare entry is a
@@ -356,7 +323,7 @@ export default function WhatATokenIsPage() {
             trueFalse(
               "Two token numbers that sit next to each other hold pieces that are related.",
               false,
-              "A token number is a position in a list, and the only question it answers is which entry this piece is. The list here is alphabetical, so 29 and 30 hold not and notes, which share three letters and nothing else, while 6 and 43 hold the same word with one letter capitalised. Nearness between two numbers is an accident of the ordering in both directions.",
+              "A token number is a position in a list, and the only question it answers is which entry this piece is. The list here is alphabetical, so 29 and 30 hold not and notes, which share three letters and nothing else, while 6 and 43 hold the same word with one letter capitalized. Nearness between two numbers is an accident of the ordering in both directions.",
             ),
             choice(
               "Why does any one-to-one assignment of numbers to pieces work equally well?",
@@ -384,10 +351,10 @@ export default function WhatATokenIsPage() {
               "A row of 768 numbers is an ordinary width. What do the 48 entries of the whole-word table cost in parameters?",
               ["768", "29,184", "36,864", "47,616"],
               2,
-              "Every entry gets a row of its own, so 48 entries at 768 numbers each come to 36,864. The character table of 38 entries needs 29,184, so a model over the whole-word table carries roughly a quarter more before it has read a word. It also carries a quarter more in the final layer, which has to pick one entry out of all of them.",
+              "An embedding table with one 768-coordinate row per vocabulary entry stores:\n\n```math\n48 × 768 = 36,864 parameters\n38 × 768 = 29,184 parameters\n```\n\nA separate vocabulary-sized output layer also depends on that size. Some models share its weights with the input embedding, so those tables are not always two independent parameter costs.",
             ),
             several(
-              "Once something has been trained against a table, which of these change what every number means?",
+              "Which vocabulary changes require checking compatibility with a model already trained against that table?",
               [
                 "Adding an entry",
                 "Removing an entry",
@@ -395,7 +362,7 @@ export default function WhatATokenIsPage() {
                 "Encoding a sentence the table has not seen before",
               ],
               [0, 1, 2],
-              "Fixed means fixed. Adding, removing and reordering each move pieces to numbers whose rows were learned for other pieces, and there is no signal that it has happened beyond the answers quietly getting worse. Encoding new text is only using the table, and a piece it does not hold is the separate question Part 4 takes up.",
+              "Existing IDs must keep pointing to their learned rows. Appending an entry can preserve those IDs, but the model needs a corresponding new row and possibly an expanded output layer. Removing or reordering entries can shift IDs unless they are explicitly preserved. Encoding new text only uses the existing mapping. A vocabulary change therefore needs a coordinated model update, not an assumption that all row meanings changed.",
             ),
         ],
         },
@@ -412,20 +379,11 @@ export default function WhatATokenIsPage() {
                     "11 29  5  1 10 24 33 15 29 19 37  1 18 23 18 26  2 31"}
                 </Equation>
                 <p>
-                  Two things follow from a table this small. The first is that
-                  almost nothing is ever unseen, since a new sentence in the
-                  same language is spelled out of letters the corpus has already
-                  met. The second is that a single character carries almost no
-                  information about the writing, so a model reading this stream
-                  has to learn that the seven characters{" "}
-                  <span className="font-mono">A l v a r e z</span> in that order
-                  are a name, and it has to learn that before it can learn
-                  anything about the person.
+                  A character vocabulary reuses letters across words, but this small corpus does not cover every character a new sentence might contain. The model must learn patterns across character sequences. The seven characters{" "}
+                  <span className="font-mono">A l v a r e z</span> can form a name. Learning that pattern and learning uses of the name can happen together during training.
                 </p>
                 <KeepInMind>
-                  A character table is small and almost never surprised. The
-                  work it saves at the table it hands to the model, which now
-                  has to assemble words out of letters for itself.
+                  {"A character vocabulary reuses letters across different words, which can reduce unknown pieces. It still needs entries for the characters it encounters, including punctuation, scripts and other symbols. The model receives longer sequences and must learn patterns across those pieces."}
                 </KeepInMind>
               </SubSection>
 
@@ -449,26 +407,16 @@ export default function WhatATokenIsPage() {
                   <span className="font-mono">she</span> at 39, and both{" "}
                   <span className="font-mono">The</span> at 6 and{" "}
                   <span className="font-mono">the</span> at 43. Three pairs out
-                  of 47 entries hold one word twice over, and each of those six
-                  entries has a row of parameters learned from half the text it
-                  should have had.
+                  of 47 entries hold one word twice over, and those six entries each use a separate parameter row. Their occurrence counts are divided between the spellings; that division need not be equal, and preserving case or punctuation can itself be useful.
                 </p>
                 <KeepInMind>
-                  Splitting at spaces is the shortest answer there is to where
-                  the words are, and it is the baseline the pages after this one
-                  each improve on. What it leaves behind is punctuation stuck to
-                  the word in front of it, which cost one duplicated entry in a
-                  table of 47 here and costs a great many more over real prose.
+                  {"Splitting at spaces is a useful baseline because its behavior is easy to inspect. Punctuation remains attached to adjacent text, so a word with and without a final period can occupy separate entries. Other rules address that duplication while making different choices about boundaries and reconstruction."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="10. Sequence length is what everything downstream pays in">
                 <p>
-                  The sentence about Dr. Alvarez is 51 numbers one way and 7 the other, a
-                  little over seven times as many, on the same writing. That
-                  ratio is the second of the two numbers a scheme is judged on,
-                  and it is the one a model&rsquo;s running cost is measured
-                  against.
+                  {"The same running sentence becomes 51 character IDs or 7 whole-word IDs. Sequence length is one important cost of a tokenizer. Its effect depends on the model operations applied to those positions."}
                 </p>
                 <NumberTable
                   headings={[
@@ -497,29 +445,17 @@ export default function WhatATokenIsPage() {
                       "2,601 / 49  ≈  53"}
                   </Equation>
                   <p>
-                    Seven times as many numbers is roughly fifty times the work
-                    by that measure, on a sentence a person reads in a second.
-                    Any fixed limit on how much text a model can hold at once is
-                    also a limit in numbers rather than in words, so the same
-                    limit holds seven times less writing under the character
-                    scheme.
-                  </p>
+                  {"For the pairwise operation counted above, the character sequence requires roughly fifty times as many position comparisons. Under a model limit measured in tokens, it also uses more of the context budget. Those comparisons concern this sentence and these rules; other text and other model operations can have different ratios."}
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  Fewer entries in the table almost always means more numbers
-                  per sentence. Neither number is worth quoting alone, and a
-                  scheme that improves one usually pays for it in the other.
+                  {"On this example, the smaller character vocabulary produces the longer sequence. Consider both counts when comparing the schemes. Coverage and reconstruction also matter, so neither size alone decides which representation fits the application."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. Which of the two tables is smaller">
                 <p>
-                  Character tables are described everywhere as the small ones,
-                  and over enough text they are. Over a little text they are
-                  not, and the crossover is worth seeing because it is the
-                  reason a small experiment can point the wrong way. I fed the
-                  six sentences in one at a time and measured both tables after
-                  each.
+                  A character vocabulary can reuse the same entries across many different words. A small corpus may not yet contain enough distinct words for that saving to exceed the character inventory. Adding the six sentences one at a time shows where the table sizes cross, so we can see why a result from one short text need not describe a larger collection.
                 </p>
                 <VocabularyGrowthChart />
                 <>
@@ -532,22 +468,11 @@ export default function WhatATokenIsPage() {
 </>
                 <WhyThisWorks title="Why one line flattens and the other does not">
                   <p>
-                    The set of characters a language writes with is finite and
-                    small, so a table over it fills up and then stops. The set
-                    of words is not bounded in the same way, since compounds,
-                    names, numbers and inflections keep arriving, and any list
-                    of them drawn from a finite corpus is missing the next
-                    sentence&rsquo;s words. That is the growth Heaps described,
-                    a count rising as a power of the amount of text read, which
-                    slows without ever flattening.
-                  </p>
+                  {"A character vocabulary can reuse a limited inventory across many words. Word inventories keep encountering names, compounds, numbers and inflected forms as text grows. Heaps’ law describes an empirical power-law relationship between text size and distinct word count over studied ranges. It is a useful model of growth, not a promise about every corpus or every future sentence."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The claim that character tables are smaller is a claim about
-                  the limit, not about any particular corpus. Measured on six
-                  sentences the character table is the larger one for four of
-                  them, which is exactly the kind of result a small pilot
-                  produces and a reader over-reads.
+                  {"Character and whole-word table sizes depend on the corpus. In the first four prefixes here, the character table is larger; by all six sentences, the whole-word table is larger. A pilot on one short text can therefore give a different comparison from a larger collection."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -570,7 +495,7 @@ export default function WhatATokenIsPage() {
                 "Spaces and punctuation count as characters, which fills that table at once",
               ],
               0,
-              "The 375 characters of these six sentences are drawn from an alphabet that was nearly complete after four of them. Any list of words drawn from a finite corpus is missing the next sentence’s words, which is the growth Heaps described, rising as a power of the amount of text read and slowing without ever flattening.",
+              "These six sentences introduce relatively few new characters after the fourth, while still introducing new combinations of familiar characters. Larger natural-language corpora often keep adding distinct word spellings, including names and numbers. Heaps’ law describes an empirical growth pattern; it does not guarantee that every new sentence adds words or that every corpus follows one exact curve.",
             ),
             choice(
               "The sentence about Dr. Alvarez is 51 numbers under the character rule and 7 under the whole-word rule. For a model that lets every position read every other position, what does that ratio cost?",
@@ -592,7 +517,7 @@ export default function WhatATokenIsPage() {
                 "did and n’t",
               ],
               [0, 1],
-              "The full stop rides along on the last word and a capital is a different character, so both of those pairs are two entries, as She and she are. Three pairs out of 47 entries hold one word twice over, and each of those six entries has a row learned from half the text it should have had. A hyphen and an apostrophe are not spaces, so low-cost and didn’t each arrive as one piece.",
+              "This rule keeps punctuation attached and treats capitalized and lowercase strings as different spellings. Those differences can create separate vocabulary entries and split their occurrence counts. The counts are not necessarily divided equally. Hyphens and apostrophes are not whitespace, so low-cost and didn’t each remain one piece under this rule.",
             ),
         ],
         },
@@ -602,13 +527,7 @@ export default function WhatATokenIsPage() {
             <>
               <SubSection title="12. A vocabulary is finite and writing is not">
                 <p>
-                  Everything so far assumed the piece being looked up is in the
-                  list. The interesting case is the other one, and it is not
-                  rare. The same growth measurement says how often it happens.
-                  Fitting on the first five sentences and then reading the
-                  sixth, which those five have never seen, 8 of its 12 words are
-                  absent from the word table while 1 of its 60 characters is
-                  absent from the character table.
+                  {"What happens when a piece is absent from the vocabulary? Fit both tables on the first five sentences, then encode the sixth. The whole-word table lacks 8 of its 12 pieces. The character table lacks 1 of its 60 characters. This held-out sentence exposes the two tables’ coverage directly."}
                 </p>
                 <NumberTable
                   headings={[
@@ -626,31 +545,16 @@ export default function WhatATokenIsPage() {
                   caption="Each row encodes the sentence that has not arrived yet against tables that have never met it."
                 />
                 <p>
-                  The character column falls to nothing at the fourth sentence
-                  and then rises by one at the fifth, because the sixth sentence
-                  opens with a capital S and the five before it never used one.
-                  The word column does not fall at all. Two thirds of an
-                  ordinary sentence is missing from a word
-                  table built on five sentences, and the reason the same thing
-                  does not happen at the scale of a million words is only that
-                  the fraction gets smaller, never that it reaches zero.
+                  {"The character unknown count reaches zero in the fourth row, then rises in the fifth because the next sentence introduces a capital S. The whole-word counts remain high in this small test. A larger fitting corpus can improve coverage, but its size alone does not guarantee that a new sentence contains no unseen pieces."}
                 </p>
                 <KeepInMind>
-                  Something has to happen at a piece the list does not hold, in
-                  every scheme, forever. It is not a corner case to be tidied
-                  away, and how a scheme answers it is most of that
-                  scheme&rsquo;s character.
+                  {"A tokenizer needs an explicit coverage policy. It can replace an unfamiliar piece, reject it, or use units whose inventory covers every permitted input. We will compare those options before choosing larger learned pieces."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="13. Substituting a stand-in">
                 <p>
-                  The common answer is to reserve one entry that means
-                  &ldquo;something else&rdquo; and hand its number back for
-                  anything the list does not hold. That is the extra entry both
-                  tables on this page carry, sitting at number 0, and it is why
-                  47 distinct words come to 48 entries. Every text then encodes,
-                  whatever is in it, and nothing ever refuses.
+                  {"A common policy reserves an entry for an unknown piece and returns its ID when a lookup fails. That entry is ID 0 in both tables here, which is why 47 distinct word pieces require 48 entries. Lookup can then continue through unseen pieces, while recording less information about them."}
                 </p>
                 <UnknownAnswerTable />
                 <p>
@@ -661,10 +565,7 @@ export default function WhatATokenIsPage() {
                   input.
                 </p>
                 <KeepInMind>
-                  A stand-in buys the guarantee that any text can be encoded.
-                  What it spends is the distinction between everything it stands
-                  in for, and on a word table over five sentences that was two
-                  thirds of the sentence.
+                  {"The unknown entry lets lookup continue without a separate error for each unfamiliar piece. Different unseen spellings receive the same ID. In the five-sentence whole-word table, that substitution affects two thirds of the held-out sentence’s pieces."}
                 </KeepInMind>
               </SubSection>
 
@@ -681,19 +582,10 @@ export default function WhatATokenIsPage() {
                     "back  →  The [UNK] drift was larger than expected."}
                 </Equation>
                 <p>
-                  Notice how mild this looks on these two sentences and how bad
-                  it would be on a page where the unseen words are the names, the
-                  quantities and the technical terms, which is exactly where
-                  unseen words concentrate. The words a corpus has already met
-                  many times are the common ones, so the pieces a stand-in
-                  swallows are disproportionately the ones carrying the content.
+                  Substituting a stand-in can matter when an unfamiliar name, quantity or technical term distinguishes the sentence. The fitting corpus determines which spellings are absent. Inspect the actual replaced pieces rather than assuming every unknown word is rare or that every frequent word is uninformative.
                 </p>
                 <KeepInMind>
-                  The stand-in destroys the difference between everything it
-                  covers, and what it covers are the rare pieces, which are
-                  usually the ones carrying most of what the sentence was about.
-                  Every subword scheme later in this section is an attempt to
-                  make that entry unreachable in practice.
+                  {"Substitution loses the distinction between the unseen pieces it covers. Learned subwords can represent many new words by combining familiar parts. Some schemes still need an unknown entry; others add complete byte coverage to avoid it."}
                 </KeepInMind>
               </SubSection>
 
@@ -706,15 +598,7 @@ export default function WhatATokenIsPage() {
                   block above.
                 </p>
                 <p>
-                  Refusing is not obviously worse. It is louder, which is
-                  usually what one wants from a mistake, and it can be the
-                  correct behaviour rather than a limitation. A scheme whose
-                  pieces are guaranteed to cover every possible text should
-                  never reach a stand-in, so giving it one would hide a fault in
-                  the cutting rule behind a plausible-looking encoding. What
-                  refusing costs is that it is now the caller&rsquo;s problem,
-                  and a system that has to answer something cannot simply
-                  decline to read the input.
+                  {"Rejecting an unknown piece can be useful when the caller needs to know that coverage failed. The caller can then report an error, choose a fallback or repair the vocabulary. A tokenizer designed for complete byte coverage should not need an unknown entry for valid input; an unexpected failure there deserves investigation."}
                 </p>
                 <DerivationTable
                   expressionHeading="answer at an unseen piece"
@@ -723,36 +607,28 @@ export default function WhatATokenIsPage() {
                     {
                       expression: "one reserved entry",
                       reason:
-                        "every text encodes, and nothing ever fails. All the pieces it stands for become indistinguishable, and they are the rare ones.",
+                        "Unseen pieces can use the reserved ID instead of failing lookup. Their different spellings become indistinguishable from those IDs alone. Whether they are rare depends on the fitting corpus and the input.",
                     },
                     {
                       expression: "refuse",
                       reason:
-                        "the failure is visible at the moment it happens, and can be handled deliberately. Something upstream now has to handle it, and a system that must answer cannot.",
+                        "Lookup reports the uncovered piece. The caller can choose a fallback or return a clear error instead of silently substituting a token.",
                     },
                     {
                       expression: "make the case unreachable",
                       reason:
-                        "no reserved entry is needed, because the pieces cover every text by construction. The pieces are then small, so sequences are long, which is the cost section 10 measures.",
+                        "No unknown entry is needed when the base units cover every permitted input. Larger pieces can still combine those units, so complete coverage does not fix one sequence length.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  There is no free answer here. A scheme either loses the
-                  distinctions it cannot represent, or refuses to encode, or
-                  makes its pieces small enough that the case cannot arise and
-                  pays in sequence length.
+                  {"These policies make different tradeoffs. Substitution loses the original spelling; rejection makes coverage failure explicit. Complete coverage can use small units such as bytes, often producing longer sequences unless those units are combined into larger pieces."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. The table that can never meet an unseen piece">
                 <p>
-                  The third answer deserves its own section, because it is the
-                  one that shows the other two are choices rather than
-                  necessities. Text stored on a computer is a sequence of bytes,
-                  and there are exactly 256 possible byte values, so a table of
-                  all 256 spells every text that can be written and needs no
-                  reserved entry and no corpus to be built from.
+                  {"A byte vocabulary gives us a coverage guarantee. There are exactly 256 byte values. Encode valid Unicode text as UTF-8 and give each byte its own entry: no fitting corpus is needed to cover those bytes. The model can later combine or learn patterns across them."}
                 </p>
                 <p>
                   Put the sentence that carries two letters the six sentences
@@ -768,11 +644,8 @@ export default function WhatATokenIsPage() {
                 </p>
                 <WorkedExample title="Counting the same sentence both ways">
                   <p>
-                    A plain English letter, digit, space or mark is stored as
-                    one byte. A letter outside that basic set is stored as
-                    more than one, and the two accented letters here take two
-                    each.
-                  </p>
+                  {"In UTF-8, an ASCII letter, digit, space or punctuation mark uses one byte. Other Unicode characters use more than one. The two accented letters in this example use two bytes each."}
+                </p>
                   <Equation>
                     {"Dr. Alvarez didn't expect the low-cost re-analysis in Ångström units.\n" +
                       "\n" +
@@ -809,11 +682,7 @@ export default function WhatATokenIsPage() {
             <>
               <SubSection title="17. Encoding the sentence and reading it straight back">
                 <p>
-                  The sharpest test of a scheme is to encode a text and decode
-                  the numbers immediately, with no model in between, and compare
-                  what comes back against what went in, character for character.
-                  Anything the scheme discards shows up as a difference, and
-                  nothing else does.
+                  {"A direct test is to encode text and immediately decode it, with no model in between. Compare the returned string with the input character by character. A difference shows that the pipeline did not reproduce this input exactly; inspect splitting, normalization, vocabulary substitution and decoding to find why."}
                 </p>
                 <RoundTripTable />
                 <p>
@@ -848,9 +717,7 @@ export default function WhatATokenIsPage() {
                   and applied everywhere.
                 </p>
                 <KeepInMind>
-                  If a scheme does not keep the whitespace, no run of its
-                  numbers can reproduce the whitespace. Everything a cut throws
-                  away is gone before the model is reached.
+                  {"Once different whitespace patterns produce the same IDs, those IDs alone cannot tell the decoder which pattern was supplied. The model may guess a plausible spacing, but it cannot uniquely recover the original from information that was discarded."}
                 </KeepInMind>
               </SubSection>
 
@@ -867,10 +734,7 @@ export default function WhatATokenIsPage() {
                   These failures need different repairs. Adding the missing line break and accented character to this character vocabulary would let it round trip both texts. The whole-word rule discards information during splitting, so adding more vocabulary entries cannot recover it. When decoding loses something, check whether it was absent from the vocabulary or removed before the lookup.
                 </p>
                 <KeepInMind>
-                  A round trip can fail because the table was too small or
-                  because the cut discarded something, and those have different
-                  remedies. More text fixes the first and never fixes the
-                  second.
+                  {"An uncovered character and discarded whitespace have different remedies. Extending the character inventory can fix the first example. Changing only the vocabulary cannot restore separators that the splitting rule never recorded."}
                 </KeepInMind>
               </SubSection>
 
@@ -881,23 +745,11 @@ export default function WhatATokenIsPage() {
                   nothing else. Keeping means the cut did not discard it;
                   spelling means the table holds the pieces it was cut into.
                 </p>
-                <p>
-                  It follows that any scheme which normalises anything cannot
-                  round trip exactly, and this is a choice rather than a defect.
-                  Folding capitals together makes{" "}
-                  <span className="font-mono">The</span> and{" "}
-                  <span className="font-mono">the</span> one entry instead of
-                  the two this page has, which is one fewer row of parameters
-                  and twice the text to learn it from, and it makes the capital
-                  unrecoverable. Later pages in this section normalise a good
-                  deal more than case, rewriting quotation marks and escaping
-                  characters, and each of those rewritings is a place where the
-                  writing that comes back is not the writing that went in. The
-                  honest way to describe such a scheme is to say what it
-                  discards, not to claim it is lossless.
-                </p>
+                <p>Combining <span className="font-mono">The</span> and <span className="font-mono">the</span> into one vocabulary entry combines their occurrence counts and removes one parameter row. It also removes the case distinction from those IDs. Without a separate case record, the decoder cannot tell which spelling was supplied.</p>
+<p>That many-to-one change differs from a reversible rewrite, such as an escape convention that preserves enough information to recover its input. Exact reconstruction depends on the whole pipeline: its transformations, retained separators and vocabulary coverage. State those choices before calling the result lossless.</p>
                 <KeepInMind>
-                  Exact round tripping and normalisation pull against each
+
+                  Exact round tripping and normalization pull against each
                   other, and a scheme is entitled to choose either one. What it
                   should not do is describe itself as lossless while folding two
                   spellings onto one entry.
@@ -912,11 +764,8 @@ export default function WhatATokenIsPage() {
             <>
               <SubSection title="21. The four things any scheme has to settle">
                 <p>
-                  Everything on this page reduces to four questions, and every
-                  page after it answers the same four differently. Carrying them
-                  is enough to read the rest of the section, and enough to
-                  compare two schemes that describe themselves in quite
-                  different language.
+
+                  To compare the next schemes, keep asking which pieces they recognize and how those pieces receive IDs. Then check what happens to an unfamiliar piece and whether decoding preserves the original text. These choices explain the differences we have observed without assuming that every tokenizer defines a word in the same way.
                 </p>
                 <DerivationTable
                   expressionHeading="the question"
@@ -940,7 +789,7 @@ export default function WhatATokenIsPage() {
                     {
                       expression: "is the round trip exact",
                       reason:
-                        "whether decoding the numbers gives back the original string character for character. Any normalisation at all means no, and a scheme may reasonably want the normalisation.",
+                        "Check whether decoding returns the original string. A many-to-one normalization loses distinctions unless separate information preserves them. A reversible rewrite can still support exact reconstruction.",
                     },
                   ]}
                 />
@@ -962,20 +811,13 @@ export default function WhatATokenIsPage() {
                   />
                 </WorkedExample>
                 <KeepInMind>
-                  Four questions, and a scheme that leaves any of them unstated
-                  has not been described. The two numbers underneath, the count
-                  of entries and the count of numbers per sentence, are what any
-                  two schemes can actually be compared on.
+                  {"These questions describe the tokenizer’s boundary rules, lookup, coverage and reconstruction. Vocabulary size and sequence length then give two useful cost measures. A practical comparison should also test the language and tasks for which the tokenizer will be used."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="22. Vocabulary rules that an integer ID cannot decide" id="22-what-is-undefined-and-what-has-to-be-chosen">
                 <p>
-                  Some of what a scheme has to settle is a genuine choice
-                  between defensible answers, and some of it is a case where the
-                  idea simply does not extend. The two are worth separating,
-                  since arguing about the second is wasted effort. The table
-                  gathers both, with what the mathematics says in each.
+                  {"Some cases require an interface policy; others violate the vocabulary’s rules. For example, an unknown piece can use a fallback, while an out-of-range ID names no entry in this table. The responses below make those distinctions explicit."}
                 </p>
                 <DerivationTable
                   expressionHeading="Piece, ID or empty input"
@@ -984,12 +826,12 @@ export default function WhatATokenIsPage() {
                     {
                       expression: "a piece the list does not hold",
                       reason:
-                        "undefined, and unavoidable. A list is finite and the set of things that can be written is not, so the case arises for every scheme whose pieces are not guaranteed to cover every text. There are three answers and each costs something, which is section 15.",
+                        "The lookup has no entry for this piece. This vocabulary either substitutes its reserved unknown ID or raises an error. The case can be prevented by a base inventory that covers every permitted input.",
                     },
                     {
                       expression: "a number outside the list",
                       reason:
-                        "undefined, with no choice attached. A table of 48 entries owns the numbers 0 to 47, and 48 names no piece, so there is nothing to decode. This is the case a model generating numbers can walk into, since nothing about a generated number guarantees it is in range.",
+                        "With 48 entries, valid IDs run from 0 to 47. ID 48 names no piece, so this decoder rejects it. A model that chooses only among its vocabulary outputs can prevent that case; arbitrary external ID sequences still need validation.",
                     },
                     {
                       expression: "a text with nothing in it that counts as a piece",
@@ -999,7 +841,7 @@ export default function WhatATokenIsPage() {
                     {
                       expression: "the same piece listed twice",
                       reason:
-                        "undefined, because the number of a piece is its position and a piece in two positions has two numbers. Whichever is used, everything learned about that piece is split across two rows, so the list has to hold each piece once and be checked for it.",
+                        "This vocabulary requires each piece to occur once and rejects duplicates. A different format could define aliases or a preferred ID, but that would need an explicit lookup rule.",
                     },
                     {
                       expression: "the reserved entry, decoded",
@@ -1007,7 +849,7 @@ export default function WhatATokenIsPage() {
                         "defined, and it is not the writing it stood for. It decodes to its own spelling, since nothing about what was there survived the substitution. Two texts differing only in an unseen word decode to the identical string, which section 14 measures.",
                     },
                     {
-                      expression: "a scheme that normalises, round tripped",
+                      expression: "a scheme that normalizes, round tripped",
                       reason:
                         "no longer exact, by construction rather than by accident. Folding two spellings onto one entry is the discarding of the difference between them, and the difference cannot be reconstructed from an entry that no longer records it.",
                     },
@@ -1019,16 +861,12 @@ export default function WhatATokenIsPage() {
                     {
                       expression: "changing the list after training",
                       reason:
-                        "well defined and silently wrong, which is the harder failure of the two. Inserting or removing an entry shifts the numbers of everything after it, so every shifted piece points at a row learned for a different piece, and the model goes on running and answers worse.",
+                        "Inserting, removing or reordering entries can change existing IDs. If the model’s rows are not updated consistently, an ID may select the wrong learned row or fall outside its shape. Appending entries preserves earlier IDs but requires compatible new rows.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Two of these are worth carrying. The unseen piece is
-                  unavoidable and has no free answer, so a scheme is largely
-                  described by what it does there. And the numbers say which
-                  piece and nothing more, so any nearness a reader imagines
-                  between them has to be built separately before it exists.
+                  {"Keep the token-to-ID mapping separate from the learned representation. IDs identify entries. Coverage policy determines what happens when text cannot use one of those entries, and later embedding lessons explain how a model gives the identified pieces useful numerical relationships."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1049,7 +887,7 @@ export default function WhatATokenIsPage() {
               "Two seven-word sentences, each using six words the table holds and one it does not, come out as the identical seven numbers, so a model shown either is shown the same input. Reading the numbers back gives the same sentence for both, with the same gap in the same place. On a word table built from five sentences that gap covered 8 of the next sentence’s 12 words.",
             ),
             several(
-              "Which answers to the unseen piece does the page name?",
+              "Which policies named here handle an unseen piece without changing a trained model’s vocabulary?",
               [
                 "Reserve one entry meaning something else, which spends the distinction between everything it stands in for",
                 "Refuse to encode, which makes the piece the caller’s problem",
@@ -1057,7 +895,7 @@ export default function WhatATokenIsPage() {
                 "Add the unseen piece to the table when it is met",
               ],
               [0, 1, 2],
-              "There is no free answer here, and how a scheme answers is most of that scheme’s character. The byte table is the unreachable case, since its 256 entries spell every text, and it pays 71 numbers against the character table’s 69 on the sentence with two accented letters. Adding the piece when it is met is not available, because adding an entry after anything has been trained against the table changes what every number means.",
+              "A fixed vocabulary can substitute an unknown entry, reject the piece, or use a representation with complete coverage of the accepted input domain. This byte tokenizer covers UTF-8 text with its 256 byte entries, at the cost of longer sequences for some characters. Adding new entries is also possible as a separate engineering change, but it requires coordinating the vocabulary with the model’s parameters.",
             ),
             choice(
               "Which of these round-trip failures is a fact about the rule rather than about the corpus?",
@@ -1067,17 +905,17 @@ export default function WhatATokenIsPage() {
                 "The character rule substitutes for two accented letters the six sentences never used",
               ],
               0,
-              "The character rule could round trip both texts perfectly had its corpus held a line break and an accent, so more text fixes it. The whole-word rule keeps runs of non-space characters and keeps nothing about what lay between them, so the information was discarded at the cut and no amount of text brings it back.",
+              "Adding the missing accented characters and line break to this character vocabulary would allow these particular probes to round-trip. It would not guarantee coverage of every future character. Whitespace splitting has a different limitation: it discards the separators themselves. A larger word vocabulary cannot recover whether a removed gap was one space, two spaces or a line break.",
             ),
             trueFalse(
               "A scheme that folds The and the onto one entry can still fairly describe itself as lossless.",
               false,
-              "Folding the capitals buys one fewer row of parameters and twice the text to learn it from, and it makes the capital unrecoverable. Normalisation and exact round tripping pull against each other, and a scheme is entitled to choose either, but the honest description says what it discards.",
+              "Mapping The and the to the same entry discards their case distinction unless it is stored separately. The IDs alone cannot recover it. Some text transformations are reversible; this many-to-one case folding is not. Describe what the tokenizer preserves and what additional information would be needed for an exact round trip.",
             ),
             trueFalse(
               "A table of 48 entries owns the numbers 0 to 47, so a model that produces the number 48 has produced something with no piece to decode to.",
               true,
-              "The number of a piece is its position, and position 48 does not exist in a list of 48. This case has no choice attached, unlike the unseen piece, and it is one a model generating numbers can walk into, since nothing about a generated number guarantees it is in range.",
+              "This table has no entry at position 48. A decoder must reject that ID rather than invent a spelling. A correctly sized vocabulary output layer selects only its valid class indices; out-of-range IDs can instead arise from an incompatible table, a program error or external input. Validate that boundary explicitly.",
             ),
         ],
         },

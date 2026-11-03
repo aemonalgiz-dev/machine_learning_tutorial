@@ -174,7 +174,7 @@ export function RegularisationPathDashboard({
               <Stat label="total" value={step.objective.toFixed(2)} />
             </div>
             <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-              Grey is RSS, colour is λ times the penalty sum. The fit at each λ minimised the whole bar, not the grey part.
+              Gray is RSS, color is λ times the penalty sum. The fit at each λ minimized the whole bar, not the gray part.
             </p>
           </Frame>
         )}

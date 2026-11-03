@@ -384,7 +384,7 @@ function RulerRow({
         </div>
         <div className="font-mono text-xs text-slate-500 dark:text-slate-400">
           {scaling
-            ? `centre ${formatNumber(scaling.centre)} · spread ${formatNumber(scaling.spread)}`
+            ? `center ${formatNumber(scaling.centre)} · spread ${formatNumber(scaling.spread)}`
             : "…"}
         </div>
       </div>

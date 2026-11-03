@@ -19,7 +19,7 @@ export function GaussianProcessExperiment(){
   const selected=greenhousePrediction(readings.map(r=>r.x),readings.map(r=>r.t),[position],length,noise);
   return <section aria-label="Greenhouse temperature and uncertainty" className="space-y-5">
     <BotieSays>{readings.length?`We have ${readings.length} reading${readings.length===1?'':'s'}. Compare the band near a thermometer with the band farther away. A longer length scale shares information over more of the greenhouse; more reading noise makes each thermometer less decisive.`:"We have no readings yet. The usual temperature is twenty degrees, but several patterns are possible. Place a thermometer and watch which possibilities remain."}</BotieSays>
-    <div ref={plotRef}><svg viewBox={`0 0 ${plotWidth} 335`} role="img" aria-label="Temperature in degrees Celsius against position in metres. Shading is the pointwise 95 percent latent interval, with three sampled temperature curves." className="w-full rounded-xl border border-line bg-surface">
+    <div ref={plotRef}><svg viewBox={`0 0 ${plotWidth} 335`} role="img" aria-label="Temperature in degrees Celsius against position in meters. Shading is the pointwise 95 percent latent interval, with three sampled temperature curves." className="w-full rounded-xl border border-line bg-surface">
       <polygon points={[...upper,...lower].join(' ')} fill="#60a5fa" opacity=".2"/>
       {[0,1,2,3,4,5,6].map(x=><g key={x}><path d={`M${X(x)},35V285`} stroke="currentColor" opacity=".1"/><text x={X(x)} y={305} textAnchor="middle" fill="currentColor" fontSize="12">{x}</text></g>)}
       {[low,(low+high)/2,high].map(t=><text key={t} x="48" y={Y(t)+4} textAnchor="end" fontSize="12" fill="currentColor">{t.toFixed(1)}</text>)}
@@ -27,7 +27,7 @@ export function GaussianProcessExperiment(){
       <path d={line(prediction.mean)} fill="none" stroke="#fbbf24" strokeWidth="3"/>
       {readings.map((r,i)=><circle key={i} cx={X(r.x)} cy={Y(r.t)} r="5" fill="#fbbf24" stroke="#111827"/>)}
       <path d={`M${X(position)},35V285`} stroke="currentColor" strokeDasharray="4 4" opacity=".6"/>
-      <text x="48" y="20" fill="currentColor" fontSize="12">Temperature (°C)</text><text x={plotWidth/2} y="328" textAnchor="middle" fill="currentColor" fontSize="12">{plotWidth<360?'Position (metres)':'Position along the greenhouse (metres)'}</text>
+      <text x="48" y="20" fill="currentColor" fontSize="12">Temperature (°C)</text><text x={plotWidth/2} y="328" textAnchor="middle" fill="currentColor" fontSize="12">{plotWidth<360?"Position (meters)":"Position along the greenhouse (meters)"}</text>
     </svg></div>
     <p className="text-xs leading-6 text-muted">Gold: predicted mean and observed readings. Blue band: pointwise 95% interval for the underlying temperature. Thin curves: three reproducible samples from the current Gaussian model. A future noisy reading has additional variance.</p>
     <div className="grid gap-4 sm:grid-cols-2">{[

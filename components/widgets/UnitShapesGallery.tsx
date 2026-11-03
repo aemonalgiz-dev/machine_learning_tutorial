@@ -73,7 +73,7 @@ export function UnitShapesGallery() {
           From (1, 1)
         </button>
         <span className="ml-auto text-sm text-slate-600 dark:text-slate-300">
-          Centre{" "}
+          Center{" "}
           <span className="font-mono">
             ({centre.x.toFixed(1)}, {centre.y.toFixed(1)})
           </span>
@@ -92,9 +92,9 @@ export function UnitShapesGallery() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Indigo cells sit within one unit of the centre under that metric, and
+        Indigo cells sit within one unit of the center under that metric, and
         the darker ones exactly one unit away. Click a panel to move the
-        centre.
+        center.
       </p>
 
       {message && (

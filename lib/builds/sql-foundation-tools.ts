@@ -84,11 +84,11 @@ export const sqlFoundationTools: Record<string, Tool> = {
     run: ([value,threshold],settings) => {if(typeof threshold!=="number"||!Number.isFinite(threshold))throw Error("Use a finite threshold.");return rows(value).map(row=>{const v=cell(row,String(settings.field));if(v!==null&&(typeof v!=="number"||!Number.isFinite(v)))throw Error("Measurements must be numbers or null.");return {...row,[String(settings.output)]:v===null?"unknown":(v as number)>=threshold?"inspect":"monitor"};});},
   },
   sqlAggregate: {
-    title: "Summarise all rows", why: "Create one result row. Count rows includes missing cells; count values excludes nulls. Sum and average of no known values are null.", inputs: ["Rows"], settings: aggregateSettings,
+    title: "Summarize all rows", why: "Create one result row. Count rows includes missing cells; count values excludes nulls. Sum and average of no known values are null.", inputs: ["Rows"], settings: aggregateSettings,
     run: ([value],settings) => [{[String(settings.output)]:aggregate(rows(value),String(settings.field),String(settings.operation))}],
   },
   sqlGroup: {
-    title: "Summarise each group", why: "Collect records sharing the selected key, then summarise values inside each collection. The output has one row per key. Null keys belong to one group here.", inputs: ["Rows"], settings: [{key:"key",label:"Group field",initial:"asset_id"},...aggregateSettings],
+    title: "Summarize each group", why: "Collect records sharing the selected key, then summarize values inside each collection. The output has one row per key. Null keys belong to one group here.", inputs: ["Rows"], settings: [{key:"key",label:"Group field",initial:"asset_id"},...aggregateSettings],
     run: ([value],settings) => {const groups=new Map<string,{key:Data;rows:Row[]}>(); for(const row of rows(value)){const key=scalar(cell(row,String(settings.key))),id=JSON.stringify(key);if(!groups.has(id))groups.set(id,{key,rows:[]});groups.get(id)!.rows.push(row);}return [...groups.values()].map(group=>({[String(settings.key)]:group.key,[String(settings.output)]:aggregate(group.rows,String(settings.field),String(settings.operation))}));},
   },
   sqlJoin: {

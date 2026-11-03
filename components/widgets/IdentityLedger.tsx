@@ -57,7 +57,7 @@ export function IdentityLedger() {
         {NOISY_THROW.map((point, index) => (
           <circle key={index} cx={plotX(point.x)} cy={plotY(point.y)} r={3.5} className="fill-slate-800 stroke-white dark:fill-slate-100 dark:stroke-slate-900" strokeWidth={1.5} />
         ))}
-        <text x={FRAME.left} y={FRAME.height - 10} className="fill-slate-500 text-[10px] dark:fill-slate-400">grey, ridge solved by feature · indigo, the same solve by row, drawn on top</text>
+        <text x={FRAME.left} y={FRAME.height - 10} className="fill-slate-500 text-[10px] dark:fill-slate-400">gray, ridge solved by feature · indigo, the same solve by row, drawn on top</text>
       </svg>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         <Stat label="ridge slope, per feature" value={answer ? answer.ridge_slope.toFixed(6) : "…"} />

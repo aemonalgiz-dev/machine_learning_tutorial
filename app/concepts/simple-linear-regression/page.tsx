@@ -19,9 +19,9 @@ import { LossBowlPlayground } from "@/components/widgets/LossBowlPlayground";
 import { SquaresChart } from "@/components/widgets/SquaresChart";
 
 export const metadata: Metadata = {
-  title: "Simple Linear Regression · oop_ml",
+  title: "Simple Linear Regression · Perceptron Lab",
   description:
-    "Taller people tend to weigh more, but height does not determine weight exactly. We will use that relationship to build a prediction rule and work out what makes one line fit the observations better than another.",
+    "Linear regression represents a relationship with a straight line. Fitting the line means choosing its slope and intercept according to the differences between observed and predicted values.",
 };
 
 export default function SimpleLinearRegressionPage() {
@@ -34,7 +34,7 @@ export default function SimpleLinearRegressionPage() {
       playgroundTitle="How does moving one person change the fitted line?"
       playgroundIntro="Choose Five height and weight pairs, then drag one person's point. Will the fitted line move closer to that person at the expense of the others? Compare their prediction errors as the line is fitted again."
       title="Simple linear regression"
-      tagline={"Taller people tend to weigh more, but height does not determine weight exactly. We will use that relationship to build a prediction rule and work out what makes one line fit the observations better than another."}
+      tagline={"Linear regression represents a relationship with a straight line. Fitting the line means choosing its slope and intercept according to the differences between observed and predicted values."}
       prerequisites={
         <>
           You only need to know what a straight line is. It has a slope that
@@ -68,14 +68,7 @@ export default function SimpleLinearRegressionPage() {
                   written x and the outcome y, so person one is the pair
                   (160, 58).
                 </p>
-                <p>
-                  Which measurement plays which role is a decision rather than a
-                  property of the data. Here height predicts weight. Swapping
-                  them, predicting height from weight, is a different problem with
-                  a different answer, even though the scatter of dots looks
-                  exactly the same either way. The picture is symmetric and the
-                  question is not.
-                </p>
+                <p>Which measurement is the input depends on the question. Here we use height to predict weight. Reversing those roles creates a different prediction problem, even though the observations come from the same people. The fitting criterion measures errors in whichever quantity we chose as the output.</p>
               </SubSection>
 
               <SubSection title="2. A line as a prediction rule">
@@ -109,11 +102,12 @@ export default function SimpleLinearRegressionPage() {
                   Two numbers position a line, and they do different jobs.
                 </p>
                 <p>
+
                   The slope says how much the prediction changes for each unit of
-                  input. A slope of 0.8 means one more centimetre of height
+                  input. A slope of 0.8 means one more centimeter of height
                   raises the predicted weight by 0.8 kg. Its units are the
                   outcome&rsquo;s over the input&rsquo;s, kilograms per
-                  centimetre, which is worth remembering because it makes the
+                  centimeter, which is worth remembering because it makes the
                   number readable.
                 </p>
                 <p>
@@ -131,11 +125,7 @@ export default function SimpleLinearRegressionPage() {
           content: (
             <>
               <SubSection title="4. One prediction and its residual">
-                <p>
-                  Take the shortest person, 160 cm and 58 kg, and a line that
-                  predicts 60 kg for them. It is 2 kg too high, and that miss has
-                  a name.
-                </p>
+                <p>For the shortest person, compare the observed weight with the candidate line&apos;s prediction. The difference records both the size of the miss and its direction. We call the observed value minus the prediction a residual.</p>
                 <Equation>{"residual = measured − predicted\ne = y − ŷ = 58 − 60 = −2"}</Equation>
                 <p>
                   The sign says which way the line missed. A positive residual
@@ -147,16 +137,10 @@ export default function SimpleLinearRegressionPage() {
                 <KeepInMind>
                   <p>
                     A residual is measured <em>vertically</em>, not
-                    perpendicular to the line. The grey stalks in the box above
+                    perpendicular to the line. The gray stalks in the box above
                     run straight up and down for that reason.
                   </p>
-                  <p>
-                    It matters because the two are different quantities and would
-                    pick different lines. Ordinary least squares is asking how
-                    wrong the prediction of y was, and a prediction of y is only
-                    ever wrong in the y direction. The horizontal distance to the
-                    line is not an error the model made.
-                  </p>
+                  <p>Ordinary least squares measures the error in the predicted output. Height is treated as the supplied input in this calculation, so the residual is a vertical difference in weight. Minimizing perpendicular distances would answer a different fitting question.</p>
                 </KeepInMind>
               </SubSection>
 
@@ -176,7 +160,8 @@ export default function SimpleLinearRegressionPage() {
                   ]}
                 />
                 <p>
-                  Each row is one grey stalk on the plot. The middle person sits
+
+                  Each row is one gray stalk on the plot. The middle person sits
                   exactly on the line and has no stalk at all.
                 </p>
               </SubSection>
@@ -187,12 +172,7 @@ export default function SimpleLinearRegressionPage() {
                   residuals, and it does not work.
                 </p>
                 <Equation>{"(−2) + (+2) + 0 + (+2) + (−2) = 0"}</Equation>
-                <p>
-                  A total of zero, from a line that is wrong about four of the
-                  five people. A line that predicted every weight exactly would
-                  also total zero, and no summary that cannot tell those two
-                  apart is worth having.
-                </p>
+                <p>The total is zero even though the line misses four of the five observed weights. A perfect fit would also give zero. The signed total therefore cannot distinguish a perfect fit from errors that cancel. It can still help identify a systematic tendency to overpredict or underpredict.</p>
                 <p>
                   The problem is the signs. Missing by 2 above and 2 below is
                   reported as not missing at all, so what is needed is a way of
@@ -214,12 +194,7 @@ export default function SimpleLinearRegressionPage() {
                     ["4", "16"],
                   ]}
                 />
-                <p>
-                  Doubling a miss quadruples its contribution. One residual of 4
-                  costs 16, the same as four separate residuals of 2, so squaring
-                  says a line would rather be a little wrong about many people
-                  than very wrong about one.
-                </p>
+                <p>Doubling a residual quadruples its squared contribution. One residual of 4 contributes 16, the same total as four residuals of 2. The objective therefore gives a large individual miss more influence than an absolute-error objective would.</p>
                 <p>
                   Add the squares and a whole line collapses to one number, the
                   residual sum of squares.
@@ -238,12 +213,7 @@ export default function SimpleLinearRegressionPage() {
                     16 squared kilograms, and it is not an answer to &ldquo;how
                     far off was the line, typically&rdquo;.
                   </p>
-                  <p>
-                    It is only meaningful in comparison. Lower is better between
-                    two lines judged on the same observations, and it says
-                    nothing on its own, since adding more people raises it
-                    whether or not the line got worse.
-                  </p>
+                  <p>RSS compares lines evaluated on the same observations. Its size also depends on the number of observations and their units, so scores from different datasets need further context. An average loss can make the number of observations explicit.</p>
                   <p>
                     Squaring is also a choice rather than a definition of error.
                     Other loss functions treat a large miss differently, and the
@@ -258,14 +228,14 @@ export default function SimpleLinearRegressionPage() {
           title: "Questions on Parts 1 and 2",
           quiz: [
             trueFalse(
-              "The scatter of dots looks exactly the same whether height predicts weight or weight predicts height, and the two fits are nonetheless different problems with different answers.",
+              "The same paired measurements can support height-to-weight and weight-to-height fits, even though the two prediction problems generally produce different lines.",
               true,
-              "Which measurement plays which role is a decision rather than a property of the data, so the picture is symmetric and the question is not. Least squares scores a miss in the outcome only, and swapping the roles changes which measurement that is. The practice problem that swaps them reports a reverse slope of 1.1364 where one line written two ways would give 1.25.",
+              "The measurements remain paired, but choosing a different target changes which mistakes are minimized. The reverse fit has a slope different from the reciprocal of the forward fit, so it is a new fit rather than the same equation rearranged.",
             ),
             trueFalse(
               "Ordinary least squares measures a residual as the perpendicular distance from the point to the line.",
               false,
-              "A residual is measured vertically, which is why the grey stalks run straight up and down. The prediction being scored is a prediction of y, and a prediction of y is only ever wrong in the y direction, so the horizontal distance is not an error the model made. The two quantities are different and would pick different lines.",
+              "Ordinary least squares holds the observed input fixed and compares the predicted target with the observed target. On a plot with input horizontal and target vertical, that difference is vertical. Minimizing perpendicular distances would define another fitting objective.",
             ),
             choice(
               "A candidate line predicts 60, 64, 68, 72 and 76 for the five people. Why is adding up its five residuals a poor way to score it?",
@@ -276,7 +246,7 @@ export default function SimpleLinearRegressionPage() {
                               "Five people is too few for any total to mean anything",
                             ],
               0,
-              "The signs cancel. Missing by 2 above and 2 below is reported as not missing at all, so the total is zero from a line that is wrong about four of the five people. No summary that cannot tell that line apart from a perfect one is worth having.",
+              "Overestimates and underestimates cancel in the signed total. This candidate has a zero total despite missing four observations. A signed total can help inspect bias, but it cannot by itself distinguish these errors from a perfect fit.",
               {
                 "description": "Residual = observed weight − predicted weight. Compare the candidate predictions in the question with these observations.",
                 "data": "height (cm): 160 165 170 175 180\nweight (kg):  58  66  68  74  74"
@@ -286,7 +256,7 @@ export default function SimpleLinearRegressionPage() {
               "Under squared error, one residual of 4 costs the same as how many separate residuals of 2?",
               ["Two", "Four", "Eight", "Sixteen"],
               1,
-              "Doubling a miss quadruples its contribution, so a residual of 4 costs 16 where a residual of 2 costs 4. That is squaring saying a line would rather be a little wrong about many people than very wrong about one.",
+              "A residual twice as large contributes four times as much squared error. Four of the smaller residuals therefore have the same total penalty as the larger one. The objective gives large individual misses more influence than an absolute-error objective would.",
             ),
             several(
               "Which of these hold for the residual sum of squares as this page describes it?",
@@ -320,30 +290,14 @@ export default function SimpleLinearRegressionPage() {
                     best-fitting coefficients.
                   </p>
                 </>
-                <p>
-                  Best-fitting means exactly that and nothing more. The line
-                  whose RSS is the lowest of all lines.
-                </p>
+                <p>For this criterion, the best-fitting line is the one with the smallest residual sum of squares. That definition concerns the observed data; usefulness on new observations needs another check.</p>
               </SubSection>
 
               <SubSection title="9. The error surface">
-                <p>
-                  There are two controls, so the score depends on two numbers at
-                  once. Plot RSS against both and the result is a surface, a
-                  landscape whose height at any point is how badly that slope and
-                  intercept fit.
-                </p>
+                <p>The score depends on both slope and intercept. Plot those two coefficients along the horizontal axes and RSS vertically. Each position on the resulting surface represents one candidate line, with its height showing that line’s total squared error.</p>
                 <LossBowlPlayground />
-                <p>
-                  The surface is a bowl. Every direction away from its floor
-                  costs more error, the floor is a single place rather than a
-                  ridge, and the best-fitting line is whatever slope and intercept
-                  sit at the bottom of it.
-                </p>
-                <p>
-                  Which turns the search into a question calculus already knows
-                  how to answer, and Part 6 answers it.
-                </p>
+                <p>When the input values vary, this least-squares surface has a unique minimum. The bowl in the activity shows how changing either coefficient increases the error away from that minimum. The constant-input case later explains when uniqueness fails.</p>
+                <p>We can search for the minimum by checking how the score changes as each coefficient changes. Part 6 uses derivatives to carry out that calculation.</p>
               </SubSection>
 
               <SubSection title="10. The least-squares solution">
@@ -351,19 +305,8 @@ export default function SimpleLinearRegressionPage() {
                   Here is the fitted rule. Let&apos;s read what its slope and intercept mean for the people in our table, then derive how the fit chose them.
                 </p>
                 <Equation>{"β = Σ(xᵢ − x̄)(yᵢ − ȳ) / Σ(xᵢ − x̄)²\n\nα = ȳ − β·x̄"}</Equation>
-                <p>
-                  The bars mean averages, so x̄ is the mean height. Read the slope
-                  in three pieces. The top asks whether people above average in
-                  height tend also to be above average in weight, since it
-                  multiplies the two deviations together for each person and adds.
-                  The bottom asks how much height varies on its own. Their ratio
-                  is how much of the joint movement to credit to each centimetre.
-                </p>
-                <p>
-                  The intercept is then whatever value puts the line through the
-                  point (x̄, ȳ), the centre of the data, which every
-                  least-squares line passes through.
-                </p>
+                <p>The bars denote means, so x̄ is the mean height. The numerator adds the products of paired height and weight deviations. Positive products indicate departures in the same direction; negative products indicate opposite departures. The denominator adds squared height deviations. Dividing gives the fitted change in predicted weight per centimeter of height.</p>
+                <p>For unweighted least squares with an intercept, the fitted line passes through the pair of sample means. Once the slope is known, that requirement determines the intercept.</p>
               </SubSection>
             </>
           ),
@@ -398,8 +341,9 @@ export default function SimpleLinearRegressionPage() {
 
               <SubSection title="12. Reading the fitted slope and intercept">
                 <p>
-                  The slope is 0.8 kilograms per centimetre. Within the range
-                  these people cover, from 160 to 180 cm, one extra centimetre of
+
+                  The slope is 0.8 kilograms per centimeter. Within the range
+                  these people cover, from 160 to 180 cm, one extra centimeter of
                   height goes with 0.8 kg more predicted weight.
                 </p>
                 <p>
@@ -409,8 +353,9 @@ export default function SimpleLinearRegressionPage() {
                   height changed.
                 </p>
                 <p>
+
                   The intercept is −68 kg, which is the predicted weight of a
-                  person zero centimetres tall. That is not a claim about
+                  person zero centimeters tall. That is not a claim about
                   anything. Zero is far outside the range of anybody measured, and
                   the intercept&rsquo;s job here is to position the line rather
                   than to mean something on its own.
@@ -462,18 +407,8 @@ export default function SimpleLinearRegressionPage() {
           content: (
             <>
               <SubSection title="14. Best line versus useful line">
-                <p>
-                  Every dataset has a least-squares line. A cloud of points with
-                  no pattern in it has one, and the arithmetic produces it just as
-                  confidently as it produced ours.
-                </p>
-                <p>
-                  So &ldquo;this is the best line&rdquo; and &ldquo;this line is
-                  worth using&rdquo; are separate claims, and RSS answers only the
-                  first. Press the no-pattern button in the box at the top and the
-                  fit still arrives. What is missing there is not optimisation, it
-                  is a relationship to find.
-                </p>
+                <p>Least squares can choose a line even when the observations contain no useful predictive pattern. The existence of fitted coefficients therefore does not establish that the input helps predict the output.</p>
+                <p>Select the no-pattern example in the activity. The fitting procedure still returns coefficients because it can minimize RSS even when a straight line captures little useful relationship. To decide whether that fit helps, compare it with a simple baseline and check predictions on observations excluded from fitting.</p>
                 <p>
                   Answering the second claim needs something to compare against.
                 </p>
@@ -532,15 +467,7 @@ export default function SimpleLinearRegressionPage() {
                   relationship with height accounts for about 91% of the variation
                   in weight among these five measurements.
                 </p>
-                <p>
-                  Three things it does not say, and each is a mistake worth not
-                  making. It does not say height causes weight, since the same
-                  0.909 would appear if a third thing drove both. It does not
-                  promise accuracy outside the range of 160 to 180 cm, where no
-                  measurement has tested whether the relationship continues. And
-                  it does not say a line was the right shape to fit, only that
-                  this line beat the flat one.
-                </p>
+                <p>The score does not establish that height causes weight. The same 0.909 could appear if another influence affected both. It also gives no evidence about heights outside the measured range of 160 to 180 cm. A line can improve on a constant while still missing a curved relationship, so we need to inspect the errors as well as the score.</p>
                 <KeepInMind>
                   <p>
                     R² computed this way, on the same rows the line was fitted to
@@ -548,12 +475,7 @@ export default function SimpleLinearRegressionPage() {
                     least-squares line can always match the flat baseline by
                     setting its slope to zero, so it never does worse.
                   </p>
-                  <p>
-                    The same formula applied to rows the model has never seen can
-                    go negative, and that is a real result rather than an error.
-                    It means the model predicted those rows worse than simply
-                    guessing the average would have.
-                  </p>
+                  <p>On observations excluded from fitting, this score can be negative. It then means the model made larger squared errors than a constant equal to that evaluation group&apos;s mean. The negative result is valid: the chosen model performed worse than the reference used in the score.</p>
                 </KeepInMind>
               </SubSection>
             </>
@@ -563,7 +485,7 @@ export default function SimpleLinearRegressionPage() {
           title: "Questions on Parts 3 to 5",
           quiz: [
             trueFalse(
-              "Every least-squares line passes through the centre of the data, the point whose coordinates are the two means.",
+              "An ordinary least-squares line with a freely fitted intercept passes through the point formed by the two sample means.",
               true,
               "The intercept is defined as whatever value puts the line there, which is what the formula subtracting the slope times the mean height from the mean weight says. The slope decides the tilt and the intercept then slides the line until it runs through that point.",
             ),
@@ -576,7 +498,7 @@ export default function SimpleLinearRegressionPage() {
                 "A line was the right shape to fit, with about 9% of the fit still to find",
               ],
               0,
-              "The page names three readings that the number does not support. It does not say height causes weight, since the same 0.909 would appear if a third thing drove both; it promises nothing outside 160 to 180 cm; and it says only that this line beat the flat one, not that a line was the right shape.",
+              "This R-squared compares the fitted line’s squared errors with the mean-only baseline on the same five measurements. It reports how much of that baseline error the fitted relationship removes. It does not establish causation, accuracy for another person or whether a straight line is the right functional form.",
             ),
             choice(
               "The total sum of squares of 176 has two readings on this page. Which pair?",
@@ -587,25 +509,25 @@ export default function SimpleLinearRegressionPage() {
                 "The error left after fitting, and the error the line removed",
               ],
               0,
-              "Both readings are the same number, and that is what makes it the right thing to compare against. It is how much variation was there for a line to account for, measured the same way any line is scored.",
+              "Predicting mean weight for everyone gives the total sum of squares. The same quantity measures total squared variation around that mean. Using it as the baseline gives the line’s residual error a reference on the same observations and in the same units.",
             ),
             trueFalse(
               "Since R-squared computed on the rows the line was fitted to cannot fall below zero, a negative value is always a sign that something was computed wrongly.",
               false,
-              "The floor at zero holds only on the fitted rows and with an intercept, because the least-squares line can always match the flat baseline by setting its slope to zero. The same formula applied to rows the model never saw can go negative, and that is a real result, saying the model predicted those rows worse than guessing the average would have.",
+              "On its training rows, ordinary least squares with a free intercept can do at least as well as the mean-only line, provided total variation is nonzero. On new rows, its errors can exceed the squared deviations around those rows’ own observed mean. That produces a valid negative R-squared; the observed mean is the reference used by this score.",
             ),
             several(
               "Which of these are true of the fit on the five people?",
               [
-                              "The slope of 0.8 is in kilograms per centimetre, the outcome’s units over the input’s",
-                              "The intercept of minus 68 kg is the predicted weight of a person zero centimetres tall, and is not a claim about anything",
+                              "The slope of 0.8 is in kilograms per centimeter, the outcome’s units over the input’s",
+                              "The intercept of minus 68 kg is the predicted weight of a person zero centimeters tall, and is not a claim about anything",
                               "The five residuals of the fitted line add to zero",
                               "The fitted line’s residual sum of squares on these five people is 16",
                             ],
               [0, 1, 2, 3],
               "All four hold. Reading the slope in units is what makes the number readable, and the intercept’s job here is to position the line rather than to mean something on its own, since zero is far outside the range anybody was measured at. Running every height through the line gives residuals of minus 2, 2, 0, 2 and minus 2, which square to a total of 16 and add to zero. The zero total is a consequence of fitting an intercept by least squares rather than a general property of good models, and fitting without one, or by a different loss, generally breaks it.",
               {
-                "description": "Fit unpenalised ordinary least squares with a freely fitted intercept. Its resulting prediction rule is weight_hat = 0.8 × height − 68.",
+                "description": "Fit unpenalized ordinary least squares with a freely fitted intercept. Its resulting prediction rule is weight_hat = 0.8 × height − 68.",
                 "data": "height (cm): 160 165 170 175 180\nweight (kg):  58  66  68  74  74"
               },
             ),
@@ -616,12 +538,7 @@ export default function SimpleLinearRegressionPage() {
           content: (
             <>
               <SubSection title="19. Deriving the intercept">
-                <p>
-                  Part 3 turned the search into finding the bottom of a bowl, and
-                  the bottom of a bowl is where the surface is flat in every
-                  direction. There are two directions here, one per control, so
-                  there are two derivatives to set to zero.
-                </p>
+                <p>At the minimum of this differentiable error surface, changing either coefficient by a sufficiently small amount cannot lower the score. We therefore set the partial derivative with respect to the slope and the partial derivative with respect to the intercept to zero. The later curvature check establishes why the stationary solution is a minimum.</p>
                 <p>Written with both controls visible, the score is</p>
                 <Equation>{"RSS(α, β) = Σ (yᵢ − βxᵢ − α)²"}</Equation>
                 <p>Differentiate with respect to the intercept first.</p>
@@ -679,7 +596,7 @@ export default function SimpleLinearRegressionPage() {
                     },
                     {
                       expression: "β = Σ(xᵢ − x̄)(yᵢ − ȳ) / Σ(xᵢ − x̄)²",
-                      reason: "Centre both sums, which subtracts zero from each",
+                      reason: "Center both sums, which subtracts zero from each",
                     },
                   ]}
                 />
@@ -690,9 +607,10 @@ export default function SimpleLinearRegressionPage() {
                   </p>
                   <Equation>{"Σ x̄(yᵢ − ȳ) = x̄ · Σ(yᵢ − ȳ) = x̄ · 0 = 0"}</Equation>
                   <p>
+
                     since the deviations of any column sum to zero, and the same
                     argument empties the term taken from the bottom. Both sums are
-                    unchanged, and the centred form is the one that reads as a
+                    unchanged, and the centered form is the one that reads as a
                     comparison of joint movement against the input&rsquo;s own.
                   </p>
                 </WhyThisWorks>
@@ -704,20 +622,8 @@ export default function SimpleLinearRegressionPage() {
                   include the tops of hills. One more argument is needed to know
                   which this is.
                 </p>
-                <p>
-                  RSS is a sum of squares of expressions that are straight lines
-                  in α and β. Squaring a straight line gives an upward-curving
-                  parabola, and adding upward-curving things gives something
-                  upward-curving, so the surface is a bowl everywhere rather than
-                  only near the answer. A bowl has no hilltops, so the one flat
-                  place is the lowest one.
-                </p>
-                <p>
-                  The bowl is genuinely bowl-shaped rather than a trough only when
-                  the heights actually vary, which is the condition Part 7 is
-                  about. The surface in the box above is the picture of this
-                  argument.
-                </p>
+                <p>Each residual is an affine expression in the slope and intercept. Along any straight path through those coefficients, its square is an upward-opening quadratic or a constant. Adding those squares preserves that property. This makes RSS convex: a stationary solution is a global minimum, rather than a separate local minimum that hides a better fit elsewhere.</p>
+                <p>When the heights vary, the surface curves upward in every coefficient direction and the minimum is unique. Constant heights leave a flat direction along which different slope and intercept pairs have the same score. Part 7 explains that case.</p>
               </SubSection>
             </>
           ),
@@ -744,16 +650,8 @@ export default function SimpleLinearRegressionPage() {
                 data prefers any of them.
               </p>
               <InAModel>
-                <p>
-                  This generalises past the extreme case. A model cannot estimate
-                  the effect of something that does not vary in its data, and a
-                  column that barely varies gives a slope that is technically
-                  computable and almost entirely noise.
-                </p>
-                <p>
-                  It is also why a constant column is refused outright
-                  rather than answered with a number nobody should use.
-                </p>
+                <p>The same issue appears more gradually when an input barely varies. Small changes in the observations can then cause large changes in its estimated coefficient. We need enough relevant variation to distinguish the effect represented by that coefficient.</p>
+                <p>The SDK’s <code>SimpleLinearRegression</code> class rejects a constant input column because its interface promises an identified slope. A separate constant predictor can still return the mean weight.</p>
               </InAModel>
             </SubSection>
           ),
@@ -770,19 +668,8 @@ export default function SimpleLinearRegressionPage() {
                   residual of 10 contributes a hundred where a residual of 2
                   contributes four.
                 </p>
-                <p>
-                  Whether that is the right behaviour depends on what the unusual
-                  point is, and the data cannot say. It might be a genuine rare
-                  observation the model should accommodate, a measurement or entry
-                  error, someone from a different population than the rest, or a
-                  sign that a variable nobody recorded is doing the work.
-                </p>
-                <p>
-                  Those call for different responses, and only the second is a
-                  case for removing the point. Deleting whatever sits far from the
-                  line is a way of guaranteeing a model that fits, which is not
-                  the same as one that is right.
-                </p>
+                <p>The scatter plot alone does not identify why an observation is unusual. It could be a rare observation from the intended population, a recording error, a different population, or a relationship affected by an unrecorded variable. We need information about how that record was produced before choosing a response.</p>
+                <p>The response depends on where the unusual observation came from and which population the prediction should describe. A documented measurement error may need correction. A genuine observation from the intended population needs investigation rather than automatic removal because it fits poorly.</p>
               </SubSection>
 
               <SubSection title="24. Extrapolation">
@@ -798,11 +685,7 @@ export default function SimpleLinearRegressionPage() {
                   −68 kg at a height of zero, and that number is what the
                   arithmetic says rather than what anyone should believe.
                 </p>
-                <p>
-                  So the strange intercept is not an oddity to explain away. It is
-                  the clearest available demonstration of what a fitted line does
-                  outside the range that produced it.
-                </p>
+                <p>An intercept can position a useful fitted line even when its prediction at zero has no physical interpretation. Check the input range before interpreting that coefficient as a prediction about an actual person.</p>
               </SubSection>
 
               <SubSection title="25. Association, causation, and generalization">
@@ -824,12 +707,7 @@ export default function SimpleLinearRegressionPage() {
                   the first while doing poorly on the second.
                 </p>
                 <InAModel>
-                  <p>
-                    Separating those two questions properly means holding data
-                    back, fitting on part of it and scoring on the part the model
-                    never saw. That is what the held-out evaluation page does, and
-                    every score after it is the second kind rather than the first.
-                  </p>
+                  <p>Holding observations aside before fitting gives us a separate check of prediction performance. The held-out evaluation page distinguishes that evidence from how closely a model fits the observations used to choose its coefficients.</p>
                 </InAModel>
               </SubSection>
             </>
@@ -852,7 +730,7 @@ export default function SimpleLinearRegressionPage() {
             trueFalse(
               "Setting both derivatives to zero is on its own enough to know the answer found is the lowest point of the surface.",
               false,
-              "A flat place can be the top of a hill. The extra argument is that the score is a sum of squares of expressions that are straight lines in the two controls, squaring a straight line gives an upward-curving parabola, and adding upward-curving things stays upward-curving. A bowl has no hilltops, so the one flat place is the lowest one.",
+              "Zero derivatives alone do not rule out a maximum. Here the loss is a sum of squared expressions that are affine in the slope and intercept, giving an upward-curving convex surface. A stationary solution is therefore a global minimum. It is unique when the inputs have nonzero variation; constant inputs leave a flat direction of equally good coefficients.",
             ),
             choice(
               "Suppose all five people are exactly 170 cm tall, with the weights unchanged. What has actually failed?",
@@ -863,9 +741,9 @@ export default function SimpleLinearRegressionPage() {
                               "The slope is still computable, but is almost entirely noise",
                             ],
               0,
-              "Every height deviation is zero, so the slope formula divides by zero. The prediction at 170 cm is the mean weight of 68 kg as always; what is gone is the tilt, because infinitely many slope and intercept pairs pass through that point and fit equally well. A slope that is computable but almost entirely noise is the nearby case of a column that barely varies rather than one that does not vary at all.",
+              "Constant heights leave no height deviations from which to identify a slope. Every slope paired with an appropriate intercept can give the same mean-weight prediction at 170 cm. With very little height variation, the slope may still be computable, but small measurement changes can have a large effect on it.",
               {
-                "description": "The five weights are 58, 66, 68, 74 and 74 kg. Replace every height with 170 cm. Fit unpenalised least squares with an intercept."
+                "description": "The five weights are 58, 66, 68, 74 and 74 kg. Replace every height with 170 cm. Fit unpenalized least squares with an intercept."
               },
             ),
             several(
@@ -891,7 +769,7 @@ export default function SimpleLinearRegressionPage() {
           practice: [
             exercise(
               "Fit the five people and predict a sixth",
-              ["The five measured people give us a relationship to fit. Use SimpleLinearRegression on the supplied heights and weights, then ask the fitted model about a person who is 172 cm tall. This applies the calculation you worked through in the lesson.","Print the fitted slope in kilograms per centimetre, the intercept in kilograms, and the predicted weight. Keep the height and weight lists paired in their original order. Use the labels and precision in the required-output panel when printing."],
+              ["The five measured people give us a relationship to fit. Use SimpleLinearRegression on the supplied heights and weights, then ask the fitted model about a person who is 172 cm tall. This applies the calculation you worked through in the lesson.","Print the fitted slope in kilograms per centimeter, the intercept in kilograms, and the predicted weight. Keep the height and weight lists paired in their original order. Use the labels and precision in the required-output panel when printing."],
               `from oop_ml import SimpleLinearRegression
 
 heights = [160, 165, 170, 175, 180]
@@ -916,7 +794,7 @@ print(f"predicted weight at 172 cm {predicted:.2f} kg")`,
               `slope 0.8000 kg per cm
 intercept -68.0000 kg
 predicted weight at 172 cm 69.60 kg`,
-              { hints: ["Construction configures and fitting learns, so the data goes to fit rather than to the constructor.", "The fitted values are properties named for what they are, slope and intercept. Reading either before fitting raises rather than returning nothing.", "predict takes a list of heights and answers one prediction per height, so a single height still goes in as a list of one."], check: numberCheck("What weight does the model predict for 172 cm, in kilograms?", 69.6, 0.05, "The prediction reads the fitted line at a height inside the observed range. Its output is an estimate in kilograms, rather than a new measurement of that person. Being inside the range avoids extrapolation, but does not establish that this small sample describes everyone."), question: "What weight does the line predict for someone we have not measured?" },
+              { hints: ["Create the model with SimpleLinearRegression(). Pass the data lists to its fit method, with heights first and weights second.", "After fitting, slope and intercept are properties of the model. Reading them before fit raises an error because no coefficients have been learned yet.", "predict takes a list of heights and answers one prediction per height, so a single height still goes in as a list of one."], check: numberCheck("What weight does the model predict for 172 cm, in kilograms?", 69.6, 0.05, "The prediction reads the fitted line at a height inside the observed range. Its output is an estimate in kilograms, rather than a new measurement of that person. Being inside the range avoids extrapolation, but does not establish that this small sample describes everyone."), question: "What weight does the line predict for someone we have not measured?" },
             ),
             exercise(
               "Score the line against the flat guess",
@@ -950,7 +828,7 @@ TSS 176.0
 R squared 0.9091
 1 - RSS / TSS 0.9091
 mean squared error 3.20`,
-              { hints: ["evaluate answers an object that has already paired every prediction with its truth. The figures are properties of that object rather than separate calls.", "The residuals are on the same object. Squaring and summing them yourself should give the residual sum of squares exactly, which is a good check that the two are the same five numbers."], check: numberCheck("What mean squared error does the evaluation report?", 3.2, 0.01, "Mean squared error averages the squared residuals over the five observations. It has units of squared kilograms, as does each squared residual. Averaging removes the direct dependence on the number of entries, but comparisons across populations still require comparable targets and sampling."), question: "How much does the fitted line improve on predicting the same weight for everyone?" },
+              { hints: ["evaluate returns an evaluation object that pairs each prediction with its observed weight. Read the reported quantities as properties of that object.", "The evaluation object also contains the residuals. Squaring and summing those values provides an independent check on residual_sum_of_squares, allowing for ordinary floating-point rounding."], check: numberCheck("What mean squared error does the evaluation report?", 3.2, 0.01, "Mean squared error averages the squared residuals over the five observations. It has units of squared kilograms, as does each squared residual. Averaging removes the direct dependence on the number of entries, but comparisons across populations still require comparable targets and sampling."), question: "How much does the fitted line improve on predicting the same weight for everyone?" },
             ),
             exercise(
               "Swap the roles",
@@ -979,7 +857,7 @@ print(f"product of the two slopes {forward.slope * reverse.slope:.4f}")`,
 reverse slope 1.1364 cm per kg
 reciprocal of the forward slope 1.2500
 product of the two slopes 0.9091`,
-              { hints: ["The same class fits either way round. What changes is which list goes first in fit.", "Least squares minimises vertical misses, and swapping the roles changes which measurement is vertical. That is why the two lines differ."], check: numberCheck("What slope does the reversed fit report, in centimetres per kilogram?", 1.1364, 0.001, "The reverse model minimises errors in height, while the forward model minimises errors in weight. Those objectives produce different lines for these imperfect observations. Here their slope product equals R squared; this relationship assumes the nonzero variances and intercepts used by these simple fits."), question: "Does predicting height from weight recover the same fitted line?" },
+              { hints: ["The same class fits either way round. What changes is which list goes first in fit.", "Least squares minimizes vertical misses, and swapping the roles changes which measurement is vertical. That is why the two lines differ."], check: numberCheck("What slope does the reversed fit report, in centimeters per kilogram?", 1.1364, 0.001, "The reverse model minimizes height errors, while the forward model minimizes weight errors. Ordinary least squares therefore produces different lines for these imperfect pairs. Their slope product equals squared correlation here because both fits use the same paired observations, fitted intercepts and nonzero variances."), question: "Does predicting height from weight recover the same fitted line?" },
             ),
             exercise(
               "Ask for a line that cannot be identified",

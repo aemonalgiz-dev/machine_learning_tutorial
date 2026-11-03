@@ -25,9 +25,9 @@ import { MatrixPlayground } from "@/components/widgets/MatrixPlayground";
 import { VectorPlayground } from "@/components/widgets/VectorPlayground";
 
 export const metadata: Metadata = {
-  title: "Linear Algebra Primer · oop_ml",
+  title: "Linear Algebra Primer · Perceptron Lab",
   description:
-    "A model often needs to work with many measurements at once. Vectors and matrices let us organise those numbers and repeat useful calculations without writing a separate rule for every example.",
+    "A system of equations can describe several quantities that depend on each other. Vectors and matrices make those relationships easier to calculate with, while geometry helps us picture what the calculations are doing.",
 };
 
 export default function LinearAlgebraPrimerPage() {
@@ -36,7 +36,7 @@ export default function LinearAlgebraPrimerPage() {
       lessonId="linear-algebra"
       technicalStart="12. Matrix-Vector Multiplication"
       title="Linear Algebra Primer"
-      tagline={"A model often needs to work with many measurements at once. Vectors and matrices let us organise those numbers and repeat useful calculations without writing a separate rule for every example."}
+      tagline={"A system of equations can describe several quantities that depend on each other. Vectors and matrices make those relationships easier to calculate with, while geometry helps us picture what the calculations are doing."}
       prerequisites={
         <>
           Arithmetic and a pair of coordinate axes. Everything else, including
@@ -52,20 +52,13 @@ export default function LinearAlgebraPrimerPage() {
 
       <PrimerSection title="1. Several Numbers as One Object">
 
-        <p>
-          Suppose we record someone&apos;s height, weight and age. These measurements belong to one person, so a model needs to receive them together. We need a way to keep that grouping as we calculate.
-        </p>
+        <p>Height, weight and age are different measurements of the same person. Keeping them together lets us describe that person as one observation while preserving what each value means. The same need appears in positions, inventories and many other calculations involving related quantities.</p>
         <Equation>{"(170, 72, 35)"}</Equation>
         <p>
           We can put those measurements in an ordered list called a vector. Here the first position means height. If we swap it with weight, we change the meaning of the input even though the numbers themselves have not changed. The number of entries is the vector&apos;s dimension, so our list of three measurements is a three-dimensional vector.
         </p>
         <p>A vector also has operations we can apply consistently. We can add corresponding entries or multiply every entry by one number. That multiplying number is called a scalar. We will picture those operations with two-entry vectors before using the same arithmetic on longer lists.</p>
-        <p>
-          A two-entry vector also has a picture, drawn as a point or an arrow on
-          a pair of axes. We stay in two dimensions throughout this primer for
-          exactly that reason, and the geometry is worth having because every
-          operation we see there keeps working in dimensions nobody can draw.
-        </p>
+        <p>A vector with two entries can be drawn as a point or an arrow on coordinate axes. That picture lets us see addition and scaling before using the same operations on longer vectors, where a drawing is less practical.</p>
       </PrimerSection>
 
       <PrimerSection title="2. Points and Movements">
@@ -82,13 +75,7 @@ export default function LinearAlgebraPrimerPage() {
           <p>
             A point describes a location. In this geometric picture, a vector describes a displacement: a direction and a distance we can apply from any starting point. Using coordinates for both can hide that distinction, so keep an eye on what each set of numbers represents.
           </p>
-          <p>
-            Coordinates let both be written with the same pair of numbers, which
-            is convenient and occasionally confusing. It matters later, when
-            transformations move the plane around. A transformation acts on
-            movements, and treating a location as a movement is what makes a
-            translation behave unlike everything else in section 14.
-          </p>
+          <p>Translating both endpoints of an arrow changes their locations by the same amount, so the displacement between them stays unchanged. This is why we need to distinguish moving a point from transforming a displacement when we reach translations in section 14.</p>
         </KeepInMind>
         <p>
           Below is one arrow on its own. Drag the tip, and watch the two dashed
@@ -102,11 +89,7 @@ export default function LinearAlgebraPrimerPage() {
       </PrimerSection>
 
       <PrimerSection title="3. Adding and Scaling Vectors">
-        <p>
-          Two things can be done to vectors before anything is measured on them,
-          and everything later is built out of the pair. They can be added, and
-          they can be scaled.
-        </p>
+        <p>Vector addition combines displacements. Scaling changes the amount of a displacement. Together, these operations let us build the weighted combinations used throughout linear algebra.</p>
         <p>
           Adding two vectors means doing one movement and then the other, and in
           coordinates it is as simple as it sounds. Add the matching entries.
@@ -140,22 +123,11 @@ export default function LinearAlgebraPrimerPage() {
             ["0", "(0, 0)", "collapsed to a point"],
           ]}
         />
-        <p>
-          These two operations are the whole of what makes the rest possible.
-          Weighted combinations, matrix transformations, eigenvectors and the
-          parameter update every model performs are all additions and scalings
-          wearing different names.
-        </p>
+        <p>Adding vectors and scaling them let us form weighted combinations. Matrix transformations are built from those operations, so understanding the small geometric example also helps us read calculations with many entries.</p>
       </PrimerSection>
 
       <PrimerSection title="4. Vector Length">
-        <p>
-          Section 3 could stretch an arrow and could add two of them, and never
-          once said how big an arrow is. A model needs that number constantly.
-          How far a point sits from the origin, how big a parameter set is, and
-          in the next section how far apart two examples are, are all the same
-          measurement, and it is called the length.
-        </p>
+        <p>An arrow has a direction and a length. Its coordinates describe movement along separate axes, while its length measures the direct distance from its start to its end. Measuring the distance between two points will use that same idea.</p>
         <p>
           A vector&rsquo;s entries describe its movement along each axis
           separately. Its length is the direct distance from its start to its
@@ -293,22 +265,19 @@ export default function LinearAlgebraPrimerPage() {
       />
 
       <PrimerSection title="6. Distance in Machine Learning">
-        <p>
-          Two of the models ahead run almost entirely on the previous section. An
-          example, once its measurements are collected into a vector, is a point
-          in a space with one axis per feature, and examples that resemble each
-          other land near each other in it.
-        </p>
+        <p>Collecting an example’s measurements into a vector gives us one coordinate per feature. We can then calculate distances between examples. Whether nearby examples are usefully similar depends on which features we chose and how their scales contribute to that distance.</p>
         <InAModel>
           <p>
-            k-nearest neighbours answers a question about a new example by
+
+            k-nearest neighbors answers a question about a new example by
             finding the stored examples closest to it, which is this distance
             computed once per stored row.
           </p>
           <p>
+
             k-means groups examples by repeatedly comparing each one against a
-            set of candidate centres and keeping the nearest, which is the same
-            distance again with the centres standing in for the stored rows.
+            set of candidate centers and keeping the nearest, which is the same
+            distance again with the centers standing in for the stored rows.
           </p>
         </InAModel>
         <KeepInMind>
@@ -319,27 +288,13 @@ export default function LinearAlgebraPrimerPage() {
             written as 1, and the formula adds their squares as though they meant
             the same amount of dissimilarity.
           </p>
-          <p>
-            They do not, and the consequence is that whichever column happens to
-            carry the larger numbers dominates every distance in the dataset.
-            Putting the columns on a common footing first is the fix, and it has
-            a page of its own under data preparation.
-          </p>
+          <p>A coordinate with larger numerical differences can dominate the distance calculation. That may reflect a choice of units rather than greater importance. Scaling gives us a way to choose how each measurement contributes; the appropriate choice depends on the comparison we intend.</p>
         </KeepInMind>
       </PrimerSection>
 
       <PrimerSection title="7. Weighted Sums">
-        <p>
-          Here is a calculation that appears inside almost every model, written
-          out before it is given a name.
-        </p>
-        <p>
-          A prediction is rarely made from one measurement, and when it is made
-          from several there is no reason every one of them should count
-          equally. What is missing is a way to let each feature count by its own
-          amount. The fix is one number per feature, called its weight, saying
-          how strongly that feature should count.
-        </p>
+        <p>Several quantities often contribute to one total. Giving each its own multiplier lets us control those contributions before adding them.</p>
+        <p>The multiplier for one input is called its weight. A weighted sum multiplies each input by its own weight and adds the results. This can describe a bill from quantities and prices, or a score from measurements and coefficients.</p>
         <p>
           Suppose a prediction uses two feature values and carries one weight for
           each.
@@ -347,12 +302,7 @@ export default function LinearAlgebraPrimerPage() {
         <WorkedExample>
           <p>Features (3, 4), weights (4, 3).</p>
           <Equation>{"3 × 4  =  12      first feature times its weight\n4 × 3  =  12      second feature times its weight\n         ────\n           24      added together"}</Equation>
-          <p>
-            Each feature is multiplied by its own weight, and the results are
-            added. A larger weight makes its feature count for more, a weight of
-            zero removes the feature from the prediction entirely, and a negative
-            weight makes the feature push the other way.
-          </p>
+          <p>Each feature is multiplied by its own weight, and the results are added. The magnitude of a weight determines how strongly a change in that feature affects the sum. A zero weight removes that feature’s contribution. A negative weight reverses the direction of its effect: increasing the feature lowers the sum.</p>
         </WorkedExample>
         <p>
           The claims in that last sentence are easiest to believe by holding the
@@ -365,19 +315,11 @@ export default function LinearAlgebraPrimerPage() {
             ["(4, 3)", "12", "12", "24", "counted the second feature three times over"],
             ["(4, 1)", "12", "4", "16", "passed it through at its measured value"],
             ["(4, 0)", "12", "0", "12", "removed it from the prediction"],
-            ["(4, −3)", "12", "−12", "0", "pushed the other way, and cancelled the first exactly"],
+            ["(4, −3)", "12", "−12", "0", "pushed the other way, and canceled the first exactly"],
           ]}
         />
-        <p>
-          The features never changed. Everything the prediction did differently
-          came from the weights, which is why the weights are what a model has
-          to learn and the features are what it is given.
-        </p>
-        <p>
-          That is the shape of a linear model&rsquo;s prediction, and with ten
-          features it is ten multiplications and nine additions written out in a
-          row. The next section is the notation that compresses it.
-        </p>
+        <p>Changing the weights changes how the same inputs contribute to the result. In a fitted prediction rule, training chooses those weights. In other applications, they may be known quantities such as prices or conversion factors.</p>
+        <p>The same calculation works with any matching number of values and weights. Dot-product notation gives us a compact way to write that repeated multiplication and addition.</p>
       </PrimerSection>
 
       <PrimerSection title="8. The Dot Product">
@@ -396,12 +338,7 @@ export default function LinearAlgebraPrimerPage() {
         </WorkedExample>
         <p>For any number of entries, written with a summation sign,</p>
         <Equation>{"a · b = Σᵢ aᵢbᵢ"}</Equation>
-        <p>
-          The two vectors must have the same number of entries, and the reason is
-          not a technicality. Every feature needs a weight of its own, so a
-          feature with no matching weight would have nothing to multiply by and
-          no way to contribute.
-        </p>
+        <p>Both vectors need the same number of entries because the operation pairs corresponding positions. A value without a matching partner would leave the calculation undefined. The positions must also have compatible meanings for the result to answer the intended question.</p>
         <InAModel>
           <p>
             A linear model&rsquo;s score for one example is one dot product plus
@@ -416,10 +353,7 @@ export default function LinearAlgebraPrimerPage() {
       </PrimerSection>
 
       <PrimerSection title="9. Direction, Magnitude, and Alignment">
-        <p>
-          The dot product also has a geometric reading, and it needs stating
-          carefully, because the loose version of it is misleading.
-        </p>
+        <p>Geometrically, the dot product depends on the angle between two arrows and on both of their lengths. We can examine those effects separately.</p>
         <p>
           Hold both arrows at fixed lengths and swing one of them. The dot
           product is largest when they point the same way, falls as they open
@@ -454,17 +388,9 @@ export default function LinearAlgebraPrimerPage() {
             out, which gives the cosine and nothing else.
           </p>
           <Equation>{"cos θ = (a · b) / (‖a‖ · ‖b‖)"}</Equation>
-          <p>
-            That quantity is cosine similarity, and the distance metrics page
-            takes it up properly.
-          </p>
+          <p>That quantity is cosine similarity. It compares the directions of nonzero vectors while removing their lengths from the comparison. The distance metrics lesson explores when that is useful.</p>
         </KeepInMind>
-        <p>
-          One consequence ties the sections together. Dot a vector with itself.
-          It is perfectly aligned with itself, so the cosine is 1, and the recipe
-          multiplies each entry by itself and adds, which is the squared-length
-          calculation from section 4.
-        </p>
+        <p>For a nonzero vector dotted with itself, the angle is zero and its cosine is 1. Multiplying each entry by itself and adding gives the squared-length calculation from section 4. The squared-length identity also holds for the zero vector, even though its direction and cosine are undefined.</p>
         <Equation>{"v · v = v₁² + v₂² = ‖v‖²"}</Equation>
         <>
           <p>
@@ -482,9 +408,9 @@ export default function LinearAlgebraPrimerPage() {
         title="Questions on Sections 6 to 9"
         questions={[
           trueFalse(
-            "Because distance adds the squares of the differences in every column, whichever column happens to carry the larger numbers dominates every distance in the dataset.",
+            "When one feature’s coordinate differences are much larger than the others, it can dominate unscaled Euclidean distances.",
             true,
-            "A difference of 1 in a column of dollars and a difference of 1 in a column of years are both written as 1, and the formula adds their squares as though they meant the same amount of dissimilarity. They do not, so the column with the bigger numbers decides nearly every distance until the columns are put on a common footing, and since k-nearest neighbours and k-means both run on this distance, it decides those models too.",
+            "Euclidean distance combines coordinate differences on their numerical scales. Large differences in one feature can outweigh differences in another even when those features use unrelated units. A large constant offset alone changes no pairwise difference. Choose scales that fit the comparison before using these distances for neighbor votes or clustering.",
           ),
           trueFalse(
             "A large positive dot product means two vectors are strongly aligned.",
@@ -500,7 +426,7 @@ export default function LinearAlgebraPrimerPage() {
               "The result would come out as a vector rather than a number",
             ],
             0,
-            "The reason is not a technicality. The recipe multiplies the entries position by position, so a feature with no weight opposite it would have no way to contribute to the score at all. A linear model’s score is x · w + b, one weight per feature and one offset, and the rule is what makes that line mean something.",
+            "A dot product multiplies matching coordinate pairs before adding them. Both vectors therefore need the same number of entries. In a weighted prediction, each feature position must have its corresponding weight, or the score has no defined contribution for that position.",
           ),
           several(
             "What can a weight do to its own feature inside a weighted sum?",
@@ -511,7 +437,7 @@ export default function LinearAlgebraPrimerPage() {
               "Make it push the other way",
             ],
             [0, 1, 2, 3],
-            "Section 7’s table holds the features at (3, 4) and changes only the second weight. At 3 the second feature adds 12, at 1 it adds its own value of 4, at 0 it adds nothing and the sum drops to 12, and at −3 it subtracts 12 and cancels the first feature exactly. Every one of the four is something a weight can do, and the features never changed.",
+            "A weight controls one feature’s contribution while the feature itself stays fixed. A weight of one passes its measured value through, zero removes its contribution and a negative weight reverses its sign. A larger magnitude makes that contribution larger.",
           ),
           choice(
             "What does (3, 4) dotted with itself give?",
@@ -528,16 +454,8 @@ export default function LinearAlgebraPrimerPage() {
       />
 
       <PrimerSection title="10. Several Outputs at Once">
-        <p>
-          A dot product takes a vector and produces one number. A layer of a
-          network, or any transformation of one representation into another,
-          needs several numbers out rather than one.
-        </p>
-        <p>
-          The fix is unglamorous. Give each output its own weight vector, and do
-          one dot product per output. Suppose two outputs are wanted from two
-          inputs.
-        </p>
+        <p>A dot product combines two vectors into one number. A calculation that needs several outputs can use a separate weight vector for each output.</p>
+        <p>For each required output, choose a row of weights and calculate its dot product with the input. Stacking the rows gives a single arrangement for all the weighted sums.</p>
         <Equation>{"o₁ = 2x + 1y\no₂ = 1x + 2y"}</Equation>
         <p>
           Each line is a weighted sum with its own pair of weights, (2, 1) for
@@ -545,11 +463,7 @@ export default function LinearAlgebraPrimerPage() {
           the collection is a matrix.
         </p>
         <Equation>{"A = ⎡ 2  1 ⎤\n    ⎣ 1  2 ⎦"}</Equation>
-        <p>
-          So a matrix is not a new idea so much as a container. It packages
-          several related weighted sums so they can be written, and performed, as
-          one operation.
-        </p>
+        <p>A matrix arranges values in rows and columns. Here each row holds the weights for one output, so the matrix describes a transformation. A matrix can also store observations; its role depends on what its entries represent.</p>
         <p>
           Rows rather than columns, because a row is what meets the input. Each
           row is read against the input vector exactly as section 8 read a
@@ -557,14 +471,7 @@ export default function LinearAlgebraPrimerPage() {
           keeps every one of the dot products visible on its own line.
         </p>
         <InAModel>
-          <p>
-            A layer of a network is this picture with the rows given a name.
-            Each neuron in the layer holds its own weight vector and answers one
-            number for the row it reads, so a layer of three neurons answers
-            three. Stack the neurons&rsquo; weight vectors as rows and the
-            result is the layer&rsquo;s matrix, which is the convention the next
-            section writes down.
-          </p>
+          <p>A fully connected layer uses a separate weight vector for each neuron. Three neurons therefore calculate three weighted sums. Stacking their weight vectors as rows gives the layer’s weight matrix. A neuron can then add its bias and apply an activation function; the matrix describes the weighted-sum part of that calculation.</p>
         </InAModel>
       </PrimerSection>
 
@@ -588,12 +495,7 @@ export default function LinearAlgebraPrimerPage() {
             ["output vector", "2", "two calculated results"],
           ]}
         />
-        <p>
-          That is the convention used throughout this site and on the neural
-          network pages later, rows correspond to outputs and columns
-          correspond to inputs. A 3 × 2 matrix would take a two-entry vector and return a
-          three-entry one.
-        </p>
+        <p>For the matrix-vector convention used here, rows correspond to outputs and columns correspond to inputs. The number of columns must match the input length. A matrix can therefore produce an output vector with a different number of entries from its input.</p>
         <WorkedExample>
           <p>
             Take a matrix with three rows, (1, 0), (0, 1) and (1, 1), each two
@@ -640,24 +542,14 @@ export default function LinearAlgebraPrimerPage() {
           than a different operation.
         </p>
         <InAModel>
-          <p>
-            A layer of a network does this to every example it is handed and
-            then adds one offset per output, which is the plus b of section 8
-            carried once per row of the matrix.
-          </p>
+          <p>The weighted-sum step of a fully connected layer applies this matrix to each example, then adds one bias per output. The bias vector carries the separate offsets.</p>
           <Equation>{"outputs = A·x + b"}</Equation>
-          <p>
-            When a later page writes a whole layer in a single line, this is
-            that line.
-          </p>
+          <p>This expression gives the layer’s weighted sums with their biases. An activation function may then transform those values before they reach the next layer.</p>
         </InAModel>
       </PrimerSection>
 
       <PrimerSection title="13. Basis Vectors and Matrix Columns">
-        <p>
-          Two particular vectors are worth naming, because everything else is
-          built from them. Call them the basis vectors.
-        </p>
+        <p>In a two-dimensional coordinate system, one unit step along each axis gives us two reference vectors. Every vector in the plane can be written as a weighted combination of those references. They form the standard basis.</p>
         <Equation>{"e₁ = (1, 0)      e₂ = (0, 1)"}</Equation>
         <p>
           One step east and one step north. They matter because every vector in
@@ -731,7 +623,7 @@ export default function LinearAlgebraPrimerPage() {
           trueFalse(
             "Knowing where the two basis vectors land is enough to know where every vector in the plane lands.",
             true,
-            "Every vector is a scaled copy of e₁ plus a scaled copy of e₂, which is what its coordinates have been saying all along, and a matrix distributes over addition and scaling. So the image of (x, y) is x copies of where e₁ went plus y copies of where e₂ went, and two arrows fix the whole transformation.",
+            "The coordinates of a vector tell us how much of each basis vector it contains. A linear transformation preserves addition and scaling, so we can transform those basis contributions separately and add the results. That determines the result for every vector in the plane.",
           ),
           several(
               "For matrix multiplication y = A x, with x written as a column vector and more than one output row, which statements hold?",
@@ -790,10 +682,7 @@ export default function LinearAlgebraPrimerPage() {
           where its image points. Usually the two differ, because the matrix has
           both stretched the arrow and turned it.
         </p>
-        <p>
-          Which raises a question worth asking before any terminology arrives.
-          Are there directions this matrix stretches without turning at all?
-        </p>
+        <p>Are there arrows that this matrix changes only by a scale factor, keeping them on their original line?</p>
         <WorkedExample>
           <p>Try the arrow (1, 1).</p>
           <Equation>{"A·(1, 1) = (2·1 + 1·1,  1·1 + 2·1) = (3, 3)"}</Equation>
@@ -854,26 +743,11 @@ export default function LinearAlgebraPrimerPage() {
             shrunk to half, still pointing up, so this one matrix shows the
             first two rows of the table and its eigenvalues are 2 and 0.5.
           </p>
-          <p>
-            Load the Shear preset, entries 1, 1, 0 and 1, and e₁ comes back as
-            (1, 0). The horizontal axis is left exactly where it was, an
-            eigenvalue of 1, which is what the worked matrix did to (1, −1).
-            Now type the entries 1, 0, 0 and 0. That matrix sends e₂ to (0, 0),
-            so the vertical direction is collapsed onto the origin, an
-            eigenvalue of exactly 0, and since the basis images fix everything,
-            the whole plane is flattened onto the horizontal axis. Finally type
-            −1, 0, 0 and 1, which is a reflection across the vertical axis. It
-            sends e₁ to (−1, 0), the same line with the arrow reversed, an
-            eigenvalue of −1.
-          </p>
+          <p>Load the Shear preset with entries 1, 1, 0 and 1. It maps e₁ to (1, 0), preserving the horizontal direction and its length. That direction has eigenvalue 1, as the earlier matrix did for (1, −1).</p>
+<p>Next use entries 1, 0, 0 and 0. The matrix maps e₂ to (0, 0), giving the vertical direction eigenvalue 0. Every vector loses its vertical component, so the plane projects onto the horizontal axis.</p>
+<p>Finally use −1, 0, 0 and 1. This reflects across the vertical axis: e₁ becomes (−1, 0), reversing its direction along the same line. Its eigenvalue is −1.</p>
         </WorkedExample>
-        <p>
-          The negative case is the one that needs the earlier phrasing tightened.
-          An eigenvector is not quite a direction the matrix leaves pointing the
-          same way, it is a direction whose <em>line</em> the matrix preserves. A
-          negative eigenvalue flips the arrow end for end while leaving it on
-          that same line, which still counts.
-        </p>
+        <p>An eigenvector stays on the same line after a matrix transformation. Its eigenvalue gives the scale factor. A negative factor reverses the arrow, so preserving the line does not always mean preserving its original direction.</p>
         <p>
           Size and sign are read differently once the matrix comes from data
           rather than from a preset. On the PCA page every eigenvalue is an
@@ -899,7 +773,7 @@ export default function LinearAlgebraPrimerPage() {
               "Lengths are preserved",
             ],
             [0, 1, 2],
-            "Those three are the whole of it. Length is not among them, since scaling stretches along the axes and shearing turns a square into a leaning parallelogram, and both remain linear.",
+            "A linear transformation preserves vector addition and scalar multiplication, which also keeps the origin fixed. It can still stretch or shear the coordinates. Preserving these operations does not require preserving lengths.",
           ),
           choice(
             "The matrix sends (1, 1) to (3, 3). What changed and what did not?",
@@ -963,8 +837,9 @@ export default function LinearAlgebraPrimerPage() {
           </p>
         </>
         <p>
+
           Finding eigenvectors algebraically is a separate skill, and this primer
-          does not need it. Recognising what one <em>is</em> is enough for
+          does not need it. Recognizing what one <em>is</em> is enough for
           everything that follows.
         </p>
         <KeepInMind>
@@ -995,21 +870,9 @@ export default function LinearAlgebraPrimerPage() {
           greatest variation runs diagonally between their axes rather than along
           either of them.
         </p>
-        <p>
-          Principal component analysis builds a matrix describing how each pair
-          of features varies together, called a covariance matrix. That matrix
-          has eigenvectors, and they turn out to name directions the data varies
-          along independently, each eigenvalue saying how much variation lies
-          along its direction.
-        </p>
+        <p>Principal component analysis builds a covariance matrix describing how pairs of features vary together. Its eigenvectors give new coordinate axes, and each eigenvalue measures the variance along one of them. The resulting coordinates have zero covariance with each other. That does not generally make them statistically independent; other relationships can remain.</p>
         <InAModel>
-          <p>
-            So the eigenvectors provide a new set of axes chosen by the data
-            rather than by whoever collected it, and the eigenvalues rank them.
-            Keeping the few directions with the largest eigenvalues keeps most of
-            the variation while describing each example with fewer numbers, which
-            is the whole of what the PCA page does.
-          </p>
+          <p>The eigenvectors provide axes calculated from the observed data, and the eigenvalues rank their variances. For a chosen number of axes, keeping those with the largest eigenvalues retains as much variance as possible among orthogonal linear projections. Whether a small number retains most of the variance depends on how that variance is distributed across the axes.</p>
         </InAModel>
       </PrimerSection>
 
@@ -1018,23 +881,14 @@ export default function LinearAlgebraPrimerPage() {
           Everything in this primer reappears, in this order, across the pages
           that follow.
         </p>
-        <p>
-          Read down the table and the pieces chain into one picture of a model.
-          A dataset is a matrix whose rows are example vectors. A model&rsquo;s
-          parameters are a vector with one entry per feature. A prediction for
-          one example is the dot product of the two plus an offset, the line
-          from section 8. A layer of a network is a matrix that carries that
-          row to a new one, section 12. And principal component analysis takes
-          the eigenvectors of a matrix built from the dataset, section 18. Each
-          page that follows is one of those, said in its own vocabulary.
-        </p>
+        <p>A data matrix can store one example per row. A single-output linear model combines each example’s features with a weight vector and a bias. A fully connected layer uses several weight vectors to calculate several outputs, while PCA uses covariance eigenvectors to choose new coordinates. The same matrix notation describes these different operations, so we need to identify what its entries mean each time.</p>
         <NumberTable
           headings={["idea", "where it shows up"]}
           rows={[
             ["vector", "one example, a parameter set, a prediction, an embedding"],
             ["subtraction", "the difference between two examples"],
             ["length", "the size of a vector, or its distance from the origin"],
-            ["distance", "nearness between examples, or to a cluster centre"],
+            ["distance", "nearness between examples, or to a cluster center"],
             ["dot product", "a weighted combination of features"],
             ["matrix", "a dataset, or several weighted sums performed together"],
             ["transformation", "a layer mapping one representation to another"],
@@ -1042,18 +896,8 @@ export default function LinearAlgebraPrimerPage() {
           ]}
         />
         <KeepInMind>
-          <p>
-            That table gives a matrix two rather different jobs, and they are
-            worth keeping apart. A dataset stored as rows and columns is a
-            matrix, and so is an operation that transforms an input vector into
-            an output vector.
-          </p>
-          <p>
-            Both are grids of numbers and both are called matrices, though one is
-            data at rest and the other is a thing that acts. &ldquo;A dataset is
-            a matrix&rdquo; is true, and it does not follow that a dataset is a
-            transformation.
-          </p>
+          <p>A matrix can have two distinct roles. A data matrix stores observations in rows and columns. A transformation matrix describes an operation on vectors. Their shared rectangular layout does not give them the same interpretation.</p>
+          <p>The meaning comes from the entries and the operation being performed. Before multiplying a matrix by a vector, identify what each row and column represents and what the output is supposed to describe.</p>
         </KeepInMind>
       </PrimerSection>
 
@@ -1063,7 +907,7 @@ export default function LinearAlgebraPrimerPage() {
           trueFalse(
             "Some matrices have no real eigenvector at all.",
             true,
-            "A quarter-turn rotation turns every arrow in the plane by ninety degrees, so no nonzero real arrow ends up back on the line it started on, and the rotation preset in section 15’s box never lines up however far the arrow is swept. The rotation does have eigenvalues and eigenvectors in the complex numbers, which is a genuine and useful fact and entirely outside what this primer needs.",
+            "A quarter-turn rotation sends every nonzero real arrow off its original line. It therefore has no real eigenvector in the plane. The same matrix has eigenvectors over complex coordinates, but the arrows in this demonstration use real coordinates.",
           ),
           choice(
             "In A·v = λ·v, which candidate v is excluded?",
@@ -1085,23 +929,23 @@ export default function LinearAlgebraPrimerPage() {
               "The measured features, recovered in the order they were collected",
             ],
             [0, 1],
-            "When two features move together, height and weight say, the direction of greatest variation runs diagonally between their axes rather than along either, so the eigenvectors are new axes and not the measured ones, and each eigenvalue says how much variation lies along its direction, which is the ranking. Nothing guarantees the diagonal lines up with a feature, and nothing hands the features back in any order.",
+            "Eigenvectors give directions for the new coordinates, and each eigenvalue gives the variance along its direction. When measured features vary together, a principal direction can combine them. A direction may also align with a measured feature; the covariance matrix determines that choice.",
           ),
           choice(
-            "What does keeping only the directions with the largest eigenvalues achieve?",
+            "Why choose directions with the largest eigenvalues when reducing data to a fixed number of PCA coordinates?",
             [
-              "Most of the variation is kept while each example is described with fewer numbers",
+              "As much variance as possible is retained for the chosen number of coordinates",
               "The data is rotated without anything being lost at all",
               "The features carrying the largest values are kept and the rest dropped",
               "The remaining directions become perpendicular to each other",
             ],
             0,
-            "The eigenvalues say how much variation lies along each direction, so the few largest carry most of it, and that is the whole of what the PCA page does. The directions are not the measured features, which is why the one with the most variation along it can run diagonally between two axes.",
+            "The largest eigenvalues identify the directions that retain the most variance for a fixed number of coordinates. Whether those directions contain most of the total variance depends on the eigenvalues and how many directions we keep. The retained-variance share lets us inspect that choice.",
           ),
           trueFalse(
             "A dataset stored as rows and columns is a matrix, so a dataset is a transformation.",
             false,
-            "Both are grids of numbers and both are called matrices, though one is data at rest and the other is a thing that acts. The first half of that sentence is true and the second does not follow from it.",
+            "A data table records observations. A transformation matrix supplies coefficients for an operation. We can multiply a data table by a vector too, but the result depends on what its entries represent. The shared rectangular format does not turn stored observations into a fitted prediction rule.",
           ),
         ]}
       />
@@ -1174,7 +1018,7 @@ cosine of a and b 0.9923`,
           exercise(
             "Apply a matrix one weighted sum at a time",
             [
-              "Section 10 describes a matrix as one weighted sum per output. Build those sums directly for the worked matrix below. Multiply every row by the input vector, then add across the columns to get one answer per row.",
+              "A matrix returns one weighted sum per output. Build those sums for the supplied matrix by multiplying each row by the input coordinates, then adding across that row. Keep one answer for each row.",
               "Complete apply_by_rows using multiplication and np.sum before using the matrix multiplication operator. Send the six supplied arrows through it and print each result. Then compare your answers with NumPy's @ operator using np.allclose.",
               "Notice the basis vectors, which reveal the matrix's columns, and the two eigenvector directions from section 15. Those directions keep their orientation while other arrows can change direction. The final input is one the primer did not calculate.",
             ],
@@ -1296,7 +1140,7 @@ same answer True`,
             "Build a covariance matrix and find its main direction",
             [
               "Section 18 connects eigenvectors with the directions in which a dataset varies. Start with the five paired height and weight measurements below. Subtract each column's mean so the arrows describe deviations rather than positions far from the origin.",
-              "Multiply the transpose of that centred table by the table itself. Each entry then sums the products for one pair of columns. Divide by one fewer than the row count to get the sample covariance matrix. The diagonal measures variation within a column; the other entries describe how the columns vary together.",
+              "For this calculation, treat the five people as a sample of a larger group. Multiply the centered table’s transpose by the table itself to sum the paired column products, then divide by one fewer than the row count for sample covariance. Diagonal entries measure variation within a column; the other entries describe how columns vary together.",
               "Use np.linalg.eigh for the eigenvalue calculation. It returns values in ascending order and directions as columns. Choose the direction belonging to the largest value, report its share of the total, and check the eigenvector equation with np.allclose. For consistent printing, point the chosen direction toward increasing height by flipping the whole vector if its first entry is negative.",
             ],
             `import numpy as np

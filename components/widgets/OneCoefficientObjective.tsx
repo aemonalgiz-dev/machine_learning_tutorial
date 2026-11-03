@@ -106,7 +106,7 @@ function Panel({
         <text x={PAD.left + PLOT.width / 2} y={VIEW.height - 4} textAnchor="middle" className="fill-slate-500 text-[10px] dark:fill-slate-400">slope β</text>
       </svg>
       <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-        Grey dashes are RSS alone, coloured dashes the penalty, solid their sum. The dot is the lowest point of the sum.
+        Gray dashes are RSS alone, colored dashes the penalty, solid their sum. The dot is the lowest point of the sum.
       </p>
     </div>
   );

@@ -23,9 +23,9 @@ import { CnnTrainingCurves } from "@/components/widgets/CnnTrainingCurves";
 import { CnnUnseenKind } from "@/components/widgets/CnnUnseenKind";
 
 export const metadata: Metadata = {
-  title: "Convolutional Networks · oop_ml",
+  title: "Convolutional Networks · Perceptron Lab",
   description:
-    "Recognising an object usually takes more than finding one edge. A convolutional network combines learned local patterns through layers, using the resulting features to make a prediction about the image.",
+    "Convolutional networks combine local image patterns through successive layers. Training learns which combinations help predict an image's label, with later representations drawing on larger regions of the input.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function ConvolutionalNetworksPage() {
       playgroundTitle="Follow an image from pixels to class scores"
       playgroundIntro="Follow a picture through its feature maps to its class scores. Compare the trained model with the alternatives before drawing conclusions about any one layer."
       title="Convolutional Networks"
-      tagline={"Recognising an object usually takes more than finding one edge. A convolutional network combines learned local patterns through layers, using the resulting features to make a prediction about the image."}
+      tagline={"Convolutional networks combine local image patterns through successive layers. Training learns which combinations help predict an image's label, with later representations drawing on larger regions of the input."}
       prerequisites={
         <>
           The individual layers have their own worked examples. The{" "}
@@ -79,16 +79,14 @@ export default function ConvolutionalNetworksPage() {
           content: (<>
 <>
               <SubSection title="1. Four kinds of small picture">
-                <p>
-                  Every picture on this page is sixteen pixels on a side, one channel of brightness, and holds one of four shapes, a cross, a square outline, a filled disc or a diagonal bar. Each shape is drawn at a random position, at a random size within a range, at a random brightness against a random background, with a little noise on every pixel, so that no single pixel can give the answer away.
-                </p>
+                <p>Each picture is sixteen pixels on a side with one brightness channel. It contains a cross, square outline, filled disc or diagonal bar. Position, size, brightness and background vary, with added pixel noise. We want the network to recognize a shape across those variations rather than depend on one fixed bright location.</p>
                 <p>
                   The network learns from 240 of them, sixty of each kind, and is scored on another 240 it never sees while training. The box at the top of the page holds the first held-out picture of each kind.
                 </p>
                 <NumberTable
                   headings={["kind", "how it is drawn"]}
                   rows={[
-                    ["cross", "two bars two pixels thick through a common centre, six to nine pixels across"],
+                    ["cross", "two bars two pixels thick through a common center, six to nine pixels across"],
                     ["square outline", "one pixel thick, six to ten pixels on a side, almost nothing inside"],
                     ["filled disc", "a radius between 2.6 and 4.6 pixels, the most lit pixels of the four"],
                     ["diagonal bar", "seven to eleven steps long, rising or falling, two pixels wide"],
@@ -96,20 +94,12 @@ export default function ConvolutionalNetworksPage() {
                   caption="The ranges are the ones the pictures are drawn from. A shape is always placed at least one pixel in from the edge."
                 />
                 <KeepInMind>
-                  The same kind appears at many positions and sizes, so the
-                  held-out half holds crosses at places and sizes the
-                  training half never had exactly, and a network is scored on
-                  finding the shape wherever it was drawn.
-                </KeepInMind>
+                  Training and held-out pictures are separate draws from the same generator. Both contain varied positions and sizes. The held-out results measure recognition on new draws; exact combinations can still overlap by chance, and this does not test every possible position, size or real-world image.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. What a dense network makes of them">
-                <p>
-                  The obvious first attempt reads the 256 pixels as a row and hands them to dense layers. A cross in the top left corner and the same cross in the bottom right share no lit pixel, so to a layer that reads a row they are two unrelated patterns, and the network has to learn every kind again at every position it might appear.
-                </p>
-                <p>
-                  Sixty pictures of each kind is nowhere near enough for that. I built a dense network of about the same size as the convolutional one on this page, 256 pixels to 9 units to 16 to 4 scores, 2541 parameters, and trained it with the same loop on the same pictures.
-                </p>
+                <p>One starting point is to arrange the 256 pixels in a row and use dense layers. Each dense weight is attached to a particular position, so moving a cross changes which weights receive its bright pixels. A dense network can learn from translated examples, but this architecture does not automatically reuse the same local detector at every position. Convolution makes that reuse explicit.</p>
+                <p>For comparison, we train a dense network with roughly the same parameter count: 256 pixel inputs, hidden widths nine and sixteen, then four output scores, giving 2,541 parameters. It uses the same loop and the same training pictures as the convolutional model. This lets us compare the two architectures on this small controlled dataset, rather than assume that either must perform better.</p>
                 <NumberTable
                   headings={["dense layers on the raw pixels", "seed 0", "seed 1", "seed 2"]}
                   rows={[
@@ -123,11 +113,8 @@ export default function ConvolutionalNetworksPage() {
                   This baseline correctly names about two thirds of the held-out pictures. It also has errors on the training pictures, and a one-pixel shift changes its answer on about a third of the images. We now have specific things to investigate: fitting the shapes, predicting new examples, and responding to small movements.
                 </p>
                 <KeepInMind>
-                  A dense layer is told nothing about which pixels are
-                  neighbours or that a shape means the same thing anywhere,
-                  so it has to learn both from the examples, and on 240
-                  pictures it cannot.
-                </KeepInMind>
+
+                  The dense baseline does not enforce local pixel neighborhoods or shared detectors. Its measured fit and held-out performance are weaker under this training setup. That does not establish that every dense network must fail with 240 examples.</KeepInMind>
               </SubSection>
 
               <SubSection title="3. The assembly, layer by layer">
@@ -182,12 +169,13 @@ export default function ConvolutionalNetworksPage() {
 
               <SubSection title="4. One number of the first map, by hand">
                 <p>
+
                   Every number in the maps at the top of the page comes from
                   the same small sum. Take the held-out cross, and the one
                   place where any first-layer filter answers most strongly,
                   which is the third filter at row 11, column 11, counting
                   from zero at the top left. The filter lays its nine weights
-                  over the three by three patch centred there, multiplies each
+                  over the three by three patch centered there, multiplies each
                   weight by the pixel beneath it, adds the nine products and
                   the filter&rsquo;s bias, and keeps the result if it is above
                   zero.
@@ -207,13 +195,12 @@ export default function ConvolutionalNetworksPage() {
                       ["products, bottom row", "1.0316", "−0.2001", "−0.1214"],
                     ]}
                   />
-                  <p>
-                    The nine products add to 3.6014, the bias is −0.9630, and
-                    the score is 2.6384. It is above zero, so the activation function keeps it
-                    unchanged. The pooling window this position shares holds
-                    0.5139, 2.3726, 0 and 2.6384, and the pooled map keeps
-                    2.6384 for all four.
-                  </p>
+                  <p>The weighted products give a sum of 3.6014. Add the filter bias to obtain its score:</p>
+<Equation>{`score = 3.6014 + (−0.9630) = 2.6384
+ReLU output = max(0, 2.6384) = 2.6384
+pooling window = [0.5139, 2.3726, 0, 2.6384]
+pooled output = 2.6384`}</Equation>
+<p>ReLU keeps the positive score unchanged. Max pooling then retains the largest of the four activated values.</p>
                 </WorkedExample>
                 <p>
                   The weights are large on the left column and small or
@@ -223,10 +210,7 @@ export default function ConvolutionalNetworksPage() {
                   thick, covers the left two columns of the patch.
                 </p>
                 <KeepInMind>
-                  Every map on the page is this sum repeated at every
-                  position with the same nine weights, and every pooled
-                  number is the largest of four such sums.
-                </KeepInMind>
+                  Each first-layer response repeats this weighted sum and activation at another position. Later convolutions use the same principle but also sum over their input channels. Max pooling selects among activated responses, not necessarily the raw weighted sums.</KeepInMind>
               </SubSection>
             </>
 </>),
@@ -236,13 +220,7 @@ export default function ConvolutionalNetworksPage() {
           content: (
             <>
               <SubSection title="5. The loop, and the curve it draws">
-                <p>
-                  The network is trained with the plain loop from the training
-                  page, 40 passes over the 240 training pictures in shuffled
-                  batches of 16 with a step size of 0.1, every layer corrected
-                  at once from the loss at the top. After each pass I read how
-                  many pictures it names correctly in both halves.
-                </p>
+                <p>Training makes forty passes through the 240 training pictures, using shuffled batches of sixteen and a learning rate of 0.1. Backpropagation calculates each layer’s gradients from the batch loss before the parameters are updated. After every pass, the recorded results include accuracy on both the training and held-out sets.</p>
                 <CnnTrainingCurves />
                 <p>
                   At weight seed 0 the loss over the first pass is 1.3691,
@@ -255,10 +233,7 @@ export default function ConvolutionalNetworksPage() {
                   0.971.
                 </p>
                 <KeepInMind>
-                  A loss that starts near the logarithm of the number of kinds
-                  is a network that has not yet preferred any of them, which
-                  is a quick check that the starting weights are small enough.
-                </KeepInMind>
+                  Uniform predictions over four classes give a cross-entropy loss equal to the natural logarithm of four. A loss near that value is a useful reference, but does not prove that every prediction is uniform or that the initial weights have an appropriate scale. Inspect the outputs as well as the mean loss.</KeepInMind>
               </SubSection>
 
               <SubSection title="6. Three starts, three networks">
@@ -287,30 +262,11 @@ export default function ConvolutionalNetworksPage() {
                   its loss kept falling.
                 </p>
                 <KeepInMind>
-                  A difference smaller than the spread between seeds of the
-                  same arrangement is not evidence about the arrangement.
-                  Every comparison in Parts 5 and 6 is read against that
-                  spread.
-                </KeepInMind>
+                  The spread across these three seeds gives context for architecture comparisons. Small differences may be sensitive to initialization. Three runs are not enough to establish a sharp cutoff below which architecture effects are impossible or above which they are certain.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. Perfect on the pictures it saw">
-                <p>
-                  All three networks name every training picture by the end,
-                  and none of them names every held-out one. After the
-                  training half is perfect, the loss keeps falling, from
-                  0.0347 at pass 33 to 0.0190 at pass 40 at seed 0, which is
-                  the network growing more certain about pictures it already
-                  names rather than learning anything new about the kinds.
-                  The{" "}
-                  <Link href="/concepts/training-a-network" className={link}>
-                    training page
-                  </Link>{" "}
-                  covers the two curves and when to stop; what matters here
-                  is that 240 pictures are enough for this network to
-                  memorise, so the held-out half is the only score on the
-                  page that measures anything.
-                </p>
+                <p>All three runs correctly classify every training picture by the end, but still make held-out errors. After seed 0 first reaches perfect training accuracy, its reported loss falls from 0.0347 at pass 33 to 0.0190 at pass 40. Accuracy can stay fixed while cross-entropy changes, because the loss also depends on the probabilities assigned to labels. That change alone does not tell us whether useful new features are being learned. The <Link href="/concepts/training-a-network" className={link}>training page</Link> explains training and validation curves. If these held-out readings guide checkpoint or architecture selection, a further test set is needed for an independent final estimate.</p>
                 <KeepInMind>
                   A training accuracy of 1.000 says the network has enough
                   parameters to fit these pictures. Every arrangement on the
@@ -326,22 +282,9 @@ export default function ConvolutionalNetworksPage() {
           content: (
             <>
               <SubSection title="8. The four filters beside the hand-designed grid">
-                <p>
-                  The usual account is that the first layer of a trained
-                  convolutional network learns edge detectors, the same kind
-                  of grid the{" "}
-                  <Link href="/concepts/filters-and-edges" className={link}>
-                    filters and edges
-                  </Link>{" "}
-                  page builds by hand. To test it I took the Sobel grid from
-                  that page, turned it in eighths of a turn so that there is
-                  one for every direction an edge can face, and asked which of
-                  the eight each trained filter is closest to in shape.
-                </p>
+                <p>First-layer filters sometimes resemble edge detectors. The <Link href="/concepts/filters-and-edges" className={link}>filters and edges page</Link> builds such grids by hand. Here the widget compares each trained filter with eight directional Sobel-style templates, then compares those similarities with a random-filter baseline.</p>
                 <CnnFilterBoard />
-                <p>
-                  Closeness is the cosine between the two grids of nine numbers after each filter&rsquo;s own mean is taken off, which is 1 for the same shape and 0 for an unrelated one. At seed 0 the four filters come out at 0.675, 0.543, 0.814 and 0.794. That sounds like edges until it is set beside what nine random numbers manage, since with eight directions to choose from one of them is always fairly close.
-                </p>
+                <p>The comparison subtracts each grid’s mean, flattens its nine entries and measures their cosine similarity. A value of one means the centered grids point in the same direction, while zero means they are orthogonal; zero does not establish statistical independence or the absence of every relationship. At seed 0 the best-template similarities are 0.675, 0.543, 0.814 and 0.794. Taking the best of eight templates can also give sizable similarities for random weights, so we need the baseline below.</p>
                 <p>
                   Over 2000 random grids the closest Sobel grid is at a median of 0.466, and one draw in ten comes closer than 0.724.
                 </p>
@@ -353,13 +296,9 @@ export default function ConvolutionalNetworksPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="9. The most edge-like filter was drawn that way">
-                <p>
-                  The board also shows each filter as it was before training, and that changes the reading. The fourth filter, the one closest to an edge that is brighter to the lower right, was already at 0.754 when its weights were drawn, and training moved its nine weights by 0.09 of their starting length. It looks like an edge detector because the random draw put one there.
-                </p>
-                <p>
-                  The third filter did move, by 1.86 times its starting length, and its closeness rose from 0.594 to 0.814, so of the two edge-like filters one was learned and one was inherited.
-                </p>
+              <SubSection title="9. A filter that started edge-like" id="9-the-most-edge-like-filter-was-drawn-that-way">
+                <p>The board also shows the starting weights. The fourth filter’s best-template similarity was already 0.754 before training and reaches 0.794 afterward. Its weight change has length 0.09 times its starting norm. Much of its edge-like orientation was therefore present initially, although training still changed it.</p>
+                <p>The third filter changes more: its weight displacement is 1.86 times its starting norm, and its best-template similarity rises from 0.594 to 0.814. Comparing before and after separates the initial resemblance from the change observed during training, without classifying the resulting filter as wholly inherited or wholly learned.</p>
                 <NumberTable
                   headings={["seed 0", "closest direction", "closeness at start", "trained", "moved"]}
                   rows={[
@@ -371,35 +310,17 @@ export default function ConvolutionalNetworksPage() {
                   caption="Moved is the length of the change in the nine weights over the length of the starting weights."
                 />
                 <KeepInMind>
-                  A trained filter that resembles an edge grid may have
-                  started that way. Comparing it with its own starting weights
-                  is the only way to tell which.
-                </KeepInMind>
+                  Compare trained filters with their starting values before attributing a visual resemblance to learning. The similarity score, weight changes and actual responses provide complementary information.</KeepInMind>
               </SubSection>
 
               <SubSection title="10. Two filters that barely trained">
-                <p>
-                  The second and fourth filters at seed 0 hardly moved, and the reason is the activation function after the convolution, which passes a score through when it is above zero and answers zero otherwise. Where it answers zero it also passes no slope back, so a filter whose scores are below zero almost everywhere receives almost no correction.
-                </p>
-                <p>
-                  Over every position of every held-out picture, the second filter answers above zero on 0.08% of them and the fourth on 2.3%. Their weights sum below zero, to −3.395 for the second and −0.738 for the fourth, and on pictures that are brighter than zero nearly everywhere that is enough to keep them quiet from the first step.
-                </p>
+                <p>These convolutions use ReLU: positive scores pass through and nonpositive scores become zero. The backward derivative is zero on the nonpositive branch under this SDK’s convention. A filter active at very few positions therefore has few routes for the loss gradient on those inputs. The board measures that activity as well as weight movement.</p>
+                <p>After training at seed 0, the second filter is positive at 0.08% of held-out positions and the fourth at 2.3%. Their weight sums are −3.395 and −0.738. On a uniformly positive patch, a negative weight sum pushes the weighted contribution downward, but nonuniform pixels and the bias also matter. These final measurements do not establish that every score was negative from the first training step.</p>
                 <InAModel title="Across the three seeds">
-                  <p>
-                    Counting a filter as nearly silent when it answers above
-                    zero on fewer than one position in twenty, seed 0 has two
-                    of its four first-layer filters in that state, seed 1 has
-                    none and seed 2 has one. The network at seed 0 names 0.971
-                    of the held-out pictures with half its first layer
-                    effectively switched off, and it is the best of the three.
-                  </p>
+                  <p>Using fewer than five percent positive positions as a nearly-silent threshold, seed 0 has two such first-layer filters, seed 1 has none and seed 2 has one. Seed 0 nevertheless has the best held-out accuracy of these three runs, 0.971. Rarely active is not identical to disabled: even an infrequent response can affect later layers.</p>
                 </InAModel>
                 <KeepInMind>
-                  A unit whose activation function answers zero on everything it sees stops
-                  learning, and nothing in the loss says so. Four filters is
-                  few enough that losing two is visible here; in a layer of
-                  hundreds it would pass unnoticed.
-                </KeepInMind>
+                  A ReLU filter with nonpositive scores on all its current inputs receives no data-loss gradient through those activations. In plain gradient descent, its own parameters then remain unchanged on that pass. Changing earlier inputs, optimizer state or additional objective terms can alter the situation in other networks. Activity measurements are useful alongside the loss, which does not identify the inactive filter directly.</KeepInMind>
               </SubSection>
 
               <SubSection title="11. The learned filters answer to brightness too">
@@ -425,12 +346,12 @@ export default function ConvolutionalNetworksPage() {
             trueFalse(
               "A loss of 1.3691 over the first pass is about what a network spreading its probability evenly over the four kinds would report.",
               true,
-              "The natural logarithm of 4 is 1.3863, and a loss starting near it says the network has not yet preferred any kind. It is a quick check that the starting weights are small enough, and after that first pass the network names 0.346 of the held-out pictures.",
+              "Uniform probabilities across four classes give cross-entropy about 1.3863. The first-pass mean of 1.3691 is close to that useful reference. A similar mean alone does not prove every prediction is uniform or that initialization has the right scale: confident correct and incorrect predictions can also average to it. Inspect probabilities and later training behavior too.",
             ),
             trueFalse(
               "The seed that finished with the lowest loss on the training half also gave the best held-out score.",
               false,
-              "The lowest final loss belongs to seed 2 and the best held-out score to seed 0, so the training loss did not order them. All three name every training picture by the end, which is why a training accuracy of 1.000 cannot tell the arrangements apart, and why a difference smaller than the 0.05 spread between seeds is not evidence about an arrangement.",
+              "Seed 2 has the lowest final training loss, while seed 0 has the best held-out accuracy in this comparison. Training loss therefore does not rank these runs by held-out accuracy. The variation across seeds also warns against treating a small single-run difference as a reliable architectural advantage. More repeats or an appropriate uncertainty analysis would strengthen that comparison.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "the network | seed 0 | seed 1 | seed 2\nheld-out accuracy after pass 40 | 0.971 | 0.921 | 0.967\nbest held-out accuracy, and the pass | 0.971, 36 | 0.938, 27 | 0.967, 25\ntraining-half accuracy after pass 40 | 1.000 | 1.000 | 1.000\nloss over pass 40 | 0.0190 | 0.0133 | 0.0122"
@@ -451,7 +372,7 @@ export default function ConvolutionalNetworksPage() {
             trueFalse(
               "Of the two edge-like filters at seed 0, one was learned and the other was already edge-like when its weights were drawn.",
               true,
-              "The fourth filter was at 0.754 when its weights were drawn, and training moved them by 0.09 of their starting length, so it resembles an edge detector because the random draw put one there. The third filter did move, by 1.86 times its starting length, and rose from 0.594 to 0.814. Comparing a trained filter against its own starting weights is the only way to tell the two apart.",
+              "The fourth filter already resembled an edge kernel at initialization and changed little during training. The third began less similar and changed substantially before reaching its final resemblance. Comparing each filter with its own initial weights helps separate inherited structure from training-induced change. Resemblance alone still does not establish how the filter is used on real inputs.",
               {
                 "description": "The table compares each filter with its closest edge template. Relative movement is the size of its weight change divided by its initial weight length. Use these observations to judge the statement.",
                 "data": "seed 0 | closest direction | closeness at start | trained | moved\nfilter 1 | brighter below | 0.309 | 0.675 | 1.33\nfilter 2 | brighter to the right | 0.552 | 0.543 | 0.01\nfilter 3 | brighter to the upper left | 0.594 | 0.814 | 1.86\nfilter 4 | brighter to the lower right | 0.754 | 0.794 | 0.09"
@@ -479,21 +400,11 @@ export default function ConvolutionalNetworksPage() {
           content: (
             <>
               <SubSection title="12. The maps at each depth">
-                <p>
-                  The box at the top of the page carries one held-out picture of each kind through the network. The first convolution gives four maps the size of the picture, one per filter, bright where that filter&rsquo;s pattern is. Pooling halves each to eight by eight, keeping the largest value in each window, so a bright answer survives even if it moved within its window.
-                </p>
+                <p>The top activity carries one held-out picture of each kind through the network. The first convolution produces four spatial response maps. The first max-pooling stage halves their sides, retaining the maximum in each two-by-two window. Moving a response can leave a pooled value unchanged when the window’s maximum remains the same, but arbitrary small shifts need not do so.</p>
                 <p>
                   The second convolution reads all four pooled maps at once through its own three by three windows, 36 weights and a bias per filter, and gives eight maps, and the second pooling halves those to four by four.
                 </p>
-                <p>
-                  On the cross, the maps after the first convolution follow
-                  the bars, and the two nearly silent filters from section 10
-                  are dark almost everywhere. By the second pooling each of the eight
-                  maps is sixteen numbers, and no longer looks like the
-                  picture at all. What it holds is where in the picture, to
-                  within four pixels, each of eight second-layer patterns was
-                  found.
-                </p>
+                <p>On the cross, the first maps respond along parts of the bars, while the two nearly silent filters are dark at most positions. After the second pooling, each of eight channels has a four-by-four map. Neighboring output positions are spaced four input pixels apart, but each can depend on a ten-by-ten input region. That sampling spacing is not a guarantee of locating a pattern to within four pixels.</p>
                 <KeepInMind>
                   The second layer does not read pixels. It reads the first
                   layer&rsquo;s answers, so its patterns are arrangements of
@@ -523,18 +434,9 @@ export default function ConvolutionalNetworksPage() {
                   ]}
                   caption="The probabilities the network gives the first held-out picture of each kind, at seed 0."
                 />
-                <p>
-                  Three of the four are named with near certainty. The disc
-                  is named correctly by a margin of 0.048, with nearly half the
-                  probability on a cross, and the maps in the box show why a
-                  small filled disc and the middle of a thick cross are
-                  similar things to a filter three pixels wide.
-                </p>
+                <p>{"Three of these four examples receive strongly concentrated predicted probabilities. The disc is also classified correctly, but its margin is only 0.048 and almost half the probability is assigned to a cross. The displayed maps let us compare the local responses to a small filled disc and the middle of a thick cross. A filter three pixels wide sees only those local patches, rather than the whole shape at once."}</p>
                 <KeepInMind>
-                  The answer is decided by sixteen numbers, and everything
-                  before them exists to make those sixteen say what kind of
-                  shape the picture holds and nothing about where it was.
-                </KeepInMind>
+                  The final decision uses a sixteen-value learned representation. Training encourages it to distinguish the four labels, but does not require it to discard every trace of position. Later shift measurements show that location can still affect the prediction.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. How far one unit sees, from the geometry">
@@ -553,7 +455,7 @@ export default function ConvolutionalNetworksPage() {
                   expressionHeading="layer, field, spacing"
                   reasonHeading="what changed"
                   rows={[
-                    { expression: "a pixel          1    1", reason: "one pixel sees itself, and neighbouring pixels are one apart." },
+                    { expression: "a pixel          1    1", reason: "one pixel sees itself, and neighboring pixels are one apart." },
                     { expression: "convolution      3    1", reason: "a window of 3 over inputs one apart adds 2. The stride is 1, so the spacing stays." },
                     { expression: "pooling          4    2", reason: "a window of 2 over inputs one apart adds 1, and the stride of 2 doubles the spacing." },
                     { expression: "convolution      8    2", reason: "a window of 3 over inputs two apart adds 4." },
@@ -562,30 +464,14 @@ export default function ConvolutionalNetworksPage() {
                   ]}
                 />
                 <KeepInMind>
-                  After two rounds a single number sees ten pixels by ten, and
-                  the largest square outline in the collection is ten pixels
-                  on a side, so the last maps are the first place where one
-                  unit can take in a whole shape.
-                </KeepInMind>
+                  The final pooled units have nominal ten-by-ten receptive fields. Such a region can cover many generated shapes when suitably aligned; smaller shapes may already fit earlier fields, and some larger or differently aligned shapes extend beyond one unit’s region. The dense layer can combine responses from the whole map.</KeepInMind>
               </SubSection>
 
               <SubSection title="15. Checked by brightening every pixel">
-                <p>
-                  The geometry says which pixels a unit could depend on. To
-                  check it I brightened each of the 256 pixels of the held-out
-                  cross by 0.5, one at a time, and recorded which of them
-                  moved a chosen unit at all. The drawing shows the units
-                  stacked over the middle of the picture, one at each depth,
-                  and the box at the top of the page does the same for any
-                  unit you click.
-                </p>
+                <p>The geometry gives the region that can affect a unit. The widget checks finite sensitivity by adding 0.5 to each input pixel separately and recording whether the selected response changes. It shows one unit at each depth near the image center. Clicking another unit in the top activity runs the same comparison there.</p>
                 <CnnFieldGrowth />
-                <p>
-                  No pixel outside a window ever moved its unit, at any depth. Inside, the counts are 9 of 9, 14 of 16, 63 of 64 and 92 of 100. The shortfall is the pooling and the activation function. A maximum passes on only the largest value in its window, so a pixel that feeds only a losing position does not reach the unit, and a pixel that feeds only a unit whose activation function answered zero does not either.
-                </p>
-                <p>
-                  For the unit in the corner of the last maps the window runs from three pixels outside the picture to six inside, so 49 of its 100 pixels exist and the rest are the padding&rsquo;s zeros; 45 of the 49 moved it.
-                </p>
+                <p>No perturbed pixel outside the geometric field changes the selected response in these measurements. Inside the fields, the changed counts are 9 of 9, 14 of 16, 63 of 64 and 92 of 100. ReLU and max-pooling choices can block contributions on a given input, while cancellations or a perturbation too small to change the selected path can also leave a value unchanged. Because the perturbation is finite, it can sometimes change which ReLU branch or pooling winner is used.</p>
+                <p>For the selected corner unit in the last maps, the nominal field extends outside the picture. Forty-nine of its hundred positions are real pixels and the rest are padding zeros. Perturbing forty-five of those forty-nine pixels changes its measured response in this example.</p>
                 <KeepInMind>
                   The geometry gives the most a unit can see. What it actually
                   responds to, on a given picture, is a subset, and the subset
@@ -616,10 +502,7 @@ export default function ConvolutionalNetworksPage() {
                   </p>
                 </>
                 <KeepInMind>
-                  Depth widens the view cheaply because each layer reuses
-                  what the one beneath found, and pooling makes it widen
-                  faster by spreading each layer&rsquo;s inputs further apart.
-                </KeepInMind>
+                  Here the small-window stack reaches a ten-pixel field with fewer convolution parameters than the illustrated large-kernel alternative. Pooling increases the spacing between later inputs, so later windows span more original pixels. The tradeoffs include lower spatial resolution and additional nonlinear operations.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -629,14 +512,7 @@ export default function ConvolutionalNetworksPage() {
           content: (
             <>
               <SubSection title="17. What removing pooling changes besides pooling">
-                <p>
-                  Taking the two poolings out leaves both convolutions reading
-                  and answering at full size, so the last maps are eight of
-                  sixteen by sixteen and the flattening hands the dense layer
-                  2048 numbers instead of 128. No arrangement removes pooling
-                  and leaves everything else as it was, since the pooling is
-                  what decides that width.
-                </p>
+                <p>Removing the two pooling stages without adding another spatial reduction leaves eight sixteen-by-sixteen final maps. Flattening then produces 2,048 values rather than 128, so the dense layer needs a different input width. We could introduce another reduction, such as strided convolution, but that would be a different comparison. The variant here simply removes pooling and adjusts the dense input size.</p>
                 <NumberTable
                   headings={["", "the network", "pooling taken away"]}
                   rows={[
@@ -669,30 +545,14 @@ export default function ConvolutionalNetworksPage() {
                   every seed.
                 </p>
                 <CnnPartsBoard variants={["reference", "without_pooling"]} />
-                <p>
-                  The held-out scores are 0.875, 0.821 and 0.817 against
-                  0.971, 0.921 and 0.967. The gap, between 0.096 and 0.150 at
-                  matching seeds, is larger than the spread of either
-                  arrangement across its own seeds, so it is a difference in
-                  the arrangement. The larger network fitted the training half
-                  just as completely and carried less of it over to pictures
-                  it had not seen.
-                </p>
+                <p>The no-pooling held-out scores are 0.875, 0.821 and 0.817, compared with 0.971, 0.921 and 0.967 for the reference. The matched-seed gaps range from 0.096 to 0.150 and exceed each variant’s observed three-seed range. This is consistent evidence for a difference under this setup, not a significance test or proof of a single cause. Both variants fit the training labels completely, while their generalization differs.</p>
                 <KeepInMind>
                   Pooling helped in this experiment. It also reduced the size of the dense layer, leaving fewer parameters for the 240 training images to constrain. These measurements do not separate that benefit from pooling&apos;s other effects.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. The textbook claim, measured on moved pictures">
-                <p>
-                  The reason usually given for pooling is that it makes a
-                  network indifferent to where a pattern sits, within a
-                  window. To test that I moved every held-out picture one, two
-                  and three pixels right, left, down and up, keeping only the
-                  moves that left the whole shape inside the frame and filling
-                  the strip left behind from the picture&rsquo;s own edge, and
-                  counted how often the network&rsquo;s answer changed.
-                </p>
+                <p>Pooling may reduce sensitivity to position changes, but it does not enforce general shift invariance. The widget tests this by moving held-out pictures one, two and three pixels in each cardinal direction. It keeps only moves that leave the shape inside the frame, fills the exposed strip using the image edge and records how often the predicted class changes.</p>
                 <CnnShiftChart variants={["reference", "without_pooling"]} />
                 <NumberTable
                   headings={["calls changed", "seed 0", "seed 1", "seed 2"]}
@@ -713,25 +573,11 @@ export default function ConvolutionalNetworksPage() {
                   before the move and 0.939 after it.
                 </p>
                 <KeepInMind>
-                  The textbook claim that pooling makes a network indifferent
-                  to small shifts did not hold at this scale. Pooling made the
-                  network less sensitive to a move of one pixel, and still one
-                  answer in every nine to eighteen changed.
-                </KeepInMind>
+                  In these runs, one-pixel shifts change between 5.5 and 11.5 percent of the reference network’s predictions. That is less than for the no-pooling variant, but still demonstrates shift sensitivity. These controlled comparisons change several downstream properties, including the dense layer’s width.</KeepInMind>
               </SubSection>
 
               <SubSection title="20. Why a two by two maximum cannot promise it">
-                <p>
-                  A maximum over a window is unchanged by a move only if the
-                  largest value stays inside the same window. The windows are
-                  fixed to the grid, two pixels wide, so a move of one pixel
-                  carries half the positions across a window boundary, and
-                  wherever the winner crosses, the pooled value changes. After
-                  two poolings the grid of windows is four pixels wide, and
-                  the dense layer that reads the result gives each of the 128
-                  numbers its own weights, so it is not indifferent to which
-                  window a pattern landed in at all.
-                </p>
+                <p>A window maximum is unchanged only when the changed window still has the same maximum value. Staying within one window is not sufficient if other values or filter responses also change. With fixed two-pixel windows, half of the input positions lie immediately beside a sampling boundary. Two pooling stages give a final grid spaced four original pixels apart. The dense layer assigns separate weights to those positions, so shifted features can change the predicted class.</p>
                 <WhyThisWorks title="Why a move of two is not safer than a move of one">
                   <p>
                     A move of two pixels lines up with the first pooling&rsquo;s
@@ -745,11 +591,7 @@ export default function ConvolutionalNetworksPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  Pooling gives a little tolerance inside each window and none
-                  across windows, and the dense layer at the end sees exactly
-                  which window everything is in. Azulay and Weiss found the
-                  same shortfall in networks thousands of times this size.
-                </KeepInMind>
+                  This network reduces some shift sensitivity without eliminating it. Pooling boundaries, padding and the position-dependent dense readout all matter. Azulay and Weiss also investigate translation sensitivity in larger image classifiers.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -777,7 +619,7 @@ export default function ConvolutionalNetworksPage() {
                               "A smaller network, since the poolings were holding weights",
                             ],
               0,
-              "The gap at matching seeds runs from 0.096 to 0.150, larger than the spread of either arrangement across its own seeds, so it is a difference in the arrangement. The network without pooling still names every training picture. It also carries 13.4 times the parameters and 3.9 times the arithmetic, because removing the pooling removes the shrinking that kept the dense layer small, so the measurement carries both at once.",
+              "The matched-seed results favor the pooled arrangement in this experiment. Removing pooling also increases parameter count and counted multiplications, because the dense layer receives a larger flattened representation. This comparison therefore changes several properties at once. It measures the complete arrangements; it does not isolate one universal effect of pooling.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "                         seed 0   seed 1   seed 2\nheld-out, with pooling    0.971    0.921    0.967\nheld-out, without pooling 0.875    0.821    0.817\n\nBoth arrangements reach training accuracy 1.000.\nParameters: with pooling 2,468; without pooling 33,188.\nMultiply counts: with pooling 29,760; without pooling 115,776."
@@ -856,34 +698,13 @@ export default function ConvolutionalNetworksPage() {
                   ]}
                   caption="Multiplications are counted as one per weight per position it is used at. Pooling compares and flattening rearranges, and neither is counted."
                 />
-                <p>
-                  The network and the dense one hold nearly the same number of
-                  weights, and the network does 11.8 times as much arithmetic
-                  on each picture, 9,216 multiplications in the first
-                  convolution and 18,432 in the second against 2,048 in its
-                  dense layer. That arithmetic is where the held-out accuracy
-                  came from. The training chart in section 5 prints how long
-                  the training took on the machine that answered, which moves
-                  from run to run while these counts do not.
-                </p>
+                <p>The reference CNN and dense baseline have similar parameter counts, but the CNN performs 11.8 times as many counted weighted multiplications per image. Its first and second convolutions account for 9,216 and 18,432, followed by 2,048 in the hidden dense layer and the output layer’s work. More arithmetic alone does not explain higher accuracy; the architecture and learned transformations differ. The training chart reports elapsed time separately because runtime also depends on the machine and implementation.</p>
                 <KeepInMind>
-                  Sharing weights across positions is why the network holds
-                  fewer parameters than the dense one and still does 11.8
-                  times its arithmetic, and on a larger picture the
-                  arithmetic would grow with the area while the 336
-                  convolution weights stayed as they are.
-                </KeepInMind>
+                  Convolution reuses each weight at many positions, so parameter count and operation count differ. The two convolution layers have 336 parameters including biases. With their kernel and channel counts fixed, a larger image increases their spatial work while those parameter counts stay fixed. The final dense layer would need separate consideration if its flattened input changed.</KeepInMind>
               </SubSection>
 
               <SubSection title="23. What the second round contributes">
-                <p>
-                  One more arrangement asks what the second round of convolve
-                  and pool adds. Keeping only the first round leaves four maps
-                  of eight by eight, 256 numbers, for the dense layer, which
-                  now holds 4112 weights, so the network with one round has
-                  more parameters than the network with two, 4220 against
-                  2468.
-                </p>
+                <p>The one-round variant retains four eight-by-eight maps, giving the dense layer 256 inputs. That hidden dense layer has 4,112 parameters including biases. The whole variant therefore has 4,220 parameters, compared with 2,468 in the two-round reference. Removing a convolution-pooling round has made the later dense layer larger.</p>
                 <NumberTable
                   headings={["", "seed 0", "seed 1", "seed 2"]}
                   rows={[
@@ -902,11 +723,7 @@ export default function ConvolutionalNetworksPage() {
                   ten, which is most of a shape.
                 </p>
                 <KeepInMind>
-                  The second round is cheaper in parameters than the dense
-                  weights it replaces, and better on the held-out pictures,
-                  because it lets the network describe a shape as an
-                  arrangement of the pieces the first round found.
-                </KeepInMind>
+                  The second convolution-pooling round uses fewer parameters than the dense connections it replaces and performs better in these runs. It also enlarges receptive fields and adds learned feature combinations. The experiment changes these properties together, so it does not isolate one explanation for the accuracy difference.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -916,40 +733,22 @@ export default function ConvolutionalNetworksPage() {
           content: (
             <>
               <SubSection title="24. A picture of another size">
-                <p>
-                  A convolution and a pooling can read a picture of any size,
-                  since both are defined window by window. The dense layer
-                  cannot. Its weights are one per number of the flattened
-                  row, and the length of that row is fixed by the picture
-                  the network was built for.
-                </p>
+                <p>The same convolution and pooling rules can be configured for different input sizes, provided the windows fit. This SDK records exact input extents on each constructed layer and checks them at runtime. Changing those extents also changes the flattened width. A dense layer requires that width to match its fixed input-weight count.</p>
                 <NumberTable
                   headings={["side", "after two poolings", "flattened width", "the dense layer reads 128"]}
                   rows={[
                     ["12", "3 × 3", "72", "undefined"],
                     ["15", "3 × 3", "72", "undefined"],
                     ["16", "4 × 4", "128", "defined"],
-                    ["17", "4 × 4", "128", "defined, the last row and column never read"],
+                    ["17", "4 × 4", "128", "same dense width if spatial layers are rebuilt for side 17"],
                     ["20", "5 × 5", "200", "undefined"],
                     ["32", "8 × 8", "512", "undefined"],
                   ]}
                   caption="Eight maps at the end, so the flattened width is 8 times the square of what two halvings leave."
                 />
-                <p>
-                  A seventeen-pixel picture happens to fit, because a two by
-                  two pooling of an odd side keeps only whole windows and
-                  leaves the last row and column out, which is a quiet way to
-                  lose a pixel. The usual repair for other sizes is to pool
-                  each final map down to a single number, whatever its size,
-                  which makes the row as long as the number of maps; the
-                  network here does not do that, and so it reads sixteen by
-                  sixteen and sixteen by sixteen only.
-                </p>
+                <p>If we rebuild the spatial layers for side seventeen, the pooling floor still leaves four-by-four final maps, so the dense input width remains 128. The first pooling omits a row and column of convolution responses; it does not imply that the corresponding original pixels had no effect on retained neighboring responses. The current SDK network is configured for side sixteen and rejects a differently sized input. Global pooling is one way to give a classifier a fixed-width input across different spatial sizes, but it is not used here.</p>
                 <KeepInMind>
-                  The convolutional part of the network is defined for any
-                  picture, and the dense part is defined for one size, so the
-                  whole network is defined for one size.
-                </KeepInMind>
+                  Distinguish a rule that can be rebuilt for a new geometry from a layer instance configured for one geometry. This network checks its sixteen-by-sixteen input. A differently configured spatial front end must still produce a width accepted by the dense layers.</KeepInMind>
               </SubSection>
 
               <SubSection title="25. A kind it was never shown">
@@ -961,9 +760,7 @@ export default function ConvolutionalNetworksPage() {
                   has no way to say that a ring is none of these.
                 </p>
                 <CnnUnseenKind />
-                <p>
-                  It called 48 of the 60 rings a square outline, 9 a cross and 3 a filled disc, which is a reasonable guess in shape, a closed outline with nothing inside. Its confidence dropped, and not by much. The probability of its call averaged 0.861 on the rings against 0.948 on the held-out pictures of the kinds it knows, and 63% of the rings were called with more than 0.9.
-                </p>
+                <p>For sixty ring images, the network predicts square outline forty-eight times, cross nine times and filled disc three times. These labels are the available choices, even though ring was absent from training. The mean probability assigned to the selected class is 0.861 on rings and 0.948 on the known-class held-out set. Sixty-three percent of rings receive a selected-class probability above 0.9. High softmax scores therefore do not establish that an image belongs to the training label set.</p>
                 <p>
                   Shown a picture with nothing on it at all, an even brightness of 0.15, it calls it a diagonal bar with a probability of 0.892.
                 </p>
@@ -986,12 +783,12 @@ export default function ConvolutionalNetworksPage() {
                   reasonHeading="Effect on the network output"
                   rows={[
                     { expression: "a window wider than what it reads, padding included", reason: "the output extent is the input extent minus the window, plus twice the padding, divided by the stride, plus one, and when that comes out below one there is no position to place the window. The arrangement is undefined before any picture arrives, which is why it can be checked when the network is built." },
-                    { expression: "an odd side under a two by two pooling", reason: "the windows cover the side in whole pairs, so one row and one column are never read. Defined, and lossy, and the only choices are to accept the loss, pad to an even side first, or use windows that overlap." },
-                    { expression: "a picture of any size but the one built for", reason: "the flattened row is a different length from the dense layer’s weights, so the product is not defined. Section 24 has the widths." },
-                    { expression: "every filter started with the same weights", reason: "identical filters give identical answers, receive identical corrections and stay identical forever, so a layer of four is a layer of one. The starting weights must differ, which is why they are drawn at random." },
-                    { expression: "a filter whose activation function answers zero everywhere", reason: "no slope passes back through a zero answer, so the filter receives no correction and never changes. At seed 0 two of the four first-layer filters were within a few percent of this." },
+                    { expression: "an odd side under a two by two pooling", reason: "at stride two, only complete windows are used, leaving one row and column of that layer’s input outside its windows. Padding or a different spatial reduction can change that behavior." },
+                    { expression: "a picture differing from the configured input shape", reason: "this SDK rejects the configured input-shape mismatch. If the spatial layers are rebuilt, check the resulting flattened width separately; some different image sizes produce the same width." },
+                    { expression: "every filter started with the same weights", reason: "identical filters produce identical initial maps, but downstream weights can give them different gradients and separate them. Persistent symmetry requires the rest of the connections and updates to preserve that symmetry too. Random initialization is a common way to avoid such symmetry." },
+                    { expression: "a filter whose activation function answers zero everywhere", reason: "for ReLU on nonpositive scores, this SDK passes zero data-loss derivative through that activation. A completely inactive first-layer filter therefore gets no such gradient on those inputs; low activity is not the same as permanent inactivity." },
                     { expression: "a unit whose window runs past the picture", reason: "the padding supplies zeros that are not pixels, so the unit is comparing a shape with a black border that was never photographed. The corner unit of the last maps has 49 of its 100 pixels inside the picture." },
-                    { expression: "a shape moved partly out of the frame", reason: "the part outside is gone, so the moved picture holds a different, smaller shape, and asking whether the answer should stay the same has no answer. The shift test above leaves such moves out." },
+                    { expression: "a shape moved partly out of the frame", reason: "cropping removes observed parts of the shape. Whether the classifier should retain its label depends on the task and remaining evidence. The shift test excludes those moves to isolate position changes that retain the whole shape." },
                     { expression: "a kind outside the set", reason: "the probabilities are shared among the kinds the last layer was built with and always sum to one, so there is no way to answer none of these. Section 25 measures what it does instead." },
                   ]}
                 />
@@ -1018,7 +815,7 @@ export default function ConvolutionalNetworksPage() {
                 "It cannot be counted until a picture arrives",
               ],
               1,
-              "Every weight in a dense layer is used once per picture and every weight in a convolution is used at every position it is swept to, so the two counts come apart. The network’s two convolutions do 9,216 and 18,432 multiplications against the 2,048 of its own dense layer, and that arithmetic is where the held-out accuracy came from. On a larger picture it would grow with the area while the 336 convolution weights stayed as they are.",
+              "A dense weight participates once per example, while each convolution weight is reused across spatial positions. The two convolution layers therefore account for most of this network’s counted multiplications despite storing fewer parameters than its dense layer. Larger images increase that arithmetic without increasing kernel storage. This operation count alone does not explain the measured accuracy.",
             ),
             choice(
               "Keeping only the first round of convolve and pool gives what?",
@@ -1029,12 +826,12 @@ export default function ConvolutionalNetworksPage() {
                 "4220 parameters and the same held-out score",
               ],
               1,
-              "One round leaves four maps of eight by eight, so the dense layer holds 4112 weights and the network 4220 against 2468. The second round raised the held-out accuracy at every seed and lowered the share of answers a one-pixel move changed, while taking 1752 parameters away. One round leaves each number seeing four pixels by four where two rounds leave it seeing ten, which is most of a shape.",
+              "One convolution-and-pooling round leaves four eight-by-eight maps. Its dense hidden layer then contains 4,112 weights and biases, and the whole network has 4,220 parameters. The two-round version has fewer parameters and a wider theoretical receptive field at its final maps. It also performs better in the reported runs, which is evidence about these full configurations.",
             ),
             trueFalse(
               "A convolution and a pooling are defined window by window, so the network can read a picture of any size.",
               false,
-              "The two halves of the network differ. A dense layer’s weights are one per number of the flattened row, and that length is fixed by the picture the network was built for, so the whole network is defined for one size. The usual repair is to pool each final map down to a single number, which this one does not do. A seventeen-pixel picture happens to fit, because a two by two pooling of an odd side keeps only whole windows and quietly leaves the last row and column out.",
+              "Local convolution kernels can be reused over different image sizes, but this SDK’s layer still declares a specific input shape. A following dense layer also expects a fixed flattened width. Rebuilding the spatial front for a different size may or may not preserve that width: the seventeen-pixel example does because pooling discards incomplete edge windows. Global pooling is one way to give a dense head a size-independent feature count.",
             ),
             several(
               "Which of these hold of the probabilities the last layer gives a picture of a kind it was never shown?",
@@ -1139,7 +936,7 @@ DenseLayer answers (4,), holds 68, multiplies 64 times
               "Work out how far one unit sees, and add a third round",
               [
   "Extend the supplied two convolution/pooling rounds with a sixteen-filter convolution and another pooling layer. Read window sizes and strides from each layer.",
-  "For every layer print output shape, theoretical receptive-field width and spacing between neighbouring responses in original-pixel units. Begin with width and spacing one; preserve the starter’s padding settings."
+  "For every layer print output shape, theoretical receptive-field width and spacing between neighboring responses in original-pixel units. Begin with width and spacing one; preserve the starter’s padding settings."
 ],
               `from oop_ml import Conv2d, LayerStack, MaxPool2d, RectifiedLinear
 

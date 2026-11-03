@@ -22,9 +22,9 @@ import { RansacGallery } from "@/components/widgets/RansacGallery";
 import { TurnCostLedger } from "@/components/widgets/TurnCostLedger";
 
 export const metadata: Metadata = {
-  title: "Image Alignment · oop_ml",
+  title: "Image Alignment · Perceptron Lab",
   description:
-    "A camera can move or turn between photographs. Matching points gives us evidence of that movement, which we can use to work out how to bring the images into alignment.",
+    "Corresponding points in two images provide evidence about how their coordinates relate. Estimating that transformation allows the images to be aligned, with incorrect matches affecting the result.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function ImageAlignmentPage() {
       playgroundTitle="Which transformation brings these images together?"
       playgroundIntro="Plant a move, turning, scaling and shifting the scene, and watch the method find it again. Compare what it kept with what was actually right, then carry the second picture back and read the difference."
       title="Image Alignment"
-      tagline={"A camera can move or turn between photographs. Matching points gives us evidence of that movement, which we can use to work out how to bring the images into alignment."}
+      tagline={"Corresponding points in two images provide evidence about how their coordinates relate. Estimating that transformation allows the images to be aligned, with incorrect matches affecting the result."}
       prerequisites={
         <>
           This lesson picks up exactly where the{" "}
@@ -70,37 +70,14 @@ export default function ImageAlignmentPage() {
                 Recall the quarter-turn experiment in the keypoints lesson. Every corner was detected again in its expected position, with the same measured strength. But the corresponding descriptors were 1.443376 apart on a distance scale whose maximum is 2.0. That was as far apart as the square&apos;s top-left and top-right corners. We found the location successfully, yet its description changed enough to resemble another corner. Let&apos;s examine what the rotation did to the patch.
               </p>
               <p>The descriptor reads a square of brightness around a keypoint. It subtracts the patch mean and divides by the length of the remaining value pattern, reducing sensitivity to a common brightness shift and positive rescaling. But it still reads the square with the image&apos;s up direction as up.</p>
-              <p>Rotate the image and the same physical corner presents its pixels in a different order. A neighbouring corner can resemble that turned pattern. We therefore need to examine orientation as well as brightness: which direction should count as up when we describe this particular keypoint?</p>
+              <p>Rotate the image and the same physical corner presents its pixels in a different order. A neighboring corner can resemble that turned pattern. We therefore need to examine orientation as well as brightness: which direction should count as up when we describe this particular keypoint?</p>
               <SubSection title="1. The cost, measured three ways">
-                <p>
-                  The bar below is the shape the keypoints lesson&rsquo;s own
-                  checks use, an L rather than a square, because an L has six
-                  corners that differ from one another by what surrounds them.
-                  It is turned a quarter circle, which is the one turn that lands
-                  every pixel exactly on a pixel, so that whatever changes
-                  changed because of the turn and not because of any blurring on
-                  the way. Each corner is then compared with its turned self under
-                  three descriptions.
-                </p>
+                <p>The checks use an L-shaped bar with six corners. Turning it by a quarter circle permutes the pixel grid without needing interpolation, so we can first isolate how each descriptor responds to that exact rotation. Later experiments use other angles, where resampling introduces another source of difference.</p>
                 <TurnCostLedger />
-                <p>
-                  The patch descriptor pays the keypoints lesson&rsquo;s 1.443376
-                  at every one of the six corners. The two descriptions this
-                  lesson builds pay nothing at all, zero bits of 256 and a distance
-                  of 0.0, because each is read in a frame that turned with the
-                  corner. Hold on to the nearest-other column, though, because it
-                  is the other half of what a description is for. Three of the
-                  six corners read as zero bits from some other corner too, and
-                  Part 3 says why.
-                </p>
+                <p>At each of the six corners, the original patch descriptor changes by 1.443376 after the quarter turn. The two orientation-aligned descriptions built below remain unchanged in this experiment: the binary descriptor has zero differing bits out of 256, and the gradient descriptor has distance 0.0. But three corners also have binary distance zero from a different corner. Rotation tolerance does not resolve repeated appearances.</p>
               </SubSection>
               <KeepInMind>
-                A description that does not move under a turn is necessary and
-                not sufficient. It also has to differ from the descriptions of
-                the other corners, or matching has nothing to choose between. The
-                whole of this lesson is the first property; the ratio test from
-                the keypoints lesson is what guards the second.
-              </KeepInMind>
+                Following the rotation helps corresponding descriptors remain comparable. They also need enough distinguishing information to avoid confusing different locations. The ratio test checks that second issue among the available candidates, but geometric consistency is still needed to assess the proposed matches.</KeepInMind>
             </>
           ),
         },
@@ -108,24 +85,9 @@ export default function ImageAlignmentPage() {
           title: "Part 2. A Direction That Belongs To The Corner",
           content: (
             <>
-              <p>
-                If the patch is going to be read in a frame that turns with the
-                picture, the corner has to supply that frame, which means it has
-                to supply a direction of its own. Two usual answers, and both are
-                built from the brightness around the corner, so both turn when it
-                does.
-              </p>
-              <SubSection title="2. The centre of brightness">
-                <p>
-                  The first is ORB&rsquo;s. Take a disc of radius four around the
-                  corner and treat every pixel&rsquo;s brightness as a weight.
-                  The weights are heavier on the bright side of the corner, so
-                  the centre of mass of the disc sits off its middle, and the
-                  direction from the corner to that centre is the direction the
-                  corner faces. Written as the two moments of the disc, with the
-                  corner at the origin, rows running down and columns running
-                  right,
-                </p>
+              <p>A description can follow an image rotation if its coordinate frame follows the keypoint’s local orientation. We therefore estimate an orientation from nearby brightness or gradients, then describe the patch relative to that estimate. The two methods below obtain that frame in different ways.</p>
+              <SubSection title="2. The center of brightness" id="2-the-centre-of-brightness">
+                <p>ORB estimates a local orientation from intensity moments. Take a disc of radius four around the corner, with the corner as the origin, rows increasing downward and columns increasing rightward. Multiply each pixel&rsquo;s brightness by its horizontal and vertical offsets, then sum separately. For nonnegative brightness, this gives the direction toward the disc&rsquo;s center of brightness when that center is displaced from the origin.</p>
                 <Equation>
                   {
                     "m_right = Σ column × brightness\nm_down = Σ row × brightness\n\ndirection = atan2(m_down, m_right)"
@@ -147,17 +109,7 @@ export default function ImageAlignmentPage() {
                 </WorkedExample>
               </SubSection>
               <SubSection title="3. The dominant gradient">
-                <p>
-                  The second is SIFT&rsquo;s. Instead of asking where the
-                  brightness is, ask which way it rises. Every pixel of the disc
-                  has a gradient, a direction and a sharpness, from the filters
-                  lesson. Sort the directions into thirty-six bins of ten degrees
-                  and let each pixel add its sharpness to its bin, weighted by a
-                  bell so the pixels nearest the corner count most. The fullest
-                  bin is the direction, refined by fitting a parabola through it
-                  and its two neighbours so that the answer is not stuck to a
-                  multiple of ten.
-                </p>
+                <p>The SIFT-style rule uses the dominant gradient direction. Each pixel contributes its gradient magnitude to one of thirty-six ten-degree bins. A Gaussian weight gives pixels near the keypoint more influence. The implementation then refines a peak&rsquo;s angle by fitting a parabola through that bin and its two neighbors, allowing angles between the bin centers.</p>
                 <OrientationBoard />
                 <p>
                   On the top-left corner the histogram has two equal peaks, at
@@ -170,27 +122,11 @@ export default function ImageAlignmentPage() {
                   agree with another rule&rsquo;s.
                 </p>
                 <KeepInMind title="Two peaks, two keypoints">
-                  A tie between two peaks is the one case a single direction
-                  cannot survive. Pick either by any rule and the turned picture
-                  picks the other. SIFT&rsquo;s answer is to keep every peak
-                  within eighty percent of the highest as a direction of its own,
-                  so a corner where two edges meet equally becomes two keypoints
-                  at one position, facing 5.54 and 95 degrees, and both travel.
-                  The centre of brightness has no such case, since a disc has one
-                  centre of mass, and it gives every corner exactly one direction.
-                </KeepInMind>
+
+                  Two similarly strong orientation peaks can make a single selected direction unstable: a small image change may switch which peak wins. SIFT keeps additional peaks reaching eighty percent of the highest, allowing several oriented keypoints at one position. Here the corner has directions 5.54 and 95 degrees. The centroid rule returns one direction, but it has its own degeneracy: when both moments are zero, there is no preferred direction, and this SDK returns zero by convention.</KeepInMind>
               </SubSection>
               <SubSection title="4. What a quarter turn does to each">
-                <p>
-                  Turn the bar a quarter circle and every centroid direction moves
-                  by exactly a quarter circle, with no rounding at all, because
-                  the turn permutes whole pixels and the moments are sums of them.
-                  The gradient directions move by a quarter circle to within
-                  4.4e-16 radians, for the same reason one step later, since the
-                  turn permutes the gradients and the histogram is a sum of
-                  those. Both are the property the frame needs, and both are
-                  measured rather than assumed.
-                </p>
+                <p>After this exact quarter turn, every centroid direction changes by a quarter turn with no measured rounding difference. The gradient directions agree with the expected change to within 4.4e-16 radians. These results check the orientation rules on this bar; arbitrary rotations also involve resampling and need not give exact agreement.</p>
               </SubSection>
             </>
           ),
@@ -199,25 +135,9 @@ export default function ImageAlignmentPage() {
           title: "Part 3. Reading The Patch In Its Own Frame",
           content: (
             <>
-              <p>
-                With a direction in hand, the patch is read with that direction
-                as its first axis. Whatever is read then comes out the same before
-                and after a turn, because the turn moves the direction and the
-                reading with it. Two readings, matching the two directions.
-              </p>
+              <p>Use the estimated orientation as the patch’s reference axis. If that estimate follows the image rotation and the sampling is consistent, corresponding structure is read in the same relative positions. The exact quarter-turn example makes that relationship visible. Arbitrary rotations also introduce resampling and estimation errors.</p>
               <SubSection title="5. Pixel pairs, one bit each">
-                <p>
-                  ORB&rsquo;s reading is the simplest description there is. Draw
-                  256 pairs of positions inside a fifteen-wide square, once, from
-                  a seeded generator, so that every corner in every picture reads
-                  the same pairs. Turn the pairs to the corner&rsquo;s direction,
-                  round them to pixels, and for each pair answer one question. Is
-                  the first pixel darker than the second? The description is 256
-                  bits, and the distance between two descriptions is how many
-                  bits differ, which is a count rather than a length. The pixels
-                  are read through a three by three mean, because a single pixel
-                  is noisy and a bit flips when it is.
-                </p>
+                <p>The binary descriptor shown here uses 256 fixed pairs of sample positions inside a fifteen-wide square. A seeded generator chooses the pairs once so every image uses the same pattern. Rotate each pair by the keypoint&rsquo;s orientation and round to pixel positions. Comparing the brightness at the two positions produces one bit. The distance between descriptors is the number of differing bits, called Hamming distance. A three-by-three mean filter reduces sensitivity to individual noisy pixels before these comparisons.</p>
                 <DescriptorFrames />
                 <p>
                   The corner at row 14, column 14 faces 45 degrees. After the
@@ -228,21 +148,8 @@ export default function ImageAlignmentPage() {
                 </p>
               </SubSection>
               <SubSection title="6. A grid of gradient counts">
-                <p>
-                  SIFT&rsquo;s reading is the oriented gradients lesson&rsquo;s
-                  idea, turned to the corner. A sixteen-wide square in the
-                  corner&rsquo;s frame is cut into four by four cells, and each
-                  cell counts which way the brightness rises in eight directions,
-                  every direction measured relative to the corner&rsquo;s own.
-                  Each sample is shared between the two nearest cells along each
-                  axis and the two nearest direction bins, in proportion to how
-                  near it sits, so that a sample on a cell boundary does not jump
-                  whole from one cell to the other under a change of a fraction
-                  of a pixel. The 128 counts are normalised to unit length, any
-                  entry above 0.2 is clipped so that one sharp edge cannot
-                  dominate, and the result is normalised again. Two readings are
-                  compared by ordinary distance.
-                </p>
+                <p>The SIFT-style descriptor uses a sixteen-pixel-wide square aligned to the keypoint’s estimated orientation. It divides that square into four-by-four cells and accumulates eight gradient-direction bins per cell, with angles measured relative to the keypoint’s orientation.</p>
+<p>A sample distributes its contribution between neighboring spatial cells and orientation bins. This interpolation reduces abrupt changes when a sample moves slightly across a boundary. The resulting 128 counts are normalized, clipped at 0.2 and normalized again to reduce domination by a few large entries. Descriptor comparisons then use Euclidean distance. This is the simplified SIFT-style implementation used here, rather than every detail of the original SIFT pipeline.</p>
                 <p>
                   On the same corner the two histograms, before and after the
                   turn, are at distance 0.0, as the roses above show cell by
@@ -251,6 +158,7 @@ export default function ImageAlignmentPage() {
               </SubSection>
               <SubSection title="7. What neither can do">
                 <p>
+
                   Read in its own frame, a bright right-angled corner is a bright
                   quadrant, whichever corner of the bar it is. Within the seven
                   pixels the pairs reach, the top-left corner, the bottom-left
@@ -259,29 +167,13 @@ export default function ImageAlignmentPage() {
                   nearest-other column of Part 1. The histogram&rsquo;s wider
                   square sees to where the bar&rsquo;s arms end and still tells
                   them apart, by 0.306, which is small beside the 1.138 that
-                  separates the concave corner from its nearest neighbour but is
+                  separates the concave corner from its nearest neighbor but is
                   not zero.
                 </p>
-                <p>
-                  That is the repeated-structure problem the keypoints lesson
-                  names, now with a reason. A rotation-invariant description
-                  cannot distinguish two things that differ only by a rotation,
-                  and two convex corners of one shape differ only by a rotation.
-                  What breaks the tie is context, and context is what a wider
-                  patch buys. The ratio test refuses the three ambiguous corners
-                  under the binary reading, at a ratio of exactly one, rather
-                  than guessing.
-                </p>
+                <p>Rotation alignment makes identical rotated local patches indistinguishable. These three corners look the same within the binary descriptor&rsquo;s reach, even though their wider surroundings differ. A wider patch can add context, as the histogram descriptor does here. Under the binary reading, their distance ratio is one, so the matcher rejects them as ambiguous.</p>
               </SubSection>
               <InAModel>
-                ORB reads 256 pairs over a thirty-one-wide patch, learned rather
-                than drawn at random so that the bits are uncorrelated, on a
-                pyramid of eight sizes. SIFT reads four by four cells of four
-                pixels, exactly the grid here, at the size and position a scale
-                space settles on. Neither changes the two ideas above, a direction
-                that turns with the corner and a reading taken in that
-                direction&rsquo;s frame.
-              </InAModel>
+                Reference ORB selects binary comparisons for high variability and low correlation, rather than using this random pair pattern. It also uses an image pyramid whose number of levels can be configured. SIFT detects keypoints in scale space and measures its descriptor relative to the selected scale. Both approaches align local descriptions to an estimated orientation; their full detection and sampling procedures go beyond the simplified versions here.</InAModel>
             </>
           ),
         },
@@ -294,7 +186,7 @@ export default function ImageAlignmentPage() {
               "The corner is found again exactly where it should be, with its strength agreeing to the last bit. What fails is the description, which sits 1.443376 from its turned self, the distance between two different corners of one square. The keypoints belong to the scene and the descriptions belonged to the frame.",
             ),
             choice(
-              "The top-left corner of the bar has moments of 25.0 rightward and 25.0 downward. What direction does the centre of brightness give it?",
+              "The top-left corner of the bar has moments of 25.0 rightward and 25.0 downward. What direction does the center of brightness give it?",
               ["45 degrees", "90 degrees", "0 degrees", "135 degrees"],
               0,
               "The direction is the arctangent of the downward moment over the rightward one, and two equal moments give an eighth of a turn, measured from pointing right towards pointing down. The bottom-left corner has the same rightward moment and a downward moment of minus 25.0, and faces minus 45 degrees.",
@@ -304,11 +196,11 @@ export default function ImageAlignmentPage() {
               [
                 "The histogram has two equal peaks, and any rule for picking one would pick the other after a turn",
                 "Two directions make the descriptor twice as long and therefore more precise",
-                "The centre of brightness is undefined at such a corner",
+                "The center of brightness is undefined at such a corner",
                 "A corner always has two edges, so every corner gets two directions",
               ],
               0,
-              "A tie is the one case a single direction cannot survive. Keeping every peak within eighty percent of the highest turns the corner into two keypoints at one position, facing 5.54 and 95 degrees on the bar, and both travel through the turn. The centroid rule gives exactly one direction because a disc has one centre of mass.",
+              "When several orientation-histogram peaks are strong, SIFT-style assignment can keep multiple oriented keypoints at the same position. That avoids discarding plausible orientations through one arbitrary peak choice. The eighty-percent rule is a stated selection convention. The centroid method uses the direction of local brightness moments instead; that direction can itself be unstable or undefined when the moments nearly cancel.",
             ),
             several(
               "Which of these hold of the binary reading on the bar?",
@@ -324,7 +216,7 @@ export default function ImageAlignmentPage() {
             trueFalse(
               "The gradient histogram tells the three ambiguous convex corners apart, if only by a little.",
               true,
-              "Its sixteen-wide square sees to where the bar's arms end, and the three corners that are bit-identical under the pairs sit 0.306 apart under the histogram. That is small beside the 1.138 that separates the concave corner from its nearest neighbour, which is the difference between context that is barely there and context that is plentiful.",
+              "Its sixteen-wide square sees to where the bar's arms end, and the three corners that are bit-identical under the pairs sit 0.306 apart under the histogram. That is small beside the 1.138 that separates the concave corner from its nearest neighbor, which is the difference between context that is barely there and context that is plentiful.",
             ),
           ],
         },
@@ -341,26 +233,8 @@ export default function ImageAlignmentPage() {
                 since it compares two of the same thing.
               </p>
               <SubSection title="8. The opening move">
-                <p>
-                  The playground&rsquo;s opening move turns the shared scene by
-                  thirty degrees and shifts it three pixels down and five to the
-                  left, about the middle of the frame. Thirty degrees lands no
-                  pixel on a pixel, so the turned picture is resampled and nothing
-                  about it is exact, which is the case that matters. With the
-                  centre of brightness and the pixel pairs, the method finds 40
-                  keypoints in each picture and the ratio test keeps 15 matches.
-                  Ten of those are right, which the page can say because it
-                  planted the move. Five are wrong, and they are wrong for the
-                  reason Part 3 gives, since the scene&rsquo;s square has four
-                  corners that look alike in their own frames.
-                </p>
-                <p>
-                  With the dominant gradient and the histogram, the same scene
-                  gives 34 matches of which 17 are right, more of both because a
-                  symmetric corner is two keypoints under that rule. Either way
-                  about a third of what survives the ratio test is wrong, and that
-                  is the input the next two parts have to work with.
-                </p>
+                <p>The playground rotates the shared scene by thirty degrees and shifts it three pixels down and five left about the frame center. This rotation requires resampling rather than simply rearranging the pixel grid. The centroid-oriented binary descriptor finds 40 keypoints per image and retains 15 matches: ten agree with the planted move and five do not. Knowing the move lets us inspect those errors directly.</p>
+                <p>The dominant-gradient and histogram combination keeps 34 matches, of which 17 are correct. Thus one third of the binary method&rsquo;s 15 accepted matches are wrong, and half of the histogram method&rsquo;s 34 are wrong. Descriptor agreement still leaves errors for the geometric estimation stage to handle.</p>
                 <NumberTable
                   headings={["Pair of rules", "Keypoints", "Matches kept", "Right", "Wrong"]}
                   rows={[
@@ -387,29 +261,18 @@ export default function ImageAlignmentPage() {
           title: "Part 5. Two Matches Fix The Move",
           content: (
             <>
-              <p>
-                A match is a claim that one position in the first picture is one
-                position in the second. If the camera moved rigidly, then every
-                true match is explained by the same move, which here is a turn, a
-                change of scale and a shift. That is a similarity transform, and
-                it has four numbers in it.
-              </p>
+              <p>A match proposes that two coordinates refer to the same scene location. The planted image changes here use a rotation, uniform scale and translation, called a similarity transform. Under that model, all correct matches should agree on the same four parameters. Real camera motion need not produce this restricted image transformation.</p>
               <Equation>
                 {
                   "second = scale × R(angle) × first + shift\n\nR(angle) = [ cos  −sin ]\n           [ sin   cos ]\n\nfour numbers: scale, angle, shift down, shift right"
                 }
               </Equation>
-              <p>
-                Two matched positions give four equations, two coordinates each,
-                so two matches fix the four numbers exactly. More matches than two
-                make the fit a least-squares one, and the closed form for it is
-                short enough to read.
-              </p>
+              <p>Two correspondences determine a positive-scale, orientation-preserving similarity transform when the two source positions are distinct and the two target positions are distinct. Each contributes two coordinate equations. With more correspondences, the transform can be fitted by least squares, allowing for imperfect agreement.</p>
               <WhyThisWorks title="The closed form">
                 <DerivationTable
                   rows={[
                     {
-                      expression: "centre both sets of positions on their means",
+                      expression: "center both sets of positions on their means",
                       reason: "the shift is whatever is left once the turn and scale are known, so it is found last",
                     },
                     {
@@ -417,35 +280,23 @@ export default function ImageAlignmentPage() {
                       reason: "the two by two cross-covariance, which holds the turn",
                     },
                     {
-                      expression: "C = U S Vᵀ,  R = U Vᵀ",
-                      reason: "the singular value decomposition, with a sign fixed so that R is a turn and not a reflection",
+                      expression: "C = U S Vᵀ,  D = diag(1, det(U Vᵀ)),  R = U D Vᵀ",
+                      reason: "the singular value decomposition; D corrects a negative determinant so the fitted transformation preserves orientation",
                     },
                     {
-                      expression: "scale = trace(S) / Σ |first − mean|²",
-                      reason: "the ratio of the spreads, read off the singular values",
+                      expression: "scale = trace(S D) / Σ |first − mean|²",
+                      reason: "the scale minimizing squared residuals, using the same reflection correction as the rotation",
                     },
                     {
                       expression: "shift = mean(second) − scale × R × mean(first)",
-                      reason: "what carries the first centre onto the second",
+                      reason: "what carries the first center onto the second",
                     },
                   ]}
                 />
-                <p>
-                  Measured on three positions under a planted turn of 0.6 radians,
-                  a scale of 1.3 and a shift of four down and two left, the
-                  recovered four numbers agree with the planted ones to 1.3e-15,
-                  which is the arithmetic and not an approximation. Two positions
-                  recover them exactly as well.
-                </p>
+                <p>For three positions transformed by a turn of 0.6 radians, scale 1.3 and shift of four down and two left, the recovered parameters agree to within 1.3e-15. The two-position example also agrees within floating-point precision. The closed-form solution avoids an iterative search, but numerical evaluation still involves rounding.</p>
               </WhyThisWorks>
               <KeepInMind>
-                Four numbers is a choice, and it is the choice that makes two
-                matches enough. A picture taken from a different place rather than
-                the same place with the camera turned is related to the first by a
-                perspective transform, which has eight numbers, needs four matches
-                to fix and is not what this lesson fits. On a flat scene
-                photographed twice from one spot, four numbers is exactly right.
-              </KeepInMind>
+                The four-parameter model is appropriate for the planted image transformations here. Camera movement in a real scene can require a different model. A homography has eight independent parameters and needs at least four nondegenerate correspondences; it can describe a plane under perspective changes or pure camera rotation under the usual pinhole model. General three-dimensional scenes can also exhibit depth-dependent parallax.</KeepInMind>
             </>
           ),
         },
@@ -453,25 +304,9 @@ export default function ImageAlignmentPage() {
           title: "Part 6. Let The Matches Vote",
           content: (
             <>
-              <p>
-                Two matches fix the move, and a third of the matches are wrong.
-                Fitting all fifteen at once would average the wrong ones into the
-                answer. Fitting two at a time and asking the others whether they
-                agree does not, and that is the whole of the method the world
-                calls RANSAC.
-              </p>
+              <p>A similarity transform can be estimated from two nondegenerate matches. If some matches are wrong, fitting them all by least squares lets those mistakes pull the result. RANSAC instead proposes a transform from a small subset and checks how many other matches support it. The next example follows that proposal-and-check process.</p>
               <SubSection title="10. Every pair proposes, the rest agree or do not">
-                <p>
-                  Take two matches, fit the move they imply, carry every first
-                  position through it, and count how many land within 1.5 pixels
-                  of their matched second position. That count is the
-                  pair&rsquo;s support. Try every pair, keep the pair with the
-                  most support, breaking ties by the smaller total error, and
-                  refit the move on everyone who supported the winner. The matches
-                  that did not support it are the outliers, and they are reported
-                  rather than discarded, because which matches were wrong is half
-                  of what the method tells you.
-                </p>
+                <p>Take two nondegenerate matches and fit their implied transform. Apply it to every source position and count targets within 1.5 pixels of their proposed partners. That count is the hypothesis&rsquo;s support. For this small example, test every pair, select the greatest support, break ties by lower total error, and refit using the supporting matches. Matches within the tolerance are called inliers; those outside it are outliers. These labels describe agreement with the fitted model, not known correctness.</p>
                 <RansacGallery />
                 <p>
                   On the opening move the 15 matches make 105 pairs, of which 104
@@ -487,17 +322,7 @@ export default function ImageAlignmentPage() {
                 </p>
               </SubSection>
               <SubSection title="11. Counting beats averaging">
-                <p>
-                  The reason to count agreement rather than average proposals is
-                  visible in the bars. A wrong match paired with anything proposes
-                  a move almost nobody agrees with, so wrong matches are not
-                  outvoted, they are simply never elected. An average would have
-                  let all five wrong matches pull on the answer; the vote lets
-                  them propose and then ignores them. With few matches every pair
-                  is tried in a fixed order, so the answer is the same on every
-                  run; with many, a seeded sample of pairs is tried, which is what
-                  the name describes.
-                </p>
+                <p>In this example, pairs containing wrong matches usually propose transforms with little support. Pairs of correct matches agree on a common move. The procedure chooses support rather than averaging every proposal. That can reject outliers, but sufficiently numerous or consistent false matches can still win. The implementation enumerates small sets of pairs and uses a seeded sample when there are many.</p>
               </SubSection>
             </>
           ),
@@ -519,10 +344,10 @@ export default function ImageAlignmentPage() {
             trueFalse(
               "The gradient and histogram pair keeps more matches than the centroid and pairs on the opening move because its descriptor is longer.",
               false,
-              "It keeps 34 against 15 because a symmetric corner is two keypoints under the dominant gradient rule, one per peak, so there are more keypoints to match. The share that is right is about the same, 17 of 34 against 10 of 15.",
+              "The dominant-gradient rule can assign more than one orientation to a position, producing more descriptors and more candidate matches. Here it retains seventeen correct matches among thirty-four, while centroid-based binary matching has ten correct among fifteen. A longer descriptor alone does not explain the count, and the correct-match proportions are different.",
             ),
             choice(
-              "Why are two matches enough to fix the move?",
+              "Why can two distinct, correctly corresponding point pairs identify a nondegenerate similarity transform?",
               [
                 "A similarity has four numbers and two matched positions give four equations",
                 "Two matches are always right, so the fit cannot be contaminated",
@@ -530,7 +355,7 @@ export default function ImageAlignmentPage() {
                 "One match fixes the shift and the second fixes the scale, which leaves the turn to the ratio test",
               ],
               0,
-              "A turn, a scale and a shift down and right are four numbers, and each matched position contributes two coordinates. More matches make the fit a least-squares one by the closed form in Part 5, which recovers a planted move to 1.3e-15. A perspective change would have eight numbers and need four matches.",
+              "The transform has four parameters: rotation, positive scale and two translation components. Two distinct correspondences supply enough independent coordinate constraints to recover them in this model. More pairs support a least-squares estimate. A general planar projective transform has eight effective parameters and needs at least four correspondences in a suitable, nondegenerate configuration.",
             ),
             several(
               "Which of these describe the vote in Part 6 on the opening move?",
@@ -541,7 +366,7 @@ export default function ImageAlignmentPage() {
                 "The five wrong matches are outvoted after being averaged into the proposal",
               ],
               [0, 1, 2],
-              "Wrong matches are never averaged in at all. Paired with anything, a wrong match proposes a move almost nobody agrees with, so it is never elected, which is the difference between counting support and averaging proposals. The ten pairs that explain ten matches are all pairs of two right ones.",
+              "Each usable pair proposes one transform, which is then tested against the other matches. On this planted example, proposals from correct pairs receive much broader support than the wrong proposals. The best proposal is refitted using its inlier set. Consistent false correspondences can also form a supported transform in other scenes, so consensus is evidence of geometric agreement, not proof of correct identity.",
             ),
             trueFalse(
               "With the ratio test turned off, the vote still has something to work with, since 16 of the 40 matches are right.",
@@ -554,14 +379,7 @@ export default function ImageAlignmentPage() {
           title: "Part 7. Carrying The Picture Back",
           content: (
             <>
-              <p>
-                A recovered move is a claim about where every pixel went, and the
-                claim can be checked by using it. Carry the second picture back
-                through the inverse of the move, reading each output pixel from
-                where it came from by interpolating between its four neighbours,
-                and lay it over the first. If the move is right the two pictures
-                agree almost everywhere.
-              </p>
+              <p>Check the recovered transformation by using it to align the images. For each output position, find the corresponding position in the second image and interpolate its neighboring pixels. Agreement after alignment supports the estimate, while occlusion, changed lighting and resampling can leave differences even with a good geometric fit.</p>
               <SubSection title="12. One number for the whole alignment">
                 <p>
                   The mean absolute difference between the first picture and the
@@ -577,20 +395,8 @@ export default function ImageAlignmentPage() {
                 </p>
               </SubSection>
               <SubSection title="13. The method&rsquo;s verdict against the truth">
-                <p>
-                  The playground draws a two-by-two count that no method can
-                  draw for itself, because the page planted the move and the
-                  method did not. Down the side, whether the method kept a match
-                  as an inlier or refused it as an outlier. Across the top,
-                  whether the match was right. On the opening move the ten
-                  inliers are the ten right matches and the five outliers are the
-                  five wrong ones, with nothing in the two cells that would mean
-                  a mistake. Shrink the scene to 0.8 and turn it forty degrees and
-                  the count changes. Eleven matches, seven right, nine kept, so
-                  two wrong matches were kept because they happened to land
-                  within 1.5 pixels of where the move sends them, and the
-                  recovered turn is still 39.97 degrees.
-                </p>
+                <p>The planted transform supplies ground truth for checking the matches. The table compares the method’s inlier/outlier decision with whether each correspondence is correct under that known transform. An ordinary alignment problem does not supply those correctness labels.</p>
+<p>For the opening transform, the ten inliers are the ten true matches and the five outliers are the five false matches. After scaling to 0.8 and rotating forty degrees, eleven proposed matches include seven true correspondences, but nine are accepted as inliers. Two incorrect correspondences happen to fall within the 1.5-pixel geometric tolerance. The recovered angle is still 39.97 degrees, showing why an accurate transform does not imply every inlier is a true match.</p>
                 <NumberTable
                   headings={["Move", "Matches", "Right", "Kept", "Kept and right", "Turn recovered", "Difference after"]}
                   rows={[
@@ -599,7 +405,7 @@ export default function ImageAlignmentPage() {
                     ["Scale 0.8, turn 40, shift (−4, 2)", "11", "7", "9", "7", "39.97", "0.0299"],
                     ["Scale 1.6, turn 20", "4", "2", "2", "2", "19.95", "none"],
                   ]}
-                  caption="The centroid and pairs on four planted moves. The last row recovers the move from two matches, which is the fewest that can, and carries nothing back because two inliers leave no outlier to test the claim against."
+                  caption="The centroid and pairs on four planted moves. The last row fits from only two inliers, the minimum required, so there are no additional supporting matches beyond the fitting pair. This example withholds the aligned-image result."
                 />
               </SubSection>
             </>
@@ -610,52 +416,16 @@ export default function ImageAlignmentPage() {
           content: (
             <>
               <SubSection title="14. A change of size">
-                <p>
-                  Nothing in Parts 2 and 3 handles a change of scale. A corner
-                  seen from twice as far away has a patch half the width, and a
-                  reading over a fixed fifteen pixels sees different things in it.
-                  The table in Part 7 shows how much the readings tolerate on
-                  this scene anyway, a scale of 1.25 or 0.8 with seven right
-                  matches, and 1.6 with two, which is the edge. ORB&rsquo;s answer
-                  is a pyramid, the picture at several sizes, each 1.2 times
-                  smaller than the last, with keypoints found and described at
-                  every size so that a corner seen from further away is described
-                  at the size where it looks as it did.
-                </p>
+                <p>Orientation alignment does not remove image-scale changes. With a fixed patch width, a smaller object places different structures inside the descriptor window. On this scene, scales 1.25 and 0.8 retain seven correct matches, while scale 1.6 retains only two.</p>
+<p>The ORB-style implementation uses an image pyramid to compare several scales: each level is smaller by a factor of 1.2, and keypoints are detected and described at each level. A suitable pair of levels can make corresponding local structures more comparable. The finite scale samples, repeated candidates and resampling still affect matching.</p>
                 <PyramidLedger />
-                <p>
-                  On the opening move, where the scale does not change, the
-                  pyramid measured worse than expected and the reason is worth
-                  knowing. Six levels find 126 keypoints where one level finds 40,
-                  because every corner is found again at each neighbouring size,
-                  and those copies are each other&rsquo;s runners-up. The ratio
-                  test then refuses the true match, and six of 32 matches are
-                  right where ten of 15 were. The move is still recovered, from
-                  the six. So the pyramid is kept for the changes of size a single
-                  level cannot reach and is not switched on by default.
-                </p>
+                <p>On the opening move, the six-level pyramid finds 126 oriented keypoints, compared with 40 from one level. Descriptions of the same corner at neighboring scales can become close competitors in the ratio test. Here it accepts 32 matches with six correct, compared with 15 matches with ten correct at one level. The six correct matches still recover the transform. More scale samples therefore add useful coverage for scale changes but do not guarantee better matching on every image pair.</p>
               </SubSection>
               <SubSection title="15. A change of viewpoint">
-                <p>
-                  Two photographs from one spot with the camera turned are related
-                  by four numbers. Two photographs from two spots are related by
-                  eight, a perspective transform, and a four-number fit of an
-                  eight-number move explains the matches near one part of the
-                  scene and not the rest. The vote then elects whichever part had
-                  the most keypoints, which is an answer, but not the one asked
-                  for. Fitting the eight numbers needs four matches a proposal and
-                  the same vote, and it is the usual next step.
-                </p>
+                <p>A similarity transform is suitable for the planted rotation, uniform scaling and translation here. A planar scene seen from different viewpoints may instead require a homography, with eight independent parameters and at least four nondegenerate matches. A general three-dimensional scene can also show parallax, where one homography cannot align every depth. Choose the transformation model before interpreting a mismatch as a bad correspondence.</p>
               </SubSection>
               <SubSection title="16. Repeated structure">
-                <p>
-                  A brick wall, a window grid, a keyboard. Every corner reads the
-                  same in its own frame, the ratio test correctly refuses every
-                  match, and the method answers nothing rather than something
-                  wrong. That is the better of the two failures and is still a
-                  failure, and a wider patch helps only until the structure
-                  repeats at that width too.
-                </p>
+                <p>Repeated patterns can leave several equally plausible local correspondences. A wider patch may add distinguishing context, but it may still repeat. The ratio test can reject these ambiguous proposals instead of making an arbitrary selection. Returning too few matches to estimate a move is a limitation to report, rather than a reason to force a transform.</p>
               </SubSection>
             </>
           ),
@@ -664,35 +434,9 @@ export default function ImageAlignmentPage() {
           title: "Part 9. Recording Coordinate and Resampling Conventions", id: "part-9-implementation-and-failure-contracts",
           content: (
             <>
-              <p>
-                Every refusal is by name and happens before an answer could be
-                wrong. A disc or a turned pattern that would read outside the
-                picture is refused with the border a detection needs to avoid it,
-                rather than padded with invented pixels. A reading of one kind
-                cannot be compared with a reading of the other, and two binary
-                readings from different pair patterns cannot be compared either,
-                since the bits would not mean the same thing. A set of readings
-                mixing kinds is refused at construction.
-              </p>
-              <p>
-                A move cannot be fixed from fewer than two matches, and two
-                matches that share a position on either side fix nothing, so a set
-                of matches in which every pair shares a position is refused by
-                name rather than answered with a transform that explains nothing.
-                A scale that is not positive, an angle that is not finite and a
-                ratio threshold outside the half-open unit interval are each
-                refused where they are given.
-              </p>
-              <p>
-                What is deliberately absent is said as plainly. No sub-pixel
-                refinement of a keypoint&rsquo;s position, no scale space finer
-                than the pyramid&rsquo;s levels, and no learned pair pattern, which
-                are what separate these readings from their reference
-                implementations. The two refinements that cost nothing and matter
-                are kept, sharing each sample between neighbouring cells and bins
-                rather than rounding it into one, and refining the orientation
-                peak with a parabola rather than taking a bin&rsquo;s centre.
-              </p>
+              <p>The SDK checks whether the requested samples fit inside the image. Orientation discs and rotated descriptor patterns that extend outside it raise an error rather than being padded. A suitable detection border avoids those errors. It also rejects comparisons between descriptor kinds or between binary patterns with different sample pairs, because corresponding entries would no longer describe the same measurements. These checks catch incompatible inputs; they do not guarantee that a valid match is correct.</p>
+              <p>Estimating this transform requires at least two nondegenerate correspondences. The estimator skips pairs sharing a position on either side and raises an error if none can propose a transform. It also checks that scale is positive and finite, angle is finite, and the ratio threshold is greater than zero and at most one. A threshold of one is allowed and accepts distance ties, which is why the playground can use it to disable ratio rejection.</p>
+              <p>These teaching implementations omit subpixel keypoint refinement, a continuous scale space beyond the pyramid levels, and a learned binary pair pattern. They retain interpolation across neighboring cells and direction bins, together with parabolic refinement of the orientation peak. Stating those choices matters when comparing the measured results with reference ORB or SIFT implementations.</p>
             </>
           ),
         },
@@ -713,12 +457,12 @@ export default function ImageAlignmentPage() {
             trueFalse(
               "On the scene shrunk to 0.8 and turned forty degrees, every match the method kept was right.",
               false,
-              "Eleven matches, seven right and nine kept, so two wrong matches were kept because they happened to land within 1.5 pixels of where the recovered move sends them. The move itself is recovered at 39.97 degrees, which is the method tolerating two wrong inliers rather than being misled by them.",
+              "The estimated transform has nine inliers, including two correspondences that are wrong under the planted ground truth but within the 1.5-pixel tolerance. Its recovered rotation is still close to the known value. An inlier therefore means geometrically consistent within the chosen threshold, not necessarily a true correspondence. Those false inliers can influence the refitted parameters.",
             ),
             choice(
               "On the opening move, six levels of pyramid at a factor of 1.2 found 126 keypoints and got six matches right where one level got ten. Why?",
               [
-                "Each corner was found at several neighbouring sizes, and those copies were each other's runners-up under the ratio test",
+                "Each corner was found at several neighboring sizes, and those copies were each other's runners-up under the ratio test",
                 "The smaller levels have fewer pixels, so their descriptions are noisier",
                 "The pyramid turns the picture as well as shrinking it",
                 "Six levels take longer and the matching was stopped early",
@@ -740,14 +484,14 @@ export default function ImageAlignmentPage() {
             trueFalse(
               "A set of matches in which every pair shares a position on one side is refused, because such pairs fix no move.",
               true,
-              "Two matches that share a first position or a second position give three distinct points rather than four, and a similarity cannot be read off them. When every pair is like that there is no proposal to vote on, and the refusal says so rather than returning a transform that explains nothing.",
+              "Estimating a nonzero-scale similarity from two correspondences requires distinct points on both sides. A repeated source paired with different destinations is inconsistent, while different sources paired with one destination would collapse scale to zero. This implementation rejects those degenerate proposal pairs; if no usable pair remains, it cannot estimate a transform.",
             ),
           ],
         },
         {
           title: "Practice. Lining Up Pictures With the Library",
           practice: [
-            exercise("Read one corner before and after a quarter turn",["Draw the lesson's bent bar, turn it a quarter circle with numpy, and give the corners of both pictures a direction with the centre-of-brightness rule.", "Find the corner at row 14, column 14 in the first picture and the corner it lands on in the second, at row 34, column 14. Print the direction each faces in degrees, then read both with the binary descriptor and print how many of the 256 bits differ."],`import numpy as np
+            exercise("Read one corner before and after a quarter turn",["Draw the lesson's bent bar, turn it a quarter circle with numpy, and give the corners of both pictures a direction with the center-of-brightness rule.", "Find the corner at row 14, column 14 in the first picture and the corner it lands on in the second, at row 34, column 14. Print the direction each faces in degrees, then read both with the binary descriptor and print how many of the 256 bits differ."],`import numpy as np
 from oop_ml.core.computer_vision.alignment import (
     BinaryDescriptor, IntensityCentroidRule, oriented_keypoints_of,
 )
@@ -787,7 +531,7 @@ reading_after = BinaryDescriptor.of(turned, twin)
 print(f"bits that differ: {reading.distance_to(reading_after):.0f} of {reading.n_values}")`,`before the turn the corner faces 45.00 degrees
 after the turn it faces -45.00 degrees
 bits that differ: 0 of 256`,{...{ hints: ["A border of 12 keeps every corner's patch inside the picture; the detector reports nothing nearer the frame than that.", "The oriented keypoints carry a row, a column and an angle in radians, so numpy's degrees turns the angle into what the lesson quotes.", "A descriptor is read from a picture and an oriented keypoint, and two descriptors of the same kind answer their distance to each other."], check: numberCheck("What direction, in degrees, does the corner face after the turn?", -45.0, 0.05, "The estimated orientation rotates with this ideal corner, and the descriptor rotates its comparison pattern with it. The bit agreement is measured on this exact quarter-turn example, not guaranteed for arbitrary rotated photographs.") },question:"Does rotating the sampling pattern preserve this corner's descriptor?"}),
-            exercise("Recover a planted move from three points",["Build a move with a scale of 1.3, a turn of 0.6 radians and a shift of four down and two to the left, carry three points through it, and fit a move back from the pairs.", "Part 5 says two pairs fix the four numbers and more make the fit a least-squares one. Print the recovered four numbers, the turn in degrees, and the largest gap between the recovered numbers and the planted ones."],`import numpy as np
+            exercise("Recover a planted move from three points",["Construct the supplied similarity transform: scale 1.3, rotation 0.6 radians, row shift 4 and column shift −2. Apply it to the three point coordinates, then recover a SimilarityTransform from the original and transformed point pairs.", "Print the recovered scale, angle in radians and degrees, row and column shifts, and largest absolute difference from the supplied parameters. Two distinct informative pairs can identify this transform; extra pairs let the method minimize coordinate error jointly."],`import numpy as np
 from oop_ml.core.computer_vision.alignment import SimilarityTransform
 
 planted = SimilarityTransform(1.3, 0.6, 4.0, -2.0)
@@ -815,7 +559,7 @@ print(f"largest gap from the planted numbers {max(gaps):.2e}")`,`scale 1.300000
 turn 0.600000 radians, 34.38 degrees
 shift 4.000000 down, -2.000000 right
 largest gap from the planted numbers 1.33e-15`,{...{ hints: ["A move carries an array of (row, column) points with applied_to, and answers one landing position per point.", "The fit takes the first points and the second points as two arrays of the same shape, and answers a move of the same kind."], check: numberCheck("What turn, in degrees, does the recovered move report?", 34.38, 0.01, "The supplied point pairs recover the planted similarity transform to floating-point precision. Its angle agrees with the planted rotation; enough distinct, informative point correspondences are required to identify the transform.") },question:"Can the point pairs recover the transformation used to move them?"}),
-            exercise("Line up a scene you drew yourself",["Use the supplied scene generator so that the numeric checks describe the same scene. Rotate it a quarter turn about the frame centre and shift it three pixels down and five left. Run the keypoint, descriptor, matching and geometric-consensus procedure on the pair.","Print both keypoint counts, the retained match count, the inlier and outlier counts, the recovered turn, and the mean pixel difference before and after aligning the second image back. Inliers are matches supporting the fitted transformation; outliers are rejected correspondences."],`import math
+            exercise("Line up a scene you drew yourself",["Use the supplied scene generator so that the numeric checks describe the same scene. Rotate it a quarter turn about the frame center and shift it three pixels down and five left. Run the keypoint, descriptor, matching and geometric-consensus procedure on the pair.","Print both keypoint counts, the retained match count, the inlier and outlier counts, the recovered turn, and the mean pixel difference before and after aligning the second image back. Inliers are matches supporting the fitted transformation; outliers are rejected correspondences."],`import math
 import numpy as np
 from oop_ml.core.computer_vision.alignment import (
     AlignmentEstimate, DescriptorSet, IntensityCentroidRule, SimilarityTransform,
@@ -881,7 +625,7 @@ print(f"difference before {mean_absolute_difference(first, second):.4f}, after {
 inliers 6, outliers 4
 planted turn 90.00 degrees, recovered 90.00 degrees
 difference before 0.1805, after 0.0000`,{...{ hints: ["A quarter turn is exact, so every corner lands on a pixel and the matches that are right come back at zero bits.", "A set of descriptors is built from a picture and its oriented keypoints, and matched to another set with the ratio test at its default of 0.8.", "The estimate carries the recovered move as its transform, and aligned carries the second picture back into the first picture's frame."], check: numberCheck("How many matches did the ratio test keep?", 10.0, 0.5, "Some visually similar corners propose incorrect correspondences. The geometric consensus retains the matches agreeing on the planted move, allowing this supplied scene to align despite those outliers.") },question:"Can the supplied scene be aligned despite incorrect corner matches?"}),
-            exercise("Turn it twenty degrees instead and see what survives",["Keep the scene from the last problem and turn it twenty degrees rather than a quarter circle, so that no pixel lands on a pixel and the second picture is resampled.", "Run the same pipeline. On this scene the ratio test is left with a single match, and fixing a move from one match is refused by name rather than answered. Catch the refusal and print it."],`import math
+            exercise("Turn it twenty degrees instead and see what survives",["Reuse the previous scene but rotate it twenty degrees about the same center instead of ninety, keeping the row and column shifts unchanged. This rotation requires resampling, so the resulting pixel and corner patterns need not match the exact quarter-turn case.", "Run the same detection, description and matching settings. Print the keypoint and match counts, then attempt AlignmentEstimate.of. Catch MLLibError and print its class name and message. Inspect whether enough usable correspondences survive to estimate the transform."],`import math
 import numpy as np
 from oop_ml.core.computer_vision.alignment import (
     AlignmentEstimate, DescriptorSet, IntensityCentroidRule, SimilarityTransform,
@@ -949,7 +693,7 @@ except MLLibError as refusal:
     print(type(refusal).__name__)
     print(refusal)`,`keypoints 20 and 40, matches 1
 TooFewValuesError
-two matches fix a similarity and one cannot; got 1`,{...{ hints: ["The resampled picture has jagged edges where the exact one had straight ones, and the corner detector finds far more candidates in it than in the original.", "The lesson's own scene survives a thirty-degree turn with fifteen matches because its shapes are more distinct within a patch than this one's; a scene with more texture inside each shape would too."] },question:"What changes when rotation requires resampling the image?"}),
+two matches fix a similarity and one cannot; got 1`,{...{ hints: ["The resampled picture has jagged edges where the exact one had straight ones, and the corner detector finds far more candidates in it than in the original.", "The lesson's different scene retains more correspondences under its thirty-degree rotation. Texture and distinctive local patterns can help, but descriptor sampling, interpolation, thresholds and geometry all affect whether this scene yields enough matches."] },question:"What changes when rotation requires resampling the image?"}),
           ],
         },
       ]}

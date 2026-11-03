@@ -89,7 +89,7 @@ export function RowAxisDemo() {
         The first {SHOWN} of the twenty; the rest read the same way.
       </p>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Stat label="distinct rows after layer normalisation, of 20" value={String(distinct)} />
+        <Stat label="distinct rows after layer normalization, of 20" value={String(distinct)} />
         <Stat label="widest distance from ±1, layer" value={formatMagnitude(widest)} />
         <Stat label="person 1, row mean and deviation" value={`${layer.statistics[0].mean}, ${layer.statistics[0].deviation.toFixed(7)}`} />
         <Stat label="column means, batch" value={`${batch.statistics[0].mean}, ${batch.statistics[1].mean}`} />

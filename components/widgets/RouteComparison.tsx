@@ -100,8 +100,8 @@ export function RouteComparison() {
       <div className="mb-3 grid grid-cols-2 gap-2 font-mono text-xs text-slate-700 dark:text-slate-200 sm:grid-cols-4">
         <div className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">height {chosen.x} cm</div>
         <div className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">weight {chosen.y} kg</div>
-        <div className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">standardised height {softmax ? softmax.standardised_points[person][0].toFixed(3) : "…"}</div>
-        <div className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">standardised weight {softmax ? softmax.standardised_points[person][1].toFixed(3) : "…"}</div>
+        <div className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">standardized height {softmax ? softmax.standardised_points[person][0].toFixed(3) : "…"}</div>
+        <div className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">standardized weight {softmax ? softmax.standardised_points[person][1].toFixed(3) : "…"}</div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

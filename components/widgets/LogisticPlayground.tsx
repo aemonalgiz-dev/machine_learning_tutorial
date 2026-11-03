@@ -81,15 +81,15 @@ function toHours(px: number) {
 function statusText(fit: LogisticFit | null, learningRate: number): string {
   if (!fit) return "…";
   if (learningRate > 2 && fit.slope > 5) {
-    return "The climb is overshooting. Each stride flies past the top, the slope balloons instead of settling, and the boundary wanders.";
+    return "The curve is steep and the learning rate is large. Large parameter updates can overshoot a better likelihood. Reduce the rate and compare whether the fit settles.";
   }
   if (fit.slope > 5) {
-    return "The two classes no longer overlap, so nothing stops the slope growing and the curve steepens toward a step.";
+    return "The large slope makes probabilities change sharply near the boundary. With perfectly separated classes, an unregularized logistic fit can keep increasing its coefficients instead of reaching a finite optimum.";
   }
   if (fit.boundary === null) {
     return "The fitted curve is level, so no boundary exists to report.";
   }
-  return `The curve crosses one half at ${fit.boundary.toFixed(2)} hours, and everything to the right is called a pass.`;
+  return `The estimated pass probability crosses 0.5 at ${fit.boundary.toFixed(2)} hours. With this slope, observations to the ${fit.slope > 0 ? "right" : "left"} of that boundary are predicted to pass.`;
 }
 
 export function LogisticPlayground() {

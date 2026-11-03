@@ -86,5 +86,5 @@ export function readPrediction(text: string, expected: Data): { value?: Data; er
     const value: unknown = JSON.parse(text);
     if (value === null || typeof value === "number" || typeof value === "boolean" || typeof value === "string" || typeof value === "object") return { value: value as Data };
   } catch { /* Explain the format without losing what the learner wrote. */ }
-  return { error: "Use a number, true or false, or an array such as [2, 4]. For a table, put each row in brackets: [[2, 4], [1, 3]]." };
+  return { error: "Enter a number, true or false, null, a list (array), or a named record in JSON. Examples are [2, 4] and {\"count\": 2}. For a table, put each row in its own list." };
 }

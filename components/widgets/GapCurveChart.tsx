@@ -296,8 +296,9 @@ export function GapCurveChart() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The indigo curve can only climb as the degree rises, while the amber
-        one turns around, and the turn is where honest capacity ends.
+        Training R² improves as the degree increases, but the held-out score
+        eventually falls. Beyond its best held-out result, the added terms fit
+        details that do not help on these unseen observations.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">

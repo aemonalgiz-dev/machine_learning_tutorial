@@ -83,7 +83,7 @@ export function MercerProbe() {
         {!fit && refusal && (
           <text x={FRAME.left + plotWidth / 2} y={FRAME.top + 24} textAnchor="middle" className="fill-rose-500 text-xs font-medium">no fit, the solve was refused</text>
         )}
-        <text x={FRAME.left} y={FRAME.height - 10} className="fill-slate-500 text-[10px] dark:fill-slate-400">tanh({GAMMA} a·b + {constant.toFixed(2)}) on the centred times, at penalty {formatSmall(penalty)}</text>
+        <text x={FRAME.left} y={FRAME.height - 10} className="fill-slate-500 text-[10px] dark:fill-slate-400">tanh({GAMMA} a·b + {constant.toFixed(2)}) on the centered times, at penalty {formatSmall(penalty)}</text>
       </svg>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="smallest Gram eigenvalue" value={smallest === null ? "…" : smallest.toFixed(4)} />

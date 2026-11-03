@@ -80,7 +80,7 @@ export function PointwisePlayground() {
       </h2>
       <p className="mb-3 text-sm text-slate-600 dark:text-slate-400">
         Pick the marked-up sentences, type anything, and every gap between two
-        neighbouring characters is given its own yes or no. Click a bar to see
+        neighboring characters is given its own yes or no. Click a bar to see
         what pushed that one gap either way. The whole-sequence method of the
         previous page is fitted on exactly the same sentences and answers
         underneath.

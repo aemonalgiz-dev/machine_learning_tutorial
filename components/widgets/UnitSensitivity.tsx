@@ -66,13 +66,13 @@ export function UnitSensitivity() {
         <>
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {answer.variants.map((grouping) => panel(grouping, `height in ${grouping.unit}`))}
-            {panel(answer.standardised, "both features standardised")}
+            {panel(answer.standardised, "both features standardized")}
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {answer.variants.map((grouping) => (
               <Stat key={grouping.unit} label={`inertia, ${grouping.unit}`} value={grouping.inertia.toFixed(1)} />
             ))}
-            <Stat label="inertia, standardised" value={answer.standardised.inertia.toFixed(3)} />
+            <Stat label="inertia, standardized" value={answer.standardised.inertia.toFixed(3)} />
           </div>
         </>
       )}

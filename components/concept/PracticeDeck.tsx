@@ -1,8 +1,11 @@
 "use client";
+import { FeedbackExplanation, InlineCodeText } from "./FeedbackExplanation";
+import { americanEnglish } from "@/lib/american-english";
+
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { challengeQuestion, type Exercise, NUMPY_SETUP_COMMANDS, SETUP_COMMANDS } from "@/lib/exercises";
+import { challengeQuestion, displayExerciseTitle, type Exercise, NUMPY_SETUP_COMMANDS, SETUP_COMMANDS } from "@/lib/exercises";
 import { draftKey, readLegacyAccountDraft, type PracticeDraft } from "@/lib/practice-drafts";
 import { useLearnerField, fingerprint, migrateLearnerRecord, useLearnerRecord } from "@/lib/learner-state";
 import { getProgressAccount, useProgressAccount } from "@/lib/progress";
@@ -12,6 +15,7 @@ import type { PythonResult } from "@/lib/python";
 import { ProgramOutput, PythonCode } from "./PythonCode";
 import { BotieSays } from "@/components/site/Botie";
 import { SqlData } from "./SqlData";
+import { reportLearningActivity } from "@/lib/learning-activity";
 
 const PythonEditor = dynamic(() => import("./PythonEditor"), {
   ssr: false,
@@ -95,9 +99,11 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
     update(index, { result: undefined });
     const execution = await run(source, check ? exercises[index].output : undefined, check ? exercises[index].tests : undefined, exercises[index].exports, exercises[index].sql);
     if (!mounted.current) return;
+    if (getProgressAccount() !== account) return;
     const passed = !execution.error && execution.tests.length > 0 && execution.tests.every((test) => test.status === "passed");
     const comparison = { passed, message: passed ? "Every test passed. Your code produced the requested results." : "The test results below show what to work on next." };
     if (check && !execution.error && !comparison.passed) setExpectedShown(true);
+    if (check && comparison.passed) reportLearningActivity("code", `code:${lesson}:${fingerprint(exercises.map(problem => problem.title))}:${index}`, account);
     update(index, {
       result: { execution, source, checked: check, ...comparison },
       solved: latest.current[index].solved || (check && comparison.passed),
@@ -122,7 +128,8 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
           {exercises.map((problem, index) => (
             <li key={problem.title}>
               <button type="button" onClick={() => changeCard(index)}
-                aria-label={`Challenge ${index + 1}: ${problem.title}${attempts[index].solved ? ", tests passed" : ""}`}
+                aria-label={`Challenge ${index + 1}: ${americanEnglish(displayExerciseTitle(problem))}${attempts[index].solved ? ", tests passed" : ""}`}
+                title={americanEnglish(displayExerciseTitle(problem))}
                 aria-current={index === card ? "step" : undefined}
                 className={"flex h-8 w-8 items-center justify-center rounded-md border font-mono text-xs transition " +
                   (index === card ? "border-accent-fill bg-accent-soft text-accent" : "border-line bg-surface text-muted hover:text-foreground")}
@@ -136,9 +143,9 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
         <div className="min-w-0" role="group" aria-label="Challenge instructions">
           <div className="rounded-xl border border-line bg-surface p-5 sm:p-6">
             <p className="mb-2 font-mono text-xs uppercase tracking-wider text-accent">Your challenge · {card + 1} of {exercises.length}</p>
-            <h3 className="text-xl font-semibold leading-snug text-foreground">{challengeQuestion(current)}</h3>
+            <h3 className="text-xl font-semibold leading-snug text-foreground">{current.question && current.question !== current.title ? challengeQuestion(current) : americanEnglish(challengeQuestion(current))}</h3>
             <div className="mt-4 space-y-3 leading-7 text-foreground">
-              {current.task.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              {current.task.map((paragraph) => <p key={paragraph}><InlineCodeText text={paragraph} /></p>)}
             </div>
             <p className="mt-4 text-sm text-muted">{isSql ? "Write your SQL in the editor. Run it to see the result table, then run the tests to check your query. Each run starts from the tables below." : "Complete the code in the editor, then run it to see what your program does. When you are ready, run the tests to check its output against the challenge."}</p>
             {isSql && <SqlData tables={current.sql?.tables ?? []} label="Challenge tables" />}
@@ -147,7 +154,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
           <details className="mt-3 rounded-lg border border-line bg-surface px-4 py-3" open={expectedShown || undefined}
             onToggle={(event) => setExpectedShown(event.currentTarget.open)}>
             <summary className="cursor-pointer text-sm font-medium text-foreground">Expected results and what the tests check</summary>
-            <p className="mt-3 text-sm leading-6 text-muted">{isSql ? "The tests compare the returned values in column and row order, then check the behaviour described below. Additional checks test whether the query still works when the data changes or whether the database enforces the requested rules. Different queries can pass." : <>The tests check that your program finishes and prints the requested results in order. Spacing can differ, and numbers are checked to the precision shown. {current.tests?.length ? "They also call your functions on further inputs. Each check below describes the behaviour it expects; different implementations can pass." : "These checks verify the printed results."}</>}</p>
+            <p className="mt-3 text-sm leading-6 text-muted">{isSql ? "The tests compare the returned values in column and row order, then check the behavior described below. Additional checks test whether the query still works when the data changes or whether the database enforces the requested rules. Different queries can pass." : <>The tests check that your program finishes and prints the requested results in order. Spacing can differ, and numbers are checked to the precision shown. {current.tests?.length ? "Additional checks cover the behavior described below. Your code can use any implementation that meets those requirements." : "These checks verify the printed results."}</>}</p>
             {current.tests?.length ? <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">{current.tests.map(test=><li key={test.name}>{test.name}</li>)}</ul> : null}
             {isSql && current.sql?.expectedTable ? <SqlData tables={[current.sql.expectedTable]} label="Expected query result" /> : <ProgramOutput output={current.output} />}
             {current.browserNote && <p className="text-sm leading-6 text-muted">{current.browserNote}</p>}
@@ -162,7 +169,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
                       {current.hints.slice(0, attempt.hintsShown).map((hint, index) => (
                         <li key={hint}>
                           <p className="mb-1 font-mono text-xs text-accent">Hint {index + 1}</p>
-                          <p>{hint}</p>
+                          <p><InlineCodeText text={hint} /></p>
                         </li>
                       ))}
                     </ol>
@@ -191,7 +198,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
               <span className="font-mono text-xs text-foreground">{isSql ? "solution.sql" : "solution.py"}</span>
               <span className="font-mono text-xs text-muted">{isSql ? "SQLite · fresh database each run" : /(?:from|import)\s+oop_ml\b/.test(current.solution) ? "NumPy + oop_ml" : /(?:from|import)\s+numpy\b/.test(current.solution) ? "Python + NumPy" : "Python · standard library"}</span>
             </div>
-            <PythonEditor key={current.title} language={current.language} label={`${isSql ? 'SQL' : 'Python'} solution for ${current.title}`} value={attempt.code}
+            <PythonEditor key={current.title} language={current.language} label={`${isSql ? 'SQL' : 'Python'} solution for ${americanEnglish(displayExerciseTitle(current))}`} value={attempt.code}
               onChange={(code) => update(card, { code })} onRun={() => void execute(false)} onCheck={() => void execute(true)} />
             <div className="flex flex-wrap items-center gap-3 border-t border-line bg-raised p-3">
               <Solid disabled={busy || !attempt.code.trim()} onClick={() => void execute(false)}>Run code</Solid>
@@ -218,7 +225,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
                   <div className="mt-3 border-t border-line pt-3 text-sm">
                     <p className={"font-semibold " + (result.passed ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300")}>{result.passed ? "All tests passed" : "Some tests need another look"}</p>
                     <p className="mt-1 text-foreground">{result.message}</p>
-                    {result.passed && current.check && <p className="mt-2 leading-6 text-muted">{current.check.because}</p>}
+                    {result.passed && current.check && <FeedbackExplanation text={current.check.because} className="mt-2 leading-6 text-muted" />}
                   </div>
                 )}
               </>

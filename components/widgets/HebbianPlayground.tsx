@@ -251,7 +251,7 @@ export function HebbianPlayground() {
           Random people
         </button>
         <button onClick={() => setPoints(CROWD)} className={BUTTON_CLASS}>
-          The crowd, unlabelled
+          The crowd, unlabeled
         </button>
         <button onClick={() => setPoints(CIRCLE)} className={BUTTON_CLASS}>
           The circle

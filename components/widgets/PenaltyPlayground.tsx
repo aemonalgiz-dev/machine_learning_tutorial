@@ -99,12 +99,12 @@ function formatPenalty(penalty: number): string {
 function statusText(fit: PenalisedFit | null, model: PenaltyModel): string {
   if (!fit) return "…";
   if (model === "ridge") {
-    return "Under ridge all nine terms shrink together as the penalty grows, though none of them ever reaches exactly zero.";
+    return "Ridge penalizes the sum of squared coefficients. A larger penalty favors smaller coefficients overall, though individual correlated terms need not decrease together. Ridge generally keeps terms rather than selecting them by setting coefficients to zero.";
   }
   if (fit.nonzero_count === 0) {
-    return "The penalty has switched every term off, so the curve is a flat line at the mean, a model that has given up on the input entirely.";
+    return "All nine feature coefficients are zero. Only the unpenalized intercept remains, so the model predicts the training mean for every input.";
   }
-  return `Under lasso the penalty has switched terms off outright, leaving ${fit.nonzero_count} of the nine still working.`;
+  return `Lasso can set coefficients exactly to zero. This fit retains ${fit.nonzero_count} nonzero coefficients out of nine; the remaining terms no longer affect its predictions.`;
 }
 
 export function PenaltyPlayground() {
@@ -286,7 +286,7 @@ export function PenaltyPlayground() {
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         The bars are the nine coefficients on a shared scale. Indigo is
-        positive, amber is negative, grey is switched off.
+        positive, amber is negative, gray is switched off.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">

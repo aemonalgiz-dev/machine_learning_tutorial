@@ -25,9 +25,9 @@ import { SelfOrganisingMapPlayground } from "@/components/widgets/SelfOrganising
 import { WhatEachCellHolds } from "@/components/widgets/WhatEachCellHolds";
 
 export const metadata: Metadata = {
-  title: "Self-Organising Maps · oop_ml",
+  title: "Self-Organizing Maps · Perceptron Lab",
   description:
-    "A large collection of measurements is difficult to picture at once. A self-organising map arranges representative examples on a small grid, trying to keep similar observations near one another.",
+    "A self-organizing map places representative vectors on a grid. Nearby positions are encouraged to respond to similar observations, giving a spatial summary of data that may have many dimensions.",
 };
 
 const link =
@@ -41,34 +41,10 @@ export default function SelfOrganisingMapPage() {
       technicalStart="Part 2. One Person, One Presentation"
       openingTitle="A Grouping Is Useful; a Map Can Show More"
       playgroundTitle="Arrange nearby observations on a map"
-      playgroundIntro="Follow one example's winning cell and the neighbouring cells it updates. Compare their grid positions with the feature values those cells represent."
-      title="Self-Organising Maps"
-      tagline={"A large collection of measurements is difficult to picture at once. A self-organising map arranges representative examples on a small grid, trying to keep similar observations near one another."}
-      prerequisites={
-        <>
-          Which cell is nearest is the{" "}
-          <Link href="/primers/linear-algebra" className={link}>
-            linear algebra primer
-          </Link>
-          &rsquo;s distance, and where a cell comes to rest is the{" "}
-          <Link href="/primers/statistics" className={link}>
-            statistics primer
-          </Link>
-          &rsquo;s mean, arrived at one person at a time. Read the{" "}
-          <Link href="/concepts/k-means" className={link}>
-            k-means page
-          </Link>{" "}
-          first, since this page spends four of its parts saying what a grid
-          adds to that loop and one part showing that with the grid switched off
-          the two methods are the same method. The rule that moves a cell is
-          local in the sense the{" "}
-          <Link href="/concepts/hopfield-network" className={link}>
-            Hopfield page
-          </Link>{" "}
-          gave the word, each cell reading only the person in front of it and
-          its own place on the grid.
-        </>
-      }
+      playgroundIntro="Follow one example's winning cell and the neighboring cells it updates. Compare their grid positions with the feature values those cells represent."
+      title="Self-Organizing Maps"
+      tagline={"A self-organizing map places representative vectors on a grid. Nearby positions are encouraged to respond to similar observations, giving a spatial summary of data that may have many dimensions."}
+      prerequisites={<>The <Link href="/primers/linear-algebra" className={link}>linear algebra primer</Link> explains vectors and distances. <Link href="/concepts/k-means" className={link}>K-means</Link> introduces representative centers and assignments; this page adds a fixed neighborhood between representatives and compares the resulting updates. The <Link href="/primers/statistics" className={link}>statistics primer</Link> explains averages, which help interpret where representatives move. The local adjustment uses an observation and a representative after the winning grid cell has been identified. For another iterative network update, see the <Link href="/concepts/hopfield-network" className={link}>Hopfield page</Link>.</>}
 
       playground={<SelfOrganisingMapPlayground />}
       sections={[
@@ -78,39 +54,25 @@ export default function SelfOrganisingMapPage() {
           content: (<>
 <>
               <SubSection title="1. Eleven people and no labels">
+                <p>The plot contains eleven people described by height and weight. We supply no category labels. Three observations are short and light, three are tall and heavy, and five lie between them. We want a small map that represents those measurement patterns and places similar representatives near one another.</p>
                 <p>
-                  The crowd in the box above is eleven people measured twice
-                  over, once for height in centimetres and once for weight in
-                  kilograms, with whatever else was known about them thrown
-                  away. Three of them are short and light, three are tall and
-                  heavy, and five sit in between. Nothing here is a question
-                  with an answer to be predicted, so the only thing that can be
-                  found is whatever structure the two columns already have.
-                </p>
-                <p>
-                  K-means gave us a centre for each group and assigned observations to those centres. We can compare the centres in measurement space, but the method does not arrange them on a map with a prescribed neighbourhood. A self-organising map adds that arrangement. We will see how neighbouring map cells influence one another while they learn.
+
+                  K-means gave us a center for each group and assigned observations to those centers. We can compare the centers in measurement space, but the method does not arrange them on a map with a prescribed neighborhood. A self-organizing map adds that arrangement. We will see how neighboring map cells influence one another while they learn.
                 </p>
                 <KeepInMind>
-                  Both methods on this page work on unlabelled measurements. No
-                  person here carries an answer, and any colour you see was put
+
+                  Both methods on this page work on unlabeled measurements. No
+                  person here carries an answer, and any color you see was put
                   there by the method rather than read off the data.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. What a grouping cannot tell you">
+                <p>Suppose k-means returns groups numbered 0, 1 and 2. Those IDs identify groups; they do not say which groups resemble one another. The fitted centers do contain measurements we could compare, but the group numbering supplies no neighborhood. A self-organizing map adds an explicit arrangement of neighboring cells.</p>
                 <p>
-                  Suppose the grouping method hands back three groups numbered
-                  0, 1 and 2. Is group 0 more like group 1 than it is like group
-                  2? The numbers cannot say. Nothing in the method ever compared
-                  one group with another; each centre was moved only toward the
-                  people who chose it, and the numbering came from whichever
-                  order the starting centres happened to be drawn in. Run the
-                  same fit from a different seed and the same three groups come
-                  back wearing different numbers.
-                </p>
-                <p>
+
                   You could of course measure afterwards how far apart the three
-                  centres landed and rank them yourself. That is a fair thing to
+                  centers landed and rank them yourself. That is a fair thing to
                   do and it is not what a map does. A map fixes the arrangement
                   before it sees any data, as part of the model, and then
                   arranges the answer to fit it.
@@ -118,36 +80,10 @@ export default function SelfOrganisingMapPage() {
               </SubSection>
 
               <SubSection title="3. The grid the answer is laid out on">
-                <p>
-                  So fix a small grid, say a row of four squares, and give each
-                  square a position in the height and weight plane. Call each
-                  square a cell. The grid never changes during the fit, so cell
-                  1 is beside cell 2 and two steps from cell 3 for the whole
-                  run, whatever those cells are doing among the people. What the
-                  fit moves is where each cell sits in the plane.
-                </p>
-                <p>
-                  Fitted to the crowd, the four cells come to rest at (177.0,
-                  76.8), (160.3, 59.0), (144.1, 46.6) and (123.2, 28.5), reading
-                  along the row. Those are the same four prototypes a grouping
-                  would produce, except that this time the order they are stored
-                  in means something. Reading along the grid reads down through
-                  the crowd from the tallest and heaviest to the shortest and
-                  lightest, and a fifth person handed to the finished model
-                  would land somewhere on that row rather than in a group with
-                  no neighbours.
-                </p>
+                <p>Give each cell a fixed place on a small grid and a changeable representative in measurement space. These are two different locations. Cell 1 stays beside cell 2 and two steps from cell 3 on the grid, while its stored height-and-weight vector moves during training. The grid defines which representatives should learn together.</p>
+                <p>The fitted four-cell row holds (177.0, 76.8), (160.3, 59.0), (144.1, 46.6) and (123.2, 28.5), in grid order. These are representative vectors, like cluster centers, although their positions need not match a k-means fit. Along this map, height and weight decrease together. A new observation is assigned to its nearest representative and therefore to that representative’s grid position.</p>
                 <InAModel title="The claim as one number">
-                  <p>
-                    Take every pair of cells and write down two things about it,
-                    how many steps apart the two sit on the grid, and how far
-                    apart they came to rest among the people. On the chain of
-                    four over the crowd those two quantities correlate at
-                    0.9902. Refit the same four cells with the reach switched
-                    off, which is section 15, and the same measurement gives
-                    &minus;0.1773, which is no relationship and a different
-                    absence of one at every seed.
-                  </p>
+                  <p>For each pair of cells, compare their fixed grid distance with the distance between their learned measurement vectors. Across the six pairs in this four-cell row, the correlation is 0.9902. With neighborhood influence disabled, it is −0.1773 in the comparison fit: much weaker agreement with that grid order. This small comparison illustrates an ordering effect, rather than proving that every winner-only fit has no relationship at all.</p>
                 </InAModel>
                 <KeepInMind>
                   A map produces a set of prototypes, as a grouping does, and it
@@ -165,19 +101,10 @@ export default function SelfOrganisingMapPage() {
           content: (
             <>
               <SubSection title="4. Compete, cooperate, adapt">
-                <p>
-                  Start every cell somewhere sensible, on a randomly drawn
-                  person, and then show the people one at a time, in a fresh
-                  shuffled order each pass through the data. For each person,
-                  three things happen. First the cells compete, and the one
-                  nearest the person wins. Then they cooperate, and every cell
-                  is given a score for how near it sits to the winner on the
-                  grid. Then they all adapt, each moving toward the person by
-                  its score times a fraction called the step.
-                </p>
+                <p>Initialize the representatives from randomly drawn observations, then present observations one at a time in shuffled passes. Find the representative nearest the current person. That winning cell moves toward the person, and nearby grid cells move too, with an influence that decreases with grid distance. The learning rate controls what fraction of the discrepancy each update removes.</p>
                 <Equation>
                   {
-                    "winner    = the cell u minimising ‖person − cell_u‖\nscore_u   = exp( −d(u, winner)² / (2 · reach²) )\ncell_u    ← cell_u + step · score_u · (person − cell_u)"
+                    "winner    = the cell u minimizing ‖person − cell_u‖\nscore_u   = exp( −d(u, winner)² / (2 · reach²) )\ncell_u    ← cell_u + step · score_u · (person − cell_u)"
                   }
                 </Equation>
                 <p>
@@ -188,13 +115,8 @@ export default function SelfOrganisingMapPage() {
                   one.
                 </p>
                 <KeepInMind>
-                  Nothing in that rule reaches outside the cell it is updating.
-                  A cell needs the person in front of it, its own current
-                  position, and how far it sits from the winner on a grid that
-                  was fixed before any data arrived. There is no error
-                  travelling backward from anywhere, because there is no target
-                  to compute an error against.
-                </KeepInMind>
+
+                  After the winning cell is identified, each update uses the observation, the cell’s representative and its fixed grid distance from that winner. Winner selection itself compares all representatives in measurement space. There is no backpropagated target error in this update rule.</KeepInMind>
               </SubSection>
 
               <SubSection title="5. The winner takes the whole step">
@@ -220,7 +142,7 @@ export default function SelfOrganisingMapPage() {
                 </WorkedExample>
               </SubSection>
 
-              <SubSection title="6. The neighbours take a share of it">
+              <SubSection title="6. The neighbors take a share of it" id="6-the-neighbours-take-a-share-of-it">
                 <p>
                   The two cells either side of the winner are one step away on
                   the grid, so at a reach of one cell each of them scores exp of
@@ -233,17 +155,12 @@ export default function SelfOrganisingMapPage() {
                     "gap   = (156, 53) − (120, 30) = (36, 23)\nmove  = 0.5 × 0.6065 × (36, 23) = (10.92, 6.98)\ncell  = (120, 30) + (10.92, 6.98) = (130.92, 36.98)"
                   }
                 </Equation>
-                <p>
-                  So the left cell travelled 12.956 where the winner travelled
-                  3.354, and it took the smaller share of the step. There is no
-                  contradiction in that, since the share scales a gap rather
-                  than a distance, and a cell far from the person has a large
-                  gap to take a small share of.
-                </p>
+                <p>The left neighbor moves 12.956 while the winner moves 3.354. Although its neighborhood multiplier is smaller, its initial difference from the observation is much larger. The multiplier scales each cell’s own difference vector, not the winner’s traveled distance.</p>
                 <OnePresentation />
                 <p>
+
                   Drag the person and watch which cell wins change. Slide the
-                  reach down to zero and the two neighbours stop moving
+                  reach down to zero and the two neighbors stop moving
                   altogether while the winner moves exactly as far as before,
                   which is section 15 in miniature. Slide the step up to one and
                   the winner lands on the person and forgets everything it had
@@ -252,21 +169,14 @@ export default function SelfOrganisingMapPage() {
               </SubSection>
 
               <SubSection title="7. Everybody ends nearer the person">
-                <p>
-                  The three distances before the presentation are 42.720, 6.708
-                  and 29.411, and after it they are 29.765, 3.354 and 20.492.
-                  Every cell is nearer the person than it was, and that holds
-                  for any step between zero and one, because the move is along
-                  the straight line from the cell to the person and stops short
-                  of arriving.
-                </p>
+                <p>The three distances fall from 42.720, 6.708 and 29.411 to 29.765, 3.354 and 20.492 in this update. Each cell moves along its own line toward the observation. When the effective rate is between zero and one, distance cannot increase. It decreases strictly when the rate and initial difference are nonzero; at zero nothing changes, and at rate one the winner reaches the observation.</p>
                 <NumberTable
                   headings={[
                     "cell",
                     "share",
                     "distance before",
                     "distance after",
-                    "travelled",
+                    "traveled",
                   ]}
                   rows={[
                     ["(0, 0)", "0.6065", "42.720", "29.765", "12.956"],
@@ -290,22 +200,13 @@ export default function SelfOrganisingMapPage() {
 <p>
                     The slope points from the person toward the cell, so stepping against it steps from the cell toward the person, which is exactly the rule with the score and the step as the size of the stride. Each cell is walking downhill on its own squared distance to whichever person is in front of it, scaled by how near it sits to the winner.
                   </p>
-                  <p>
-                    That is also the reason the metric is not a setting to be chosen here. Under a different measure of distance the slope is a different expression, and swapping the measure changes the rule rather than the ruler.
-                  </p>
+                  <p>This implementation fixes the winner metric to Euclidean distance. That matches the squared-distance interpretation of the linear update. Using another metric can be a useful variant, but the winner rule and representative update need to be considered together rather than assuming every choice has the same interpretation.</p>
 </>
                 </WhyThisWorks>
               </SubSection>
 
               <SubSection title="8. The distance on the grid is not the distance in the data">
-                <p>
-                  Two distances appear in the rule and they are not the same
-                  kind of thing. The competition asks how far a person is from a
-                  cell, which is measured in centimetres and kilograms and
-                  changes at every presentation. The cooperation asks how far
-                  one cell is from another on the grid, which is measured in
-                  cells and never changes at all.
-                </p>
+                <p>Finding the winner uses distance in measurement space: compare the person’s height and weight with each stored representative. Sharing the update uses distance on the fixed grid: compare cell positions. The former changes as representatives learn; the latter describes the map’s unchanged neighborhood layout.</p>
                 <DerivationTable
                   expressionHeading="quantity"
                   reasonHeading="what it is measured in, and whether it moves"
@@ -322,16 +223,7 @@ export default function SelfOrganisingMapPage() {
                     },
                   ]}
                 />
-                <p>
-                  Putting the second quantity where the first belongs gives a
-                  model that runs without complaint and reports plausible
-                  figures, and two things then go wrong that were found by
-                  writing it that way and running it. The grid stops mattering,
-                  so a row of eight cells and a two by four block fit
-                  identically. And the cells collapse onto one point, because
-                  cells that already agree pull each other closer, which makes
-                  them agree more.
-                </p>
+                <p>If measurement-space distance were used for neighborhood sharing instead of grid distance, the fixed grid would stop controlling that cooperation. Nearby representatives could receive similar updates regardless of whether their map cells are neighbors. That can change the organization or encourage representatives to gather together. The two distances therefore have distinct jobs.</p>
                 <KeepInMind>
                   The reach is a fact about the grid, which does not change,
                   rather than about the positions, which the rule is busy
@@ -349,17 +241,17 @@ export default function SelfOrganisingMapPage() {
               "A map hands back the same kind of prototypes a grouping does. What does it add?",
               [
                 "An arrangement of the prototypes fixed before any data arrived, so the order they are stored in means something",
-                "Prototypes that sit closer to the people than a grouping’s centres do",
+                "Prototypes that sit closer to the people than a grouping’s centers do",
                 "A rule that works out how many cells the data needs",
                 "A ranking of the groups, measured once the fit has finished",
               ],
               0,
-              "A grouping tells you who goes with whom and nothing about how the groups sit relative to one another, since each centre was moved only toward the people who chose it. Measuring afterwards how far apart the centres landed and ranking them yourself is a fair thing to do and is not what a map does, because a map fixes the arrangement as part of the model and then arranges the answer to fit it.",
+              "A grouping tells you who goes with whom and nothing about how the groups sit relative to one another, since each center was moved only toward the people who chose it. Measuring afterwards how far apart the centers landed and ranking them yourself is a fair thing to do and is not what a map does, because a map fixes the arrangement as part of the model and then arranges the answer to fit it.",
             ),
             trueFalse(
               "The reach and the competition both measure distance in the same units.",
               false,
-              "Two distances appear in the rule and they are not the same kind of thing. The competition asks how far a person is from a cell, in centimetres and kilograms, and it changes at every presentation. The cooperation asks how far one cell is from another on the grid, which is counted in cells and never changes at all.",
+              "Two distances appear in the rule and they are not the same kind of thing. The competition asks how far a person is from a cell, in centimeters and kilograms, and it changes at every presentation. The cooperation asks how far one cell is from another on the grid, which is counted in cells and never changes at all.",
             ),
             several(
               "Putting the grid distance where the competition’s distance belongs was written down and run. What happened?",
@@ -373,20 +265,20 @@ export default function SelfOrganisingMapPage() {
               "The model runs without complaint and reports plausible figures, which is why the two failures had to be found by writing it that way and running it. The reach being a fact about the grid, which does not change, rather than about the positions, which the rule is busy changing, is what stops the cooperation feeding on itself.",
             ),
             choice(
-              "The winner at (150, 50) is 6.708 from the person and a neighbour at (120, 30) is 42.720 away. At a step of a half and a reach of one cell, which of the two travels further during that presentation?",
+              "The winner at (150, 50) is 6.708 from the person and a neighbor at (120, 30) is 42.720 away. At a step of a half and a reach of one cell, which of the two travels further during that presentation?",
               [
-                "The neighbour, 12.956 against the winner’s 3.354",
+                "The neighbor, 12.956 against the winner’s 3.354",
                 "The winner, since its own score is exactly one",
                 "They travel the same distance, since the step is the same for both",
                 "Neither, since only the winner has a nonzero score",
               ],
               0,
-              "The neighbour takes 0.6065 of the step where the winner takes all of it, and still moves further. There is no contradiction, because the share scales a gap rather than a distance, and a cell far from the person has a large gap to take a small share of.",
+              "The neighbor takes 0.6065 of the step where the winner takes all of it, and still moves further. There is no contradiction, because the share scales a gap rather than a distance, and a cell far from the person has a large gap to take a small share of.",
             ),
             trueFalse(
-              "Every cell finishes a presentation nearer the person than it started, for any step between zero and one.",
+              "For a learning rate from zero to one and a neighborhood multiplier from zero to one, an updated prototype ends no farther from the current observation than it started.",
               true,
-              "The move runs along the straight line from the cell to the person and stops short of arriving, so nothing can overshoot. On the three cells shown, the distances went from 42.720, 6.708 and 29.411 to 29.765, 3.354 and 20.492.",
+              "The effective update takes a fraction of the vector from the prototype to the current observation. A fraction from zero to one cannot overshoot: zero leaves it unchanged, one reaches the observation, and intermediate fractions move it closer. This statement concerns that one observation; the move can increase its distance from others.",
             ),
         ],
         },
@@ -396,12 +288,8 @@ export default function SelfOrganisingMapPage() {
             <>
               <SubSection title="9. Two numbers falling across the walk">
                 <>
-<p>
-                  So far the step and the reach have been two fixed numbers. In a real fit both of them fall as the run goes on, and neither falls the same way. The step falls geometrically, from a half to a hundredth, because what matters about a step is its order of magnitude and a geometric fall spends most of the run at small values.
-                </p>
-                <p>
-                  The reach falls in a straight line, from half the grid&rsquo;s longest side down to a quarter of a cell, because a reach is counted in cells and the middle of the run should be the middle of its range.
-                </p>
+<p>This fit decreases both the learning rate and the neighborhood reach across its pass budget. The learning rate follows a geometric schedule from 0.5 to 0.01. It therefore spends a larger fraction of the run making small corrections. Other schedules are possible; these endpoints define the experiment shown here.</p>
+                <p>The reach decreases linearly from half the grid’s longest side to 0.25 of a cell. Early updates therefore influence a broad neighborhood, while later updates concentrate near the winner. The linear schedule is one chosen way to make that transition.</p>
 </>
                 <Equation>
                   {
@@ -419,16 +307,7 @@ export default function SelfOrganisingMapPage() {
               </SubSection>
 
               <SubSection title="10. The reach, counted in cells">
-                <p>
-                  On a three by three grid the reach begins at 1.5 cells. A cell
-                  one step from the winner then takes 0.8007 of the
-                  winner&rsquo;s move and a cell across a diagonal takes 0.6412,
-                  so almost the whole grid travels together and the arrangement
-                  is settled early, while every cell is still being dragged by
-                  everybody else&rsquo;s people. By the last pass the reach is a
-                  quarter of a cell, the neighbour&rsquo;s share is 0.000335 and
-                  the diagonal&rsquo;s is about a ten-millionth.
-                </p>
+                <p>On a three-by-three grid, the initial reach is 1.5 cells. A side neighbor has multiplier 0.8007 and a diagonal neighbor 0.6412, each applied to its own difference from the current observation. Broad influence encourages neighboring representatives to organize together. At the final reach of 0.25, those multipliers are 0.000335 and about one ten-millionth.</p>
                 <NumberTable
                   headings={[
                     "pass",
@@ -444,24 +323,11 @@ export default function SelfOrganisingMapPage() {
                   ]}
                   caption="A three by three grid over a hundred passes, read off the two curves the fit walks under."
                 />
-                <p>
-                  A quarter of a cell is not an arbitrary stopping place. At
-                  that width a cell one step away moves by a third of a
-                  thousandth of the winner&rsquo;s move, which is below anything
-                  a picture of the map could show, so for practical purposes the
-                  run has finished arranging and is refining each cell alone.
-                </p>
+                <p>The endpoint 0.25 was chosen to make influence beyond the winner very weak. A side neighbor’s multiplier is then about one third of a thousandth. It is still nonzero, and the actual displacement also depends on that cell’s difference from the observation. The run approximates winner-focused refinement rather than switching every neighbor off exactly.</p>
               </SubSection>
 
               <SubSection title="11. The step, as a fraction of the gap">
-                <p>
-                  The step is a fraction of the remaining gap rather than a
-                  distance in centimetres and kilograms. A step of a half halves
-                  the gap, a step of a hundredth closes a hundredth of it, and a
-                  step of one lands the cell exactly on the person. That last
-                  case is worth naming, because a cell that lands on the person
-                  has forgotten every other person it ever won.
-                </p>
+                <p>The step is a fraction of the difference between a representative and the current observation. A half closes half the gap; a hundredth closes a hundredth. A step of one replaces the winner’s representative with that observation, leaving none of its previous value in this update.</p>
                 <p>
 
                   A fixed step retains the same fraction of each new discrepancy. Its absolute movement still depends on the distance to the current observation. A prototype near one observation can remain far from the next, so a constant learning rate can keep it moving late in training. Reducing the rate reduces that late movement; it does not by itself establish a good arrangement.
@@ -470,21 +336,12 @@ export default function SelfOrganisingMapPage() {
 
               <SubSection title="12. How many cells still move">
                 <>
-<p>
-                  The reach is a width, and a width is hard to picture. Count cells instead. Ask how many of them take at least a thousandth of the winner&rsquo;s move, which is the smallest share that could show up in a drawing of the map. On a three by three grid over a hundred passes the answer is nine for the first eighty-nine passes, five from pass 90, and one from pass 99.
-                </p>
+<p>To make reach easier to inspect, count cells whose neighborhood multiplier is at least 0.001. That is a display threshold for influence, rather than a minimum actual movement. On the shown three-by-three grid, the count is nine for the first eighty-nine passes, five from pass 90 and one from pass 99.</p>
                 <p>
                   On a row of six cells it is six, then five from pass 80, three from pass 90 and one at pass 100.
                 </p>
 </>
-                <p>
-                  The lower chart in section 9 draws that count. It is a
-                  staircase rather than a curve, since a cell is either taking a
-                  visible share or it is not, and the staircase says the same
-                  thing the reach does in a form that can be counted, since the
-                  run begins by moving the whole grid at once and ends by moving
-                  the winner alone.
-                </p>
+                <p>The lower chart in section 9 plots this thresholded influence count. It changes in steps as cells cross the selected coefficient cutoff. Ending at one means only the winner exceeds that cutoff; the Gaussian rule can still give the other cells smaller nonzero updates.</p>
               </SubSection>
 
               <SubSection title="13. Holding one of them still at a time">
@@ -500,23 +357,13 @@ export default function SelfOrganisingMapPage() {
                 <EachDecayHeldStill />
                 <>
 <p>
-                  With both shrinking, the map settles, moving 0.2703 on its last pass, describes the people at a mean distance of 7.9669 and arranges itself at 0.9860. Hold the step at a half and the map is still travelling 13.5400 per pass at the end, roughly a fifth of the 74.7 that the settled fit&rsquo;s own six cells span, so it is being dragged a fifth of the way across the map by whoever arrived most recently.
+
+                  With both shrinking, the map settles, moving 0.2703 on its last pass, describes the people at a mean distance of 7.9669 and arranges itself at 0.9860. Hold the step at a half and the map is still traveling 13.5400 per pass at the end, roughly a fifth of the 74.7 that the settled fit&rsquo;s own six cells span, so it is being dragged a fifth of the way across the map by whoever arrived most recently.
                 </p>
-                <p>
-                  Hold the reach wide instead and the map settles beautifully, at 0.0278, and arranges itself better than anything else here, at 0.9979, while describing nobody. Its six cells span 31.2 of the arch rather than 74.7, so they rest in a knot near the middle and the mean distance from a person to their own cell is 22.7539.
-                </p>
+                <p>Holding the reach wide gives a small final-pass movement of 0.0278 and a high grid-to-data distance correlation of 0.9979. Yet its six representatives span only 31.2 of the arch rather than 74.7, and mean observation-to-winner distance is 22.7539. The map has settled into a compressed central region, so high ordering correlation alone does not establish that it represents the observations closely.</p>
 </>
-                <InAModel title="The reading that has to be honest">
-                  <p>
-                    Holding the step still gives a mean distance of 6.9227,
-                    which is lower than the settled run&rsquo;s 7.9669, and it
-                    would be easy to read that as the better map. It is not.
-                    That run is still moving 13.5400 per pass, so the number
-                    describes where the cells happened to be when the pass
-                    budget ran out, and another pass would give a different one.
-                    That is why the movement is always reported beside the mean
-                    distance rather than instead of it.
-                  </p>
+                <InAModel title="Read Movement Alongside Representation Error">
+                  <p>Holding the learning rate fixed gives a smaller mean distance, 6.9227 instead of 7.9669, at the end of these runs. It also leaves a final-pass movement of 13.5400. That fit describes the observed examples more closely by this distance metric at this checkpoint, but has not settled by the movement criterion. Report both rather than calling either one the complete measure of a better map.</p>
                 </InAModel>
                 <KeepInMind>
                   The shrinking reach is what lets the cells separate and take
@@ -538,19 +385,13 @@ export default function SelfOrganisingMapPage() {
                   longer run&rsquo;s hundredth holds.
                 </p>
                 <KeepInMind>
-                  Every change you make in the playground is a fresh fit from
-                  the same seed rather than another pass of one fit. Sliding the
-                  passes up does not continue a run, it stretches it, and
-                  nothing here records the states a run passed through, so
-                  drawing six budgets as six frames of one walk would be a small
-                  lie.
-                </KeepInMind>
+                  Each playground setting starts a fresh fit under the same seed. Changing the pass budget also changes the decay schedule, so a longer-budget result is not a continuation of a shorter run. These fits can be compared as separate outcomes; they should not be presented as consecutive frames of one recorded trajectory.</KeepInMind>
               </SubSection>
             </>
           ),
         },
         {
-          title: "Part 4. A Map With No Reach Is the Grouping Method",
+          title: "Part 4. Winner-Only Updates and Online K-Means", id: "part-4-a-map-with-no-reach-is-the-grouping-method",
           content: (
             <>
               <SubSection title="15. What the rule collapses to">
@@ -562,16 +403,7 @@ export default function SelfOrganisingMapPage() {
                 <Equation>
                   {"winner ← winner + step · (person − winner)"}
                 </Equation>
-                <p>
-                  Each person that a cell wins nudges it a fraction of the way
-                  toward them, which is a running average of the people that
-                  cell has won, assembled one at a time. The grouping method
-                  computes the same average in a single jump, by assigning
-                  everybody and then moving each centre onto its group&rsquo;s
-                  mean. The quantity being computed is the same one, and so are
-                  the places it comes to rest; what differs is the arithmetic
-                  that gets there.
-                </p>
+                <p>Without neighborhood sharing, only the winning representative moves toward the observation. This resembles an online version of k-means. A fixed learning rate gives recent winning observations more influence; it does not generally compute their exact arithmetic mean. Batch k-means instead reassigns the whole dataset and replaces each center with its group mean. The finite procedures can therefore end at different locations.</p>
               </SubSection>
 
               <SubSection title="16. The same eleven people, both ways">
@@ -594,34 +426,10 @@ export default function SelfOrganisingMapPage() {
               </SubSection>
 
               <SubSection title="17. Where the two part company">
-                <p>
-                  The agreement is not a promise, and two differences survive
-                  switching the reach off. This rule visits one person at a time
-                  under a step that decays toward something small, so a run with
-                  a pass budget can stop short of a resting place; the grouping
-                  method reassigns everybody at once and jumps each centre onto
-                  the mean, which reaches a resting place in a handful of
-                  passes. Neither difference has anywhere to bite when the
-                  groups are well separated, which is why they agreed at three
-                  cells.
-                </p>
-                <p>
-                  Slide the count up to four in the widget above and the
-                  agreement stops. On these eleven people the two methods put
-                  different people together, the furthest prototype pair sits
-                  8.0623 apart, and the chain describes its people at a mean
-                  distance of 3.5932 against the grouping method&rsquo;s 3.6373.
-                  The online walk found the better arrangement of the two here,
-                  which is luck about which local resting place each one reached
-                  rather than a general fact about the methods.
-                </p>
+                <p>Disabling neighborhood influence still leaves a different update procedure from batch k-means. The map visits one observation at a time under its learning-rate schedule; batch k-means reassigns all observations and recomputes their group means. A finite pass budget can stop either procedure at a different result. The close agreement at three representatives is an outcome of this example, not a guarantee for separated data.</p>
+                <p>At four representatives, these two fits assign some people differently. Their farthest matched prototypes are 8.0623 apart. The online fit has mean observation-to-prototype distance 3.5932, compared with 3.6373 for batch k-means. That is a comparison under the displayed mean-distance metric; k-means optimizes squared distances, and neither finite run establishes a general advantage for its method.</p>
                 <KeepInMind>
-                  A map with the reach switched off is the grouping method
-                  written as an online rule, and the two share an objective, a
-                  set of resting places and, on separated data, an answer. They
-                  do not share a guarantee of reaching the same one of those
-                  resting places.
-                </KeepInMind>
+                  With neighborhood influence disabled, the update is a winner-only online clustering rule. It is related to the squared-distance objective of k-means, but its learning-rate schedule and observation order affect the finite result. The same observations can therefore produce different fitted representatives and partitions.</KeepInMind>
               </SubSection>
 
               <SubSection title="18. What a map will do that a grouping refuses">
@@ -629,24 +437,14 @@ export default function SelfOrganisingMapPage() {
 <p>
                   Ask the grouping method for twelve groups over these eleven people and it refuses by name, since a group that nobody chose has no mean to move to. Ask a map for thirty six cells over the same eleven and it fits, and ten of the thirty six win somebody. The other twenty six are not wasted and they are not errors.
                 </p>
-                <p>
-                  They came to rest along the ways between the cells that did win, because their grid neighbours dragged them there, so a person handed to the finished map who falls between two of the winners has a cell of their own to land on.
-                </p>
+                <p>Neighborhood updates can place nonwinning cells between representatives that did win training observations. Those cells may provide useful intermediate representatives for later data. Test that behavior rather than assuming every empty training cell will attract a future example.</p>
 </>
-                <p>
-                  This is also why the starting positions matter less here than
-                  they do for a grouping. There, a centre only ever moves toward
-                  people who already chose it, so two centres landing in one
-                  clump can never separate, and a careful spreading procedure is
-                  worth its cost. Here a cell that has never won anything is
-                  still pulled about by its neighbours, so two cells starting in
-                  one clump are pushed out of it over the wide-reach passes
-                  whether or not either of them has won a single person.
-                </p>
+                <p>Neighborhood sharing also moves cells that have not won an observation. A cell initialized in a crowded region can be influenced by observations won elsewhere through its grid neighbors. This changes the effect of initialization compared with updating winners alone. It does not guarantee that poor starting positions will be repaired.</p>
                 <KeepInMind>
+
                   A cell that won nobody is an ordinary outcome on a map and it
                   is reported rather than hidden. The same request is a refusal
-                  for a grouping, and both behaviours are right for what they
+                  for a grouping, and both behaviors are right for what they
                   are computing.
                 </KeepInMind>
               </SubSection>
@@ -657,7 +455,7 @@ export default function SelfOrganisingMapPage() {
           title: "Questions on Parts 3 and 4",
           quiz: [
             choice(
-              "Why can reducing the learning rate late in training help the map's prototypes stabilise?",
+              "Why can reducing the learning rate late in training help the map's prototypes stabilize?",
               [
                 "A prototype can remain far from the next observation even when it is near earlier ones, so a fixed fractional step can keep moving it",
                 "Because the gaps themselves get smaller as the map improves",
@@ -671,12 +469,12 @@ export default function SelfOrganisingMapPage() {
               "Eighteen people along an arch, six cells, the same seed and a hundred passes, fitted four times over. Which of these did those runs report?",
               [
                 "With both shrinking, the map moved 0.2703 on its last pass and described the people at 7.9669",
-                "Holding the step at a half left the map still travelling 13.5400 per pass at the end",
+                "Holding the step at a half left the map still traveling 13.5400 per pass at the end",
                 "Holding the step still gave a mean distance of 6.9227, lower than the settled run’s figure",
                 "Holding the reach wide gave the worst arrangement of the four",
               ],
               [0, 1, 2],
-              "Holding the reach wide arranged itself better than anything else there, at 0.9979, while describing nobody, since its six cells rest in a knot spanning 31.2 of the arch rather than 74.7 and sit a mean of 22.7539 from their people. The step-held run’s lower mean distance is not the better map either, because a run still travelling 13.5400 per pass is reporting where its cells happened to be when the pass budget ran out, which is why the movement is always printed beside the mean distance.",
+              "Holding the reach wide arranged itself better than anything else there, at 0.9979, while describing nobody, since its six cells rest in a knot spanning 31.2 of the arch rather than 74.7 and sit a mean of 22.7539 from their people. The step-held run’s lower mean distance is not the better map either, because a run still traveling 13.5400 per pass is reporting where its cells happened to be when the pass budget ran out, which is why the movement is always printed beside the mean distance.",
             ),
             trueFalse(
               "Sliding the pass budget from twenty up to a hundred continues the shorter run, adding eighty more passes to its end.",
@@ -686,16 +484,16 @@ export default function SelfOrganisingMapPage() {
             choice(
               "Thirty six cells are fitted to the eleven people and ten of them win somebody. What became of the other twenty six?",
               [
-                "They came to rest along the ways between the cells that did win, dragged there by their grid neighbours",
+                "They came to rest along the ways between the cells that did win, dragged there by their grid neighbors",
                 "They stayed where they started, since nothing ever moved them",
                 "They are reported as errors, the way the grouping method refuses twelve groups over eleven people",
                 "They collapsed onto the cells that won, so the map holds ten distinct prototypes",
               ],
               0,
-              "A cell that has never won anything is still pulled about by its neighbours, which is also why starting positions matter less here than for a grouping, where two centres landing in one clump can never separate. So a person handed to the finished map who falls between two winners has a cell of their own to land on, and a cell that won nobody is an ordinary outcome reported rather than hidden.",
+              "A prototype can move through neighborhood updates even when it never wins an observation. Unused prototypes are therefore possible when there are many grid cells relative to the dataset. They may become winners for later inputs, but that is not guaranteed. K-means prototypes can also change assignments during fitting, so sharing a starting region does not make their separation impossible.",
             ),
             trueFalse(
-              "With the reach switched off, the chain of three and the grouping method put the same people together while agreeing on none of the labels.",
+              "With the reach switched off, the three-cell chain and k-means put the same people together here, although two groups have different label numbers.",
               true,
               "The chain answers 0 0 0 0 0 2 2 2 1 1 1 where the grouping method answers 1 1 1 1 1 2 2 2 0 0 0, which is the same partition written in different numbers, since nothing in either method ever said which group deserved which number. The prototypes agree closely, the furthest-separated pair sitting 0.0233 apart and the mean distance coming to 5.1887 one way and 5.1912 the other, which is why the comparison in the readout is about who shares a cell. The agreement is not a promise, and at four cells the two methods put different people together, with the furthest prototype pair 8.0623 apart.",
             ),
@@ -726,7 +524,7 @@ export default function SelfOrganisingMapPage() {
                 </p>
               </SubSection>
 
-              <SubSection title="20. Neighbouring cells hold similar people">
+              <SubSection title="20. Neighboring cells hold similar people" id="20-neighbouring-cells-hold-similar-people">
                 <p>
                   Make that measurable. Every pair of cells has two numbers, how
                   many steps apart the two sit on the grid and how far apart
@@ -734,22 +532,14 @@ export default function SelfOrganisingMapPage() {
                   itself the two rise together.
                 </p>
                 <GridDistanceAgainstDataDistance />
-                <p>
-                  With the reach the two correlate at 0.9902 across the six
-                  pairs of a chain of four. With the reach taken away they
-                  correlate at &minus;0.1773, which is no relationship, and the
-                  sign of that number changes from seed to seed because there is
-                  nothing there to have a sign. That second fit is the control
-                  the claim needs, since it describes the crowd rather better
-                  than the arranged one does and carries no arrangement
-                  whatever, so the two properties can be seen apart.
-                </p>
+                <p>With neighborhood influence, the six pairwise distances correlate at 0.9902. Without it, the correlation is −0.1773 in this fit, even though its mean representation distance is smaller. This illustrates two different properties: fitting examples closely and arranging representatives consistently with the grid. The small correlation sample does not establish independence or the behavior of every seed.</p>
               </SubSection>
 
               <SubSection title="21. The grid distance is not the distance between the people">
                 <p>
+
                   Now the qualification the claim is misleading without. Cells
-                  that are neighbours hold people who are alike, and it does not
+                  that are neighbors hold people who are alike, and it does not
                   follow that a cell two steps away holds people twice as
                   different. On the chain of four the three pairs sitting one
                   step apart came to rest 20.407, 24.364 and 27.717 from each
@@ -767,38 +557,17 @@ export default function SelfOrganisingMapPage() {
                 </p>
 </>
                 <KeepInMind>
-                  What a map preserves is roughly which cells are near which,
-                  and not the distances themselves. Reading a grid position as a
-                  measurement, or reading two steps as twice one step, is
-                  reading something into the picture that the fit never put
-                  there.
-                </KeepInMind>
+                  The map encourages nearby cells to represent related observations. It does not preserve every original distance, and an unsuccessful fit can distort neighborhoods too. Inspect the fitted representatives before interpreting the grid as an accurate geometric picture of the data.</KeepInMind>
               </SubSection>
 
-              <SubSection title="22. A square grid over a line has to fold">
-                <p>
-                  Why is the three by three so much worse than the chain?
-                  Because these eleven people run essentially along one
-                  direction, taller people being heavier, and a two-dimensional
-                  sheet laid over a one-dimensional cloud has nowhere to put its
-                  second dimension except folded back on itself. The correlation
-                  on that fit is 0.5308 against the chain&rsquo;s 0.9902, and
-                  the fold is exactly what the difference measures.
-                </p>
+              <SubSection title="22. Choosing the Grid Shape" id="22-a-square-grid-over-a-line-has-to-fold">
+                <p>These observations vary mainly along one direction. A two-dimensional grid imposes additional neighbor relationships that a one-dimensional chain does not have. In the shown three-by-three fit, some distant map cells represent nearby measurement vectors, and grid-to-data distance correlation is 0.5308 rather than 0.9902. This indicates distortion in this fit; the correlation is not itself an exact measure of a physical fold.</p>
                 <GridDistanceAgainstDataDistance
                   gridWidth={3}
                   gridHeight={3}
                   showControl={false}
                 />
-                <p>
-                  Three of the nine cells there won nobody, and the shape of the
-                  grid is a modelling choice rather than a detail. A row of
-                  cells suits data with one dominant direction, a square suits
-                  data that genuinely spreads two ways, and a square over a line
-                  fits and predicts perfectly well while reporting an
-                  arrangement whose weaker half is the fold rather than anything
-                  about the people.
-                </p>
+                <p>Three of the nine cells win no training observations. Grid shape is therefore a modeling choice worth comparing, rather than merely a display setting. A row can suit observations with one dominant variation, while a two-dimensional layout can describe other relationships. The fit and its diagnostics determine whether the chosen layout is useful.</p>
               </SubSection>
 
               <SubSection title="23. What the arrangement costs">
@@ -809,14 +578,7 @@ export default function SelfOrganisingMapPage() {
                   away puts them 3.5932 away, which is thirty percent closer. On
                   the three by three the two figures are 2.8341 and 0.7117.
                 </p>
-                <p>
-                  The reason is in Part 2. For as long as the reach lasted,
-                  every cell was dragged toward people its grid neighbours had
-                  won, so each of them ended somewhere between its own people
-                  and its neighbours&rsquo;. Afterwards the step is already
-                  small, and the cell walks toward its own average in strides
-                  too short to arrive.
-                </p>
+                <p>While the neighborhood is broad, a representative responds to observations won by nearby cells as well as its own. It can therefore remain between several groups. Later, a smaller learning rate makes further corrections slower. The final representative need not equal the mean of the observations assigned to it.</p>
                 <InAModel title="Seen on the two clumps">
                   <p>
                     Draped over the eight people the k-means page summed by
@@ -829,13 +591,7 @@ export default function SelfOrganisingMapPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  A map is a worse description of the people than a grouping
-                  with the same number of prototypes, on the same data, by a
-                  margin you can measure. What it hands back for that is four
-                  prototypes stored in an order along which height and weight
-                  both fall, so a new person can be placed on the row and read
-                  off.
-                </KeepInMind>
+                  In these comparisons, neighborhood influence increases mean representation error while giving the prototypes a useful order. That is a measured tradeoff, not a rule that every map must describe data worse than every clustering fit with the same number of prototypes. Check both representation and organization for the task.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -846,10 +602,11 @@ export default function SelfOrganisingMapPage() {
             <>
               <SubSection title="24. The same people from six seeds">
                 <p>
+
                   The seed here decides two things, which people the cells start
                   on and the order the people are shown in on each pass, so a
                   differently seeded fit is genuinely a different walk rather
-                  than the same walk relabelled. Here are six of them on the
+                  than the same walk relabeled. Here are six of them on the
                   crowd.
                 </p>
                 <SeededMapGallery />
@@ -874,33 +631,12 @@ export default function SelfOrganisingMapPage() {
                   produced the same map read right to left.
                 </p>
                 <KeepInMind>
-                  Compare two fits by which people share a cell, never by which
-                  number a person received, and state the arrangement as a
-                  relationship between distances rather than as a claim about
-                  which cell holds whom.
-                </KeepInMind>
+                  When comparing independent fits, account for grid reflections or other alignments before comparing numbered cells. Co-assignment measures whether observations stay grouped together. Prototype locations and grid-neighbor relationships provide additional comparisons when the map’s arrangement matters.</KeepInMind>
               </SubSection>
 
               <SubSection title="26. There is no total the walk lowers">
-                <p>
-                  Most of the iterative methods on this site have a number that
-                  falls as they run and can be watched. This one has none. Each
-                  cell is walking downhill on its own squared distance to
-                  whichever person is in front of it, weighted by its share, and
-                  the person changes at every presentation while the winners
-                  change underneath as the cells move. For a continuous spread
-                  of inputs there is no single quantity whose slope this rule is
-                  following, which is a result about the algorithm rather than a
-                  gap in this implementation.
-                </p>
-                <p>
-                  So the readouts on this page report two things instead. How
-                  far the furthest-moving cell travelled during the last pass,
-                  which says whether the map has settled, and the mean distance
-                  from each person to their own cell, which says whether it
-                  describes anybody. Both are needed, as section 13 measured,
-                  since a run can score well on either alone.
-                </p>
+                <p>A single update moves representatives toward the current observation, but the next observation and winning cell can change. We cannot infer a monotonically decreasing full-dataset objective from that local movement. The displays therefore track movement and representation error directly, rather than presenting every update as guaranteed progress on one fixed loss.</p>
+                <p>The largest representative movement in the last pass indicates whether the map is settling. The mean distance from observations to their winning representatives measures how closely it describes the data. A map can settle into an unhelpful arrangement, so neither measurement should be interpreted alone.</p>
                 <KeepInMind>
                   When such a fit reports that it converged, it means the cells
                   stopped moving and it does not mean a best answer was reached.
@@ -917,25 +653,21 @@ export default function SelfOrganisingMapPage() {
           title: "Part 7. Specifying the Grid and Its Learning Schedule" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="27. Grid geometry, neighbourhood reach and the stopping rule" id="27-what-a-complete-implementation-must-specify">
-                <p>To reproduce a self-organising map, first state its grid: the number and arrangement of cells, and how distance between cells is measured. Next describe how a winning cell and its neighbours move, including the neighbourhood shape and how its reach changes during training.</p>
+              <SubSection title="27. Grid geometry, neighborhood reach and the stopping rule" id="27-what-a-complete-implementation-must-specify">
+                <p>To reproduce a self-organizing map, first state its grid: the number and arrangement of cells, and how distance between cells is measured. Next describe how a winning cell and its neighbors move, including the neighborhood shape and how its reach changes during training.</p>
               <p>The run also needs starting cell positions, a learning-rate schedule, the order in which observations are presented and a stopping rule. State whether schedules depend on the pass number or total pass budget. Finally, record the measurement-space distance used to choose a winner and what the returned labels and diagnostics mean. Grid position, fitted feature position and cluster label are different objects.</p>
                 <>
 <p>
-                  This implementation answers all of those. The grid is a rectangle and grid distance is straight-line across it, so a diagonal neighbour is the square root of two away rather than one or two, which is chosen because the reach is stated as a radius, and counting a diagonal as one step would let the same radius reach further across the grid on the diagonal than along a row.
+
+                  This implementation answers all of those. The grid is a rectangle and grid distance is straight-line across it, so a diagonal neighbor is the square root of two away rather than one or two, which is chosen because the reach is stated as a radius, and counting a diagonal as one step would let the same radius reach further across the grid on the diagonal than along a row.
                 </p>
                 <p>
-                  The neighbourhood is a bell curve in grid distance. Both schedules are fractions of the pass budget. The cells start on randomly drawn people, the people are reshuffled every pass, and the metric is fixed at straight-line distance for the reason section 7 derives.
+
+                  The neighborhood is a bell curve in grid distance. Both schedules are fractions of the pass budget. The cells start on randomly drawn people, the people are reshuffled every pass, and the metric is fixed at straight-line distance for the reason section 7 derives.
                 </p>
 </>
                 <KeepInMind>
-                  One thing this implementation does not offer is a recording of
-                  the run. It reports where the cells came to rest and nothing
-                  about how they got there, so every picture on this page is a
-                  finished fit rather than a frame of an animation, and where a
-                  section wanted to show a run unfolding it shows several
-                  finished runs instead.
-                </KeepInMind>
+                  The fit-level displays compare completed runs at different settings or budgets. The API does not retain a trajectory for those fitted maps. The separate single-observation example shows one controlled update; it should not be confused with frames from a recorded full fit.</KeepInMind>
               </SubSection>
 
               <SubSection title="28. Empty input, tied winners and a map with too few cells" id="28-the-edges">
@@ -947,20 +679,14 @@ export default function SelfOrganisingMapPage() {
                 </p>
                 <MapFailureTable />
                 <>
-<p>
-                  Three of those deserve a sentence each. A reach that never shrinks is accepted rather than refused, and it produces a map that has settled, arranges itself almost perfectly and describes nobody, which no guard can catch because it is a legitimate answer to a badly chosen setting. A column that never changes is kept exactly, every cell resting at 60 along it, because the gap along a flat column is zero at every presentation and no step in the fit divides by a spread.
-                </p>
+<p>A fixed broad reach is accepted and, in the displayed experiment, gives low movement and strong ordering correlation but high representation error. That setting is mathematically valid; its usefulness needs the additional measurements. A constant feature is also accepted: if every training value is 60, representatives initialized from those observations stay at 60 on that coordinate, because every update has zero difference there.</p>
                 <p>
                   And a query is matched to the fit by column name rather than by position, so the same columns in the other order answer identically while a missing or unknown column is refused.
                 </p>
 </>
                 <>
-<p>
-                  One caution that a measurement did not support belongs here too. A method built on distances is usually said to follow whichever column carries the larger numbers, so I rewrote the crowd&rsquo;s heights in millimetres and expected the map to be dragged onto the height axis. It was not. The same four cells won the same people and the arrangement moved from 0.9902 to 0.9892, because on this crowd height and weight run together so closely that stretching one barely changes which cell is nearest.
-                </p>
-                <p>
-                  On data where the columns are less related the caution would bite, and the honest report is that it did not bite here.
-                </p>
+<p>Rescaling a feature can change which representative is nearest. In this experiment, converting height from centimeters to millimeters leaves the same four groups and changes the ordering correlation from 0.9902 to 0.9892. Height and body weight are strongly related here, so increasing the weight of height in the distance does not change these assignments. The following qualification matters when the columns contain different information.</p>
+                <p>The nearly unchanged result here reflects these strongly related columns. It does not establish that units are irrelevant to the method. With differently related measurements, rescaling one column can change the winners and the learned representatives.</p>
 </>
               </SubSection>
             </>
@@ -979,11 +705,11 @@ export default function SelfOrganisingMapPage() {
               [
                 "These eleven people run essentially along one direction, so a two-dimensional sheet has nowhere to put its second dimension except folded back on itself",
                 "Nine cells is too many for eleven people, so three of them won nobody",
-                "A diagonal neighbour is counted as two steps, which stretches the grid distances",
+                "A diagonal neighbor is counted as two steps, which stretches the grid distances",
                 "A square grid starts its cells on randomly drawn people where a chain does not",
               ],
               0,
-              "Taller people here are heavier, so the second dimension of the sheet has nothing to describe and folds back. The fold is exactly what the difference between the two correlations measures, and the shape of the grid is a modelling choice rather than a detail, since a square over a line fits and predicts perfectly well while reporting an arrangement whose weaker half is the fold rather than anything about the people. Three of the nine cells did win nobody, and that is an ordinary outcome on a map rather than the cause, since Part 4 fitted thirty six cells over the same eleven people with twenty six of them idle.",
+              "The row and square grid impose different neighborhood structures on the same observations. Here height and weight largely vary together, so a one-dimensional arrangement follows their main pattern more closely by the displayed distance-correlation measure. The lower correlation for the square does not by itself prove a particular fold or isolate its cause. Inspect prototype positions as well as the summary.",
             ),
             several(
               "The arrangement is paid for in how well the map describes the people. Which of these figures does the page report?",
@@ -994,7 +720,7 @@ export default function SelfOrganisingMapPage() {
                 "A row of two cells over the eight people of the k-means page rests at (122.96, 27.77) and (179.05, 78.25), each on the side of its own clump’s mean that faces the other clump",
               ],
               [0, 1, 2, 3],
-              "The cause is in the rule itself. For as long as the reach lasted every cell was dragged toward people its grid neighbours had won, so each ended somewhere between its own people and its neighbours’, and afterwards the step is already too small to walk the rest of the way. The two cells over the eight people, whose clump means are the whole numbers (121, 26) and (181, 80), rest beside those means rather than on them, each pulled toward the other clump, and that map moved 0.107 on its last pass while putting each person a mean of 3.279 from their cell.",
+              "The cause is in the rule itself. For as long as the reach lasted every cell was dragged toward people its grid neighbors had won, so each ended somewhere between its own people and its neighbors’, and afterwards the step is already too small to walk the rest of the way. The two cells over the eight people, whose clump means are the whole numbers (121, 26) and (181, 80), rest beside those means rather than on them, each pulled toward the other clump, and that map moved 0.107 on its last pass while putting each person a mean of 3.279 from their cell.",
             ),
             choice(
               "Six differently seeded fits of the chain on the crowd. What varied between them?",
@@ -1008,16 +734,16 @@ export default function SelfOrganisingMapPage() {
               "All six put the same people together, arranged the chain between 0.9901 and 0.9904 and described the people at between 5.1435 and 5.1520. Each is exactly reproducible on its own and none of the other five reproduces the first, which is what fixing a seed buys. A fit laying the identical arrangement out backwards is the same map read right to left, so compare two fits by which people share a cell and state the arrangement as a relationship between distances.",
             ),
             trueFalse(
-              "Rewriting the crowd’s heights in millimetres left the same four cells winning the same people, with the arrangement moving only from 0.9902 to 0.9892.",
+              "Rewriting the crowd’s heights in millimeters left the same four cells winning the same people, with the arrangement moving only from 0.9902 to 0.9892.",
               true,
-              "A method built on distances is usually said to follow whichever column carries the larger numbers, so the map was expected to be dragged onto the height axis, and it was not. On this crowd height and weight run together so closely that stretching one barely changes which cell is nearest. On data where the columns are less related the caution would bite, and the honest report is that it did not bite here.",
+              "On this dataset, height and weight vary together strongly enough that rescaling height leaves the winning groups unchanged. That is a result of this comparison, not evidence that the distance rule is unit-invariant. Rescaling a feature can change distances and winners on other data, so choose units or standardization deliberately.",
             ),
         ],
         },
         {
           title: "Practice. Draping a Chain Over the Crowd With the Library",
           practice: [
-            exercise("Drape the chain of four over the crowd",["Fit the chain Part 1 describes with the library rather than through the playground. A row of four cells, a hundred passes and a seed of 3 are what every figure on the page was quoted under, with the step falling from a half to a hundredth and the reach from half the row to a quarter of a cell.", "Part 1 says the four cells come to rest at (177.0, 76.8), (160.3, 59.0), (144.1, 46.6) and (123.2, 28.5) reading along the row. Read them off the fitted map, read which cell won each person, and read how far the furthest-moving cell travelled during the last pass, a number the page quotes for the arch and the two clumps but never for the crowd."],`from oop_ml import Feature, LinearDecaySchedule, SelfOrganisingMap
+            exercise("Drape the chain of four over the crowd",["Fit four prototypes arranged in one row to the supplied height-and-weight observations. Use 100 passes and seed 3. Let the neighborhood radius decrease from 2.0 grid cells to 0.25; keep the default learning-rate schedule.", "Print each prototype’s final height and weight, then the winning prototype for each person in the original observation order. Also print the largest prototype movement during the final pass. Use that last measurement to check whether the run was still moving when its pass budget ended."],`from oop_ml import Feature, LinearDecaySchedule, SelfOrganisingMap
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1050,7 +776,7 @@ cell 3 rests at (144.1, 46.6)
 cell 4 rests at (123.2, 28.5)
 cell won by each person [3, 2, 3, 2, 2, 4, 4, 4, 1, 1, 1]
 passes run 100, furthest cell moved 0.1496 on the last pass`,{...{ hints: ["The reach has to be named, because the library cannot know how large the grid is. Part 3 says it falls in a straight line from half the grid’s longest side to a quarter of a cell, which for a row of four is a LinearDecaySchedule from 2.0 to 0.25. The step’s geometric fall from a half to a hundredth is the default and need not be passed.", "units iterates the cells in grid order. Each one has a position with a row and a column, and weight_for reads its resting value along a named feature.", "predict answers the index of the cell that won each person, counting from zero in the same order units iterates, so adding one makes the labels match the cell numbers printed.", "epochs_run and final_epoch_movement are properties of the fitted map, the second being the furthest any cell moved during the last pass."], check: numberCheck("How far did the furthest-moving cell travel during the last pass?", 0.1496, 0.0001, "A small final movement can reflect the shrinking learning-rate schedule as well as proximity to a stable arrangement. Read it alongside the distance from observations to their selected prototypes.") },question:"Where do the map's prototypes finish, and are they still moving?"}),
-            exercise("Measure the arrangement, then take the reach away",["Part 5 makes the arrangement claim measurable. Every pair of cells has two numbers, how many steps apart they sit on the grid and how far apart they came to rest among the people, and on an arranged map the two rise together. Fit the chain of four twice, once as in the first problem and once with the reach held at zero for the whole run, and print both numbers for all six pairs of each.", "The page quotes the one-step pairs at 20.407, 24.364 and 27.717 and the three-step pair at 72.332, and never prints the two-step pairs. Then print the mean distance from each person to their own cell for both fits, which Part 5 gives as 5.1435 arranged against 3.5932 with the reach taken away."],`from math import hypot
+            exercise("Measure the arrangement, then take the reach away",["Fit the same four-prototype map twice: once with the shrinking neighborhood from the previous challenge, and once with radius zero throughout. Radius zero updates only the winning prototype. For every pair, print their grid distance and their distance in the height-and-weight coordinates.", "For each fit, also calculate the mean distance from every observation to its winning prototype. Compare that nearest-prototype fit with the relationship between grid and feature distances. Does a more orderly grid necessarily put each prototype closer to its assigned observations?"],`from math import hypot
 
 from oop_ml import ConstantSchedule, Feature, LinearDecaySchedule, SelfOrganisingMap
 
@@ -1099,8 +825,8 @@ reach taken away
   cells 2 and 3 sit 1 apart on the grid and rest 51.558 apart
   cells 2 and 4 sit 2 apart on the grid and rest 31.051 apart
   cells 3 and 4 sit 1 apart on the grid and rest 81.417 apart
-  mean distance from a person to their cell 3.5932`,{...{ hints: ["ConstantSchedule(value=0.0) is a reach that is zero for the whole run, which is how Part 4 switches the cooperation off and leaves only the winner moving.", "A cell’s position has distance_to, which counts steps on the grid between two positions, and the resting distance is the straight-line gap between the two cells’ heights and weights, which hypot gives from the two differences.", "The mean distance pairs each person with the cell predict names for them, takes the straight-line gap to that cell’s resting height and weight, and averages the eleven gaps."], check: numberCheck("What mean distance from a person to their cell does the chain with the reach taken away report?", 3.5932, 0.0001, "Neighbourhood updates encourage neighbouring grid cells to remain related, at a cost to this nearest-prototype fit. Removing that constraint gives a lower mean distance here without preserving the same grid arrangement.") },question:"Does preserving grid neighbourhoods improve the nearest-prototype fit?"}),
-            exercise("Hold each decay still on the arch",["Part 3 tests the two decays by holding each one still in turn. Fit the eighteen people along the arch with a row of six cells four times over, from seed 3 for a hundred passes, with both schedules shrinking, the step held at a half, the reach held wide at three cells, and neither shrinking.", "For each run print how far the furthest cell moved on the last pass and the mean distance from a person to their cell, which the page gives as 0.2703 and 7.9669, 13.5400 and 6.9227, 0.0278 and 22.7539, and 17.9446 and 21.3833. Also print how much of the arch the six cells span, which the page quotes only for two of the four runs."],`from math import hypot
+  mean distance from a person to their cell 3.5932`,{...{ hints: ["ConstantSchedule(value=0.0) is a reach that is zero for the whole run, which is how Part 4 switches the cooperation off and leaves only the winner moving.", "A cell’s position has distance_to, which counts steps on the grid between two positions, and the resting distance is the straight-line gap between the two cells’ heights and weights, which hypot gives from the two differences.", "The mean distance pairs each person with the cell predict names for them, takes the straight-line gap to that cell’s resting height and weight, and averages the eleven gaps."], check: numberCheck("What mean distance from a person to their cell does the chain with the reach taken away report?", 3.5932, 0.0001, "Neighborhood updates encourage neighboring grid cells to remain related, at a cost to this nearest-prototype fit. Removing that constraint gives a lower mean distance here without preserving the same grid arrangement.") },question:"Does preserving grid neighborhoods improve the nearest-prototype fit?"}),
+            exercise("Hold each decay still on the arch",["The supplied observations follow an arch. Fit six prototypes in a row under four schedule combinations: both schedules shrink, only the neighborhood shrinks, only the learning rate shrinks, and neither shrinks. Keep the seed and 100-pass budget fixed.", "For each run, print the largest prototype movement in the final pass, the mean observation-to-winner distance, and the range of prototype heights. Together these show whether the prototypes cover the arch, remain near observations, and have stopped moving substantially."],`from math import hypot
 
 from oop_ml import ConstantSchedule, ExponentialDecaySchedule, Feature, LinearDecaySchedule, SelfOrganisingMap
 
@@ -1148,8 +874,8 @@ for name, (step, reach) in runs.items():
     print(f"{name}: moved {chain.final_epoch_movement:.4f} on the last pass, mean distance {sum(distances) / len(distances):.4f}, cells span {span:.1f}")`,`both shrink: moved 0.2703 on the last pass, mean distance 7.9669, cells span 74.7
 the step held at a half: moved 13.5400 on the last pass, mean distance 6.9227, cells span 82.0
 the reach held wide: moved 0.0278 on the last pass, mean distance 22.7539, cells span 31.2
-neither shrinks: moved 17.9446 on the last pass, mean distance 21.3833, cells span 34.1`,{...{ hints: ["Both schedules are fields of the map, learning_rate for the step and neighbourhood_radius for the reach. ExponentialDecaySchedule and LinearDecaySchedule take a start and an end, and ConstantSchedule holds one value for the whole run.", "On a row of six the reach starts at three cells, half the longest side, so a held reach is a constant three and a shrinking one runs from three to a quarter.", "The last pass’s movement is final_epoch_movement, the mean distance is the same calculation as the previous problem, and the span is the gap between the largest and smallest resting height among the six cells."], check: numberCheck("How far was the map still travelling per pass with the step held at a half?", 13.54, 0.0001, "A fixed half-gap learning rate retains the same fraction of each new discrepancy; its absolute movement still depends on that discrepancy. Late observations can continue moving prototypes substantially, so a lower distance at the last pass is not evidence that this schedule converged.") },question:"What happens when the learning-rate or neighbourhood schedule stops shrinking?"}),
-            exercise("Switch the reach off and compare with the grouping method",["Part 4 says a map with no reach is the grouping method written as an online rule. Fit a row of three cells to the crowd with the reach held at zero, fit the grouping method with three groups from the same seed, and print both labellings.", "The page says the two put the same people together while answering 0 0 0 0 0 2 2 2 1 1 1 and 1 1 1 1 1 2 2 2 0 0 0, and that the furthest-separated pair of prototypes sits 0.0233 apart. Sort the three cells and the three centres by height so they pair up, print each pair, and print how far apart the furthest-separated pair is."],`from math import hypot
+neither shrinks: moved 17.9446 on the last pass, mean distance 21.3833, cells span 34.1`,{...{ hints: ["Both schedules are fields of the map, learning_rate for the step and neighbourhood_radius for the reach. ExponentialDecaySchedule and LinearDecaySchedule take a start and an end, and ConstantSchedule holds one value for the whole run.", "On a row of six the reach starts at three cells, half the longest side, so a held reach is a constant three and a shrinking one runs from three to a quarter.", "The last pass’s movement is final_epoch_movement, the mean distance is the same calculation as the previous problem, and the span is the gap between the largest and smallest resting height among the six cells."], check: numberCheck("How far was the map still traveling per pass with the step held at a half?", 13.54, 0.0001, "A fixed half-gap learning rate retains the same fraction of each new discrepancy; its absolute movement still depends on that discrepancy. Late observations can continue moving prototypes substantially, so a lower distance at the last pass is not evidence that this schedule converged.") },question:"What happens when the learning-rate or neighborhood schedule stops shrinking?"}),
+            exercise("Switch the reach off and compare with the grouping method",["Set the map’s neighborhood radius to zero so only each observation’s winner updates. Fit three prototypes, then fit KMeans with three groups to the same observations. Use seed 3 for both and print each model’s labels in observation order.", "Compare which observations share a label, rather than expecting the label numbers to match. For this dataset, sorting both sets of prototypes by height pairs the corresponding groups. Print those pairs and their largest distance apart. This checks how closely the two finite training procedures agree here."],`from math import hypot
 
 from oop_ml import ConstantSchedule, Feature, KMeans, SelfOrganisingMap
 
@@ -1184,7 +910,7 @@ grouping labels [1, 1, 1, 1, 1, 2, 2, 2, 0, 0, 0]
 cell (119.9996, 25.6656) beside centre (120.0000, 25.6667)
 cell (153.8233, 53.7996) beside centre (153.8000, 53.8000)
 cell (180.3333, 80.3333) beside centre (180.3333, 80.3333)
-furthest-separated pair 0.0233 apart`,{...{ hints: ["A reach held at zero is ConstantSchedule(value=0.0), and the grouping method is KMeans with n_clusters set to the same three as the chain has cells.", "Both models answer predict with one label per person. Compare which people share a label rather than the labels themselves, since nothing ever told either method which group deserved which number.", "The map’s cells are read through units and weight_for, and the grouping method’s centres through centroids and coordinate_for. Sorting both lists of pairs by height lines the three up."], check: numberCheck("How far apart are the furthest-separated cell and centre?", 0.0233, 0.0001, "With zero neighbourhood radius only the winning prototype moves, resembling online k-means. The groups happen to agree closely here; fixed fractional updates and finite training do not guarantee the exact batch means or the same partition.") },question:"How close is winner-only map training to the fitted k-means groups?"}),
+furthest-separated pair 0.0233 apart`,{...{ hints: ["A reach held at zero is ConstantSchedule(value=0.0), and the grouping method is KMeans with n_clusters set to the same three as the chain has cells.", "Both models answer predict with one label per person. Compare which people share a label rather than the labels themselves, since nothing ever told either method which group deserved which number.", "The map’s cells are read through units and weight_for, and the grouping method’s centers through centroids and coordinate_for. Sorting both lists of pairs by height lines the three up."], check: numberCheck("How far apart are the furthest-separated cell and center?", 0.0233, 0.0001, "With zero neighborhood radius only the winning prototype moves, resembling online k-means. The groups happen to agree closely here; fixed fractional updates and finite training do not guarantee the exact batch means or the same partition.") },question:"How close is winner-only map training to the fitted k-means groups?"}),
           ],
         },
       ]}

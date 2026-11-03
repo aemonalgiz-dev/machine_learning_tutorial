@@ -154,8 +154,10 @@ export function SceneLedger({
           />
         </div>
         <Caption>
-          the two timings were measured when this page loaded and will differ
-          from machine to machine; the counts will not
+          These timings are measured on the server and cached. The dense timing
+          covers pairwise distances; the keypoint timing also includes descriptor
+          construction and matching. Their different scopes make this an illustration
+          of work performed, rather than a direct speed comparison.
         </Caption>
       </div>
     );

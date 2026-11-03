@@ -21,9 +21,9 @@ import { UNetLargerPicture } from "@/components/widgets/UNetLargerPicture";
 import { UNetTrainingCurves } from "@/components/widgets/UNetTrainingCurves";
 
 export const metadata: Metadata = {
-  title: "U-Net · oop_ml",
+  title: "U-Net · Perceptron Lab",
   description:
-    "To outline an object, we need a prediction for each pixel. U-Net learns from images paired with labelled masks, using spatial information from the encoder to help the decoder recover the regions and their boundaries.",
+    "U-Net learns from images paired with labeled masks to predict a label for each pixel. Connections from earlier layers preserve spatial detail as the network reconstructs a higher-resolution output.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function UNetPage() {
       playgroundTitle="Follow image details down and back up the network"
       playgroundIntro="Compare the predicted mask with the target pixel by pixel. Pay particular attention to boundaries and thin shapes when the skip connections are removed."
       title="U-Net"
-      tagline={"To outline an object, we need a prediction for each pixel. U-Net learns from images paired with labelled masks, using spatial information from the encoder to help the decoder recover the regions and their boundaries."}
+      tagline={"U-Net learns from images paired with labeled masks to predict a label for each pixel. Connections from earlier layers preserve spatial detail as the network reconstructs a higher-resolution output."}
       prerequisites={
         <>
           The way down is the network on the{" "}
@@ -77,7 +77,8 @@ export default function UNetPage() {
                   Every picture here is one of the sixteen by sixteen pictures from the convolutional networks page, a cross, a square outline, a filled disc or a diagonal bar drawn at a random place and size, brightness and background, with a little noise on every pixel. That page asked which of the four kinds each picture held.
                 </p>
                 <p>
-                  Now we want a decision for each of the image&apos;s 256 pixels: does it belong to the shape? We train with labelled data, pairing every image with its correct segmentation mask. In this drawn dataset we know the mask because we placed the shape ourselves. The display shows held-out images with their masks, so we can compare a predicted region with the labelled target.
+
+                  Now we want a decision for each of the image&apos;s 256 pixels: does it belong to the shape? We train with labeled data, pairing every image with its correct segmentation mask. In this drawn dataset we know the mask because we placed the shape ourselves. The display shows held-out images with their masks, so we can compare a predicted region with the labeled target.
                 </p>
 </>
                 <NumberTable
@@ -89,33 +90,15 @@ export default function UNetPage() {
                     ["pixels right if every pixel is called ground", "0.889"],
                   ]}
                 />
-                <p>
-                  The last line is the trap in scoring this task by the share of
-                  pixels right. Only about one pixel in nine belongs to a shape,
-                  so a network that never calls anything a shape gets 0.889 of
-                  pixels right while finding nothing at all, and two networks
-                  that differ in whether they find the shape can differ by a few
-                  hundredths on that score. So the page reports the share of
-                  pixels right and always sets beside it a second score that a
-                  network answering nothing cannot win, which section 3 defines.
-                </p>
+                <p>Only about one pixel in nine belongs to a shape. Predicting background everywhere therefore gives pixel accuracy 0.889 while finding none of the shapes. That baseline shows why overall pixel accuracy is insufficient here. We will keep it beside a measure of overlap with the shape region, defined in section 3.</p>
                 <KeepInMind>
-                  A per-pixel answer is 256 answers per picture, most of them
-                  ground, and a score dominated by ground says little about
-                  whether the shape was found.
+                  {"A per-pixel prediction must distinguish the shape from the background. Because most pixels here are background, overall accuracy can look high even when the predicted shape is poor."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. What a classifier keeps and what it throws away">
                 <p>
-                  The obvious start is the network that already names these
-                  pictures, which gets 0.971 of the held-out kinds right. Its
-                  first four layers keep the arrangement of the picture, since a
-                  convolution answers at every position and a pooling halves the
-                  maps without shuffling them. Then the flattening lays the last
-                  maps out as a row of 128 numbers, the dense layers mix all of
-                  them into sixteen and then four, and from that point on no
-                  number stands for any place in the picture.
+                  {"The existing classifier gets 0.971 of the held-out image categories right. Its convolutions and pooling keep spatially arranged feature maps. Flattening then places the last maps in a row of 128 numbers, and dense layers combine them into sixteen features and four class scores. Flattening is reversible if we retain the shape; it is the final category output that no longer supplies a location for every pixel."}
                 </p>
                 <NumberTable
                   headings={["layer of the classifier", "answers", "still arranged as a picture"]}
@@ -130,12 +113,7 @@ export default function UNetPage() {
                   ]}
                 />
                 <p>
-                  To see how little the kind alone says about where, I took the
-                  kind the classifier calls each held-out picture, averaged the
-                  masks of every training picture of that kind, and called a
-                  pixel shape wherever that average was above one half. The same
-                  was done with each picture&rsquo;s true kind, to be sure the
-                  classifier&rsquo;s few mistakes were not the problem.
+                  {"One baseline starts from the predicted image category. Average the training masks for that category, then predict shape wherever the average exceeds one half. Repeat using the true category to check whether classification mistakes explain the result. This uses category-level information without giving the baseline the particular image's shape location."}
                 </p>
                 <NumberTable
                   headings={["answering from the kind alone", "pixels right", "overlap with the true shape"]}
@@ -146,30 +124,16 @@ export default function UNetPage() {
                   caption="Overlap is defined in section 3; one is a perfect mask and zero is a mask that shares no pixel with the truth."
                 />
                 <p>
-                  Knowing the kind exactly is worth an overlap of 0.080, since a
-                  cross can be drawn anywhere and the average of crosses drawn
-                  everywhere is a faint blur in the middle. What the classifier
-                  learned to throw away, the position, is the whole of what this
-                  task asks for.
+                  {"Even the true category gives overlap only 0.080 with this baseline. Crosses appear at different locations, so their average mask does not identify the cross in a particular image. A category label and a segmentation mask answer different questions."}
                 </p>
                 <KeepInMind>
-                  A classifier is built to give the same answer wherever the
-                  shape is, so once it has flattened its maps there is nothing
-                  left in it that could say where the shape was.
+                  {"The classifier is trained to name the shape regardless of its position. That label alone is insufficient for segmentation. Its earlier feature maps may still contain location information, which gives us something useful to reuse."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="3. Scoring a mask, and the pixels at its edge">
                 <p>
-                  The second score counts only pixels that matter. Take the
-                  pixels a network calls shape and the pixels that truly are,
-                  count the pixels in both, and divide by the pixels in either.
-                  A network that calls nothing scores zero, a network that calls
-                  everything scores the shape&rsquo;s share of the picture, and
-                  only an exact mask scores one. It is usually called the
-                  intersection over union, and this page calls it the overlap
-                  and averages it over pictures, so a thin square outline counts
-                  as much as a large disc.
+                  {"We can evaluate foreground overlap instead of counting every correct background pixel. Count the pixels marked as shape in both the prediction and the target, then divide by the pixels marked as shape in either one. This is intersection over union, or IoU. On the nonempty target masks here, predicting no shape scores zero, predicting shape everywhere scores the shape's fraction of the image, and an exact prediction scores one. This page averages IoU over images, so a thin outline counts as much as a large disc."}
                 </p>
                 <Equation>{"overlap  =  pixels called shape and truly shape  ÷  pixels called shape or truly shape"}</Equation>
                 <WorkedExample title="The held-out cross, answered by the U without its skip connections">
@@ -188,14 +152,10 @@ export default function UNetPage() {
                   </>
                 </WorkedExample>
                 <p>
-                  The third score is the claim this whole architecture is built
-                  on. A pixel is on the edge if the pixel above, below, left or
-                  right of it has the other label, which counts both the
-                  shape&rsquo;s outermost pixels and the ground&rsquo;s innermost,
-                  and the frame of the picture does not count as a change. Of
-                  the 61,440 held-out pixels, 12,433 are on an edge and 49,007
-                  are not, and on the cross above 52 are on an edge, of which the
-                  network got 39 right.
+                  {"We also measure accuracy near the boundary. A pixel counts as a boundary pixel when its neighbor above, below, left or right has the other label. This includes pixels on both sides of the shape outline. The image frame itself does not count as a label change."}
+                </p>
+                <p>
+                  {"Of the 61,440 held-out pixels, 12,433 meet that definition and 49,007 do not. On the cross above, 52 are boundary pixels and the network predicts 39 of them correctly. Scoring this group separately lets us test whether skip connections help preserve the outline."}
                 </p>
                 <KeepInMind>
                   The share of pixels right is always reported beside the
@@ -224,63 +184,38 @@ export default function UNetPage() {
                 </p>
                 <Equation>{"parameters  =  filters × (channels read × 3 × 3 + 1)"}</Equation>
                 <p>
-                  What is different is what happens to the two convolutions&rsquo;
-                  answers. In the classifier each is read by the pooling above it
-                  and then forgotten. Here each is also kept, the four full-size
-                  maps and the eight half-size maps, because the way back up is
-                  going to need them.
+                  {"The U-Net also sends each encoder convolution's output to a later decoder stage. It keeps the four full-size maps and the eight half-size maps for these connections. The classifier instead uses those maps along a single forward path; it does not supply them to a segmentation decoder."}
                 </p>
                 <KeepInMind>
-                  The encoder of a U-Net is an ordinary shrinking network, and
-                  the only change to it is that two of its intermediate answers
-                  are held on to.
+                  {"In this teaching network, the encoder uses the classifier's convolution-and-pooling arrangement. The skip connections make its intermediate maps available to the decoder as well as to the next pooling layer."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="5. The middle, where the picture is smallest">
                 <>
 <p>
-                  At the bottom of the U one more convolution, eight filters of three by three, reads the eight maps of four by four and answers eight more of the same size. Each of its sixteen positions stands for a block of four by four pixels of the picture, and by the geometry the convolutional networks page worked out, a number here can depend on a patch eighteen pixels wide, wider than the picture itself.
+                  {"At the bottom, another convolution uses eight three-by-three filters on the eight four-by-four maps. The resulting map has sixteen spatial positions, spaced four input pixels apart. The receptive-field calculation gives a potential input patch eighteen pixels wide. Near the frame, some of that patch is padding rather than observed image pixels."}
                 </p>
                 <p>
-                  So the middle is the one place where every number can take in a whole shape, and it is also the place with the least idea where, to finer than four pixels, anything is.
+                  {"These coarse maps can combine information from a broad part of the image. Their spatial grid is less detailed than the input grid, but the channels can still encode location information within that grid. Coarse spacing is not a proof that every finer distinction has disappeared."}
                 </p>
 </>
                 <KeepInMind>
-                  The middle knows the most about what is in the picture and the
-                  least about where, and the two come together because every
-                  pooling that widened what a number could see also spread the
-                  numbers further apart.
+                  {"Pooling increases the spacing between map positions. Skip connections let the decoder combine those broad features with encoder features kept at finer spatial resolutions, reducing what it must reconstruct from the coarse maps alone."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="6. The way back up, by repeating each value">
                 <p>
-                  To answer at every pixel the maps have to grow back to sixteen
-                  by sixteen, and the cheapest way is to copy each value over a
-                  two by two block, which doubles both sides. It has nothing to
-                  learn. On the way back, each value was copied to four places,
-                  so it reaches the loss by four routes and its slope is the
-                  total of the four slopes that arrive there.
+                  {"One simple way to grow the maps back to sixteen by sixteen is to repeat each value over a two-by-two block. Both sides double without adding learned parameters. During backpropagation, every copied output contributes a derivative to the original value, so the original receives the sum of those contributions."}
                 </p>
                 <Equation>{"up[2i + a, 2j + b]  =  x[i, j]      for a and b each 0 or 1"}</Equation>
                 <Equation>{"slope at x[i, j]  =  sum over a, b of  slope at up[2i + a, 2j + b]"}</Equation>
                 <WorkedExample title="A two by two map grown to four by four">
-                  <p>
-                    A map holding p and q in its top row and r and s below
-                    becomes a four by four map whose top left block is four
-                    copies of p, top right four copies of q, and so on. If the
-                    blame arriving at the top left block is 0.1, 0.2, 0.3 and
-                    0.4, then p is owed their sum, 1.0, since moving p by a small
-                    amount moves all four copies by that amount together.
-                  </p>
+                  <p>{"The original map has p and q on its top row, with r and s below. Upsampling repeats each value into a block of four entries. If the four derivatives arriving at p's block are 0.1, 0.2, 0.3 and 0.4, the derivative for p is their combined 1.0. Each copied output depends on the same original value, so all four routes contribute to its update."}</p>
                 </WorkedExample>
                 <p>
-                  The paper used a learned upsampling instead, a two by two
-                  convolution run backwards that can learn how to spread each
-                  value. Repetition is used here because it has no weights to
-                  get wrong, and whatever detail it cannot put back has to come
-                  from somewhere else, which is the point of the next section.
+                  {"The original paper used learned two-by-two up-convolutions in its expanding path. This example uses repetition to make the resizing and its derivative easy to inspect. Repetition alone adds no new detail, but the decoder convolutions that follow can transform its output. Skip connections supply additional features from the encoder."}
                 </p>
                 <KeepInMind>
                   Repeating a value cannot put back detail that pooling threw
@@ -317,17 +252,10 @@ export default function UNetPage() {
                   ]}
                 />
                 <p>
-                  The joins cost 720 parameters, all of them in the two decoder
-                  convolutions, which read more channels. The U with them holds
-                  2,521 parameters, close to the classifier&rsquo;s 2,468, and
-                  the U without them 1,801, so the comparison in Part 4 is not
-                  between networks of equal size. It could not be, since the
-                  channels a skip adds are what the decoder spends weights on.
+                  {"With these fixed channel counts, adding the joins adds 720 decoder parameters. The network with skips has 2,521 parameters, close to the classifier's 2,468; the network without skips has 1,801. The comparison in Part 4 therefore changes both access to encoder features and decoder parameter count. A different experiment could adjust widths to compare equal-sized models."}
                 </p>
                 <KeepInMind>
-                  A skip connection adds no layer. It widens what one decoder
-                  convolution reads, and its whole cost is the extra weights
-                  that convolution needs for the extra channels.
+                  {"Concatenation itself has no learned weights. In this design it increases the channels read by the decoder convolutions, which adds weights and computation. Keeping the encoder maps available also uses memory."}
                 </KeepInMind>
               </SubSection>
 
@@ -365,13 +293,7 @@ export default function UNetPage() {
 
               <SubSection title="9. One score per pixel, and what it costs to be wrong">
                 <p>
-                  The last layer is a convolution with one filter of one by one,
-                  which gives each pixel a score from the four numbers the layer
-                  below answered there. The score is squashed into a probability
-                  of shape, and a pixel is called shape when that probability is
-                  above one half. Training makes small the negative logarithm of
-                  the probability each pixel gave its true answer, added over
-                  every pixel and divided by the number of pictures.
+                  {"A final one-by-one convolution uses the four decoder features at each pixel to produce one score. A sigmoid converts that score to a probability of shape, and the prediction is shape when that probability exceeds one half. The loss below adds binary cross-entropy over every pixel and divides by the number of pictures. That denominator matters when we choose the learning rate."}
                 </p>
                 <Equation>{"p  =  1 ÷ (1 + e^(−score))"}</Equation>
                 <Equation>{"loss  =  − (1 ÷ pictures) × sum over every pixel of  [ y log p + (1 − y) log (1 − p) ]"}</Equation>
@@ -397,17 +319,10 @@ export default function UNetPage() {
                   </>
                 </WorkedExample>
                 <p>
-                  Because the loss adds up 256 pixels for every picture, the
-                  slope on a shared kernel weight is a sum over 256 positions,
-                  and the step size has to be much smaller than the
-                  classifier&rsquo;s. Both arrangements here are trained with a
-                  step of 0.003 against the classifier&rsquo;s 0.1, for 20 passes
-                  over the same 240 training pictures in shuffled batches of 16.
+                  {"This loss sums 256 pixel terms per picture, so shared weights receive contributions from many positions. Its scale differs from a loss averaged over all pixels. The reported runs use step size 0.003, compared with the classifier's 0.1, for 20 passes over the same 240 training pictures in shuffled batches of 16. Those are settings for this objective and experiment, not a universal required ratio."}
                 </p>
                 <KeepInMind>
-                  A per-pixel loss is the classifier&rsquo;s yes-or-no loss
-                  asked 256 times per picture, and the step has to shrink to
-                  match or the first few steps push every pixel to ground.
+                  {"Check whether a segmentation loss is summed or averaged over pixels before reusing a classifier's learning rate. Changing that convention changes gradient magnitudes even when the prediction task stays the same."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -436,7 +351,7 @@ export default function UNetPage() {
               "The classifier gets 0.971 of held-out kinds right. Turning each picture’s true kind into a mask, by averaging the training masks of that kind, is worth what overlap?",
               ["0.080", "0.556", "0.889", "0.971"],
               0,
-              "A cross can be drawn anywhere, so the average of crosses drawn everywhere is a faint blur in the middle and names no position. Using the kind the classifier calls instead of the true one gives 0.081, so its few mistakes were not what held the score down. What the classifier learned to throw away, the position, is the whole of what this task asks for.",
+              "A class label says which shape is present without locating its pixels. Averaging same-class training masks spreads different positions into a blur, so even knowing the correct class does not recover this image’s mask. That demonstrates the limits of the label-based reconstruction, not proof that every hidden feature in the classifier discarded position.",
             ),
             several(
               "Which of these hold for the two skip connections in this U?",
@@ -447,7 +362,7 @@ export default function UNetPage() {
                               "They leave the two arrangements compared in Part 4 the same size",
                             ],
               [0, 1],
-              "Nothing in a join has weights. A join lays one block beside another, and the whole cost is the extra channels the following convolution has to read, which is why the U with skips holds 2,521 parameters against 1,801 without them.",
+              "Concatenation retains both channel blocks without adding trainable weights of its own. The following convolution has more input channels and therefore stores more weights. In the displayed layouts, that increases the total from 1,801 to 2,521 parameters. The join can also require memory and data movement; zero trainable parameters does not mean zero runtime cost.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "layer | with the skips | without them\nway down, two convolutions | 336 | 336\nthe middle | 584 | 584\nhalf-size decoder convolution | 8 × (16 × 9 + 1) = 1,160 | 8 × (8 × 9 + 1) = 584\nfull-size decoder convolution | 4 × (12 × 9 + 1) = 436 | 4 × (8 × 9 + 1) = 292\none score per pixel | 5 | 5\nall parameters | 2,521 | 1,801\n\nEach skip concatenates an encoder feature block with a decoder block.\nIt has no weights of its own, but increases the input channel count of the following convolution."
@@ -466,14 +381,7 @@ export default function UNetPage() {
           content: (
             <>
               <SubSection title="10. The forward walk">
-                <p>
-                  The forward pass is the chain of layers with two extra moves.
-                  After each encoder convolution its answer is kept, and just
-                  before each decoder convolution the kept answer is laid
-                  alongside what came up from below, the repeated maps first
-                  and the encoder&rsquo;s after them. The order matters, because
-                  the way back has to split the blame in the same order.
-                </p>
+                <p>{"The forward pass saves each encoder convolution's output. Before a decoder convolution, it joins the upsampled maps with the saved encoder maps, placing the repeated maps first. That channel order also determines how the backward pass separates the derivatives for the two routes."}</p>
                 <DerivationTable
                   expressionHeading="step"
                   reasonHeading="what is read, and what is kept"
@@ -487,36 +395,18 @@ export default function UNetPage() {
                   ]}
                 />
                 <KeepInMind>
+
                   Each encoder answer is read twice in the forward pass, once by
                   the pooling above it and once by the decoder across the U,
-                  and that is the fact the backward pass has to honour.
+                  and that is the fact the backward pass has to honor.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. The backward walk, split and then added">
-                <p>
-                  Walking back, each layer works out its own correction from the
-                  blame that arrives at its answer and hands down the blame for
-                  what it read. At a decoder convolution that blame covers the
-                  whole joined block, so it is split by channel in the order the
-                  block was built. The part for the repeated maps goes on down
-                  through the repetition to the layers below. The part for the
-                  encoder&rsquo;s maps is held until the walk reaches that
-                  encoder convolution from above, and there the two are added.
-                </p>
+                <p>{"A decoder convolution returns input derivatives for the complete joined block. Splitting them in the original channel order recovers the contribution for the upsampled maps and the contribution for the saved encoder maps. The first continues through the lower route. The second is retained until the backward pass reaches its encoder convolution, where it is added to the contribution arriving through the pooled route."}</p>
                 <Equation>{"blame at e2  =  blame down through the pooling  +  blame across the skip"}</Equation>
                 <WhyThisWorks title="Why the two parts are added">
-                  <p>
-                    The encoder&rsquo;s answer e2 changes the loss by two
-                    routes, one through the pooling and the middle and one
-                    straight across into the decoder convolution. A small change
-                    in one number of e2 moves the loss by its effect along the
-                    first route plus its effect along the second, and the slope
-                    of a sum is the sum of the slopes. It is the same reason the
-                    repetition in section 6 adds the four blames arriving at the
-                    four copies of one value, since in both cases one number was
-                    used more than once.
-                  </p>
+                  <p>{"The encoder output e2 affects the loss through two routes: the pooled path through the middle, and the skip connection into the decoder convolution. Its gradient adds the contributions from both routes because both depend on the same stored value. The repeated values in section 6 follow the same rule: derivatives arriving at the four copies must be added for the original value."}</p>
                 </WhyThisWorks>
                 <KeepInMind>
                   Nothing in the join has weights, so the join&rsquo;s whole
@@ -527,13 +417,7 @@ export default function UNetPage() {
 
               <SubSection title="12. Checked against a finite difference">
                 <p>
-                  A backward pass written by hand can be checked without trusting
-                  any of it. Nudge one weight up by a millionth, measure the
-                  loss, nudge it down by the same amount, measure again, and the
-                  difference divided by two millionths is the slope. I did that
-                  for twelve weights of every convolution in the untrained U
-                  with skips at seed 0, on the first held-out picture of each
-                  kind, and for twelve pixels of those pictures.
+                  {"A central finite difference estimates a derivative independently of the backward implementation. Increase one weight by a millionth and measure the loss, then decrease it by the same amount and measure again. Divide the loss difference by two millionths. The recorded check applies this to twelve weights of every convolution in the untrained U with skips at seed 0, using the first held-out image of each kind, and to twelve input pixels."}
                 </p>
                 <NumberTable
                   headings={["convolution", "largest slope", "largest disagreement", "if the skip’s share is not added"]}
@@ -549,28 +433,15 @@ export default function UNetPage() {
                   caption="Four pictures, a nudge of one millionth each way. The last column runs the same walk with the addition of section 11 left out."
                 />
                 <p>
-                  The walk agrees with the finite difference to within about two
-                  hundred-millionths everywhere, which is what the rounding in a
-                  nudge of a millionth allows. The last column is the mistake a
-                  hand-written join invites. Leaving out the addition does not
-                  touch the middle or the decoder, which are above the joins,
-                  and it puts the two encoder convolutions wrong by 6.838 and
-                  4.054 on slopes no larger than 9.505.
+                  {"The largest reported discrepancies are about two hundred-millionths. That is strong agreement for these checked entries at this finite-difference step, rather than a proof for every input or parameter. Omitting the skip-gradient addition leaves the middle and decoder derivatives unchanged, but changes the two encoder results by 6.838 and 4.054 on slopes no larger than 9.505."}
                 </p>
                 <KeepInMind>
-                  A walk that forgets the skip&rsquo;s share still runs and still
-                  trains, since the encoder receives the blame from the middle,
-                  and only a check like this one says that its slopes are wrong.
+                  {"Omitting a skip contribution can leave a program that still runs and updates its encoder through the deeper route. Running successfully therefore does not establish that every gradient contribution is present. A finite-difference check can expose this particular error."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="13. How much of the blame crosses the skip">
-                <p>
-                  The two parts added at each encoder convolution can be
-                  measured separately. I took the length of each block of blame,
-                  the square root of the sum of its squares, on the same four
-                  pictures, before training and after it.
-                </p>
+                <p>The gradient contributions at each encoder convolution can be inspected separately. The recorded comparison uses the Euclidean norm, which combines a block’s entries into one magnitude. It uses the same four pictures before and after training, letting us compare the sizes of the pooled-route and skip-route contributions under the same inputs.</p>
                 <NumberTable
                   headings={["length of the blame", "across the skip", "down through the pooling", "their sum"]}
                   rows={[
@@ -579,18 +450,10 @@ export default function UNetPage() {
                     ["second convolution, before training", "5.333", "5.769", "7.873"],
                     ["second convolution, after training", "0.311", "0.520", "0.599"],
                   ]}
-                  caption="The sum is shorter than the two lengths added because the two blocks point partly against each other."
+                  caption="The norm of the sum is smaller than the sum of the norms because the gradient blocks are not perfectly aligned. This does not require their dot product to be negative."
                 />
                 <p>
-                  Before training the first convolution hears mostly from the
-                  middle, 6.551 against 1.861 across the skip. After twenty
-                  passes the two routes carry about the same, 0.573 and 0.587,
-                  so the full-size skip has become half of what shapes the first
-                  filters. That is the second thing a skip connection does,
-                  beside carrying detail forward. It gives the layers nearest
-                  the picture a short route from the loss that passes through
-                  two convolutions, where the route through the middle passes
-                  through five.
+                  {"Before training, the first convolution's deep-route gradient norm is 6.551, compared with 1.861 across the skip. After twenty passes, the two norms are similar at 0.573 and 0.587. Similar norms do not mean each supplies exactly half the update; their directions matter too. The skip also provides a shorter derivative path through two convolutions rather than five through the middle."}
                 </p>
                 <KeepInMind>
                   A skip carries detail up to the decoder on the way forward
@@ -608,12 +471,7 @@ export default function UNetPage() {
             <>
               <SubSection title="14. The same U trained twice">
                 <p>
-                  To measure what the joins buy, the U is trained with them and
-                  without them from the same seed, which draws the same starting
-                  weights for the way down and the middle, so the only
-                  difference is whether the decoder can read the encoder&rsquo;s
-                  maps. After every pass I scored both on the 240 held-out
-                  pictures.
+                  {"The reported comparison trains both arrangements from the same seed and scores them on the 240 held-out images after every pass. The encoder and middle start with the same weights. Decoder input widths differ because one arrangement includes the saved feature maps, so its decoder weights and parameter count also differ. This tests these two complete arrangements rather than isolating one variable at equal model size."}
                 </p>
                 <UNetTrainingCurves />
                 <p>
@@ -650,26 +508,16 @@ export default function UNetPage() {
                   ]}
                 />
                 <p>
-                  With the skips the three seeds agree within 0.004 in overlap.
-                  Without them they spread from 0.163 to 0.623, and the worst
-                  of them gets 0.906 of pixels right, which is only 0.016 above
-                  the 0.889 that calling everything ground gets. Every seed of the U with skips beats
-                  every seed of the U without them by more than the spread of
-                  either.
+                  {"With skips, the three recorded seeds agree within 0.004 in overlap. Without them, overlap ranges from 0.163 to 0.623. The worst no-skip run still gets 0.906 of pixels right, only about 0.016 above the background-only baseline of 0.889 when the difference is calculated using the unrounded accuracies. Every recorded skip-connected run has higher overlap than every no-skip run."}
                 </p>
                 <KeepInMind>
-                  The difference the skips make is larger than anything the
-                  choice of starting weights does to either arrangement, and
-                  the share of pixels right alone would have made the two look
-                  much closer than they are.
+                  {"Across the three recorded starts, the overlap advantage of the skip-connected arrangement is larger than either arrangement's seed-to-seed spread. Overall pixel accuracy makes that difference look smaller because most background pixels are easy for both networks."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. Where the errors are">
                 <p>
-                  The claim for skip connections is that they put the edges back,
-                  so I counted the wrong pixels separately on the edges and
-                  away from them.
+                  {"Do the saved high-resolution features help near shape outlines? The following comparison counts prediction errors separately at the defined boundary pixels and elsewhere."}
                 </p>
                 <NumberTable
                   headings={["held-out", "edge pixels right", "other pixels right"]}
@@ -681,28 +529,14 @@ export default function UNetPage() {
                 />
                 <InAModel title="Seed 0, pixel by pixel">
                   <p>
-                    The U without skips gets 3,130 held-out pixels wrong, and
-                    3,007 of them are on an edge. It misses 1,760 shape pixels
-                    and invents 1,370, close to as many of one as the other, so
-                    its shapes come out about the right size and are off by a
-                    pixel or so along most of their outline. The U with skips
-                    gets 48 pixels wrong, 47 of them on an edge, and 45 of the
-                    48 are shape pixels it missed.
-                  </p>
+                  {"Without skips, seed 0 gets 3,130 held-out pixels wrong, including 3,007 boundary pixels. It misses 1,760 shape pixels and adds 1,370 false shape pixels. Those totals show errors of both kinds; the displayed masks reveal where their outlines differ. With skips, 47 of the 48 errors lie at boundaries, and 45 of those 48 are missed shape pixels."}
+                </p>
                 </InAModel>
                 <p>
-                  Away from the edges both do nearly as well as each other, and
-                  the whole difference sits in the band a pixel wide on either
-                  side of each shape&rsquo;s outline. That is what section 5
-                  predicts, since the middle can place a shape to within about
-                  four pixels and no closer, and the full-size skip is what
-                  carries the one-pixel detail across.
+                  {"Most of the difference lies near shape boundaries. The skip connections give the decoder direct access to finer-resolution encoder features, while the other arrangement must form its output from the coarse middle maps. The results support that explanation on this dataset; they do not establish a hard four-pixel limit on what a learned decoder can represent."}
                 </p>
                 <KeepInMind>
-                  Here the textbook claim held in exactly the form it is made.
-                  The skip connections changed almost nothing away from the
-                  edges and raised the share of edge pixels right from between
-                  0.62 and 0.76 to about 0.997.
+                  {"The measured improvement is concentrated at the boundaries: accuracy there rises from between 0.62 and 0.76 without skips to about 0.997 with them. The separate interior scores show where the two arrangements were already similar."}
                 </KeepInMind>
               </SubSection>
 
@@ -720,13 +554,7 @@ export default function UNetPage() {
                   ]}
                 />
                 <p>
-                  In the box at the top of the page, choose the square outline
-                  and switch the skips off. The probability map draws a soft ring
-                  roughly where the square is, too thick and with rounded
-                  corners, since a one-pixel line cannot be drawn from blocks of
-                  four. With the skips it is the square. The diagonal bar is the
-                  U with skips&rsquo; weakest kind at 0.977, since a stair of
-                  two-pixel steps puts every one of its pixels on an edge.
+                  {"Choose the square outline in the playground and disable the skips. The predicted region is broader and its corners less precise in this example. Repetition starts from coarse blocks, but the later decoder convolutions can refine those values, so a one-pixel line is not mathematically forbidden without a skip. Here the saved features make that reconstruction much easier. The diagonal bar is the skip-connected network's weakest category at 0.977; its narrow stepped outline leaves little interior area."}
                 </p>
                 <KeepInMind>
                   The less of a shape lies away from its edge, the more it needs
@@ -743,7 +571,7 @@ export default function UNetPage() {
             trueFalse(
               "A backward pass that forgets the skip’s share of the blame fails loudly, so the mistake shows up without a check.",
               false,
-              "It still runs and still trains, because the encoder goes on receiving the blame that comes down through the middle. Only a finite difference check said the slopes were wrong, by 6.838 and 4.054 at the two encoder convolutions on slopes no larger than 9.505. The middle and the decoder sit above the joins, so their slopes came out right either way, and the error is confined to the layers whose answers were read twice and credited once.",
+              "Omitting a skip contribution can leave finite gradients of the expected shape, so the backward pass need not fail visibly. The encoder still receives a contribution through the middle, but it is missing another route from the same output. Here a numerical gradient check exposes that discrepancy. Layers reached only once can still have correct gradients, which helps localize the error.",
             ),
             choice(
               "What does this error breakdown tell us about the U-Net without skips?",
@@ -754,7 +582,7 @@ export default function UNetPage() {
                               "Mostly in the ground far from any shape, which the coarse maps fill in",
                             ],
               0,
-              "It misses 1,760 shape pixels and invents 1,370, so its shapes come out about the right size and are off by a pixel or so along most of their outline. Away from the edges it gets 0.998 of pixels right, nearly as many as the U with skips, since the middle can place a shape to within about four pixels and no closer. The skips raised the share of edge pixels right from between 0.62 and 0.76 to about 0.997.",
+              "The breakdown shows many of the no-skip model’s errors occur near shape boundaries. Its false-positive and false-negative counts are both substantial even though its interior/background accuracy is high. Those counts do not prove a uniform pixel displacement or a hard four-pixel localization limit. Retained high-resolution features help the decoder in this experiment, and the edge-specific measurements show where the improvement occurs.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "Seed 0, U-Net without skips:\nwrong held-out pixels: 3,130\nwrong pixels on an edge: 3,007\nshape pixels incorrectly called ground: 1,760\nground pixels incorrectly called shape: 1,370\n\nHeld-out pixels on edges: 12,433; other pixels: 49,007."
@@ -774,7 +602,7 @@ export default function UNetPage() {
                               "The three seeds without skips agree with each other within 0.004",
                             ],
               [0, 1, 2],
-              "It is the U with skips whose three seeds agree within 0.004; without them they spread from 0.163 to 0.623. And 0.906 of pixels right is only 0.016 above what answering ground everywhere gets, which is how little that score separates the two arrangements.",
+              "The skip-connected runs agree within 0.004 in overlap; the no-skip runs range from 0.163 to 0.623. The worst no-skip accuracy is displayed as 0.906. Its gain over predicting background everywhere is about 0.016 using the unrounded accuracies, so subtracting the separately rounded displays need not reproduce that exact difference. Most background pixels are easy for both arrangements.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "held-out, after pass 20 | seed 0 | seed 1 | seed 2\noverlap, with the skips | 0.992 | 0.995 | 0.995\noverlap, without them | 0.623 | 0.163 | 0.559\npixels right, with the skips | 0.9992 | 0.9994 | 0.9994\npixels right, without them | 0.949 | 0.906 | 0.935\n\nDuring these measured runs the no-skip U-Net never exceeds overlap 0.64.\nCalling every pixel ground gives pixel accuracy about 0.889."
@@ -789,7 +617,7 @@ export default function UNetPage() {
                 "The cross",
               ],
               0,
-              "A square outline here is one pixel thick, so every pixel of it is on an edge and nothing is left for the coarse route to get right. The filled disc has an inside and is its best kind; the diagonal bar is the weakest kind for the U with skips, at 0.977, which is a different question.",
+              "The no-skip model performs worst on the one-pixel square outline in this comparison. Thin outlines are difficult to preserve after repeated spatial reduction because almost every foreground pixel lies on a boundary. A filled disc has a larger interior region. This explains a useful architectural concern, rather than proving that a coarse decoder can never reconstruct a thin shape.",
             ),
         ],
         },
@@ -800,7 +628,7 @@ export default function UNetPage() {
               <SubSection title="18. The obvious alternative, measured">
                 <>
 <p>
-                  Every picture in this collection is a dim background with a brighter shape drawn on it, so the obvious way to find the shape is to call every pixel brighter than some level shape. I tried two versions. The first uses one level for every picture, the one of 41 levels from 0.20 to 0.60 that got most training pixels right, which was 0.41.
+                  {"These generated images put a brighter shape against a dimmer background. A simple threshold rule is therefore a useful baseline. The shared-threshold experiment compares 41 levels from 0.20 to 0.60 using training-pixel accuracy and selects 0.41. Selecting on the training data keeps the held-out images available for evaluating the chosen rule."}
                 </p>
                 <p>
                   The second chooses a level for each picture from that picture alone, by Otsu&rsquo;s rule of 1979, which tries every cut between two brightnesses and keeps the one that splits the picture into two groups whose means are furthest apart for their sizes.
@@ -817,13 +645,7 @@ export default function UNetPage() {
                   ]}
                 />
                 <p>
-                  The U with skips beats one fixed level, by about 0.01 in
-                  overlap and on the edges too, and a fixed level has no way to
-                  follow a picture whose background happens to be bright. It
-                  loses to a level chosen per picture, which gets one pixel
-                  wrong in 61,440. The U has 2,521 parameters, took twenty passes
-                  over 240 pictures and their masks to train, and is beaten by a
-                  rule with no parameters that has never seen a mask.
+                  {"The skip-connected network beats the shared threshold by about 0.01 in overlap and also has better boundary accuracy. Otsu's per-image threshold does better still, missing one pixel in 61,440. The network uses 2,521 learned parameters and twenty passes over 240 labeled images. Otsu estimates a threshold from each image's brightness values without training on masks. That is the relevant baseline advantage here."}
                 </p>
                 <KeepInMind>
                   On these pictures a U-Net with 2,521 trained parameters got 48
@@ -835,19 +657,14 @@ export default function UNetPage() {
               <SubSection title="19. Why, and what that says about the task">
                 <>
 <p>
-                  The threshold wins because the pictures were drawn so that it would. A shape pixel is its picture&rsquo;s background plus a lift of at least 0.4, and the noise on each pixel has a spread of 0.05, so within one picture the shape and the ground are two groups of brightness with a gap between them, and splitting the gap is the whole task.
+                  {"The image generator makes the shape at least 0.4 brighter than its background, while pixel noise has spread 0.05. Foreground and background therefore form well-separated brightness groups within most images. A threshold can use that separation without learning the shape category or a detailed spatial model."}
                 </p>
                 <p>
-                  What the U-Net was invented for is the case where that is not true, where a membrane in an electron microscope picture is no brighter than the inside of the cell beside it and the only way to tell them apart is the shape of the surroundings. That case is not in this collection, and building it would need pictures drawn some other way.
+                  {"The original U-Net addressed biomedical segmentation, where local brightness alone may not separate structures reliably and labeled images can be scarce. It combines image context with high-resolution features to predict detailed regions. The collection here does not reproduce that difficulty: brightness already provides a very strong cue. Testing the broader advantage would require a different image distribution."}
                 </p>
 </>
                 <p>
-                  So what this collection can show about a U-Net is the
-                  architecture itself, the gap between having the skips and not,
-                  and where that gap sits. It cannot show the architecture
-                  earning its place, since on this task a rule with no
-                  parameters already gets 61,439 of the 61,440 held-out pixels
-                  right.
+                  {"This collection illustrates how the architecture computes a mask and how these versions behave with and without skips. It does not show that a neural network is necessary for the task. The per-image threshold already labels 61,439 of the 61,440 held-out pixels correctly."}
                 </p>
                 <KeepInMind>
                   Before training, compare with a brightness-threshold baseline. On these held-out images, that rule gets all but one of 61,440 pixels right. A network result needs to be judged against that strong performance on this deliberately simple image distribution.
@@ -862,12 +679,7 @@ export default function UNetPage() {
             <>
               <SubSection title="20. Rings">
                 <p>
-                  The classifier on the convolutional networks page had no way to
-                  answer a ring, since it could only share each picture among the
-                  four kinds it knew, and it called most rings a square outline.
-                  A U-Net is asked only which pixels are shape, so a kind it
-                  never saw is a question it can still answer. I drew the same sixty rings that page used and scored
-                  both arrangements on them.
+                  {"The classifier has four output categories, so it cannot name ring as a new category and calls most rings square outlines. The segmenter instead predicts shape versus background at each pixel. That output definition also applies to rings, although good predictions on a new shape are not guaranteed. The following results use the same sixty ring examples as the classifier comparison."}
                 </p>
                 <NumberTable
                   headings={["overlap on 60 rings", "seed 0", "seed 1", "seed 2"]}
@@ -885,39 +697,28 @@ export default function UNetPage() {
                 </p>
 </>
                 <KeepInMind>
-                  A per-pixel answer built from local detail carries over to a
-                  shape the network never saw far better than a classifier&rsquo;s
-                  kind does, and the detail that carries it over is the detail
-                  the skips bring across.
+                  {"These ring results show useful transfer for the skip-connected binary segmenter on this image distribution. They do not turn its shape/background labels into a ring category. Deciding what each pixel belongs to and assigning a new image category remain different tasks."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="21. A picture twice the size">
                 <p>
-                  The classifier reads sixteen by sixteen and no other size,
-                  because its dense layer has one weight per number of the
-                  flattened row. The U has no dense layer. Every layer in it
-                  reads its input window by window, so the same trained weights
-                  can read a bigger picture, and I laid four held-out pictures
-                  out two by two as one picture of 32 by 32 and handed it to the
-                  U with skips at seed 0 without retraining anything.
+                  {"This classifier's dense layer expects the flattened size produced by a sixteen-by-sixteen input. The U uses local operations instead, so its weights can be reused at compatible spatial sizes. The reported test joins four held-out images into one 32-by-32 image and applies the seed-0 skip-connected network without retraining. The pooling and join shapes still need to agree, as section 22 checks."}
                 </p>
                 <UNetLargerPicture />
                 <p>
+
                   It gets all 1,024 pixels right, and its call at every pixel is
                   the same as when the four pictures were read apart, including
                   the pixels next to the seams, where a window now reads the
-                  neighbouring picture instead of the zeros it saw at the frame
+                  neighboring picture instead of the zeros it saw at the frame
                   during training. On a picture with nothing drawn on it, an even
                   brightness of 0.15, it calls no pixel shape, and the largest
                   probability of shape it gives any pixel is 0.0044, where the
                   classifier called the same blank picture a diagonal bar.
                 </p>
                 <KeepInMind>
-                  A network with no dense layer is defined for pictures of other
-                  sizes, which is what the word fully convolutional means, and
-                  in this U it held on a picture four times the area it was
-                  trained on.
+                  {"Fully convolutional describes this use of convolutional feature maps rather than a fixed-size dense output. It permits reuse across compatible image sizes, but pooling, padding and skip joins still impose shape rules. Here the same weights processed an image four times the training area."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -945,28 +746,24 @@ export default function UNetPage() {
                     ["30", "15", "7", "14, then 28", "14 beside 15, undefined", "28 beside 30, undefined"],
                     ["32", "16", "8", "16, then 32", "16 beside 16", "32 beside 32"],
                   ]}
-                  caption="With two poolings the joins are defined exactly when the side is divisible by four, and with d poolings when it is divisible by two to the power d."
+                  caption="For the same-padding, halving-and-repetition design shown here, two poolings require sides divisible by four for these joins to align. The corresponding condition with d poolings is divisibility by two to the power d."
                 />
                 <>
 <p>
-                  There are three ways out, and each costs something. Pad the picture up to the next side that halves evenly, which invents pixels at the border that the network then has to answer for. Crop the larger block down to the smaller, which is what the paper did throughout, since its unpadded convolutions shrank every map anyway, and which throws away the encoder&rsquo;s outermost rows.
+                  {"One option is to pad the input to a compatible size, then remove the padding from the final output. That introduces a choice about border context. Another is to crop the larger feature map before concatenation. The original paper cropped encoder maps because its unpadded convolutions reduced their spatial sizes."}
                 </p>
                 <p>
                   Or resize the picture, which changes every shape in it. Without the joins the question does not arise at the joins, but it moves to the answer, which for a side of 30 comes out 28 wide and cannot be compared with a mask of 30.
                 </p>
 </>
                 <KeepInMind>
-                  A U-Net with d poolings is defined for sides divisible by two
-                  to the power d, and every other side needs a decision about
-                  which pixels to invent or throw away.
+                  {"For the halving-and-repetition arrangement shown here, compatible sides divide evenly at every pooling stage. Other U-Net implementations can use explicit padding, cropping or size-aware resizing to align their maps. The architecture name alone does not specify how borders and odd sizes are handled."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="23. The cases where the method has no answer">
                 <p>
-                  Each of these is a fact about answering every pixel with a
-                  shrinking and growing network, and each is a decision any
-                  implementation of it faces.
+                  {"The image shape, prediction rule and evaluation convention each determine which outputs we can interpret. The cases below separate missing input context from an invalid join or an undefined metric."}
                 </p>
                 <DerivationTable
                   expressionHeading="Mask, prediction or image shape"
@@ -974,19 +771,16 @@ export default function UNetPage() {
                   rows={[
                     { expression: "a picture with no shape in it", reason: "if the network also calls nothing, the overlap is zero pixels over zero pixels and is undefined. Counting it as one, leaving the picture out, or pooling the counts over all pictures before dividing are the three choices, and each gives a different average. The blank picture of section 21 is this case, and the U called nothing." },
                     { expression: "a picture with no shape, and a call of some", reason: "the overlap is zero whatever the size of the mistake, so one wrongly called pixel and a wrongly called half picture score the same." },
-                    { expression: "a probability of exactly one half", reason: "the pixel is neither called shape nor ground by the rule until a side is chosen for the tie. It moves the scores only when it happens, which in floating point is rare." },
+                    { expression: "a probability of exactly one half", reason: "The rule used here predicts shape only above one half, so an exact tie is background. Another threshold convention could assign that tie differently. State the convention instead of leaving the case unspecified." },
                     { expression: "a side not divisible by two to the power of the depth", reason: "the joins pair blocks of different sizes, which is undefined. Section 22 has the widths and the three ways out." },
                     { expression: "a shape touching the frame", reason: "a window at the frame reads the padding’s zeros, which are not pixels, so the network learned the frame as a dark border. A picture with a bright shape running off its edge asks it about a situation it was never shown. Every shape in this collection is drawn at least one pixel in from the frame." },
                     { expression: "two shapes touching", reason: "a mask says which pixels are shape and not which shape, so two touching shapes are one region in the answer. The paper met this with touching cells and weighted the loss heavily on the thin gaps between them, which is a change to the loss and not to the architecture." },
-                    { expression: "blame split in another order than the join", reason: "if the forward pass lays the encoder’s maps first and the backward pass takes the first channels as the repeated ones, every slope in the encoder is computed for the wrong maps. Nothing about the arithmetic refuses it, and only a check like section 12 finds it." },
-                    { expression: "detail finer than the smallest map, with no skip", reason: "repetition copies each value over a block, so without a skip the answer can place an edge only on the block grid, four pixels here. Nothing after the middle can put back what the poolings discarded unless something carries it around them." },
+                    { expression: "blame split in another order than the join", reason: "If the forward pass places encoder maps first but the backward split treats those channels as repeated maps, derivatives follow the wrong branches. Matching shapes may let the computation run. A finite-difference check such as section 12 can reveal the incorrect gradient routing." },
+                    { expression: "detail finer than the smallest map, with no skip", reason: "Repetition initially copies each value over a block, four pixels across here after both enlargements. The following learned convolutions can vary the final predictions within those blocks. They cannot recover information absent from every retained feature, but coarse map spacing alone does not prove that all finer location information was lost." },
                   ]}
                 />
                 <KeepInMind>
-                  Two of these fail silently, the join whose blame is split in
-                  the wrong order and the picture whose overlap is zero over
-                  zero, since in both the numbers keep coming and only a check
-                  from outside says they mean nothing.
+                  {"A mistaken gradient split may still produce finite updates, while an empty-union IoU needs an explicit convention. These are different failures. Numerical checks can test the gradient path, and evaluation code must state what it does with an empty foreground union."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1004,7 +798,7 @@ export default function UNetPage() {
                 "The U was trained with a step of 0.003, which is too small to compete",
               ],
               0,
-              "The pictures were drawn so that splitting the gap in brightness is the whole task, and a rule that splits it has nothing left to learn. The rule has never seen a mask, which is what makes it beating a trained network worth reporting rather than embarrassing.",
+              "These generated pictures separate foreground and background mainly by brightness. Choosing a threshold from each image therefore matches how the data was constructed, without needing labeled masks for fitting. That makes it a useful baseline here. Images with overlapping brightness ranges, texture or shadows can require a different method.",
             ),
             trueFalse(
               "The U with skips, with its 2,521 trained parameters, gets fewer held-out pixels wrong than a brightness level chosen for each picture.",
@@ -1020,7 +814,7 @@ export default function UNetPage() {
                 "Both arrangements had to be retrained on rings before they could answer"
               ],
               [0, 1, 2],
-              "A U-Net is asked only which pixels are shape, so a kind it never saw is still a question it can answer without retraining. The handful of hole pixels called shape is what says it did not simply fill a ring in as though it were a disc.",
+              "The prediction target is a foreground/background mask, so the network can produce a mask for an unseen shape category without adding another output class. Whether that mask is useful still requires evaluation. The reported ring results, including the hole pixels, show what these fitted models actually did; the output format alone gives no guarantee of generalization.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "60 rings, absent from both training sets; evaluated directly without retraining.\nTrue ring pixels: 2,257; pixels inside ring holes: 2,046.\nWith skips, missed ring pixels, seeds 0/1/2: 20 / 70 / 11.\nWith skips, at most 2 hole pixels are called shape.\nWithout skips, seed 0 calls 245 hole pixels shape and misses 908 ring pixels."
@@ -1035,7 +829,7 @@ export default function UNetPage() {
                 "The seams between the four pictures are padded with zeros during the pass",
               ],
               0,
-              "A dense layer has one weight per number of the flattened row, which fixes the classifier at sixteen by sixteen and no other size. At the seams a window reads the neighbouring picture rather than the zeros it saw at the frame during training, and the call at every pixel came out the same as when the four were read apart.",
+              "The U’s convolutional parameters are shared across spatial positions, so they can be reused in a larger compatible spatial layout. The classifier’s dense head expects a fixed flattened feature count. Boundary conditions still matter: adjoining tiles lets windows read neighboring pixels where separate tiles used padding. The reported agreement is a result for this example, not a guarantee for every image or architecture.",
             ),
             several(
               "For this U-Net with two floor-halving poolings and two exact doublings, which statements describe the shape problem and its possible repairs?",
@@ -1107,7 +901,7 @@ the full-size skip only: 1945 parameters in all`,
             exercise(
               "Grow a two by two map, and send the blame back",
               [
-  "Build the supplied nearest-neighbour repetition layer on the two-by-two map [1,2;3,4]. Print its input/output shapes and enlarged map.",
+  "Build the supplied nearest-neighbor repetition layer on the two-by-two map [1,2;3,4]. Print its input/output shapes and enlarged map.",
   "Use the specified upstream contributions on the upper-left and lower-right repeated blocks, with zero elsewhere. Print input derivatives, the upper-left total and the layer’s parameter gradient."
 ],
               `import numpy as np
@@ -1245,7 +1039,7 @@ length across the skip 3.499, down through the pooling 1.179, their sum 3.752`,
             exercise(
               "Train a small U with its skip and without it",
               [
-  "The supplied small U training uses forty labelled outline images and keeps forty separate for evaluation. Compare the trained one-full-size-skip network with the no-skip version.",
+  "The supplied small U training uses forty labeled outline images and keeps forty separate for evaluation. Compare the trained one-full-size-skip network with the no-skip version.",
   "On held-out images call pixels shape when raw score exceeds zero. Print pixel accuracy, mean per-image intersection-over-union and predicted shape-pixel count for each, then the all-background pixel-accuracy baseline."
 ],
               `import numpy as np

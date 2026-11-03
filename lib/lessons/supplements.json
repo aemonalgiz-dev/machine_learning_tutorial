@@ -6,7 +6,7 @@
         "title": "A New Sequence Needs a Deliberate Initial State",
         "paragraphs": [
           "If Botie processes one greenhouse's week and then another greenhouse's week, carrying hidden state across the boundary lets the second prediction depend on the first greenhouse. Reset state for independent sequences unless the task explicitly defines continuity.",
-          "For chunks of one continuous record, carrying the numerical state may be appropriate. Detaching its gradient at a chunk boundary truncates backpropagation while retaining the state value. That changes how far a later error can teach earlier computations, not what the retained vector currently contains."
+          "For chunks of one continuous record, we may want the next chunk to remember the earlier readings. Carrying the hidden-state value preserves that information. We can separately stop derivatives at the chunk boundary, so an error in the new chunk does not update computations in an earlier chunk. This is truncated backpropagation through time. The value continues forward while the training calculation reaches back only a limited distance."
         ],
         "interpretation": []
       },
@@ -34,7 +34,7 @@
       {
         "title": "Shared Weights Receive Contributions from Every Use",
         "paragraphs": [
-          "Unrolling the recurrent computation gives a copy of the update operation at each time step, but those copies share parameters. Backpropagation adds the gradient contributions from every use into the same weight arrays.",
+          "Draw the recurrent update once for each reading in time order. This is called unrolling. The drawings represent repeated uses of the same weights, rather than separate weights for each date. When we differentiate the error, every use contributes to the derivative of those shared weights, so the backward calculation must add the contributions together.",
           "Clipping a gradient's norm can limit unusually large updates, but it does not repair a wrong derivative or restore information lost through vanishing gradients. Check a short deterministic sequence with finite differences before trusting a long training run."
         ],
         "interpretation": []
@@ -43,20 +43,21 @@
     "practice": []
   },
   "radial-basis-networks": {
-    "reason": "Fit the linear output layer, expose centre-width choices and evaluate extrapolation.",
+    "reason": "Fit the linear output layer, expose center-width choices and evaluate extrapolation.",
     "parts": [
       {
-        "title": "A Centre and a Width Define One Local Response",
+        "title": "A Center and a Width Define One Local Response",
         "paragraphs": [
-          "A radial basis unit responds according to distance from its centre. The width determines how quickly its response falls as the input moves away. Several centres divide the input space into overlapping regions of influence without assigning each input to only one region.",
-          "Choosing centres from training observations or fitted clusters is a modelling step. Learning widths or centres by optimisation is another. Keep those choices separate from fitting the output weights, which is a linear problem once the basis responses are fixed."
+          "A radial basis unit responds according to distance from its center. The width determines how quickly its response falls as the input moves away. Several centers divide the input space into overlapping regions of influence without assigning each input to only one region.",
+          "Choosing centers from training observations or fitted clusters is a modeling step. Learning widths or centers by optimization is another. Keep those choices separate from fitting the output weights, which is a linear problem once the basis responses are fixed."
         ],
-        "interpretation": []
+        "interpretation": [],
+        "id": "a-centre-and-a-width-define-one-local-response"
       },
       {
         "title": "Turn Local Responses into a Regression Table",
         "paragraphs": [
-          "Evaluate each basis at every training input to build a design matrix. Add an intercept column if the output rule needs a baseline. A least-squares solver can then fit the output coefficients.",
+          "Give each training input one row and each basis unit one column. Each entry records how strongly that unit responds to that input. This table is the design matrix. The output rule combines its columns using adjustable coefficients, and an optional all-ones column supplies an intercept. We can now fit those coefficients with the least-squares method we used for regression.",
           "The basis functions are nonlinear in the original input, but the prediction is linear in these output coefficients. This is the same distinction used in polynomial regression."
         ],
         "interpretation": [],
@@ -64,7 +65,7 @@
           {
             "title": "Fit two Gaussian basis responses and an intercept",
             "paragraphs": [
-              "The centres and width are fixed teaching choices, not learned quantities in this program."
+              "The centers and width are fixed teaching choices, not learned quantities in this program."
             ],
             "code": "import numpy as np\nx = np.array([-1.,0.,1.])\ny = np.array([0.,1.,0.])\ncentres = np.array([-1.,1.])\ndef design(values):\n    response = np.exp(-.5*((values[:,None]-centres[None,:])/1.)**2)\n    return np.column_stack([np.ones(len(values)),response])\nw = np.linalg.lstsq(design(x), y, rcond=None)[0]\nprint(np.round(design(x)@w, 4).tolist())\nprint(design(np.array([10.])).shape)",
             "output": "[0.0, 1.0, 0.0]\n(1, 3)",
@@ -75,12 +76,13 @@
         ]
       },
       {
-        "title": "Far from Every Centre, Only the Baseline May Remain",
+        "title": "Far from Every Center, Only the Baseline May Remain",
         "paragraphs": [
-          "Gaussian basis responses approach zero far from their centres. With an intercept, the prediction then approaches that intercept. Without one, it approaches zero. Neither behaviour necessarily matches the underlying problem.",
-          "Inspect widths that are too narrow and too broad. Narrow units can leave unsupported gaps; broad units can create similar columns and unstable coefficients. Choose centres, widths and regularisation using an evaluation that reflects where new inputs will occur."
+          "Gaussian basis responses approach zero far from their centers. With an intercept, the prediction then approaches that intercept. Without one, it approaches zero. Neither behavior necessarily matches the underlying problem.",
+          "Inspect widths that are too narrow and too broad. Narrow units can leave unsupported gaps; broad units can create similar columns and unstable coefficients. Choose centers, widths and regularization using an evaluation that reflects where new inputs will occur."
         ],
-        "interpretation": []
+        "interpretation": [],
+        "id": "far-from-every-centre-only-the-baseline-may-remain"
       }
     ],
     "practice": []
@@ -126,8 +128,8 @@
       {
         "title": "A Lookup Selects Rows, Not Numerical Magnitudes",
         "paragraphs": [
-          "A token ID identifies one row of the embedding table. Changing cat's ID from three to seven and moving its embedding row with it should leave the model's behaviour unchanged. The ID itself does not tell the model that cat is closer to one word than another.",
-          "The selected vector enters later computations, whose loss supplies a gradient for that row. Rows absent from the batch receive no lookup contribution from it. Their possible regularisation updates are a separate part of training."
+          "A token ID identifies one row of the embedding table. If we change cat's ID from three to seven and move its embedding to row seven, that lookup still returns the same vector. The ID itself does not tell the model that cat is closer to one word than another.",
+          "The selected vector enters later computations, whose loss supplies a gradient for that row. Rows absent from the batch receive no lookup contribution from it. Their possible regularization updates are a separate part of training."
         ],
         "interpretation": []
       },
@@ -199,7 +201,7 @@
         "title": "A Position Rule and a Trained Context Length Are Different Limits",
         "paragraphs": [
           "A sinusoidal formula can be evaluated at positions beyond those seen during training. That does not establish that the trained model will behave well there. Learned absolute tables can also have an explicit maximum index.",
-          "Relative-position methods and rotary methods change how positional relationships enter attention. They do not remove memory cost, training-distribution limits or the need to evaluate long-context behaviour. Distinguish a mathematically defined position from a context length the full model has learned to use."
+          "Relative-position methods and rotary methods change how positional relationships enter attention. They do not remove memory cost, training-distribution limits or the need to evaluate long-context behavior. Distinguish a mathematically defined position from a context length the full model has learned to use."
         ],
         "interpretation": []
       }
@@ -212,13 +214,13 @@
       {
         "title": "Mask a Score before Turning It into a Share",
         "paragraphs": [
-          "A padded position should not receive attention merely because a batch needs a rectangular shape. Set its score to an excluded value before softmax so the allowed positions receive the whole normalised share. A causal mask additionally excludes future positions.",
+          "A padded position should not receive attention merely because a batch needs a rectangular shape. Set its score to an excluded value before softmax so the allowed positions receive the whole normalized share. A causal mask additionally excludes future positions.",
           "If an entire query row is masked, ordinary softmax has no allowed outcome. Handle that row explicitly according to the task. Replacing excluded scores with a large negative number is a numerical implementation choice; it does not define what an all-masked row should mean."
         ],
         "interpretation": []
       },
       {
-        "title": "Remove an Unavailable Key and Renormalise",
+        "title": "Remove an Unavailable Key and Renormalize",
         "paragraphs": [
           "An attention share is relative to the allowed keys. Removing one key changes the denominator and therefore the shares of the remaining keys, even when their original scores stay unchanged.",
           "The resulting vector is a weighted sum of values. Scores and values have separate jobs, so keep both beside the calculation."
@@ -233,16 +235,17 @@
             "code": "import numpy as np\nscores = np.array([1.,1.,9.])\nallowed = np.array([True,True,False])\nmasked = np.where(allowed, scores, -np.inf)\nweight = np.exp(masked-np.max(masked))\nweight /= weight.sum()\nvalues = np.array([[2.,0.],[0.,4.],[100.,100.]])\nprint(weight.tolist())\nprint((weight@values).tolist())",
             "output": "[0.5, 0.5, 0.0]\n[1.0, 2.0]",
             "interpretation": [
-              "The very large padded score contributes nothing. Masking the output after softmax instead would have already changed the allowed weights."
+              "The padded value contributes nothing because its weight is zero. If we included its score in softmax and only then set its weight to zero, the other two weights would still be too small unless we normalized them again."
             ]
           }
-        ]
+        ],
+        "id": "remove-an-unavailable-key-and-renormalise"
       },
       {
         "title": "Each Head Makes Its Own Comparison",
         "paragraphs": [
-          "Multihead attention projects the representation into several query, key and value spaces. Each head calculates its own score table and weighted values. Concatenate those head outputs, then apply an output projection to mix their information.",
-          "Heads are learned computational components, not preassigned grammatical jobs. A head may show a recognisable pattern on some examples without reliably representing one human concept. Track batch, head, query, key and feature axes before combining arrays."
+          "One comparison may help a token find a nearby description, while another may pick out a reference elsewhere in the sequence. Multihead attention allows several comparisons to be learned. Each head has its own transformations for queries, keys and values, and produces its own weighted result. Place those results side by side, which is concatenation, then apply a learned output transformation to combine their coordinates.",
+          "Heads are learned computational components, not preassigned grammatical jobs. A head may show a recognizable pattern on some examples without reliably representing one human concept. Track batch, head, query, key and feature axes before combining arrays."
         ],
         "interpretation": []
       },
@@ -260,7 +263,7 @@
         "title": "Can masked attention handle every permitted query row?",
         "question": "Can masked attention handle every permitted query row?",
         "task": [
-          "The workshop produced a weighted mixture for one query. Here the compatibility scores are already supplied, and several queries may allow different keys. Make the normalisation and value mixing reusable without letting an excluded key receive a share.",
+          "The workshop produced a weighted mixture for one query. Here the compatibility scores are already supplied, and several queries may allow different keys. Make the normalization and value mixing reusable without letting an excluded key receive a share.",
           "Write masked_attention(scores, values, allowed). scores is a finite (queries, keys) table; values is a finite (keys, features) table; allowed is a Boolean table matching scores. Every query must allow at least one key, and both tables must have positive dimensions.",
           "Apply stable softmax only over allowed keys and return the weighted value table. Preserve inputs and raise ValueError for invalid layouts, non-Boolean masks or an all-masked query. Print the demonstration output rounded to four places."
         ],
@@ -269,7 +272,7 @@
         "output": "[[1.0, 3.0], [8.0, 8.0]]",
         "hints": [
           "Exclude forbidden scores before choosing a row maximum. An all-masked query needs an error, rather than a fabricated probability distribution.",
-          "Normalise each query over its allowed keys, then multiply by the value table. The output keeps one row per query and one column per value feature."
+          "Normalize each query over its allowed keys, then multiply by the value table. The output keeps one row per query and one column per value feature."
         ],
         "tests": [
           {
@@ -292,13 +295,13 @@
       }
     ],
     "checkpoint": {
-      "after": "Remove an Unavailable Key and Renormalise",
+      "after": "Remove an Unavailable Key and Renormalize",
       "title": "Questions on Masked Attention",
       "questions": [
         {
           "kind": "choice",
           "given": {
-            "description": "Use this setup.",
+            "description": "Question data",
             "data": "Scores are [1,1,9]. The third key is padding and is excluded before softmax."
           },
           "prompt": "What shares should the two allowed keys receive?",
@@ -308,7 +311,7 @@
             "Shares summing to less than one"
           ],
           "answer": 0,
-          "because": "The padded key is outside the normalisation. Equal allowed scores receive equal shares of the complete allowed distribution."
+          "because": "The padded key is outside the normalization. Equal allowed scores receive equal shares of the complete allowed distribution."
         }
       ]
     }
@@ -319,7 +322,7 @@
       {
         "title": "A Batch Adds an Axis, Not a Conversation between Examples",
         "paragraphs": [
-          "A decoder batch commonly stores batch, token and feature axes. Attention should compare positions within the same sequence, not words from unrelated examples in other batch rows.",
+          "Suppose we process several sentences together. One array axis identifies the sentence, another the token position, and another the coordinates describing that token. These are the batch, token and feature axes. Attention compares positions within each sentence; putting sentences in the same batch does not make their words context for one another.",
           "Different sequence lengths need padding masks, while next-token training also needs a causal mask. Check both with unequal lengths. A triangular mask alone prevents looking forward but does not automatically remove every padded key."
         ],
         "interpretation": []
@@ -354,12 +357,13 @@
         "interpretation": []
       },
       {
-        "title": "Normalisation Placement Is Part of the Architecture",
+        "title": "Normalization Placement Is Part of the Architecture",
         "paragraphs": [
-          "Applying normalisation before a sublayer and applying it after the residual addition produce different computations and gradient paths. Preserve the selected convention when reproducing a model; moving a normalisation is not a formatting change.",
-          "Training and generation also require different execution behaviour for dropout and gradient tracking. Save enough configuration to reconstruct the exact block, including widths, head count, activation, normalisation convention and mask rules."
+          "Applying normalization before a sublayer and applying it after the residual addition produce different computations and gradient paths. Preserve the selected convention when reproducing a model; moving a normalization is not a formatting change.",
+          "Training and generation also require different execution behavior for dropout and gradient tracking. Save enough configuration to reconstruct the exact block, including widths, head count, activation, normalization convention and mask rules."
         ],
-        "interpretation": []
+        "interpretation": [],
+        "id": "normalisation-placement-is-part-of-the-architecture"
       }
     ],
     "practice": []
@@ -378,7 +382,7 @@
       {
         "title": "Train a Small Next-Token Model before Adding a Network",
         "paragraphs": [
-          "A bigram model keeps one next-token count row per current token. Adding a small count to every possible continuation prevents an unseen pair from receiving zero probability. Normalising each row produces a complete conditional distribution.",
+          "A bigram model keeps one next-token count row per current token. Adding a small count to every possible continuation prevents an unseen pair from receiving zero probability. Normalizing each row produces a complete conditional distribution.",
           "This model reads only the immediately preceding token. That limitation makes a useful baseline: the training target is the same kind of next-token target, but the context representation is deliberately restricted."
         ],
         "interpretation": [],
@@ -408,7 +412,7 @@
         "title": "Low Next-Token Loss Does Not Answer Every User Task",
         "paragraphs": [
           "The objective rewards probability on observed continuations. It does not directly certify factuality, instruction following, useful explanations or safety. A model can exploit repeated boilerplate and frequent tokens while failing on the decisions people care about.",
-          "Retain token-level loss as one diagnostic and evaluate relevant tasks separately. Compare losses only under compatible tokenisation, target masking and data conventions; changing those changes what one averaged term represents."
+          "Retain token-level loss as one diagnostic and evaluate relevant tasks separately. Compare losses only under compatible tokenization, target masking and data conventions; changing those changes what one averaged term represents."
         ],
         "interpretation": []
       }
@@ -420,14 +424,14 @@
         "task": [
           "A simple next-token model can count which token follows the current one. Build that table from several documents while keeping their boundaries intact, then use smoothing so an unseen transition still has positive probability.",
           "Write bigram_table(documents, vocabulary_size, smoothing). documents is a sequence of one-dimensional integer token sequences; token IDs must be in range. vocabulary_size is a positive integer and smoothing is finite and positive. Empty documents are valid.",
-          "Start every transition count at smoothing, count adjacent pairs within each document only, and return a row-normalised probability table. Raise ValueError for invalid IDs or settings. Print the demonstration probabilities rounded to four places."
+          "Start every transition count at smoothing, count adjacent pairs within each document only, and return a row-normalized probability table. Raise ValueError for invalid IDs or settings. Print the demonstration probabilities rounded to four places."
         ],
         "starter": "import numpy as np\n\ndef bigram_table(documents, vocabulary_size, smoothing):\n    # Write the procedure here.\n    raise NotImplementedError\n\nprint(np.round(bigram_table([[0,1,1],[1,2]],3,1),4).tolist())",
         "solution": "import numpy as np\n\ndef bigram_table(documents, vocabulary_size, smoothing):\n    if isinstance(vocabulary_size,bool) or not isinstance(vocabulary_size,(int,np.integer)) or vocabulary_size < 1 or not np.isfinite(smoothing) or smoothing <= 0:\n        raise ValueError('Invalid vocabulary or smoothing')\n    count = np.full((vocabulary_size,vocabulary_size), float(smoothing))\n    for document in documents:\n        ids = np.asarray(document)\n        if ids.ndim != 1 or (ids.size and (not np.issubdtype(ids.dtype,np.integer) or np.any(ids<0) or np.any(ids>=vocabulary_size))):\n            raise ValueError('Invalid token IDs')\n        if ids.size > 1:\n            np.add.at(count,(ids[:-1],ids[1:]),1)\n    return count/count.sum(axis=1,keepdims=True)\n\nprint(np.round(bigram_table([[0,1,1],[1,2]],3,1),4).tolist())",
         "output": "[[0.25, 0.5, 0.25], [0.2, 0.4, 0.4], [0.3333, 0.3333, 0.3333]]",
         "hints": [
           "Count adjacent pairs separately inside each document. A document's final token must not gain a transition to another document's first token.",
-          "Repeated pairs, including self-transitions, add repeated counts. Add smoothing to the whole table and normalise each source-token row separately."
+          "Repeated pairs, including self-transitions, add repeated counts. Add smoothing to the whole table and normalize each source-token row separately."
         ],
         "tests": [
           {
@@ -456,7 +460,7 @@
       {
         "title": "A Cache Reuses Computation from an Unchanged Prefix",
         "paragraphs": [
-          "During causal generation, earlier token representations cannot depend on tokens that have not been generated yet. Their key and value projections can therefore be retained while a new query is calculated for the appended token.",
+          "After generating another token, we need to calculate what follows it. Recomputing every earlier key and value would repeat work. In ordinary causal attention, an earlier position cannot read the new token, so its previously calculated keys and values remain usable. A key-value cache stores them while we calculate the appended token's new projections, including its query, key and value. The new key and value join the cache for later tokens.",
           "The cache must match the model weights, position convention, mask and exact prefix. Editing an earlier token invalidates affected cached state. A cache accelerates the same intended computation; it does not supply additional knowledge or change the probability model by itself."
         ],
         "interpretation": []
@@ -486,7 +490,7 @@
         "title": "Dropping Old Tokens Changes the Available Evidence",
         "paragraphs": [
           "A context limit can require truncating a long prefix. Decide which information is retained, including task instructions and recent conversation. A model cannot reliably use evidence that has been removed from its input.",
-          "Position handling and cache updates must remain consistent with the chosen truncation method. Test the complete generation implementation against an uncached reference on short prefixes before relying on an optimisation for long ones."
+          "Position handling and cache updates must remain consistent with the chosen truncation method. Test the complete generation implementation against an uncached reference on short prefixes before relying on an optimization for long ones."
         ],
         "interpretation": []
       }
@@ -497,15 +501,16 @@
     "reason": "Separate policy order, stochastic reproducibility and evaluation over samples.",
     "parts": [
       {
-        "title": "Filtering Changes the Distribution, Not Just Its Display",
+        "title": "Filtering and Renormalizing Token Probabilities",
         "paragraphs": [
-          "After selecting a permitted set of tokens, normalise the remaining weights again. The sampled probabilities belong to that filtered distribution, which can differ substantially from the original model distribution.",
+          "Removing a candidate also removes its share of the probability. The remaining shares must add to one before we sample from them, so we divide each retained weight by the retained total. This is renormalization. The resulting probabilities describe the filtered choice, and can differ substantially from the probabilities originally returned by the model.",
           "Temperature, top-k and nucleus filtering can be composed in different orders. State the order being used, and preserve at least one candidate. Temperature zero needs a separately defined greedy policy rather than literal division by zero."
         ],
         "interpretation": [],
+        "id": "filtering-changes-the-distribution-not-just-its-display",
         "examples": [
           {
-            "title": "Renormalise after a top-two choice",
+            "title": "Renormalize after a top-two choice",
             "paragraphs": [
               "The model probabilities are supplied. No retraining occurs."
             ],
@@ -521,7 +526,7 @@
         "title": "One Pleasant Completion Is Not a Sampling Evaluation",
         "paragraphs": [
           "A random seed can reproduce a particular draw sequence under the same implementation and request order. It does not establish that a sampling policy usually produces useful responses.",
-          "Evaluate several declared prompts and repeated samples, retaining failures as well as successes. Compare diversity, correctness and task constraints separately. Lower temperature can repeat an incorrect favourite more consistently; greater variety can reveal alternatives without making them more reliable."
+          "Evaluate several declared prompts and repeated samples, retaining failures as well as successes. Compare diversity, correctness and task constraints separately. Lower temperature can repeat an incorrect favorite more consistently; greater variety can reveal alternatives without making them more reliable."
         ],
         "interpretation": []
       }
@@ -563,7 +568,7 @@
       {
         "title": "A Wide Shortcut Can Make Reconstruction Too Easy",
         "paragraphs": [
-          "If the model can copy every input coordinate directly, low reconstruction loss may reveal little about useful structure. A bottleneck, denoising task, sparsity constraint or another explicit restriction changes what the model must learn.",
+          "If the model can copy every input coordinate directly, low reconstruction loss may reveal little about useful structure. A narrow code forces compression. A denoising task asks the model to recover a clean input from a damaged one. A sparsity constraint limits how many code entries are active. These restrictions create different learning problems, so we should choose one for a reason rather than assume every autoencoder learns the same kind of representation.",
           "Choose the restriction from the intended use. Compression, anomaly detection and representation learning need different evaluations. Inspect held-out reconstruction and downstream usefulness rather than assuming a low training loss establishes a meaningful code."
         ],
         "interpretation": []
@@ -585,7 +590,7 @@
       {
         "title": "Freeze the Opponent’s Parameters without Breaking Its Derivative",
         "paragraphs": [
-          "During a discriminator update, generated samples are treated as inputs from the current generator. During a generator update, the discriminator's parameters stay fixed, but its derivative with respect to the generated input must still flow back into the generator.",
+          "The discriminator learns to tell real examples from the generator's current outputs. In its update, we change the discriminator's weights. Next the generator needs to know how changing its output would affect the discriminator's response. We hold the discriminator's weights fixed for that calculation, but still differentiate its response with respect to the generated input. That derivative tells the generator how its own weights affected the result.",
           "Removing that derivative path would leave the generator without feedback. Updating the discriminator at the same time with the generator's objective would train a different game. Make parameter ownership explicit in each half of the loop."
         ],
         "interpretation": []
@@ -628,8 +633,8 @@
       {
         "title": "The Denoiser Must Predict Noise It Was Not Given",
         "paragraphs": [
-          "The earlier oracle check recovers a clean strip by supplying its actual noise. A learned denoiser receives only the noisy value and the timestep. Its target is the noise used to create that training pair, which stays on the training side of the loss.",
-          "To make a complete fit manageable, we will use one-dimensional clean samples instead of images. They come from a Gaussian centred at two with standard deviation one half. A separate linear predictor at each timestep can approximate the optimal noise prediction for this Gaussian teaching distribution."
+          "The earlier check recovers a clean strip by supplying the noise that was added to it. A learned denoiser receives only the noisy value and the timestep. During training, we compare its prediction with the noise used to create that pair. During generation, that original noise is unavailable, so the denoiser must estimate it.",
+          "To make a complete fit manageable, we will use one-dimensional clean samples instead of images. They come from a Gaussian centered at two with standard deviation one half. A separate linear predictor at each timestep can approximate the optimal noise prediction for this Gaussian teaching distribution."
         ],
         "interpretation": []
       },
@@ -666,7 +671,7 @@
             "code": "import numpy as np\nrng = np.random.default_rng(12)\nbeta = np.full(60, .1)\nalpha = 1-beta\nretained = np.cumprod(alpha)\nmodel = []\nfor t in range(len(beta)):\n    clean = rng.normal(2., .5, 20000)\n    noise = rng.normal(size=len(clean))\n    noisy = np.sqrt(retained[t])*clean + np.sqrt(1-retained[t])*noise\n    design = np.column_stack([noisy, np.ones(len(noisy))])\n    model.append(np.linalg.lstsq(design, noise, rcond=None)[0])\ngenerated = rng.normal(size=5000)\nfor t in range(len(beta)-1, -1, -1):\n    predicted_noise = model[t][0]*generated + model[t][1]\n    mean = (generated-beta[t]*predicted_noise/np.sqrt(1-retained[t]))/np.sqrt(alpha[t])\n    previous_retained = retained[t-1] if t > 0 else 1.\n    variance = beta[t]*(1-previous_retained)/(1-retained[t])\n    generated = mean + np.sqrt(variance)*rng.normal(size=len(generated)) if t > 0 else mean\nprint(generated.shape)\nprint(round(float(generated.mean()), 3), round(float(generated.std()), 3))",
             "output": "(5000,)\n2.007 0.377",
             "interpretation": [
-              "The mean is close to the source mean, but the generated spread is noticeably smaller than one half. The coarse schedule, chosen reverse variance and fitted predictors approximate the reverse process. This is a working chain whose distribution still needs improvement, not a successful fit merely because it produces numbers. Try a finer schedule and compare repeated runs, including spread as well as location."
+              "The generated mean is close to the source mean, but its standard deviation is smaller than one half. The coarse schedule and chosen reverse variance approximate the reverse process, and the fitted noise predictions can add estimation error. Try a finer schedule and compare both the mean and standard deviation over repeated runs to see which parts of the distribution improve."
             ]
           }
         ]
@@ -674,7 +679,7 @@
       {
         "title": "Why More Steps and Better Training Solve Different Problems",
         "paragraphs": [
-          "A finer reverse schedule can reduce discretisation effects, while a more capable denoiser can reduce prediction error. Increasing sampling steps does not automatically fix a predictor trained on the wrong data, and a perfect training fit does not guarantee coverage of unseen modes.",
+          "A finer reverse schedule can reduce discretization effects, while a more capable denoiser can reduce prediction error. Increasing sampling steps does not automatically fix a predictor trained on the wrong data, and a perfect training fit does not guarantee coverage of unseen modes.",
           "Conditional generation adds another input, such as a class or text representation, and must be trained to use it. Guidance changes the sampling procedure and its tradeoffs. Keep those extensions separate from the unconditional scalar chain so the source of each improvement can be investigated."
         ],
         "interpretation": []
@@ -688,7 +693,7 @@
         {
           "kind": "choice",
           "given": {
-            "description": "Use this setup.",
+            "description": "Question data",
             "data": "Training creates noisy values from clean samples and recorded random noise. Generation begins from a new Gaussian draw and uses the fitted timestep predictors."
           },
           "prompt": "Which quantity must generation estimate rather than receive from the training pair?",
@@ -709,7 +714,7 @@
       {
         "title": "The Conversation Template Is Part of the Training Input",
         "paragraphs": [
-          "Role markers, separators and end markers tell the model where instructions and responses begin and end. Training with one template and serving with another changes the token sequence on which the model was conditioned.",
+          "A conversation contains different speakers, and the model needs to know where one turn ends and the next begins. Role markers and separators encode those boundaries. Their exact arrangement is the conversation template. If we format training examples one way and user requests another way, the model receives a different pattern of tokens from the one it learned to continue.",
           "Use the exact tokenizer and formatting convention intended for the base model. Preserve boundaries when packing multiple examples. If examples share one packed sequence, decide whether attention may cross their boundaries rather than silently training on unrelated preceding conversations."
         ],
         "interpretation": []
@@ -738,7 +743,7 @@
       {
         "title": "Demonstrations Teach Their Habits as well as Their Answers",
         "paragraphs": [
-          "A dataset can teach verbosity, refusal patterns, formatting errors and unsupported claims alongside the intended task. Deduplicate and inspect examples, reserve independent prompts for validation, and test behaviours the base model should retain.",
+          "A dataset can teach verbosity, refusal patterns, formatting errors and unsupported claims alongside the intended task. Deduplicate and inspect examples, reserve independent prompts for validation, and test behaviors the base model should retain.",
           "Compare the adapted model with the base model under the same prompting and decoding policy. Falling response loss is evidence of fitting the demonstrations, not proof of broader usefulness. LoRA changes which parameters are trained; it does not change these data and evaluation responsibilities."
         ],
         "interpretation": []
@@ -749,15 +754,15 @@
         "title": "Can you score only the intended response targets?",
         "question": "Can you score only the intended response targets?",
         "task": [
-          "The earlier response mask decided which tokens should teach the model. Now calculate the loss only for those selected targets. The targets and mask are already aligned with the logit rows in this function; do not shift them again.",
+          "The response mask selects which next-token predictions contribute to the training objective. Calculate the loss for those selected targets. The targets and mask already align with the logit rows in this function; do not shift them again.",
           "Write response_loss(logits, targets, mask). logits has shape (positions, vocabulary), targets is an integer vector with one valid ID per position, and mask is a Boolean vector selecting scored targets. Require finite logits, compatible nonempty dimensions and at least one selected target.",
-          "Return the mean negative log probability over selected positions, using stable log normalisation. Raise ValueError for invalid inputs. Print the demonstration loss with four decimal places."
+          "Return the mean negative log probability over selected positions, using stable log normalization. Raise ValueError for invalid inputs. Print the demonstration loss with four decimal places."
         ],
         "starter": "import numpy as np\n\ndef response_loss(logits, targets, mask):\n    # Write the procedure here.\n    raise NotImplementedError\n\nprint(f'{response_loss([[1000.,1000.],[0.,np.log(3.)]],[0,1],[False,True]):.4f}')",
         "solution": "import numpy as np\n\ndef response_loss(logits, targets, mask):\n    logits = np.asarray(logits, dtype=float)\n    targets, mask = np.asarray(targets), np.asarray(mask)\n    if logits.ndim != 2 or min(logits.shape) < 1 or targets.shape != (len(logits),) or mask.shape != targets.shape or mask.dtype != bool or not np.issubdtype(targets.dtype,np.integer):\n        raise ValueError('Incompatible target layout')\n    if not np.isfinite(logits).all() or np.any(targets<0) or np.any(targets>=logits.shape[1]) or not mask.any():\n        raise ValueError('Invalid target or empty objective')\n    shifted = logits-logits.max(axis=1,keepdims=True)\n    log_probability = shifted-np.log(np.exp(shifted).sum(axis=1,keepdims=True))\n    return float(-log_probability[np.arange(len(targets)),targets][mask].mean())\n\nprint(f'{response_loss([[1000.,1000.],[0.,np.log(3.)]],[0,1],[False,True]):.4f}')",
         "output": "0.2877",
         "hints": [
-          "Use a stable log normaliser for each logit row. The target ID chooses one log probability from that row.",
+          "Use a stable log normalizer for each logit row. The target ID chooses one log probability from that row.",
           "Apply the already aligned Boolean target mask before averaging. Count selected positions, rather than all positions, in the denominator."
         ],
         "tests": [
@@ -787,7 +792,7 @@
         {
           "kind": "choice",
           "given": {
-            "description": "Use this setup.",
+            "description": "Question data",
             "data": "Tokens are [prompt_A, prompt_B, answer_A, end]. The objective scores answer_A and end only."
           },
           "prompt": "Which input position predicts the first scored response token?",
@@ -808,7 +813,7 @@
       {
         "title": "The Factors Need Different Initial Roles",
         "paragraphs": [
-          "If both factors are zero, each factor's gradient is multiplied by the other zero factor. Neither starts learning. Initialising one factor randomly and the other at zero keeps the initial effective update zero while allowing one gradient route to begin.",
+          "If both factors are zero, each factor's gradient is multiplied by the other zero factor. Neither starts learning. Initializing one factor randomly and the other at zero keeps the initial effective update zero while allowing one gradient route to begin.",
           "Using row inputs, write the adapter as x A B with A mapping down to the rank dimension and B mapping back to the output dimension. This is a convention for these examples; transpose conventions in other implementations must be followed consistently."
         ],
         "interpretation": []
@@ -816,7 +821,7 @@
       {
         "title": "Trace Which Factor Receives the First Gradient",
         "paragraphs": [
-          "The upstream derivative reaches B through x A. It reaches A through B, so when B begins at zero, A initially receives zero gradient. After B changes, both factors can learn.",
+          "The upstream derivative tells us how the loss changes with the adapter's output. To find the derivative for B, we combine it with the intermediate value x A. To find the derivative for A, we must pass it back through B. When B begins at zero, that second route gives A a zero gradient. B can change first; once it is nonzero, A can also receive a learning signal.",
           "The base weight remains fixed in this adaptation. Its contribution still affects the prediction and therefore the upstream loss derivative."
         ],
         "interpretation": [],
@@ -838,15 +843,15 @@
         "title": "Merging Must Preserve the Scale and the Base Version",
         "paragraphs": [
           "For a purely linear adapter, its scaled matrix product can be added to the compatible base weight for inference. Save the adapter scaling and the exact base-model identity. Applying it to a different base version does not generally reproduce the trained model.",
-          "Quantisation, dropout during training and implementation-specific layouts require additional care. Verify merged and unmerged evaluation outputs on preserved fixtures. The algebraic equivalence assumes the same linear operation and compatible numerical representation."
+          "Quantization, dropout during training and implementation-specific layouts require additional care. Verify merged and unmerged evaluation outputs on preserved fixtures. The algebraic equivalence assumes the same linear operation and compatible numerical representation."
         ],
         "interpretation": []
       },
       {
         "title": "Fewer Trainable Parameters Does Not Eliminate Every Cost",
         "paragraphs": [
-          "LoRA reduces the parameters receiving updates and their optimiser state. Activations, base weights and attention computation still consume memory and time. Increasing rank also increases adapter capacity and cost.",
-          "Choose target layers and rank through task evaluation, and compare with a full fine-tuning baseline when feasible. A low-rank update is a constrained change to a pretrained model, not a guarantee that a small dataset is sufficient or that the base model will retain every prior behaviour."
+          "LoRA reduces the parameters receiving updates and their optimizer state. Activations, base weights and attention computation still consume memory and time. Increasing rank also increases adapter capacity and cost.",
+          "Choose target layers and rank through task evaluation, and compare with a full fine-tuning baseline when feasible. A low-rank update is a constrained change to a pretrained model, not a guarantee that a small dataset is sufficient or that the base model will retain every prior behavior."
         ],
         "interpretation": []
       }
@@ -857,7 +862,7 @@
         "question": "Can you differentiate both adapter factors?",
         "task": [
           "The workshop ran the adapter forward through its two factors. Use the chain rule from backpropagation to find how each factor affects a supplied loss. Both derivatives must use the same original factors before either is updated.",
-          "Write adapter_gradients(X, A, B, upstream, scale). The row-input adapter is scale * X @ A @ B. X has shape (batch, inputs), A is (inputs, rank), B is (rank, outputs), and upstream is the derivative of the scalar loss with respect to the adapter output.",
+          "Write adapter_gradients(X, A, B, upstream, scale). The row-input adapter is scale * X @ A @ B. X has shape (batch, inputs), A is (inputs, rank), B is (rank, outputs), and upstream has shape (batch, outputs) and is the derivative of the scalar loss with respect to the adapter output.",
           "Return dA and dB without changing inputs. Require finite two-dimensional compatible arrays with positive dimensions and a finite scale; raise ValueError otherwise. Do not average the gradients again: upstream already carries the loss convention. Print both demonstration gradients."
         ],
         "starter": "import numpy as np\n\ndef adapter_gradients(X, A, B, upstream, scale):\n    # Write the procedure here.\n    raise NotImplementedError\n\ndA,dB = adapter_gradients([[1,2]],[[1],[1]],[[2]],[[3]],.5)\nprint(dA.tolist())\nprint(dB.tolist())",
@@ -873,7 +878,7 @@
             "code": "X=np.array([[1.,2.],[-1.,.5]]); A=np.array([[.2,.1],[.3,-.4]]); B=np.array([[.5],[-.2]]); U=np.array([[2.],[-1.]])\ndA,dB=adapter_gradients(X,A,B,U,.7)\nfor matrix,gradient in [(A,dA),(B,dB)]:\n    for index in np.ndindex(matrix.shape):\n        old=matrix[index]; eps=1e-6\n        matrix[index]=old+eps; plus=np.sum((.7*X@A@B)*U)\n        matrix[index]=old-eps; minus=np.sum((.7*X@A@B)*U)\n        matrix[index]=old\n        assert np.isclose(gradient[index],(plus-minus)/(2*eps))"
           },
           {
-            "name": "Zero-initialised output factor",
+            "name": "Zero-initialized output factor",
             "code": "dA,dB=adapter_gradients([[1,2]],[[.1],[.2]],[[0]],[[3]],1)\nassert np.allclose(dA,0) and np.allclose(dB,[[1.5]])"
           },
           {
@@ -890,7 +895,7 @@
       {
         "title": "Split a Document without Separating a Claim from Its Conditions",
         "paragraphs": [
-          "A passage should contain enough context to interpret its claim. Splitting a maintenance instruction from the warning immediately below it can produce a misleading retrieved fragment. Keep document identity, version, location and neighbouring context available.",
+          "A passage should contain enough context to interpret its claim. Splitting a maintenance instruction from the warning immediately below it can produce a misleading retrieved fragment. Keep document identity, version, location and neighboring context available.",
           "Chunk size and overlap trade coverage against repetition and context cost. Inspect retrieval on questions that depend on tables, qualifications and headings. A fixed number of characters is a starting implementation choice, not a definition of a useful evidence unit."
         ],
         "interpretation": []
@@ -898,7 +903,7 @@
       {
         "title": "Check Whether Retrieval Supplied the Required Evidence",
         "paragraphs": [
-          "Before blaming the generator, identify the source passage needed to answer each evaluation question and check whether retrieval included it. The ranker cannot use evidence that the candidate stage never returned.",
+          "Suppose the answer depends on a warning in one maintenance guide. First check whether the search returned that passage at all. The candidate stage gathers possible passages; a ranker orders those candidates. If the required passage is missing from the candidates, improving their order cannot recover it. This check helps us distinguish a search failure from a failure to use evidence already supplied.",
           "A simple top-k hit check is a starting diagnostic. Questions requiring several passages need an evidence-set criterion rather than a single relevant ID."
         ],
         "interpretation": [],
@@ -942,7 +947,7 @@
         "title": "Write the Evaluation Set before Looking for a Winner",
         "paragraphs": [
           "Choose prompts that represent the intended users and include difficult cases, ambiguous requests and cases with insufficient evidence. Keep prompt sources and near-duplicates separate from model-development data where possible.",
-          "Specify the task rubric before comparing outputs. Factual support, completeness, formatting and usefulness are different properties. A single preference score can hide which one changed, especially if an evaluator favours longer answers."
+          "Specify the task rubric before comparing outputs. Factual support, completeness, formatting and usefulness are different properties. A single preference score can hide which one changed, especially if an evaluator favors longer answers."
         ],
         "interpretation": []
       },
@@ -971,7 +976,7 @@
         "title": "An Automatic Judge Is Another Measurement Procedure",
         "paragraphs": [
           "A judge model can be sensitive to answer order, verbosity and wording. Human ratings can also vary. Use a clear rubric, blind model identity where practical, check agreement and inspect disagreement cases.",
-          "Keep enough labelled examples to compare automatic judging with the task's actual requirements. A judge's confident score is not a substitute for source verification on factual tasks or execution on programming tasks."
+          "Keep enough labeled examples to compare automatic judging with the task's actual requirements. A judge's confident score is not a substitute for source verification on factual tasks or execution on programming tasks."
         ],
         "interpretation": []
       },
@@ -979,7 +984,7 @@
         "title": "Image Quality and Distribution Coverage Need Separate Evidence",
         "paragraphs": [
           "Sharp individual images can coexist with missing modes or repeated training examples. Compare representative sample collections, diversity and distribution-sensitive metrics under a stated feature representation and sample size.",
-          "No single score establishes that a generator covers every meaningful group or respects every constraint. Preserve failure examples and subgroup results, and repeat stochastic evaluations with declared settings rather than selecting only favourable samples."
+          "No single score establishes that a generator covers every meaningful group or respects every constraint. Preserve failure examples and subgroup results, and repeat stochastic evaluations with declared settings rather than selecting only favorable samples."
         ],
         "interpretation": []
       }
@@ -987,26 +992,27 @@
     "practice": []
   },
   "u-net": {
-    "reason": "Extend labelled segmentation into loss masking and per-image evaluation.",
+    "reason": "Extend labeled segmentation into loss masking and per-image evaluation.",
     "parts": [
       {
-        "title": "Unlabelled Pixels Are Not Automatically Background",
+        "title": "Unlabeled Pixels Are Not Automatically Background",
         "paragraphs": [
-          "A segmentation target assigns a class to each labelled pixel. Some datasets leave uncertain or uninspected pixels unlabelled. Treating those as background teaches the model a claim the annotator did not make.",
+          "A segmentation target assigns a class to each labeled pixel. Some datasets leave uncertain or uninspected pixels unlabeled. Treating those as background teaches the model a claim the annotator did not make.",
           "Keep a validity mask for supervised loss and metrics when the annotation scheme requires one. Apply spatial augmentations to the image, target and validity mask together. Document class IDs, ignored values and the difference between a missing mask and an all-background mask."
         ],
-        "interpretation": []
+        "interpretation": [],
+        "id": "unlabelled-pixels-are-not-automatically-background"
       },
       {
         "title": "Measure Foreground Agreement beside Pixel Accuracy",
         "paragraphs": [
-          "A tray can contain much more background than seed. Predicting background everywhere may achieve high pixel accuracy while missing every object. Foreground IoU and Dice focus the comparison on overlap, with an explicit convention for empty masks.",
+          "A tray can contain much more background than seed. Predicting background everywhere may achieve high pixel accuracy while missing every object. We can instead compare the pixels marked as seed with the labeled seed pixels. Intersection over union, or IoU, divides their overlap by all pixels either mask marks as seed. Dice compares twice the overlap with the combined number of seed pixels in the two masks. Both need an explicit convention when there is no foreground to compare.",
           "Report metrics per image or acquisition group as well as any pooled score. Large easy images can otherwise dominate the aggregate."
         ],
         "interpretation": [],
         "examples": [
           {
-            "title": "Compare overlap on one labelled mask",
+            "title": "Compare overlap on one labeled mask",
             "paragraphs": [
               "The prediction contains two of three seed pixels and one extra background pixel."
             ],
@@ -1021,7 +1027,7 @@
       {
         "title": "A New Camera Can Change More Than Resolution",
         "paragraphs": [
-          "Lighting, colour response, focus and framing can all change the input distribution. A random pixel split from the same photographs cannot assess transfer to a new acquisition setup.",
+          "Lighting, color response, focus and framing can all change the input distribution. A random pixel split from the same photographs cannot assess transfer to a new acquisition setup.",
           "Hold out appropriate plants, trays or sessions, and inspect boundaries and small objects separately. Compare performance after resizing carefully: resampling can erase thin structures even when the final mask has the expected dimensions."
         ],
         "interpretation": []

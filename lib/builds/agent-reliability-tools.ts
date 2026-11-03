@@ -29,7 +29,7 @@ function amounts(value: Data, label: string): Record<string, number> {
 
 export const agentReliabilityTools: Record<string, Tool> = {
   arSummariseTrials: {
-    title: "Summarise each controller's trials", why: "Keep task results, worst observed latency and total measured cost together for each tested controller.", inputs: ["Controller trial records"],
+    title: "Summarize each controller's trials", why: "Keep task results, worst observed latency and total measured cost together for each tested controller.", inputs: ["Controller trial records"],
     run: ([input]) => {
       if (!Array.isArray(input)) throw Error("Supply a list of controller records.");
       const names = new Set<string>(); let count: number | undefined;
@@ -84,7 +84,7 @@ export const agentReliabilityTools: Record<string, Tool> = {
     run: ([command, outcome]) => {
       const r = record(command, "Operation");
       choice(r.effect, ["read", "write"], "Operation effect");
-      if (typeof r.idempotent !== "boolean") throw Error("Declare a boolean idempotency contract.");
+      if (typeof r.idempotent !== "boolean") throw Error("Supply true only when the receiving service guarantees that repeating this request cannot create another effect.");
       choice(outcome, ["success", "transient", "permanent", "unknown"], "Outcome");
       if (outcome === "success") return "done";
       if (outcome === "permanent") return "repair request";

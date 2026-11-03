@@ -37,12 +37,12 @@ function statusText(applied: AppliedVector, vector: PlanePoint): string {
     return "Drag the arrow away from the origin so there is a direction to test.";
   }
   if (applied.aligned && applied.factor !== null) {
-    return `The arrows line up. This direction is only stretched, by ${applied.factor.toFixed(2)}, so it is an eigen direction.`;
+    return `The output stays on the same line as your arrow. The matrix multiplies it by ${applied.factor.toFixed(2)}. Your arrow is an eigenvector of this matrix; a negative multiplier reverses its direction.`;
   }
   if (applied.angle_degrees !== null && applied.angle_degrees < 8) {
-    return "Very close. The image is nearly in line with your arrow, so a kept direction is a nudge away.";
+    return "The output is nearly on the same line as your arrow. Adjust the arrow to find a direction the matrix scales without turning it off that line.";
   }
-  return "The image points a different way. The matrix turned this arrow, so this is not a kept direction.";
+  return "The output lies on a different line from your arrow. This arrow is not an eigenvector of the matrix.";
 }
 
 export function EigenPlayground() {

@@ -64,7 +64,7 @@
     ],
     "blocks": [
       "A simulation needs places to accumulate results before those results exist. It also needs repeatable grids of proposed times or settings. Asking a person to type every initial value would make both jobs fragile.",
-      "Oliphant’s 2006 Guide to NumPy documented distinct constructors for filled storage, uninitialised storage and regularly spaced values. That distinction makes the programmer’s intention visible: reserving room is different from assigning meaningful starting values. Our schedule will use those separate choices so an uninitialised entry cannot be mistaken for a sensor reading."
+      "Oliphant’s 2006 Guide to NumPy documented distinct constructors for filled storage, uninitialized storage and regularly spaced values. That distinction makes the programmer’s intention visible: reserving room is different from assigning meaningful starting values. Our schedule will use those separate choices so an uninitialized entry cannot be mistaken for a sensor reading."
     ]
   },
   "numpy-indexing": {
@@ -236,7 +236,7 @@
       }
     ],
     "blocks": [
-      "A calculation could behave differently on another computer because machines used different ways to approximate numbers. IEEE 754 standardised important rules for this floating-point arithmetic in 1985, including rounding and exceptional results.",
+      "A calculation could behave differently on another computer because machines used different ways to approximate numbers. IEEE 754 standardized important rules for this floating-point arithmetic in 1985, including rounding and exceptional results.",
       "Goldberg’s 1991 survey explained why programmers still had to account for finite precision under those rules. A stored number can approximate the intended value, and successive calculations can round differently. Our NumPy checks will therefore distinguish an invalid value from a small expected discrepancy. The tolerance must come from what the calculation needs to resolve."
     ]
   },
@@ -339,7 +339,7 @@
       }
     ],
     "blocks": [
-      "Chamberlin and Boyce’s 1974 SEQUEL paper described composing operations on tables to express a query. The user specified the desired information without writing a record-navigation program.",
+      "Asking for a few fields from many stored records once meant writing code to find and read those records. Chamberlin and Boyce's 1974 SEQUEL paper described a higher-level approach: compose operations on tables to state which information the result should contain. The database could then determine how to obtain it.",
       "Selecting fields and eliminating repeated result rows remain separate choices in SQL. That distinction lets the maintenance register support both an asset list and a site-category report."
     ]
   },
@@ -399,7 +399,7 @@
     ],
     "blocks": [
       "An absent value complicates ordinary comparisons: we cannot determine whether an unknown duration equals ten. SQLite’s NULL documentation describes compatibility tests performed in 2002 to compare how other SQL engines handled these cases.",
-      "The resulting behaviours include distinctions between equality predicates, grouping and duplicate removal. We study those operations explicitly instead of treating NULL as a special number."
+      "The resulting behaviors include distinctions between equality predicates, grouping and duplicate removal. We study those operations explicitly instead of treating NULL as a special number."
     ]
   },
   "sql-case": {
@@ -520,7 +520,7 @@
       }
     ],
     "blocks": [
-      "Codd’s 1970 relational model made it possible to keep related facts in separate relations and combine them by their values. A matching operation answers which records have a partner. A report often needs to show the missing partnerships too: an asset that has never been inspected must not disappear merely because there is nothing to match.",
+      "Keeping assets and their inspections separately avoids copying every asset detail onto each visit. Codd's 1970 relational model supported combining such separately stored facts by their values. A report introduces another requirement: the asset with no matching visit must remain visible, because the missing inspection is exactly what the report needs to show.",
       "Outer joins address that reporting need by preserving selected unmatched rows and supplying missing values for the absent side. The left side of a LEFT JOIN says which population remains in the report. Starting from the asset register therefore keeps an uninspected pump visible."
     ]
   },
@@ -612,7 +612,7 @@
       }
     ],
     "blocks": [
-      "Codd’s relational model used mathematical relations, bringing operations such as union and difference into the description of stored data. Combining query results follows that same family of questions: which assignments appear in either list, which occur in both, and which remain after another list is removed?",
+      "Separate teams can produce lists that overlap. Combining them requires a decision about repeated entries and about which assignments should remain. Codd's relational model used mathematical relations, including operations such as union and difference. Those operations give us precise questions to ask of the lists: membership in either list, membership in both, or membership remaining after another list is removed.",
       "SQL also permits repeated result rows, so its combinations must say what to do with repetitions. UNION removes equal result rows, while UNION ALL retains them. The maintenance desk may need both meanings. Two alert events can be worth retaining even when they concern the same pump; a list of pumps assigned to a team may need each pump only once."
     ]
   },
@@ -692,7 +692,7 @@
       }
     ],
     "blocks": [
-      "Analytical reporting needed calculations beside individual rows, such as a running total or a recent average. Window functions made that different from ordinary grouping: a row can remain visible while related rows contribute to a calculation. SQLite added window-function support in September 2018, including a frame specification that describes which neighbouring rows contribute.",
+      "Analytical reporting needed calculations beside individual rows, such as a running total or a recent average. Window functions made that different from ordinary grouping: a row can remain visible while related rows contribute to a calculation. SQLite added window-function support in September 2018, including a frame specification that describes which neighboring rows contribute.",
       "Ordering alone leaves a further question. When two readings share a timestamp, should the cumulative calculation include both together, or advance one physical row at a time? Default peer-based frames and explicit ROWS frames can answer differently. Our example keeps the duplicate timestamps visible so the choice follows the meaning of the report instead of an accidental row order."
     ]
   },
@@ -731,7 +731,7 @@
     ],
     "blocks": [
       "A high-level database query needs to distinguish the value being searched from the rules used to compare it. System R’s relational interface was part of moving this work into the database rather than implementing each search as a record-navigation program. Text added choices that numerical examples can hide: letter case, surrounding spaces and reserved pattern characters can all change a match.",
-      "SQL systems consequently expose both comparison rules and text operations. A pattern reserves some characters to stand for other text; a normalisation step may instead choose a common representation before comparison. Our imported identifiers use a small explicit convention: surrounding ordinary spaces, ASCII letter case and a literal underscore. It is a checkable policy for these records, not a complete treatment of names in every language."
+      "SQL systems consequently expose both comparison rules and text operations. A pattern reserves some characters to stand for other text; a normalization step may instead choose a common representation before comparison. Our imported identifiers use a small explicit convention: surrounding ordinary spaces, ASCII letter case and a literal underscore. It is a checkable policy for these records, not a complete treatment of names in every language."
     ]
   },
   "sql-json": {
@@ -781,7 +781,7 @@
       }
     ],
     "blocks": [
-      "Codd’s 1970 paper argued for a relational description of data that did not make users depend on physical storage arrangements. A logical table needs a stable interpretation even when the database changes how it stores its rows. Our equipment register uses that distinction: an asset identity should survive a new sort order or index.",
+      "A stored record needs to keep its meaning when a database changes how it arranges data on disk. Codd's 1970 paper argued for a relational description independent of those physical choices. Our equipment register follows that separation: an asset identity refers to the same pump after sorting the rows or adding an index.",
       "SQLite later made a deliberate choice to support flexible value typing. Its STRICT table option, introduced in version 3.37.0 in 2021, provides stronger type enforcement for applications that want it. The browser exercises use SQLite 3.39-compatible syntax and make those dialect choices explicit."
     ]
   },
@@ -820,7 +820,7 @@
     ],
     "blocks": [
       "Storing each inspection beside a copy of its pump details makes a display convenient. It also means a pump move may require many edits, with partial edits leaving contradictory current sites. Codd’s 1970 relational paper included normal-form reasoning as part of describing data independently of its storage arrangement. Later relational design work examined dependencies to understand which facts could safely be separated.",
-      "The dependency is the useful starting point: if an asset identity determines its current site, that fact should not have to be independently maintained on every inspection row. Separate asset facts from inspection facts, then use their shared identity when the display needs both. Our example still has to define whether site means the current location or the location at inspection time. Normalisation cannot settle that business meaning by itself."
+      "The dependency is the useful starting point: if an asset identity determines its current site, that fact should not have to be independently maintained on every inspection row. Separate asset facts from inspection facts, then use their shared identity when the display needs both. Our example still has to define whether site means the current location or the location at inspection time. Normalization cannot settle that business meaning by itself."
     ]
   },
   "sql-insert-update-delete": {
@@ -887,7 +887,7 @@
     ],
     "blocks": [
       "Two programs can read the same stock balance and both decide that a spare part is available. Each individual calculation may look reasonable, while the combined result spends the same stock twice. Transaction-processing research therefore had to consider overlapping work, not only whether one transaction’s writes succeeded. Jim Gray’s 1981 account treated transactions as units whose concurrent execution needs a controlled meaning.",
-      "Databases developed locking and version-based approaches to this coordination. SQLite serialises writers and can let readers retain a snapshot in WAL mode; PostgreSQL exposes several isolation levels with different permitted behaviours. Our small exercise uses an expected-version condition on one connection. It makes the stale-read decision visible without pretending to implement either database’s complete concurrency machinery."
+      "Databases developed locking and version-based approaches to this coordination. SQLite serializes writers and can let readers retain a snapshot in WAL mode; PostgreSQL exposes several isolation levels with different permitted behaviors. Our small exercise uses an expected-version condition on one connection. It makes the stale-read decision visible without pretending to implement either database’s complete concurrency machinery."
     ]
   },
   "sql-indexes": {
@@ -907,7 +907,7 @@
       }
     ],
     "blocks": [
-      "SQL lets a caller describe desired records without specifying their physical traversal. System R’s 1979 access-path paper described choosing routes for queries, including joins. Indexes provide candidate routes that the optimiser can compare with reading a table.",
+      "SQL lets a caller describe desired records without specifying their physical traversal. System R’s 1979 access-path paper described choosing routes for queries, including joins. Indexes provide candidate routes that the optimizer can compare with reading a table.",
       "Our pump-and-time example gives a physical intuition: equal leading keys occupy a region of an ordered index. The widget lays out records directly; it does not implement database pages, B-tree balancing or disk I/O."
     ]
   },
@@ -958,7 +958,7 @@
     ],
     "blocks": [
       "Shared computer systems had to answer who could read or change stored information. Saltzer and Schroeder’s 1975 protection paper explained access-control principles, including giving a program only the authority it needs. That problem carries into a shared database: a syntactically valid query can still request another person’s records.",
-      "An application supplying values to a reusable query creates another boundary. Parameter binding keeps a supplied value from being parsed as SQL structure, while authorisation decides whether the caller may access the selected records. Botie’s maintenance search needs both. Our browser database demonstrates the value-binding operation; the production roles and row-level policies shown in the references require enforcement by a real server."
+      "An application supplying values to a reusable query creates another boundary. Parameter binding keeps a supplied value from being parsed as SQL structure, while authorization decides whether the caller may access the selected records. Botie’s maintenance search needs both. Our browser database demonstrates the value-binding operation; the production roles and row-level policies shown in the references require enforcement by a real server."
     ]
   },
   "sql-data-quality": {
@@ -1008,7 +1008,7 @@
     ],
     "blocks": [
       "Databases needed a record of changes so they could recover meaningful state after a crash. ARIES, published in 1992, is a documented recovery method built around write-ahead logging: record information needed for recovery before the corresponding changed pages become durable. That recovery problem helped make ordered change history a central database mechanism.",
-      "Change-data-capture interfaces expose committed changes for other systems to follow instead of repeatedly copying the entire source. PostgreSQL logical decoding is one implementation, with explicit restart and retention responsibilities. Our consumer uses a supplied ingestion sequence and record versions to recognise progress and replay. It demonstrates an application-level consumer rule, not the database’s recovery algorithm or a guarantee supplied by any arbitrary timestamp column."
+      "Change-data-capture interfaces expose committed changes for other systems to follow instead of repeatedly copying the entire source. PostgreSQL logical decoding is one implementation, with explicit restart and retention responsibilities. Our consumer uses a supplied ingestion sequence and record versions to recognize progress and replay. It demonstrates an application-level consumer rule, not the database’s recovery algorithm or a guarantee supplied by any arbitrary timestamp column."
     ]
   },
   "nosql-data-models": {
@@ -1045,7 +1045,7 @@
       }
     ],
     "blocks": [
-      "Redis began in 2009 under Salvatore Sanfilippo. Its string commands illustrate a small interaction: set a value under a key, then retrieve that key. A server can implement that interface without interpreting the application meaning of a pump name.",
+      "A program often knows the name of the value it needs: the saved answer for one asset or the state of one session. A key-value interface makes that interaction explicit by storing a value under a key and retrieving it with the same key. Redis, begun in 2009 by Salvatore Sanfilippo, provides that interface through commands such as its string operations. The application still has to decide what a key names.",
       "That division gives the application responsibility for a naming convention. Our site and asset pair is an invented example. The key must carry enough identity before a key-value service can return the intended record."
     ]
   },
@@ -1087,7 +1087,7 @@
       }
     ],
     "blocks": [
-      "MongoDB’s April 2010 manual already describes JSON-style objects and BSON storage. This offered applications a way to retain nested fields instead of flattening every object into one row shape. The historical manual records that design; it is not a claim that MongoDB invented structured records.",
+      "An application record can contain details that belong together but have their own structure, such as a sensor with its value, unit and measurement time. MongoDB's April 2010 manual already described retaining nested JSON-style objects in BSON storage. This gave applications an alternative to flattening every detail into one row shape. The manual documents that design; MongoDB did not invent structured records.",
       "For our maintenance screen, a sensor object keeps a reading beside its unit. The remaining question is whether every writer supplies the fields the reader expects. Flexible document shapes make a shared contract more useful, not less necessary."
     ]
   },
@@ -1108,7 +1108,7 @@
       }
     ],
     "blocks": [
-      "MongoDB’s early manual described embedded objects and references resolved through additional reads. The document model made locality a modelling decision: related information could travel together, while independently maintained objects could keep their own identities.",
+      "Reading one complete object is convenient until part of it is shared with many others and changes independently. MongoDB's early manual described both embedded objects and references resolved through another read. Those choices let a program keep details together where useful while giving a separately maintained object its own identity. The application has to decide which relationship it is representing.",
       "The maintenance example puts that decision under pressure. A pump’s installed sensor configuration belongs with the pump. A supplier’s current phone number is shared. A purchase-time supplier name may be a historical snapshot that should remain unchanged. Their relationships look similar on a screen but require different update rules."
     ]
   },
@@ -1150,7 +1150,7 @@
       }
     ],
     "blocks": [
-      "MongoDB’s early interface included field-level update operators as well as document replacement. That distinction let a caller change a specified part of an object without resending every field. It addressed the practical difference between altering a value and replacing an entire stored record.",
+      "Changing one note should not require replacing unrelated fields from a possibly old copy of the whole record. MongoDB's early interface provided field-level update operators alongside document replacement. A caller could identify the part to change and leave the other stored fields in place. Coordinating concurrent edits still requires a condition on the state being changed.",
       "Current MongoDB documentation describes atomic single-document writes and recommends including an expected current value in a write filter when concurrent updates must be coordinated. Our version check is a teaching example of that condition. The Python function exposes the rule but does not implement concurrent database access."
     ]
   },
@@ -1171,7 +1171,7 @@
       }
     ],
     "blocks": [
-      "MongoDB’s early documentation included indexes alongside document queries. Storing a flexible object did not remove the older database problem of finding a small result without scanning every stored record. A secondary structure could organise selected field values for repeated reads.",
+      "Flexible record shapes do not make it cheap to search every stored document for one site's pumps. MongoDB's early documentation included indexes to organize selected field values separately from the full records. A query could use that structure to locate candidates sooner, then check conditions the index had not decided.",
       "Our teaching index groups documents by site. It exposes candidate reduction without claiming to reproduce MongoDB’s B-tree implementation or planner. We then examine a real compound index as a server-side way to support the site and temperature conditions together."
     ]
   },
@@ -1196,7 +1196,7 @@
       }
     ],
     "blocks": [
-      "MongoDB’s August 2012 release announcement introduced its aggregation framework for reporting and analysis over stored documents. Applications needed more than retrieving one object: they needed to select records, reshape them and combine values into reports.",
+      "Retrieving one document was insufficient for a report that needed totals across many embedded visits. MongoDB's August 2012 release announcement introduced its aggregation framework for this reporting work. It expressed selection, reshaping and combination as stages, with each stage receiving the records produced by the one before it.",
       "A pipeline expresses those changes as ordered stages. That makes our maintenance report readable as a sequence of record transformations. It also makes a mistake inspectable: after expanding an array, the rows represent visits, so repeating a pump-level quantity on each row can inflate a later sum."
     ]
   },
@@ -1230,7 +1230,7 @@
       }
     ],
     "blocks": [
-      "Google’s 2006 Bigtable paper described a sorted map for large structured datasets, with rows, column families and timestamped values. Cassandra later combined ideas from systems including Bigtable and Dynamo, while developing its own storage and consistency behaviour. These names do not identify one interchangeable database model.",
+      "Google’s 2006 Bigtable paper described a sorted map for large structured datasets, with rows, column families and timestamped values. Cassandra later combined ideas from systems including Bigtable and Dynamo, while developing its own storage and consistency behavior. These names do not identify one interchangeable database model.",
       "For our maintenance example, locality is the useful idea: store the records needed by one bounded query together, and order them by the field the query ranges over. Cassandra’s partition and clustering columns express those different jobs explicitly."
     ]
   },
@@ -1440,7 +1440,7 @@
       }
     ],
     "blocks": [
-      "Cypher developed inside Neo4j as a declarative property-graph language. Its 2018 language paper explains pattern matching as producing rows of variable bindings: each row records which entities satisfy a connected pattern.",
+      "A question about equipment often spans several relationships: this pump has an inspection, and that inspection identifies its technician. Searching each relationship independently can lose which inspection connected the two. Cypher developed in Neo4j as a declarative property-graph language. Its 2018 language paper describes matching a connected pattern and retaining each matching assignment in a row of variable bindings.",
       "That is why the inspection variable matters. Once a row binds it to I1, the technician relationship must extend from I1. The drawing-like syntax makes this connection visible while leaving physical execution to the database."
     ]
   },
@@ -1512,7 +1512,7 @@
       }
     ],
     "blocks": [
-      "Dijkstra’s 1959 paper described a procedure for finding the shortest route between nodes in a weighted graph. The useful step is to separate tentative distances from settled ones: with nonnegative lengths, the least tentative distance cannot later be improved by taking a detour through a more expensive unsettled node.",
+      "The route with the fewest links need not have the least total travel time. Dijkstra's 1959 paper described finding the shortest route in a weighted graph while keeping a tentative distance for each destination. With nonnegative lengths, the smallest tentative distance can be settled: reaching it through a more expensive unsettled node cannot make it shorter. This lets the search reuse the best distances already found.",
       "Dijkstra’s shortest-path method is used to find minimum accumulated cost in graphs with suitable nonnegative weights. Neo4j’s Graph Data Science documentation exposes that method separately from simple hop-count path matching. The algorithm keeps the cheapest unsettled distance visible rather than committing to the first route discovered.",
       "For our cart, that distinction allows a route with an extra stop to win. The Python exercise implements a small nonnegative-weight version so we can inspect why the earlier expensive route is replaced."
     ]
@@ -1580,8 +1580,8 @@
       }
     ],
     "blocks": [
-      "An import has two histories to preserve: where the source identities came from and which work has already committed. Database recovery methods such as ARIES used logged information to recognise and reconstruct changes after failure. Application-level imports encounter a related interruption when the database commits a batch but its response never reaches the loader.",
-      "Modern graph loaders combine row-oriented input with identity matching and merge operations. Neo4j’s LOAD CSV and MERGE documentation gives concrete interfaces, while transaction batching defines how much work can commit together. Our stable source IDs and saved checkpoint let a retry recognise committed work. They form an application replay policy. MERGE still needs the appropriate constraints when the import must enforce uniqueness."
+      "An import has two histories to preserve: where the source identities came from and which work has already committed. Database recovery methods such as ARIES used logged information to recognize and reconstruct changes after failure. Application-level imports encounter a related interruption when the database commits a batch but its response never reaches the loader.",
+      "Modern graph loaders combine row-oriented input with identity matching and merge operations. Neo4j’s LOAD CSV and MERGE documentation gives concrete interfaces, while transaction batching defines how much work can commit together. Our stable source IDs and saved checkpoint let a retry recognize committed work. They form an application replay policy. MERGE still needs the appropriate constraints when the import must enforce uniqueness."
     ]
   },
   "graph-query-performance": {
@@ -1618,8 +1618,8 @@
       }
     ],
     "blocks": [
-      "W3C’s 1999 RDF recommendation addressed machine-readable descriptions of Web resources. Shared identifiers and statement structure let descriptions from different applications be combined without agreeing on one table layout. The later RDF 1.1 and SPARQL 1.1 recommendations specify the graph model and its query language.",
-      "That helps our two maintenance teams state which resource a claim concerns. Agreement on identifiers and predicates still requires modelling work. Publishing a statement in RDF does not establish that it is correct."
+      "Two applications may describe the same resource while arranging their own records differently. Sharing a table layout is then an obstacle to combining their information. W3C's 1999 RDF recommendation addressed machine-readable descriptions of Web resources using shared identifiers and a common statement structure. The later RDF 1.1 and SPARQL 1.1 recommendations specify the graph representation and the language used to query it.",
+      "That helps our two maintenance teams state which resource a claim concerns. Agreement on identifiers and predicates still requires modeling work. Publishing a statement in RDF does not establish that it is correct."
     ]
   },
   "graph-provenance": {
@@ -1631,7 +1631,7 @@
       }
     ],
     "blocks": [
-      "W3C’s 2013 PROV recommendations gave applications a shared way to describe the entities and activities involved in producing information, including who was responsible. A chart could be linked to the dataset and transformation that produced it rather than circulating without that history.",
+      "A chart can circulate without the dataset or transformation that produced it. When a value is disputed, the final image alone gives us little to investigate. W3C's 2013 PROV recommendations provided a shared description of the entities and activities behind information, including who was responsible. Those links let an application retain the origin of a result alongside the result itself.",
       "Our maintenance claims have the same need on a smaller scale. A recorded source helps us inspect a disagreement or withdraw a superseded claim. Provenance explains how information arrived; it is not a certificate of truth."
     ]
   },
@@ -1648,7 +1648,7 @@
       }
     ],
     "blocks": [
-      "The 2024 GraphRAG paper studied questions that require a broad view of a document collection. Its method builds an entity graph and community summaries to support query-focused summarisation. It addresses a different failure from simply finding a nearby text passage.",
+      "The 2024 GraphRAG paper studied questions that require a broad view of a document collection. Its method builds an entity graph and community summaries to support query-focused summarization. It addresses a different failure from simply finding a nearby text passage.",
       "Our maintenance example uses a smaller local retrieval mechanism: start from a known asset and follow approved dependency types to related manuals. It is not a reproduction of that paper’s community-summary pipeline. The common motivation is that useful evidence may be connected across records."
     ]
   },
@@ -1700,7 +1700,7 @@
       }
     ],
     "blocks": [
-      "Measurements of direction posed an awkward problem for ordinary straight-line statistics: values near opposite ends of a written scale can be neighbours on the circle. Clock time has the same difficulty at midnight.",
+      "Measurements of direction posed an awkward problem for ordinary straight-line statistics: values near opposite ends of a written scale can be neighbors on the circle. Clock time has the same difficulty at midnight.",
       "Nicholas Fisher’s 1993 Statistical Analysis of Circular Data developed methods for observations such as orientations and bearings, where that circular relationship matters. It documents a statistical setting for treating a cycle as a position around a circle. In our model inputs, sine and cosine coordinates preserve that same adjacency. We will use the pair together so a single coordinate cannot confuse distinct parts of the day."
     ]
   },
@@ -1747,7 +1747,7 @@
       }
     ],
     "blocks": [
-      "Consider a classifier trained on records where one outcome is much more common than the other. It can reduce its total mistakes by favouring the common class, even if the rare cases are the ones we most need to find. Work on imbalanced classification addresses that mismatch between a convenient training objective and the job the model is meant to do.",
+      "Consider a classifier trained on records where one outcome is much more common than the other. It can reduce its total mistakes by favoring the common class, even if the rare cases are the ones we most need to find. Work on imbalanced classification addresses that mismatch between a convenient training objective and the job the model is meant to do.",
       "Chawla and colleagues' 2002 SMOTE paper studied synthetic minority oversampling, creating additional minority examples between nearby observations. That is one response to imbalance, not a universal remedy. Our lesson first makes the evaluation problem visible; it does not generate synthetic sensor records."
     ]
   },
@@ -1833,9 +1833,9 @@
       }
     ],
     "blocks": [
-      "Researchers predicting at a new location found that a random row split could leave neighbouring or otherwise related observations on both sides of the evaluation. The test then benefited from information about the group it was meant to hold out.",
+      "Researchers predicting at a new location found that a random row split could leave neighboring or otherwise related observations on both sides of the evaluation. The test then benefited from information about the group it was meant to hold out.",
       "Roberts and colleagues’ 2017 study examined cross-validation for spatial, temporal and other structured data. It showed why blocks must reflect the prediction task: estimating another observation near known data is different from estimating performance in a new region.",
-      "Botie’s greenhouse identity gives us a small version of that distinction. We keep each greenhouse’s rows together when asking about a new greenhouse, while recognising that another deployment question can require a different boundary."
+      "Botie’s greenhouse identity gives us a small version of that distinction. We keep each greenhouse’s rows together when asking about a new greenhouse, while recognizing that another deployment question can require a different boundary."
     ]
   },
   "distribution-shift": {
@@ -1925,7 +1925,7 @@
       }
     ],
     "blocks": [
-      "Comparing learning procedures requires separating a method change from variation in the evaluation data. Cawley and Talbot examined how selection itself can overfit an estimated performance criterion. A favourable comparison becomes harder to interpret when it was selected from many attempts.",
+      "Comparing learning procedures requires separating a method change from variation in the evaluation data. Cawley and Talbot examined how selection itself can overfit an estimated performance criterion. A favorable comparison becomes harder to interpret when it was selected from many attempts.",
       "Here we begin with a simpler fixed comparison. Both frozen models see the same cases. We keep each pair together when resampling so the uncertainty calculation still describes their difference on shared observations."
     ]
   },
@@ -1942,7 +1942,7 @@
       }
     ],
     "blocks": [
-      "Model fitting was already understood as a source of overfitting, but the criterion used to choose a fitted model also varies with the sample. Cawley and Talbot examined how optimising that noisy criterion can bias the reported result.",
+      "Model fitting was already understood as a source of overfitting, but the criterion used to choose a fitted model also varies with the sample. Cawley and Talbot examined how optimizing that noisy criterion can bias the reported result.",
       "Nested cross-validation separates the search from an outer assessment. The outside observations ask whether the entire inner choosing procedure produces useful predictions on data it did not use."
     ]
   },
@@ -1973,7 +1973,7 @@
     ]
   },
   "model-behaviour-tests": {
-    "title": "Testing Behaviour That a Single Score Misses",
+    "title": "Testing Behavior That a Single Score Misses",
     "sources": [
       {
         "title": "Ribeiro and colleagues: Beyond Accuracy, CheckList, 2020",
@@ -1981,7 +1981,7 @@
       }
     ],
     "blocks": [
-      "A held-out average can miss a specific behaviour that users rely on. CheckList applied behavioural testing ideas to language models, including tests of capabilities and expected responses to input changes.",
+      "A held-out average can miss a specific behavior that users rely on. CheckList applied behavioral testing ideas to language models, including tests of capabilities and expected responses to input changes.",
       "We use that testing perspective for a temperature service. Our unit and batching checks are examples of declared relationships between inputs and outputs, not a claim to implement the CheckList software or certify robustness."
     ]
   },
@@ -2080,7 +2080,7 @@
     ]
   },
   "density-based-clustering": {
-    "title": "Finding Shapes Without Supplying Their Centres",
+    "title": "Finding Shapes Without Supplying Their Centers",
     "sources": [
       {
         "title": "Ester, Kriegel, Sander and Xu: DBSCAN (1996)",
@@ -2092,8 +2092,8 @@
       }
     ],
     "blocks": [
-      "Spatial databases contained clusters with shapes that centre-based partitions did not describe well, together with observations that should be treated as noise. Ester and colleagues introduced DBSCAN in 1996 to address arbitrary-shaped clusters through a density-based definition.",
-      "Its local question is whether a neighbourhood contains enough observations. Connected regions of sufficiently dense neighbourhoods form clusters. Our workshop rebuilds that neighbourhood test, then the lesson follows how those local decisions grow into groups. The plotted sensors are invented."
+      "Spatial databases contained clusters with shapes that center-based partitions did not describe well, together with observations that should be treated as noise. Ester and colleagues introduced DBSCAN in 1996 to address arbitrary-shaped clusters through a density-based definition.",
+      "Its local question is whether a neighborhood contains enough observations. Connected regions of sufficiently dense neighborhoods form clusters. Our workshop rebuilds that neighborhood test, then the lesson follows how those local decisions grow into groups. The plotted sensors are invented."
     ]
   },
   "images-as-arrays": {
@@ -2110,7 +2110,7 @@
     ],
     "blocks": [
       "In 1957, Russell Kirsch and colleagues at the US National Bureau of Standards produced a digital scan of a photograph. A picture had to become a collection of numerical samples before their computer could process it. The problem was representation before recognition.",
-      "Our tiny tray image follows that same requirement, although it is invented and uses modern array conventions. Giving each measurement a row and column lets us select a region, compare neighbours, or apply the same operation across the picture."
+      "Our tiny tray image follows that same requirement, although it is invented and uses modern array conventions. Giving each measurement a row and column lets us select a region, compare neighbors, or apply the same operation across the picture."
     ]
   },
   "image-thresholding": {
@@ -2160,8 +2160,8 @@
       }
     ],
     "blocks": [
-      "Rosenfeld and Pfaltz's 1966 work addressed sequential operations on digital pictures, including the organisation of picture regions. A computer needs explicit local relationships where a person might simply see a connected shape.",
-      "Modern connected-component routines expose the same essential choice: which neighbouring positions may connect? We will use a simple flood fill so every step is visible. It illustrates the task, rather than reproducing the historical paper's algorithm."
+      "Rosenfeld and Pfaltz's 1966 work addressed sequential operations on digital pictures, including the organization of picture regions. A computer needs explicit local relationships where a person might simply see a connected shape.",
+      "Modern connected-component routines expose the same essential choice: which neighboring positions may connect? We will use a simple flood fill so every step is visible. It illustrates the task, rather than reproducing the historical paper's algorithm."
     ]
   },
   "image-augmentation": {
@@ -2190,7 +2190,7 @@
       }
     ],
     "blocks": [
-      "Training a deep model for each new task can require more labelled examples than we have. Yosinski and colleagues studied transfer between image tasks in 2014, examining the difference between more general early features and more task-specific later features. Their results also showed that transfer depends on the relationship between tasks.",
+      "Training a deep model for each new task can require more labeled examples than we have. Yosinski and colleagues studied transfer between image tasks in 2014, examining the difference between more general early features and more task-specific later features. Their results also showed that transfer depends on the relationship between tasks.",
       "That work investigated transfer rather than inventing the general idea of reusing learned knowledge. For our purposes, it suggests a practical question: do the available features already separate our new classes, or does the representation itself need to change?"
     ]
   },
@@ -2207,8 +2207,8 @@
       }
     ],
     "blocks": [
-      "The PASCAL VOC challenge, beginning in 2005, distinguished recognising an object's presence from predicting its location. The detection task supplied labelled bounding boxes and evaluated predicted boxes through their overlap with the annotations. Shared data and evaluation rules made systems easier to compare.",
-      "That challenge did not invent rectangles or overlap. It illustrates why detection needs a localisation criterion in addition to a class score. We will use continuous rectangle boundaries; always check a dataset's coordinate convention before applying the same arithmetic to its annotations."
+      "The PASCAL VOC challenge, beginning in 2005, distinguished recognizing an object's presence from predicting its location. The detection task supplied labeled bounding boxes and evaluated predicted boxes through their overlap with the annotations. Shared data and evaluation rules made systems easier to compare.",
+      "That challenge did not invent rectangles or overlap. It illustrates why detection needs a localization criterion in addition to a class score. We will use continuous rectangle boundaries; always check a dataset's coordinate convention before applying the same arithmetic to its annotations."
     ]
   },
   "non-maximum-suppression": {
@@ -2259,7 +2259,7 @@
     ],
     "blocks": [
       "A record unfolding through time contains information in its order. Using an earlier reading as a predictor requires preserving which observation was earlier, rather than handing a learning algorithm an unordered collection.",
-      "Yule’s 1927 study of disturbed periodic series, including sunspot records, modelled a value through earlier values of the series. This helped develop the autoregressive approach: the record’s own past supplies explanatory inputs. Our demand table uses that idea in a small supervised-learning layout. Every row must be constructed using values available before its target, and a useful lag is not proof that the earlier value caused the later one."
+      "Yule’s 1927 study of disturbed periodic series, including sunspot records, modeled a value through earlier values of the series. This helped develop the autoregressive approach: the record’s own past supplies explanatory inputs. Our demand table uses that idea in a small supervised-learning layout. Every row must be constructed using values available before its target, and a useful lag is not proof that the earlier value caused the later one."
     ]
   },
   "seasonality-and-differencing": {
@@ -2271,8 +2271,8 @@
       }
     ],
     "blocks": [
-      "Time-series modelling developed tools for records whose levels or recurring patterns changed over time. Differencing became a central part of the Box-Jenkins ARIMA approach: model changes when a more stable relationship can be expressed there.",
-      "Let's try differencing on a record where we know the trend and repeating cycle we put into it. We can watch what each subtraction removes. A real record may retain changing behaviour afterwards, so differencing is something to inspect, not an automatic guarantee of stationarity."
+      "Time-series modeling developed tools for records whose levels or recurring patterns changed over time. Differencing became a central part of the Box-Jenkins ARIMA approach: model changes when a more stable relationship can be expressed there.",
+      "Let's try differencing on a record where we know the trend and repeating cycle we put into it. We can watch what each subtraction removes. A real record may retain changing behavior afterwards, so differencing is something to inspect, not an automatic guarantee of stationarity."
     ]
   },
   "exponential-smoothing": {
@@ -2349,7 +2349,7 @@
     ],
     "blocks": [
       "Dynamic programming developed a way to solve multistage decisions by describing the current situation and the remaining problem. Bellman's work in the 1950s made this recursive view central to sequential planning.",
-      "A Markov decision process supplies states, actions, transitions, and rewards. Our dry-or-moist greenhouse is a deliberately simplified model. Its value is that every transition can be inspected, not that two labels fully describe soil behaviour."
+      "A Markov decision process supplies states, actions, transitions, and rewards. Our dry-or-moist greenhouse is a deliberately simplified model. Its value is that every transition can be inspected, not that two labels fully describe soil behavior."
     ]
   },
   "discounted-returns": {
@@ -2382,7 +2382,7 @@
       }
     ],
     "blocks": [
-      "Bellman's dynamic-programming approach expressed a multistage problem through an immediate choice and the problem remaining afterward. A state's value summarises that remaining problem, avoiding a separate calculation for every history that reaches it.",
+      "Bellman's dynamic-programming approach expressed a multistage problem through an immediate choice and the problem remaining afterward. A state's value summarizes that remaining problem, avoiding a separate calculation for every history that reaches it.",
       "Value iteration repeatedly applies an optimality update under a known model. Our finite teaching environment separates this planning calculation from learning an unknown model through interaction."
     ]
   },
@@ -2399,7 +2399,7 @@
       }
     ],
     "blocks": [
-      "Watkins and Dayan's 1992 paper analysed Q-learning, a method for learning action values from experience without requiring an explicit transition model. It combines an observed reward with a current estimate of the best available continuation.",
+      "Watkins and Dayan's 1992 paper analyzed Q-learning, a method for learning action values from experience without requiring an explicit transition model. It combines an observed reward with a current estimate of the best available continuation.",
       "This belongs to temporal-difference learning: an estimate is moved toward a target partly built from another estimate. Our tabular examples expose the update, including the important exception when a transition ends the episode."
     ]
   },
@@ -2443,7 +2443,7 @@
       }
     ],
     "blocks": [
-      "Kalman’s 1960 paper recast linear filtering as a recursive estimation problem. An estimate and its uncertainty could be carried forward and corrected as new measurements arrived.",
+      "A new measurement can improve an estimate, but accepting it completely discards what earlier evidence already told us. Kalman's 1960 paper described carrying an estimate and its uncertainty forward, then using the reliability of new measurements to determine the correction. This recursive arrangement avoided rebuilding the whole estimation problem after each observation.",
       "Our thermometers isolate the measurement-combination step. The full Kalman filter also predicts how the state and its uncertainty change over time; averaging simultaneous readings alone is not that complete algorithm."
     ]
   },
@@ -2456,7 +2456,7 @@
       }
     ],
     "blocks": [
-      "Rabiner’s 1989 tutorial explained hidden Markov models and their use in speech recognition. A sound recording gives noisy observations of an underlying sequence, rather than a direct label for each state.",
+      "Speech recognition had to infer a changing underlying sequence from a sound recording that did not label each state directly. Rabiner's 1989 tutorial explained hidden Markov models for that setting. A transition model describes how the unobserved state can change, and an observation model describes what it could produce. Keeping those two relationships separate allows each new sound to update the current state probabilities.",
       "We can use the same forward calculation to track the pump. First the transition model tells us how its condition might have changed. We then ask how likely the alarm is under each possible condition and update their probabilities. Our pump example uses supplied transition and alarm probabilities so we can follow each update by hand."
     ]
   },
@@ -2469,7 +2469,7 @@
       }
     ],
     "blocks": [
-      "Rasmussen and Williams’s 2006 book develops Gaussian processes as a practical framework for regression and classification. A central idea is to describe relationships between function values using a covariance function rather than choose one fixed finite set of coefficients.",
+      "A few measurements leave many possible functions passing between them. We need a way to express which patterns are plausible and how a new measurement should constrain nearby values. Rasmussen and Williams's 2006 book develops Gaussian processes for this problem. A covariance function describes how function values vary together, so observations can update both predictions and their remaining uncertainty.",
       "For our greenhouse, nearby locations can share information through their covariance. The kernel and noise assumptions decide how far that influence extends and how strongly a reading should constrain a prediction."
     ]
   },
@@ -2487,7 +2487,7 @@
     ],
     "blocks": [
       "An exact expected response can be unavailable even when another noisy observation is easy to obtain. Robbins and Monro’s 1951 stochastic approximation method addressed that situation by choosing successive experiments and updating an estimate from their responses.",
-      "Later stochastic optimisation uses the same broad opportunity in learning: a sampled contribution can guide an update without evaluating the entire population objective. A minibatch averages several such contributions and suits numerical hardware. We will inspect that average for a one-weight model, including what changes when the last batch has fewer observations. The original paper was about noisy root finding, not this particular batch training program."
+      "Later stochastic optimization uses the same broad opportunity in learning: a sampled contribution can guide an update without evaluating the entire population objective. A minibatch averages several such contributions and suits numerical hardware. We will inspect that average for a one-weight model, including what changes when the last batch has fewer observations. The original paper was about noisy root finding, not this particular batch training program."
     ]
   },
   "momentum-updates": {
@@ -2503,7 +2503,7 @@
       }
     ],
     "blocks": [
-      "Early iterative optimisation methods could make slow progress when their successive directions kept changing. Throwing away all information from the previous step left each update to respond to the current slope alone.",
+      "Early iterative optimization methods could make slow progress when their successive directions kept changing. Throwing away all information from the previous step left each update to respond to the current slope alone.",
       "Polyak’s 1964 work studied ways to accelerate iterative methods using information from earlier iterations. The momentum idea we need is to retain a decaying contribution from the previous direction. A direction that persists can build up; opposing contributions can cancel.",
       "We will keep that stored velocity separate from the weight. The convention here adds the current gradient to beta times the previous velocity, then applies the learning rate when changing the weight. That lets us inspect why the weight can keep moving after the latest gradient changes sign."
     ]
@@ -2521,8 +2521,8 @@
       }
     ],
     "blocks": [
-      "Adaptive subgradient methods used gradient history to change parameter-specific scales. Kingma and Ba’s Adam combined running first and second moment estimates with a correction for their zero initialisation.",
-      "Adam is an update rule, not a substitute for choosing a loss or checking generalisation. Our examples calculate the state explicitly; they do not claim that Adam always outperforms other optimisers."
+      "One learning rate can be awkward when different parameters repeatedly receive gradients on very different scales. Adaptive subgradient methods used gradient history to adjust parameter-specific step sizes. Kingma and Ba's Adam combined a running estimate of the gradient with another estimate of its squared magnitude. A correction accounts for both estimates having started at zero. Each stored quantity changes a different part of the update we will calculate.",
+      "Adam is an update rule, not a substitute for choosing a loss or checking generalization. Our examples calculate the state explicitly; they do not claim that Adam always outperforms other optimizers."
     ]
   },
   "initialisation-and-gradient-checks": {
@@ -2534,8 +2534,8 @@
       }
     ],
     "blocks": [
-      "Glorot and Bengio examined why deep feedforward networks were difficult to train, including saturation and how activation and gradient scales changed across layers. Their analysis connected weight initialisation to the number of incoming and outgoing connections.",
-      "A finite-difference check addresses a different issue: whether an implemented derivative agrees with the loss. Good initialisation cannot repair a wrong derivative, so our lesson keeps these two checks separate."
+      "Deep feedforward networks could become difficult to train before useful learning had begun. Passing values and gradients through many layers could leave them too large or too small, including activations stuck in regions with little sensitivity. Glorot and Bengio examined how the starting weight scale contributed to that problem and connected initialization rules to the numbers of incoming and outgoing connections.",
+      "A finite-difference check addresses a different issue: whether an implemented derivative agrees with the loss. Good initialization cannot repair a wrong derivative, so our lesson keeps these two checks separate."
     ]
   },
   "training-diagnostics": {
@@ -2552,7 +2552,7 @@
     ],
     "blocks": [
       "A network can keep improving its training fit after its predictions on new examples have started to deteriorate. Stopping as soon as one validation measurement rises can also be premature when that curve is noisy.",
-      "Prechelt’s 1998 work compared explicit early-stopping criteria and the tradeoff between training time and generalisation. It treated the stopping rule as something to investigate, rather than a decision made by casually watching a plot. We will use recorded curves to inspect our own declared rule. Learning-rate scheduling changes the updates; validation-based stopping chooses when to keep a fitted state."
+      "Prechelt’s 1998 work compared explicit early-stopping criteria and the tradeoff between training time and generalization. It treated the stopping rule as something to investigate, rather than a decision made by casually watching a plot. We will use recorded curves to inspect our own declared rule. Learning-rate scheduling changes the updates; validation-based stopping chooses when to keep a fitted state."
     ]
   },
   "popularity-baselines": {
@@ -2565,7 +2565,7 @@
     ],
     "blocks": [
       "As collaborative-filtering algorithms multiplied, researchers were making comparisons that used different tasks and different measures of success. Predicting someone’s rating and choosing a useful short list could reward different systems.",
-      "Herlocker and colleagues’ 2004 evaluation study examined those choices and organised the decisions needed for a meaningful comparison. Our popularity list supplies an inexpensive reference before personalisation. It can work without a reader’s history, but it also reflects which guides the service previously displayed and counted. We will inspect that reference before asking whether a personalised procedure improves on it."
+      "Herlocker and colleagues’ 2004 evaluation study examined those choices and organized the decisions needed for a meaningful comparison. Our popularity list supplies an inexpensive reference before personalization. It can work without a reader’s history, but it also reflects which guides the service previously displayed and counted. We will inspect that reference before asking whether a personalized procedure improves on it."
     ]
   },
   "content-based-ranking": {
@@ -2577,12 +2577,12 @@
       }
     ],
     "blocks": [
-      "Vector-space information retrieval represented documents using shared term coordinates, allowing a query and a document to be compared numerically. This provides a foundation for using item descriptions in retrieval and recommendation.",
-      "Our guides use two hand-labelled topic coordinates so the comparison is inspectable. Real systems may use terms or learned embeddings, but the coordinate meaning and similarity assumptions still matter."
+      "Searching documents requires comparing a request with material that may contain a different selection of words. Vector-space information retrieval gave queries and documents shared term positions so those matching contributions could be compared numerically. The same arrangement lets an item description contribute to a recommendation before anyone has rated the item.",
+      "Our guides use two hand-labeled topic coordinates so the comparison is inspectable. Real systems may use terms or learned embeddings, but the coordinate meaning and similarity assumptions still matter."
     ]
   },
   "collaborative-filtering": {
-    "title": "Sharing Judgements Across Readers",
+    "title": "Sharing Judgments Across Readers",
     "sources": [
       {
         "title": "GroupLens: An Open Architecture for Collaborative Filtering of Netnews (1994)",
@@ -2590,8 +2590,8 @@
       }
     ],
     "blocks": [
-      "GroupLens explored collaborative filtering for netnews, using readers’ ratings to help predict which articles others would find interesting. Shared judgements supplied information that the article text alone might not capture.",
-      "Our small rating table uses the same broad idea, but the workshop is a transparent neighbourhood calculation rather than a recreation of the original service."
+      "An article's words do not fully explain whether a particular reader will find it useful. Other readers' judgments can supply information missing from the text. GroupLens explored that idea for netnews by using patterns of ratings to help predict which articles another reader might prefer. The comparison depended on shared judgments, so missing ratings remained an important limitation.",
+      "Our small rating table uses the same broad idea, but the workshop is a transparent neighborhood calculation rather than a recreation of the original service."
     ]
   },
   "recommendation-factorisation": {
@@ -2603,8 +2603,8 @@
       }
     ],
     "blocks": [
-      "Koren, Bell and Volinsky described matrix-factorisation methods that became prominent in recommender systems, including work associated with the Netflix Prize. Learned low-dimensional factors allowed user and item information to interact.",
-      "The coordinates are learned to fit the objective. They should not automatically be labelled with human interests such as humour or difficulty unless additional evidence supports that interpretation."
+      "A rating table can contain many readers and items while leaving most pairs unobserved. Learning each missing cell independently would discard the patterns that readers share across items. Koren, Bell and Volinsky described matrix-factorization methods prominent in recommender systems, including work associated with the Netflix Prize. Short learned descriptions of readers and items could interact to predict many ratings from the observations that were available.",
+      "The coordinates are learned to fit the objective. They should not automatically be labeled with human interests such as humor or difficulty unless additional evidence supports that interpretation."
     ]
   },
   "ranking-evaluation": {
@@ -2616,7 +2616,7 @@
       }
     ],
     "blocks": [
-      "Herlocker and colleagues emphasised that evaluating a recommender involves the user task, data, metrics, and experimental design. A numerical comparison is meaningful only when these choices match the intended use.",
+      "A recommender can predict ratings accurately and still show an unhelpful list. Evaluating it therefore requires a decision about what the person is trying to do and what they will actually see. Herlocker and colleagues examined those choices alongside the data and experimental design used to measure them. A score becomes interpretable when we can explain which user task and result it rewards.",
       "Our exercise fixes the candidate set, relevance labels, and list length. That lets us calculate exactly what a metric rewards before drawing conclusions about a live recommendation system."
     ]
   },
@@ -2629,7 +2629,7 @@
       }
     ],
     "blocks": [
-      "Huber’s work formalised robust estimation under departures from an assumed model. The practical concern is that a few contaminated observations should not determine an entire estimate.",
+      "A few contaminated measurements can move an estimated center away from the ordinary observations it is meant to describe. Huber's work formalized robust estimation under departures from an assumed model. It made the influence of contamination something to analyze, rather than assuming every recorded value should have unlimited influence on the reference.",
       "Our median and median-absolute-deviation score is a simple robust teaching example, not Huber’s specific estimator. It lets us inspect how the reference changes when an extreme reading is present."
     ]
   },
@@ -2643,7 +2643,7 @@
     ],
     "blocks": [
       "The LOF paper introduced a degree of outlierness based on local density rather than a single global distance threshold. Its comparison lets regions with different densities provide their own local reference.",
-      "Our one-dimensional example avoids distance ties to expose the mechanism. The original neighbourhood definition includes ties at the kth-neighbour distance, which can make a neighbourhood contain more than k points."
+      "Our one-dimensional example avoids distance ties to expose the mechanism. The original neighborhood definition includes ties at the kth-neighbor distance, which can make a neighborhood contain more than k points."
     ]
   },
   "isolation-forests": {
@@ -2655,7 +2655,7 @@
       }
     ],
     "blocks": [
-      "Liu, Ting and Zhou developed isolation-based anomaly detection, using random partitions to separate observations. The method estimates how easily a point can be isolated without first fitting a full density.",
+      "An unusual observation can be easy to separate even when estimating the full pattern of normal data would be difficult. Liu, Ting and Zhou developed isolation-based anomaly detection around that distinction. Random partitions repeatedly divide the observations, and the number of splits needed to isolate a point supplies its evidence of unusualness.",
       "Our first tree has supplied splits so every branch can be followed. The second exercise averages path lengths from several trees. A production forest fits many random trees on subsamples and handles depth limits and unresolved leaves."
     ]
   },
@@ -2668,8 +2668,8 @@
       }
     ],
     "blocks": [
-      "Hinton and Salakhutdinov demonstrated learning compact representations with neural networks by reconstructing data. A reconstruction objective teaches what information must survive compression.",
-      "Using reconstruction error as an anomaly signal is an additional modelling choice. A network may reconstruct some anomalies well, and a normal condition absent from training may reconstruct poorly."
+      "A large input can contain more detail than we want to store in its internal representation. Hinton and Salakhutdinov demonstrated neural networks that learned compact representations by trying to reconstruct the original data. To reproduce the input after compression, the network had to retain information useful for that reconstruction. Using the resulting error to flag unusual observations is a further modeling decision.",
+      "Using reconstruction error as an anomaly signal is an additional modeling choice. A network may reconstruct some anomalies well, and a normal condition absent from training may reconstruct poorly."
     ]
   },
   "graph-representations": {
@@ -2694,12 +2694,12 @@
       }
     ],
     "blocks": [
-      "PageRank used a random-surfer interpretation to relate the importance of web pages to incoming links from other pages. Teleportation provides a way to leave a local link structure and makes the process less dependent on traps.",
+      "Counting a page's incoming links treats every linking page alike. PageRank instead related a page's importance to the pages linking to it and used a random-surfer interpretation to explain that relationship. A transition follows an available link, while a restart can leave the local link structure. This avoids depending entirely on paths that might cycle or end in a trap.",
       "Our pipe-network walk first studies ordinary transitions. It is a structural probability calculation, not a physical fluid simulation; actual flow depends on pressures and capacities as well as connectivity."
     ]
   },
   "neighbour-aggregation": {
-    "title": "Learning How to Combine Local Neighbourhoods",
+    "title": "Learning How to Combine Local Neighborhoods",
     "sources": [
       {
         "title": "Hamilton, Ying and Leskovec: Inductive Representation Learning on Large Graphs",
@@ -2707,8 +2707,8 @@
       }
     ],
     "blocks": [
-      "GraphSAGE learned functions for sampling and aggregating local neighbourhood information, allowing representations to be constructed from node features and neighbourhoods. This differs from storing a separate learned vector for every node identity.",
-      "Before adding learned transformations, let's calculate the mean of all a node's neighbours. That smaller operation lets us see exactly which readings reach each node. GraphSAGE also samples neighbours and learns how to combine their information; our first example isolates the gathering step."
+      "A separate learned vector for every node can be awkward when a new node arrives with useful features and known neighbors. GraphSAGE learned functions that sampled and combined local neighborhood information to construct a representation. The reusable operation could use a node's features and surroundings, rather than relying only on an embedding stored for its identity.",
+      "Before adding learned transformations, let's calculate the mean of all a node's neighbors. That smaller operation lets us see exactly which readings reach each node. GraphSAGE also samples neighbors and learns how to combine their information; our first example isolates the gathering step."
     ]
   },
   "graph-convolution": {
@@ -2720,8 +2720,8 @@
       }
     ],
     "blocks": [
-      "Kipf and Welling proposed a computationally efficient graph-convolution approach for semi-supervised node classification. Their propagation rule combines self-loops, symmetric degree normalisation, learned feature transforms, and nonlinearities.",
-      "The construction here reproduces one forward layer with supplied weights. Training would require a loss on labelled nodes and an explicit split protocol; the forward calculation alone has not learned a classifier."
+      "Labels can be scarce in a network even when each node has measurements and recorded connections. Kipf and Welling proposed a graph-convolution approach for semi-supervised node classification, where only some nodes supply training labels. Their layer combines information from connected nodes and the node itself, adjusts the connection contributions by degree, then uses shared learned transformations. We will separate those operations before combining them.",
+      "The construction here reproduces one forward layer with supplied weights. Training would require a loss on labeled nodes and an explicit split protocol; the forward calculation alone has not learned a classifier."
     ]
   },
   "link-prediction": {
@@ -2733,7 +2733,7 @@
       }
     ],
     "blocks": [
-      "Variational graph auto-encoders combined graph-based representations with a decoder for reconstructing links. An inner-product decoder provides a simple way to turn two node representations into a link score.",
+      "A network can contain useful node measurements while leaving some connections unknown. Variational graph auto-encoders combined graph-based node representations with a decoder that tried to reconstruct links. An inner-product decoder compares two node vectors by multiplying matching entries and adding them. That gives a simple pair score whose assumptions and evaluation boundaries we can inspect.",
       "Our exercise uses supplied vectors and the same basic dot-product decoder. It does not implement variational training, and its output should not be assumed calibrated merely because a sigmoid lies between zero and one."
     ]
   },
@@ -2746,7 +2746,7 @@
       }
     ],
     "blocks": [
-      "Causal modelling distinguishes observing a choice from intervening to set it. Pearl’s graphical framework makes assumptions about common causes and pathways explicit, allowing us to ask when observational comparisons identify an intervention effect.",
+      "People often choose a treatment because of the condition they are trying to improve. Comparing treated and untreated outcomes can then mix the treatment with those starting differences. Pearl's graphical framework describes assumptions about common causes and pathways explicitly. It lets us ask which observational comparisons could identify what would happen if we intervened to set the treatment.",
       "Our plant example is invented. Its purpose is to expose why a common cause of treatment and outcome can distort a comparison, not to establish an agricultural recommendation."
     ]
   },
@@ -2759,7 +2759,7 @@
       }
     ],
     "blocks": [
-      "Rubin’s 1974 paper described treatment effects using the outcomes a unit would have under different treatments, and considered both randomised and nonrandomised studies. Randomisation supplies a known assignment mechanism for comparing groups.",
+      "To ask what a treatment changes, compare what would happen to a unit under each treatment. Usually only one of those outcomes can be observed. Rubin's 1974 paper used this potential-outcomes description for randomized and nonrandomized studies. Random assignment supplies a known procedure for forming the groups whose average outcomes we compare; it does not reveal both outcomes for an individual unit.",
       "We observe only the outcome under the assignment actually received. The example therefore estimates an average difference; it cannot reveal both possible outcomes for an individual bed."
     ]
   },
@@ -2790,7 +2790,7 @@
       }
     ],
     "blocks": [
-      "The potential-outcomes framework defines an average effect as a comparison of outcomes under two interventions. Hernán and Robins develop identification and estimation methods, including weighting, while making exchangeability, positivity, and consistency assumptions explicit.",
+      "An observational comparison can contain different kinds of people in its treatment and control groups. Weighting is one way to make their measured starting conditions represent a shared population. Hernán and Robins develop that approach within the potential-outcomes framework while making its assumptions explicit. Those include a well-defined treatment, appropriate control of common causes, and a nonzero chance of either treatment where the comparison is required.",
       "Our supplied propensity scores are part of a teaching model. Estimating them from observations adds uncertainty and model dependence; weighting does not automatically remove unmeasured confounding."
     ]
   },
@@ -2860,7 +2860,7 @@
       }
     ],
     "blocks": [
-      "Changing an input dataset or a preparation setting can change a model’s behaviour while its prediction function remains byte-for-byte identical. A code revision alone therefore gives the next operator an incomplete account of what changed.",
+      "Changing an input dataset or a preparation setting can change a model’s behavior while its prediction function remains byte-for-byte identical. A code revision alone therefore gives the next operator an incomplete account of what changed.",
       "The 2015 Hidden Technical Debt study by Sculley and colleagues described data dependencies, configuration issues and interactions between model components as sources of maintenance cost. Applying version control to such a system requires deciding which surrounding inputs belong to the versioned procedure. We will make that decision visible in a small immutable manifest, keeping its declared preparation and model state together."
     ]
   },
@@ -2873,7 +2873,7 @@
       }
     ],
     "blocks": [
-      "The ML Test Score organised tests and monitoring for production machine-learning systems, including data, models, infrastructure, and changes between training and serving. This reflects a practical reality: model code can remain unchanged while its operating conditions move.",
+      "The ML Test Score organized tests and monitoring for production machine-learning systems, including data, models, infrastructure, and changes between training and serving. This reflects a practical reality: model code can remain unchanged while its operating conditions move.",
       "Our small monitoring examples distinguish a changed input distribution from an observed increase in prediction error. Neither should be mistaken for the other."
     ]
   },
@@ -2894,8 +2894,8 @@
       }
     ],
     "blocks": [
-      "Huber’s 1964 work examined how to estimate a central location when some observations depart from an assumed normal model. It made resistance to contamination a property to analyse, instead of assuming that every unusual value should determine the reference.",
-      "Later production work raised a second question: how should a fitted reference be tested and watched once it is used repeatedly? Breck and colleagues’ 2017 ML Test Score organised concrete testing and monitoring needs for learning systems.",
+      "An alert reference built from a mean can be pulled toward the very extreme readings we want to investigate. Huber's 1964 work examined estimating a central location when some observations depart from an assumed normal model. It treated resistance to contamination as a property to analyze. Our project uses a different, inspectable reference and asks how much one unusual contribution can change the resulting alerts.",
+      "Later production work raised a second question: how should a fitted reference be tested and watched once it is used repeatedly? Breck and colleagues’ 2017 ML Test Score organized concrete testing and monitoring needs for learning systems.",
       "This project brings those concerns together with a simple median-based reference. An alert asks for an inspection; a confirmed fault is evidence from that inspection. We will keep those outcomes separate while choosing and testing the alert rule."
     ]
   },
@@ -2930,7 +2930,7 @@
     ],
     "blocks": [
       "Early digital-picture programs had to turn local pixel operations into descriptions of complete regions. A threshold could mark foreground positions, but counting those marked positions would count pixels rather than the objects they might depict.",
-      "Rosenfeld and Pfaltz’s 1966 work on sequential picture operations addressed the organisation of image regions through local relationships. We will use an explicit four-neighbour flood fill to make one such relationship inspectable. The algorithm groups our invented foreground pixels; deciding whether each group is one seed still depends on separation, lighting and the threshold we chose."
+      "Rosenfeld and Pfaltz’s 1966 work on sequential picture operations addressed the organization of image regions through local relationships. We will use an explicit four-neighbor flood fill to make one such relationship inspectable. The algorithm groups our invented foreground pixels; deciding whether each group is one seed still depends on separation, lighting and the threshold we chose."
     ]
   },
   "design-from-decisions": {
@@ -3024,7 +3024,7 @@
       }
     ],
     "blocks": [
-      "MCUNet examined neural-network inference on microcontrollers with tight memory and compute limits. Its design combined choices about the network with an inference engine suited to those limits. A useful model had to fit the way the device actually executed it.",
+      "A useful neural network can still be impossible to run on a device with little working memory. MCUNet investigated inference on microcontrollers under tight memory and computation limits. Its design considered the network together with the inference engine that would execute it, because fitting the parameter file alone did not settle whether the computation could run.",
       "Our budget is much simpler. We count parameter storage, an estimated peak activation cost per example, and fixed runtime memory. We are not reproducing MCUNet’s engine or claiming that this linear estimate describes every network."
     ]
   },
@@ -3037,7 +3037,7 @@
       }
     ],
     "blocks": [
-      "Satyanarayanan’s discussion of edge computing describes the role of computation close to data sources when latency and bandwidth make distant processing difficult. The location of computation changes how much information has to travel and how long a response takes.",
+      "A distant server may calculate quickly while receiving the data and returning its answer takes too long. Satyanarayanan's discussion of edge computing examines computation closer to the data source under latency and bandwidth limits. Moving the calculation changes which information must travel and when the application can act on the result.",
       "Our inspection example compares a local estimate with a simplified remote path. It does not claim that local computation always wins. A larger remote model may be more useful, and many systems divide work between the device and a server."
     ]
   },
@@ -3096,11 +3096,11 @@
     "blocks": [
       "An agricultural treatment can have a different effect under another growing condition. Studying one setting at a time can miss that dependence, or confuse the treatment with ordinary differences between plots. Fisher's 1926 paper on field experiments discussed arranging comparisons so their effects and uncertainty could be investigated deliberately.",
       "Factorial designs develop that idea by including combinations of the settings being tested. If changing the batch size helps only with one parameter format, the combination carries information that isolated trials would miss. This is an interaction: the effect of one choice depends on the other.",
-      "Our prototype uses illustrative timing measurements for those combinations. Botie will calculate the difference between effects, then ask which further measurements the result calls for. The contrast describes this supplied table. Replication and a suitable statistical analysis would be needed to judge how confidently it generalises."
+      "Our prototype uses illustrative timing measurements for those combinations. Botie will calculate the difference between effects, then ask which further measurements the result calls for. The contrast describes this supplied table. Replication and a suitable statistical analysis would be needed to judge how confidently it generalizes."
     ]
   },
   "design-fallbacks": {
-    "title": "A Busy Service Needs a Defined Reduced Behaviour",
+    "title": "A Busy Service Needs a Defined Reduced Behavior",
     "sources": [
       {
         "title": "Google: Site Reliability Engineering and the 2018 workbook",
@@ -3113,7 +3113,7 @@
     ],
     "blocks": [
       "A model cannot always provide a usable prediction. An input may be missing, or the service may be too busy to finish in time. If the surrounding application assumes success on every request, those failures have no defined destination.",
-      "Google's Site Reliability Engineering book, first published in 2016, recorded experience with production services under overload. Its account of reduced responses and admission control addressed a practical failure: attempting every request normally could consume the capacity needed to keep the service running. Deciding what work may be deferred or simplified made the reduced behaviour part of the design.",
+      "Google's Site Reliability Engineering book, first published in 2016, recorded experience with production services under overload. Its account of reduced responses and admission control addressed a practical failure: attempting every request normally could consume the capacity needed to keep the service running. Deciding what work may be deferred or simplified made the reduced behavior part of the design.",
       "For our inspection service, an unusable sensor record routes to review. That is a deliberate policy for this example, not a universal fallback. We need to ask who receives the case and whether that route can meet the required response time. Calling something a fallback does not give it unlimited capacity."
     ]
   },
@@ -3131,7 +3131,7 @@
     ],
     "blocks": [
       "Suppose every component passes its tests, but the maintenance team cannot act on the inspection list in time. We have evidence that the implementation matches its tests. We still need evidence that those tests describe what the team actually needs.",
-      "NASA's handbook collected systems-engineering practice from its projects and revised that guidance as further mission experience exposed weaknesses. Product-realisation guidance distinguishes verification against specified requirements from validation against intended use. The distinction keeps a successful component check from silently becoming a claim that the complete system solves the operational problem.",
+      "NASA's handbook collected systems-engineering practice from its projects and revised that guidance as further mission experience exposed weaknesses. Product-realization guidance distinguishes verification against specified requirements from validation against intended use. The distinction keeps a successful component check from silently becoming a claim that the complete system solves the operational problem.",
       "This review brings that question back to Botie's inspection service. We can verify numerical requirements on the supplied records. To validate the service, we would also need representative evidence about faults and the team's actual workload. Passing the fixture is a result we can inspect; fewer real breakdowns is a claim that still needs an operational test."
     ]
   },
@@ -3161,7 +3161,7 @@
       }
     ],
     "blocks": [
-      "Adapting a language model to a task once commonly meant collecting labelled examples and updating its parameters. Brown and colleagues investigated a different setting in GPT-3: give the model a task and a small number of demonstrations in its input, then test it without task-specific parameter updates. The examples helped specify the requested behaviour, although success varied across tasks.",
+      "Adapting a language model to a task once commonly meant collecting labeled examples and updating its parameters. Brown and colleagues investigated a different setting in GPT-3: give the model a task and a small number of demonstrations in its input, then test it without task-specific parameter updates. The examples helped specify the requested behavior, although success varied across tasks.",
       "That distinction matters here. Writing a prompt changes the input to an existing model; it does not train the model in this lesson. An agent adds software that can let the model select another action after seeing a result. Anthropic’s 2024 engineering article distinguishes this from a workflow whose route is already prescribed in code. We will use that distinction, while remembering that the word agent is used more broadly elsewhere."
     ]
   },
@@ -3199,7 +3199,7 @@
       }
     ],
     "blocks": [
-      "Distributed services faced uncertain outcomes before language models began selecting tools. The AWS Builders’ Library describes using a caller-provided request identifier to recognise a retry and avoid repeating a side effect. It also discusses the case where an identifier is reused with different parameters, which should not silently become the same request.",
+      "Distributed services faced uncertain outcomes before language models began selecting tools. The AWS Builders’ Library describes using a caller-provided request identifier to recognize a retry and avoid repeating a side effect. It also discusses the case where an identifier is reused with different parameters, which should not silently become the same request.",
       "ReAct studied language-model interactions that interleave reasoning and actions, allowing observations to affect subsequent steps. Once a proposed action reaches a real service, ordinary service guarantees still matter. Our workshop separates a model’s candidate request from the application checks that decide whether it can proceed."
     ]
   },
@@ -3230,7 +3230,7 @@
     ],
     "blocks": [
       "A language model answering from its initial input cannot inspect a tool result that has not arrived yet. ReAct explored sequences that interleave reasoning and actions, letting observations affect the next step. This supplied a concrete way to combine language-based task handling with information gathered during execution.",
-      "Our controller is smaller than a full agent implementation. It consumes supplied proposals and results so we can inspect termination behaviour. The workshop does not run a language model or reveal its private reasoning. It shows the operational decisions an application must make around whatever model supplies the proposals."
+      "Our controller is smaller than a full agent implementation. It consumes supplied proposals and results so we can inspect termination behavior. The workshop does not run a language model or reveal its private reasoning. It shows the operational decisions an application must make around whatever model supplies the proposals."
     ]
   },
   "agent-or-workflow": {
@@ -3271,8 +3271,8 @@
       }
     ],
     "blocks": [
-      "A useful model response still has to fit into an ordinary Python application. The next function may need a particular record, and a tool may need this request’s permitted manual data. Pydantic AI is a Python framework that organises model calls and tools around those requirements. It lets the application declare expected output fields and provide dependencies such as the records a tool may read.",
-      "The Pydantic team’s September 4, 2025 v1 announcement emphasised those software-engineering concerns and a stable interface after months of development. The output can be checked before other code consumes it, while dependency injection gives the tool its application-supplied resources. That term means passing in what the tool needs, rather than making it discover a global source itself. Our citation check still has to establish that the named manual supports the answer; accepted Python structure cannot do that alone."
+      "A useful model response still has to fit into an ordinary Python application. The next function may need a particular record, and a tool may need this request’s permitted manual data. Pydantic AI is a Python framework that organizes model calls and tools around those requirements. It lets the application declare expected output fields and provide dependencies such as the records a tool may read.",
+      "The Pydantic team’s September 4, 2025 v1 announcement emphasized those software-engineering concerns and a stable interface after months of development. The output can be checked before other code consumes it, while dependency injection gives the tool its application-supplied resources. That term means passing in what the tool needs, rather than making it discover a global source itself. Our citation check still has to establish that the named manual supports the answer; accepted Python structure cannot do that alone."
     ]
   },
   "agent-langchain": {
@@ -3346,7 +3346,7 @@
       }
     ],
     "blocks": [
-      "Long before language-model agents, shared computer systems needed to control who could read or change an object. Saltzer and Schroeder’s 1975 account describes protection mechanisms and distinguishes authentication from authorisation. Their discussion also includes requirements for human judgement before granting access.",
+      "Long before language-model agents, shared computer systems needed to control who could read or change an object. Saltzer and Schroeder’s 1975 account describes protection mechanisms and distinguishes authentication from authorization. Their discussion also includes requirements for human judgment before granting access.",
       "An inspection assistant adds generated proposals to that old problem. It still needs a trusted component that grants access to a particular operation. Our approval record is a teaching design for binding a decision to a proposal. It is not a claim that a language model, a checkbox or a checkpoint supplies that authority automatically."
     ]
   },
@@ -3383,7 +3383,7 @@
       }
     ],
     "blocks": [
-      "Assistants could generate text but often lacked a consistent connection to the systems holding a user’s documents and tools. Anthropic introduced MCP in November 2024 to standardise those integrations. A service can describe its capabilities through one protocol instead of requiring a separate custom interface for every assistant.",
+      "Assistants could generate text but often lacked a consistent connection to the systems holding a user’s documents and tools. Anthropic introduced MCP in November 2024 to standardize those integrations. A service can describe its capabilities through one protocol instead of requiring a separate custom interface for every assistant.",
       "Our invented maintenance service uses that idea to expose manual content. Sharing a protocol does not settle whether a server is trustworthy, which technician may read a record, or whether a proposed action needs approval. Those decisions remain in the host application and the service that owns the data."
     ]
   },
@@ -3450,7 +3450,7 @@
       }
     ],
     "blocks": [
-      "Keeping a database private does not settle what happens when an application copies its contents to another system. NIST’s January 2020 Privacy Framework organised privacy risk around data processing and the organisations involved in it. That gives us a useful question for an agent: which information leaves each boundary, for what purpose, and under whose controls?",
+      "Keeping a database private does not settle what happens when an application copies its contents to another system. NIST’s January 2020 Privacy Framework organized privacy risk around data processing and the organizations involved in it. That gives us a useful question for an agent: which information leaves each boundary, for what purpose, and under whose controls?",
       "Tools such as Presidio address a narrower part of that problem by identifying and transforming sensitive entities in text and other data. Its documentation explicitly warns that automated detection cannot find every sensitive item. Our workshop begins earlier, with a new record containing only the fields this lookup needs."
     ]
   },
@@ -3504,7 +3504,7 @@
       }
     ],
     "blocks": [
-      "Distributed services have long faced the problem of a request whose effect succeeds while its reply is lost. Amazon’s Builders’ Library describes how client request identifiers let a service recognise repeated intent; its idempotent API article was announced in January 2021. An agent calling a work-order service inherits this same communication problem.",
+      "Distributed services have long faced the problem of a request whose effect succeeds while its reply is lost. Amazon’s Builders’ Library describes how client request identifiers let a service recognize repeated intent; its idempotent API article was announced in January 2021. An agent calling a work-order service inherits this same communication problem.",
       "The practical idea is to give the intended inspection a stable identity. A repeated delivery of that operation can then recover its earlier result within the receiving service’s documented contract. Our receipt ledger is a teaching model. It does not implement a distributed transaction or promise that every request eventually succeeds."
     ]
   },
@@ -3585,7 +3585,7 @@
     ],
     "blocks": [
       "After a language-model application ships, its developers need to connect a poor answer with the work that produced it. Ordinary request analytics often missed model-specific questions about quality, cost and changing prompts. Langfuse’s July 19, 2023 launch described open-source product analytics for LLM applications built around those needs.",
-      "The project first concentrated on tracing and later added prompt management and dataset experiments. That development connects two records that otherwise drift apart: the actual execution and the judgement of its answer. In the maintenance example, a run identifier lets us return from a suspicious score to the retrieved manual and model output that were judged. Langfuse organises that evidence; the evaluator still has to justify what the score means."
+      "The project first concentrated on tracing and later added prompt management and dataset experiments. That development connects two records that otherwise drift apart: the actual execution and the judgment of its answer. In the maintenance example, a run identifier lets us return from a suspicious score to the retrieved manual and model output that were judged. Langfuse organizes that evidence; the evaluator still has to justify what the score means."
     ]
   },
   "agent-evaluation-datasets": {
@@ -3605,8 +3605,8 @@
       }
     ],
     "blocks": [
-      "Benchmarks built around isolated answers leave out much of an agent’s work. AgentBench evaluated language models acting through interactive environments, making sequences of decisions part of the task. HELM separately emphasised evaluating models across scenarios and multiple metrics rather than reducing capability to one favourable number.",
-      "Our maintenance tests borrow that question about behaviour: what did the system do in the environment it was given? The small cases here are invented regression fixtures, not a reproduction of either benchmark and not evidence about a particular model’s capability."
+      "Benchmarks built around isolated answers leave out much of an agent’s work. AgentBench evaluated language models acting through interactive environments, making sequences of decisions part of the task. HELM separately emphasized evaluating models across scenarios and multiple metrics rather than reducing capability to one favorable number.",
+      "Our maintenance tests borrow that question about behavior: what did the system do in the environment it was given? The small cases here are invented regression fixtures, not a reproduction of either benchmark and not evidence about a particular model’s capability."
     ]
   },
   "agent-framework-tests": {
@@ -3626,7 +3626,7 @@
       }
     ],
     "blocks": [
-      "Software tests often need to observe a caller’s reaction without depending on a slow or unpredictable service. Test doubles replace that dependency with controlled behaviour. Martin Fowler’s 2007 account distinguished several forms, including stubs that supply prepared answers and mocks that can check expected interactions. This was a testing technique before the dependency was a language model.",
+      "Software tests often need to observe a caller’s reaction without depending on a slow or unpredictable service. Test doubles replace that dependency with controlled behavior. Martin Fowler’s 2007 account distinguished several forms, including stubs that supply prepared answers and mocks that can check expected interactions. This was a testing technique before the dependency was a language model.",
       "Pydantic AI’s TestModel and FunctionModel, and LangChain’s mock-model tests, apply the same idea to agent code. Supply a known response and check what the application does next. That lets us reproduce a malformed proposal or a tool error cheaply. It deliberately leaves the real model out, so it cannot establish how often a provider will produce a useful answer; integration tests and task evaluations answer that later question."
     ]
   },
@@ -3656,7 +3656,7 @@
       }
     ],
     "blocks": [
-      "CheckList, published in 2020, proposed behavioural tests for language systems rather than relying only on aggregate accuracy. Tests could target a capability and probe how behaviour changed when the input changed.",
+      "CheckList, published in 2020, proposed behavioral tests for language systems rather than relying only on aggregate accuracy. Tests could target a capability and probe how behavior changed when the input changed.",
       "That is useful for our desk because “wrong answer” covers several mechanisms. We can test whether the right manual is retrieved, whether the answer uses it correctly, and whether an approved call reaches the correct service. Each failure gives us a narrower question to investigate."
     ]
   },
@@ -3699,7 +3699,7 @@
     ],
     "blocks": [
       "Teams learned that combining everyone’s code only near the end of a project made failures expensive to untangle. Continuous integration brought changes together frequently and checked them with an automated build and tests. Fowler’s account, including its 2006 revision, explains why that repeated check gives a team earlier feedback about a broken change.",
-      "Language-model applications need the same repeatable comparison, but the output can vary between runs. Fixed cases and identified prompt/model configurations make that variation inspectable. Tools such as promptfoo bring evaluations into a command-line or integration job. Our release policy decides in advance which measured failures prevent the next shift, rather than choosing a threshold after seeing which candidate it would favour."
+      "Language-model applications need the same repeatable comparison, but the output can vary between runs. Fixed cases and identified prompt/model configurations make that variation inspectable. Tools such as promptfoo bring evaluations into a command-line or integration job. Our release policy decides in advance which measured failures prevent the next shift, rather than choosing a threshold after seeing which candidate it would favor."
     ]
   },
   "agent-adversarial-evaluations": {
@@ -3757,8 +3757,8 @@
       }
     ],
     "blocks": [
-      "A repair that answers one new question correctly may still break an older question. CheckList’s 2020 behavioural-testing work made particular capabilities and input changes explicit tests for language systems. A discovered failure could then become a repeatable case, rather than disappear inside the next average score.",
-      "Keeping those cases is the basis of this maintenance project. An experiment dataset connects each stored task to its expected behaviour, and a recorded execution shows what a candidate actually did. Langfuse provides tools for organising that comparison, but the task supplies the acceptance rule. We will carry the repaired incident into the next run alongside earlier requirements, so a new success cannot hide an old regression."
+      "A repair that answers one new question correctly may still break an older question. CheckList’s 2020 behavioral-testing work made particular capabilities and input changes explicit tests for language systems. A discovered failure could then become a repeatable case, rather than disappear inside the next average score.",
+      "Keeping those cases is the basis of this maintenance project. An experiment dataset connects each stored task to its expected behavior, and a recorded execution shows what a candidate actually did. Langfuse provides tools for organizing that comparison, but the task supplies the acceptance rule. We will carry the repaired incident into the next run alongside earlier requirements, so a new success cannot hide an old regression."
     ]
   },
   "agent-guardrail-boundaries": {
@@ -3774,8 +3774,8 @@
       }
     ],
     "blocks": [
-      "Software teams have long needed a way to turn a security concern into a development requirement they can check. NIST’s 2022 SSDF organises practices for preparing development work, protecting software and responding to vulnerabilities. That problem remains when a model writes part of the program or chooses which operation to request.",
-      "An agent adds a controller whose proposals depend on text and changing context. We can still describe a forbidden consequence precisely: no record from another tenant may be returned, and no public post may be created without its required authorisation. Those statements give us something more useful to test than whether the agent sounded careful."
+      "Software teams have long needed a way to turn a security concern into a development requirement they can check. NIST’s 2022 SSDF organizes practices for preparing development work, protecting software and responding to vulnerabilities. That problem remains when a model writes part of the program or chooses which operation to request.",
+      "An agent adds a controller whose proposals depend on text and changing context. We can still describe a forbidden consequence precisely: no record from another tenant may be returned, and no public post may be created without its required authorization. Those statements give us something more useful to test than whether the agent sounded careful."
     ]
   },
   "agent-guardrail-coding": {
@@ -3837,7 +3837,7 @@
       }
     ],
     "blocks": [
-      "Once software builds consumed many dependencies and ran on separate services, checking the source repository was no longer enough to identify the file being shipped. The file could have been produced from another revision or by a different build process. SLSA was introduced publicly in 2021 to organise progressively stronger software-supply-chain controls, including a record of how an artifact was produced.",
+      "Once software builds consumed many dependencies and ran on separate services, checking the source repository was no longer enough to identify the file being shipped. The file could have been produced from another revision or by a different build process. SLSA was introduced publicly in 2021 to organize progressively stronger software-supply-chain controls, including a record of how an artifact was produced.",
       "That production record is provenance. A verifier needs to establish who issued it and which artifact it describes, under a stated trust policy. Botie’s green test report should therefore name the same candidate revision and artifact waiting for release. Even authentic provenance does not establish that the source is bug-free; it lets us connect the checks to the actual output we are deciding whether to publish."
     ]
   },
@@ -3859,7 +3859,7 @@
     ],
     "blocks": [
       "Assistants needed access to information held in many systems, and each custom connector repeated some of the same integration work. Anthropic introduced the Model Context Protocol on November 25, 2024 to provide a common way to connect those sources and tools. A server can describe capabilities through that protocol, while a host decides which of them to make available to its application.",
-      "Discovering a tool is not the same as reviewing its current behaviour. The 2025-11-25 specification includes descriptions, argument schemas and notifications that the available tool list changed. Those fields can influence a model’s next request, so the host must notice when the reviewed description or schema is no longer the offered one. A familiar short name cannot stand in for that comparison."
+      "Discovering a tool is not the same as reviewing its current behavior. The 2025-11-25 specification includes descriptions, argument schemas and notifications that the available tool list changed. Those fields can influence a model’s next request, so the host must notice when the reviewed description or schema is no longer the offered one. A familiar short name cannot stand in for that comparison."
     ]
   },
   "agent-guardrail-mcp-auth": {
@@ -3884,7 +3884,7 @@
     ],
     "blocks": [
       "Giving an application a person’s password lets it do far more than one limited job. OAuth developed a different arrangement: issue access authority for a defined purpose instead. RFC 6749 specified OAuth 2.0 in October 2012, separating the resource owner, client and service holding the protected resource. The receiving service still needs to know which authority was intended for it.",
-      "Deployment experience exposed credentials accepted in the wrong context. The February 2020 JWT best-practice document, RFC 8725, includes checking the intended audience when JWTs are used, and RFC 9700 records later OAuth security guidance. MCP’s HTTP authorisation builds on those mechanisms. The workshop starts after token validation and asks whether the verified issuer, destination and scope belong to this service; it never treats a readable token as verified authority."
+      "Deployment experience exposed credentials accepted in the wrong context. The February 2020 JWT best-practice document, RFC 8725, includes checking the intended audience when JWTs are used, and RFC 9700 records later OAuth security guidance. MCP’s HTTP authorization builds on those mechanisms. The workshop starts after token validation and asks whether the verified issuer, destination and scope belong to this service; it never treats a readable token as verified authority."
     ]
   },
   "agent-guardrail-application-actions": {
@@ -3908,8 +3908,8 @@
       }
     ],
     "blocks": [
-      "Approving access has always needed a connection to the thing being accessed. Saltzer and Schroeder’s 1975 protection paper discussed controls that introduce human judgement before access and mechanisms that check the requested operation. A person’s general willingness to let a program work is different from reviewing a particular change to a particular record.",
-      "Transaction-authorisation guidance makes that distinction concrete: show the actual operation, retain what was approved, and enforce it at execution. Agent frameworks now offer a pause around a proposed tool call, but a resumed conversation cannot establish that the customer, amount or record version stayed unchanged. Botie’s approval must remain attached to the same inspection proposal when the receiving service acts."
+      "Approving access has always needed a connection to the thing being accessed. Saltzer and Schroeder’s 1975 protection paper discussed controls that introduce human judgment before access and mechanisms that check the requested operation. A person’s general willingness to let a program work is different from reviewing a particular change to a particular record.",
+      "Transaction-authorization guidance makes that distinction concrete: show the actual operation, retain what was approved, and enforce it at execution. Agent frameworks now offer a pause around a proposed tool call, but a resumed conversation cannot establish that the customer, amount or record version stayed unchanged. Botie’s approval must remain attached to the same inspection proposal when the receiving service acts."
     ]
   },
   "agent-guardrail-memory-delegation": {
@@ -3929,7 +3929,7 @@
       }
     ],
     "blocks": [
-      "A program can keep notes between steps without changing its model’s weights. That stored context lets later work continue from earlier observations. In the 2023 Generative Agents study, Park and colleagues stored natural-language experiences, formed reflections and retrieved relevant memories to guide later behaviour in a simulated town. The study supplied a concrete architecture for making earlier experience part of a later model input.",
+      "A program can keep notes between steps without changing its model’s weights. That stored context lets later work continue from earlier observations. In the 2023 Generative Agents study, Park and colleagues stored natural-language experiences, formed reflections and retrieved relevant memories to guide later behavior in a simulated town. The study supplied a concrete architecture for making earlier experience part of a later model input.",
       "Remembering text also preserves whatever was wrong with that text. A summary may carry an outside instruction into another worker’s context while losing its original source label. The maintenance task therefore needs to keep ownership and review information with saved notes. Passing a note to a child worker is also separate from granting that worker tools: remembered prose cannot create the authority to read another customer’s records."
     ]
   },
@@ -3955,7 +3955,7 @@
     ],
     "blocks": [
       "An assistant can say the expected words after performing the wrong action. Evaluating only its final sentence would miss that failure. AgentBench, introduced in 2023, evaluated language models interacting with environments, making a sequence of decisions part of what had to be assessed. That shifted the observation from one answer to what the system did while trying to complete the task.",
-      "For this release exercise, we need the operation records as well as the answer. The receiving service tells us whether a write actually occurred, while an application-owned scenario lists the effects that were permitted. Langfuse can organise the runs and their scores, but it cannot supply that permission policy on our behalf. The final test asks whether Botie can finish legitimate work while keeping forbidden effects out of a fresh shift."
+      "For this release exercise, we need the operation records as well as the answer. The receiving service tells us whether a write actually occurred, while an application-owned scenario lists the effects that were permitted. Langfuse can organize the runs and their scores, but it cannot supply that permission policy on our behalf. The final test asks whether Botie can finish legitimate work while keeping forbidden effects out of a fresh shift."
     ]
   },
   "software-feature-contracts": {
@@ -3985,7 +3985,7 @@
     ],
     "blocks": [
       "Machine-learning libraries needed different algorithms to work together without every caller learning a new interface. The scikit-learn team’s 2013 API-design paper described a common arrangement: fit learns from a dataset, while prediction and transformation methods use the resulting state. That consistency lets a preprocessing object and a predictor participate in the same application.",
-      "For a centring procedure, the learned state includes the training mean. Later requests should use that stored reference. Relearning a mean from each request would give the same measurement a different meaning whenever its neighbours change. Separate fit and transform methods make the intended distinction visible, and a changed-batch test checks that the implementation actually respects it."
+      "For a centering procedure, the learned state includes the training mean. Later requests should use that stored reference. Relearning a mean from each request would give the same measurement a different meaning whenever its neighbors change. Separate fit and transform methods make the intended distinction visible, and a changed-batch test checks that the implementation actually respects it."
     ]
   },
   "software-retrieval-shortlists": {
@@ -4001,7 +4001,7 @@
       }
     ],
     "blocks": [
-      "Selecting the next best item was an algorithm problem long before a retrieval system had thousands of passages to rank. J. W. J. Williams’ 1964 Heapsort algorithm described a heap: an array organised so an extreme item stays at its root. In his formulation the least item is immediately available, and insertion or extraction repairs the ordering without sorting the entire collection again.",
+      "Selecting the next best item was an algorithm problem long before a retrieval system had thousands of passages to rank. J. W. J. Williams’ 1964 Heapsort algorithm described a heap: an array organized so an extreme item stays at its root. In his formulation the least item is immediately available, and insertion or extraction repairs the ordering without sorting the entire collection again.",
       "That idea also helps a bounded shortlist. Keep only the best k candidates, with the weakest retained candidate easiest to inspect. A better arrival can replace it. Our workshop uses sorting to show which positions win; the Python challenge builds the bounded heap. Both must preserve passage IDs and the declared tie rule. Efficient selection does not decide whether the retrieval scores identify useful evidence."
     ]
   },
@@ -4095,7 +4095,7 @@
     ],
     "blocks": [
       "When one program calls another over a network, performing an action and receiving its answer are separate events. A training service can create a job just before the connection fails. The caller needs a way to describe that uncertainty, because repeating the command may create another job. A sentence written for a person is difficult for a program to use reliably: its wording can change without the failure changing.",
-      "HTTP, the request-and-response protocol used by web services, supplies status and method rules. RFC 9457, published in 2023 as a replacement for RFC 7807, adds a standard format for more specific problem details. A stable problem type lets the client recognise the category while the explanatory wording improves. We will use short outcome codes to decide what can happen next, and keep a lost answer separate from a confirmed failure."
+      "HTTP, the request-and-response protocol used by web services, supplies status and method rules. RFC 9457, published in 2023 as a replacement for RFC 7807, adds a standard format for more specific problem details. A stable problem type lets the client recognize the category while the explanatory wording improves. We will use short outcome codes to decide what can happen next, and keep a lost answer separate from a confirmed failure."
     ]
   },
   "software-contract-tests": {
@@ -4116,7 +4116,7 @@
     ],
     "blocks": [
       "A hand-calculated example can tell us what one prediction should be. It cannot list every future request. Some promises are easier to describe as relationships: if the same named measurements arrive in another order, the result should stay the same. Property-based testing starts from such a promise and tries many inputs that could contradict it.",
-      "Claessen and Hughes first published QuickCheck in 2000. The tool generated inputs for developer-written properties and helped reduce failures to smaller examples. Hypothesis brings this approach to Python. The useful result is a counterexample: a concrete input that breaks the stated promise. For our model interface, we will begin with the saved-centre mistake, then test whether changing feature order exposes another mistake. Each relationship must follow from the model’s actual behaviour."
+      "Claessen and Hughes first published QuickCheck in 2000. The tool generated inputs for developer-written properties and helped reduce failures to smaller examples. Hypothesis brings this approach to Python. The useful result is a counterexample: a concrete input that breaks the stated promise. For our model interface, we will begin with the saved-center mistake, then test whether changing feature order exposes another mistake. Each relationship must follow from the model’s actual behavior."
     ]
   },
   "data-partition-statistics": {
@@ -4209,6 +4209,238 @@
       "We will start with a much smaller record: the exact dependencies of one prepared feature file. This record is a manifest. Comparing its input and code identities lets us explain why a previous result can be reused, or why replacing an input requires doing the calculation again."
     ]
   },
+  "what-is-databricks": {
+    "title": "Why a Processing Engine Became a Shared Platform",
+    "sources": [
+      {
+        "title": "Databricks platform introduction",
+        "url": "https://docs.databricks.com/aws/en/introduction/"
+      },
+      {
+        "title": "Databricks company history",
+        "url": "https://www.databricks.com/company/about-us"
+      },
+      {
+        "title": "Apache Spark project history",
+        "url": "https://spark.apache.org/history.html"
+      },
+      {
+        "title": "Resilient Distributed Datasets, NSDI 2012",
+        "url": "https://people.csail.mit.edu/matei/papers/2012/nsdi_spark.pdf"
+      },
+      {
+        "title": "The data lakehouse architecture",
+        "url": "https://docs.databricks.com/aws/en/lakehouse/"
+      }
+    ],
+    "blocks": [
+      "Spark began as a UC Berkeley research project in 2009 and became open source in 2010. Its researchers were addressing calculations that reused data, including repeated model-training steps and interactive analysis. Repeatedly writing intermediate results to external storage and reading them back could make that work expensive. Spark provided a way to organize distributed calculations and reuse data while retaining information needed to recover lost work.",
+      "A processing engine still needs somewhere to run. Teams have to provide computing resources, connect storage, share code and inspect failures. Spark’s creators founded Databricks in 2013. The platform developed around making shared data work easier to operate. Spark remained a separate open-source project, and it can run without Databricks.",
+      "As a team’s uses grow, keeping separate copies for reporting and model development can make it difficult to establish which data a result used. The lakehouse approach brings table-management capabilities to data-lake storage. We will explain those storage ideas next, then distinguish them from the engine that calculates over the records."
+    ]
+  },
+  "databricks-data-lakes": {
+    "title": "Why Storing the Files Was Not Enough",
+    "sources": [
+      {
+        "title": "Armbrust and colleagues: Lakehouse, CIDR 2021",
+        "url": "https://www.databricks.com/sites/default/files/2020/12/cidr_lakehouse.pdf"
+      },
+      {
+        "title": "Delta Lake: reading versions through the transaction log",
+        "url": "https://delta.io/blog/2023-02-01-delta-lake-time-travel/"
+      },
+      {
+        "title": "Delta Lake: migration precautions",
+        "url": "https://docs.delta.io/porting/"
+      },
+      {
+        "title": "Amazon S3: object identities",
+        "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html"
+      },
+      {
+        "title": "Apache Parquet: file format overview",
+        "url": "https://parquet.apache.org/docs/overview/"
+      },
+      {
+        "title": "Delta Lake: retained batch reads",
+        "url": "https://docs.delta.io/delta-batch/"
+      }
+    ],
+    "blocks": [
+      "Data warehouses brought records together so people could ask analytical questions across an organization. A maintenance report might compare repair costs by site using deliberately prepared tables. Keeping a wide variety of source files was another need. File-based lakes let teams retain those inputs for different kinds of processing, but a pile of files did not explain how a reader should handle a partly completed update.",
+      "The lakehouse architecture described in the 2021 CIDR paper brought table-management capabilities to data held in open file formats. The aim was to support analytical tables and other data work without always maintaining separate copies in a lake and a warehouse. This is an architectural approach, not a rule that every warehouse or lake must behave the same way.",
+      "Delta Lake addresses part of that reliability problem by recording committed table changes. A reader determines which data belongs to a table version from that recorded state. A file can therefore exist in storage without belonging to the version being read. Our workshop isolates that distinction with an already reconstructed file list; it does not implement Delta transactions."
+    ]
+  },
+  "databricks-workspaces-compute": {
+    "title": "Why Interactive Work and Repeatable Runs Need Different Controls",
+    "sources": [
+      {
+        "title": "Databricks company history",
+        "url": "https://www.databricks.com/company/about-us"
+      },
+      {
+        "title": "Resilient Distributed Datasets, NSDI 2012",
+        "url": "https://people.csail.mit.edu/matei/papers/2012/nsdi_spark.pdf"
+      },
+      {
+        "title": "Databricks notebooks",
+        "url": "https://docs.databricks.com/aws/en/notebooks/"
+      },
+      {
+        "title": "Run Databricks notebooks",
+        "url": "https://docs.databricks.com/aws/en/notebooks/run-notebook"
+      },
+      {
+        "title": "Databricks compute choices",
+        "url": "https://docs.databricks.com/aws/en/compute/"
+      },
+      {
+        "title": "Manage classic compute",
+        "url": "https://docs.databricks.com/aws/en/compute/clusters-manage"
+      },
+      {
+        "title": "SQL warehouse compute",
+        "url": "https://docs.databricks.com/aws/en/compute/sql-warehouse/"
+      },
+      {
+        "title": "Spark application components",
+        "url": "https://spark.apache.org/docs/latest/cluster-overview.html"
+      }
+    ],
+    "blocks": [
+      "Interactive analysis involves asking one question, inspecting the result, then changing the next question. Spark’s early research addressed this reuse of data alongside repeated algorithm steps. A running environment can keep useful intermediate state, which makes exploration convenient. It also creates a dependency on what happened earlier in that environment.",
+      "A team sharing that work needs the program to be visible and the result to be reproducible elsewhere. Databricks, founded in 2013 by Spark’s creators, brought managed execution together with a shared development environment. Its notebooks allow code and displayed results to stay together, while jobs provide a way to run defined work repeatedly.",
+      "These capabilities expose different lifetimes. The notebook document can remain when a process stops. A table saved in persistent storage can be read by a later process. A value that existed only in the earlier process’s memory must be recreated. Our workshop makes that last distinction explicit instead of treating everything visible in the interface as the same kind of saved work."
+    ]
+  },
+  "databricks-table-names": {
+    "title": "Why Teams Needed a Shared Record of Their Tables",
+    "sources": [
+      {
+        "title": "Unity Catalog public preview announcement, April 2022",
+        "url": "https://www.databricks.com/blog/2022/04/20/announcing-gated-public-preview-of-unity-catalog-on-aws-and-azure.html"
+      },
+      {
+        "title": "Databricks database objects",
+        "url": "https://docs.databricks.com/aws/en/database-objects"
+      },
+      {
+        "title": "Databricks catalogs",
+        "url": "https://docs.databricks.com/aws/en/catalogs"
+      },
+      {
+        "title": "Databricks schemas",
+        "url": "https://docs.databricks.com/aws/en/schemas"
+      },
+      {
+        "title": "Databricks table identifier resolution",
+        "url": "https://docs.databricks.com/aws/en/query/"
+      },
+      {
+        "title": "Unity Catalog privilege management",
+        "url": "https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/"
+      },
+      {
+        "title": "Unity Catalog managed tables",
+        "url": "https://docs.databricks.com/aws/en/tables/managed"
+      },
+      {
+        "title": "Unity Catalog external tables",
+        "url": "https://docs.databricks.com/aws/en/tables/external"
+      }
+    ],
+    "blocks": [
+      "A program can read a file by its storage path, but that path tells a colleague little about the dataset. When several teams keep their own table lists and access rules, the same name can refer to different records and permissions become difficult to inspect together. A shared catalog records the objects people are trying to use and the rules governing access to them.",
+      "Databricks announced Unity Catalog at its 2021 Data and AI Summit. Its April 2022 public-preview announcement described the problem of managing access across different data assets and workspaces. Centralized metadata and access management were practical needs created by shared data work. A table name became part of an organized, governed namespace rather than an informal label inside one notebook.",
+      "Unity Catalog now organizes tables under catalogs and schemas and manages their metadata and supported access. We will begin with that naming structure. The later permissions lesson works through the required privileges in more detail; recognizing a table and authorizing a request are separate steps."
+    ]
+  },
+  "databricks-basics": {
+    "title": "Why Spark Was Developed",
+    "sources": [
+      {
+        "title": "Apache Spark project history",
+        "url": "https://spark.apache.org/history.html"
+      },
+      {
+        "title": "Resilient Distributed Datasets, NSDI 2012",
+        "url": "https://people.csail.mit.edu/matei/papers/2012/nsdi_spark.pdf"
+      },
+      {
+        "title": "Spark application components",
+        "url": "https://spark.apache.org/docs/latest/cluster-overview.html"
+      },
+      {
+        "title": "Spark DataFrame quickstart",
+        "url": "https://spark.apache.org/docs/latest/api/python/getting_started/quickstart_df.html"
+      }
+    ],
+    "blocks": [
+      "Large calculations often revisit the same records. A model may pass over its training data repeatedly, and an analyst may ask several questions of the same dataset. Writing each intermediate result to external storage and reading it back adds work every time. Spark began at UC Berkeley in 2009 and became open source in 2010. Its researchers described a way to reuse distributed data in memory while keeping enough information about its transformations to recover lost partitions.",
+      "Dividing data between machines creates a recovery problem. If one process disappears, its portion of the calculation may need to run again. The researchers described a distributed dataset whose transformation history allowed missing partitions to be reconstructed. Reusing data and recovering lost work were both part of the design.",
+      "Our count does not need an in-memory training loop, but it lets us inspect the same division of work on a small example. We can calculate a result for each portion and combine the results. Later, operations that need matching records to meet will explain why some distributed calculations also move data between partitions."
+    ]
+  },
+  "databricks-notebooks-jobs": {
+    "title": "From an Interactive Calculation to Repeatable Work",
+    "sources": [
+      {
+        "title": "Project Jupyter origins",
+        "url": "https://jupyter.org/about"
+      },
+      {
+        "title": "Databricks notebooks",
+        "url": "https://docs.databricks.com/aws/en/notebooks/"
+      },
+      {
+        "title": "Running Databricks notebooks",
+        "url": "https://docs.databricks.com/aws/en/notebooks/run-notebook"
+      },
+      {
+        "title": "Lakeflow Jobs concepts",
+        "url": "https://docs.databricks.com/aws/en/jobs/"
+      },
+      {
+        "title": "A Databricks notebook workflow",
+        "url": "https://docs.databricks.com/aws/en/jobs/jobs-quickstart"
+      }
+    ],
+    "blocks": [
+      "Interactive computing lets someone try a calculation and inspect the result while deciding what to do next. Notebook interfaces keep that exploration beside the explanation. Project Jupyter grew out of IPython in 2014 as the work expanded across programming languages. Databricks notebooks address a related need in a shared data platform: colleagues can develop code and inspect results in the same workspace.",
+      "A saved notebook does not, by itself, describe every action that produced an interactive session. Running cells out of order can leave values that are no longer explained by the visible code. Repeated work needs an explicit execution procedure. Databricks jobs coordinate tasks and their dependencies, and can start those workflows from schedules or other triggers. That solves when and in what order work runs; the program still has to calculate the right result."
+    ]
+  },
+  "databricks-mlflow-basics": {
+    "title": "Why Experiment Tracking Needed Its Own Record",
+    "sources": [
+      {
+        "title": "MLflow’s June 2018 introduction",
+        "url": "https://www.databricks.com/blog/2018/06/05/introducing-mlflow-an-open-source-machine-learning-platform.html"
+      },
+      {
+        "title": "MLflow Tracking concepts",
+        "url": "https://mlflow.org/docs/latest/ml/tracking/"
+      },
+      {
+        "title": "MLflow Tracking API concepts",
+        "url": "https://mlflow.org/docs/latest/ml/tracking/tracking-api/"
+      },
+      {
+        "title": "MLflow Tracking quickstart",
+        "url": "https://mlflow.org/docs/latest/ml/tracking/quickstart/"
+      },
+      {
+        "title": "MLflow Model Registry concepts",
+        "url": "https://mlflow.org/docs/latest/ml/model-registry/"
+      }
+    ],
+    "blocks": [
+      "Trying a different model setting is easy. Reconstructing which code, data and setting produced an old model can be much harder. The June 2018 MLflow announcement described that difficulty alongside the problem of moving work between different machine-learning libraries and execution environments. The initial project provided an open way to track attempts instead of tying their records to one algorithm.",
+      "Tracking makes each recorded attempt something we can inspect later. Its settings, measured results and output files stay connected by the run identity. That connection does not establish that the measurement was fair or that the model is ready to deploy. It gives us the evidence we need to ask those questions without first guessing which attempt a file came from."
+    ]
+  },
   "databricks-lazy-dataframes": {
     "title": "Why a Table Calculation Became a Platform Problem",
     "sources": [
@@ -4257,7 +4489,7 @@
     ],
     "blocks": [
       "Counting records for one pump across many files requires combining contributions that began in different places. The same issue appears when two tables need to match rows by an identifier. A distributed system must arrange for the matching contributions to meet somewhere; this movement between partitions is called a shuffle.",
-      "Spark SQL’s 2015 paper described planning table calculations as operations the engine can optimise and execute across a cluster. The plan still has to respect the grouping we requested. If one pump owns most of the work, sending all of that group to one task can leave the other workers waiting. More machines help only when the work can actually be divided between them.",
+      "Spark SQL’s 2015 paper described planning table calculations as operations the engine can optimize and execute across a cluster. The plan still has to respect the grouping we requested. If one pump owns most of the work, sending all of that group to one task can leave the other workers waiting. More machines help only when the work can actually be divided between them.",
       "We will split one pump’s work into temporary partial groups while preserving its original identifier. A count can later add those partial counts. Spark may already perform local aggregation or choose an adaptive plan, so the workshop exposes a routing decision we can reason about rather than predicting a real cluster’s task counts."
     ]
   },
@@ -4305,8 +4537,8 @@
     ],
     "blocks": [
       "As cloud storage filled with incoming files, repeatedly listing every directory became an expensive way to discover the next input. Teams also had to remember which discoveries had actually reached their output after failures and retries.",
-      "Databricks announced Auto Loader in public preview in February 2020 to handle incremental discovery and loading of files from cloud storage. It is a file source used with Spark streaming, with checkpointed progress so a restarted query can continue. A checkpoint is the durable recovery record for that query; it has to work with the destination’s commit behaviour.",
-      "That distinction is what we will build. A discovery says there is a file to consider. A completed-file record says its effect belongs in the committed output. Keeping the output rows and progress together prevents a lost acknowledgement from becoming a second copy of the observations."
+      "Databricks announced Auto Loader in public preview in February 2020 to handle incremental discovery and loading of files from cloud storage. It is a file source used with Spark streaming, with checkpointed progress so a restarted query can continue. A checkpoint is the durable recovery record for that query; it has to work with the destination’s commit behavior.",
+      "That distinction is what we will build. A discovery says there is a file to consider. A completed-file record says its effect belongs in the committed output. Keeping the output rows and progress together prevents a lost acknowledgment from becoming a second copy of the observations."
     ]
   },
   "databricks-change-data-capture": {
@@ -4328,7 +4560,7 @@
     "blocks": [
       "Once a source table can correct or delete a reading, copying it once is no longer enough. A downstream training table needs to learn which records changed and what happened to them. Change data capture, usually shortened to CDC, is the process of communicating those inserts, updates and deletions.",
       "The Delta Lake work described in the 2020 paper addressed dependable table updates over analytical files. Delta’s MERGE operation can match incoming rows to stored rows and apply declared insert or update rules. That gives us somewhere to express a correction, but we must still decide which source change is authoritative when messages arrive out of order.",
-      "Here the source gives each pump’s changes an increasing sequence. A later arrival can therefore be recognised as an older change. We also keep the version of a deletion behind the consumer’s view, so an old update cannot make a deleted pump reappear."
+      "Here the source gives each pump’s changes an increasing sequence. A later arrival can therefore be recognized as an older change. We also keep the version of a deletion behind the consumer’s view, so an old update cannot make a deleted pump reappear."
     ]
   },
   "databricks-lakeflow-quality": {
@@ -4452,7 +4684,7 @@
     "blocks": [
       "A service can call another service, which calls a third. If each starts a fresh timeout, the complete request may take much longer than its caller agreed to wait. Work can also continue consuming resources after the caller has given up.",
       "In a 2018 gRPC article, Google site reliability engineer Gráinne Sheerin explained why clients should set deadlines deliberately. gRPC is a framework for calling procedures in another process across a network. Its deadline support lets the caller put a time boundary on that work, and implementations can propagate the remaining allowance to downstream calls. The allowance shrinks as work happens; another service does not receive a fresh budget simply because it started later.",
-      "An agent making several tool calls has the same dependency. We will calculate what remains before starting the next call. Cancelling a request still requires cooperation from the work it started, especially if an external action may already have happened."
+      "An agent making several tool calls has the same dependency. We will calculate what remains before starting the next call. Canceling a request still requires cooperation from the work it started, especially if an external action may already have happened."
     ]
   },
   "systems-kv-cache-memory": {
@@ -4500,7 +4732,7 @@
       }
     ],
     "blocks": [
-      "Once a model has learned its parameters, using it to produce an output is called inference. A service has to arrange that work for the people sending requests. Putting several requests through a model together can use the hardware more efficiently. That arrangement is a batch. Generating text complicates it: the model produces a token, uses that growing text as context, and returns to produce another. One answer may finish while its neighbour still has a page to write.",
+      "Once a model has learned its parameters, using it to produce an output is called inference. A service has to arrange that work for the people sending requests. Putting several requests through a model together can use the hardware more efficiently. That arrangement is a batch. Generating text complicates it: the model produces a token, uses that growing text as context, and returns to produce another. One answer may finish while its neighbor still has a page to write.",
       "In 2022, the Orca research serving system addressed batches that stayed fixed for an entire response. Its iteration-level scheduling reconsidered the participating requests after each generation step. That gave finished requests a way out and waiting requests a way in. We will return to that decision later. First, we need to see where a reader waits. The invented timestamps below explain timing measurements used by serving systems such as vLLM; they are not measurements of either implementation."
     ]
   },
@@ -4587,7 +4819,7 @@
     "blocks": [
       "An arm joint describes motion relative to another joint. A camera describes an object relative to the camera. Giving both descriptions numbers does not make their origins and directions agree. Mechanical systems needed a consistent way to connect these local descriptions before a learned detector entered the picture.",
       "Denavit and Hartenberg's 1955 paper described mechanisms using matrix relationships. Writing each relationship explicitly made it possible to combine a chain of links through matrix algebra. The useful idea here is a change of coordinates: the object stays where it is while we express its position using another origin and set of axes.",
-      "We will use a supplied rotation and translation to turn a detector's position into the robot's coordinates. This known rigid transform is simpler than estimating calibration or the robot's location. It lets us inspect the geometric step between recognising an object and choosing where the robot should move."
+      "We will use a supplied rotation and translation to turn a detector's position into the robot's coordinates. This known rigid transform is simpler than estimating calibration or the robot's location. It lets us inspect the geometric step between recognizing an object and choosing where the robot should move."
     ]
   },
   "robot-observation-latency": {
@@ -4622,7 +4854,7 @@
     ],
     "blocks": [
       "A steam engine's speed changes when its load changes. A governor responds to that speed and adjusts the steam supply, so the next action depends on what the machine is actually doing. This is feedback: measure the result and use it to change the input.",
-      "Maxwell's 1868 paper On Governors examined why such regulators could settle or develop oscillations. Feeding a measurement back into a machine creates a changing loop, so a correction that points in the right direction can still be poorly timed or too strong. The loop's behaviour needs analysis of its own.",
+      "Maxwell's 1868 paper On Governors examined why such regulators could settle or develop oscillations. Feeding a measurement back into a machine creates a changing loop, so a correction that points in the right direction can still be poorly timed or too strong. The loop's behavior needs analysis of its own.",
       "Our robot uses a much smaller proportional rule. A larger position error asks for a larger correction, and a new measurement informs the next move. A learned detector may provide that measurement; its static accuracy alone does not establish the stability of the resulting controller."
     ]
   },
@@ -4709,11 +4941,11 @@
     ],
     "blocks": [
       "The Kalman filter’s correction depends on how much error its model expects from movement and from observation. That raises a practical problem: those error statistics have to come from somewhere. If we understate motion error, a prediction can retain too much influence even while new readings keep disagreeing with it. A small reported variance then describes the assumptions we supplied, rather than demonstrating that they were right.",
-      "Welch and Bishop’s introduction works through the effect of changing assumed noise statistics in a concrete Kalman-filter example. Barfoot develops state estimation with those modelling questions in view. We will examine a conveyor whose simulated movement departs from its predictor, then compare the result with an independent reference. The reference helps test the estimate; it must stay out of the estimate’s own input."
+      "Welch and Bishop’s introduction works through the effect of changing assumed noise statistics in a concrete Kalman-filter example. Barfoot develops state estimation with those modeling questions in view. We will examine a conveyor whose simulated movement departs from its predictor, then compare the result with an independent reference. The reference helps test the estimate; it must stay out of the estimate’s own input."
     ]
   },
   "security-retrieval-authority": {
-    "title": "Authorisation Is a Service Responsibility",
+    "title": "Authorization Is a Service Responsibility",
     "sources": [
       {
         "title": "OWASP: Authorization Cheat Sheet",
@@ -4725,12 +4957,12 @@
       }
     ],
     "blocks": [
-      "Shared computers had to let several people use one system without giving everyone access to everyone else’s files. Saltzer and Schroeder’s 1975 account of information protection described principles such as checking each access and granting only the authority needed for the job. Authentication establishes who is asking; authorisation decides whether that requester may perform this operation on this object.",
+      "Shared computers had to let several people use one system without giving everyone access to everyone else’s files. Saltzer and Schroeder’s 1975 account of information protection described principles such as checking each access and granting only the authority needed for the job. Authentication establishes who is asking; authorization decides whether that requester may perform this operation on this object.",
       "A retrieval model supplies another fact: which passage seems relevant. It supplies no permission to disclose the passage. The service must check the user’s access even when the model ranks a protected record first. OWASP’s current guidance carries the same deny-by-default and per-request checks into web applications. Our deliberately high-scoring forbidden passage tests that separation."
     ]
   },
   "security-private-aggregates": {
-    "title": "A Privacy Claim Needs a Neighbouring-Dataset Definition",
+    "title": "A Privacy Claim Needs a Neighboring-Dataset Definition",
     "sources": [
       {
         "title": "OpenDP: differential privacy",
@@ -4743,11 +4975,11 @@
     ],
     "blocks": [
       "Publishing a statistic can reveal something about a person even after their name is removed. Researchers studying statistical databases therefore needed a privacy claim about what changes when one person’s information changes. Dwork, McSherry, Nissim and Smith’s 2006 work connected the random noise used in a release to the sensitivity of its calculation: the greatest effect one allowed contribution can have.",
-      "Differential privacy concerns the behaviour of the randomised release across those neighbouring datasets. The neighbouring-dataset definition matters before we choose noise. Here the participant count is fixed and public, and one person has one bounded value that may be replaced. We will calculate the mean’s resulting influence bound. The exact teaching mean is still an exact disclosure; bounding it alone does not make it a private release."
+      "Differential privacy concerns the behavior of the randomized release across those neighboring datasets. The neighboring-dataset definition matters before we choose noise. Here the participant count is fixed and public, and one person has one bounded value that may be replaced. We will calculate the mean’s resulting influence bound. The exact teaching mean is still an exact disclosure; bounding it alone does not make it a private release."
     ]
   },
   "security-model-artifacts": {
-    "title": "Object Reconstruction Can Execute Behaviour",
+    "title": "Object Reconstruction Can Execute Behavior",
     "sources": [
       {
         "title": "Python: pickle security warning",
@@ -4759,7 +4991,7 @@
       }
     ],
     "blocks": [
-      "Python programmers wanted to save an object and reconstruct it later, including the state its class needed. Pickle saves those objects. Rebuilding an object is more powerful than reading a list of numbers: reconstruction can invoke Python behaviour. A saved preprocessing object therefore brings a different loading question from a plain table of coefficients.",
+      "Python programmers wanted to save an object and reconstruct it later, including the state its class needed. Pickle saves those objects. Rebuilding an object is more powerful than reading a list of numbers: reconstruction can invoke Python behavior. A saved preprocessing object therefore brings a different loading question from a plain table of coefficients.",
       "The 2003 PEP 307 proposal extended the pickle protocol and explicitly rejected earlier checks that had suggested untrusted unpickling could be made safe. Its warning was to avoid loading pickles from untrusted or unauthenticated sources. That history matters when a model file arrives as an apparently passive download. We will check its bytes against an independently trusted expectation before loading anything; a matching digest still leaves the choice and constraints of the loader to be reviewed."
     ]
   },
@@ -4776,12 +5008,12 @@
       }
     ],
     "blocks": [
-      "A learned model changes when its training evidence changes. That gives someone who can supply examples a way to influence later decisions without editing the model’s code. Deliberately manipulating that learning material is called poisoning. The material might be a labelled example or a proposed model update; the important question is what the contributor can actually change.",
+      "A learned model changes when its training evidence changes. That gives someone who can supply examples a way to influence later decisions without editing the model’s code. Deliberately manipulating that learning material is called poisoning. The material might be a labeled example or a proposed model update; the important question is what the contributor can actually change.",
       "Biggio, Nelson and Laskov studied this problem for support vector machines in 2012. They constructed training examples to increase later test error, examining how a learner could be influenced through its data supply. Our smaller workshop uses the average of accepted targets so the effect of each record is visible. Before fitting it, we will decide which sources and reviewed labels this release is allowed to use, and keep the accepted record identities with the result."
     ]
   },
   "security-backdoor-evaluation": {
-    "title": "Ordinary Validation Can Miss Conditional Behaviour",
+    "title": "Ordinary Validation Can Miss Conditional Behavior",
     "sources": [
       {
         "title": "Gu, Dolan-Gavitt and Garg: BadNets (2017)",
@@ -4793,8 +5025,8 @@
       }
     ],
     "blocks": [
-      "Reusing a pretrained model or asking someone else to train it saves work, but also means receiving behaviour we did not build ourselves. Ordinary validation checks the examples we chose. It can miss a hidden rule that responds to another condition. A deliberately introduced rule activated by a particular input pattern is a model backdoor; the activating pattern is its trigger.",
-      "The 2017 BadNets paper investigated outsourced training and demonstrated networks that performed well on ordinary validation examples while misbehaving on attacker-chosen inputs. This made the training and model supply path part of the investigation. Our workshop supplies original and changed predictions for reviewed image pairs. We will measure the observed conditional failure, without assuming that a bad result alone proves who trained the model or how that behaviour arose."
+      "Reusing a pretrained model or asking someone else to train it saves work, but also means receiving behavior we did not build ourselves. Ordinary validation checks the examples we chose. It can miss a hidden rule that responds to another condition. A deliberately introduced rule activated by a particular input pattern is a model backdoor; the activating pattern is its trigger.",
+      "The 2017 BadNets paper investigated outsourced training and demonstrated networks that performed well on ordinary validation examples while misbehaving on attacker-chosen inputs. This made the training and model supply path part of the investigation. Our workshop supplies original and changed predictions for reviewed image pairs. We will measure the observed conditional failure, without assuming that a bad result alone proves who trained the model or how that behavior arose."
     ]
   },
   "security-adversarial-threat-models": {
@@ -4827,7 +5059,7 @@
       }
     ],
     "blocks": [
-      "A prediction API lets another program send inputs to a model kept on a server and receive its answers. The owner can offer useful predictions without distributing the model files. Repeated answers still reveal how the model behaves, though. Model extraction tries to use that query access to build another model with similar behaviour; recovering the original source code or exact weights is not required.",
+      "A prediction API lets another program send inputs to a model kept on a server and receive its answers. The owner can offer useful predictions without distributing the model files. Repeated answers still reveal how the model behaves, though. Model extraction tries to use that query access to build another model with similar behavior; recovering the original source code or exact weights is not required.",
       "Tramèr and colleagues demonstrated extraction through prediction services in 2016, including methods for several model families. They also found that removing confidence scores alone did not eliminate harmful extraction. Our workshop examines controls around the service: count the evaluated rows inside a batch, and return the output the public task actually needs. These decisions limit work and exposed detail, while the useful answers still reveal something about the model."
     ]
   },
@@ -4881,7 +5113,7 @@
     ],
     "blocks": [
       "An engineer may know the form of a machine's motion without knowing its coefficients accurately. A motor's response can differ from its nominal specification, and a controller built around the wrong response will make poor predictions. Measuring inputs beside the resulting outputs gives us evidence about the missing parameters.",
-      "Åström and Bohlin's 1966 work on identifying linear dynamic systems studied learning such models from operating records. System identification is this task of estimating a system's behaviour from observations. It connects a chosen physical model with statistical estimation instead of requiring every coefficient to be supplied in advance.",
+      "Åström and Bohlin's 1966 work on identifying linear dynamic systems studied learning such models from operating records. System identification is this task of estimating a system's behavior from observations. It connects a chosen physical model with statistical estimation instead of requiring every coefficient to be supplied in advance.",
       "We will estimate just one gain through the origin using least squares. The model says which relationship to fit; the recorded observations determine its coefficient. An offset or a delay would change the model we need, so a good fit to this restricted example cannot establish that every physical effect has been captured."
     ]
   },
@@ -4895,7 +5127,7 @@
     ],
     "blocks": [
       "A visual model can learn the lighting or textures of a simulator so well that it struggles with real images. Making the simulator look realistic in one particular setting does not tell us which details the model is relying on.",
-      "Tobin and colleagues' 2017 domain-randomization work varied rendering conditions while training a model for robotic object localisation. By seeing many appearances, the model had less reason to depend on one simulated appearance. The researchers studied whether that training could transfer to real images. This was an experimental response to the gap between simulated and real observations, not a guarantee that arbitrary variation would solve it.",
+      "Tobin and colleagues' 2017 domain-randomization work varied rendering conditions while training a model for robotic object localization. By seeing many appearances, the model had less reason to depend on one simulated appearance. The researchers studied whether that training could transfer to real images. This was an experimental response to the gap between simulated and real observations, not a guarantee that arbitrary variation would solve it.",
       "Botie's policy-cost table applies the broader comparison idea to a smaller problem. We will change the supplied conditions and see whether a policy still behaves acceptably. The original paper studied visual transfer; our table does not reproduce that experiment or establish safety in an unseen physical setting."
     ]
   },
@@ -4935,8 +5167,8 @@
     ],
     "blocks": [
       "Suppose every calibration test turns two heaters up together. A fitting program can learn their combined heat output while leaving each heater’s contribution unresolved. Repeating that same operating pattern gives it more records of the combined effect, without asking the question that separates the gains.",
-      "A least-squares fit chooses coefficients by minimising the sum of squared prediction errors. Computational work on these fits had to address both noisy equations and weakly determined answers. In 1965, Gene Golub and William Kahan described a numerically stable way to calculate singular values and a matrix’s pseudo-inverse, which extends the idea of an inverse to such fitting problems. These calculations can expose changes to the coefficients that the measurements constrain strongly, weakly or not at all.",
-      "That historical numerical work does not tell us which heater is stronger. It helps us recognise when a returned coefficient is a convention rather than an independently measured effect. We will first design a setting on which two fitting models disagree, then give the missing information its linear-algebra names."
+      "A least-squares fit chooses coefficients by minimizing the sum of squared prediction errors. Computational work on these fits had to address both noisy equations and weakly determined answers. In 1965, Gene Golub and William Kahan described a numerically stable way to calculate singular values and a matrix’s pseudo-inverse, which extends the idea of an inverse to such fitting problems. These calculations can expose changes to the coefficients that the measurements constrain strongly, weakly or not at all.",
+      "That historical numerical work does not tell us which heater is stronger. It helps us recognize when a returned coefficient is a convention rather than an independently measured effect. We will first design a setting on which two fitting models disagree, then give the missing information its linear-algebra names."
     ]
   },
   "numerical-gradient-checks": {

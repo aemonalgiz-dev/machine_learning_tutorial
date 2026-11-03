@@ -61,15 +61,15 @@ function formatScore(value: number): string {
 function statusText(fit: SplitFit | null, degree: number): string {
   if (!fit) return "…";
   if (degree === 1) {
-    return "Too stiff. The curve misses both shares alike, which is what underfitting looks like.";
+    return "A straight line cannot follow the curved relationship in these measurements. Errors on both training and held-out data suggest underfitting.";
   }
   if (fit.held_out_r_squared < 0) {
-    return "The training score looks splendid and the held-out score has collapsed. The fit has memorised its share and learned nothing portable.";
+    return "Held-out R² is below zero. On these observations, the model's squared errors exceed those from predicting their mean. Compare that result with its training score before choosing this degree.";
   }
   if (fit.held_out_r_squared > 0.9 && degree <= 5) {
-    return "Both shares agree. The curve is learning the throw, not the measurements.";
+    return "The held-out score is high for this degree. That is evidence that the curve predicts these excluded measurements well; it does not establish how it will perform on every later throw.";
   }
-  return "The shares are parting. The extra polynomial terms are fitting details that do not transfer to held-out data.";
+  return "Compare the training and held-out scores as you change the degree. If training improves while held-out performance falls, the extra terms are fitting details that do not transfer to these excluded observations.";
 }
 
 // With ``concealable`` the held-out points start hidden, so a reader can

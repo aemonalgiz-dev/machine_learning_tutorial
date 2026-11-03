@@ -130,8 +130,9 @@ export function DescentChart() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The first bars are the worked example&apos;s own numbers and every
-        later round keeps shrinking what remains.
+        Each bar measures the squared prediction errors after a round of
+        boosting. The first rounds match the calculation above. Later trees
+        continue correcting the errors left by the current model.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">

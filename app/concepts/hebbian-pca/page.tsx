@@ -21,9 +21,9 @@ import { SweepTable } from "@/components/widgets/SweepTable";
 import { WalkTrace } from "@/components/widgets/WalkTrace";
 
 export const metadata: Metadata = {
-  title: "Hebbian Principal Components · oop_ml",
+  title: "Hebbian Principal Components · Perceptron Lab",
   description:
-    "Can a neuron learn a useful direction from examples arriving one at a time? Oja's rule adjusts its weights using the input and output, while adding a correction that prevents simple Hebbian growth from continuing unchecked.",
+    "Oja's rule adjusts a neuron's weights from successive inputs and outputs. A normalization-related correction limits unbounded growth, allowing the updates to seek a principal direction under suitable learning conditions.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -38,27 +38,8 @@ export default function HebbianPcaPage() {
       playgroundTitle="Learn a direction from one observation at a time"
       playgroundIntro="Watch both the weight direction and its length. Compare the learned direction with the PCA reference rather than judging progress by the output alone."
       title="Hebbian Principal Components"
-      tagline={"Can a neuron learn a useful direction from examples arriving one at a time? Oja's rule adjusts its weights using the input and output, while adding a correction that prevents simple Hebbian growth from continuing unchecked."}
-      prerequisites={
-        <>
-          The answer being reached is the{" "}
-          <Link href="/concepts/pca" className={link}>
-            PCA page
-          </Link>
-          &rsquo;s, and its four people are worked again here, so that page&rsquo;s
-          centring, its projection onto a direction and its eigenvector route are
-          assumed rather than retaught. The unit fires by the{" "}
-          <Link href="/primers/linear-algebra" className={link}>
-            linear algebra primer
-          </Link>
-          &rsquo;s dot product, and the rule that moves it is local in the sense the{" "}
-          <Link href="/concepts/hopfield-network" className={link}>
-            Hopfield page
-          </Link>{" "}
-          gave the word, each weight reading only the two ends it joins. Nothing here
-          descends a loss.
-        </>
-      }
+      tagline={"Oja's rule adjusts a neuron's weights from successive inputs and outputs. A normalization-related correction limits unbounded growth, allowing the updates to seek a principal direction under suitable learning conditions."}
+      prerequisites={<>The <Link href="/concepts/pca" className={link}>PCA page</Link> explains centering, projections and principal directions. We reuse its four observations to compare an iterative learning rule with an eigensolver. The <Link href="/primers/linear-algebra" className={link}>linear algebra primer</Link> explains the dot product used by the unit. The update uses activity available at a connection, similar to the local learning idea introduced with <Link href="/concepts/hopfield-network" className={link}>Hopfield memory</Link>; it does not backpropagate an error from a supplied target.</>}
 
       playground={<HebbianPlayground />}
       sections={[
@@ -85,32 +66,19 @@ export default function HebbianPcaPage() {
                 </p>
 </>
                 <KeepInMind>
-                  A unit&rsquo;s weight vector is a direction through the cloud, and
-                  its output on a person is that person&rsquo;s coordinate along it.
-                  The question the page answers is what direction a unit ends up
-                  pointing in if a rule is allowed to nudge the weights after every
-                  person it reads.
-                </KeepInMind>
+                  The weight vector supplies an orientation and a scale. At unit length, its dot product with a centered observation is the coordinate along that direction. At another length, the output is scaled too. We will watch both quantities as the update changes the vector.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. Fire together, wire together">
-                <p>
-                  Hebb&rsquo;s rule says that when the input and the output are
-                  active at the same moment, the connection between them should
-                  grow, and grow by more when both are more active. Written for the
-                  two weights it is one line. Each weight moves by a rate times the
-                  output times its own input, which is the outer product of the two
-                  ends of the connection and involves nothing else. There is no
-                  target in it and no loss, and nothing is carried back to the
-                  weight from anywhere else in a network.
-                </p>
+                <p>Hebbian learning strengthens a connection according to activity at its input and output. In this linear unit, each weight change is the learning rate multiplied by the input value and the unit’s output. There is no supplied target answer. The update uses the activity available at that connection, which is why it is described as a local learning rule.</p>
                 <Equation>{"w ← w + rate · y · x"}</Equation>
                 <WorkedExample title="One step on the four height and weight measurements">
                   <>
                     <p>
+
                       Start with weights (1, 0) and learning rate 0.0025. Section 12
                       explains this choice of rate. The seeded walk presents person 4
-                      first, with centred measurements (−5, 5). Compute the response,
+                      first, with centered measurements (−5, 5). Compute the response,
                       the Hebbian update and the new weights in that order.
                     </p>
                     <Equation>{"response y = 1 × (−5) + 0 × 5 = −5\nupdate = 0.0025 × (−5) × (−5, 5) = (0.0625, −0.0625)\nnew weights = (1, 0) + (0.0625, −0.0625)\n            = (1.0625, −0.0625)"}</Equation>
@@ -121,28 +89,20 @@ export default function HebbianPcaPage() {
                     </p>
                   </>
                 </WorkedExample>
-                <p>
-                  Two things in that step deserve a look. The update lies along the
-                  person, scaled by how hard the unit fired, so a person the unit
-                  already agrees with pushes it further the way it already leans. And
-                  the weights got longer. They will get longer on every person, and
-                  section 4 measures how much.
-                </p>
+                <p>The update is proportional to the input vector and the unit’s current output. Its component along the current weights cannot reduce their squared norm when the learning rate is positive. A zero output produces no update, while individual weight coordinates can increase or decrease. Section 4 measures the resulting growth in this example.</p>
                 <KeepInMind>
-                  Hebb&rsquo;s rule strengthens a connection in proportion to the
-                  product of its two ends. It is local and needs no teacher, and
-                  nothing in it ever makes a weight smaller.
-                </KeepInMind>
+                  Each coordinate changes by the learning rate times its input activity and the unit’s output. That change can be positive or negative. The problem is that the plain rule has no term controlling the overall vector norm, which can keep growing.</KeepInMind>
               </SubSection>
 
-              <SubSection title="3. Centre first">
+              <SubSection title="3. Center first" id="3-centre-first">
                 <p>
+
                   The rule multiplies by the row, so whatever the row is measured
                   from is what the unit is pulled toward. Handed raw heights near 170
                   and raw weights near 68, every person is a long vector pointing
                   from the origin to roughly the same place, and the weights turn to
                   match that place rather than the shape of the cloud around it. The
-                  PCA page centred for the same reason, and the fit here centres
+                  PCA page centered for the same reason, and the fit here centers
                   itself, storing the two means so a new person can be read the same
                   way later.
                 </p>
@@ -155,10 +115,8 @@ export default function HebbianPcaPage() {
                   rows are deviations.
                 </p>
                 <KeepInMind>
-                  Centring is part of the method rather than a preliminary. A
-                  Hebbian unit on uncentred data learns where the cloud is, and the
-                  spread it was meant to find is lost under that.
-                </KeepInMind>
+
+                  Centering makes the averaged input products describe covariance around the mean. Without centering, they describe second moments around the origin, which also include the mean’s contribution. A large mean can then dominate the learned direction. The SDK stores the training means so later observations use the same reference.</KeepInMind>
               </SubSection>
 
               <SubSection title="4. What the plain rule does to the weights, measured">
@@ -181,22 +139,9 @@ export default function HebbianPcaPage() {
                     { label: "Oja, constant rate", rule: "oja", decay: false, start: "along_height" },
                   ]}
                 />
-                <p>
-                  The length is on a logarithmic axis because the plain rule&rsquo;s
-                  and the corrected rule&rsquo;s have to be on one picture. The
-                  direction the plain rule takes is worth knowing too, because it is
-                  the right one. At the constant rate the weights after twenty epochs
-                  point 0.0006 degrees from the eigen direction while being seven
-                  million long. The rule finds the direction and then runs along it
-                  forever, which is what my own notes on it call exploding along a
-                  direction rather than converging to one.
-                </p>
+                <p>At the constant rate, the plain weights point within 0.0006 degrees of the leading eigenvector after twenty epochs, but their norm has grown to about seven million. The orientation is useful in this run while the scale is not controlled. That is the problem Oja’s correction addresses.</p>
                 <KeepInMind>
-                  Every update from Hebb&rsquo;s rule has a part along the current
-                  weights of rate times the output squared, which cannot be negative,
-                  so the length only ever grows. The direction it grows along is the
-                  right one, and that is the clue to the repair.
-                </KeepInMind>
+                  For a positive rate, the squared-norm change from plain Hebbian learning is nonnegative. It is zero when the output is zero and otherwise permits growth. Under suitable data and initialization conditions, the orientation can approach a leading principal direction even as the norm grows. The correction needs to retain that useful directional behavior while controlling scale.</KeepInMind>
               </SubSection>
             </>
 </>),
@@ -206,14 +151,7 @@ export default function HebbianPcaPage() {
           content: (
             <>
               <SubSection title="5. Subtract what the unit already explains">
-                <p>
-                  The unit&rsquo;s output times its own weights is the unit&rsquo;s
-                  reconstruction of the person, the part of them it already accounts
-                  for. Oja&rsquo;s correction subtracts that from the person before
-                  the update is formed, so the rule moves the weights toward only the
-                  part of each person the unit does not yet explain. Nothing else
-                  changes. The rate, the output and the locality are all as they were.
-                </p>
+                <p>Oja’s correction subtracts the output multiplied by the current weight vector from the input used in the update. When the weights have unit length, that subtraction removes the input component already represented along their direction. The remaining component can turn the weights. The same correction also limits the growth seen under the plain Hebbian rule.</p>
                 <Equation>{"w ← w + rate · y · (x − y · w)"}</Equation>
                 <WorkedExample title="The same first step under the corrected rule">
                   <>
@@ -230,12 +168,7 @@ export default function HebbianPcaPage() {
                     </p>
                   </>
                 </WorkedExample>
-                <p>
-                  The subtraction has removed exactly the part of the update that
-                  lay along the weights themselves, which is the part that was doing
-                  the lengthening, and left the part across them, which is the part
-                  that turns. Section 6 makes that exact.
-                </p>
+                <p>At unit weight length, the correction removes the component of the Hebbian update parallel to the weights. Away from unit length, it also acts to restore that length. A finite update can still change the length, so section 6 examines the exact squared-length calculation rather than treating this as perfect normalization.</p>
                 <KeepInMind>
                   Oja&rsquo;s rule is Hebb&rsquo;s rule applied to the residual, the
                   person minus the unit&rsquo;s own reconstruction of them. It is
@@ -255,9 +188,7 @@ export default function HebbianPcaPage() {
 <p>
                   The first term is the subtraction at work. It is positive while the weights are shorter than one, negative while they are longer, and zero at length one exactly, so a vector that has grown is pulled back and one that has shrunk is pushed out, harder the further from one it is and harder the more strongly the unit fired.
                 </p>
-                <p>
-                  The second term is the square of the step and is always positive, which is why a single step can still leave the length a little over one. It is smaller by a factor of the rate, so it loses as the rate falls.
-                </p>
+                <p>The quadratic term is nonnegative, and is positive when both the output and residual are nonzero. For a fixed input and weight state it scales with the square of the rate. Reducing the rate makes that finite-step effect smaller, but the linear term can also vanish, including at unit length. The displayed identity is more informative than assuming exact normalization on every update.</p>
 </>
                 <InAModel title="The third step of the walk from (1, 0)">
                   <>
@@ -293,22 +224,12 @@ export default function HebbianPcaPage() {
                   ]}
                 />
                 <KeepInMind>
-                  The unit length is a result rather than a step. Oja&rsquo;s
-                  subtraction drives the squared length toward one from either side,
-                  and the fit never normalises the weights, because how close the
-                  length comes to one is the evidence that the rule worked.
-                </KeepInMind>
+
+                  Oja’s update does not divide by the norm. Its average dynamics can stabilize a nonzero solution near unit length under suitable learning conditions, while finite updates can still overshoot or fluctuate. Watch the measured length alongside direction and update size.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. Where the subtraction comes from">
-                <p>
-                  The blunt way to keep a weight vector at unit length is to take
-                  the Hebbian step and then divide by the new length. For a small
-                  rate the new length is close to one, and expanding the division to
-                  first order in the rate, the calculus primer&rsquo;s move of keeping
-                  the slope and dropping the curve, turns the division into a
-                  subtraction.
-                </p>
+                <p>We could instead take a Hebbian step and explicitly divide by its new length. Starting with unit weights and keeping only the first-order terms for a small learning rate gives the correction below. This connects Oja’s update with approximate normalization while explaining why a finite step can still leave a small length error.</p>
                 <DerivationTable
                   expressionHeading="step"
                   reasonHeading="why"
@@ -321,47 +242,23 @@ export default function HebbianPcaPage() {
                     { expression: "w′ ≈ w + rate · y · (x − y · w)", reason: "factor out rate times y; this is Oja’s rule" },
                   ]}
                 />
-                <p>
-                  So the subtracted term is the piece that normalising would have
-                  removed, applied before the length has a chance to drift. That is
-                  why the rule reads as Hebb&rsquo;s rule with a correction and why it
-                  keeps every property of Hebb&rsquo;s rule that mattered, above all
-                  that the weight joining input to output is changed using only the
-                  values at its two ends.
-                </p>
+                <p>The correction approximates what explicit normalization would remove while retaining a local update. Each connection uses its input activity, the unit’s output and its own weight. We do not need to calculate a target projection using a previously known principal direction.</p>
                 <KeepInMind>
+
                   Oja&rsquo;s rule is the first-order expansion of Hebb&rsquo;s rule
-                  followed by normalisation. The approximation is in the rate, so it
+                  followed by normalization. The approximation is in the rate, so it
                   is a better approximation the smaller the rate is, which is one of
                   the reasons the rate is made to fall.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="8. Where the unit comes to rest">
-                <p>
-                  Now ask where a unit obeying the corrected rule stops moving. Over
-                  many people the update averages, and the averages are quantities
-                  the PCA page built. The average of y times x is the average of
-                  (w · x) times x, which is the covariance matrix C applied to w, and
-                  the average of y squared is the variance along w, which that page
-                  wrote as wᵀCw.
-                </p>
+                <p>For fixed current weights and centered inputs, the expected input-output product is Cw, where C is the population-form covariance. The expected squared output is wᵀCw. That is the variance of the unit’s output; it equals variance along the direction only when the weights have unit length. These averages connect the local rule with PCA.</p>
                 <Equation>{"average update = rate · (C w − (wᵀ C w) · w)"}</Equation>
-                <p>
-                  The unit rests where the average update is zero, which says that
-                  C w is a multiple of w. A direction the matrix only stretches is the
-                  linear algebra primer&rsquo;s eigenvector, and the multiple, wᵀCw,
-                  is its eigenvalue, the variance along w. Every eigenvector is a
-                  resting point. Only the one with the largest eigenvalue is a stable
-                  one, and the argument is short enough to fold away.
-                </p>
+                <p>For a nonzero stationary solution with positive output variance, the average update requires a unit-length eigenvector of C. An eigenvector is a direction that multiplication by C only stretches. There are also unhelpful stationary cases, such as zero weights or a direction with zero variance. Stability of the positive-variance solutions favors the largest-eigenvalue eigenspace, as the local argument below shows.</p>
                 <WhyThisWorks title="Why only the largest direction is stable">
                   <>
-                    <p>
-                      Suppose the weights lie on eigenvector u, whose eigenvalue is λ.
-                      Add a small component in another eigenvector direction v, whose
-                      eigenvalue is μ.
-                    </p>
+                    <p>Start at a unit eigenvector u with eigenvalue λ, and add a small component in a perpendicular eigenvector v with eigenvalue μ. The first-order change in that component is:</p>
                     <Equation>{"perturbed weights: w = u + εv\nfirst-order change in the perturbation ≈ rate × (μ − λ) × εv"}</Equation>
                     <p>
                       If the other eigenvalue is larger, the perturbation grows. If it
@@ -373,19 +270,9 @@ export default function HebbianPcaPage() {
                   </>
                 </WhyThisWorks>
                 <Equation>{"C w = λ w,        λ = wᵀ C w"}</Equation>
-                <p>
-                  On the four height and weight measurements the covariance matrix is the PCA page&rsquo;s
-                  [62.5, 37.5; 37.5, 62.5], its eigenvectors run along (1, 1) and
-                  (1, −1), and the unit rests on the first. Nothing here built that
-                  matrix. The average of the updates is what the matrix would have
-                  said, and the unit reaches it one person at a time.
-                </p>
+                <p>For the four observations, the population-form covariance is [62.5, 37.5; 37.5, 62.5]. Its principal axes follow (1, 1) and (1, −1), and this run approaches the first. The sample-covariance convention used to report variances later multiplies this matrix by a common factor, changing its eigenvalues but not its directions. The iterative update itself does not construct either matrix.</p>
                 <KeepInMind>
-                  Averaged over the people, Oja&rsquo;s update is zero exactly on an
-                  eigenvector of the covariance matrix and stable only on the one with
-                  the largest eigenvalue. The unit finds the first principal component
-                  without ever assembling the matrix that defines it.
-                </KeepInMind>
+                  The expected update has unit eigenvectors as positive-variance stationary solutions, with stability favoring the leading eigenspace under the stated analysis. Reaching one in a finite stochastic run also depends on initialization and step sizes. The method can seek that direction without constructing the covariance matrix.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -396,7 +283,7 @@ export default function HebbianPcaPage() {
             trueFalse(
               "At a constant rate the plain Hebbian rule finds the eigen direction and then runs along it, seven million long after twenty epochs.",
               true,
-              "It finds the direction and then runs along it forever. At the constant rate the weights after twenty epochs point 0.0006 degrees from the eigen direction while being 7.8 million long, because every update has a part along the current weights of the rate times the output squared, and that cannot be negative. The direction it grows along being the right one is the clue to the repair, since only the lengthening has to be removed.",
+              "In this constant-rate experiment, plain Hebbian updates bring the direction close to the leading eigenvector while the weight length grows enormously. Its update has a nonnegative component along the current weights. That explains the observed growth, but it does not guarantee convergence to the leading direction for every initialization, dataset or rate. Oja’s correction addresses the length growth.",
             ),
             choice(
               "What does Oja’s subtraction take out of the update?",
@@ -404,13 +291,13 @@ export default function HebbianPcaPage() {
                 "The part lying along the weights themselves, which was doing the lengthening, leaving the part across them, which turns",
                 "The part across the weights, which was making the direction wander",
                 "The dependence of the rate on the scale the people are measured in",
-                "The need to centre the rows before reading them",
+                "The need to center the rows before reading them",
               ],
               0,
-              "The unit’s output times its own weights is the part of the person the unit already explains, and subtracting it removes exactly the part of the update that lay along the weights, which was the part doing the lengthening. The part across them, which turns, is left as it was. On the first step from (1, 0) the plain rule left a length of about 1.064 and the corrected rule about 1.002, with the direction changing by a similar amount under both.",
+              "At unit weight length, Oja’s subtraction removes the radial component of the plain Hebbian update to first order in the learning rate. The remaining first-order change turns the direction. A finite step can still change the length, and away from unit length the correction also acts to restore that length. The displayed one-step comparison separates these effects.",
             ),
             choice(
-              "Does the rule normalise the weights?",
+              "Does the rule normalize the weights?",
               [
                 "No, nothing ever divides by the norm, and the length arriving at one is the evidence the rule worked",
                 "Yes, every step divides by the new length",
@@ -443,7 +330,7 @@ export default function HebbianPcaPage() {
                 "Only where every person’s residual is zero",
               ],
               0,
-              "The average of the output times the person is the covariance matrix applied to the weights, and the average of the output squared is the variance along them, so resting says the matrix only stretches that direction. Every eigenvector is a resting point, and a perturbation toward another one grows whenever its eigenvalue is larger, which leaves the largest as the only stable one.",
+              "For centered data, the average rule uses the covariance matrix. A unit eigenvector makes that average update zero because the matrix stretches it without turning it. When the leading eigenvalue is distinct, its direction is the stable leading-component target under the usual small-step analysis. Tied leading eigenvalues instead permit a whole subspace of equivalent directions.",
             ),
         ],
         },
@@ -492,28 +379,12 @@ export default function HebbianPcaPage() {
 <p>
                   The first step in that table went the wrong way. Person 4 turned the weights from 45 degrees off the answer to 48.6 degrees off, and it was the next two people who turned them back. That is not a mistake in the rule. A single person pulls the weights toward their own axis, whichever sign they lie on, and person 4 lies on the second eigen direction, so they pull toward it.
                 </p>
-                <p>
-                  What decides the outcome is how hard each person pulls, which is the output times the part of the person that lies across the weights.
-                </p>
+                <p>An observation’s influence depends on the current output and on the part of the observation that lies across the weight direction. Different observations can therefore turn the weights different ways. The principal direction emerges from their accumulated effects, rather than from every individual step pointing toward it.</p>
 </>
                 <Equation>{"turn from one person  =  rate · y · (the part of x across w)"}</Equation>
-                <p>
-                  Both factors grow with the person&rsquo;s distance from the mean,
-                  so the pull grows with its square. On the four height and weight measurements the two
-                  people on the first axis are ten root two from the mean and the
-                  two on the second are five root two, so the first axis pulls four
-                  times as hard per person, and over an epoch the weights turn
-                  toward it. That is the covariance matrix acting in
-                  instalments. Every person&rsquo;s pull is one term of the average
-                  section 8 wrote down, and the average is what wins.
-                </p>
+                <p>At a fixed weight state, scaling an observation by a factor scales this update by the factor’s square. In the four-observation example, the first-axis observations have lengths ten root two and the second-axis observations five root two. Their covariance contributions therefore differ by a factor of four. The actual turn from any presentation also depends on the current orientation and output; it is not always four times the turn from another observation.</p>
                 <KeepInMind>
-                  A single step can move the weights away from the answer, and it
-                  will whenever the person presented lies closer to another
-                  direction. Convergence is a property of the average update over
-                  many people, and the rate is what makes any one person unable to
-                  undo the rest.
-                </KeepInMind>
+                  Individual observations can turn the weights away from the leading direction, or produce no turn at all. The expected update explains the longer-run preference under suitable sampling. Step sizes control how strongly individual updates affect that trajectory; they do not guarantee that each observation respects the final direction.</KeepInMind>
               </SubSection>
 
               <SubSection title="11. Shuffling the order, and the seed">
@@ -535,11 +406,7 @@ export default function HebbianPcaPage() {
                 </p>
                 <SweepTable people="four" section="seeds" />
                 <KeepInMind>
-                  The seed fixes where the walk starts and the order it reads the
-                  people in. On a cloud with a clear first direction it changes the
-                  path and the sign and not the answer, and section 26 shows the
-                  cloud on which it changes the answer too.
-                </KeepInMind>
+                  The seed determines initialization and shuffled presentation order under a fixed setup. All tested seeds approach the same leading axis in the four-observation case, up to sign. A finite budget can produce more variation, and tied eigenvalues can make the preferred axis nonunique, as section 26 shows.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -549,30 +416,15 @@ export default function HebbianPcaPage() {
           content: (
             <>
               <SubSection title="12. The rate carries the square of the data’s units">
-                <p>
-                  The update multiplies the rate by the output and by the person, and
-                  the output is itself the person times the weights, so the update
-                  carries the square of whatever unit the people are measured in.
-                  A rate that behaves on data spread about one is a hundred times too
-                  large on data spread about ten, and the default rate of 0.05,
-                  which suits data spread about one, overflows on the four height and weight measurements in centimetres on the third epoch. So the endpoint
-                  sets the rate from the cloud rather than fixing it.
-                </p>
+                <p>If every input coordinate is multiplied by ten, the Oja update at fixed weights grows by a factor of one hundred. Dividing the rate by that factor restores the same update. For this dataset, the default 0.05 overflows in the third epoch, so the endpoint chooses a starting rate from the maximum centered input norm instead. Rescaling only one feature also changes the covariance geometry, rather than only the rate scale.</p>
                 <Equation>{"starting rate = 0.5 / (longest deviation)²        = 0.5 / 200 = 0.0025 on the four height and weight measurements"}</Equation>
                 <>
-<p>
-                  The half comes from section 6. The subtraction moves the squared length toward one by twice the rate times the output squared, and the output squared is at most the squared length of the longest person, so at a half the largest single kick lands on length one rather than carrying past it. Scaling every rate alike moves no direction and no share, which is what lets the eigensolver be run on the raw people and still be the right comparison.
-                </p>
-                <p>
-                  Write the heights in millimetres and the starting rate becomes 0.0000495, the first direction still lands within a hundredth of a degree, and nothing else about the answer moves.
-                </p>
+<p>The factor 0.5 is the endpoint’s chosen damping constant. Dividing by the largest squared centered-input norm controls the initial update scale, but is not a global bound guaranteeing that every new norm stays at or below one. Section 6 already shows a finite step that overshoots. Changing a common positive rate does not change the averaged stationary equations, although it changes the finite trajectory and stability.</p>
+                <p>Converting height alone to millimeters gives a starting rate of 0.0000495. The learned first direction remains within a hundredth of a degree of the eigensolver’s direction for those rescaled data. That reference is recomputed in the new units; the principal direction in the original coordinate geometry need not remain unchanged.</p>
 </>
                 <KeepInMind>
-                  The rate is not a scale-free number. It has to be set from the
-                  data&rsquo;s own spread, or the data standardised first, and a rate
-                  copied from another dataset is the commonest way for this method to
-                  overflow.
-                </KeepInMind>
+
+                  Choose the rate with the input scale in mind and test whether the weights stay finite. Standardizing features is one option when comparable scaled features suit the analysis. A rate copied from another dataset may be unstable, but standardizing also changes which variation PCA emphasizes.</KeepInMind>
               </SubSection>
 
               <SubSection title="13. Too large a rate, measured">
@@ -608,11 +460,7 @@ export default function HebbianPcaPage() {
 </>
                 <SweepTable people="four" section="rates" />
                 <KeepInMind>
-                  Below the line a larger rate settles sooner. Above it the length
-                  bounces and then overflows, and the fit refuses rather than
-                  answering with a non-finite direction. The line is a fact about
-                  the data&rsquo;s spread, which is why the rate is set from it.
-                </KeepInMind>
+                  The tested larger rates reach different outcomes: faster settling for one setting, sustained oscillation for another, and overflow at still larger values. A stable range depends on the input scale, initialization and schedule. Increasing the rate within a valid numerical range is not guaranteed to improve convergence.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. How many presentations it takes">
@@ -645,12 +493,8 @@ export default function HebbianPcaPage() {
 
               <SubSection title="15. Whether the rate has to fall">
                 <>
-<p>
-                  The textbook argument, from Robbins and Monro, is that a constant rate can never settle. Each person moves the weights by a fixed amount, so the weights keep chasing whichever person arrived last, and the fit becomes a fact about presentation order. I measured it, and on the four height and weight measurements the claim does not hold.
-                </p>
-                <p>
-                  Every one of those four lies exactly on an eigen direction, so at the answer the bracket is exactly zero for each of them, and a constant rate settles at epoch 46 where the falling one takes 91, and lands on the diagonal just as exactly.
-                </p>
+<p>A constant learning rate generally leaves continuing fluctuations when individual observations still produce nonzero updates at the average solution. That is why decreasing rates matter in stochastic approximation. The four height-and-weight observations form a special case: a constant rate can settle here because of their exact arrangement. The next calculation explains that exception.</p>
+                <p>Each of these four observations lies on a principal axis. At the unit leading direction, observations parallel to it have a zero residual bracket; orthogonal observations have zero output. The complete update is therefore zero for every observation, even though the bracket is not always zero. This special structure lets the constant-rate run settle at epoch 46, compared with 91 for the falling schedule.</p>
 </>
                 <p>
                   On the crowd the claim holds. Nobody there lies on an axis, so at
@@ -671,11 +515,7 @@ export default function HebbianPcaPage() {
                   ]}
                 />
                 <KeepInMind>
-                  A falling rate is what lets the average win over the last person
-                  presented. It is needed exactly when the people do not lie on the
-                  answer, which is every real cloud, and the four height and weight measurements are the
-                  exception that shows what the condition is for.
-                </KeepInMind>
+                  When individual observations keep producing nonzero updates at the averaged solution, a constant rate can sustain fluctuations. A decreasing schedule can reduce them, provided it still allows enough learning. The four-observation example has individually vanishing updates at its solution, so it behaves differently from the shown crowd.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -691,13 +531,13 @@ export default function HebbianPcaPage() {
             choice(
               "Why is the rate set from the cloud rather than fixed at a default?",
               [
-                "The update carries the square of whatever unit the people are measured in, so a default of 0.05 overflows on the four height and weight measurements in centimetres",
+                "The update carries the square of whatever unit the people are measured in, so a default of 0.05 overflows on the four height and weight measurements in centimeters",
                 "A smaller cloud needs more epochs, and the rate stands in for the epoch count",
                 "The rate has to be matched to the number of units",
-                "Centring changes the scale of the rows, so the rate has to follow it",
+                "Centering changes the scale of the rows, so the rate has to follow it",
               ],
               0,
-              "The starting rate is a half over the squared longest deviation, which is 0.0025 here, and the half is there because the subtraction moves the squared length toward one by twice the rate times the output squared, so the largest single kick lands on length one rather than carrying past it. In millimetres the rate becomes 0.0000495 and the direction still lands within a hundredth of a degree.",
+              "The update size depends on the scale of the centered observations. Using the largest squared deviation to set the starting rate makes that choice respond to the dataset’s scale. The factor one half controls a first-order length correction; it is not a guarantee that a finite update cannot overshoot. Check weight lengths, directional agreement and convergence after fitting.",
             ),
             several(
               "Raising the rate on the four height and weight measurements, which of these were measured?",
@@ -734,7 +574,7 @@ export default function HebbianPcaPage() {
                 "Because the rate falls, and the order has to fall with it",
               ],
               0,
-              "The same seeded generator draws the starting weights and the order, which is what makes a fit reproducible and why the numbers in the prose are the numbers on the screen. On the four height and weight measurements five seeds all land within a ten thousandth of a degree of the diagonal, in between fourteen and twenty-two epochs, differing only in sign.",
+              "A fixed observation order can create a repeating sequence of directional pulls. Reshuffling reduces dependence on that particular ordering while still visiting every observation in an epoch. A seeded generator makes the starting weights and subsequent permutations reproducible. Reproducibility describes one run; comparing seeds checks how sensitive its outcome is to those choices.",
             ),
         ],
         },
@@ -762,26 +602,17 @@ export default function HebbianPcaPage() {
                   ]}
                 />
                 <KeepInMind>
-                  The two units are independent, and that is the difficulty.
-                  Nothing in Oja&rsquo;s rule tells a unit what the other units have
-                  already found, so every unit finds
-                  the direction of greatest spread and no other.
-                </KeepInMind>
+                  Independent Oja units optimize the same leading-variance problem without accounting for what other units represent. They can therefore approach the same axis instead of providing distinct components. Tied leading eigenvalues or incomplete learning can produce other outcomes; an explicit multi-component rule is needed to encourage separation.</KeepInMind>
               </SubSection>
 
               <SubSection title="17. Sanger’s rule">
-                <p>
-                  Sanger&rsquo;s extension hands the second unit the person with the
-                  first unit&rsquo;s reconstruction removed, so the second unit can
-                  only lean on what the first left unexplained. The bracket for unit
-                  i subtracts the reconstructions of every earlier unit and of unit i
-                  itself, and the last of those is Oja&rsquo;s own normalisation.
-                </p>
+                <p>To learn another direction, Sanger’s rule subtracts the reconstructions from the earlier units before updating the next one. It also subtracts the current unit’s own reconstruction, retaining Oja’s growth control. Later units are therefore directed toward variation that the earlier units have not already represented.</p>
                 <Equation>{"w₂ ← w₂ + rate · y₂ · (x − y₁ · w₁ − y₂ · w₂)"}</Equation>
                 <p>
+
                   The sum running up to and including the unit&rsquo;s own term is
                   the whole of it. Drop that term and the second unit loses its
-                  normalisation; drop the earlier terms and it loses its reason to
+                  normalization; drop the earlier terms and it loses its reason to
                   differ from the first. The part of the second unit along the first
                   direction is driven toward zero, which is what perpendicular
                   means, and its own subtraction keeps its length near one. On the four height and weight measurements the two units are 83 degrees apart after one epoch,
@@ -789,11 +620,7 @@ export default function HebbianPcaPage() {
                 </p>
                 <HebbianStepper people="four" rule="sanger" nComponents={2} maxEpochs={3} />
                 <KeepInMind>
-                  Deflation is subtraction. Each unit reads the person minus what
-                  every earlier unit explains, so the units find the components in
-                  order of variance, and the rule stays local because a
-                  reconstruction needs only outputs and weights.
-                </KeepInMind>
+                  Deflation subtracts contributions already represented by earlier units. Under suitable convergence conditions, Sanger’s rule can recover principal directions in variance order. Later-unit updates need earlier units’ outputs and weights as well as their own activity, so this is a broader dependency than an isolated connection’s own two endpoints.</KeepInMind>
               </SubSection>
 
               <SubSection title="18. The second direction learns at a pace set by its variance">
@@ -806,30 +633,16 @@ export default function HebbianPcaPage() {
                 </p>
 </>
                 <SweepTable people="crowd" section="epochs" />
-                <p>
-                  What starves the second unit is the falling rate, and I measured
-                  that too. Hold the rate constant on the crowd and the second
-                  direction reaches 0.07 degrees at a length of 1.003, while the
-                  first wobbles as section 15 showed; run the falling rate at four
-                  times its size and the second reaches 0.14 degrees at 0.995. The
-                  length is the diagnostic for all of this. A slow unit comes back
-                  with a length well under one, and that is how the readout reports
-                  it.
-                </p>
+                <p>The falling learning rate leaves the second unit with updates too small to approach its direction closely. Holding the rate constant brings that unit to 0.07 degrees of the reference direction with length 1.003, while the first direction fluctuates as section 15 shows. Multiplying the falling schedule by four instead reaches 0.14 degrees with length 0.995.</p>
+                <p>The reported vector length helps diagnose incomplete convergence. A second unit whose length remains well below one has not reached the same state as a nearly unit-length solution, even when both have a readable direction.</p>
                 <SweepTable people="crowd" section="constant" />
                 <KeepInMind>
-                  An eigensolver hands over every direction at once. The local rule
-                  pays for each in proportion to how little there is to find, and a
-                  second direction that is left short is a fit that stopped early
-                  rather than a rule that failed.
-                </KeepInMind>
+                  Small-variance directions can require more effective updates than a leading direction. In these examples, a short learned vector and a directional error show that the finite schedule has not reached the desired component. Extra epochs or a different rate can help, but a component with no positive variance is a separate case discussed later.</KeepInMind>
               </SubSection>
 
               <SubSection title="19. Orthogonality and the shares are measurements">
                 <>
-<p>
-                  An eigensolver&rsquo;s directions are perpendicular to the last bit and its variances add to the total exactly. The rule&rsquo;s are neither, and the fit reports rather than pretends. The worst orthogonality is the largest dot product between two learned unit directions, 0.000043 on the four height and weight measurements after the full walk and 0.14 on the crowd, where the second direction was left short.
-                </p>
+<p>An eigensolver produces orthonormal directions to numerical tolerance. For a complete basis, their projected variances sum to the total variance up to numerical error. Finite iterative directions need not yet be orthogonal. The worst absolute dot product between normalized learned directions is 0.000043 in the four-observation run and 0.14 in the crowd run, where the second component remains incomplete.</p>
                 <p>
                   The variances along the two learned directions add to 166.66666685 against a total of 166.66666667, a little over. After one epoch, with the directions 0.12 from perpendicular, they add to 176.3. These are measurements of this fit. Non-orthogonal directions can overcount some parts of the spread and miss others, so their sum can fall above or below the total. In two dimensions, two perpendicular unit directions form a complete basis and their variances add to the total.
                 </p>
@@ -860,11 +673,7 @@ export default function HebbianPcaPage() {
                 </p>
 </>
                 <KeepInMind>
-                  Where the walk settles, it settles on the eigensolver&rsquo;s
-                  direction to within millionths of a degree. Where a walk is left
-                  short, the length reads well under one while the angle can still
-                  be several degrees off.
-                </KeepInMind>
+                  The well-converged four-observation run agrees extremely closely with its eigenvector reference. The crowd’s incomplete second component has length below one and an angle several degrees away. A stopping flag alone is not a general guarantee of millionth-degree agreement; inspect both diagnostics and any eigenvalue ties.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. The variance recovered">
@@ -886,16 +695,7 @@ export default function HebbianPcaPage() {
               </SubSection>
 
               <SubSection title="22. The scores agree">
-                <p>
-                  A fitted rule transforms people the way a fitted PCA does, by
-                  centring with the stored means and projecting onto the unit
-                  directions, and it names the output columns as the PCA page does so
-                  one can be swapped for the other downstream. On the four height and weight measurements
-                  person 1 scores 14.1421 on the first direction by both routes and
-                  person 3 scores 7.0711 on the second by both, with the cross terms
-                  at six ten-thousandths and six quadrillionths where the eigensolver
-                  has exact zeros.
-                </p>
+                <p>The fitted transform centers inputs with the stored means and projects onto normalized learned directions. Its output format resembles PCA, but the columns may differ in sign or alignment. For the four observations, person 1 has first-component score 14.1421 by both routes. Person 3 has second-component magnitude 7.0711, with opposite signs in the table. Cross-component terms are small rather than exact zeros. Align signs and components before comparing coordinates or replacing a representation used by another fitted model.</p>
                 <NumberTable
                   headings={["person", "first, by the rule", "first, eigen", "second, by the rule", "second, eigen"]}
                   rows={[
@@ -914,39 +714,16 @@ export default function HebbianPcaPage() {
                   on a person thirteen units from the mean.
                 </p>
                 <KeepInMind>
-                  Where the directions agree the coordinates agree, and where a
-                  direction was left short every coordinate along it is off by the
-                  same angle. There is no inverse transform here, since rebuilding a
-                  person by a transpose needs exactly orthonormal directions and
-                  these are only nearly so.
-                </KeepInMind>
+                  Aligned matching directions give matching projection coordinates. An angular error changes each observation’s score according to its position; the error is not one common angle added to every coordinate. This SDK does not offer an inverse transform. A transpose gives the usual orthogonal reconstruction only for orthonormal directions; other reconstruction rules could be defined but are not implemented here.</KeepInMind>
               </SubSection>
 
               <SubSection title="23. What the local route buys, and what it costs">
-                <p>
-                  Two things, and they are narrow. The covariance matrix of p
-                  features holds p squared numbers; k units hold k times p weights,
-                  so at ten thousand features and ten directions the matrix is a
-                  thousand times the size of the weights, and the rule never builds
-                  it. And the update reads one person and forgets them, so a fit can
-                  be driven by people arriving over time from a source too large to
-                  hold, tracking a cloud that drifts underneath it.
-                </p>
-                <p>
-                  Against that, it is slow, and for anything that fits in memory the
-                  eigensolver wins outright. On the crowd, two hundred epochs of two
-                  units is 2,200 presentations through a Python loop, and I measured
-                  the fit at 28 milliseconds against 0.38 for the eigensolver, a
-                  ratio of 76. It is also less exact, by the residual a finite walk
-                  leaves, which on the four height and weight measurements is millionths of a degree and on
-                  the crowd&rsquo;s second direction is eight degrees.
-                </p>
+                <p>For p features and k learned directions, the iterative weights use k times p entries rather than a p-by-p covariance matrix. At ten thousand features and ten directions, that matrix has a thousand times as many entries as the weights. The local rule itself can process successive centered observations.</p>
+<p>The current SDK fit is still an in-memory procedure: it builds the feature set, computes training means and replays centered rows. A streaming application would also need a centering convention and persistent update state. Avoid assuming this fit already exposes incremental training on an unbounded source.</p>
+                <p>For this in-memory example, the eigensolver is much faster. The recorded iterative fit takes 28 milliseconds, compared with 0.38 for the eigensolver, a reported ratio of about 76. Its two hundred epochs over the eleven observations expose each unit to 2,200 observation updates through the Python loop.</p>
+                <p>Finite iteration also leaves a directional error. That error is millionths of a degree for the four-person example but about eight degrees for the second direction of the larger group. The update method’s ability to process observations incrementally is useful, but these measurements give no speed or accuracy advantage when the full matrix fits in memory.</p>
                 <KeepInMind>
-                  The local rule earns its place by not needing the matrix and by not
-                  needing the whole dataset at once. On a cloud small enough to draw,
-                  both advantages are worth nothing and the eigensolver is faster by
-                  a factor of tens.
-                </KeepInMind>
+                  The update rule avoids building a feature covariance matrix and provides an incremental calculation. Those are useful properties at larger feature counts or with an appropriate streaming implementation. In this small in-memory benchmark, the eigensolver is much faster and gives the reference directions directly.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -965,22 +742,14 @@ export default function HebbianPcaPage() {
                   endpoint passes the refusal through as it stands.
                 </p>
                 <Equation>{"DivergenceError: the weights overflowed on epoch 4; the learning rate is too large\nfor this data’s scale, so lower it or standardize the features first"}</Equation>
-                <p>
-                  That is the four height and weight measurements at four times the endpoint&rsquo;s
-                  rate. The repairs are the two the message names, a smaller rate or
-                  features standardised first, and the second is the honest one for
-                  columns measured in different things, exactly as it is for the PCA
-                  page&rsquo;s standardised variant, with the difference that there
-                  it changes which matrix is decomposed and here it also decides
-                  whether the walk survives.
-                </p>
+                <p>For the four observations, that failure occurs at four times the endpoint’s selected rate. Reducing the rate can preserve the current coordinate geometry. Standardizing the features is another option when equalized scales suit the analysis, but it changes the PCA problem as well as the numerical step scale. Choose based on what variation should count.</p>
                 <KeepInMind>
                   A diverged walk is refused by name. Nothing about the answer is
                   reported from a fit whose weights stopped being finite.
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. Uncentred data learns where the cloud is">
+              <SubSection title="25. Uncentered data learns where the cloud is" id="25-uncentred-data-learns-where-the-cloud-is">
                 <>
 <p>
                   Run the rule on the raw positions rather than the deviations and it still settles at length one, on a direction that is wrong. On the four height and weight measurements the weights come to rest 0.08 degrees from the line joining the origin to the mean at (170, 68) and 23.1 degrees from the eigen direction, which is the angle between those two lines.
@@ -991,18 +760,17 @@ export default function HebbianPcaPage() {
 </>
                 <HebbianStepper people="four" rule="sanger" nComponents={1} maxEpochs={20} centre={false} />
                 <p>
+
                   The average update on raw rows is the second-moment matrix rather
                   than the covariance matrix, and its leading eigenvector is
                   dominated by where the mean is when the mean is far from the
-                  origin, as it is for heights in centimetres. The unit did what the
+                  origin, as it is for heights in centimeters. The unit did what the
                   rule says on the rows it was given, and those rows carried the
                   origin&rsquo;s position as well as the people&rsquo;s shape.
                 </p>
                 <KeepInMind>
-                  Without centring the rule finds the direction of the mean, which is
-                  a fact about the units and the origin rather than about the people.
-                  The fit centres itself and stores the means for that reason.
-                </KeepInMind>
+
+                  Without centering, the expected rule uses the second-moment matrix. In these height-and-weight examples its leading direction lies close to the line toward the mean. That is not a universal identity with the mean direction. The fitted centered method stores means so later inputs use the same reference.</KeepInMind>
               </SubSection>
 
               <SubSection title="26. Equal eigenvalues, where no direction is the answer">
@@ -1010,31 +778,15 @@ export default function HebbianPcaPage() {
 <p>
                   Put eight people evenly round a circle about the mean and the two eigenvalues tie, at half the variance each. The eigensolver still answers, with the height axis and the weight axis, and that answer is an arbitrary choice, since every direction through a circle carries the same spread. The rule answers too. It settles at length 1.0005 on a direction 80 degrees from the eigensolver&rsquo;s, with a share of exactly a half, and five seeds send it 21, 9, 57 and 39 degrees from where the page&rsquo;s own seed sent it.
                 </p>
-                <p>
-                  None of those is wrong, and the walk never stops itself, because a flat objective gives it no reason to.
-                </p>
+                <p>Equal leading eigenvalues leave a whole set of equally good principal directions. A different learned angle within that set is not automatically an error. The implementation uses its pass budget rather than an angle comparison to a uniquely defined direction that does not exist in this case.</p>
 </>
                 <SeedDirections left="four" right="circle" />
                 <KeepInMind>
-                  A tie between eigenvalues means the components inside the tied
-                  plane are not determined, by either route. The rule reports a
-                  direction and a length of one as if it had found something, and
-                  only the shares and the disagreement between seeds say that it
-                  could not have.
-                </KeepInMind>
+                  Tied eigenvalues leave individual axes within the tied eigenspace unidentified. A learned axis can still be a valid principal direction and capture the correct variance share. Compare the represented subspace and shares instead of treating disagreement with an eigensolver’s arbitrary basis as a failure.</KeepInMind>
               </SubSection>
 
               <SubSection title="27. A direction with no variance cannot be found">
-                <p>
-                  Hold height constant and let weight vary and the first direction
-                  is pure weight, (0, 1) to the last bit, in agreement with the
-                  eigensolver. The second unit is then handed a residual of zero on
-                  every person, since the first explains everything, and its only
-                  remaining term is its own subtraction, so it can only shrink. After
-                  two hundred epochs it is 0.24 long and 22 degrees from the axis the
-                  eigensolver assigns a variance of zero, and the length is again the
-                  report that nothing was found there.
-                </p>
+                <p>With constant height and varying body weight, the first principal direction is along body weight, (0, 1), matching the reference. No remaining positive variance identifies a second informative component. In the shown run, the second vector ends with length 0.24 and lies 22 degrees from the height axis used by the eigensolver for its zero eigenvalue. That residual direction describes the finite update state, rather than recovered variation in the data.</p>
                 <KeepInMind>
                   A unit is pushed by its output, and a direction with no spread
                   gives no output. The fit accepts the data and the second unit decays
@@ -1048,7 +800,7 @@ export default function HebbianPcaPage() {
           title: "Questions on Parts 5 to 7",
           quiz: [
             choice(
-              "Two independent Oja units see the same centred data, which has a unique largest-variance direction. There is no term making them avoid one another. What should we expect if both converge to the leading direction?",
+              "Two independent Oja units see the same centered data, which has a unique largest-variance direction. There is no term making them avoid one another. What should we expect if both converge to the leading direction?",
               [
                 "They find the same direction, possibly with opposite signs, because neither accounts for what the other has found",
                 "They settle perpendicular to one another",
@@ -1056,12 +808,12 @@ export default function HebbianPcaPage() {
                 "They split the largest eigenvalue between them"
               ],
               0,
-              "Each unit independently maximises variance along one direction. With a unique leading direction they have the same target. Sanger’s extension subtracts what earlier units already represent, giving a later unit a reason to learn a different component.",
+              "Each unit independently maximizes variance along one direction. With a unique leading direction they have the same target. Sanger’s extension subtracts what earlier units already represent, giving a later unit a reason to learn a different component.",
             ),
             trueFalse(
               "Two learned directions that overlap slightly count the overlap twice, so their variances can add to a little more than the total.",
               true,
-              "On the four height and weight measurements they come to 166.66666685 against a total of 166.66666667, and after one epoch, with a dot product of 0.12 between the two directions where perpendicular would be zero, they come to 176.3. A share above one is a report on the fit rather than an error in it, which is why the rule’s answer lives in its own vocabulary instead of the one that refuses a pair of directions a hundred-millionth from perpendicular.",
+              "Adding projected variances represents a nonoverlapping decomposition only when the directions are orthonormal. If learned directions overlap, the sum can exceed the total variance because some variation is included more than once. The reported excess therefore warns that the iterative directions are not yet an exact PCA basis. Check their inner products before interpreting normalized shares as an additive variance breakdown.",
             ),
             several(
               "On the four height and weight measurements after the full walk, which of these does the page report?",
@@ -1087,10 +839,10 @@ export default function HebbianPcaPage() {
                 "A direction whose length stays well under one, which reports the failure",
               ],
               0,
-              "The average update on raw rows is the second-moment matrix rather than the covariance matrix, and its leading eigenvector is dominated by where the mean is when the mean is far from the origin. It still settles at length one, so nothing about the length announces that the answer is a fact about the units and the origin rather than about the people.",
+              "Without centering, the average rule follows the second-moment matrix, which includes the mean’s contribution as well as variation around it. When the mean is far from the origin, that contribution can dominate the leading direction. A weight length near one does not verify that centering was done. Use the stored training mean when the goal is principal variation around that mean.",
             ),
             several(
-              "Eight observations are evenly spaced around a circle centred at the origin. Both covariance eigenvalues are equal. Which statements follow?",
+              "Eight observations are evenly spaced around a circle centered at the origin. Both covariance eigenvalues are equal. Which statements follow?",
               [
                 "Every unit direction in the plane captures half the total variance",
                 "Separate fits can return different directions without disagreeing about the captured variance",
@@ -1098,7 +850,7 @@ export default function HebbianPcaPage() {
                 "An eigensolver may return the coordinate axes, but those axes are one valid choice among many"
               ],
               [0,1,3],
-              "The circle has the same spread along every direction through its centre. A complete perpendicular pair can therefore be rotated without changing the explained variances. An iterative rule’s stopping behaviour also depends on its update order, rate and stopping test; equal eigenvalues alone do not determine whether it stops.",
+              "The circle has the same spread along every direction through its center. A complete perpendicular pair can therefore be rotated without changing the explained variances. An iterative rule’s stopping behavior also depends on its update order, rate and stopping test; equal eigenvalues alone do not determine whether it stops.",
             ),
         ],
         },
@@ -1108,38 +860,29 @@ export default function HebbianPcaPage() {
             <>
               <SubSection title="28. What a Hebbian fit must specify and refuse">
                 <p>To replay the learning process, save the training means, requested direction count, initial-weight draw and shuffle order. Record the learning-rate schedule and the count against which it decays, along with the epoch cap and movement tolerance used to stop.</p>
-                <p>The learned weights are not normalised during training. Variance is instead measured along each unit direction, so distinguish the direction from the length of its learned weight vector. Check which properties the fit enforces and which it merely reports: length, orthogonality and ordering are separate questions. This learner provides no inverse transform.</p>
+                <p>The learned weights are not normalized during training. Variance is instead measured along each unit direction, so distinguish the direction from the length of its learned weight vector. Check which properties the fit enforces and which it merely reports: length, orthogonality and ordering are separate questions. This learner provides no inverse transform.</p>
                 <DerivationTable
                   expressionHeading="Observations or learning setting"
                   reasonHeading="Effect on the learned directions"
                   rows={[
                     { expression: "no features, or a non-finite value", reason: "refused at the boundary every feature passes through; the endpoint refuses a non-finite coordinate before any fit begins." },
                     { expression: "one person", reason: "refused by name, since one row has no spread to find a direction in; the endpoint refuses fewer than two a layer earlier." },
-                    { expression: "two people", reason: "accepted; the first direction is the line through them and the second eigenvalue is zero." },
+                    { expression: "two people", reason: "accepted for two distinct observations; their centered variation lies along one line and the second eigenvalue is zero." },
                     { expression: "every person on one spot", reason: "refused by name, since every share would divide by zero; the endpoint's eigensolver refuses the same cloud first." },
                     { expression: "one feature", reason: "accepted, with one direction carrying a share of one." },
                     { expression: "a constant column beside a varying one", reason: "accepted; the first direction is the varying column exactly and the second unit shrinks to 0.24 rather than pointing anywhere." },
                     { expression: "more directions asked for than features", reason: "refused at the fit, since a direction beyond the last has nothing left to see." },
-                    { expression: "a rate too large for the data's scale", reason: "refused on the epoch a weight overflows, naming the epoch; four times the endpoint's rate on the four, and the default rate of 0.05 on centimetres." },
-                    { expression: "a rate that never falls", reason: "accepted as a legitimate configuration; measured to settle on the four and to wobble forever on the crowd." },
+                    { expression: "a rate too large for the data's scale", reason: "refused on the epoch a weight overflows, naming the epoch; four times the endpoint's rate on the four, and the default rate of 0.05 on centimeters." },
+                    { expression: "a rate that never falls", reason: "accepted; the four-observation run settles, while the displayed crowd run continues fluctuating throughout its two-hundred-epoch budget." },
                     { expression: "reading directions or transforming before fitting", reason: "refused by name, as not fitted rather than as an attribute error." },
                     { expression: "new people with reordered columns", reason: "matched by name and accepted; a column missing or unknown is refused." },
                     { expression: "directions not perpendicular, not unit length, or not in order of variance", reason: "accepted and reported, as the worst orthogonality, the lengths and an ordering flag, since refusing them would refuse a correct fit stopped early." },
-                    { expression: "a learned vector of length under a trillionth", reason: "refused, since a vector that short names no direction." },
+                    { expression: "a learned vector of length under a trillionth", reason: "refused by the implementation’s numerical cutoff. A nonzero vector has a mathematical direction, but normalizing a tiny learned vector can be an unreliable representation of this fit." },
                     { expression: "two eigenvalues tied", reason: "accepted; the directions inside the tie are arbitrary by both routes, and different seeds return different ones." },
-                    { expression: "inverse transform, or saving the fit", reason: "neither is offered, and both are documented rather than defended; the first needs directions more orthonormal than these are." },
+                    { expression: "inverse transform, or saving the fit", reason: "neither is offered by this API. The usual transpose-based PCA reconstruction assumes orthonormal directions; a more general reconstruction or serialization interface would need its own implementation." },
                   ]}
                 />
-                <p>
-                  Every row of that table was probed, on this page&rsquo;s own people
-                  where an endpoint reaches the case and against the model directly
-                  where none does. The two that deserve the most care are the
-                  refusals that are not refusals. A constant rate is accepted because
-                  a walk that never settles is worth being able to demonstrate, and a
-                  second direction left short is accepted because the length reports
-                  it, and refusing it would turn every under-converged fit into an
-                  error where the honest answer is that it under-converged.
-                </p>
+                <p>The table distinguishes supported configurations from convergence guarantees. A constant rate is allowed, even when it leaves fluctuations at the end of the budget. A learned component can also be returned before it reaches unit length or the reference direction. Read the length, angle and stopping information to decide whether that result is sufficient, rather than treating acceptance as proof of a completed PCA fit.</p>
               </SubSection>
             </>
           ),
@@ -1265,7 +1008,7 @@ by the eigensolver
               { hints: [
   "Transform returns named component features with one value for the newcomer.",
   "Opposite component signs describe the same direction with reversed orientation, so compare that possibility before diagnosing an error."
-], check: numberCheck("What does the newcomer score on the first direction?", 4.9497, 0.0005, "The first score is 4.9497 using the stored training centre. Named feature matching preserves the input meaning even when the supplied column order changes."), question: "Can both fitted models score a new person despite a changed input-column order?" },
+], check: numberCheck("What does the newcomer score on the first direction?", 4.9497, 0.0005, "The first score is 4.9497 using the stored training center. Named feature matching preserves the input meaning even when the supplied column order changes."), question: "Can both fitted models score a new person despite a changed input-column order?" },
             ),
             exercise(
               "Take the default rate to centimetres, then standardise",
@@ -1318,14 +1061,14 @@ component_2
   share 0.2004`,
               { hints: [
   "Use MLLibError to catch the learner’s reported divergence, while allowing NumPy’s own warning to remain distinguishable.",
-  "Read the weight length separately from the normalised direction. Inspect convergence and orthogonality before interpreting variance shares."
-], check: numberCheck("After standardising, what length does the second direction come back with?", 0.9936, 0.0005, "The second stored weight length is 0.9936. Standardisation prevents the earlier overflow, but the run still reaches its epoch ceiling without reporting convergence."), question: "What happens when a learning rate is too large for the measurement scale?" },
+  "Read the weight length separately from the normalized direction. Inspect convergence and orthogonality before interpreting variance shares."
+], check: numberCheck("After standardizing, what length does the second direction come back with?", 0.9936, 0.0005, "The second stored weight length is 0.9936. Standardization prevents the earlier overflow, but the run still reaches its epoch ceiling without reporting convergence."), question: "What happens when a learning rate is too large for the measurement scale?" },
             ),
             exercise(
               "Hold the rate constant on the four and on the crowd",
               [
-  "For both supplied datasets derive the initial rate from the stated longest centred deviation. Fit each with a rate falling a hundredfold and with a constant rate at that initial value.",
-  "Print starting rate, epochs, convergence flag and learned direction lengths for every run. Keep each dataset’s centring and maximum-epoch setting fixed across its two schedules."
+  "For both supplied datasets derive the initial rate from the stated longest centered deviation. Fit each with a rate falling a hundredfold and with a constant rate at that initial value.",
+  "Print starting rate, epochs, convergence flag and learned direction lengths for every run. Keep each dataset’s centering and maximum-epoch setting fixed across its two schedules."
 ],
               `from oop_ml import ConstantSchedule, ExponentialDecaySchedule, Feature, HebbianPrincipalComponents
 
@@ -1392,7 +1135,7 @@ the crowd, starting rate 0.000249
               { hints: [
   "Pass the appropriate ExponentialDecaySchedule or ConstantSchedule to learning_rate.",
   "Inspect both stopping status and direction lengths. Results on four observations do not establish convergence for the larger crowd."
-], check: numberCheck("On the four height and weight measurements, at which epoch does the constant rate stop the walk?", 46, 0, "The four-observation constant-rate run stops at epoch forty-six. That example does not establish the same behaviour on the larger crowd or every learning rate."), question: "Does one successful constant-rate run establish that a schedule always converges?" },
+], check: numberCheck("On the four height and weight measurements, at which epoch does the constant rate stop the walk?", 46, 0, "The four-observation constant-rate run stops at epoch forty-six. That example does not establish the same behavior on the larger crowd or every learning rate."), question: "Does one successful constant-rate run establish that a schedule always converges?" },
             ),
           ],
         },

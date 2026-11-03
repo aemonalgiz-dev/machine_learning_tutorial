@@ -92,7 +92,7 @@ export function PositionBuildUp({
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
         <label className="flex items-center gap-2">
-          <span className="text-xs">neighbours added so far</span>
+          <span className="text-xs">neighbors added so far</span>
           <input
             type="range"
             min={0}
@@ -112,11 +112,11 @@ export function PositionBuildUp({
         <Stat label="the word" value={built.word} />
         <Stat label="times it appears" value={String(built.n_occurrences)} />
         <Stat
-          label="neighbours in all"
+          label="neighbors in all"
           value={String(built.steps.length)}
         />
         <Stat
-          label="how far a neighbour may be"
+          label="how far a neighbor may be"
           value={String(built.window)}
         />
       </div>
@@ -175,7 +175,7 @@ export function PositionBuildUp({
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         className="mt-3 w-full rounded-lg bg-slate-50 dark:bg-slate-900/60"
         role="img"
-        aria-label={`The running total for ${built.word} after ${step} neighbours`}
+        aria-label={`The running total for ${built.word} after ${step} neighbors`}
       >
         <line
           x1={PADDING}
@@ -211,7 +211,7 @@ export function PositionBuildUp({
       </svg>
 
       <Legend>
-        At zero neighbours the position is the origin, which is exactly what a
+        At zero neighbors the position is the origin, which is exactly what a
         word with no company would keep. Every step adds one whole direction, so
         the total only ever moves in the {built.n_nonzero} places that direction
         is anything but zero, and after the last step it is the position the fit

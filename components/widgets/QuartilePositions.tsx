@@ -90,7 +90,7 @@ export function QuartilePositions() {
       </svg>
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="first quartile" value={answer.first_quartile.value.toFixed(1)} />
-        <Stat label="median, the robust centre" value={answer.robust_centre.toFixed(1)} />
+        <Stat label="median, the robust center" value={answer.robust_centre.toFixed(1)} />
         <Stat label="third quartile" value={answer.third_quartile.value.toFixed(1)} />
         <Stat label="interquartile range, the robust spread" value={answer.robust_spread.toFixed(1)} />
       </div>

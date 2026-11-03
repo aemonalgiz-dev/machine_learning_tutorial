@@ -104,7 +104,7 @@ test("free accounts keep saving and see verified monthly and annual offers witho
     await page.screenshot({ path: info.outputPath(`membership-${width}.png`), fullPage: true });
   }
   await page.goto("/account");
-  await expect(page.getByText("All work synced", { exact: true })).toBeVisible();
+  await expect(page.getByText("All work saved", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Your free account", exact: true })).toBeVisible();
 });
 

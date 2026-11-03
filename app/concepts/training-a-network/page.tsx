@@ -23,9 +23,9 @@ import { TrainingRunPlayground } from "@/components/widgets/TrainingRunPlaygroun
 import { TwoLossCurves } from "@/components/widgets/TwoLossCurves";
 
 export const metadata: Metadata = {
-  title: "Training a Network · oop_ml",
+  title: "Training a Network · Perceptron Lab",
   description:
-    "We now have a prediction, a way to measure its error, and gradients that describe possible adjustments. Training brings those steps together and repeats them over examples so the network can improve.",
+    "Training repeatedly calculates predictions and measures their errors. Gradients then guide parameter updates, with the update size and sequence of examples affecting how the network changes.",
 };
 
 const link =
@@ -41,42 +41,8 @@ export default function TrainingANetworkPage() {
       playgroundTitle="Watch the loss as the network adjusts its parameters"
       playgroundIntro="Compare training and validation curves as the run progresses. Change one training setting at a time and distinguish the number of updates from the number of epochs."
       title="Training a Network"
-      tagline={"We now have a prediction, a way to measure its error, and gradients that describe possible adjustments. Training brings those steps together and repeats them over examples so the network can improve."}
-      prerequisites={
-        <>
-          The chain being trained here is built from the{" "}
-          <Link href="/concepts/neurons-and-activations" className={link}>
-            neuron
-          </Link>{" "}
-          and its activation function, joined into{" "}
-          <Link href="/concepts/dense-layers" className={link}>
-            dense layers
-          </Link>
-          , scored by a{" "}
-          <Link href="/concepts/loss-functions" className={link}>
-            loss
-          </Link>
-          , with the slopes coming from{" "}
-          <Link href="/concepts/backpropagation" className={link}>
-            backpropagation
-          </Link>{" "}
-          and one of its layers borrowed from the{" "}
-          <Link href="/concepts/dropout" className={link}>
-            dropout
-          </Link>{" "}
-          page. None of those is explained again. The two curves in Part 5 are
-          the{" "}
-          <Link href="/concepts/held-out-evaluation" className={link}>
-            held-out evaluation
-          </Link>{" "}
-          page&rsquo;s measurement taken once an epoch, and the step itself is
-          the{" "}
-          <Link href="/primers/calculus" className={link}>
-            calculus primer&rsquo;s
-          </Link>{" "}
-          single move.
-        </>
-      }
+      tagline={"Training repeatedly calculates predictions and measures their errors. Gradients then guide parameter updates, with the update size and sequence of examples affecting how the network changes."}
+      prerequisites={<>The <Link href="/concepts/neurons-and-activations" className={link}>neuron</Link> and <Link href="/concepts/dense-layers" className={link}>dense-layer</Link> pages explain this network’s forward calculation. <Link href="/concepts/loss-functions" className={link}>Loss functions</Link> measure its errors, and <Link href="/concepts/backpropagation" className={link}>backpropagation</Link> calculates the gradients. We will use those gradients repeatedly, compare training and validation results as in <Link href="/concepts/held-out-evaluation" className={link}>held-out evaluation</Link>, and examine how a <Link href="/concepts/dropout" className={link}>dropout layer</Link> keeps its random state. The <Link href="/primers/calculus" className={link}>calculus primer</Link> explains a gradient-descent update.</>}
 
       playground={<TrainingRunPlayground />}
       sections={[
@@ -86,18 +52,8 @@ export default function TrainingANetworkPage() {
           content: (<>
 <>
               <SubSection title="1. The crowd, the chain, and what is left to do">
-                <p>
-                  Sixty people have each been measured twice, and thirty of
-                  them belong to one group and thirty to the other. Plotted
-                  against their two measurements they fall into two rings, a
-                  small one near the middle of the picture and a wider one
-                  around it, so the inner group is completely surrounded. No
-                  straight boundary can separate them, and the box above
-                  measures exactly that. Fitted on the same sixty people, a
-                  straight boundary calls 0.583 of them correctly, which is
-                  barely better than tossing a coin, and the chain trained
-                  below reaches 1.000.
-                </p>
+                <p>The example contains sixty observations with two measurements each. Thirty belong to the inner ring and thirty to the surrounding ring. We constructed the rings to make the limitation visible: a straight boundary cannot put the entire inner group on one side and the outer group on the other.</p>
+                <p>On these training observations, the linear model has accuracy 0.583. The trained network below reaches 1.000. We will work through how its parameters were adjusted, then examine what these training scores can tell us.</p>
                 <p>
                   We have already met the components of this network. Two measurements feed six tanh units, and those activations feed one output unit with no nonlinear activation. The loss compares its prediction with the target, and backpropagation gives a derivative for each of its twenty-five parameters. Now we need to use those derivatives. How large should an update be, which observations should it use, and when have we trained enough?
                 </p>
@@ -113,14 +69,7 @@ export default function TrainingANetworkPage() {
               </SubSection>
 
               <SubSection title="2. One step, traced through twenty-five numbers">
-                <p>
-                  Start from an untrained chain, whose twenty-five numbers were
-                  drawn at random, and take exactly one step. The backward walk
-                  measures the loss on its way forward and hands back one slope
-                  for every number. Each number then moves against its own
-                  slope, by the same fraction of it, and that fraction is the
-                  step size. Nothing else happens.
-                </p>
+                <p>Start with randomly initialized weights and zero biases, making twenty-five parameters in total. Run the network forward, measure its loss, and calculate a derivative for each parameter. A gradient-descent update subtracts the learning rate times each derivative. We will inspect one update before repeating it.</p>
                 <Equation>{"every number w:    w  ←  w  −  rate × (slope of the loss at w)"}</Equation>
                 <WorkedExample title="Three of the twenty-five, at a step size of a half">
                   <p>
@@ -180,15 +129,7 @@ export default function TrainingANetworkPage() {
                   ]}
                   caption="One backward walk on the untrained chain, over all sixty people."
                 />
-                <p>
-                  That the output layer&rsquo;s slopes are the larger ones at
-                  the start is what the backpropagation page would predict. A
-                  slope deep in the chain is the slope above it multiplied by
-                  the weights it passed through and by the activation function&rsquo;s own
-                  slope, and every one of those factors is smaller than one
-                  here, so a slope shrinks the further down the chain it is
-                  carried.
-                </p>
+                <p>The largest observed gradients are in the output layer at this initialization. Gradients reaching the hidden layer also pass through output weights and tanh derivatives, which can reduce their magnitudes. Parameter gradients additionally depend on the inputs and how contributions combine across the batch. The output layer need not have the largest gradients in every network or run.</p>
                 <KeepInMind>
                   The largest slope in the chain is a single number worth
                   watching, because it says how much anything anywhere still
@@ -206,46 +147,25 @@ export default function TrainingANetworkPage() {
                   once.
                 </p>
                 <Equation>{"distance covered  =  rate × ‖slope‖\n\n0.5 × 0.139819  =  0.069910"}</Equation>
-                <p>
-                  The same step size therefore moves the chain a different
-                  distance on every epoch, and moves it further wherever the
-                  loss is steep. That is a useful property rather than an
-                  awkward one, since the walk slows down of its own accord as
-                  it approaches somewhere flat, and it is also the reason a
-                  step size that worked on one problem means nothing on
-                  another.
-                </p>
+                <p>A fixed learning rate can therefore produce different update lengths as the gradient changes. Small gradients make small updates, which may indicate an approach to a stationary point or a region where progress is slow. The same numerical rate can behave differently after changing the loss scale, inputs or architecture.</p>
                 <KeepInMind>
-                  Quoting a step size without saying what the slopes were like
-                  says almost nothing. Two problems whose slopes differ by a
-                  factor of a hundred want step sizes differing by a factor of
-                  a hundred.
-                </KeepInMind>
+                  The learning rate and gradient scale jointly determine update size. If we multiply the entire objective by a constant, dividing the rate by the same constant preserves the basic gradient-descent update. Different problems can also have different curvature, so matching one gradient norm does not establish a suitable rate.</KeepInMind>
               </SubSection>
 
               <SubSection title="5. What the slope promises, and what the step delivers">
                 <p>
+
                   There is a prediction hidden inside every step. The slope
                   says how fast the loss changes right where it was read, so it
                   also says how much the loss ought to fall for a step of a
                   given size, and the two are not the same number. The slope
-                  describes the loss only in the immediate neighbourhood of the
+                  describes the loss only in the immediate neighborhood of the
                   point it was taken at, and a step carries the chain out of
-                  that neighbourhood.
+                  that neighborhood.
                 </p>
                 <Equation>{"predicted drop  =  rate × ‖slope‖²\n\n0.5 × 0.139819²  =  0.009775\nactual drop      =  0.009155"}</Equation>
                 <WhyThisWorks title="Why a sufficiently small negative-gradient step lowers the loss">
-                  <p>
-                    Moving each number by &minus;rate times its own slope
-                    changes the loss, to first order, by the sum over numbers
-                    of the slope times the movement, which is
-                    &minus;rate times the sum of the squared slopes. That sum
-                    is the squared length of the whole slope, so the predicted
-                    drop is the rate times it, and it is positive for any
-                    positive rate. This is why a small enough step always
-                    lowers the loss, and it is also why the promise is only
-                    good for a small enough step.
-                  </p>
+                  <p>For a differentiable loss and a nonzero gradient, a small move in the negative-gradient direction reduces the loss to first order. Substituting the update into that linear approximation gives the learning rate times the squared gradient norm as the predicted drop. A sufficiently small positive step reduces the exact loss under these conditions. At a zero gradient, this update does not move.</p>
                 </WhyThisWorks>
                 <>
 <p>
@@ -280,11 +200,12 @@ export default function TrainingANetworkPage() {
             <>
               <SubSection title="6. Too small, measured">
                 <p>
+
                   A step size too small does not fail loudly. The loop runs,
                   every epoch lowers the loss, nothing comes apart and no
                   number misbehaves, and at the end almost nothing has
                   happened. That
-                  is the failure worth being able to recognise, because it
+                  is the failure worth being able to recognize, because it
                   looks like a working loop that simply needs more time, and
                   sometimes it is and sometimes it is not.
                 </p>
@@ -309,23 +230,11 @@ export default function TrainingANetworkPage() {
                   whether it would arrive.
                 </p>
                 <KeepInMind>
-                  A step size too small is indistinguishable from a step size
-                  that needs more epochs, because that is what it is. The
-                  question is always whether the epochs it needs are epochs you
-                  can afford.
-                </KeepInMind>
+                  A small rate may need more updates to make useful progress. At extremely small scales, rounding can also prevent a parameter from changing at all. Compare loss and update magnitudes before deciding whether extra epochs or a larger rate is appropriate.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. The useful range, and how wide it turns out to be">
-                <p>
-                  Between the rate that does nothing and the rate that comes
-                  apart there is a range where the loop simply works, and on
-                  this chain it covers at least everything from a half to five,
-                  a factor of ten.
-                  Every curve in the chart below starts from the identical
-                  twenty-five numbers and runs for the same two hundred epochs,
-                  so the only thing separating them is the step size.
-                </p>
+                <p>The tested rates from 0.5 through 5 reach useful fits in this run. Every curve starts from the same parameters and uses two hundred epochs, so the comparison isolates the learning rate for this particular initialization. It does not establish that every rate in that interval will work under different starts or settings.</p>
                 <StepSizeSweep />
                 <p>
                   At 0.5 the loss reaches 0.135431 and every person is called
@@ -337,21 +246,10 @@ export default function TrainingANetworkPage() {
                   whose loss ever rises, on 3 of its 199 readings.
                 </p>
                 <InAModel>
-                  <p>
-                    A range that forgiving is a property of a small chain on a
-                    clean problem rather than a general fact. What makes the
-                    range narrow in practice is depth, since a slope that is a
-                    product of many factors varies far more from place to
-                    place, and it is why the machinery that comes after this
-                    page, momentum and per-number step sizes and normalisation
-                    between layers, exists mostly to widen it again.
-                  </p>
+                  <p>This broad tested range belongs to this small network and dataset. Stable rates also depend on input scaling, curvature, initialization, activation functions and the objective. Depth can add further difficulties when gradients change substantially across layers. Momentum, adaptive updates and normalization address different parts of these optimization problems; none makes rate selection unnecessary.</p>
                 </InAModel>
                 <KeepInMind>
-                  Search the step size on a logarithmic ladder rather than a
-                  linear one, since the difference between 0.001 and 0.01
-                  matters and the difference between 0.51 and 0.52 does not.
-                </KeepInMind>
+                  When the useful rate scale is unknown, test values spaced by factors, such as powers of ten. After locating a useful region, compare closer values. Small numerical differences can matter near an instability threshold, so inspect the curves rather than dismissing them in advance.</KeepInMind>
               </SubSection>
 
               <SubSection title="8. Too large does not have to mean not a number">
@@ -375,21 +273,9 @@ export default function TrainingANetworkPage() {
                     for as long as it was asked to.
                   </p>
                 </WorkedExample>
-                <p>
-                  A rate of one hundred behaves the same way, rising on 77 of
-                  the 199 readings, reaching 0.550848 at epoch 193 and
-                  finishing at 12.186892. I expected at least one of these to
-                  produce a value that is not a number, and on this chain under
-                  this loss none of them does, however large the rate. The
-                  reason is worth knowing and is in the next section.
-                </p>
+                <p>At a rate of one hundred, loss rises on 77 of the 199 comparisons, reaches 0.550848 at epoch 193 and finishes at 12.186892. The tested log-loss runs remain finite, even though the final fits can be poor. That does not show that arbitrarily large rates are safe. The next section compares how the objective affects these updates.</p>
                 <KeepInMind>
-                  The signature of a step size that is too large is a loss that
-                  rises about as often as it falls, and the best loss it ever
-                  reached being much lower than the loss it finished at. Watch
-                  both numbers, since the final loss alone hides the second
-                  fact.
-                </KeepInMind>
+                  Repeated loss increases and a final loss far above the best value reached can indicate an unstable learning rate. In minibatch training, some increases can also result from sampling noise. Compare the pattern, update sizes and best checkpoint before changing the rate.</KeepInMind>
               </SubSection>
 
               <SubSection title="9. Whether a walk runs away depends on the objective">
@@ -419,16 +305,7 @@ export default function TrainingANetworkPage() {
                   ]}
                   caption="Squared error on the same chain and the same start. A larger step runs away sooner, and the loss stops being a number one or two epochs before the twenty-five numbers themselves do."
                 />
-                <p>
-                  The gap between those two columns is worth a sentence. The
-                  loss overflows first, while the twenty-five numbers are still
-                  finite enough for another step to be built out of them, and
-                  it takes one or two more epochs before a step produces a
-                  number that is not a number. So the measurement stops saying
-                  anything an epoch or two before the chain does, and once the
-                  weights have gone there is nothing left to walk from, since
-                  every later slope is computed out of them.
-                </p>
+                <p>The loss becomes non-finite before the parameter update is rejected in these runs. Squaring a large finite residual can overflow while the model parameters are still finite. Subsequent gradients or proposed parameters may then become non-finite too. The API records the first non-finite loss and the later rejection separately; a non-finite loss should already trigger investigation rather than waiting for the parameters to fail.</p>
                 <KeepInMind>
                   A step size is only safe or unsafe with respect to a
                   particular objective on a particular chain. The same rate of
@@ -438,16 +315,7 @@ export default function TrainingANetworkPage() {
               </SubSection>
 
               <SubSection title="10. Choosing one, in practice">
-                <p>
-                  The measurements above suggest a recipe rather than a
-                  formula, and it is the one the practice collections give.
-                  Start too large deliberately and come down. A rate that
-                  thrashes announces itself within a few tens of epochs, since
-                  the loss rises about half the time; a rate that is too small
-                  looks fine for as long as you care to run it and tells you
-                  nothing. Divide by three or ten until the loss falls on
-                  nearly every epoch, then take one more division as a margin.
-                </p>
+                <p>Compare short pilot runs at several learning rates, keeping the initialization and data fixed. Look for meaningful loss reduction, finite values and updates that do not repeatedly undo earlier progress. If a run oscillates strongly, try a smaller rate. If progress is tiny, compare a larger rate while also checking input scale and gradients. A rate selected this way is a starting point to verify across more than one run.</p>
                 <DerivationTable
                   expressionHeading="what you see"
                   reasonHeading="what it means, and what to do"
@@ -455,12 +323,12 @@ export default function TrainingANetworkPage() {
                     {
                       expression: "the loss is not a number after a few epochs",
                       reason:
-                        "far too large, and under a bounded objective you may never see this at all. Divide by ten.",
+                        "check the learning rate, input values and numerical operations. A large rate is one possible cause; reduce it and compare a fresh run.",
                     },
                     {
                       expression: "the loss rises about as often as it falls",
                       reason:
-                        "too large. The best loss reached is far below the final one, which is the tell. Divide by three.",
+                        "possible instability, especially when the final loss is far above the best reached. Try a smaller rate and account for minibatch noise.",
                     },
                     {
                       expression:
@@ -472,16 +340,12 @@ export default function TrainingANetworkPage() {
                       expression:
                         "the loss falls by a few thousandths over hundreds of epochs",
                       reason:
-                        "too small. Multiply by ten and see whether the shape of the curve changes at all.",
+                        "possibly a rate that is too small, but also inspect gradient magnitudes, saturation and input scaling. Compare a larger rate.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Whatever rate you settle on belongs to that chain, that
-                  objective and that scaling of the measurements. Changing any
-                  of the three invalidates it, which is the strongest practical
-                  argument for scaling the inputs before training anything.
-                </KeepInMind>
+                  Recheck the rate after changing the architecture, objective or input scale. Standardizing measurements can make their scales easier to manage, but it does not guarantee stable training or require discarding a previously useful rate without testing it.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -490,7 +354,7 @@ export default function TrainingANetworkPage() {
           title: "Questions on Parts 1 and 2",
           quiz: [
             choice(
-              "One step at a rate of 0.5 from the untrained chain. What did the slope promise and what arrived?",
+              "For the first update at learning rate 0.5, what does the gradient predict about the loss change?",
               [
                 "A predicted drop of 0.009775 and an actual drop of 0.009155",
                 "A predicted drop of 0.009155 and an actual drop of 0.009775",
@@ -498,12 +362,12 @@ export default function TrainingANetworkPage() {
                 "Both the same, since the slope is exact at the point it was read",
               ],
               0,
-              "The predicted drop is the rate times the squared length of the whole slope, and the slope describes the loss only in the immediate neighbourhood of the point it was taken at, which a step carries the chain out of. The 0.069910 is a different quantity, the distance the chain actually covered, which is the rate times the length of the slope rather than its square.",
+              "The gradient gives a local, first-order estimate of the loss change along the update direction. That predicted decrease depends on the learning rate and squared gradient length. The actual decrease can differ because the gradient changes as the parameters move. The reported parameter displacement of 0.069910 is a distance in parameter space, not a loss decrease.",
             ),
             trueFalse(
               "A step whose actual drop is a poor fraction of its predicted one can still be the step that reached the lowest loss.",
               true,
-              "At a rate of 5.0 the step keeps only 39 percent of its promise and still reaches a loss of 0.688570, lower than the 0.717923 the well-behaved rate of 0.5 reached, because 39 percent of a promise ten times as large is still more. The ratio says how far the slope can be trusted and says nothing about how much ground was covered, and it approaches one only as the step shrinks.",
+              "At rate 5.0, the observed decrease is a smaller fraction of the local prediction, yet it is still larger than the decrease at rate 0.5. The ratio measures agreement with a local linear approximation. The final loss measures where the update arrived. A better ratio alone does not select the most useful step size.",
             ),
             choice(
               "Why are the output layer’s slopes the larger ones at the start?",
@@ -514,12 +378,12 @@ export default function TrainingANetworkPage() {
                 "The loss is measured at the output, so only that layer is handed a slope",
               ],
               0,
-              "A slope therefore shrinks the further down the chain it is carried, which is what the backpropagation page predicts. Eighteen of the twenty-five numbers belong to the hidden layer and seven to the output unit, so the output layer is the smaller of the two, and the largest single slope anywhere in the chain, 0.084723, still sits there.",
+              "For this initialization and batch, the largest parameter gradient belongs to the output layer. Hidden-layer gradients also depend on the output weights and hidden activation derivatives through the chain rule. Those factors can reduce or amplify a signal, so gradients do not necessarily shrink at every earlier layer. The observed magnitudes are a property of this run.",
             ),
             trueFalse(
               "A step size that is too large always sends the loss off to infinity.",
               false,
-              "That is one of two things that can happen. Under log-loss here the walk kept producing perfectly ordinary numbers and simply stopped making progress, touching 0.591843 at epoch 127 and finishing at 13.216754, and it could have gone on that way for as long as it was asked to. Switch the objective to squared error and the same chain at the same rates does run away, because squared error compares the raw output with the target and its slope grows without limit.",
+              "An excessive learning rate can produce oscillating or worsening loss while every computed value remains finite. That happens in this full-batch cross-entropy run. The last stored pre-update loss is 13.216754; the separately measured final network loss is 4.683362. A different squared-error run becomes non-finite. These are possible failure modes, rather than an exhaustive list.",
             ),
             several(
               "Which of these are signatures of a step size that is too large, as measured on this chain under log-loss?",
@@ -553,56 +417,23 @@ export default function TrainingANetworkPage() {
                   decides how many steps an epoch contains.
                 </p>
                 <Equation>{"steps in one epoch  =  ⌈ rows ÷ batch size ⌉\n\n60 ÷ 60  =  1 step        60 ÷ 15  =  4 steps\n60 ÷ 30  =  2 steps       60 ÷ 1   =  60 steps"}</Equation>
-                <p>
-                  Reading every row before moving is the whole-batch case, and
-                  it is what Cauchy described. Reading one row before moving is
-                  the other extreme, and it is what the perceptron did and what
-                  Robbins and Monro justified. Everything between them is a
-                  choice, and the usual arrangement is to shuffle the rows at
-                  the start of each epoch and then walk through them in
-                  consecutive slices, so no row is used twice in an epoch and
-                  no batch is the same batch twice.
-                </p>
+                <p>A full-batch step uses every training row. A single-example step uses one row, connecting this loop to online methods such as the perceptron and the stochastic-approximation work of Robbins and Monro. Minibatches lie between those extremes. Here we reshuffle each epoch and take consecutive slices, visiting each row once. Reshuffling changes the groupings, but it does not guarantee that a particular batch can never recur.</p>
                 <KeepInMind>
-                  A batch is about which rows a step reads, and it is unrelated
-                  to how many rows you have or to how many epochs you run.
-                  Those are three separate settings and a loop must state all
-                  three.
-                </KeepInMind>
+                  Dataset size, batch size and epoch budget are separate settings with connected effects. Dataset size and batch size determine how many updates make one complete pass, while the epoch budget determines how many such passes the run attempts.</KeepInMind>
               </SubSection>
 
               <SubSection title="12. What a small batch does to the direction">
-                <p>
-                  A batch of five people points in a direction, and that
-                  direction is not the direction all sixty point in. It is an
-                  estimate of it, correct on average over all the batches that
-                  might have been drawn, and any particular draw can be a long
-                  way off. That difference can be measured directly by asking
-                  for the angle between the two directions.
-                </p>
+                <p>At fixed parameters, averaging gradients from a uniformly sampled batch gives an unbiased estimate of the full-data gradient. A particular sample can still point in a very different direction. The chart measures that difference using the cosine of the angle between the batch gradient and the full-data gradient. Unbiased gradient components do not imply an unbiased or small angle.</p>
                 <BatchSizeComparison showAgreement={true} />
                 <>
 <p>
                   The bars are the cosine of that angle at the untrained chain, averaged over two hundred draws. A batch of every row agrees with the whole crowd exactly, at 1.000, since it is the same calculation. A batch of thirty averages 0.780, a batch of fifteen 0.546, a batch of five 0.332 and a batch of one only 0.073, which is very nearly a right angle.
                 </p>
-                <p>
-                  And the worst single draw of one person points at &minus;0.785, which is about a hundred and forty-two degrees away from where the crowd wanted to go, so the step taken from that one person made the loss worse on the fifty-nine it did not read.
-                </p>
+                <p>The worst single-example draw has cosine agreement −0.785, about a hundred and forty-two degrees from the full-data gradient. For a sufficiently small negative-gradient step on that draw, the first-order prediction is an increase in the full-data loss. The angle alone does not measure the exact change after a finite update.</p>
 </>
-                <p>
-                  Even a batch of thirty, half the crowd, produced one draw at
-                  &minus;0.0009. Half the data pointing at right angles to what
-                  all of it wanted is not a rare pathology, it is what an
-                  average over a small sample does, and the loop tolerates it
-                  because the next step reads a different half.
-                </p>
+                <p>One sampled batch of thirty has cosine agreement −0.0009, nearly perpendicular to the full-data gradient. Even half this dataset can therefore give a substantially different update direction at this parameter state. Further steps use new batches and also change the parameters, so each estimate must be interpreted where it was measured.</p>
                 <KeepInMind>
-                  A small batch does not give a slightly noisier version of the
-                  right direction. At a batch of one on this crowd it gives a
-                  direction almost unrelated to the right one, and the loop
-                  works because those errors cancel across many steps rather
-                  than because any of them is nearly right.
-                </KeepInMind>
+                  For this initial network, the one-example gradients have low average directional agreement with the full-data gradient. They are still estimates of that gradient under uniform sampling. Stochastic updates can make progress over many draws, but their errors do not cancel exactly along a trajectory whose parameters keep changing.</KeepInMind>
               </SubSection>
 
               <SubSection title="13. The same sixty epochs at five batch sizes">
@@ -631,15 +462,7 @@ export default function TrainingANetworkPage() {
                   ]}
                   caption="One start, one step size of 0.5, sixty epochs each, the loss measured on all sixty people whatever the run stepped on."
                 />
-                <p>
-                  The run that read one person at a time finished at a loss a
-                  hundred and seventy times lower than the run that read all
-                  sixty, and it got there by taking sixty times as many steps.
-                  So what the table shows is that an epoch is a much bigger
-                  unit of work once it is cut into pieces, which is a different
-                  claim from a small batch being better, and section 16 sets
-                  out the three ways of making the comparison.
-                </p>
+                <p>The one-example run finishes with a loss about a hundred and seventy times lower than the full-batch run, while taking sixty times as many updates. Both visit the same number of examples over sixty epochs. Smaller batches change the update frequency and path, as well as the processing overhead. Section 16 compares ways to hold the training budget fixed.</p>
                 <KeepInMind>
                   Comparing batch sizes at a fixed number of epochs compares
                   runs that took very different numbers of steps. It is a
@@ -659,22 +482,9 @@ export default function TrainingANetworkPage() {
                   wrong way can leave a resting place that a step always going
                   downhill would settle into.
                 </p>
-                <p>
-                  I could not measure that benefit here and I am not going to
-                  claim it. This chain reaches an accuracy of 1.000 from every
-                  batch size that gets enough steps, so there is no bad resting
-                  place for the noise to rescue anything from. What is
-                  measurable on this crowd is the cost side, which is that the
-                  loss curve of the smallest batch is the only one you cannot
-                  read as a straightforward record of progress.
-                </p>
+                <p>These runs do not demonstrate a generalization benefit from minibatch noise. They evaluate loss on all sixty training examples after each epoch, so the curves use a fixed measurement set. Differences between them come from the parameter trajectories, not from changing the rows used to score each point. Enough updates let each tested batch size reach perfect training accuracy; that result does not establish performance on new examples.</p>
                 <KeepInMind>
-                  The claim that small batches escape poor resting places is
-                  about problems that have poor resting places. On a problem
-                  small enough to be shown on a page, all the batch size
-                  changes is how many steps an epoch contains and how noisy
-                  each of them is.
-                </KeepInMind>
+                  Minibatch noise can alter the optimization path, and in some problems it helps leave a stationary region. This experiment does not isolate that benefit. It compares trajectories, update counts and costs on one small dataset, so we should keep those findings separate from claims about generalization or escaping local minima.</KeepInMind>
               </SubSection>
 
               <SubSection title="15. Steps are not free, and are not proportional either">
@@ -704,16 +514,7 @@ export default function TrainingANetworkPage() {
                   ]}
                   caption="One run on one ordinary machine, so the absolute figures belong to that machine, and what matters is the ratio, since a step on one row costs 0.62 of a step on sixty."
                 />
-                <p>
-                  So sixty times the steps cost thirty-seven times the time
-                  rather than sixty, which is a saving and a small one. The
-                  same measurement on a large network on a graphics card comes
-                  out very differently, because there the surrounding work is a
-                  smaller share and the arithmetic runs on hardware that is
-                  idle unless the batch is large, and it is the reason batch
-                  sizes in the hundreds are ordinary there and a batch of one
-                  is not.
-                </p>
+                <p>In this measurement, sixty times as many updates take thirty-seven times as long. Larger networks and different hardware can have different ratios. A GPU may process a larger batch efficiently by doing more operations in parallel, while memory limits can favor smaller batches. Measure useful progress per unit of time on the hardware and model you intend to use.</p>
                 <KeepInMind>
                   How much a batch size costs is a fact about the machine it
                   runs on, so it has to be measured there rather than reasoned
@@ -722,15 +523,7 @@ export default function TrainingANetworkPage() {
               </SubSection>
 
               <SubSection title="16. Which comparison you are making">
-                <p>
-                  There are three ways to hold something fixed while varying the
-                  batch size, and they answer three different questions. Fixing
-                  the epochs asks which run learns most from one pass over the
-                  data. Fixing the steps asks which run learns most per update.
-                  Fixing the wall-clock time asks which run learns most per
-                  second, which is the only one a person waiting for a result
-                  actually cares about.
-                </p>
+                <p>To compare batch sizes, decide what budget to hold fixed. Equal epochs compare progress after equal passes over the data. Equal updates compare progress per optimization step. Equal elapsed time compares progress within a time budget. These answer different practical questions, and data access, memory or monetary cost may matter too.</p>
                 <DerivationTable
                   expressionHeading="held fixed"
                   reasonHeading="what the measurement above says"
@@ -743,7 +536,7 @@ export default function TrainingANetworkPage() {
                     {
                       expression: "sixty steps",
                       reason:
-                        "the whole batch is the only run that has finished an epoch. Comparing here compares a run that saw every person against one that saw sixty single people.",
+                        "every tested batch size has completed at least one epoch. The whole-batch run has made sixty full passes; the single-example run has made one. Equal update counts therefore involve different amounts of data processing.",
                     },
                     {
                       expression: "fifteen milliseconds",
@@ -775,22 +568,9 @@ export default function TrainingANetworkPage() {
                   a step are the same thing, which is why the distinction only
                   becomes visible once Part 3 has been read.
                 </p>
-                <p>
-                  The loss reported after an epoch is worth being careful
-                  about, because the backward walk measures on its way forward.
-                  The number an epoch reports therefore belongs to the chain as
-                  it stood before that epoch&rsquo;s step, not after it. That is
-                  why the first reading of a run is the untrained loss, and why
-                  a run of two hundred epochs reports 0.135431 as its last
-                  reading while the chain it finishes with actually stands at
-                  0.134309.
-                </p>
+                <p>For the full-batch run shown here, each reading stores the loss measured before that update. The first reading is therefore the untrained loss. After two hundred updates, the last stored reading is 0.135431, while a fresh measurement of the returned network is 0.134309. Other logging loops may record after updates or average minibatch measurements, so check the convention.</p>
                 <KeepInMind>
-                  A loss curve is offset by one step from the chain that
-                  produced it. It rarely matters, and it matters exactly when
-                  someone compares the last point of a curve with a separately
-                  measured final loss and finds they disagree.
-                </KeepInMind>
+                  A logged loss and a final-model measurement can differ because they were evaluated before and after different updates. State when each curve is measured instead of assuming that every training library uses the same one-step offset.</KeepInMind>
               </SubSection>
 
               <SubSection title="18. Three readings that do not move together">
@@ -811,12 +591,7 @@ export default function TrainingANetworkPage() {
                 </p>
 </>
                 <KeepInMind>
-                  The largest slope is the honest convergence reading, because
-                  when nothing anywhere wants to move by more than a whisker,
-                  further epochs are buying nothing. A loss that has stopped
-                  changing to four decimal places can still have a large slope
-                  underneath it.
-                </KeepInMind>
+                  The largest absolute parameter gradient helps identify whether this objective is locally sensitive to any parameter. A small gradient can indicate a stationary point, but that point may be a minimum, a saddle or a flat region with poor predictions. A rounded-flat loss curve can also hide gradients that still produce meaningful updates.</KeepInMind>
               </SubSection>
 
               <SubSection title="19. What it means for the loss to stop falling">
@@ -831,22 +606,9 @@ export default function TrainingANetworkPage() {
                   clearly different by loss.
                 </p>
                 <Equation>{"loss at epoch 1     0.7271        accuracy 0.483\nloss at epoch 50    0.5893        accuracy 0.750\nloss at epoch 100   0.3604        accuracy 0.917\nloss at epoch 200   0.1354        accuracy 1.000"}</Equation>
-                <p>
-                  So the loss has not stopped falling here, and it would not
-                  stop if the run were three times as long, since a chain that
-                  can separate its training rows can always separate them more
-                  confidently. Something else has to say when to stop, and the
-                  three candidates are a fixed budget of epochs, a threshold on
-                  the largest slope, and a second set of people the steps were
-                  not taken from. Part 5 is about why the third is the only one
-                  of the three that answers the question anybody actually has.
-                </p>
+                <p>The training loss is still falling when this run ends. Once the classes are separated, cross-entropy can continue rewarding more confident predictions, although numerical limits or other settings may eventually stop that decrease. We need a stopping rule: a training budget, a gradient criterion or a validation measure. A validation measure addresses performance on examples the updates did not use.</p>
                 <KeepInMind>
-                  A training loss that keeps falling is not evidence that more
-                  training is worth doing. On a chain with more capacity than
-                  its rows can pin down, the training loss falls forever and
-                  says nothing about anyone new.
-                </KeepInMind>
+                  Continued reduction of training loss does not establish that more training improves predictions on new data. A model may fit details specific to its training examples. Validation gives a separate measurement to compare with that training progress.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -863,7 +625,7 @@ export default function TrainingANetworkPage() {
                 "A cosine of 0.780",
               ],
               0,
-              "A batch of five averages 0.332, fifteen averages 0.546 and thirty averages 0.780, while every row agrees exactly at 1.000 because it is the same calculation. The worst single draw of one person pointed at minus 0.785, about a hundred and forty-two degrees away, so the step taken from that person made the loss worse on the fifty-nine it did not read.",
+              "Larger batches agree more closely with the full-batch gradient on average in these sampled draws. An individual one-person gradient can point in a direction that initially increases the full-batch loss. That comparison concerns the local derivative of the full-batch objective; it does not by itself measure a finite step’s effect on each of the other fifty-nine observations.",
             ),
             trueFalse(
               "The run reading one person at a time finished at a loss a hundred and seventy times lower than the run reading all sixty, which shows a small batch is better.",
@@ -879,7 +641,7 @@ export default function TrainingANetworkPage() {
                 "A step on one row costs a sixtieth of a step on sixty rows"
               ],
               [0, 1, 2],
-              "Single-row steps are not sixty times faster, because they still pay per-step overhead. The 3,600-step run takes about 37 times the total time of the 60-step run on this machine. Larger matrix operations, accelerator utilisation and framework overhead can give another setup different ratios.",
+              "Single-row steps are not sixty times faster, because they still pay per-step overhead. The 3,600-step run takes about 37 times the total time of the 60-step run on this machine. Larger matrix operations, accelerator utilization and framework overhead can give another setup different ratios.",
               {
                 "description": "This is one measurement on the lesson’s small CPU network. Total time and fixed overhead are specific to this implementation and machine.",
                 "data": "rows per step | steps in all | milliseconds a step | milliseconds in all\n1 | 3600 | 0.153 | 552\n5 | 720 | 0.162 | 116\n15 | 240 | 0.174 | 42\n30 | 120 | 0.213 | 26\n60 | 60 | 0.248 | 15"
@@ -891,15 +653,15 @@ export default function TrainingANetworkPage() {
               "The backward walk measures on its way forward, so the first reading of a run is the untrained loss and a run of two hundred epochs reports 0.135431 as its last reading while the chain it finishes with stands at 0.134309. A loss curve is offset by one step from the chain that produced it, and it matters exactly when someone compares the last point of a curve with a separately measured final loss.",
             ),
             choice(
-              "Why is the largest single slope the honest convergence reading?",
+              "What does the largest absolute parameter gradient tell us that a rounded training loss can hide?",
               [
-                "When nothing anywhere wants to move by more than a whisker, further epochs are buying nothing",
+                "It reports the largest local coordinate sensitivity, which may still be appreciable when the displayed loss looks unchanged.",
                 "It falls steadily from the first epoch to the last",
                 "It reaches zero exactly when the accuracy reaches one",
                 "It is the only one of the three readings that needs no extra data",
               ],
               0,
-              "A loss that has stopped changing to four decimal places can still have a large slope underneath it. On this run the largest slope rises before it falls, peaking at 0.084723 in the very first epoch, dropping to 0.024 by epoch 25, rising again to 0.052 by epoch 75 as the chain learns the relationship it needs, and settling to 0.028. All three of the readings a loop can watch need no extra data.",
+              "A loss can appear unchanged at the displayed precision while some parameter gradients remain appreciable. The largest absolute gradient reports the steepest coordinate direction at the current parameters. It can help diagnose optimization, but a small value does not prove a global minimum or good validation performance. Read it alongside the unrounded loss and the task’s validation results.",
             ),
         ],
         },
@@ -908,23 +670,8 @@ export default function TrainingANetworkPage() {
           content: (
             <>
               <SubSection title="20. Two losses, and only one a loop can see">
-                <p>
-                  Take fourteen of the sixty people, seven from each group, and
-                  train on those alone. Hold the other forty-six back and score
-                  them after every epoch too, without ever taking a step from
-                  them. Now there are two numbers per epoch. The first is what
-                  a loop watching its own progress would see and the second is
-                  what it cannot see, and the whole of this part is that the
-                  first says almost nothing about the second.
-                </p>
-                <p>
-                  The chain here is given eight hidden tangent units rather than six,
-                  thirty-three numbers over fourteen people, which is more than
-                  enough capacity to describe those fourteen exactly. Three of
-                  their labels are then flipped, so that there is something in
-                  the training rows the rest of the crowd genuinely does not
-                  share.
-                </p>
+                <p>Use fourteen of the sixty observations for updates, with seven from each group. Keep the other forty-six out of those updates and score them after every epoch. The training and validation losses can then be compared directly. The validation loss supplies information that cannot be recovered from the training curve alone.</p>
+                <p>This experiment uses eight hidden tanh units and thirty-three parameters. Three of the fourteen training labels are flipped, introducing labels that contradict the original ring pattern. The run below eventually classifies all fourteen training labels correctly, letting us inspect what happens to validation performance as that fit develops.</p>
                 <TwoLossCurves showAccuracy={true} />
                 <p>
                   The two lines separate almost immediately and never come back
@@ -935,22 +682,11 @@ export default function TrainingANetworkPage() {
                   every one of the epochs after it, all the way to 1.6472.
                 </p>
                 <KeepInMind>
-                  A falling training loss and a held-out score that has stopped
-                  improving are different facts and the loop can only observe
-                  one of them. There is no rearrangement of the training loss
-                  that recovers the other.
-                </KeepInMind>
+                  Training and validation losses measure different sets of examples. A loop can record both, but only the training examples determine the parameter gradients here. A falling training curve does not tell us whether validation performance is improving.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. The epoch the walk should have stopped at">
-                <p>
-                  Epoch 73 is where the walk should have stopped, and it is
-                  invisible from inside. At that epoch the training loss stands at
-                  0.3070 and is still falling, and nothing about it announces
-                  anything. Every one of the remaining five hundred and
-                  twenty-seven epochs lowered the training loss and raised the
-                  held-out one.
-                </p>
+                <p>The lowest validation loss in this run occurs at epoch 73, when training loss is 0.3070 and still falling. Every later recorded epoch lowers training loss while raising validation loss. If validation loss is our selection measure, epoch 73 is the checkpoint we would keep from this completed run.</p>
                 <NumberTable
                   headings={[
                     "epoch",
@@ -967,24 +703,12 @@ export default function TrainingANetworkPage() {
                     ["400", "0.0904", "1.3017", "1.000", "0.674"],
                     ["600", "0.0757", "1.6472", "1.000", "0.630"],
                   ]}
-                  caption="One run, both sets scored at every epoch. The left two columns fall together throughout; the right two part company around epoch 73."
+                  caption="One run, both sets scored at every epoch. Training loss falls throughout, while validation loss reaches its minimum around epoch 73 and then rises. Accuracy follows a different pattern."
                 />
-                <p>
-                  This is what early stopping is, and it is why it needs a
-                  second set of people rather than a cleverer reading of the
-                  first. Keep the numbers from the epoch at which the held-out
-                  loss was lowest, and throw away everything the walk did
-                  afterwards. It costs one extra measurement per epoch and a
-                  copy of the chain, and Prechelt&rsquo;s 1998 chapter is about
-                  the awkward practical question of how long to keep going
-                  after a new low before believing it was the last one.
-                </p>
+                <p>Early stopping uses validation results to decide which parameter checkpoint to keep. Save the parameters whenever the selected validation measure improves, then stop after a chosen period without sufficient improvement. Prechelt’s 1998 chapter examines the practical question of how long that period should be.</p>
+<p>Because these held-out examples influence checkpoint selection, they form a validation set. Use a separate test set when you need an evaluation that was not also used to choose the model.</p>
                 <KeepInMind>
-                  Early stopping is a decision made on rows the steps were not
-                  taken from. A loop with no held-out set can be stopped on a
-                  budget or on a slope, and cannot be stopped at the right
-                  place.
-                </KeepInMind>
+                  A budget limits training cost, a gradient threshold checks local optimization progress, and validation-based stopping checks a selected performance measure on other examples. Choose the rule for the question you need to answer, and record which checkpoint is returned.</KeepInMind>
               </SubSection>
 
               <SubSection title="22. The two held-out readings disagree with each other">
@@ -997,50 +721,16 @@ export default function TrainingANetworkPage() {
                   are two defensible answers to the question of when this walk
                   was at its best.
                 </p>
-                <p>
-                  The disagreement has the same source as the one in section
-                  18. Accuracy only counts sides and loss counts distances, so
-                  a chain can become more confident about people it is calling
-                  wrongly, which raises its loss without changing its accuracy
-                  at all. Whichever of the two you stop on, say which, since
-                  reporting a stopping epoch without saying what it was chosen
-                  by is not reporting anything.
-                </p>
+                <p>Accuracy counts correct class decisions; cross-entropy also responds to their assigned probabilities. A model can become more confident in a wrong decision, increasing loss without changing accuracy. State which validation measure selects the checkpoint so the result can be interpreted and compared.</p>
                 <KeepInMind>
-                  Pick the held-out measure that matches what the model will be
-                  judged by, and stop on that one. Do not pick whichever
-                  measure gives the more flattering stopping epoch after the
-                  fact.
-                </KeepInMind>
+                  Choose the validation measure based on the intended use before comparing runs. Selecting whichever metric looks best afterward introduces another model-selection choice. Keep a separate test evaluation if you need to estimate performance after those choices.</KeepInMind>
               </SubSection>
 
               <SubSection title="23. Without flipped labels the curve flattens rather than turning">
-                <p>
-                  The rising held-out curve above is the textbook picture, and
-                  it needed three flipped labels to produce. Press the other
-                  button on the chart and the same fourteen people with the
-                  labels as they were drawn give a curve that flattens instead.
-                  The held-out loss reaches 0.2469 at epoch 256, and it does
-                  rise on every one of the three hundred and forty-four epochs
-                  after that, by 0.0113 in total. The held-out accuracy reaches
-                  0.9130 at epoch 131 and is still exactly 0.9130 at epoch
-                  600.
-                </p>
-                <p>
-                  So the shape of the second curve depends on what there is in
-                  the training rows to memorise. With clean labels a chain with
-                  spare capacity mostly stops learning anything new, and with
-                  three rows contradicting the pattern it spends five hundred
-                  epochs learning those three and gets steadily worse at
-                  everybody else. The training loss cannot tell the two cases
-                  apart at all, finishing under 0.1 in both.
-                </p>
+                <p>{"The clearly rising held-out curve uses three flipped labels. With the original labels, the curve mostly flattens instead. Its minimum held-out loss is 0.2469 at epoch 256; it rises on every one of the following three hundred and forty-four epochs, by 0.0113 in total. Held-out accuracy reaches 0.9130 at epoch 131 and remains exactly 0.9130 at epoch 600. A small loss change and an unchanged accuracy can therefore describe the same run."}</p>
+                <p>In these two runs, changing three training labels substantially changes the validation curve. The corrupted-label run reaches lower training loss while validation performance deteriorates. With the original labels, validation loss improves longer and then changes only slightly. Both finish with training loss below 0.1, so that final training value alone does not distinguish their behavior.</p>
                 <KeepInMind>
-                  Do not expect the held-out curve to turn. Waiting for a
-                  visible turn before stopping will run a clean-label fit far
-                  longer than it needed, and the flat stretch after the low
-                  point is the common case rather than the exception.
-                </KeepInMind>
+                  Validation loss need not show a dramatic turn. It can flatten or change by less than a useful improvement threshold. Define patience and the minimum change you consider meaningful, and account for noise in the measurement.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -1058,21 +748,11 @@ export default function TrainingANetworkPage() {
                   Repeating the same configuration gives 0.05945412 both times. Changing only the row-order seed gives 0.05903582 with the same initial weights. In the full-batch comparison, both order seeds give 0.53659416. Row order changes which observations contribute to intermediate minibatch updates, whereas these full-batch runs use the complete group for each update.
                 </p>
                 <KeepInMind>
-                  The order the rows are visited in matters only once the epoch
-                  is cut into batches. Shuffling a set you are about to average
-                  over in full is a no-op, and a loop that seeds its shuffle
-                  and then never batches is controlling nothing.
-                </KeepInMind>
+                  For these full-batch runs, reshuffling leaves the same examples in each update and gives matching displayed results. In floating-point arithmetic, a different accumulation order can still cause small rounding differences. Minibatches can have much larger order effects because their intermediate updates use different groups of rows.</KeepInMind>
               </SubSection>
 
               <SubSection title="25. Four starts, four different places">
-                <p>
-                  What a seed does not fix is which resting place the walk
-                  finds. The loss over twenty-five numbers is not a bowl with
-                  one bottom, so where the walk ends depends on where it began,
-                  and four draws of the starting numbers under the identical
-                  loop end up somewhere different each time.
-                </p>
+                <p>Fixing all random choices can make this implementation repeat a run. Choosing a seed does not guarantee that the resulting fit is a good one. The objective is nonconvex, so different initial parameters can follow different paths and finish at different losses under the same update settings. The next comparison changes only the initialization seed.</p>
                 <SeedLedger show="starts" />
                 <p>
                   Three of the four call every person correctly and the fourth
@@ -1084,14 +764,7 @@ export default function TrainingANetworkPage() {
                   two are connected.
                 </p>
                 <InAModel>
-                  <p>
-                    This is why a result from one seed is not a result. The
-                    convention in any paper reporting a number of this kind is
-                    several seeds with a spread quoted, and the reason is
-                    visible in four rows here, where the seed moved the final
-                    loss by more than most of the changes a person would
-                    consider making to the method.
-                  </p>
+                  <p>A single-seed run reports what happened from that initialization. Repeating with several seeds helps measure how sensitive the result is to starting conditions. These four runs show a meaningful spread in final loss. When comparing a small change to the method, report enough repetitions to distinguish its effect from that variation.</p>
                 </InAModel>
                 <KeepInMind>
                   A seed makes a run reproducible. It does not make it
@@ -1101,29 +774,14 @@ export default function TrainingANetworkPage() {
               </SubSection>
 
               <SubSection title="26. A layer that draws has to survive the step">
-                <p>
-                  One kind of layer holds a source of randomness of its own,
-                  the one that silences a random share of its units on every
-                  training pass. Every other layer here can be rebuilt from its
-                  numbers at any moment without consequence, and that one
-                  cannot, because rebuilding it rebuilds its generator at the
-                  same position and the next pass draws exactly what the last
-                  one drew.
-                </p>
+                <p>Dropout keeps a random generator as part of its state. Recreating the layer from the same seed before every pass resets that generator. If the draws have the same shape, each pass then receives the same mask. To keep sampling a sequence of masks, preserve or advance the generator state across updates.</p>
                 <SeedLedger show="draws" />
                 <>
-<p>
-                  On the left, one layer is carried across four passes, and no two passes keep the same units. On the right the same layer is rebuilt from the same seed before each pass, and all four passes are identical, which over a whole run would silence the same units every time and leave a permanently narrower layer instead of one that breaks a different partnership on every pass.
-                </p>
-                <p>
-                  So a layer holding a generator has to be carried through the step rather than rebuilt from its settings, which is the one place in a walk where a step cannot hand back something newly made.
-                </p>
+<p>The left experiment carries one dropout layer through four passes and obtains four different masks. The right experiment recreates the layer from its seed before each pass, producing the same mask four times. Persistently reusing that mask removes the same activations in this demonstration, rather than sampling a new set each pass.</p>
+                <p>This SDK carries the dropout layer forward so its generator keeps advancing. Another design could rebuild the object while preserving the current generator state. The requirement is continuity of that state, rather than reuse of one particular object identity.</p>
 </>
                 <KeepInMind>
-                  A draw cannot be recomputed, so anything holding one has to
-                  survive the step. This is the one exception to the rule that
-                  a step produces a new chain and leaves the old one alone.
-                </KeepInMind>
+                  Random draws can be reproduced from a generator state. Training must retain the intended state progression rather than resetting the seed on every step. This SDK does that by keeping the dropout layer between updates.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -1200,7 +858,7 @@ export default function TrainingANetworkPage() {
                     {
                       expression: "the order the rows are visited in",
                       reason:
-                        "shuffling once and reusing that order costs nothing after the first pass, and it lets the same rows fall into the same batch on every epoch, which is a pattern the chain can pick up. Reshuffling every epoch costs one pass over the row positions and makes consecutive batches behave like fresh draws. Section 24 measures the case where the choice makes no difference at all, since a step reading every row averages them in any order.",
+                        "reusing a fixed order keeps the same batch groupings each epoch. Reshuffling changes those groupings and the resulting update sequence. Section 24 compares order seeds; full-batch updates use all rows, apart from possible accumulation-order rounding differences.",
                     },
                     {
                       expression: "how many rows a step reads",
@@ -1210,7 +868,7 @@ export default function TrainingANetworkPage() {
                     {
                       expression: "when to stop",
                       reason:
-                        "a fixed budget costs nothing and says nothing about whether the epochs were worth running. A threshold on the largest slope needs no extra rows and stops where nothing anywhere wants to move, which on a chain that can separate its training rows arrives long after the useful part. A held-out score costs the rows it is read on and a second measurement every epoch, and section 21 is why it is the only one of the three that stops near the right place.",
+                        "a fixed budget limits cost. A gradient threshold checks local stationarity on the measured objective. A validation measure checks performance on examples excluded from updates and adds evaluation work. Each rule answers a different stopping question.",
                     },
                     {
                       expression: "what is kept from each epoch",
@@ -1221,7 +879,7 @@ export default function TrainingANetworkPage() {
                       expression:
                         "whether the step size is one number or one per number",
                       reason:
-                        "a single rate is one setting to search, and it has to suit the largest slope in the chain and the smallest at the same time, which is the range Part 2 measures. A rate per number adapts to how large that number’s slopes have been and widens the range that works, at the cost of carrying a running figure alongside every weight from one step to the next.",
+                        "a global rate scales every parameter gradient equally. Adaptive methods use per-parameter state to change that scaling based on past gradients. They can help with differing scales, but still require a global rate and other settings to be checked.",
                     },
                   ]}
                 />
@@ -1282,7 +940,7 @@ export default function TrainingANetworkPage() {
                       expression:
                         "a chain answering one number against targets two wide",
                       reason:
-                        "the loss compares an answer with a truth one pair at a time, and one number does not pair with two, so there is no quantity to minimise. Nothing about the data changes that, since it is a disagreement between the chain and the objective.",
+                        "the loss compares an answer with a truth one pair at a time, and one number does not pair with two, so there is no quantity to minimize. Nothing about the data changes that, since it is a disagreement between the chain and the objective.",
                     },
                     {
                       expression: "fewer targets than rows",
@@ -1293,12 +951,12 @@ export default function TrainingANetworkPage() {
                       expression:
                         "a measurement that is not a number among the rows",
                       reason:
-                        "arithmetic on it answers with the same non-number, so it spreads through the forward pass into the loss and back down into every slope, and the whole chain is unusable after one step rather than one weight being spoilt.",
+                        "the layer’s incoming-value check rejects a non-finite measurement before it enters the forward calculation.",
                     },
                     {
                       expression: "an infinite measurement among the rows",
                       reason:
-                        "an infinity carries through multiplication and addition as an infinity, and the moment it meets a zero or is subtracted from another infinity the result is not a number at all, so one unbounded reading can leave the loss undefined for reasons that have nothing to do with the other fifty-nine rows.",
+                        "the layer’s incoming-value check rejects an infinite measurement before the network computes predictions.",
                     },
                     {
                       expression: "a walk whose numbers stop being finite",
@@ -1313,17 +971,12 @@ export default function TrainingANetworkPage() {
                     {
                       expression: "asking a chain that has not been trained",
                       reason:
-                        "perfectly defined, and meaningless. The chain answers 0.2369 about the first person, which is the opinion of the numbers it was drawn with, and nothing in the answer distinguishes it from a trained one.",
+                        "defined: the initial chain outputs 0.2369 for the first person. That numerical result does not establish a fitted or reliable prediction; evaluate the model state rather than inferring training from the output format.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  The step size is the setting on this page with no natural
-                  bound of its own, since zero, negative and enormous are all
-                  arithmetically meaningful and only one of them is ever meant.
-                  A loop that does not bound it is trusting whoever writes the
-                  number.
-                </KeepInMind>
+                  For descent, this API requires a positive finite learning rate within its configured bound. A zero rate is useful as a no-update control in a separate experiment; a negative rate reverses the local direction. Very large finite rates can still produce unstable or overflowing updates, so valid input is not a guarantee of successful optimization.</KeepInMind>
               </SubSection>
 
               <SubSection title="30. How early each of those can be caught">
@@ -1391,14 +1044,7 @@ export default function TrainingANetworkPage() {
                   Neither is on this page, and both need the step to widen from taking a rate to taking something carrying state of its own, which is the same problem the layer holding a draw already posed in section 26.
                 </p>
 </>
-                <p>
-                  What does not change is the shape of the loop. It measures,
-                  it moves, it does that again on some rows, and some rule
-                  eventually says to stop. Momentum and the rest change what
-                  moving means, early stopping changes what stopping means, and
-                  the arrangement of the four is the same arrangement Cauchy
-                  described in 1847.
-                </p>
+                <p>The loop still produces predictions, measures the objective and applies an update repeatedly. Momentum and adaptive methods change the update and maintain additional optimizer state. Early stopping changes how checkpoints are selected. These methods extend gradient-based optimization rather than making a different kind of prediction problem.</p>
                 <KeepInMind>
                   The hard parts of training are the two decisions this page
                   measured, how far to move and when to stop, and both of them
@@ -1451,7 +1097,7 @@ export default function TrainingANetworkPage() {
                 "It holds no numbers to move, so a step would delete it",
               ],
               0,
-              "Carried across four passes, no two passes keep the same units. Rebuilt from the same seed before each pass, all four are identical, which over a whole run would silence the same units every time and leave a permanently narrower layer. A draw cannot be recomputed, so this is the one exception to the rule that a step produces a new chain and leaves the old one alone.",
+              "Dropout carries a random-generator state between training passes. Rebuilding it from the same seed before every pass restarts that sequence and repeats the same mask in this example. Preserving the evolving state allows new masks to be drawn. An implementation can preserve that state in several ways; random draws are reproducible when their generator state is known.",
             ),
             choice(
               "Of the ways a training loop can fail, which one can be settled by looking at the chain alone, before a single row is read?",
@@ -1462,7 +1108,7 @@ export default function TrainingANetworkPage() {
                 "A batch larger than the training set, which the loop hands back whole",
               ],
               0,
-              "That is the only failure here that can be known while the chain is being put together rather than hours into a run, which is the argument the shapes page makes at length. A loop that has started at all is already past it, and what it can still meet at epoch 157 is a chain whose numbers have stopped being numbers, with the loss having gone first two epochs earlier, which was the only warning there was. Asking for more rows than the set holds is not a failure at all, since it simply hands back the whole set.",
+              "Incompatible adjoining layer shapes can be detected from the network’s declared dimensions before any data is evaluated. Optimization failures, such as non-finite loss or gradients, require evaluating the actual calculations. In this batch API, requesting more rows than the dataset contains returns the available set rather than causing a shape failure.",
             ),
         ],
         },
@@ -1471,7 +1117,7 @@ export default function TrainingANetworkPage() {
           practice: [
             exercise(
               "Take one step from the untrained chain",
-              ["The backpropagation challenge inspected a fixed network. Here the supplied seeds create the sixty labelled people and the initial trainable network reproducibly. Calculate one backward pass and apply one update at learning rate 0.5.","Print the first hidden connection's old weight, gradient and updated weight, together with the largest gradient and losses before and after the update. Measure the updated network again rather than treating the old loss as its new loss."],
+              ["The backpropagation challenge inspected a fixed network. Here the supplied seeds create the sixty labeled people and the initial trainable network reproducibly. Calculate one backward pass and apply one update at learning rate 0.5.","Print the first hidden connection's old weight, gradient and updated weight, together with the largest gradient and losses before and after the update. Measure the updated network again rather than treating the old loss as its new loss."],
               `import numpy as np
 from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
 
@@ -1529,7 +1175,7 @@ first hidden weight before 0.345584
 its slope 0.028119
 first hidden weight after 0.331525
 largest slope anywhere 0.084723`,
-              { hints: ["The starting weights are drawn with a spread of the square root of two over the fan-in, which is 1 for the two measurements and the root of a third for the six hidden units, in the order the neurons are built. The seed of 1 is what makes the page’s numbers quotable.", "backward_pass measures the loss on its way forward and answers one gradient per layer, so the loss before the step is on the backward pass itself and the hidden layer’s slopes are at position 0.", "stepped_by hands back a new chain. Measuring the loss after the step means running a second backward pass on that chain, or a forward pass and the loss, and reading its loss."], check: numberCheck("What is the loss on all sixty people after one step at 0.5?", 0.717923, 1e-05, "The measured loss decreases after this update on the supplied batch. The gradient described the local behaviour before the step; a finite step need not produce exactly its linear prediction of the loss change. Subsequent updates must recalculate derivatives at the new parameters."), question: "What changes after the first supervised update of this network?" },
+              { hints: ["The starting weights are drawn with a spread of the square root of two over the fan-in, which is 1 for the two measurements and the root of a third for the six hidden units, in the order the neurons are built. The seed of 1 is what makes the page’s numbers quotable.", "backward_pass measures the loss on its way forward and answers one gradient per layer, so the loss before the step is on the backward pass itself and the hidden layer’s slopes are at position 0.", "stepped_by hands back a new chain. Measuring the loss after the step means running a second backward pass on that chain, or a forward pass and the loss, and reading its loss."], check: numberCheck("What is the loss on all sixty people after one step at 0.5?", 0.717923, 1e-05, "The measured loss decreases after this update on the supplied batch. The gradient described the local behavior before the step; a finite step need not produce exactly its linear prediction of the loss change. Subsequent updates must recalculate derivatives at the new parameters."), question: "What changes after the first supervised update of this network?" },
             ),
             exercise(
               "Run two hundred epochs and read the curve",
@@ -1657,7 +1303,7 @@ print(f"loss of the finished chain {network.backward_pass(rows, targets, loss).l
 lowest reading 0.591843 at epoch 127
 last reading 13.216754
 loss of the finished chain 4.683362`,
-              { hints: ["Only the rate changes from the previous problem. The chain, the people and the loop are the same.", "zip the readings against themselves shifted by one to compare each reading with the next, and count the pairs where the later one is larger.", "The last reading belongs to the chain before its final step, so the finished chain’s loss is a separate measurement and here it is a very different number."], check: numberCheck("On how many of the 199 consecutive readings did the loss rise?", 100, 0.5, "Frequent rises and a poor final state show that this large rate behaves badly in this deterministic full-batch experiment. Finite numbers alone do not establish successful optimisation. The final post-update measurement can differ substantially from the last stored pre-update reading."), question: "What happens when the same network takes much larger updates?" },
+              { hints: ["Only the rate changes from the previous problem. The chain, the people and the loop are the same.", "zip the readings against themselves shifted by one to compare each reading with the next, and count the pairs where the later one is larger.", "The last reading belongs to the chain before its final step, so the finished chain’s loss is a separate measurement and here it is a very different number."], check: numberCheck("On how many of the 199 consecutive readings did the loss rise?", 100, 0.5, "Frequent rises and a poor final state show that this large rate behaves badly in this deterministic full-batch experiment. Finite numbers alone do not establish successful optimization. The final post-update measurement can differ substantially from the last stored pre-update reading."), question: "What happens when the same network takes much larger updates?" },
             ),
             exercise(
               "Hold forty-six people back and watch two curves",

@@ -17,7 +17,7 @@ const flags = (value: Data): (0 | 1 | null)[] => {
 export const agentAssuranceTools: Record<string, Tool> = {
   agentAssuranceRate: {
     title: 'Count reviewed outcomes',
-    why: 'Reports events, reviewed outcomes and total attempts alongside the reviewed-outcome rate and review coverage. Null is unresolved, never a successful prevention. Empty denominators stay null.',
+    why: "Count recorded events, reviewed outcomes and all attempts. Return the event rate among reviewed outcomes beside review coverage. A null flag remains unresolved; an empty denominator produces a null rate.",
     inputs: ['Outcome flags: 0, 1 or null'],
     run: ([input]) => {
       const values = flags(input);
@@ -37,7 +37,7 @@ export const agentAssuranceTools: Record<string, Tool> = {
   },
   agentAssuranceUnsettled: {
     title: 'Keep unsettled actions',
-    why: 'Keeps pending, in_flight and unknown actions for reconciliation. Completed and cancelled actions remain in the audit history but leave this work list. Rejects duplicate IDs and unrecognised states.',
+    why: "Keeps pending, in_flight and unknown actions for reconciliation. Completed and canceled actions remain in the audit history but leave this work list. Rejects duplicate IDs and unrecognized states.",
     inputs: ['One release’s action records'],
     run: ([input]) => {
       const rows = records(input);

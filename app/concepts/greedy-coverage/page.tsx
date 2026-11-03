@@ -23,9 +23,9 @@ import { TwoVocabularies } from "@/components/widgets/TwoVocabularies";
 import { UnitRivals } from "@/components/widgets/UnitRivals";
 
 export const metadata: Metadata = {
-  title: "Greedy Coverage · oop_ml",
+  title: "Greedy Coverage · Perceptron Lab",
   description:
-    "There is only so much room in a vocabulary. Instead of choosing the most frequent pair to merge, we can ask which new piece covers the most text that our earlier choices have not already covered.",
+    "A limited vocabulary needs a rule for deciding which pieces deserve space. Greedy coverage selects pieces according to how much previously uncovered text they represent, producing different choices from repeated pair merging.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -40,7 +40,7 @@ export default function GreedyCoveragePage() {
       playgroundTitle="Which piece covers the most unread text?"
       playgroundIntro="Inspect each candidate's additional coverage after the earlier choices. Compare what changes when coverage is measured using a different unit."
       title="Greedy Coverage"
-      tagline={"There is only so much room in a vocabulary. Instead of choosing the most frequent pair to merge, we can ask which new piece covers the most text that our earlier choices have not already covered."}
+      tagline={"A limited vocabulary needs a rule for deciding which pieces deserve space. Greedy coverage selects pieces according to how much previously uncovered text they represent, producing different choices from repeated pair merging."}
       prerequisites={
         <>
           Two things from earlier in this section. Something has already decided
@@ -56,8 +56,8 @@ export default function GreedyCoveragePage() {
 
       playground={<GreedyCoveragePlayground />}
       sections={[
-        {
-          title: "Part 1. What Merging Was Maximising",
+        { id: "part-1-what-merging-was-maximising",
+          title: "Part 1. What Merging Was Maximizing",
           defaultOpen: true,
           content: (<>
 <>
@@ -89,14 +89,7 @@ export default function GreedyCoveragePage() {
 
               <SubSection title="2. A pair that merges often is not a piece that covers a lot">
                 <p>
-                  Merging scores a candidate by how many times two symbols sit
-                  next to each other, and it can only ever consider two symbols
-                  at a time, because that is what a merge is. On the eighteen
-                  sentences the winner of that contest is h followed by the
-                  marked e, adjacent 31 times, and the runners-up are t followed
-                  by h at 20, r followed by e at 17, and T followed by h at 12.
-                  Nothing longer is in the running, since nothing longer exists
-                  yet.
+                  {"At the initial character stage, byte-pair encoding considers adjacent symbol pairs. The most frequent is h followed by marked e. Longer character strings become eligible through later merges of already-built symbols. Coverage instead considers longer substrings directly from the start."}
                 </p>
                 <>
                   <p>
@@ -124,10 +117,10 @@ export default function GreedyCoveragePage() {
                 />
                 <>
 <p>
-                  The difference is not a refinement of the same idea. A merge count answers how many pieces one join removes from the corpus, which for a pair is how often the pair occurs; a coverage figure answers how much of the corpus a row of the table would account for, which is that occurrence count multiplied by the length of the piece.
+                  {"The merge score counts adjacent current-symbol pairs, while the coverage score counts newly claimed character positions. A merge can reduce token count by one for each nonoverlapping occurrence applied. The raw adjacent-pair count can include overlaps, so it is not always exactly the realized reduction."}
                 </p>
                 <p>
-                  Merging cannot ask the second question at all, because it has no candidate longer than two symbols to ask it about, and reaches analys only by making five separate joins and scoring each of them on its own.
+                  {"Byte-pair encoding reaches a longer piece through a sequence of pair joins. Greedy coverage can select the complete substring directly. They search different candidate sets at each stage and reward different gains."}
                 </p>
 </>
                 <KeepInMind>
@@ -140,23 +133,11 @@ export default function GreedyCoveragePage() {
 
               <SubSection title="3. The objective, stated plainly">
                 <p>
-                  So state the thing the vocabulary is for, and then choose to
-                  maximise it. Every position in every word should lie under some
-                  piece of more than one symbol, because a position left bare is a
-                  whole token spent on one character. A vocabulary of a given size
-                  is good to the extent that it covers those positions, and each
-                  word counts as often as it occurs.
+                  {"For this objective, credit positions covered by selected multi-symbol pieces, weighted by word frequency. Positions left bare become single-symbol tokens. Maximizing that coverage is one vocabulary-design goal; it does not directly minimize every encoded sequence length or measure linguistic usefulness."}
                 </p>
                 <Equation>{"covers(p)  =  Σ over words w   count(w) × (positions of w that p claims)"}</Equation>
                 <p>
-                  The rule is then the shortest one on this site. Take the
-                  candidate covering the most positions nothing has covered yet,
-                  add it to the vocabulary, and repeat until the budget is spent
-                  or nothing is left to cover. Candidates are every run of two or
-                  more symbols the corpus contains. Single symbols are not
-                  candidates, since the alphabet is in the vocabulary anyway and a
-                  single symbol covers nothing that was not already going to be
-                  its own token.
+                  {"Select the candidate covering the most available positions, add it to the ranked vocabulary, and repeat. Candidates are observed substrings of at least two symbols. Single symbols are already supplied as fallbacks and receive no additional coverage credit under this chosen objective."}
                 </p>
                 <Equation>{"take   argmax over candidates p   covers(p) restricted to positions still bare"}</Equation>
                 <KeepInMind>
@@ -204,7 +185,7 @@ export default function GreedyCoveragePage() {
                   Run the rule on low, lower, newest and widest and the first turn goes to newest with its mark, six positions in a word seen six times, which covers 36. Its nearest rivals are ewest with the mark and newes, both five positions in the same six occurrences and worth 30, and then est with the mark, three positions across nine occurrences and worth 27.
                 </p>
                 <p>
-                  Merging&rsquo;s own first choice on this corpus is the pair e followed by s, which appears nine times; here that pair is not even a separate candidate, since every run containing it is one.
+                  {"Byte-pair encoding first selects e followed by s on these words. That two-symbol string is also a coverage candidate, but longer strings compete with it immediately. Coverage therefore chooses the whole newest entry instead."}
                 </p>
 </>
                 <CoverClaims />
@@ -311,7 +292,7 @@ export default function GreedyCoveragePage() {
                 "The number of distinct words it turns up in",
               ],
               0,
-              "On the eighteen sentences he scores 31 × 2 = 62 and analys scores 7 × 6 = 42, which puts a piece seen 7 times above the pair re seen 17 times. A merge count answers how many pieces one join removes from the corpus; a coverage figure answers how much of the corpus a row of the table would account for.",
+              "The coverage score counts newly represented positions, weighted by occurrence frequency. In the eighteen sentences, he covers 62 positions and analys covers 42, putting analys above re even though re occurs more often. A pair-merge count measures a different benefit: how many adjacent joins the merge would make. Neither score is a linguistic definition of a useful word part.",
             ),
             trueFalse(
               "On the four words the first turn goes to the marked ending est, because it reaches two of them.",
@@ -332,7 +313,7 @@ export default function GreedyCoveragePage() {
                 "Lowest was in the corpus, so its positions had already been claimed",
               ],
               0,
-              "A merged vocabulary of the same size answers that word in three pieces, because it built the marked est on the way to newest and kept it. Coverage buys pieces outright and buys no rungs, since a rung covers positions its parent already covers and is therefore worth nothing the moment the parent is in.",
+              "The four selected whole-word pieces do not match lowest, so the coverage tokenizer falls back to six single symbols. At the same vocabulary size, BPE uses three pieces because its merge history retained shorter intermediate fragments, including marked est. Coverage selected complete candidates directly; it was not required to retain the fragments that might help another word.",
             ),
             several(
               "Which of these follow from scoring a candidate against what is still bare?",
@@ -410,17 +391,14 @@ export default function GreedyCoveragePage() {
                 <BestTwoRows />
                 <>
 <p>
-                  Enumerating the possible pairs finds a better result: the two whole words cover all 39 positions. Greedy selection reaches 84.6% of that coverage. The first choice had the largest immediate gain, but it prevented the better two-piece combination.
+                  Enumerating every candidate pair finds two whole-word pieces that cover all 39 positions. The greedy selection reaches 84.6 per cent of that coverage. Its first choice had the largest immediate gain, but the remaining choice could not recover the better combination. This case shows why evaluating one addition at a time does not establish a globally best selection under the available budget.
                 </p>
                 <p>
                   Encoding length shows another cost. With the greedy pieces, the six word occurrences require 15 tokens; costly becomes cost followed by l and a marked y. With the two whole words, they require six tokens. Coverage and encoded length describe different aspects of the result.
                 </p>
 </>
                 <KeepInMind>
-                  Greedy choice is optimal at one piece and can be beaten from two
-                  onward. Here the shortfall is 6 positions in 39 and 9 pieces in
-                  15, and nothing in the rule could have seen it coming, since at
-                  the moment of choosing, cost really was the best piece available.
+                  {"The first greedy choice has the largest immediate coverage. With two choices, this example is beaten by selecting the two complete words. The shortfall demonstrates the difference between choosing one gain at a time and considering a combination."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -479,10 +457,7 @@ export default function GreedyCoveragePage() {
                 </p>
 </>
                 <KeepInMind>
-                  Counting characters does not, on these four words, choose a
-                  different piece. A shorter candidate gains more from the change
-                  than a longer one does, which is why a flip is possible at all,
-                  and here it gains three and needed nine.
+                  {"The added boundary weight does not change the selected pieces on this corpus. A candidate gains once per word-final occurrence, so a more frequent ending can gain more than a complete word. The gain depends on frequency as well as length."}
                 </KeepInMind>
               </SubSection>
 
@@ -608,11 +583,7 @@ export default function GreedyCoveragePage() {
 
               <SubSection title="15. Two vocabularies of the same size">
                 <p>
-                  Ask both methods for 100 tokens on this corpus and both learn 48
-                  rows above the same 51-symbol alphabet, which makes the
-                  comparison a fair one. Twelve of the 96 rows are shared. The rest
-                  are not, and the difference has a clear shape rather than being
-                  scattered.
+                  {"At the requested size 100, both methods add 48 entries above the same 51-symbol alphabet and reserved entry. They share 12 learned entries. This matches their available row budget, while the remaining comparison still depends on the different objectives and encoding rules."}
                 </p>
                 <TwoVocabularies />
                 <p>
@@ -627,41 +598,29 @@ export default function GreedyCoveragePage() {
                 </p>
                 <InAModel>
                   <p>
-                    The two vocabularies favour different kinds of pieces in this experiment. Their objectives help explain the preference, but eighteen sentences cannot establish which will encode a much larger training or held-out corpus more efficiently. That comparison needs its own data and evaluation.
+
+                    The two vocabularies favor different kinds of pieces in this experiment. Their objectives help explain the preference, but eighteen sentences cannot establish which will encode a much larger training or held-out corpus more efficiently. That comparison needs its own data and evaluation.
                   </p>
                 </InAModel>
                 <KeepInMind>
+
                   Two methods at 100 rows on one corpus produced 48 rows each and
                   agreed on 12. What a vocabulary is made of is decided by what is
-                  being maximised, and both are answering their own question
+                  being maximized, and both are answering their own question
                   correctly.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. What the training corpus costs">
                 <p>
-                  Read the corpus the pieces were chosen from and coverage wins at
-                  every size, which it ought to, since covering that corpus is
-                  precisely what it was maximising. At 60 tokens it reads the 133
-                  word occurrences in 475 pieces against merging&rsquo;s 531; at
-                  100 it is 296 against 344; at 121, where it has run out of
-                  positions, it is 267 against 295.
+                  {"On this training corpus, the coverage vocabularies use fewer tokens at the sizes tested. That is a useful measured result. It is not guaranteed by the objective, since covered positions and encoded token count differ. Compare both quantities explicitly."}
                 </p>
                 <CoverageLengths />
                 <p>
-                  That is 56 pieces saved at 60 tokens, 48 at 100 and 28 at 121,
-                  and it is a direct consequence of buying long pieces. A row that
-                  covers six positions removes five pieces from the corpus every
-                  time it is used, where a row that covers two removes one. The two
-                  ceilings differ as well, since coverage stops at 121 tokens when
-                  the corpus is covered and merging continues to 137 before it runs
-                  out of pairs seen twice.
+                  {"At the listed sizes, coverage saves 56,48 and 28 encoded pieces respectively. Long nonoverlapping pieces can replace several singleton tokens, but overlapping selections and bare leftovers also affect the final length. The run stops at 121 rows with some isolated positions still bare."}
                 </p>
                 <KeepInMind>
-                  On the corpus it was chosen from, this vocabulary is shorter at
-                  every size tried. That result is not evidence of anything, since
-                  it is the objective reporting on itself, and the next section is
-                  where the question is actually asked.
+                  {"The shorter training encoding shows what happens on the fitting data. To assess transfer, encode text not used in vocabulary selection and keep both results in the comparison."}
                 </KeepInMind>
               </SubSection>
 
@@ -695,10 +654,7 @@ export default function GreedyCoveragePage() {
                   will read resembles the text the vocabulary was chosen from.
                 </p>
                 <KeepInMind>
-                  The training corpus and a held-out sentence disagree about which
-                  method is better, and they disagree at every size above the
-                  crossover. The crossover here is at 70 tokens, which is well
-                  below any size a person would actually choose.
+                  {"The training corpus and held-out sentence favor different methods above the tested crossover. Seventy is the first listed size where merging leads on that sentence. A single sentence and a coarse size sweep do not establish an exact universal crossover."}
                 </KeepInMind>
               </SubSection>
 
@@ -732,12 +688,7 @@ export default function GreedyCoveragePage() {
                   caption="The same two vocabularies of 100 tokens, reading three words. Coverage is one piece behind on the words the corpus holds and three behind on the word it does not."
                 />
                 <p>
-                  So the length that wins on the training corpus is the same length
-                  that loses on new text, and it is one property rather than two. A
-                  piece of seven symbols covers seven positions wherever it occurs
-                  and occurs in fewer distinct words than a piece of three. Nothing
-                  in the objective values the ability to fall back gracefully,
-                  since falling back never happens on the corpus being covered.
+                  {"This fitted vocabulary handles expected efficiently but lacks useful shorter fallbacks for expect. That is a consequence of the selected pieces, not a rule that every longer substring occurs in fewer distinct words than every shorter one. Test representative new spellings when choosing a vocabulary."}
                 </p>
                 <KeepInMind>
                   Coverage buys length, and length is exactly what an unseen word
@@ -764,6 +715,7 @@ export default function GreedyCoveragePage() {
                   terms.
                 </p>
                 <p>
+
                   That is not a complaint about the rule; it is the content of the
                   definition. On the eighteen sentences the rule buys expecte,
                   which is the stem expect with the first letter of its ending
@@ -771,7 +723,7 @@ export default function GreedyCoveragePage() {
                   missing. Both are correct answers to the question asked, and both
                   would be rejected by anybody dividing those words by hand. The
                   information that would settle it is not in the objective, and
-                  adding it means changing what is maximised rather than tuning
+                  adding it means changing what is maximized rather than tuning
                   anything.
                 </p>
                 <KeepInMind>
@@ -806,18 +758,10 @@ export default function GreedyCoveragePage() {
                     ["100", "48", "10", "0"],
                     ["121", "69", "13", "0"],
                   ]}
-                  caption="Fifty-four of the seventy-two distinct words occur exactly once. A row spent on one of them shortens the training corpus once and can never be used on any other text."
+                  caption="A whole-word entry observed once shortens that training occurrence. It may also appear in future text, so one observed occurrence does not make the row permanently unusable elsewhere. Its future value needs evidence beyond this sample."
                 />
                 <p>
-                  Whether that is memorisation or good value is genuinely open, and
-                  the answer differs by which text is being read. On the corpus
-                  those rows earn their keep, since a whole word bought as one row
-                  removes every position of it but one. On any other text they are
-                  dead weight, and
-                  they are dead weight that displaced a shorter, commoner piece
-                  which would have earned something everywhere. Merging&rsquo;s
-                  frequency floor is a decision about the same question, made in the
-                  other direction and made without measuring.
+                  {"Long singleton entries can save training tokens while using rows that might otherwise hold more reusable fragments. Whether they are worthwhile depends on future text: a rare training word may recur, or its long piece may occur inside another word. Compare that possibility with a minimum-count rule rather than declare all singleton rows dead weight."}
                 </p>
                 <KeepInMind>
                   The objective offers no way to say that a piece seen once is worth
@@ -829,7 +773,8 @@ export default function GreedyCoveragePage() {
 
               <SubSection title="21. How long a piece may be, which nothing decides">
                 <p>
-                  We can test a possible repair by limiting candidate length. Currently candidates can contain any run of two or more symbols. A shorter maximum would rule out some whole-word entries and force selection among shorter pieces. The objective does not choose that limit for us, and the two evaluations below need not favour the same setting.
+
+                  We can test a possible repair by limiting candidate length. Currently candidates can contain any run of two or more symbols. A shorter maximum would rule out some whole-word entries and force selection among shorter pieces. The objective does not choose that limit for us, and the two evaluations below need not favor the same setting.
                 </p>
                 <LengthCeiling />
                 <>
@@ -837,7 +782,7 @@ export default function GreedyCoveragePage() {
                   At the same 100 tokens, allowing pieces of any length reads the corpus in 296 pieces and the held-out sentence in 32. Capping at five symbols reads the corpus in 324 and the sentence in 28, which is 28 pieces worse on the corpus and 4 better on the sentence, and it cuts the rows spent on words seen once from 10 to 2.
                 </p>
                 <p>
-                  Capping at three goes too far in that direction, 384 and 29. Past eight the ceiling stops binding at all, since the pieces the rule wanted were shorter than that anyway.
+                  With the three-symbol cap, the same experiment needs 384 pieces for the corpus and 29 for the held-out sentence. Beyond a cap of eight, relaxing the limit changes nothing in this run because the selected pieces were already shorter. Naming both sequence counts makes the effect on training text and held-out text visible rather than treating the cap as one overall quality score.
                 </p>
 </>
                 <KeepInMind>
@@ -854,19 +799,7 @@ export default function GreedyCoveragePage() {
                 <DerivationTable
                   expressionHeading="Coverage decision"
                   reasonHeading="What the objective does and does not settle"
-                  rows={[
-                    { expression: "the unit a covering is counted in", reason: "undecided by the objective, which says to cover the most text and does not say what text is measured in. Counting positions and counting characters are both natural and differ by one per word-final position; on three endings against three openings the first is chosen by the second, at 30 against 27 one way and 36 against 30 the other." },
-                    { expression: "two candidates covering the same amount", reason: "the objective is indifferent, so no answer is more correct. A choice must be made and any choice is arbitrary; taking the lexicographically smaller at least makes the fit repeatable, where taking whichever was met first makes it depend on the order the words arrived in. Ties are common rather than rare here, and on the eighteen sentences thirteen consecutive turns were each worth exactly two." },
-                    { expression: "the best set of a given size", reason: "Greedy selection does not search every combination. Exact search on the small two-word case finds a pair covering six more positions than the greedy pair. Larger cases require a choice of search method and computational budget." },
-                    { expression: "how far short the rule can fall", reason: "The 1 − 1/e theorem applies to ordinary weighted set union. This tokenizer rejects partially overlapping occurrences and depends on selection order, so that theorem supplies no bound for its result. The two-word example reaches 84.6% of the best pair's coverage by direct measurement." },
-                    { expression: "how long a text will be", reason: "Measure encoded length separately from coverage. Here a coverage vocabulary encodes the training corpus in 296 pieces but needs 32 for a held-out sentence. A merged vocabulary of the same size needs 27 for that sentence." },
-                    { expression: "the longest a piece may be", reason: "a decision with no answer in the objective. Uncapped, the rule buys whole words; capped at five symbols on the eighteen sentences it reads the corpus 28 pieces longer and the held-out sentence 4 pieces shorter. Which of those is the right trade is a fact about the text a model will read." },
-                    { expression: "a word the corpus saw exactly once", reason: "worth covering, and by construction worth exactly as much as a short piece seen several times, since the objective multiplies length by count. Refusing such a piece is a frequency floor imposed from outside; accepting it spends a row that can never be used on any other text. Fifty-four of the seventy-two distinct words here occur once, and ten of forty-eight rows go on them." },
-                    { expression: "whether a chosen piece is a sensible unit", reason: "not a question the objective can be asked. It scores runs of symbols by how much they account for, so a piece that stops one letter short of a stem is exactly as good as one that does not, and expecte and analys are both bought. Supplying that judgement means maximising something else." },
-                    { expression: "a vocabulary smaller than the alphabet", reason: "there is nothing to give. The floor is one row per symbol the corpus is spelled in, plus whatever stands in for the unspellable, since dropping a symbol leaves part of the training corpus itself unreadable. On the eighteen sentences that floor is 52." },
-                    { expression: "a vocabulary larger than the corpus can fill", reason: "the rule runs out of positions and stops. The size asked for is a ceiling and not a promise, and the number reached is a fact about the corpus; on the four words every position is covered after four pieces and asking for 300 gives the same four." },
-                    { expression: "a symbol the corpus used only inside words, at the end of one", reason: "unspellable, and shared with every scheme that marks where a word ends rather than being anything to do with coverage. The letter z appears in the eighteen sentences, in size, and no word there ends in it, so Alvarez cannot be spelled and the stand-in that replaces it carries no word boundary." },
-                  ]}
+                  rows={[{"expression":"the unit a covering is counted in","reason":"undecided by the objective, which says to cover the most text and does not say what text is measured in. Counting positions and counting characters are both natural and differ by one per word-final position; on three endings against three openings the first is chosen by the second, at 30 against 27 one way and 36 against 30 the other."},{"expression":"two candidates covering the same amount","reason":"the objective is indifferent, so no answer is more correct. A choice must be made and any choice is arbitrary; taking the lexicographically smaller at least makes the fit repeatable, where taking whichever was met first makes it depend on the order the words arrived in. Ties are common rather than rare here, and on the eighteen sentences thirteen consecutive turns were each worth exactly two."},{"expression":"the best set of a given size","reason":"Greedy selection does not search every combination. Exact search on the small two-word case finds a pair covering six more positions than the greedy pair. Larger cases require a choice of search method and computational budget."},{"expression":"how far short the rule can fall","reason":"The 1 − 1/e theorem applies to ordinary weighted set union. This tokenizer rejects partially overlapping occurrences and depends on selection order, so that theorem supplies no bound for its result. The two-word example reaches 84.6% of the best pair's coverage by direct measurement."},{"expression":"how long a text will be","reason":"Measure encoded length separately from coverage. Here a coverage vocabulary encodes the training corpus in 296 pieces but needs 32 for a held-out sentence. A merged vocabulary of the same size needs 27 for that sentence."},{"expression":"the longest a piece may be","reason":"a decision with no answer in the objective. Uncapped, the rule buys whole words; capped at five symbols on the eighteen sentences it reads the corpus 28 pieces longer and the held-out sentence 4 pieces shorter. Which of those is the right trade is a fact about the text a model will read."},{"expression":"a word the corpus saw exactly once","reason":"A long substring seen once can tie the immediate coverage of a shorter repeated piece. A frequency floor is an additional selection constraint. Future reuse is not ruled out by a single training occurrence."},{"expression":"whether a chosen piece is a sensible unit","reason":"not a question the objective can be asked. It scores runs of symbols by how much they account for, so a piece that stops one letter short of a stem is exactly as good as one that does not, and expecte and analys are both bought. Supplying that judgment means maximizing something else."},{"expression":"a vocabulary smaller than the alphabet","reason":"there is nothing to give. The floor is one row per symbol the corpus is spelled in, plus whatever stands in for the unspellable, since dropping a symbol leaves part of the training corpus itself unreadable. On the eighteen sentences that floor is 52."},{"expression":"a vocabulary larger than the corpus can fill","reason":"The loop stops when no eligible candidate has positive remaining gain. The small corpus is fully covered after four selections; another corpus may stop with isolated uncovered positions."},{"expression":"a symbol the corpus used only inside words, at the end of one","reason":"unspellable, and shared with every scheme that marks where a word ends rather than being anything to do with coverage. The letter z appears in the eighteen sentences, in size, and no word there ends in it, so Alvarez cannot be spelled and the stand-in that replaces it carries no word boundary."}]}
                 />
                 <KeepInMind>
                   Four of these are decisions rather than limits, namely the unit,
@@ -886,7 +819,7 @@ export default function GreedyCoveragePage() {
             trueFalse(
               "On the corpus the pieces were chosen from, coverage reads the text in fewer pieces at every size tried.",
               true,
-              "It reads the 133 word occurrences in 475 pieces at 60 tokens against merging’s 531, 296 against 344 at 100, and 267 against 295 at 121. The page also says that result is not evidence of anything, since covering that corpus is precisely what the rule was maximising and this is the objective reporting on itself.",
+              "Coverage uses fewer pieces on this training corpus at every tested size: 475 versus 531 at 60 rows, 296 versus 344 at 100, and 267 versus 295 at 121. These are valid in-sample compression measurements. They do not establish better performance on new text, because the same corpus supplied the selection objective. The held-out sentence needs its own comparison.",
             ),
             choice(
               "On the held-out sentence the ordering changes hands at 70 tokens. What is doing that?",
@@ -897,12 +830,12 @@ export default function GreedyCoveragePage() {
                 "The sentence holds words the corpus does not, which coverage refuses to encode",
               ],
               0,
-              "The corpus uses expected and never the bare stem, so coverage buys expecte and merging keeps exp and ec as rungs it climbed. Across the sentence about Dr. Alvarez 24 of coverage’s 32 pieces are bare single symbols against 17 of merging’s 27, and merging’s mean piece is the shorter of the two at 3.04 characters against 3.77.",
+              "The training text contains expected but not the bare expect. Coverage selects expecte, which is poorly suited to that unseen complete word, while BPE retains exp and ec as intermediate pieces. In the held-out sentence, 24 of coverage's 32 tokens are single symbols, compared with 17 of BPE's 27. The average lengths 3.77 and 3.04 describe vocabulary entries, not the average length of tokens actually used in that sentence.",
             ),
             trueFalse(
-              "The objective has no way to prefer a piece that is a stem or a syllable over one that is not.",
+              "The coverage objective has no explicit feature identifying a candidate as a stem or syllable.",
               true,
-              "It is a statement about positions and counts and has no representation of a prefix, a stem or a syllable, which is why it buys expecte, the stem with the first letter of its ending glued on, and analys, analysis with its last two letters missing. Both are correct answers to the question asked, and the information that would settle them is not in the objective at all, so supplying it means maximising something else.",
+              "It is a statement about positions and counts and has no representation of a prefix, a stem or a syllable, which is why it buys expecte, the stem with the first letter of its ending glued on, and analys, analysis with its last two letters missing. Both are correct answers to the question asked, and the information that would settle them is not in the objective at all, so supplying it means maximizing something else.",
             ),
             choice(
               "Why can the rule not tell a word of eight symbols seen once from a pair of symbols seen four times?",
@@ -924,7 +857,7 @@ export default function GreedyCoveragePage() {
                 "Left one setting best for the text the pieces were chosen from and a different one best for the held-out sentence",
               ],
               [0, 1, 2, 3],
-              "The cap trades 28 pieces on the corpus for 4 on the sentence, so it does not improve both readings at once, and nothing in the objective says where the limit should be. Capping at three goes too far at 384 and 29, and past eight the ceiling stops binding at all, since the pieces the rule wanted were shorter than that anyway. It is the disagreement between the corpus and the held-out sentence again, arriving through a different door.",
+              "A five-symbol cap increases the corpus encoding by 28 tokens while shortening the held-out sentence by four. It improves one measured outcome at the expense of the other. A three-symbol cap goes further, giving 384 and 29 tokens respectively. Beyond eight, the limit no longer excludes the pieces this run would choose. The cap is therefore a setting to evaluate on the intended text, rather than a value determined by coverage alone.",
             ),
         ],
         },
@@ -993,7 +926,7 @@ question: "Does covering familiar words also help spell a new one?",
   "chosen_pieces records the selection order. Each selection exposes piece and coverage; total_coverage adds newly covered positions.",
   "The coverage fit may stop before its requested size. Use the same actual row budget for the BPE comparison.",
   "Sum encoding.n_tokens over all corpus strings, then inspect encoding.texts separately for the two test words."
-], check: numberCheck("How many pieces does the four-word corpus cost under merging at 16 rows?", 48, 0, "BPE uses 48 pieces for this corpus at sixteen rows. Coverage spends its learned entries on the complete familiar words, while BPE’s intermediate parts are more useful on lowest.") },
+], check: numberCheck("How many tokens does BPE use for the four-word training corpus at 16 vocabulary rows?", 48, 0, "BPE uses 48 pieces for this corpus at sixteen rows. Coverage spends its learned entries on the complete familiar words, while BPE’s intermediate parts are more useful on lowest.") },
             ),
             exercise(
               "Spend one, two and three pieces on costing and costly",
@@ -1032,7 +965,7 @@ question: "Can complete coverage still leave a longer encoding?",
  hints: [
   "Read n_chosen_pieces and chosen_pieces from each fresh fit.",
   "total_coverage measures covered positions. Sum encode(text).n_tokens for encoded length; one measurement cannot substitute for the other."
-], check: numberCheck("How many pieces does the corpus cost once the rule has chosen three?", 12, 0, "The third learned piece completes coverage but leaves twelve encoded pieces. Selecting whole words would give a shorter representation here, so complete coverage does not establish a shortest encoding.") },
+], check: numberCheck("How many tokens represent the corpus after all three learned pieces have been selected?", 12, 0, "The third learned piece completes coverage but leaves twelve encoded pieces. Selecting whole words would give a shorter representation here, so complete coverage does not establish a shortest encoding.") },
             ),
             exercise(
               "Move the ceiling on how long a piece may be",
@@ -1122,7 +1055,7 @@ question: "How does limiting piece length change what the vocabulary can reuse?"
   "max_piece_length is a constructor setting. Six and sixteen can admit pieces that five excludes.",
   "List chosen_pieces in learned order and inspect the first four; use each selection’s piece.",
   "Compare expect with the selected piece’s exact spelling. A marked final character is different from the same character inside a longer word."
-], check: numberCheck("How many pieces does the corpus cost with the longest piece capped at six symbols?", 304, 0, "The six-symbol limit gives 304 corpus pieces. Its selected expect is an internal spelling from expected, so it does not match the marked ending of the complete word expect.") },
+], check: numberCheck("How many tokens represent the training corpus when max_piece_length is six?", 304, 0, "The six-symbol limit gives 304 corpus pieces. Its selected expect is an internal spelling from expected, so it does not match the marked ending of the complete word expect.") },
             ),
           ],
         },

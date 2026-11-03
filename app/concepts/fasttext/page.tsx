@@ -24,9 +24,9 @@ import { FasttextSpelling } from "@/components/widgets/FasttextSpelling";
 import { FasttextUnseenWord } from "@/components/widgets/FasttextUnseenWord";
 
 export const metadata: Metadata = {
-  title: "FastText · oop_ml",
+  title: "FastText · Perceptron Lab",
   description:
-    "A rare word may share useful parts with words we have seen many times. FastText includes character fragments in its word representations, allowing those related spellings to share information during learning.",
+    "FastText represents words using character fragments as well as whole-word information. Shared fragments allow related spellings to contribute to each other's representations, including words with few observed occurrences.",
 };
 
 const link =
@@ -42,7 +42,7 @@ export default function FasttextPage() {
       playgroundTitle="What can word parts tell us about an unseen word?"
       playgroundIntro="Compare a familiar word's whole-word contribution with its substring contributions. Try an unseen spelling and inspect which learned pieces support its vector."
       title="FastText"
-      tagline={"A rare word may share useful parts with words we have seen many times. FastText includes character fragments in its word representations, allowing those related spellings to share information during learning."}
+      tagline={"FastText represents words using character fragments as well as whole-word information. Shared fragments allow related spellings to contribute to each other's representations, including words with few observed occurrences."}
       prerequisites={
         <>
           This page changes one part of{" "}
@@ -54,8 +54,7 @@ export default function FasttextPage() {
           <Link href="/concepts/distance-metrics" className={link}>
             cosine
           </Link>{" "}
-          between their vectors throughout, which is an angle rather than a
-          distance, and{" "}
+          {" similarity, which measures directional alignment rather than vector magnitude. The "}{" "}
           <Link href="/concepts/a-vector-for-a-word" className={link}>
             what a vector for a word is for
           </Link>{" "}
@@ -83,44 +82,16 @@ export default function FasttextPage() {
                   There is a deliberate omission: the corpus contains play, plays, player and played, but never playing. Its shorter character pieces occur in those forms and in staying, saying, walking and talking. Can the model build a useful representation for the unseen word from pieces it has learned elsewhere? That is the question we will test.
                 </p>
                 <KeepInMind>
-                  The sentences are nonsense, which is deliberate. Words are drawn
-                  at random from a list, so nothing is grammatical and nothing
-                  means anything, and the only structure available to any method
-                  is which words turn up beside which. The two numbers this page
-                  keeps reporting, how alike two words of one list came out and
-                  how alike a word of each came out, are therefore the whole
-                  score.
+                  {"The sentences are generated from the two lists rather than written as grammatical prose. That creates a controlled topic pattern and deliberately omits natural syntax. We will inspect both topic separation and the effects of spelling; two mean scores do not capture every useful property."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. Asking for a word the corpus never held">
-                <p>
-                  Word2vec learns by prediction. Slide a window along the corpus,
-                  and at every position nudge the vectors so that a word&rsquo;s
-                  vector predicts the words beside it, and words that keep the
-                  same company end up in the same place. When the passes are over
-                  there is a table with one row per word, 31 rows of twelve
-                  numbers here, and that table is the answer. Everything in this
-                  page keeps that arrangement; the one thing it changes is what a
-                  row is looked up by.
-                </p>
-                <p>
-                  Ask that table for playing and there is nothing to return. A row
-                  was allocated for each word the corpus held, playing was not one
-                  of them, and no amount of further training changes that, since
-                  further training walks the same sentences. This is not a
-                  shortcoming of any particular program. A method whose answer is
-                  a table indexed by whole words has, by construction, no entry
-                  for a word it never indexed.
-                </p>
+                <p>The word-level comparison keeps one learned vector per vocabulary entry. Training adjusts those vectors using nearby-word prediction tasks. Here the table has 31 rows of twelve numbers. FastText retains that prediction setting while changing how an input word&apos;s representation is assembled.</p>
+                <p>A lookup table indexed only by known whole words has no learned row for playing when that word is absent from its vocabulary. Repeating the same training text cannot supply a missing entry. A subword representation offers another route by reusing learned pieces of its spelling.</p>
                 <Equation>{"vector(w) = row(w),  which exists only for the words the corpus held"}</Equation>
                 <KeepInMind>
-                  The honest response is a refusal rather than a default vector,
-                  because any default names a position in the space, and every
-                  position in that space means something the corpus taught. A
-                  vector of zeros is not a neutral answer either, as Part 6 comes
-                  back to, since it has no direction at all and cannot be compared
-                  to anything.
+                  {"A whole-word lookup needs a policy for an entry absent from its vocabulary. It can reject it or return a documented fallback. A zero fallback has no cosine direction, while a shared unknown-word row cannot distinguish unseen spellings."}
                 </KeepInMind>
               </SubSection>
 
@@ -137,13 +108,7 @@ export default function FasttextPage() {
                 </p>
                 <FasttextHeldOut />
                 <p>
-                  The method built from pieces places walking at a mean cosine of
-                  0.9953 to the nineteen verb forms that survived and 0.0497 to the
-                  eleven money words, with walked nearest, and it does that having
-                  never seen the word. The method with one row per word has
-                  nothing to return, exactly as it had nothing to return for
-                  playing. Which word was held out made no difference to either
-                  answer.
+                  {"In this walking holdout, the subword model places it closer to the surviving verb forms than to the money words, with walked nearest. The whole-word model still has no entry. Two successful held-out examples do not establish that every missing spelling will receive the same quality of answer."}
                 </p>
                 <KeepInMind>
                   Nothing here measures how often a missing word turns up in
@@ -162,13 +127,9 @@ export default function FasttextPage() {
             <>
               <SubSection title="4. Wrapping the word and cutting it up">
                 <p>
-                  FastText adds one thing. A word still has a row of its own, and
-                  the window, the scoring, the drawn wrong answers and the falling
-                  step size are all unchanged. What is new is that a word also
-                  stands for the short runs of characters its spelling is made of,
-                  so that two words spelled alike are made of some of the same
-                  parts.
+                  {"FastText combines a whole-word vector with character n-gram vectors. An n-gram is an overlapping run of n characters. Related spellings can share learned rows, including when a complete word was rare or unseen. Bojanowski and colleagues described this extension in a 2016 preprint and the 2017 paper Enriching Word Vectors with Subword Information, addressing the limited evidence available for many individual word forms."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://aclanthology.org/Q17-1010/">{"Bojanowski et al.: Enriching Word Vectors with Subword Information (2017)"}</Link></p>
                 <>
 <p>
                   Before it is cut, the word is wrapped, so play becomes &lt;play&gt;. The wrapping is not decoration. Without it the three letters her at the beginning of a word, in the middle of one and at its end would all be the same piece; with it the piece at the start of her is &lt;he and the piece at its end is er&gt;, while the her sitting inside where is the same plain her that her itself also contains.
@@ -185,32 +146,18 @@ export default function FasttextPage() {
                     The wrapped word &lt;where&gt; has seven characters, so at a length of exactly three it gives five pieces, &lt;wh, whe, her, ere and re&gt;, which is the example the original paper works. At the published lengths of three to six the same word gives fourteen, five of length three, four of four, three of five and two of six.
                   </p>
                   <p>
-                    The shortest useful case is a word like at, whose wrapped form has four characters and yields exactly &lt;at and at&gt;, since the wrapped word itself is never one of its own pieces. It does not need to be; the word already has a row.
-                  </p>
+                  {"With the three-to-six range, the wrapped form <at> supplies <at and at> in this SDK, excluding the complete wrapped word. Some shorter spellings provide no eligible fragment. A known word still has its own row; an unseen word then depends entirely on whatever fragment rows can be used."}
+                </p>
 </>
                 </WorkedExample>
                 <KeepInMind>
-                  A piece is a run of characters and not a morpheme. Nothing here
-                  segments anything, and &lt;pl, pla and lay are not parts of a
-                  word that any linguist would name. What the method relies on is
-                  the weaker and much cheaper fact that related words tend to share
-                  runs of letters. A piece occurring twice in one word counts once,
-                  since the collection is a set, and the released program adds the
-                  wrapped word itself as one extra piece for short words, so a
-                  short word there reaches one row more than it does here.
+                  {"These are overlapping character fragments, not a linguistic segmentation into meaningful word parts. This SDK uses distinct fragment strings and excludes the full wrapped spelling. The released implementation’s fragment handling differs, including whether repeated n-gram occurrences contribute more than once, so exact vectors need not agree."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="5. Where the pieces are kept">
                 <p>
-                  There are far more pieces than there are words. The 31 words of
-                  this corpus own 279 distinct pieces between them, 13.6129 per
-                  word on average, five for the shortest and 22 for the longest,
-                  and that ratio grows with the vocabulary rather than shrinking,
-                  since a bigger vocabulary holds longer words and a longer word
-                  has more pieces. Giving each piece an entry of its own would mean
-                  a second vocabulary to build, hold and look up, which is most of
-                  what a fixed width was meant to avoid.
+                  {"The 31 vocabulary words produce 279 distinct fragments, averaging 13.6129 per word in this example. A separate fragment dictionary is possible, but this implementation instead allocates a fixed set of hash buckets. Vocabulary growth does not necessarily increase fragments per word: that depends on the spellings and length range."}
                 </p>
                 <p>
                   So the pieces get no vocabulary at all. Each is put through a
@@ -233,20 +180,13 @@ export default function FasttextPage() {
                   </p>
                 </WorkedExample>
                 <KeepInMind>
-                  There is no lookup and no list of pieces anywhere. Nothing checks
-                  whether a piece was ever seen, so a piece nobody has ever written
-                  is given a row just as readily as a common one. The consequence,
-                  which the method accepts and Part 4 measures, is that two
-                  different pieces can be sent to one row and are then added into
-                  the same numbers.
+                  {"The hash computes a bucket without consulting a fragment-to-ID vocabulary. Different fragments can share that bucket and therefore share its learned row. The SDK can still enumerate a supplied word’s fragments when inspecting how its vector was assembled."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="6. A word’s vector is its own row plus its pieces’ rows">
                 <p>
-                  With the pieces placed, a word&rsquo;s vector is a sum. Its own
-                  row carries whatever is true of that word alone, and the rows of
-                  its pieces carry whatever is true of every word that shares them.
+                  {"Compose the word from its whole-word row and the rows selected by its fragments. The whole-word row can capture occurrence-specific evidence for that spelling; shared rows receive updates from all the words that use them, including hash collisions. None is a direct statement of what is true about the word."}
                 </p>
                 <Equation>{"vector(w) = row(w) + Σ over the pieces g of <w> of row(g)"}</Equation>
                 <p>
@@ -254,16 +194,8 @@ export default function FasttextPage() {
                 </p>
                 <WhyThisWorks title="Why a sum, and why the choice is nearly invisible">
                   <p>
-                    The paper composes by adding. The released program averages the
-                    parts on the way forward while still adding the whole
-                    correction to each of them on the way back, which scales the
-                    gradient by however many parts a word has. Since a cosine
-                    ignores a vector&rsquo;s length entirely, the choice between
-                    the sum and the mean cannot change any comparison of two words
-                    made by angle, which is every comparison on this page. What it
-                    does change is how far a step moves things, which is the next
-                    step&rsquo;s subject.
-                  </p>
+                  {"For fixed stored component rows, summing or averaging multiplies a word’s composed vector by a positive scalar, so cosine comparisons are unchanged. Using the two rules during training is different: forward scores and gradients can change, producing different fitted component rows. This SDK uses a sum and its corresponding derivative."}
+                </p>
                 </WhyThisWorks>
               </SubSection>
 
@@ -279,13 +211,7 @@ export default function FasttextPage() {
                 </p>
                 <Equation>{"∂cost / ∂row(part) = ∂cost / ∂vector(w),  the same for every part"}</Equation>
                 <p>
-                  One consequence is arithmetical. A word here has 14.6129 parts on
-                  average counting its own row, six for the shortest word and 23
-                  for the longest, so its composed vector travels that many times
-                  as far per correction as a plain one would for the same gradient.
-                  The cost curve shows it. The first pass over the corpus costs
-                  2.5560 per training pair where the same fit without pieces costs
-                  3.7370, and by the second pass the two are 2.0716 and 2.6643.
+                  {"With distinct component rows, applying the same gradient to each moves their composed sum by the number of components times the individual step. Hash collisions within a word can add multiplicities, changing that factor. The loss comparison below also includes differences in the resulting representation and trajectory; it does not isolate update amplification as the sole cause."}
                 </p>
                 <NumberTable
                   headings={["pass", "cost per pair, with the pieces", "without them"]}
@@ -330,17 +256,11 @@ export default function FasttextPage() {
                   Playing has 22 pieces at the published lengths. Sixteen of them are owned by some word of the corpus, and those rows have been written to thousands of times; six of them, layi, playi, layin, &lt;playi, playin and laying, occur in no word of the corpus and their rows never moved. Seventeen of the 22 rows it reaches had been written to, one more than those sixteen pieces account for, and the extra one is an accident worth remembering.
                 </p>
                 <p>
-                  The piece playin, which no word of this corpus holds, was sent to row 1312, and so was ayed&gt;, which played, stayed, walked and talked all own.
+                  {"The unseen fragment playin hashes to row 1312. The fragment ayed>, present in played and stayed, hashes there too. Walked and talked do not contain ayed>; their spelled endings differ."}
                 </p>
 </>
                 <KeepInMind>
-                  There is no unknown word here, only unseen ones, and the
-                  difference matters. A method with a fallback entry gives every
-                  unknown word the same vector, so two unknown words are perfectly
-                  alike and neither is near anything in particular. Here two unseen
-                  words get different answers, worked out from different pieces,
-                  which is the point of the arrangement and also, as Part 5 shows,
-                  where its new failure lives.
+                  {"An unseen spelling can receive a vector from its component buckets, rather than sharing one unknown-word fallback. The result may be distinct, but collisions or identical fragment sets can also give different spellings the same vector. Check its supporting fragments rather than assume that every unseen word has a useful unique representation."}
                 </KeepInMind>
               </SubSection>
 
@@ -352,37 +272,18 @@ export default function FasttextPage() {
                 </p>
                 <FasttextUnseenWord />
                 <p>
-                  Playing comes back at a mean cosine of 0.9970 to the twenty verb
-                  forms and 0.1003 to the eleven money words. The verb form it is
-                  least alike is still 0.9939 and the money word it is most alike is
-                  0.1106, so the two ranges are separated by 0.8833 and nothing
-                  overlaps. Its four nearest words are play at 0.9993, plays at
-                  0.9988, player at 0.9987 and played at 0.9985, which are the four
-                  forms of its own verb and in a sensible order, from a fit that
-                  never saw the word.
+                  {"Playing is closer to every tested verb form than to any tested money word under this fit. Its nearest entries are play, plays, player and played. That agrees with the held-out construction; the precise ordering among those forms needs a task criterion before calling it sensible."}
                 </p>
                 <InAModel title="What the answer is actually made of">
                   <p>
-                    Eight words of the corpus share a piece with playing, and they
-                    are the eight an English speaker would name. Saying and staying
-                    share ten pieces each, all from the ending; play, played, player
-                    and plays share six each, all from the beginning; talking and
-                    walking share the three pieces of ing. None of the eleven money
-                    words shares a single piece. So the answer is a sum over rows
-                    that only verb forms ever wrote to, and its landing among the
-                    verb forms is that arithmetic rather than any insight into
-                    English.
-                  </p>
+                  {"Playing shares literal fragments with the listed verb forms and none with the money words. Those shared fragments explain much of its learned support. Hash collisions can also bring updates from words with no matching literal fragment, so inspect bucket usage as well as string overlap."}
+                </p>
                 </InAModel>
               </SubSection>
 
               <SubSection title="10. How much of a word the corpus did hold is its spelling">
                 <p>
-                  The same sum can be taken for a word the corpus did hold, leaving
-                  out its own row. What comes back is what that word&rsquo;s vector
-                  would have been had it never been seen, and comparing the two
-                  says how much of the word is carried by its spelling rather than
-                  by its own occurrences.
+                  {"Drop the whole-word row from a known word after training and compare the remaining fragment sum with its full vector. This measures a component contribution in the trained model. It is not the counterfactual vector from a fit that never observed the word, since its occurrences also trained the shared buckets and output rows."}
                 </p>
                 <NumberTable
                   headings={[
@@ -400,20 +301,10 @@ export default function FasttextPage() {
                   caption="Each word’s vector with its own row dropped, compared to the vector with it kept."
                 />
                 <p>
-                  On this corpus a word is almost entirely its spelling. Dropping
-                  played&rsquo;s own row leaves a vector pointing 0.9997 of the way
-                  in the same direction and 0.9827 as long, and bond, the shortest
-                  of the four with nine pieces, is the one that loses most of its
-                  length at 0.9043.
+                  {"For these words, the fragment-only sum has nearly the same direction and length as the full vector. For played, the cosine is 0.9997 and the length ratio is 0.9827. Cosine is not a fraction of the way in a direction, and this ablation does not separate spelling knowledge from the contexts that trained those fragments."}
                 </p>
                 <KeepInMind>
-                  That ratio is a fact about this corpus rather than about the
-                  method. A word occurring 34 times has its own row corrected 34
-                  times over, while the rows of its pieces are corrected by every
-                  occurrence of every word that shares them, which here is
-                  hundreds. On a corpus where a word is common and its spelling
-                  unusual the balance would run the other way, and nothing in the
-                  method fixes where it falls.
+                  {"The balance depends on the gradients and how often component rows are used. Whole-word rows and shared fragment rows both receive context-based updates. Count alone does not fix their norms or guarantee which contribution dominates."}
                 </KeepInMind>
               </SubSection>
 
@@ -426,21 +317,10 @@ export default function FasttextPage() {
                 </p>
                 <FasttextNeighbours />
                 <p>
-                  Asked for the five words nearest walked, the fit that reads
-                  spellings names talked, walk, says, walking and walks; the fit
-                  with one row per word names talking, walking, talk, stays and
-                  said. Both lists are entirely verb forms, so neither is wrong
-                  about the category, and they share one word of the five. What has
-                  changed is that three of the five are now forms of walk itself
-                  where before there was one, which is what sharing &lt;wa, wal and
-                  alk does.
+                  {"The two nearest-word lists contain only verb forms but differ in their fine ordering. In the subword list, walk and walking are forms of the query verb; talked and says belong to other verbs. The shared fragments add a spelling-based influence that the whole-word model does not have."}
                 </p>
                 <KeepInMind>
-                  Pulling the forms of one verb together is what the method is for,
-                  and it is not free. Two words spelled alike are pushed together
-                  whether or not the corpus said they belong together, so a
-                  neighbour list read as evidence about meaning is now partly a
-                  statement about spelling. Part 5 measures where that goes wrong.
+                  {"Shared rows tie part of the representation to spelling. Context-trained whole-word rows and other fragments can still distinguish words with similar spelling. The mechanism creates a tendency, not a requirement that every similar spelling be close regardless of context."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -463,23 +343,23 @@ export default function FasttextPage() {
                 "So a word shorter than the minimum piece length still yields pieces",
               ],
               0,
-              "Without the wrapping the three letters her would be one piece wherever they fell. With it the piece at the start of her is <he and the piece at its end is er>, while the her sitting inside where stays plain her, and telling a beginning from an ending is what carries a grammatical ending. The wrapped word is deliberately never one of its own pieces, because the word already has a row.",
+              "The boundary markers tell a piece at the start or end of a word apart from the same letters inside another word. For her, <he marks the beginning and er> marks the end; her inside where has neither marker. This provides information about spelling position, which may help represent prefixes and suffixes. The implementation excludes the complete wrapped word from its character pieces because a known word already has its own word row.",
             ),
             choice(
               "Playing is in no sentence, yet it comes back at 0.9970 to the verb forms and 0.1003 to the money words. Why does it land there?",
               [
-                "Its vector is a sum over rows that only verb forms ever wrote to, since eight verb forms share a piece with it and no money word does",
-                "The fit recognised ing as a verb ending and placed the word by its grammar",
+                "Its vector combines bucket rows trained through character pieces shared with familiar verb forms, while hash collisions can add other words’ updates",
+                "The fit recognized ing as a verb ending and placed the word by its grammar",
                 "An unseen word is given the average of the verb forms’ vectors as a fallback",
                 "Its own row was filled in from the rows of play, plays, player and played",
               ],
               0,
-              "Saying and staying share ten of its pieces, the four play forms share six each, and talking and walking share the three pieces of ing, while none of the eleven money words shares one. So the landing is that arithmetic and no insight into English. There is no fallback entry and no row of its own, which is why two unseen words get different answers worked out from different pieces.",
+              "Playing shares character pieces with familiar verb forms, including pieces from play and ing. Their trained bucket rows contribute to its vector even though playing has no word row of its own. The resulting cosines are 0.9970 to the verb group and 0.1003 to the money group. This is a useful result on the supplied corpus, but spelling overlap is evidence about usage only when the training data supports that relationship.",
             ),
             trueFalse(
               "A piece is given a row only once some word of the corpus has been found to contain it.",
               false,
-              "There is no lookup and no list of pieces anywhere. A piece is hashed and the remainder on division by the number of rows is the row it uses, so a piece nobody has ever written is given a row just as readily as a common one. The piece laying, which no word of this corpus contains, lands in row 827, and that row is still every coordinate zero.",
+              "The piece table has a fixed number of bucket rows before fitting. Hashing a piece selects one of those rows whether or not the piece has appeared in training. No vocabulary of observed piece spellings is needed for that lookup. In this example laying maps to row 827, which remains zero because no training piece updated it.",
             ),
             several(
               "Which statements follow from the update rule or agree with this first-pass comparison?",
@@ -517,29 +397,21 @@ export default function FasttextPage() {
                 <WhyThisWorks title="Why the rows for the pieces start at zero">
                   <>
 <p>
-                    Word rows start at a small random draw, which breaks the symmetry between words that would otherwise all begin identical. The rows for the pieces start at zero instead, for two reasons. A random offset on a shared row carries nothing about the corpus, and two pieces that only ever occur together receive identical corrections forever, so they would differ for good by nothing but where they happened to start.
-                  </p>
+                  {"This SDK initializes word rows randomly and bucket rows at zero. The zero bucket initialization helps the no-fragments case reproduce the plain model without consuming extra random draws. It is an implementation choice; other initializations are possible. Two components used together can receive matching updates, but collisions and other words may change their histories."}
+                </p>
                   <p>
                     And starting at zero, and taking nothing from the sequence of random numbers, means a word&rsquo;s composed vector begins precisely where a plain one begins and the two fits walk the same walk.
                   </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  A gap of exactly zero rules out a class of mistake that a gap of
-                  four decimal places would not. Any difference in how the corpus
-                  is walked, how far the window reaches at each position, which
-                  words are drawn as wrong answers or how the step falls would show
-                  up as a small disagreement rather than none at all, so zero says
-                  the added machinery touches nothing but the composition.
+                  {"The no-fragments equality check verifies that this test follows the same calculation as the plain model. It is useful regression evidence, but a finite equality result does not rule out every possible implementation mistake on other inputs."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="13. More pieces than words, and no vocabulary for them">
                 <p>
-                  A word of length L wrapped has L plus two characters, so at
-                  lengths m to M it yields one run for every starting position at
-                  every length that fits, which is a count that grows with the
-                  word&rsquo;s length and with the width of the range.
+                  {"Count the candidate substring spans at each length after wrapping the word. Exclude the complete wrapped word for this SDK. The formula below counts positions; if the same fragment string occurs more than once, the distinct-string set can contain fewer entries."}
                 </p>
                 <Equation>{"how many pieces =  Σ over k from m to min(M, L + 1) of (L + 3 − k)"}</Equation>
                 <WorkedExample title="The count, checked on three words">
@@ -592,11 +464,7 @@ export default function FasttextPage() {
                   caption="Every row is a fit of the whole corpus at those lengths, with the same width, reach, passes, first step and seed."
                 />
                 <KeepInMind>
-                  Nothing computed during a fit says which of those rows is best.
-                  The lengths have to be set before the corpus is read and judged
-                  from outside, and the published three to six is a value that
-                  worked on the languages the authors had rather than a value
-                  derived from anything.
+                  {"Choose the fragment-length range for the language and task, then evaluate it. The paper’s three-to-six range is a useful reference setting, rather than a universal optimum. Training diagnostics and held-out tests can help compare alternatives."}
                 </KeepInMind>
               </SubSection>
 
@@ -610,32 +478,16 @@ export default function FasttextPage() {
                 </p>
                 <FasttextBuckets />
                 <p>
-                  At two thousand rows the 279 pieces occupy 260, so nineteen of
-                  them are sharing. Row 1713 holds &lt;play, which the four play
-                  forms own, together with alk, which walk, talk and their six other
-                  forms own, so every one of those twelve words is reading a number
-                  the other eleven helped write. Row 897 holds &lt;sto from stock and
-                  lay&gt; from play. At twenty thousand rows only two pieces share
-                  one, and at the published two million none of them do.
+                  {"At 2,000 buckets, 279 fragments occupy 260 rows: 19 more fragments than occupied rows. That is a count of excess assignments, not necessarily the number of distinct fragments participating in collisions. The named collisions show which words share particular rows."}
                 </p>
                 <KeepInMind>
-                  Two pieces sharing a row is not an error state. Nothing detects
-                  it, nothing reports it, and the fit proceeds exactly as if the two
-                  pieces were one. The lines above were found from outside, by
-                  hashing this corpus&rsquo;s pieces a second time and looking for
-                  two that agree, which is possible only because the list of pieces
-                  was already in hand.
+                  {"A collision is accepted by the hash-based model. It can be detected for a known set of fragments by comparing their bucket IDs, and that inspection can be instrumented during training. The vector values alone do not identify every contributor."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. What a table too small costs">
                 <p>
-                  Making the table small enough shows the sharing doing damage. At
-                  ten rows all 279 pieces are crushed into ten, and the two lists
-                  come out 0.9359 alike within a list and 0.4942 alike across the
-                  two, a separation of 0.4417 against the 0.8723 that two thousand
-                  rows give. The missing form comes back at 0.5497 to the money
-                  words, which is no longer an answer worth reading.
+                  {"With ten buckets, the two topic groups have less separation under the reported measure, and the held-out spelling is more similar to finance words. This is a degraded result for the intended test, rather than proof that the vector is useless for every possible query."}
                 </p>
                 <p>
                   The sweep is uneven. With fifty rows, the missing form&apos;s similarity to the finance words is 0.1133; with two hundred rows it is 0.2285, worse for this comparison. A larger table changes which pieces collide under this hash. It need not improve this particular result at every size.
@@ -679,14 +531,7 @@ export default function FasttextPage() {
                   caption="Measured on this corpus at a width of twelve, two thousand rows for the pieces and the published piece lengths."
                 />
                 <p>
-                  That is just over sixty five times as many numbers held for an
-                  answer of the same size, and 1,740 of the two thousand rows were
-                  never written to at all, because how many rows there are is
-                  settled before any text is read rather than discovered from it. On
-                  a corpus this small that is the clearest place the method is worse
-                  than the one it extends, and it is also the cost that scales best,
-                  since two million rows is a fixed bill however large the
-                  vocabulary becomes.
+                  {"The bucket rows add a substantial fixed allocation in this small example, including 1,740 unused rows. The bucket allocation stays fixed when vocabulary grows, but whole-word and output tables still grow with it. Alternative storage or export formats may retain fewer arrays depending on the queries they support."}
                 </p>
                 <KeepInMind>
                   The cost per correction grew too, from one row to 14.6129 on
@@ -713,29 +558,19 @@ export default function FasttextPage() {
                 </p>
                 <FasttextSpelling />
                 <>
-<p>
-                  Five of them land where a reader would put them. Banking comes back at 0.9632 to the money words against 0.3718 to the verbs, and its three nearest are trade, yield and debt; stocking, traded, sharing and priced do the same, the last at 0.9870 with price, yield and fund nearest. Walkway lands among the verbs at 0.9970, nearest walk and walks, and that is the spelling working exactly as designed while giving the wrong answer, since a walkway is a thing rather than something anybody does.
-                </p>
+<p>The held-out examples show both the value and the limit of shared spelling. Banking has a cosine of 0.9632 to the finance group and 0.3718 to the verbs, with trade, yield and debt nearest. Stocking, traded, sharing and priced also join the finance group; priced reaches 0.9870, nearest price, yield and fund. Walkway instead joins the verb group at 0.9970, nearest walk and walks. Its shared fragments explain that result without establishing that its grammatical role or meaning matches those verbs.</p>
                 <p>
                   No sentence here ever put walkway beside anything, so there was no evidence to weigh against the letters it shares with walk, walks, walked and walking.
                 </p>
 </>
                 <KeepInMind>
-                  Stocking is the same shape of mistake wearing a better disguise. A
-                  stocking has nothing to do with the stock market, and the fit puts
-                  it at 0.9694 to the money words with stock nearest, because the
-                  five letters agree. A word inherits the company of the words it is
-                  spelled like, whether or not it means anything similar.
+                  {"In the clothing sense, stocking is unrelated to the stock market, yet this fit places it near the finance words. The same spelling can also refer to supplying goods. An unseen word’s intended sense is not specified by its letters alone, so choose evaluation prompts that make that distinction clear."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="18. A word placed by one shared row">
                 <p>
-                  The eighth word is the interesting one. Queue has fourteen pieces
-                  and shares no letters worth mentioning with anything in this
-                  corpus, so thirteen of its rows were never written to and
-                  contribute nothing. The fourteenth is queue&gt;, which the hash
-                  sent to row 98, and so is arket, which market owns.
+                  {"Queue has fourteen eligible fragments here. None matches a trained fragment string, but queue> hashes to the same bucket as arket from market. The other thirteen selected rows remain zero in this fit."}
                 </p>
                 <p>
                   So the whole of queue&rsquo;s vector is one row that market and
@@ -775,16 +610,11 @@ export default function FasttextPage() {
                   A cosine is a ratio whose denominator is the product of the two lengths, so against a zero vector it is zero divided by zero. It is not a small similarity and not a large distance; the quantity does not exist, because the zero vector has no direction for an angle to be measured from.
                 </p>
                 <p>
-                  That is a fact about the arithmetic rather than about any program, and every implementation faces the same choice. Refusing says so. Returning zero would report that the word is unrelated to everything, which is a claim the method never made. Returning some default direction would place the word somewhere the corpus never implied, which is the thing having pieces was supposed to avoid.
+                  {"Cosine needs a nonzero vector. This SDK rejects the comparison when the fragment sum is zero. Another system could return a labeled fallback, but that would be an interface policy rather than a cosine measured from this vector."}
                 </p>
 </>
                 <KeepInMind>
-                  This is the honest edge of the promise. A method built from pieces
-                  has no unknown words, only unseen ones, and that holds exactly as
-                  long as some piece of the word reaches a row something wrote to.
-                  Below that line it has nothing, and the line moves with the
-                  corpus, the piece lengths and the number of rows rather than
-                  sitting anywhere a reader can point to in advance.
+                  {"Reaching trained buckets does not guarantee a nonzero or useful result: their vectors can cancel or contain irrelevant collision evidence. An unseen-word interface should report those limits and, where possible, the amount and kind of supporting evidence."}
                 </KeepInMind>
               </SubSection>
 
@@ -798,30 +628,20 @@ export default function FasttextPage() {
                 </p>
                 <>
 <p>
-                  The collisions this page names were found from outside, by taking the corpus&rsquo;s own list of pieces and hashing it a second time looking for two that agree, which works only because that list was already in hand. It does not extend to the case that matters. The piece queue&gt; belongs to no word of the corpus, so no list of the corpus&rsquo;s pieces contains it, and the only way to find that particular accident is to already suspect the word queue and go looking.
+                  {"For a query such as queue, enumerate its fragments and inspect their buckets against retained training provenance. This identifies known collisions affecting that query. Discovering every possible future collision is a different and much larger problem."}
                 </p>
                 <p>
-                  The set of spellings that might one day be asked for is not a set anybody can enumerate.
+                  {"There are infinitely many possible spellings without a length bound. A finite query set can still be checked directly."}
                 </p>
 </>
                 <KeepInMind>
-                  There is no repair inside the method either. A different hash, or
-                  more rows, is a different table, and a different table has to be
-                  trained again from the beginning; nothing can be moved from the
-                  old one, since a row of the old table is a sum whose terms are no
-                  longer separable. The number of rows is therefore a decision taken
-                  before training with no way back.
+                  {"Changing the hash or bucket count changes the parameter-sharing scheme. The existing sums generally do not reveal how to split collided contributions exactly. A system can still migrate an approximation, retain provenance, or retrain and evaluate the new representation; starting from nothing is not mathematically required in every case."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="21. Whether the spelling helps is a fact about the language">
                 <p>
-                  Everything the method adds is carried by one quantity, how much
-                  two related words&rsquo; pieces overlap. On this corpus that
-                  quantity is generous, and it is why the method works here at all.
-                  Playing shares ten pieces with saying and six with played, and
-                  none at all with any of the eleven money words, so the sum over its
-                  pieces could hardly land anywhere else.
+                  {"The character representation helps when useful forms share fragments, as playing does with trained play and-ing forms. The learned context values and hash collisions matter too. String overlap alone does not determine where a vector must land."}
                 </p>
                 <>
 <p>
@@ -832,14 +652,7 @@ export default function FasttextPage() {
                 </p>
 </>
                 <KeepInMind>
-                  Nothing on this page measures a second language, and the claim
-                  here is narrower than a comparison would be. The quantity the
-                  method depends on is one the writing system fixes in advance, so
-                  reporting that FastText helped on one corpus says something about
-                  that corpus rather than about the method, and the original
-                  paper&rsquo;s own results say the same thing in the other
-                  direction, since its gains were largest exactly where a word
-                  carries most of its grammar in its endings.
+                  {"These examples use English and do not measure another language. To compare languages, evaluate their data, tokenization and morphology directly. Results on one corpus give evidence about the method under those conditions, rather than saying nothing about the method itself."}
                 </KeepInMind>
               </SubSection>
 
@@ -848,56 +661,10 @@ export default function FasttextPage() {
                 <DerivationTable
                   expressionHeading="Word or character-part evidence"
                   reasonHeading="What can contribute to its vector"
-                  rows={[
-                    {
-                      expression: "a word none of whose pieces\nreaches a written row",
-                      reason:
-                        "the sum is over rows that never moved, so the vector is every coordinate zero and a cosine against it is zero over zero. Undefined rather than distant. Measured here on a three-letter word whose five rows nothing had reached, giving a vector of length exactly 0.",
-                    },
-                    {
-                      expression: "a word shorter than the\nshortest piece",
-                      reason:
-                        "wrapped, it holds no run of the required length, so it has no pieces at all. Its answer is its own row alone if the corpus held it, and nothing whatever if it did not. Where the shortest length is put therefore decides which words the method can answer for, and no quantity inside a fit says where to put it.",
-                    },
-                    {
-                      expression: "the shortest and longest\npiece lengths",
-                      reason:
-                        "a real choice with no principle behind it. Too long and few words share anything; too short and every word shares with every other. Measured, cutting at three only puts the missing form at 0.1427 to the wrong list and refusing to cut below four puts it at 0.2302, against 0.1003 at the published three to six.",
-                    },
-                    {
-                      expression: "two pieces sent to one row",
-                      reason:
-                        "defined and undetectable. Their corrections are added together and the table holds only the sum, so nothing in the answer says a row was shared or by what. The rows named on this page were found by hashing a list of pieces that was already in hand, which is not available for a spelling nobody has asked for yet.",
-                    },
-                    {
-                      expression: "how many rows the pieces\nshare",
-                      reason:
-                        "a choice made before any text is read, and one with no way back, since a different number of rows is a different table that has to be trained from the start. Measured, ten rows here cost the separation of the two lists, 0.4417 against 0.8723, and the damage in between is not monotone, since fifty rows put the missing form at 0.1133 to the wrong list and two hundred at 0.2285.",
-                    },
-                    {
-                      expression: "a word spelled like an\nunrelated word",
-                      reason:
-                        "defined, and confidently wrong. The method has no term that could separate resemblance from relatedness, so a word inherits the company of the words it looks like. Measured here at 0.9694 between an unseen word and a list it has nothing to do with, reached through five shared letters.",
-                    },
-                    {
-                      expression: "the length of a word’s vector,\nread as confidence",
-                      reason:
-                        "it does carry how many written rows went into the sum, 3.7789 for a word with seventeen against 0.1893 for a word with one, but a cosine divides both lengths out, so the ordinary comparison cannot see it. And nothing in the method says what length is enough, since the scale depends on the corpus, the passes and the step size.",
-                    },
-                    {
-                      expression: "the individual coordinates\nof a vector",
-                      reason:
-                        "undefined as quantities, exactly as they are for the method this one extends. Rotating every row, piece row and scoring row by one rotation leaves every score and so the whole objective unchanged, so the coordinates are one arbitrary choice among infinitely many. Only rotation-invariant readings, cosines and distances, carry anything.",
-                    },
-                  ]}
+                  rows={[{"expression":"a word none of whose pieces\nreaches a written row","reason":"the sum is over rows that never moved, so the vector is every coordinate zero and a cosine against it is zero over zero. Undefined rather than distant. Measured here on a three-letter word whose five rows nothing had reached, giving a vector of length exactly 0."},{"expression":"a word shorter than the\nshortest piece","reason":"wrapped, it holds no run of the required length, so it has no pieces at all. Its answer is its own row alone if the corpus held it, and nothing whatever if it did not. Where the shortest length is put therefore decides which words the method can answer for, and no quantity inside a fit says where to put it."},{"expression":"the shortest and longest\npiece lengths","reason":"Lengths control which spellings share fragments and how many updates are combined. Compare candidate ranges on development tasks; the shown English setting is not a universal optimum."},{"expression":"two pieces sent to one row","reason":"The shared row combines updates. Its values alone do not identify all contributing fragments, but retained fragment-to-bucket provenance can reveal collisions for known training strings and queries."},{"expression":"how many rows the pieces\nshare","reason":"Bucket count changes collisions and storage. Moving to another count may require retraining or an evaluated migration because collided contributions cannot generally be separated exactly."},{"expression":"a word spelled like an\nunrelated word","reason":"Shared fragments can encourage similarity, while whole-word rows and other context-trained components can counter it. The unseen stocking example depends on which sense is intended."},{"expression":"the length of a word’s vector,\nread as confidence","reason":"Vector length depends on both the contributing rows and their alignment, not only their count. It is not a calibrated confidence value; cosine removes it from the comparison."},{"expression":"the individual coordinates\nof a vector","reason":"Coordinates are defined in a chosen basis. Shared orthogonal rotations preserve scoring dot products; coordinate-specific interpretation or cross-fit comparison requires a compatible basis."}]}
                 />
                 <KeepInMind>
-                  Two of those lines carry most of the weight in practice. A word
-                  reaching no written row has no answer at all rather than a poor
-                  one, which is the limit of the promise that there are no unknown
-                  words; and a shared row cannot be found from the answer, so a
-                  reading produced by a collision, like the 0.9919 above, arrives
-                  looking exactly like a reading produced by a shared spelling.
+                  {"For an unseen query, inspect its fragment support and whether the sum has a defined cosine direction. Shared strings, hash collisions and cancellation can produce quite different evidence behind a similar-looking score."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -909,7 +676,7 @@ export default function FasttextPage() {
             trueFalse(
               "With the shortest piece set to fifty characters, the fit agrees with the plain method exactly, with a largest disagreement of 0.0.",
               true,
-              "The longest wrapped word here is nine characters, so no word has a piece and every row kept for the pieces stays at the zero it started from. Two passes cost 3.8942 and 2.7842 by both routes, the same numbers to the last bit. A gap of exactly zero rules out a class of mistake that four matching decimal places would not, since any difference in how the corpus is walked would show up as a small disagreement.",
+              "No wrapped corpus word reaches the minimum piece length of fifty, so every word is represented by its whole-word row alone. Both implementations report costs of 3.8942 and 2.7842 over the two passes, and their compared outputs agree exactly. That is a useful regression check for this configuration. It does not rule out every implementation error or prove that a different corpus traversal would necessarily produce a different result.",
             ),
             choice(
               "Stocking is in no sentence and comes back at 0.9694 to the money words with stock nearest. What does that reading show?",
@@ -920,12 +687,12 @@ export default function FasttextPage() {
                 "The fit is right, since a stocking belongs with the stock market",
               ],
               0,
-              "A stocking has nothing to do with the stock market, and the five letters it shares with stock are the whole of the evidence, because no sentence ever put the word beside anything. Walkway is the same mistake among the verbs at 0.9970. Queue is a different failure, placed by one colliding row and no shared spelling at all.",
+              "The model places stocking near stock because their shared character pieces contribute trained vectors. It also shares some pieces with verb forms, but it has no observed contexts of its own to establish the intended meaning. A stocking as clothing need not belong near financial words. The example shows why generating a vector for an unfamiliar spelling is different from verifying that vector's meaning.",
             ),
             trueFalse(
               "Raising the number of rows improves the answer steadily, because fewer pieces collide.",
               false,
-              "The sweep is not a smooth curve. Fifty rows put the missing form at 0.1133 to the money words and two hundred rows put it at 0.2285, which is worse at the larger table. Which particular pieces happen to collide is a fact about the hash and this vocabulary, although ten rows really does break the method, separating the two lists by 0.4417 against the 0.8723 that two thousand rows give.",
+              "A larger bucket table does not improve every measured result in this sweep. The missing form's money-group cosine rises from 0.1133 at fifty rows to 0.2285 at two hundred rows. Changing the table size changes which pieces collide, so a particular word can receive less suitable contributions even as overall collision pressure falls. The gap between the known groups is 0.4417 at ten rows and 0.8723 at two thousand rows.",
             ),
             choice(
               "Queue comes back at 0.9919 to the eleven money words. What produced that reading?",
@@ -936,7 +703,7 @@ export default function FasttextPage() {
                 "An unseen word falls back to a default vector that sits among the money words",
               ],
               2,
-              "Thirteen of queue’s rows were never written to and contribute nothing, so the whole of its vector is one row that market and nothing else wrote. It is an arithmetic accident with no connection to spelling, meaning or usage, and it sits within 0.0051 of playing’s reading of its own list, so nothing distinguishes the two answers at the point a reader sees them.",
+              "Queue reaches fourteen distinct rows here. Thirteen stay zero, and the remaining row was updated by a piece of market that hashes to the same bucket. That collision supplies queue's entire nonzero vector in this fit. Its high cosine to the money words therefore does not establish a relationship in spelling or usage. Looking at bucket coverage helps us see evidence that a cosine value alone hides.",
             ),
             several(
               "Zap has five pieces, and the hash sent every one of them to a row no word of this corpus reaches. Which of these then hold?",
@@ -947,7 +714,7 @@ export default function FasttextPage() {
                               "More passes over the same corpus would give it a direction",
                             ],
               [0, 1],
-              "Every term of the sum is a row that never moved, and a cosine divides by the product of the two lengths, so against a zero vector the denominator is zero. Returning zero instead would report that the word is unrelated to everything, which is a claim the method never made. More passes walk the same sentences, and no word in them reaches any of zap’s five rows, so the rows stay where they started.",
+              "Zap’s selected rows remain zero under this corpus, so their sum has zero norm. Cosine divides by the product of vector norms and is undefined for that result. This SDK rejects the comparison. A system could instead return a labeled fallback, but that would be an interface convention rather than a measured cosine. Repeating the unchanged corpus still supplies no updates to these five rows.",
               {
                 "description": "Zap has no whole-word row in this model. Its vector is the sum of its five hashed character-part contributions. Unused character-part rows start at zero, and no training word reaches any of these five rows. The corpus remains unchanged."
               },
@@ -1039,7 +806,7 @@ to the money words: 0.1003`,
               "Find the words stocking is spelled like",
               [
   "Without fitting, cut stocking and every supplied corpus word into FastText character pieces of lengths three through six.",
-  "Print stocking’s piece count and the number appearing in any corpus word, then each sharing word and overlap count in the supplied descending-count order. This measures spelling overlap before learned vector comparisons."
+  "Print the number of distinct pieces in stocking and how many also occur in any supplied corpus word. Then print each word with a nonzero overlap, ordered by decreasing overlap count and alphabetically when counts tie. This compares spelling before any vectors are trained."
 ],
               `from oop_ml import FastText
 
@@ -1088,13 +855,13 @@ stayed   1
 stays    1`,
               { hints: [
   "Use n_grams_of and sets to compare distinct piece spellings.",
-  "Count intersection sizes and preserve the starter’s tie order when sorting equally large overlaps."
+  "Count each set intersection. Sort with (-shared[word], word) so a larger overlap comes first and ties use alphabetical order."
 ], check: numberCheck("How many pieces does stocking share with stock?", 10, 0, "Stocking and stock share ten distinct pieces. Character overlap supplies reusable parameters but cannot establish which meaning of a spelling is intended."), question: "Which known spellings share character pieces with stocking?" },
             ),
             exercise(
               "Read the length a cosine throws away",
               [
-  "Fit FastText as in the first exercise. For playing, stocking, queue and zap print how many of their hashed piece-row occurrences have nonzero vectors, out of the total, and each composed vector’s norm.",
+  "Fit FastText as in the first exercise. For playing, stocking, queue and zap, find the distinct bucket rows reached by their character pieces. Print how many of those rows contain nonzero vectors, the total number of reached rows, and the norm of the composed word vector.",
   "Finally ask for zap’s nearest word and print the library refusal. A bucket hit can be caused by a different piece hashing to that bucket, so a nonzero row does not prove that exact spelling was observed."
 ],
               `import random

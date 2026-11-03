@@ -59,7 +59,7 @@ test("account sync hydrates remote completion before uploading and ignores legac
   service.records.alice = { done: { [other]: ["practice"] }, required: { [other]: 1 } };
   await page.addInitScript(({ key, lesson }) => localStorage.setItem(key, JSON.stringify({ done: { [lesson]: ["quiz"] }, required: { [lesson]: 1 } })), { key: guestKey, lesson });
   await page.goto("/account");
-  await expect(page.getByText("All work synced", { exact: true })).toBeVisible();
+  await expect(page.getByText("All work saved", { exact: true })).toBeVisible();
   expect(service.records.alice.done[lesson]).toBeUndefined();
   expect(service.uploads[0].data.done[other]).toEqual(["practice"]);
   await expect(page.getByRole("heading", { name: /^1 of .* lessons finished$/ })).toBeVisible();
@@ -84,7 +84,7 @@ test("registration retry does not restore or import legacy guest work", async ({
 
   service.authFails = false;
   await page.getByRole("button", { name: "Create account", exact: true }).click();
-  await expect(page.getByText("All work synced", { exact: true })).toBeVisible();
+  await expect(page.getByText("All work saved", { exact: true })).toBeVisible();
   expect(service.authRequests).toEqual(["/account-api/auth/register", "/account-api/auth/register"]);
   expect(service.records["new-learner"].done).toEqual({});
   await expect(page.getByRole("button", { name: "Add my guest progress" })).toHaveCount(0);
@@ -138,13 +138,13 @@ test("a legacy account completion cache waits for hydration before it migrates",
   service.fail = true;
   await page.addInitScript(({ key, lesson }) => localStorage.setItem(key + ":account:alice", JSON.stringify({ done: { [lesson]: ["quiz"] }, required: { [lesson]: 1 } })), { key: guestKey, lesson });
   await page.goto("/account");
-  await expect(page.getByText(/Sync will retry/)).toBeVisible();
+  await expect(page.getByText(/Saving will retry/)).toBeVisible();
   await expect(page.getByRole("heading", { name: /^0 of .* lessons finished$/ })).toBeVisible();
   expect(service.uploads).toHaveLength(0);
   expect(await page.evaluate(key => localStorage.getItem(key + ":account:alice"), guestKey)).not.toBeNull();
   service.fail = false;
   await page.getByRole("button", { name: "Sync now" }).click();
-  await expect(page.getByText("All work synced", { exact: true })).toBeVisible();
+  await expect(page.getByText("All work saved", { exact: true })).toBeVisible();
   expect(service.records.alice.done[lesson]).toEqual(["quiz"]);
   expect(await page.evaluate(key => localStorage.getItem(key + ":account:alice"), guestKey)).toBeNull();
 });
@@ -153,7 +153,7 @@ test("switching accounts does not import the previous user's completion", async 
   const service = await accountService(page);
   service.records.alice = { done: { [lesson]: ["quiz"] }, required: { [lesson]: 1 } };
   await page.goto("/account");
-  await expect(page.getByText("All work synced", { exact: true })).toBeVisible();
+  await expect(page.getByText("All work saved", { exact: true })).toBeVisible();
   service.user = "bob";
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByText("bob", { exact: true })).toBeVisible();
@@ -197,7 +197,7 @@ test("a response from the previous account cannot enter the new account cache", 
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByText("bob", { exact: true })).toBeVisible();
   release();
-  await expect(page.getByText("All work synced", { exact: true })).toBeVisible();
+  await expect(page.getByText("All work saved", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: /^0 of .* lessons finished$/ })).toBeVisible();
   expect(await page.evaluate(key => localStorage.getItem(key + ":account:bob"), guestKey)).toBeNull();
 });

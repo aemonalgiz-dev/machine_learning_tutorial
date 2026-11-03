@@ -98,7 +98,7 @@ export function WhoNoticed({ panel }: { panel: NoticedPanel }) {
               "",
             ],
             ...models.ridge_penalty_one.map((reading) => [
-              `penalised, ${readingLabel(reading.reading)}`,
+              `penalized, ${readingLabel(reading.reading)}`,
               reading.coefficients[0].value.toPrecision(5),
               reading.coefficients[1].value.toPrecision(5),
               reading.intercept.toFixed(4),
@@ -112,7 +112,7 @@ export function WhoNoticed({ panel }: { panel: NoticedPanel }) {
           {models.least_squares_score_gap === 0
             ? "the last bit"
             : models.least_squares_score_gap.toExponential(1)}
-          . The two penalised rows are two different fits.
+          . The two penalized rows are two different fits.
         </p>
       </div>
     );

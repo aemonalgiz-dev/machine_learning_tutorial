@@ -24,8 +24,8 @@ import { WindowReach } from "@/components/widgets/WindowReach";
 
 
 export const metadata: Metadata = {
-  title: "Learning Boundaries From Examples · oop_ml",
-  description: "If people have already marked word boundaries in example text, we can use those labels to teach a model. The surrounding characters provide clues it can use when deciding where to split new text.",
+  title: "Learning Boundaries From Examples · Perceptron Lab",
+  description: "Annotated boundaries provide examples of where text should be split. A supervised model uses surrounding character information to learn decisions that can be applied to new sequences.",
 };
 
 export default function LearningBoundariesFromExamplesPage() {
@@ -35,10 +35,10 @@ export default function LearningBoundariesFromExamplesPage() {
       intuition={lessonIntuitions["learning-boundaries-from-examples"]}
       technicalStart="Part 2. What a Gap Is Asked"
       openingTitle="Ask Each Gap Whether a Word Ends Here"
-      playgroundTitle="Let labelled gaps teach the splitting rule"
-      playgroundIntro="Select a gap and examine the neighbouring characters used to classify it. Compare individual boundary decisions with the resulting complete segmentation."
+      playgroundTitle="Let labeled gaps teach the splitting rule"
+      playgroundIntro="Select a gap and examine the neighboring characters used to classify it. Compare individual boundary decisions with the resulting complete segmentation."
       title="Learning Boundaries From Examples"
-      tagline={"If people have already marked word boundaries in example text, we can use those labels to teach a model. The surrounding characters provide clues it can use when deciding where to split new text."}
+      tagline={"Annotated boundaries provide examples of where text should be split. A supervised model uses surrounding character information to learn decisions that can be applied to new sequences."}
       prerequisites={
         <>
           The page on segmenting with a hidden model, since this one is the
@@ -99,7 +99,8 @@ export default function LearningBoundariesFromExamplesPage() {
 
               <SubSection title="2. One question at every gap, answered on its own">
                 <p>
-                  Between any two neighbouring characters of a text there either
+
+                  Between any two neighboring characters of a text there either
                   is a word boundary or there is not. That is a question with two
                   answers, it has one at every gap of every text, and nothing in
                   it mentions any other gap. So take it as the whole method. Ask
@@ -133,19 +134,15 @@ export default function LearningBoundariesFromExamplesPage() {
                   Imagine asking someone to annotate boundaries and allowing them to leave uncertain cases unmarked. A compound noun may have more than one reasonable treatment under different conventions. A boundary classifier can learn from the gaps the annotator did label without requiring a complete segmentation for every sentence. That is a practical reason to investigate this arrangement, separate from its accuracy.
                 </p>
                 <p>
-                  The gap learner can use each marked gap as one training example. The SDK’s supervised character-role counter needs enough adjacent boundary labels to decide a character’s role, such as beginning or ending a word. A missing gap label can therefore make both neighbouring character roles unavailable to that counting procedure.
+
+                  The gap learner can use each marked gap as one training example. The SDK’s supervised character-role counter needs enough adjacent boundary labels to decide a character’s role, such as beginning or ending a word. A missing gap label can therefore make both neighboring character roles unavailable to that counting procedure.
                 </p>
                 <p>
                   Other sequence-training methods can use partially observed labels. We are comparing the two procedures in this experiment, rather than proving a limit of all sequence models. The widget uses two hundred generated sentences with a chosen share of boundary labels retained.
                 </p>
                 <AnnotationReach />
                 <p>
-                  With two fifths of the gaps marked, the gap learner keeps
-                  39.49% of its training material and the sequence learner keeps
-                  19.61% of its own, a little over half as much, which is what
-                  you would expect from needing two independent events rather
-                  than one. At a fifth marked it is 20.41% against 7.79%, so the
-                  gap between them widens as the annotation gets sparser.
+                  {"The experiment retains each gap label independently. With two fifths retained, the gap learner can use 39.49% of its original examples, while the role counter can use 19.61% of its character labels. At a fifth retained, the shares are 20.41% and 7.79%. The character counter usually needs labels on both sides of a character, so missing labels affect it more often."}
                 </p>
                 <WhyThisWorks title="Why the second share is not simply the first one squared">
                   <p>
@@ -175,20 +172,11 @@ export default function LearningBoundariesFromExamplesPage() {
                 </WhyThisWorks>
                 <InAModel>
                   <p>
-                    The implementation this page runs on is handed sentences that
-                    are marked all the way through, because that is the form
-                    every other segmenter in the family reads, and the numbers
-                    above are counted rather than fitted. Nothing in the learning
-                    rule would change for a partly marked corpus, since it never
-                    looks at more than one gap at a time, and that is precisely
-                    the claim the method rests on.
-                  </p>
+                  {"The SDK fit method accepts fully segmented sentences. This widget counts the examples a partially annotated corpus would supply; it does not train either model on partial annotations. A separate input interface could supply each known gap label to the same local update rule."}
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  The reason to give up the whole-sequence answer is what can be
-                  learned from, not what can be read. A corpus somebody marked in
-                  part is worth roughly twice as much to a method that asks one
-                  gap at a time.
+                  {"Independent gap examples make partial annotation useful. In this experiment, a larger share of gap examples survives than character-role labels. Those percentages measure available supervision, rather than a doubling of accuracy or annotation value."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -200,19 +188,15 @@ export default function LearningBoundariesFromExamplesPage() {
             <>
               <SubSection title="4. The characters either side, and how far to look">
                 <p>
-                  A gap has to be answered from something, and the only thing
-                  available is the text around it. Number the characters so that
-                  the one immediately before the gap is at offset minus one and
-                  the one immediately after is at offset zero, and then decide how
-                  far to look in each direction. That distance is the one number
-                  the whole design turns on, and we will call it the reach.
+                  {"Start with the characters immediately before and after a possible boundary. Number the character before it as offset minus one and the character after it as offset zero. Then choose how many characters to inspect on either side. That distance is the context window, called the reach here."}
                 </p>
                 <Equation>
                   {"… c[−3] c[−2] c[−1] | c[0] c[1] c[2] …   with the gap at the bar"}
                 </Equation>
                 <p>
+
                   Within the reach, each single character is one thing the gap is
-                  asked about, and each neighbouring pair of them is another. The
+                  asked about, and each neighboring pair of them is another. The
                   pairs matter because a boundary is often a fact about a
                   juxtaposition rather than about either character alone. In our
                   sentence a punctuation mark sits immediately to the left of four
@@ -223,14 +207,8 @@ export default function LearningBoundariesFromExamplesPage() {
                 </p>
                 <WorkedExample>
                   <p>
-                    At a reach of one, the gap in the two characters a and b is
-                    asked seven things. Whether it is a gap at all, which
-                    contributes the same number everywhere. Which character sits
-                    on the left, and which on the right. What kind each of those
-                    is. Which pair they make, and what pair of kinds that is. Seven
-                    questions, and the next two sections are about the kinds and
-                    about where seven comes from.
-                  </p>
+                  {"With a reach of one, the gap between a and b has seven features. One is a constant that is present at every gap, allowing the model to learn a baseline preference. The others identify the left and right characters, their categories, the character pair and its category pair. We will count those features in section 6."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
                   A gap sees a fixed window of characters and nothing else, so two
@@ -243,16 +221,11 @@ export default function LearningBoundariesFromExamplesPage() {
 
               <SubSection title="5. What kind of character, as well as which one">
                 <p>
-                  Asking which character sits at an offset is exact and it is
-                  useless the first time an unfamiliar character turns up. So each
-                  offset is asked a second, coarser question, which is what kind
-                  of character that is. Seven kinds are enough for this purpose,
-                  namely a Han character, a hiragana, a katakana, any other
-                  letter, a digit, a punctuation mark, and everything else.
+                  {"An exact character feature has no learned weight when that character and offset never appeared during fitting. A broader feature can still help: is this a letter, a digit or a punctuation mark? This implementation uses seven categories: Han, hiragana, katakana, other letters, numbers, punctuation and everything else. They are design choices, rather than a complete description of writing systems."}
                 </p>
                 <>
 <p>
-                  What that buys is a rule learned once instead of once per pair. A boundary between a run of one script and a run of another is a single thing to learn, rather than something that must be learned separately for every one of the thousands of character pairs that could sit astride it. And it never goes silent.
+                  {"Category features share weights across characters. A learned preference for separating a letter from a Han character can apply to a new letter at that offset. It still needs relevant training evidence: an unfamiliar category combination can also have zero weight."}
                 </p>
                 <p>
                   Counted over every gap of two hundred held-out sentences of a generated language, 31,566 questions in all, the ones naming particular characters carry a weight 79.33% of the time and the ones naming kinds carry one every time.
@@ -271,23 +244,13 @@ export default function LearningBoundariesFromExamplesPage() {
                   sentences answers Ortiz漢 and 字文 and gets neither of them.
                 </p>
                 <KeepInMind>
-                  A question about which character it is carries no weight 20.67%
-                  of the time on unfamiliar text and settles the full stop of Dr.
-                  almost on its own; a question about what kind it is always
-                  carries one and gave the apostrophe and the hyphen the identical
-                  figure. Both are asked at every offset and a gap is answered by
-                  whatever the two of them add up to.
+                  {"In the reported held-out sample, character-identity features have zero weight 20.67% of the time, while every category feature has a nonzero weight. In the four displayed gaps, exact character features supply most of the evidence after Dr.; category features contribute the same subtotal before the apostrophe and hyphen. These are properties of the fitted examples."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="6. How many questions one gap answers">
                 <p>
-                  Count them, since the number is exact and it is the only cost a
-                  wider reach carries. A reach of w covers 2w offsets, minus w to
-                  w minus one, and each of those contributes a question about the
-                  character and a question about its kind. The neighbouring pairs
-                  inside that stretch number 2w minus one, and each contributes
-                  the same two. One more for the fact of being a gap at all.
+                  {"A wider window introduces more features at each gap. At reach w there are 2w character positions, each supplying an identity feature and a category feature. The 2w minus one adjacent pairs supply two more features each. Add the constant feature. The equation below counts the total; the number of distinct stored features and the training evidence they need are separate costs."}
                 </p>
                 <Equation>
                   {"questions at a gap  =  1 + 2 × 2w + 2 × (2w − 1)  =  8w − 1"}
@@ -308,17 +271,10 @@ export default function LearningBoundariesFromExamplesPage() {
                   caption="Counted by listing the questions of one gap at each reach rather than by evaluating the formula. A gap near either end of a run asks fewer, since an offset that falls off the end contributes nothing at all."
                 />
                 <p>
-                  Three is the reach used everywhere on this page, so a gap in
-                  the middle of a run answers twenty-three questions. That is
-                  small, it does not grow with the length of the text, and it does
-                  not grow with the amount of marked-up text the answers were
-                  learned from, which is what makes the cost of reading a text
-                  the dull half of this method.
+                  {"This page uses a reach of three, giving twenty-three active features at an interior gap. That per-gap count stays fixed as the text or training corpus grows. The number of gaps to score still grows with text length, and the stored feature vocabulary can grow with training data."}
                 </p>
                 <KeepInMind>
-                  Eight times the reach, less one. Widening the reach is linear
-                  in questions asked and, as the eighteenth section shows, is the
-                  only thing that lets a gap see evidence sitting further away.
+                  {"Each extra position of reach adds eight active features at an interior gap. Within this design, widening the window is how we expose more distant characters. A different feature design could supply distant information another way."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -330,34 +286,18 @@ export default function LearningBoundariesFromExamplesPage() {
             <>
               <SubSection title="7. A score that is a sum of weights">
                 <p>
-                  Each of the questions at a gap gets a number, and the answer at
-                  that gap is the sum of the numbers of the questions it asked.
-                  Positive means cut and anything else means keep going. That is
-                  the whole scoring rule, and its plainness is the property the
-                  eleventh section trades on, since a sum can be listed term by
-                  term where a maximum over readings cannot.
+                  {"Give each active feature a weight and add those weights to obtain the gap score. A positive score means cut; zero or a negative score means continue the word. We can inspect every term in this local sum. The sequence model also has inspectable score terms, but its final boundary depends on comparing complete paths."}
                 </p>
                 <Equation>
                   {"score at a gap  =  Σ over the questions this gap asks of  weight(question)"}
                 </Equation>
                 <p>
-                  A question the marked-up sentences never raised has a weight of
-                  zero and therefore contributes nothing, which is the right
-                  behaviour and not a special case. There is no threshold to
-                  choose either, because the constant question every gap asks can
-                  absorb any base rate on its own.
+                  {"A feature that was never updated has weight zero. The constant feature is the bias: its learned weight shifts the score at every gap. This implementation uses zero as its decision threshold. That convention and the learned bias are separate parts of the rule."}
                 </p>
                 <WorkedExample>
                   <p>
-                    Take one sentence of two characters, a and b, marked as two
-                    words, and a reach of one. Every weight starts at zero, so the
-                    gap scores zero, which is right for neither answer and counts
-                    as a mistake. Add one to each of the seven weights the gap
-                    asked about. Now that same gap scores exactly 7.0 and the text
-                    comes back as a and b. Mark the sentence as the single word ab
-                    instead and every weight becomes minus one, the gap scores
-                    −7.0, and the text comes back whole.
-                  </p>
+                  {"Take the two characters a and b as separate labeled words, with a reach of one. All weights start at zero. Training requires the score to have the label’s strict sign, so this tie triggers an update. Adding one to each of the seven active weights produces a score of 7.0 and a cut. If the supplied word is ab instead, the update subtracts one from each weight; the score becomes −7.0 and prediction keeps the characters together."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
                   The whole of reading a text is adding numbers up and comparing
@@ -369,66 +309,37 @@ export default function LearningBoundariesFromExamplesPage() {
 
               <SubSection title="8. Correcting only the gaps it gets wrong">
                 <p>
-                  Visit each labelled gap and score it with the current weights. If the predicted sign agrees with the annotation, leave the weights alone. Otherwise update each active feature weight: add one for a required cut, or subtract one for a required continuation. This perceptron rule makes corrections only on mistaken labelled examples.
+                  {"Visit each labeled gap and calculate its current score. Leave its weights alone only when the score is strictly positive for a cut or strictly negative for a continuation. Otherwise add the label to every active feature weight: plus one for a cut, minus one for a continuation. This is the perceptron update used here."}
                 </p>
                 <Equation>
                   {"on a mistake:  weight(question)  ←  weight(question) + label,  with label = +1 to cut and −1 to join"}
                 </Equation>
                 <p>
-                  A score of exactly zero counts as a mistake while learning,
-                  since zero is right for neither answer, and at reading time it
-                  is not a cut, because leaving text whole is the more
-                  conservative of the two errors. Our eight marked-up sentences
-                  hold 189 gaps between them, 34 of which carry a boundary, and
-                  here is what the corrections do over twenty passes.
+                  {"Training updates a score of zero for either label. Prediction resolves that same tie by keeping the characters together. This is an implemented convention; neither joining nor cutting is always the safer error. The eight training sentences contain 189 gaps, including 34 boundaries. The display follows the corrections over twenty passes."}
                 </p>
                 <PerceptronWalk showSentences />
                 <p>
-                  Forty-five corrections on the first pass, then ten, five, nine,
-                  seven, three, and from the seventh pass onwards none at all,
-                  which means every one of the 189 gaps is now answered the way
-                  the annotator marked it. That is a stopping condition rather
-                  than a convergence in any deeper sense, and the ninth and tenth
-                  sections are about the two things it does not settle.
+                  {"The first pass makes forty-five corrections. The next passes make ten, five, nine, seven and three, followed by no corrections from the seventh pass onward. The working weights then give every training gap a score with the required sign. The returned model averages earlier weight states too, so its predictions need their own check. Neither result establishes held-out accuracy."}
                 </p>
                 <KeepInMind>
-                  The rule only ever repairs what it is currently wrong about, so
-                  it stops as soon as it is right about everything it was shown.
-                  Being right about the marked gaps is not the same as being right
-                  about a gap it has not been shown, which is what the fourteenth
-                  section measures.
+                  {"A correction-free pass checks the current working weights on the labeled gaps. The averaged model returned by fitting can differ from those weights, and new text can differ from the training text. Evaluate the actual returned model on the data relevant to its use."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="9. The average of every set of weights, not the last one">
                 <p>
-                  There is a repair worth making before the weights are used, and
-                  it costs almost nothing. The walk of the previous section passes
-                  through one set of weights after every correction, and the last
-                  of those has no special claim on being the best. It is simply
-                  the one that happened to be current when the passes ran out, and
-                  it carries the full imprint of whatever gap was corrected most
-                  recently.
+                  {"The final weights can depend strongly on which examples arrived last. Averaging offers another choice: retain the contribution of earlier weight states rather than returning only the last state. This reduces reliance on one point in the update sequence."}
                 </p>
                 <p>
-                  So answer with the mean of every set of weights the walk passed
-                  through, counting each one once for every step it survived. That
-                  is the averaged form Freund and Schapire analysed, and it
-                  generalises considerably better than the final set on data the
-                  walk has not seen.
+                  {"For each weight, take its mean over the training steps, counting an unchanged value for every step it remains in use. Averaged perceptrons are used to improve generalization and reduce sensitivity to the final update. That is a reason to test averaging, rather than a guarantee that every dataset will improve."}
                 </p>
                 <Equation>
                   {"averaged weight  =  ( Σ over steps of the weight at that step ) / number of steps"}
                 </Equation>
                 <WorkedExample title="A walk of two steps, averaged">
                   <p>
-                    Take one sentence of three characters, a, b and c, marked
-                    as the two words ab and c, with a reach of one and a single
-                    pass that visits the first gap first. The two gaps ask
-                    seven questions each, and four of the seven are the same
-                    four at both, namely whether this is a gap at all and the
-                    three about kinds, since every character here is a letter.
-                  </p>
+                  {"Consider the sentence abc labeled as the words ab and c. Use a reach of one and visit the first gap before the second during a single pass. Each gap has seven features. Four are shared: the constant feature and three category features, because all three characters are letters."}
+                </p>
                   <NumberTable
                     headings={[
                       "weight of",
@@ -444,34 +355,16 @@ export default function LearningBoundariesFromExamplesPage() {
                     caption="Step 1 meets a score of zero at the gap marked as a join and subtracts one from its seven weights. Step 2 scores the other gap at −4 from the four shared weights, which is wrong for a gap marked as a cut, and adds one to its seven."
                   />
                   <p>
-                    The four shared weights finish the walk at zero, as though
-                    nothing had been learned about them, and the average
-                    remembers that they spent half the walk at minus one. That
-                    is where a weight of one half comes from. It also shows
-                    what one pass is worth, since the averaged weights score
-                    the two gaps at −5.0 and −0.5 and the text comes back as
-                    the single piece abc, with the second gap still wrong.
-                  </p>
+                  {"The four shared weights finish at zero, but their average retains the earlier negative state. The other feature groups retain different histories. With the averaged weights, the two scores are −5.0 and −0.5. Prediction returns abc as one piece, so the second gap remains wrong after this single pass."}
+                </p>
                 </WorkedExample>
                 <WhyThisWorks title="Average the weights without storing every intermediate model">
                   <p>
-                    Written that way it looks expensive, since it seems to need
-                    every set of weights kept. It does not. A weight only changes
-                    on a correction, so between two corrections it contributes its
-                    own value once per step, and the running total can be charged
-                    that whole stretch at the moment it next changes. Each weight
-                    therefore needs one extra number recording when it last moved,
-                    and nothing at all is stored per step. That is why the
-                    averaged form is used rather than merely admired.
-                  </p>
+                  {"We can calculate the mean without keeping a model copy after every step. When a weight changes, record how many steps it held its old value and add that contribution to a running total. Each updated feature needs a total and the step of its last change, alongside its current weight. A final contribution accounts for the steps since its last change."}
+                </p>
                   <p>
-                    It also explains the fractions in the twelfth section. Every
-                    correction adds or subtracts exactly one, so whole numbers are
-                    what the weights would be if the answer were the state the
-                    walk finished in, and a weight of one half belongs to a
-                    question that spent half the walk at one value and half at
-                    another.
-                  </p>
+                  {"Unit updates keep the working weights at integer values. Averaging those values can produce fractions. A half-valued result can arise when two integer states occupy equal shares of the steps; other histories can produce the same mean."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
                   The answer is a mean over the whole walk rather than the state
@@ -482,39 +375,18 @@ export default function LearningBoundariesFromExamplesPage() {
 
               <SubSection title="10. The order the corrections arrive in">
                 <p>
-                  The rule repairs the gap it is currently looking at, so which
-                  gap it looks at first changes which weights move first, which
-                  changes what it is wrong about next. Two runs over the same
-                  marked-up sentences in two different orders therefore end up
-                  with different weights, and the widget in the eighth section
-                  shows what that is worth on our own sentence.
+                  {"A correction changes shared feature weights, which can change later gap decisions. Different example orders can therefore produce different weights and segmentations. A fixed seed makes the SDK’s shuffled order reproducible; it does not establish which order predicts best."}
                 </p>
                 <p>
-                  Eight orders over the same eight sentences give five different
-                  readings of the same forty-five characters, and none of the
-                  eight reproduces the reading a person gives. Every one of them
-                  runs out of corrections within seven passes, so all eight are
-                  equally right about the 189 gaps they were shown and disagree
-                  only about the gaps they were not. The disagreement is
-                  concentrated in the surname, which is the one stretch of the
-                  sentence made of characters those sentences never carried.
+                  {"Eight training orders produce five different readings of the forty-five-character probe, and none matches the supplied reference segmentation. Each run reaches a correction-free pass within seven passes. That describes the working update states, while the displayed probe uses the returned averaged weights. The probe errors concentrate around the unfamiliar surname."}
                 </p>
                 <InAModel>
                   <p>
-                    That is worth stating flatly rather than as a caveat. A
-                    segmentation quoted from this method is a segmentation from
-                    one order of one corpus, and the order is a free choice that
-                    nothing in the method makes for you. Fixing it makes two runs
-                    agree with each other; it does not make either of them the
-                    right one. The averaging of the ninth section reduces the
-                    spread and, on eight sentences, does not remove it.
-                  </p>
+                  {"Record the seed and training data when reporting a segmentation. Fixing the order makes a run reproducible; evaluating the result checks whether it is useful. Averaging does not eliminate the variation between these eight small-corpus runs."}
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  Being right about every marked gap does not pin the weights
-                  down, because many different sets of weights are right about the
-                  same gaps and they disagree about the gaps nobody marked. On a
-                  small corpus that disagreement is visible in the answer.
+                  {"Many weight settings can classify the same training gaps correctly and disagree on new gaps. Small training sets can leave those differences visible. Neither a reproducible seed nor a correction-free pass substitutes for checking the returned model on new text."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -537,7 +409,7 @@ export default function LearningBoundariesFromExamplesPage() {
                 "Unmarked gaps are counted as joins, which biases the whole-sequence learner towards long words",
               ],
               0,
-              "A marked gap is one usable instance to a gap-at-a-time learner and needs no neighbour. A method working in places inside a word needs two settled gaps per character, so it loses roughly twice as much. Counted on two hundred sentences with two fifths of the gaps marked, the gap learner keeps 39.49 percent of its material and the sequence learner 19.61 percent of its own.",
+              "A marked gap is one usable instance to a gap-at-a-time learner and needs no neighbor. A method working in places inside a word needs two settled gaps per character, so it loses roughly twice as much. Counted on two hundred sentences with two fifths of the gaps marked, the gap learner keeps 39.49 percent of its material and the sequence learner 19.61 percent of its own.",
             ),
             choice(
               "Every weight starts at zero, so the first marked gap the walk meets scores exactly zero. What does the learning rule do with it?",
@@ -548,12 +420,12 @@ export default function LearningBoundariesFromExamplesPage() {
                 "Skips the gap until some other gap has moved its weights",
               ],
               0,
-              "Zero is right for neither answer, so it counts as a mistake while learning, and a gap already answered correctly is never touched. On two characters marked as two words, at a reach of one, that single correction adds one to seven weights and the same gap then scores exactly 7.0. Reading is the other way round, where a score of zero is not a cut, because leaving text whole is the more conservative of the two errors.",
+              "During training, this perceptron updates when the signed margin is zero or negative. That includes a zero score even when the prediction-time tie rule would happen to match the label. Prediction uses a separate convention: cut only for a score above zero. The single marked example produces the displayed score of 7.0 after its first correction.",
             ),
             trueFalse(
               "Counted over the held-out sentences, a question naming a particular character carried no weight about one time in five, while a question naming a kind carried one every time.",
               true,
-              "Over 31,566 questions the ones naming particular characters carried a weight 79.33 percent of the time, which leaves 20.67 percent silent, and the ones naming kinds were never silent. That is why both are asked at every offset. Naming the character is exact, and it is what settles the full stop of Dr. almost on its own. Naming the kind is what still answers in a name nobody has written down, where the kinds are all there is.",
+              "Character-specific features can be absent or have zero learned weight on new text. Broader character-type features reuse evidence across different letters and marks; they had nonzero weights throughout this reported held-out sample. That is useful coverage in this experiment, not a guarantee for every new name. A zero weight alone does not prove a feature was never observed, because updates can also cancel.",
             ),
             several(
               "Eight orders of the same eight marked-up sentences were run. Which of these hold?",
@@ -564,7 +436,7 @@ export default function LearningBoundariesFromExamplesPage() {
                 "Averaging the weights removes the spread on these eight sentences",
               ],
               [0, 1],
-              "Each run stops as soon as it is right about everything it was shown, so all eight are right about the same 189 gaps and disagree only about the gaps nobody marked. None of the eight matches a reader, and the disagreement sits in the surname, the one stretch made of characters those sentences never carried. Averaging reduces the spread here and does not remove it.",
+              "The same labeled examples can lead to different weights when their training order changes. These runs reach a correction-free training pass yet produce different probe segmentations, and none matches the supplied reader segmentation. The difficult gaps occur around the unfamiliar surname. Averaging can reduce order sensitivity, but its returned weights still need their own training and held-out checks.",
             ),
         ],
         },
@@ -574,34 +446,14 @@ export default function LearningBoundariesFromExamplesPage() {
             <>
               <SubSection title="11. Forty-four gaps and three of them wrong">
                 <p>
-                  Now the whole thing on our own sentence, with the marked-up
-                  sentences chosen so that the exercise is not rigged. Eight
-                  sentences carry the shapes the sentence needs, which are an
-                  abbreviation whose full stop ends it, a contraction, a
-                  hyphenated compound and a prefix. Four of the seven words a
-                  reader answers with are absent from those eight sentences
-                  altogether, namely Alvarez, expect, low-cost and re-analysis
-                  with its full stop.
+                  {"The probe sentence contains an abbreviation, a contraction, a hyphenated compound and a prefix. The eight training sentences include related patterns. Four reference words are absent as complete training entries: Alvarez, expect, low-cost and re-analysis with its period. This tests specific unfamiliar combinations, rather than independent evidence that the overall experiment is unbiased."}
                 </p>
                 <GapStrip scenarioKeys={["sentence"]} />
                 <p>
-                  Three of the forty-four gaps come out against the reading a
-                  person gives, and all three are inside the surname. The method
-                  cuts after the v and after the a, leaving a single letter
-                  standing as a word of its own, and then fails to cut between the
-                  z and the d that begins didn&rsquo;t, so what comes back is Alv,
-                  then a, then rezdidn&rsquo;t. Everywhere else it is right, and
-                  three of the four words the sentences never held come back
-                  exactly, which is the thing to take from the widget.
+                  Three of the forty-four gap decisions disagree with the intended reading, all within the surname. The model cuts after v and after a, then misses the boundary after z, producing Alv, a and rezdidn&apos;t in that region. The example lets us trace each local error while also seeing the correctly recovered words. It does not turn a few successful unfamiliar words into a general segmentation-accuracy claim.
                 </p>
                 <p>
-                  Set against it is the whole-sequence method taught the identical
-                  eight sentences. It recovers Alvarez whole, which is precisely
-                  where this method fails, and it loses didn&rsquo;t and expect,
-                  which is precisely where this method succeeds. The sixteenth
-                  section comes back to the surname, where the difference between
-                  the two is a consequence of how each answer is put together
-                  rather than an accident.
+                  {"The whole-sequence model fitted to the same eight sentences recovers Alvarez whole, where the local model fails. It splits the reference words didn’t and expect, which the local model recovers. Section 16 compares their scoring rules; this single contrast cannot identify one cause for every difference."}
                 </p>
                 <KeepInMind>
                   Any method&rsquo;s answer can be set beside a reader&rsquo;s gap
@@ -625,15 +477,16 @@ export default function LearningBoundariesFromExamplesPage() {
                 />
                 <>
 <p>
-                  The first of those is the gap between the full stop of Dr. and the A of Alvarez, and it comes to +7.1283. Every question about the characters after the gap carries a weight of zero, so the whole of the positive case is made from behind it, and two of those questions could never have carried a weight at all, since those eight sentences contain no capital A and no v anywhere.
+                  {"The gap after Dr. scores +7.1283. In its character-identity features, the nonzero evidence comes from before the gap; the following identities contribute zero. Some of those features could not have been updated because the training sentences contain neither capital A nor v. Category features and the bias still contribute separately."}
                 </p>
                 <p>
-                  The single largest contribution is +3.6304, for the full stop sitting immediately to the left, and the questions about kinds contribute −0.3188 between them, which is to say almost nothing.
+                  {"The largest single contribution is +3.6304 from the immediately preceding period. The category features sum to −0.3188 here. That is a small subtotal compared with this gap’s character-identity evidence, rather than a universally negligible contribution."}
                 </p>
 </>
                 <>
 <p>
-                  Now the second and third, which are a letter followed by a punctuation mark inside didn&rsquo;t and inside low-cost. Both are kept together, at −17.5093 and −19.7016, and in both the questions about kinds contribute −12.0563, the same figure to the last digit, since those two gaps ask exactly the same questions about kinds. That is the generalisation working, and it is also why the offsets have to be kept apart, since the full stop of Dr. carries its punctuation on the other side of the gap, asks a different set of questions about kinds, and gets −0.3188 out of them rather than −12.0563.
+
+                  Now the second and third, which are a letter followed by a punctuation mark inside didn&rsquo;t and inside low-cost. Both are kept together, at −17.5093 and −19.7016, and in both the questions about kinds contribute −12.0563, the same figure to the last digit, since those two gaps ask exactly the same questions about kinds. That is the generalization working, and it is also why the offsets have to be kept apart, since the full stop of Dr. carries its punctuation on the other side of the gap, asks a different set of questions about kinds, and gets −0.3188 out of them rather than −12.0563.
                 </p>
                 <p>
                   The fourth gap is the opposite case, a change of script where only one of the eleven questions about which characters these are carries any weight, and the cut is made at +0.0367.
@@ -641,11 +494,8 @@ export default function LearningBoundariesFromExamplesPage() {
 </>
                 <WorkedExample title="The four gaps, each added up by kind of question">
                   <p>
-                    A gap in the middle of a run asks twenty-three questions at
-                    this reach. One is whether it is a gap at all, eleven name
-                    particular characters and eleven name kinds, and the score
-                    is the three subtotals added together.
-                  </p>
+                  {"An interior gap has twenty-three active features at this reach. We can group them into the constant bias, eleven character-identity features and eleven category features. Adding those group totals reproduces the score."}
+                </p>
                   <NumberTable
                     headings={[
                       "the gap",
@@ -663,26 +513,16 @@ export default function LearningBoundariesFromExamplesPage() {
                     caption="Each row adds across to its score, to within the rounding of the figures shown. The last row comes from the fit on the eight sentences that mix two scripts, which is why its first column differs."
                   />
                   <p>
-                    Read down the columns. The first is the same number for
-                    every gap of one fit, and it is negative because most gaps
-                    are not boundaries, 155 of the 189 marked ones here. The
-                    third is what the two punctuation marks inside a word have
-                    in common. The second is the only place the full stop of
-                    Dr. gets its cut from, and it is also the only column that
-                    tells the apostrophe from the hyphen.
-                  </p>
+                  {"Within one fitted model, the bias column has the same value at every gap. Its negative value favors continuation before the other evidence is added; this training set has 155 nonboundary gaps among 189. That imbalance helps motivate a bias, but does not by itself determine its exact learned weight. The remaining columns show how identity and category evidence alter the baseline."}
+                </p>
                 </WorkedExample>
                 <WhyThisWorks title="What a score contribution can and cannot explain">
                   <p>
                     These contributions explain how this fitted model obtained its score. They do not establish a linguistic cause for the boundary. A different order of training corrections can produce different weights, as section 10 showed, so read the display as an account of this calculation rather than a general rule about English.
                   </p>
                   <p>
-                    What it does support is a repair. A gap answered wrongly names
-                    the questions that got it wrong, and marking more text in which
-                    those questions arise moves exactly those weights. That is a
-                    loop an annotator can be put in, and it is the second half of
-                    the argument the method was invented for.
-                  </p>
+                  {"A wrong score also suggests what to investigate. Additional labeled contexts can update the features that appear there. Those weights are shared with other gaps, so an update may repair one decision and change others. Test the resulting model rather than assuming the new annotation repairs only the selected boundary."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
                   This list describes the local score used for one gap. A sequence
@@ -703,14 +543,7 @@ export default function LearningBoundariesFromExamplesPage() {
                 </p>
                 <GapStrip scenarioKeys={["spaced"]} />
                 <p>
-                  Eight characters here with a space in the middle, so there are
-                  two runs of four and six gaps rather than seven. The boundary at
-                  the space is free, in the sense that it costs no question and
-                  cannot be got wrong, and the six that remain are all answered
-                  correctly. The other thing being kept is that the pieces coming
-                  back report where they sit in the original text rather than in
-                  their own run, so the third word starts at position five rather
-                  than at zero.
+                  {"The eight-character example has two four-character runs separated by a space. There are six within-run gaps to score. The scanner forces a boundary at the space; that is a policy that suits this example, not an error-free linguistic inference for every application. Returned spans keep their offsets in the original text, so the third word starts at position five."}
                 </p>
                 <p>
                   There is a mild consequence for the reach. A gap near the start
@@ -737,14 +570,7 @@ export default function LearningBoundariesFromExamplesPage() {
             <>
               <SubSection title="14. Where each of them wins, on the same marked sentences">
                 <p>
-                  The comparison has to be made on the same evidence or it says
-                  nothing, so both methods are handed the identical marked-up
-                  sentences at every size, and both are scored on the same two
-                  hundred held-out sentences, with a word counting as recovered
-                  only when both of its ends land where the sentence put them.
-                  Two generated languages are used, one of seventy words spelled
-                  out of forty characters and one of ordinary English words with
-                  the spaces taken out.
+                  {"Fit both procedures to the same labeled sentences and score them on the same two hundred held-out sentences. A reference word counts as recovered when both boundaries match. This controls the training and evaluation inputs for this comparison, though other comparisons could reasonably study different data budgets. The two generated tasks use a seventy-word character vocabulary and ordinary English words with spaces removed."}
                 </p>
                 <MethodRace languageKeys={["characters", "letters"]} />
                 <p>
@@ -757,59 +583,25 @@ export default function LearningBoundariesFromExamplesPage() {
                 </p>
                 <>
 <p>
-                  On the English words the picture is not the same picture shifted along, it is a different picture. The gap method passes the other one by twenty sentences and then keeps climbing, reaching 0.9057 at 1,280 sentences, while the whole-sequence method peaks at 0.6087 and then falls back to 0.5186 as more text is added.
+                  {"On the generated English-word task, the gap model overtakes the sequence model by twenty training sentences. It reaches 0.9057 at 1,280 sentences. The sequence model’s reported peak is 0.6087, followed by 0.5186 at the largest training size. These curves concern this constructed task."}
                 </p>
                 <p>
-                  The previous page measured why that happens to it, which is that a single letter of an alphabet says very little about where in its word it sits and says less as the vocabulary widens. A gap method never asks a character where it sits; it asks a window of six characters and five pairs whether a boundary is between the middle two, and that question keeps its answer.
+                  {"One plausible explanation is the information supplied to each model. The hidden-state model scores individual character emissions and adjacent roles. The gap model reads a six-character window, including five neighboring pairs, so it can use local combinations directly. The displayed curves measure performance; they do not isolate every cause of the difference."}
                 </p>
 </>
                 <InAModel>
-                  <p>
-                    I went into this expecting the two methods to be close on the
-                    alphabet, and 0.9057 against 0.5186 is not close. The honest
-                    reading is that these two are not variants of one approach
-                    with a knob between them. One of them is built on a claim
-                    about individual characters and the other on a claim about
-                    windows of them, and on a writing system where an individual
-                    character carries little the first claim fails while the
-                    second does not.
-                  </p>
+                  <p>The scores 0.9057 and 0.5186 show a substantial difference on this constructed alphabet. The methods make different assumptions: the hidden-state model links individual character roles, while the local predictor uses windows of neighboring characters. Where a single character carries little boundary information, those windows can provide evidence the individual-character model lacks. This result depends on the constructed writing system.</p>
                 </InAModel>
                 <KeepInMind>
-                  On a large character set the whole-sequence method wins until
-                  there is a good deal of marked-up text; on an alphabet the gap
-                  method wins throughout and by a wide margin. Neither of those is
-                  a fact about which method is better in general.
+                  {"The generated character task favors the sequence model at smaller training sizes; the gap model later overtakes it. On the English-word task, the gap model leads from twenty sentences onward. Neither curve establishes a general winner for every alphabet or character-based writing system."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. Where it is plainly the worse of the two">
-                <p>
-                  Two places, and both are worth stating without softening.
-                </p>
-                <p>
-                  The first is words the marked-up sentences never held, which is
-                  the very thing the previous page&rsquo;s method was built to
-                  reach. Splitting the same recall by whether the word had been
-                  seen, on the character language at thirty sentences, the gap
-                  method recovers 0.2640 of the unfamiliar words and the
-                  whole-sequence method recovers 0.6560 of them, two and a half
-                  times as many. The table under the widget above carries that
-                  split at every size, and the gap method is behind on unfamiliar
-                  words at every size up to forty sentences. At eighty only
-                  nineteen unfamiliar words are left among the held-out
-                  sentences, and the gap method recovers six of them to the
-                  other method&rsquo;s five, which is too few to rank the two
-                  on.
-                </p>
-                <p>
-                  The second is small corpora of a script whose characters are
-                  strongly positional. Four sentences whose every word is exactly
-                  two characters long are enough to teach the whole-sequence
-                  method that words come in twos, since that fact lives directly
-                  in its table of steps from one place to the next. The gap method
-                  has nowhere to put it.
-                </p>
+                <p>Two comparisons here favor the sequence model.</p>
+                <p>At thirty training sentences in the generated character language, unfamiliar-word recall is 0.2640 for the gap model and 0.6560 for the sequence model. The gap model remains behind on that group through forty sentences.</p>
+<p>At eighty sentences, only nineteen unfamiliar words remain in the held-out sample. Recovering six rather than five of them gives little evidence for a general ranking. Keep that shrinking evaluation group beside the recall figures when comparing the curves.</p>
+                <p>The second comparison uses a small corpus whose words are all two characters long. Its state transitions encourage the sequence model’s two-character reading on this probe. That is a learned preference, not a hard length rule. The independent gap model has no joint constraint requiring every output word to have two characters.</p>
                 <GapStrip scenarioKeys={["paired", "surname"]} showSentences />
                 <p>
                   Handed 生命起源, which is two of the three words those sentences
@@ -820,23 +612,13 @@ export default function LearningBoundariesFromExamplesPage() {
                   a general result about either method.
                 </p>
                 <KeepInMind>
-                  The same independence that lets the full stop of Dr. be traced
-                  to a weight of +3.6304 is what leaves four sentences of
-                  two-character words with nowhere to record that words come in
-                  twos, and 生命起源 then comes back as a single piece. No setting
-                  keeps the first of those without the second.
+                  {"The local model has no transition state that tracks a sequence of word roles. On the two-character-word probe, it returns 生命起源 as one piece. This illustrates a failed prediction after limited training, rather than proving that local character features could never learn the needed cuts."}
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="16. An answer that maximises nothing">
+              <SubSection title="16. Comparing Local Decisions with a Sequence Objective" id="16-an-answer-that-maximises-nothing">
                 <p>
-                  Here is the cost of independence stated exactly. The
-                  whole-sequence method returns the reading with the largest total
-                  score, so its answer is the best reading under one account of
-                  the sentence, and changing any single boundary in it lowers that
-                  total. An answer assembled out of independent decisions has no
-                  such property, because there is no quantity anywhere in the
-                  method that mentions the whole run.
+                  {"The sequence decoder maximizes its total path score. No alternative path has a larger score, though ties can exist. The local method chooses each cut from its own score. Those choices can be described as maximizing a sum of independent local preferences; they do not optimize the sequence model’s transition-and-emission score."}
                 </p>
                 <p>
                   That is checkable rather than merely arguable. Take the reading
@@ -858,14 +640,7 @@ export default function LearningBoundariesFromExamplesPage() {
                   caption="All three readings of the same forty-five characters, scored by the same tables. The middle row is the largest by construction, since it is what that method returns; the top row is a reading it considered and rejected, and the bottom row is the right answer, which it also rejected."
                 />
                 <p>
-                  Read the bottom row before the top one. The reading a person
-                  gives scores lower than the reading the whole-sequence method
-                  chose, so being the maximum of that score is not the same as
-                  being right, and the consistency the method buys is consistency
-                  with its own account of sentences rather than with the language.
-                  The top row then says what independence costs in those terms, a
-                  gap of 4.7503 between an answer that maximises that score and
-                  one that maximises nothing.
+                  {"The reference reading scores below the sequence decoder’s chosen reading. Maximizing that fitted score therefore does not guarantee the intended segmentation. The local reading scores 4.7503 below the sequence optimum under these same tables. That is a difference under the HMM’s score, not an absence of any objective for local decisions."}
                 </p>
                 <Equation>
                   {"the best whole sequence, less one answer per gap   −151.0253 − (−155.7756)  =  4.7503\n" +
@@ -879,43 +654,19 @@ export default function LearningBoundariesFromExamplesPage() {
                   method&rsquo;s answer is and still short of it.
                 </p>
                 <p>
-                  What that looks like in the answer is the single letter a
-                  standing as a word inside a surname. Cutting after the v is
-                  defensible on its own and cutting after the a is defensible on
-                  its own, and nothing in the method ever puts the two decisions
-                  in the same sentence. It is tempting to say the whole-sequence
-                  method could not have produced such a thing, and that is not
-                  true, which is the subject of the twentieth section.
+                  {"The local model cuts out the single letter a within Alvarez. Each decision uses overlapping character windows, but neither uses the other predicted cut or a joint word-length constraint. A sequence model can also produce odd word lengths, as section 20 checks."}
                 </p>
                 <KeepInMind>
-                  The answer is a set of decisions rather than the maximum of
-                  anything, so there is no reading of it as best under any account
-                  of what sentences look like. On our own sentence that costs
-                  4.7503 by the other method&rsquo;s own score, and it costs the
-                  surname.
+                  {"Independent decisions do not maximize the HMM path score. On this probe, the local output lies 4.7503 below its optimum, while the reference reading also lies below that optimum. Compare segmentation errors as well as fitted scores when judging the models."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="17. How the context window changes training and prediction work" id="17-what-it-costs">
                 <p>
-                  Two costs, and the honest one is not the time. Reading a text is
-                  8w minus 1 additions per gap at a reach of w, so twenty-three
-                  per gap at the reach used here, against the whole-sequence
-                  method&rsquo;s eight comparisons per character. Both are linear
-                  in the length of the text and neither grows with the amount of
-                  marked-up text behind them, so on a sentence of forty-five
-                  characters the difference is a few hundred additions and is not
-                  a consideration.
+                  {"With fixed reach w, the local scorer adds at most 8w minus one feature weights per gap. The sequence decoder has a bounded set of role transitions to inspect at each character. Both scale linearly with text length for these fixed model designs. Their actual runtimes also include feature construction, dictionary lookup and implementation overhead; counts of additions and comparisons are not interchangeable timing measurements."}
                 </p>
                 <p>
-                  The cost that matters is marked gaps. Our eight sentences hold
-                  189 of them and produce 631 weights, so there are more weights
-                  than examples, which is the ordinary situation for this kind of
-                  model and is the reason the tenth section&rsquo;s eight orders
-                  disagree. On the generated character language, the gap method
-                  needs a hundred and sixty sentences, 1,361 marked gaps, before
-                  it passes a whole-sequence method that was already ahead at
-                  thirty sentences and 265 gaps.
+                  {"The eight training sentences expose 631 distinct features on 189 gaps. Shared features let examples inform multiple predictions, but the larger parameter space can also leave many settings plausible. The generated character task needs a hundred and sixty training sentences, or 1,361 gaps, before the local model overtakes the sequence model. The table shows that data requirement for this experiment."}
                 </p>
                 <NumberTable
                   headings={[
@@ -932,22 +683,13 @@ export default function LearningBoundariesFromExamplesPage() {
                     ["160", "1,361", "2,314", "0.9650", "0.9178"],
                     ["320", "2,675", "2,996", "0.9799", "0.9223"],
                   ]}
-                  caption="The character language, both methods on the same sentences, scored on the same two hundred held-out ones. The count of weights is what the marked gaps raised between them, so it grows with the corpus and never stops growing."
+                  caption="The generated character task, with identical training and held-out sentences for both methods. The feature count is the distinct feature set observed during fitting. It increases across these samples; repeated examples need not introduce any new features."
                 />
                 <p>
-                  Set that beside the third section and the trade is visible from
-                  both ends. This method needs more marked gaps than the other one
-                  to reach the same score, and it can be handed marked gaps that
-                  the other one cannot use at all. Which of those dominates is a
-                  question about how the annotation was produced rather than about
-                  either method.
+                  {"This experiment presents two separate questions. How many labeled examples are needed to reach a useful evaluation score? Which labels can the training procedure use? The character-task curve and partial-annotation count address those questions differently; the practical choice depends on the data and annotation process."}
                 </p>
                 <KeepInMind>
-                  The price is paid in marked gaps rather than in time, and it is
-                  roughly five times as many of them on the character language for
-                  the lead to change hands. The number of weights grows with the
-                  corpus without limit, since a new pair of characters raises new
-                  questions.
+                  {"The sequence model leads at thirty sentences and 265 gaps; the local model overtakes it at a hundred and sixty sentences and 1,361 gaps. That is roughly five times the labeled gaps in this task. Distinct stored features increase across the displayed training sizes, but need not grow on every added sentence."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1003,26 +745,18 @@ export default function LearningBoundariesFromExamplesPage() {
                   ]}
                 />
                 <p>
-                  So the reach is not a tuning parameter in the usual sense of
-                  trading accuracy against cost. It is a statement about which
-                  dependencies can be written down at all, made before any text is
-                  read, and a dependency outside it is invisible rather than
-                  poorly estimated. Widening the reach is not free either, since
-                  each step raises eight more questions per gap and every one of
-                  them needs marked gaps to answer.
+                  The context reach is a design choice as well as a tuning parameter. It determines which nearby dependencies the features can represent; information outside that reach is not supplied to this classifier. Widening it adds eight feature questions per gap in this implementation, increasing the evidence needed to estimate their usefulness. The accuracy and cost trade-off still needs to be measured on representative data.
                 </p>
                 <KeepInMind>
-                  Whatever the reach, some real dependency is wider than it, and
-                  for that dependency the method has no representation rather than
-                  a weak one. A long-range agreement in a sentence is the ordinary
-                  example and it is entirely out of reach here.
+                  {"Any fixed window excludes characters beyond its reach. A task that genuinely requires one of those characters cannot be settled from identical local windows alone. Whether that restriction matters depends on the boundary rule and the available local clues."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. The features are a design decision, not a learned one">
                 <p>
+
                   Every question a gap is asked was chosen by a person. Somebody
-                  decided that single characters and neighbouring pairs are asked
+                  decided that single characters and neighboring pairs are asked
                   about and that triples are not, that seven kinds of character
                   are told apart and not seventy, and that the offsets are treated
                   separately rather than as a bag. Those choices fix what the
@@ -1030,30 +764,13 @@ export default function LearningBoundariesFromExamplesPage() {
                   each of the chosen questions counts.
                 </p>
                 <p>
-                  What follows is a ceiling that no amount of text raises. A
-                  boundary whose evidence is a triple of characters, or a
-                  distinction the seven kinds do not draw, has no question to
-                  attach itself to, so the weights cannot represent it however
-                  many marked gaps arrive. It is the same shape of limit as the
-                  window and it is easier to miss, because widening the questions
-                  is a change to the design where widening the reach is a change
-                  to a number.
+                  {"A selected feature set can also omit useful combinations inside the window. Some decisions depend on an interaction that cannot be written as an additive combination of the supplied identity and pair features. Merely involving three characters is not sufficient to prove failure: their existing features may already distinguish the relevant cases."}
                 </p>
                 <p>
-                  Two things follow that are worth separating. Adding questions
-                  widens what can be represented and at the same time thins the
-                  evidence behind each one, since every new question needs marked
-                  gaps to settle it and our eight sentences already raise 631 of
-                  them on 189 gaps. And a ceiling set by hand is one that can be
-                  raised by hand, which is exactly what the neural descendants of
-                  this idea do, replacing the chosen questions with a function
-                  that learns what to read.
+                  {"We can add features by hand, then measure whether the added detail improves held-out decisions. A neural model offers another approach: learn intermediate representations instead of listing every feature combination explicitly. It still has design constraints, including its input window and architecture; learned representations do not remove all limits."}
                 </p>
                 <KeepInMind>
-                  The set of questions is the model. Its ceiling was fixed by
-                  whoever wrote the list, and no quantity of marked-up text moves
-                  it, which makes it the one part of this method that cannot be
-                  improved by annotating more.
+                  {"Training chooses weights for the supplied features. If two cases need different decisions but have identical feature vectors, more labels alone cannot separate them. Changing the representation or supplying additional context is then necessary."}
                 </KeepInMind>
               </SubSection>
 
@@ -1061,17 +778,8 @@ export default function LearningBoundariesFromExamplesPage() {
                 <p>
                   The classifier makes each gap decision independently. It cannot use another predicted boundary as evidence or enforce consistency across a whole word. Boundaries describe parts of the same segmentation, so that restriction can matter. The examples below test cases whose required relationship falls outside the local decision rule.
                 </p>
-                <p>
-                  What is tempting here is to conclude that the answers can
-                  therefore contradict each other in ways a whole-sequence method
-                  could not produce, and that turns out to be wrong. Any set of
-                  cuts is a segmentation, so there is no arrangement of
-                  independent answers that the other method is incapable of
-                  returning. I checked it on the case where the argument should be
-                  strongest, four marked-up sentences whose every word is exactly
-                  two characters long, over all 1,296 four-character texts
-                  spellable from their alphabet.
-                </p>
+                <p>Independent gap predictions can produce a segmentation for any pattern of cuts. A whole-sequence model may assign that segmentation a poor score, but this does not necessarily put it outside the model’s supported paths.</p>
+                <p>The controlled check trains on four sentences containing only two-character words, then tests all 1,296 four-character strings from that alphabet. It lets us compare which cuts the methods choose without assuming that local decisions must create an impossible word sequence.</p>
                 <NumberTable
                   headings={[
                     "method",
@@ -1082,35 +790,18 @@ export default function LearningBoundariesFromExamplesPage() {
                     ["one answer per gap", "32", "1,296"],
                     ["the best whole sequence", "45", "1,296"],
                   ]}
-                  caption="A corpus in which every word is two characters long, so a piece of odd length is a word shape the corpus never showed. The whole-sequence method produces one more often, not less, which is the opposite of what the argument from independence predicts."
+                  caption="Both methods were trained on two-character words. Each sometimes returns an odd-length piece on these probes, with forty-five such texts for the sequence model and thirty-two for the local model. Joint decoding alone therefore does not enforce the training corpus’s word lengths."
                 />
                 <p>
-                  So the difference is not that one method forbids incoherent
-                  answers. Both produce them, and here the one with a model of the
-                  sentence produces them more often, since it has never seen a
-                  one-character word either and what decides those cases for it is
-                  the amount added to every count it never saw. The real difference
-                  is the one the sixteenth section measured, which is that only one
-                  of the two answers is the maximum of anything, and the practical
-                  consequence, which the fifteenth section already showed, is that
-                  a fact about word shapes has nowhere to be recorded here.
+                  {"The sequence model’s role transitions constrain valid paths, but permit word lengths it never saw. Smoothing can give such paths positive probability. The local model has no coupled role-path constraint at all. Those are different mechanisms, and both can still yield an unwanted word length."}
                 </p>
                 <InAModel>
                   <p>
-                    I had this section written the other way round before I
-                    counted, with the corpus of two-character words as the case
-                    where independent answers invent a word length the language
-                    does not have. They do, thirty-two times, and so does the
-                    method that supposedly cannot. The claim that survives is
-                    narrower than the one I set out to make and it is the one the
-                    numbers support.
-                  </p>
+                  In the two-character-word experiment, independent boundary decisions produce an unsupported word length thirty-two times. The hidden-state method can produce that kind of error too. Its transition constraints enforce compatible role sequences, rather than every word-length property of the language. The counted example therefore supports a narrower comparison than claiming that joint decoding makes such errors impossible.
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  Independence is false, and what it costs is not that the answers
-                  contradict one another. It is that a dependency between two gaps
-                  has nowhere to live, so the method cannot be told a fact it
-                  would need two gaps to state.
+                  {"Local predictions cannot directly condition on one another’s chosen boundaries. If the task requires coordinating those decisions beyond what the character features encode, this design needs additional state, features or joint decoding. Independence alone does not make every returned segmentation contradictory."}
                 </KeepInMind>
               </SubSection>
 
@@ -1123,12 +814,12 @@ export default function LearningBoundariesFromExamplesPage() {
                     {
                       expression: "a gap scoring exactly zero",
                       reason:
-                        "right for neither answer, so something has to be decided. Counting it as a mistake while learning and as no cut while reading is one choice, and the other choices are to cut, which makes an unfamiliar text fall apart, or to refuse and leave the gap for something else. Nothing in the arithmetic prefers any of the three.",
+                        "Training updates at zero because it requires a strict signed margin. Prediction resolves zero as no cut in this implementation. Cutting or abstaining would be alternative policies whose consequences need evaluation.",
                     },
                     {
                       expression: "a run of one character",
                       reason:
-                        "has no gap, so there is no question and no answer. The run is one word by default rather than by decision, and that is the only case in which this method returns something without having been asked anything.",
+                        "There is no internal gap to score. The nonempty run returns as one piece under the scanner’s policy; whitespace-only or empty text has no such run.",
                     },
                     {
                       expression: "a question the marked gaps never raised",
@@ -1138,7 +829,7 @@ export default function LearningBoundariesFromExamplesPage() {
                     {
                       expression: "the order the marked gaps are visited in",
                       reason:
-                        "undetermined by the method and it changes the answer. Eight orders over the same eight sentences give five different readings of the same forty-five characters, all of them right about every one of the 189 gaps they were shown.",
+                        "The SDK shuffles examples using a configurable seed. Eight seeds here produce five probe readings. Their working weights reach correction-free training passes; their returned averaged weights are a separate object.",
                     },
                     {
                       expression: "evidence outside the window",
@@ -1153,22 +844,17 @@ export default function LearningBoundariesFromExamplesPage() {
                     {
                       expression: "which questions a gap is asked",
                       reason:
-                        "assumed answered, and answered by a person. That list fixes the ceiling, and no quantity of marked-up text raises it; more text can only settle the questions already on the list, of which our eight sentences raise 631 on 189 gaps.",
+                        "The feature design is supplied before fitting. These eight sentences expose 631 distinct features on 189 gaps. More labels can improve their estimated weights but cannot distinguish cases whose supplied feature vectors are identical.",
                     },
                     {
                       expression: "whether an answer is right",
                       reason:
-                        "outside the method, as it was on the dictionary pages and the hidden-model one. Even the whole-sequence score disagrees with a reader here, ranking its own nine-piece answer at −151.0253 above the reader’s seven-piece one at −153.9847, so an accuracy figure is always a figure against one person’s cutting.",
+                        "Correctness needs a stated segmentation convention and reference labels. Here the HMM ranks its own nine-piece answer at −151.0253 above the reference’s seven-piece answer at −153.9847. Its likelihood score and reference accuracy measure different things.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Three of these are decisions rather than limits, namely what to
-                  do with a score of zero, what order to visit the marked gaps in,
-                  and which questions a gap is asked. Each has a defensible answer
-                  on more than one side and each changes what comes back, so each
-                  belongs in whatever describes a segmenter rather than being left
-                  to whoever writes one.
+                  {"Choose and document the zero-score policy, shuffled training order and feature design. They are configurable parts of a segmenter and can change its output. The representational limits then tell us which failures may require a different design rather than more examples of the same kind."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1186,12 +872,12 @@ export default function LearningBoundariesFromExamplesPage() {
                 "The learning rule clamps the contribution from kinds once a gap is answered correctly",
               ],
               0,
-              "Kinds are coarse on purpose, so an apostrophe and a hyphen raise the identical questions and get the identical number. That is the generalisation working. It is also why the offsets are kept apart, since the full stop of Dr. carries its punctuation on the other side of the gap and gets minus 0.3188 from kinds rather than minus 12.0563.",
+              "Kinds are coarse on purpose, so an apostrophe and a hyphen raise the identical questions and get the identical number. That is the generalization working. It is also why the offsets are kept apart, since the full stop of Dr. carries its punctuation on the other side of the gap and gets minus 0.3188 from kinds rather than minus 12.0563.",
             ),
             trueFalse(
               "On the English words with the spaces taken out, the whole-sequence method finishes below its own best score while the gap method is still climbing.",
               true,
-              "The whole-sequence method peaks at 0.6087 and falls back to 0.5186 as more text is added, where the gap method reaches 0.9057 at 1,280 sentences. A single letter of an alphabet says little about where in its word it sits and says less as the vocabulary widens. The gap method never asks a character where it sits. It asks a window of six characters and five pairs whether a boundary lies between the middle two, and that question keeps its answer.",
+              "In the generated alphabetic-word experiment, the wider local-feature model improves with more training text while the role-conditioned model does not follow the same curve. The gap learner reads nearby character identities, types and pairs together. That richer local context helps on these data, but the comparison does not establish the same learning curves for every alphabetic language.",
             ),
             choice(
               "On the character language at thirty sentences, recall was split by whether the word had been seen before. Which way did the split go?",
@@ -1207,13 +893,13 @@ export default function LearningBoundariesFromExamplesPage() {
             choice(
               "What does answering every gap independently cost, as the page measures it?",
               [
-                "The answer is the maximum of nothing, and on the sentence about Dr. Alvarez it scores 4.7503 below the best whole sequence by that method’s own tables",
+                "It does not optimize the whole-sequence model’s score; on the sentence about Dr. Alvarez it scores 4.7503 below that model’s best path",
                 "It returns segmentations the whole-sequence method is incapable of returning",
                 "It answers with a piece of a length its corpus never showed more often than the whole-sequence method does",
                 "Its cost of reading a text grows with the amount of marked-up text behind the weights",
               ],
               0,
-              "Any set of cuts is a segmentation, so no arrangement of independent answers is beyond the other method. Over all 1,296 four-character texts from a corpus of two-character words, the gap method answered with a piece of odd length 32 times and the whole-sequence method 45 times. Reading a text costs twenty-three additions a gap however much text was marked up, which is not a consideration. What is lost is that no quantity in the method mentions the whole run, so a fact needing two gaps to state has nowhere to be recorded.",
+              "Independent gap decisions always produce some segmentation, but this model has no joint score that can require several distant cuts to agree. The reported odd-length pieces illustrate that limitation on this constructed language. The whole-sequence model also makes such errors, so adding a sequence decoder alone does not guarantee the needed word-length constraint. Runtime and modeling capability are separate comparisons.",
             ),
             several(
               "Which of these are decisions nothing in the method makes for you, rather than limits of what it can express?",
@@ -1224,7 +910,7 @@ export default function LearningBoundariesFromExamplesPage() {
                 "That a dependency wider than the reach has nowhere to be written down",
               ],
               [0, 1, 2],
-              "The score of exactly zero, the order the gaps are visited in and the questions a gap is asked each have a defensible answer on more than one side, and each changes what comes back, so each belongs in whatever describes a segmenter. A dependency wider than the reach is not a choice at all. A character outside the reach has no place in the question being asked, so the dependency is invisible rather than poorly estimated, and more text cannot supply one.",
+              "The feature window, update order and zero-score policy are explicit design choices. With a fixed feature set, two gaps that have identical visible features must receive the same score even if distant context calls for different labels. More examples can improve estimates of those features, but cannot add an input the model never receives.",
             ),
         ],
         },
@@ -1308,7 +994,7 @@ question: "Where does a learned boundary rule cut a new surname incorrectly?",
             exercise(
               "Open up the gap after the full stop",
               [
-  "Inspect one decision instead of treating the boundary score as an unexplained number. Use the same fitted model and examine gap 2, between the full stop and A in the text with spaces removed.",
+  "Inspect one decision instead of treating its score as an unexplained number. With the same fitted model, examine gap 2 between the period and A in the text with spaces removed.",
   "List that gap’s features with gap_features at window=3 and look up each averaged weight. Print the five features with the largest absolute weights. Then print the feature count and separate totals for character features, character-type features, the bias and all features.",
   "Print the model’s own gap score beside your total. Character features begin with c, type features with t, and bias is the constant feature. The internal helper is imported explicitly in the starter."
 ],
@@ -1379,14 +1065,14 @@ question: "Which learned features cause the cut after Dr.?",
   "gap_features(text, 2, 3) supplies the names whose weights participate in this decision.",
   "Sort by abs(weight), not by signed weight, so a strong negative contribution remains visible.",
   "Sum each named group and compare the complete sum with gap_scores(text)[2]. The displayed four-decimal figures are rounded from the underlying weights."
-], check: numberCheck("What do the twenty-three weights at that gap add up to, to four places?", 7.1283, 5e-05, "The complete feature sum is 7.1283 to four decimal places, matching the model’s score. Its positive sign chooses a boundary. The largest individual contribution comes from the adjacent full stop.") },
+], check: numberCheck("What do the twenty-three weights at that gap add up to, to four places?", 7.1283, 5e-05, "The feature contributions total 7.1283 to four decimal places, matching the model’s positive boundary score. The largest individual contribution is the feature identifying the adjacent period. This explains the current calculation, rather than proving that punctuation alone determines every such decision.") },
             ),
             exercise(
               "Run the same eight sentences in eight orders",
               [
   "Keep the eight marked training sentences fixed and vary only the order used to visit their examples. Fit models with seeds 0 through 7, window=3 and epochs=20.",
   "For each fit print the total training corrections, the probe’s piece count and whether its segmentation equals the supplied reader segmentation. Finish by counting distinct probe segmentations across all eight fits.",
-  "Use the recorded update counts to inspect training behaviour separately from the held-out probe. A run making no further corrections has settled on the training examples, not proved a rule for every new name."
+  "Use the recorded update counts to inspect training behavior separately from the held-out probe. A run making no further corrections has settled on the training examples, not proved a rule for every new name."
 ],
               `from oop_ml import PointwiseSegmenter
 

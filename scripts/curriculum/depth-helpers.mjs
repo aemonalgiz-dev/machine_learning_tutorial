@@ -1,7 +1,7 @@
 import { part, exercise } from './authoring.mjs';
 
 export const section = (title, explanation, calculation = null, interpretation = '') => part(title, explanation, calculation, interpretation);
-export const question = (description, prompt, options, answer, because) => ({kind:'choice',given:{description:'Use this setup.',data:description},prompt,options,answer,because});
+export const question = (description, prompt, options, answer, because) => ({kind:'choice',given:{description:'Question data',data:description},prompt,options,answer,because});
 export function functionTask(title, task, setup, signature, body, demo, output, hints, tests) {
   return {...exercise(title, task, `${setup}\n\n${signature}\n    # Write the procedure here.\n    raise NotImplementedError\n\n${demo}`, `${setup}\n\n${signature}\n${body}\n\n${demo}`, output, hints),tests:tests.map(([name,code])=>({name,code}))};
 }

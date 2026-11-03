@@ -16,7 +16,7 @@ export function ExpandedLessonPage({ id }: { id: string }) {
     item.scene ?? strips("An invented example for this lesson.", item.rows))), lesson.reading.connectionTitle, [lesson.build.why]),
     exampleNote: lesson.reading.exampleNote };
   return <ConceptPage lessonId={lesson.id} title={lesson.title} tagline={lesson.blurb}
-    openingTitle={lesson.openingTitle} intuition={intuition} technicalStart={lesson.technicalStart ?? (lesson.parts[1] ?? lesson.parts[0]).title}
+    openingTitle={lesson.openingTitle} openingId={lesson.openingId} openingBeforeHistory={lesson.openingBeforeHistory} bookmarkRedirects={lesson.bookmarkRedirects} intuition={intuition} technicalStart={lesson.technicalStart ?? (lesson.parts[1] ?? lesson.parts[0]).title}
     prerequisites={<>{lesson.prerequisites.map((item, i) => <span key={item.href}>{i > 0 && ", "}<Link href={item.href}>{item.title}</Link></span>)}.</>}
     playgroundTitle={lesson.reading.experimentTitle}
     playgroundIntro={lesson.reading.experimentIntro}

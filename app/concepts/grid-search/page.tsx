@@ -23,9 +23,9 @@ import { SearchCurveChart } from "@/components/widgets/SearchCurveChart";
 import { SpaceBuilder } from "@/components/widgets/SpaceBuilder";
 
 export const metadata: Metadata = {
-  title: "Searching for a Setting · oop_ml",
+  title: "Searching for a Setting · Perceptron Lab",
   description:
-    "Many model settings must be chosen before fitting. We need a fair way to compare those choices using training and validation data, while keeping the final test separate from the decision.",
+    "Model settings chosen before fitting affect the result. Grid search compares specified combinations using validation data, while a separate final test checks the choice after the search is complete.",
 };
 
 const link =
@@ -41,16 +41,18 @@ export default function GridSearchPage() {
       playgroundTitle="Compare settings on the same validation folds"
       playgroundIntro="Compare the candidates on the same folds. Read the winning validation score alongside the separate test result, since they answer different questions."
       title="Searching for a Setting"
-      tagline={"Many model settings must be chosen before fitting. We need a fair way to compare those choices using training and validation data, while keeping the final test separate from the decision."}
+      tagline={"Model settings chosen before fitting affect the result. Grid search compares specified combinations using validation data, while a separate final test checks the choice after the search is complete."}
       prerequisites={
         <>
           The folding this page searches inside comes from the{" "}
           <Link href="/concepts/held-out-evaluation" className={link}>
             held-out evaluation
           </Link>{" "}
-          page, and the dial being searched over is the neighbour count of{" "}
+
+          page, and the dial being searched over is the neighbor count of{" "}
           <Link href="/concepts/k-nearest-neighbours" className={link}>
-            k-nearest neighbours
+
+            k-nearest neighbors
           </Link>
           , used here to predict a person&rsquo;s weight from their height.
           The two-dial grid in Part 2 borrows the{" "}
@@ -70,18 +72,9 @@ export default function GridSearchPage() {
           defaultOpen: true,
           content: (<>
 <>
-              <SubSection title="1. Twelve people and a neighbour count">
-                <p>
-                  Twelve people were measured, height in centimetres and
-                  weight in kilograms, from 150 centimetres and 50 kilograms
-                  up to 183 centimetres and 82 kilograms. To guess a new
-                  person&rsquo;s weight from their height, the neighbour
-                  method finds the k people closest in height and averages
-                  their weights, and everything about that guess is fixed by
-                  the twelve people except k itself. Ask for one neighbour
-                  and the guess is one person&rsquo;s weight; ask for nine
-                  and it is nearly the average of everyone.
-                </p>
+              <SubSection title="1. Twelve people and a neighbor count" id="1-twelve-people-and-a-neighbour-count">
+                <p>We have twelve height and weight pairs, ranging from 150 centimeters and 50 kilograms to 183 centimeters and 82 kilograms. To predict weight, a nearest-neighbor rule finds people with similar heights and averages their weights.</p>
+                <p>The number of neighbors changes that rule. With one neighbor, the prediction uses one person’s weight. With nine, it averages most of the sample. How should we choose between those settings without using the final test answers to make the choice?</p>
                 <NumberTable
                   headings={["person", "height, cm", "weight, kg", "person", "height, cm", "weight, kg"]}
                   rows={[
@@ -94,61 +87,38 @@ export default function GridSearchPage() {
                   ]}
                   caption="The twelve people every widget on this page searches over. Persons 5, 9 and 12 are the ones the page holds back."
                 />
-                <p>We choose the neighbour count k before fitting. It changes how the prediction rule uses the stored examples, rather than being a coefficient fitted from their errors. A setting like this is called a hyperparameter.</p>
+                <p>We choose the neighbor count k before fitting. It changes how the prediction rule uses the stored examples, rather than being a coefficient fitted from their errors. A setting like this is called a hyperparameter.</p>
               <p>A line&apos;s slope and intercept are fitted parameters. A tree&apos;s depth limit, a polynomial degree or a ridge penalty are examples of hyperparameters. We need a selection procedure for them too, while keeping separate observations for assessing the final choice. Grid search is one such procedure; it does not have exclusive claim to choosing these settings.</p>
                 <KeepInMind>
-                  A hyperparameter is a number the fit takes as given. The
-                  fit optimises everything else with it held fixed, so the
-                  fit cannot tell you what it should have been.
-                </KeepInMind>
+
+                  A hyperparameter is a setting treated as fixed by the fitting procedure we are using. We can compare alternative values in an outer selection procedure. It need not be numeric, and a different algorithm may learn a setting that this procedure takes as given.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. Why the fit cannot choose it">
                 <>
-<p>
-                  We could try letting the fit choose k the way it chooses a slope, by asking which k makes the misses on the twelve people smallest. The grey line in the playground is that experiment, each k fitted on the nine searched people and scored on those same nine, and it reads exactly one at one neighbour and falls from there, 0.9758 at two, 0.9560 at three, 0.9258 at four and 0.8564 at five.
-                </p>
+<p>Suppose we choose k by the score on the observations used for fitting. The playground&rsquo;s gray curve fits each candidate on the nine searched people and scores those same nine. It is exactly 1.0 at one neighbor, then 0.9758, 0.9560, 0.9258 and 0.8564 for two through five neighbors. This comparison favors retrieving the stored observations, which is different from predicting a new person.</p>
                 <p>
-                  It reads one at k = 1 because every person&rsquo;s nearest neighbour among the people the model remembers is that person, so the guess is their own weight and the miss is zero.
+
+                  It reads one at k = 1 because every person&rsquo;s nearest neighbor among the people the model remembers is that person, so the guess is their own weight and the miss is zero.
                 </p>
 </>
                 <Equation>{"score on the fitted rows at k = 1  =  1 − 0 / TSS  =  1"}</Equation>
-                <p>
-                  So a fit allowed to set its own k would always answer one,
-                  and one neighbour is the setting that memorises. The
-                  training score cannot turn as k rises, for the same reason
-                  the held-out page gave about a polynomial&rsquo;s degree,
-                  since a smaller k always has at least as much freedom to
-                  match the rows it was shown. A number that is guaranteed to
-                  prefer the most flexible setting cannot be the number that
-                  chooses between settings.
-                </p>
+                <p>A one-neighbor model can reproduce each unique training input by retrieving that same observation. Its perfect training score therefore gives us little reason to expect a useful prediction for someone new. Training scores at larger k need not be monotonic on every dataset, but selecting by them still rewards fitting the observations already available.</p>
                 <KeepInMind>
-                  A score on the rows the model was fitted to always prefers
-                  the setting that memorises them. Here it is exactly 1.0 at
-                  one neighbour, and that is not a coincidence of these
-                  twelve people.
-                </KeepInMind>
+
+                  When each training input is unique, a one-neighbor rule can reproduce its stored target exactly. Its perfect training score then ties the best possible score, even if it predicts new observations poorly. Duplicate inputs with conflicting targets would change that result.</KeepInMind>
               </SubSection>
 
               <SubSection title="3. The held-out score is the ruler">
                 <>
-<p>
-                  The ruler has to be data the fit did not see, which is the held-out page&rsquo;s whole argument, and the version used here is its folded form. The searched people are dealt into folds, each k is fitted on all but one fold and scored on the fold it was denied, and the mean of those fold scores is what that k earns.
-                </p>
+<p>We need observations excluded from the candidate’s fit. Split the searched data into folds. For each candidate k, fit on all but one fold and score on the omitted fold, repeating until each fold has been evaluated. The candidate receives the mean of those scores.</p>
                 <p>
-                  The indigo line in the playground is that number at each k, and it does turn, rising from 0.8944 at one neighbour to 0.9252 at two and then falling to 0.2448 at five.
+
+                  The indigo line in the playground is that number at each k, and it does turn, rising from 0.8944 at one neighbor to 0.9252 at two and then falling to 0.2448 at five.
                 </p>
 </>
-                <Equation>{"score(k)  =  (1 / n_folds) Σ over folds f of R² of the k-neighbour fit\n             fitted without fold f, scored on fold f"}</Equation>
-                <p>
-                  Read the two lines together. The grey line says memorising
-                  is best; the indigo line says two neighbours is best,
-                  because a guess averaged over two nearby people is steadier
-                  than one person&rsquo;s weight and still local enough to
-                  follow the trend. Every score on this page from here on is a
-                  held-out one.
-                </p>
+                <Equation>{"score(k)  =  (1 / n_folds) Σ over folds f of R² of the k-neighbor fit\n             fitted without fold f, scored on fold f"}</Equation>
+                <p>The gray line favors reproducing the stored observations. The indigo line favors two neighbors on these validation folds. Averaging nearby weights helped on observations excluded from fitting, while retaining enough local detail to follow the trend. This is evidence for that setting under this split, rather than a rule that two neighbors always work best.</p>
                 <KeepInMind>
                   We compare candidate hyperparameters using observations excluded from each candidate&apos;s fit. Those observations are validation data: their scores now help us select the setting. They are therefore part of model selection, and we still need a separate final assessment if we want an independent estimate of the selected procedure&apos;s performance.
                 </KeepInMind>
@@ -162,21 +132,16 @@ export default function GridSearchPage() {
             <>
               <SubSection title="4. A candidate is a whole model, rebuilt">
                 <>
-<p>
-                  A search needs one model per setting, and the way it builds them matters more than it looks. The safe way is to build each candidate from scratch through the same constructor a person would use, handing it the searched value along with every other setting copied from the prototype, so that a value the model would refuse is refused here too, and a name the model does not have is refused before a single fold is fitted.
-                </p>
+<p>Each candidate needs a fresh model with its own settings. Constructing it through the usual model constructor runs the same validation as an ordinary fit. Checking parameter names before the search also prevents a misspelled setting from being silently ignored.</p>
                 <p>
                   The dial&rsquo;s name is checked against the model&rsquo;s declared fields at the moment the range is written down, and the widget below lets you misspell it.
                 </p>
 </>
                 <SpaceBuilder />
                 <>
-<p>
-                  Misspell the dial as n_neighbors and the space is refused at once, with the two dials the model does have, metric and n_neighbours, named in the message. Try a zero and the model&rsquo;s own constructor refuses the candidate, since a neighbour count has to be above zero. I made the other choice first, building candidates by copying the prototype and overwriting one field, and a copy accepts a field name it has never heard of without complaint and leaves the real field at its default, so a grid over the misspelling would have fitted the same model at every point, reported a perfectly flat curve, and picked the first value by tie-break.
-                </p>
-                <p>
-                  Nothing about that output would look wrong.
-                </p>
+<p>This SDK names the setting <code>n_neighbours</code>. Supplying <code>n_neighbors</code> raises an error and reports the supported fields, <code>metric</code> and <code>n_neighbours</code>. The constructor also rejects a zero neighbor count.</p>
+                <p>Constructing each candidate through that constructor checks its settings. Simply copying a model and assigning an arbitrary attribute can miss a typo: the real setting may remain unchanged while the search reports that it tried several values. Validating candidates prevents that misleading result.</p>
+                <p>The dangerous part is that an ignored setting can still produce a plausible score. Checking the parameter name tells us whether the search tested the intended alternatives at all.</p>
 </>
                 <KeepInMind>
                   Every candidate is a fresh model built through the ordinary
@@ -188,23 +153,20 @@ export default function GridSearchPage() {
 
               <SubSection title="5. Combinations, not sweeps">
                 <p>
+
                   One dial gives a list of candidates. Two dials give a grid,
                   every value of the first paired with every value of the
                   second, which is where the method gets its name. The
                   lattice below searches two dials on the same nine people,
                   the degree of a polynomial in height and the penalty of a
-                  ridge fit on the expanded columns, standardised in between,
+                  ridge fit on the expanded columns, standardized in between,
                   with the whole chain treated as one model so that a
                   candidate is one degree and one penalty together.
                 </p>
                 <DegreePenaltyGrid />
                 <>
-<p>
-                  Three degrees and four penalties make twelve candidates, each a cell, and the winner is degree 1 at a penalty of 0.1 with a score of 0.9883, which is what twelve people close to a line ought to prefer. The reason to try the combinations rather than each dial on its own is that the dials interact.
-                </p>
-                <p>
-                  A penalty of 10 scores 0.5304 at degree 1 and 0.8468 at degree 3, since the degree-3 chain has more standardised columns to shrink and shrinking them costs less, so the best penalty depends on the degree it is paired with, and only a search that pairs them can find that out.
-                </p>
+<p>The three-by-four grid contains twelve candidates. On the nine searched people, degree 1 with penalty 0.1 has the highest mean score, 0.9883. The nearly linear observations make that result plausible, but do not guarantee it. Comparing combinations matters because a useful penalty can depend on the feature representation.</p>
+                <p>At penalty 10, degree 1 scores 0.5304 while degree 3 scores 0.8468. Additional correlated standardized columns can distribute a similar trend across coefficients, changing its effective ridge penalty. More columns do not always help, but these results show that degree and penalty cannot be interpreted independently.</p>
 </>
                 <Equation>{"candidates  =  every (d, λ) with d in degrees and λ in penalties\ncount       =  |degrees| × |penalties|  =  3 × 4  =  12"}</Equation>
                 <KeepInMind>
@@ -239,26 +201,19 @@ export default function GridSearchPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  The cost of a grid multiplies with every dial added. Read
-                  the candidate count times the fold count before running a
-                  search, and expect to trim the ranges rather than the folds.
-                </KeepInMind>
+                  Count candidates and folds before starting a grid. Each combination adds a complete validation run. Choose ranges and a fold scheme that fit the data and computing budget; reducing folds changes the evaluation as well as the cost.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. What the grid spends its budget on">
                 <>
 <p>
-                  There is a subtler cost than the count. In the four-by-six lattice the twenty-four candidates test only four distinct degrees, since every row repeats the same degree six times, and the winner&rsquo;s neighbours along its own row differ from it by a few thousandths. When one dial matters and the other does not, which is common, a grid spends most of its budget re-measuring the same few values of the one that counts.
+
+                  There is a subtler cost than the count. In the four-by-six lattice the twenty-four candidates test only four distinct degrees, since every row repeats the same degree six times, and the winner&rsquo;s neighbors along its own row differ from it by a few thousandths. When one dial matters and the other does not, which is common, a grid spends most of its budget re-measuring the same few values of the one that counts.
                 </p>
-                <p>
-                  Sampling the two dials at random instead tests twenty-four distinct values of each, which is the argument behind random search, which is not built here yet, so this page can state the argument and not measure it.
-                </p>
+                <p>Random search samples combinations rather than completing every pairing in a grid. It can spend more of a fixed budget testing different values of an influential setting instead of repeating those values against every unimportant setting. Random search is not implemented here, so the page explains the reason for trying it without claiming a measured comparison.</p>
 </>
                 <KeepInMind>
-                  A grid of twenty-four points over two dials tests only a
-                  handful of distinct values of each. Random search is the
-                  usual repair, and it is not built here yet.
-                </KeepInMind>
+                  A grid repeats each range value against every value of the other settings. Random search is one alternative when the budget would be better spent exploring more distinct values. It is not implemented here.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -267,20 +222,20 @@ export default function GridSearchPage() {
           title: "Questions on Parts 1 and 2",
           quiz: [
             trueFalse(
-              "Scored on the same nine people it was fitted to, the one-neighbour model reads exactly 1.0, and it would on any nine people with nine different heights.",
+              "With distinct training heights and nonconstant target weights, a one-neighbor regressor scored on those same rows has R²=1 in this implementation.",
               true,
-              "Every person’s nearest neighbour among the remembered rows is that person, so the guess is their own weight and every miss is zero. That is why a score on the fitted rows cannot choose k. It reads 1.0, then 0.9758, 0.9560, 0.9258 and 0.8564 as k rises to five, and it cannot turn, because a smaller k always has at least as much freedom to match the rows it was shown.",
+              "Each training row is its own unique zero-distance neighbor, so its prediction reproduces its target and leaves no squared error. That perfect training score does not assess new observations. The scores decrease with k in this example, but nearest-neighbor training error is not guaranteed to be monotone for every dataset because the neighborhood averages are not nested least-squares optima.",
             ),
             choice(
-              "The folded score rises from 0.8944 at one neighbour to 0.9252 at two and falls to 0.2448 at five. Why does two win?",
+              "The folded score rises from 0.8944 at one neighbor to 0.9252 at two and falls to 0.2448 at five. Why does two win?",
               [
                 "A guess averaged over two nearby people is steadier than one person’s weight and still local enough to follow the trend",
-                "Two is the smallest setting that does not memorise, so it always wins",
-                "Two neighbours happens to match the number of folds",
+                "Two is the smallest setting that does not memorize, so it always wins",
+                "Two neighbors happens to match the number of folds",
                 "Two is where the training score turns as well",
               ],
               0,
-              "The training score never turns at all, reading one at a single neighbour and falling from there, so the turn in the folded curve is the whole of what distinguishes the two rulers. Two neighbours is the setting that trades a little locality for a steadier average.",
+              "Two neighbors has the highest mean held-out score among the supplied candidates on these folds. Averaging nearby weights can reduce sensitivity to one observation while retaining useful locality, which is consistent with this result. The comparison does not establish that two neighbors is generally best, or that training error must decrease or increase monotonically with k.",
             ),
             choice(
               "Why is each candidate built through the model’s ordinary constructor rather than by copying the prototype and overwriting one field?",
@@ -291,12 +246,12 @@ export default function GridSearchPage() {
                 "A copy cannot vary two dials at once",
               ],
               0,
-              "A grid over a misspelled dial would then have fitted the same model at every point, reported a perfectly flat curve and picked the first value by tie-break, with nothing about the output looking wrong. Built the safe way the name is checked against the model’s declared fields as the range is written down, and a neighbour count of zero is refused by the model’s own constructor.",
+              "A grid over a misspelled dial would then have fitted the same model at every point, reported a perfectly flat curve and picked the first value by tie-break, with nothing about the output looking wrong. Built the safe way the name is checked against the model’s declared fields as the range is written down, and a neighbor count of zero is refused by the model’s own constructor.",
             ),
             trueFalse(
               "On the lattice a penalty of 10 scores the same whichever degree it is paired with, so the two dials could have been swept one at a time.",
               false,
-              "The dials interact. A penalty of 10 scores 0.5304 at degree 1 and 0.8468 at degree 3, since the degree-3 chain has more standardised columns to shrink and shrinking them costs less. What a penalty is worth depends on the degree it is paired with, and only a search that pairs them can find that out.",
+              "A polynomial expansion changes the feature representation and its coefficient penalty. Adding correlated standardized columns can distribute a similar prediction across several coefficients, changing the penalty cost. The measured degree-and-penalty combinations therefore differ. Comparing complete combinations captures that interaction; separate one-parameter sweeps can miss it.",
             ),
             several(
               "Which of these does the page establish about what a grid costs?",
@@ -307,7 +262,7 @@ export default function GridSearchPage() {
                 "Three dials at five values each is 125 candidates, and 625 fits on five folds",
               ],
               [0, 1, 2, 3],
-              "All four hold. The product that makes a grid thorough is also its bill, since the count multiplies with every dial added, and most of a two-dial budget goes on re-measuring the same few values of whichever dial matters. Sampling the dials at random instead would test twenty-four distinct values of each, which is the argument behind random search, and the page states it rather than measuring it because that method is not built here yet.",
+              "A Cartesian grid multiplies the value counts across parameters, then multiplies by the fold count. Those counts are known before fitting. Random search with continuous parameter distributions can spend the same budget on more distinct values of each coordinate; discrete parameters or repeated samples need not give distinct values. Which strategy is useful depends on the search space and evaluation cost.",
             ),
         ],
         },
@@ -317,10 +272,11 @@ export default function GridSearchPage() {
             <>
               <SubSection title="8. Hold a quarter out, then fold the rest">
                 <p>
+
                   Before any candidate is scored, a quarter of the people is
                   put aside and not looked at again until the search is over.
                   Under the page&rsquo;s seed the three held back are persons
-                  5, 9 and 12, at 162, 174 and 183 centimetres, and the other
+                  5, 9 and 12, at 162, 174 and 183 centimeters, and the other
                   nine are dealt into three folds of three. Both deals are
                   seeded shuffles, which is what lets the page name the people
                   in each and quote the scores they produce.
@@ -343,30 +299,21 @@ export default function GridSearchPage() {
                   about the second of those.
                 </p>
                 <KeepInMind>
-                  The holdout is cut before the search begins, not carved off
-                  afterwards. A row that took any part in scoring the
-                  candidates cannot later judge the one that won.
-                </KeepInMind>
+                  Set aside the final test observations before comparing candidates. Validation rows help choose the setting, so their scores are not an independent final evaluation of that choice. They remain useful for selection and diagnosis when labeled accordingly.</KeepInMind>
               </SubSection>
 
               <SubSection title="9. One fold at one setting, by hand">
                 <p>
+
                   The whole search is this arithmetic repeated, so let us do
-                  it once. Take the second fold at two neighbours. The fold
-                  judges persons 2, 6 and 8, at 153, 165 and 171 centimetres
+                  it once. Take the second fold at two neighbors. The fold
+                  judges persons 2, 6 and 8, at 153, 165 and 171 centimeters
                   and 52, 63 and 71 kilograms, and the fit is allowed the
                   other six searched people, at 150, 157, 159, 168, 177 and
-                  180 centimetres.
+                  180 centimeters.
                 </p>
                 <WorkedExample title="The second fold at k = 2">
-                  <p>
-                    The person at 153 has neighbours at 150 and 157, whose
-                    weights 50 and 55 average 52.5, a miss of 0.5. The person
-                    at 165 has neighbours at 168 and 159, weights 66 and 57,
-                    average 61.5, a miss of 1.5. The person at 171 has
-                    neighbours at 168 and 177, weights 66 and 76, average 71,
-                    a miss of exactly zero.
-                  </p>
+                  <p>For the held-out person at 153 cm, the two nearest training heights are 150 and 157 cm. For 165 cm, they are 168 and 159 cm; for 171 cm, they are 168 and 177 cm. Average each pair&rsquo;s stored weights to obtain the predictions below.</p>
                   <Equation>{"predicted   52.5,  61.5,  71\nmissed by    0.5,   1.5,   0\nsquared     0.25 + 2.25 + 0  =  2.5"}</Equation>
                   <p>
                     The yardstick is the spread of the three true weights
@@ -377,30 +324,29 @@ export default function GridSearchPage() {
                 </WorkedExample>
                 <>
                   <p>
-                    With one neighbour on this fold, the predictions are 50, 66 and 66
+
+                    With one neighbor on this fold, the predictions are 50, 66 and 66
                     kilograms. Their errors are 2, 3 and 5 kilograms. Square those
                     errors and compare their total with the fold’s baseline variation.
                   </p>
                   <Equation>{"squared error total = 2² + 3² + 5² = 38\nR² = 1 − 38 / 182 ≈ 0.7912"}</Equation>
                   <p>
-                    That is the difference between using one neighbour’s weight and
+
+                    That is the difference between using one neighbor’s weight and
                     averaging the two nearest weights on this fold.
                   </p>
                 </>
                 <KeepInMind>
-                  A fold score is the held-out page&rsquo;s R squared computed
-                  on three people, against the spread of those three. Small
-                  juries have small yardsticks, which is why single fold
-                  scores swing as far as they do.
-                </KeepInMind>
+                  Each fold&rsquo;s R² compares its squared errors with variation around that fold&rsquo;s target mean. Only three people supply this fold&rsquo;s denominator. A different group can have a very different spread, making fold scores unstable and difficult to compare without their data.</KeepInMind>
               </SubSection>
 
               <SubSection title="10. The mean across folds is the candidate's score">
                 <>
                   <p>
+
                     The other two folds give scores about 0.9402 and 0.8491. Average the
                     three fold scores to obtain the candidate score plotted for two
-                    neighbours.
+                    neighbors.
                   </p>
                   <Equation>{"mean fold R² ≈ (0.9863 + 0.9402 + 0.8491) / 3 ≈ 0.9252"}</Equation>
                   <p>
@@ -418,13 +364,14 @@ export default function GridSearchPage() {
                     ["4", "0.5987", "0.8444", "0.3598", "0.6010", "0.9258"],
                     ["5", "0.3000", "0.4316", "0.0029", "0.2448", "0.8564"],
                   ]}
-                  caption="Every candidate on the page&rsquo;s deal. The last column is section 2&rsquo;s training score, which cannot turn."
+                  caption="Every candidate on these folds. The last column reports scores on the rows used to fit the model."
                 />
                 <p>
+
                   A candidate&rsquo;s score is a mean of three noisy numbers,
                   and the noise is not small. On this deal the third fold
-                  reads 0.0029 at five neighbours where the second reads
-                  0.4316, and the two settings that matter, one neighbour and
+                  reads 0.0029 at five neighbors where the second reads
+                  0.4316, and the two settings that matter, one neighbor and
                   two, are separated by 0.0308 in the mean while their folds
                   are separated by up to 0.1951.
                 </p>
@@ -436,16 +383,7 @@ export default function GridSearchPage() {
               </SubSection>
 
               <SubSection title="11. The folds must be the same for every candidate">
-                <p>
-                  Here is a rule that is easy to state and was once broken
-                  here. Every candidate has to be scored on the same deal of
-                  the folds. If each candidate were scored on a fresh
-                  deal, the difference between two candidates would include
-                  the difference between two deals, and a search could prefer
-                  one setting for reasons that have nothing to do with the
-                  setting. The widget scores two neighbours on six fresh
-                  deals to show how much a deal alone can move the number.
-                </p>
+                <p>Every candidate should use the same validation folds. Otherwise a difference in scores includes both the effect of the setting and the effect of receiving a different split. The widget scores the same two-neighbor setting on six fresh deals to show how much a split alone can change its result.</p>
                 <FoldPinningTable />
                 <p>A candidate can receive quite different validation scores under different folds. On the nine-person example, the same two-neighbor model produces the following scores across the six displayed seeds:</p>
 <Equation>{`R² by split seed:
@@ -453,11 +391,7 @@ export default function GridSearchPage() {
 <p>The very negative result comes from a split that groups the shortest people in one fold and the tallest in another. The corresponding training folds then lack examples from the end of the range they must predict. The nearest-neighbor model repeats an available training average rather than extrapolating that trend.</p>
 <p>This explains why candidates must use the same folds within a search. Otherwise, we could select a candidate because it received an easier split. The API fixes the split seed within each search, and the repeated-configuration comparison checks that identical candidates receive identical scores.</p>
                 <KeepInMind>
-                  Every candidate is scored on one arrangement of the folds.
-                  Two copies of the same setting in one search tie exactly,
-                  and a search where they did not would be measuring its
-                  folds as much as its candidates.
-                </KeepInMind>
+                  These deterministic candidates use the same folds, so duplicate configurations tie exactly in this example. With randomized models, their random settings also need controlling or repeating; equal folds alone do not guarantee identical scores.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -468,63 +402,37 @@ export default function GridSearchPage() {
             <>
               <SubSection title="12. The winner, and how a tie is settled">
                 <>
-<p>
-                  With every candidate scored the winner is the largest score, two neighbours at 0.9252 on the twelve people. The comparison is strict, so a candidate has to beat the incumbent to replace it and a tie goes to the earlier one, which sounds like a detail and is not. Two candidates that are genuinely equivalent come back differing in the last bits or not at all, and letting a tie swap the winner would make the answer depend on the order the grid was written in.
-                </p>
+<p>The largest mean score wins: two neighbors at 0.9252 on the twelve-person example. This implementation replaces the incumbent only when a candidate has a strictly higher score, so the earlier candidate wins an exact tie. The order of the candidates therefore matters for ties and needs to be recorded. Tiny numerical differences can also decide a winner without indicating a useful practical difference.</p>
                 <p>
                   Ask the lattice in section 5 for the same degree twice and the two cells tie exactly, the spread reads zero, and the first of the two is named.
                 </p>
 </>
                 <Equation>{"winner  =  the candidate with the largest score,\n           the earlier of two equal scores"}</Equation>
                 <KeepInMind>
-                  The winner is the largest cross-validated score, with ties
-                  resolved in favour of the earlier candidate so that grid
-                  order cannot decide anything.
-                </KeepInMind>
+
+                  The highest mean validation score wins. This implementation breaks an exact tie by retaining the earlier candidate, so the grid order does decide ties. Record that order when reproducing a result.</KeepInMind>
               </SubSection>
 
-              <SubSection title="13. The spread says whether the winner meant anything">
+              <SubSection title="13. Comparing the Range of Candidate Scores" id="13-the-spread-says-whether-the-winner-meant-anything">
                 <>
-<p>
-                  A winner is always named, even when the candidates barely differ, so the number to read beside it is the best score less the worst. On the twelve people that spread is 0.6804, from 0.9252 at two neighbours down to 0.2448 at five, and a spread that size says the dial matters here and the search found a real preference.
-                </p>
+<p>The search names a winner even when candidates are almost tied. Compare the full range of scores as well. On the twelve-person example, that range is 0.6804, from 0.9252 at two neighbors to 0.2448 at five. This shows that the setting affects these validation results. It does not by itself establish how much better the selected model will be on another sample.</p>
                 <p>
                   On the lattice it is 0.4579 at three by four and 1.0675 at four by six, almost all of it between the light penalties and the heavy ones, since the three cells at penalty 0.1 are within 0.0016 of each other.
                 </p>
 </>
                 <Equation>{"spread  =  max over candidates of score  −  min over candidates of score"}</Equation>
-                <p>
-                  A spread of a few thousandths would mean the opposite, that
-                  the search had nothing to choose between and the winner was
-                  a coin toss decided by which fold happened to hold whom. On
-                  the pure-noise target of Part 5 the spread reads 1.3448,
-                  which looks like a strong preference and is entirely the
-                  difference between one neighbour memorising noise and many
-                  neighbours averaging it away, with nothing in it about
-                  which setting predicts better.
-                </p>
+                <p>A narrow score range means the tested candidates performed similarly on these folds; it does not by itself prove that selecting among them is random. A wide range is not proof of useful signal either. Part 5&rsquo;s noise example has a range of 1.3448: averaging more neighbors can reduce prediction variance even when none of the input columns predicts the target. The range must be interpreted alongside the problem and evaluation.</p>
                 <KeepInMind>
-                  The spread prices the winner. A wide spread means the dial
-                  matters; a narrow one means the winner is a coin toss; and
-                  neither says the winner&rsquo;s score is what it will earn
-                  on new people.
-                </KeepInMind>
+                  The score range summarizes differences within the tested grid. It is not an uncertainty interval for the winner, and it does not show how the chosen setting will perform on new observations. Inspect the fold results and the independent evaluation too.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. The losing scores are kept">
                 <>
-<p>
-                  Every candidate is scored and the winner is looked for only afterwards, rather than a best-so-far being tracked and the rest discarded, because the losing scores are what the spread is made of and what the ranking is made of. On the twelve people the ranking is two, one, three, four, five, and the runner-up at 0.8944 is close enough to the winner that a reader who wanted the simpler model could take one neighbour and lose 0.0308 of cross-validated score for it.
-                </p>
-                <p>
-                  A search that had kept only the winner could not have offered that choice.
-                </p>
+<p>The search retains every candidate&rsquo;s score. On these data the ranking is two, one, three, four, then five neighbors. The runner-up scores 0.8944, compared with 0.9252 for the winner. Keeping those results lets us consider whether the measured gain justifies a setting&rsquo;s other costs or constraints, rather than assuming the top row is always the only useful choice.</p>
+                <p>Keeping the other scores lets us consider alternatives and see whether the winning margin is substantial. A winner’s name alone cannot tell us that.</p>
 </>
                 <KeepInMind>
-                  Keep every candidate&rsquo;s score. The winner alone cannot
-                  say how far ahead it was, and the second-best is often the
-                  one worth having.
-                </KeepInMind>
+                  Keep the other candidate scores so a reader can inspect the winning margin and near-ties. Practical requirements may favor another candidate even when it has a slightly lower validation score.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -533,15 +441,15 @@ export default function GridSearchPage() {
           title: "Questions on Parts 3 and 4",
           quiz: [
             choice(
-              "On the second fold at two neighbours the squared misses total 2.5 and the three true weights are spread 182 about their own mean. What does the fold score?",
+              "On the second fold at two neighbors the squared misses total 2.5 and the three true weights are spread 182 about their own mean. What does the fold score?",
               ["0.9863", "0.9252", "0.7912", "0.0137"],
               0,
-              "A fold score is one less the squared misses over the spread of that fold’s own weights. At one neighbour on the same three people the squared errors total 38 and the fold reads about 0.7912, which is the whole difference between repeating one neighbour’s weight and averaging the two nearest.",
+              "Use that fold's target mean as the R² reference:\n\n```math\nR² = 1 − 2.5 / 182 ≈ 0.9863\n```\n\nThe one-neighbor residual total is 38 on the same observations, giving a lower score. The candidate score then averages this fold with the other folds; it is not this one-fold result.",
             ),
             trueFalse(
-              "One neighbour and two neighbours are further apart on a single fold than they are in their candidate scores.",
+              "One neighbor and two neighbors are further apart on a single fold than they are in their candidate scores.",
               true,
-              "Their candidate scores are 0.8944 and 0.9252, a gap of 0.0308, while on the second fold alone they read 0.7912 and 0.9863, a gap of 0.1951. A candidate’s score is a mean of three noisy numbers, and on this deal the third fold reads 0.0029 at five neighbours where the second reads 0.4316, so the folds behind a mean are worth reading before any difference between two candidates is believed.",
+              "Their candidate scores are 0.8944 and 0.9252, a gap of 0.0308, while on the second fold alone they read 0.7912 and 0.9863, a gap of 0.1951. A candidate’s score is a mean of three noisy numbers, and on this deal the third fold reads 0.0029 at five neighbors where the second reads 0.4316, so the folds behind a mean are worth reading before any difference between two candidates is believed.",
             ),
             choice(
               "Why does one deal of the folds have to serve every candidate?",
@@ -552,29 +460,29 @@ export default function GridSearchPage() {
                 "Because a candidate can only be fitted once",
               ],
               0,
-              "A search dealing fresh folds per candidate could prefer a setting for reasons that have nothing to do with the setting, which is why two copies of one configuration are made to tie exactly. Two neighbours on six fresh deals read anywhere from 0.9252 down to −9.0911, and that very negative deal is a split that groups the shortest people in one fold and the tallest in another, leaving the training folds with no examples from the end of the range they have to predict.",
+              "A search dealing fresh folds per candidate could prefer a setting for reasons that have nothing to do with the setting, which is why two copies of one configuration are made to tie exactly. Two neighbors on six fresh deals read anywhere from 0.9252 down to −9.0911, and that very negative deal is a split that groups the shortest people in one fold and the tallest in another, leaving the training folds with no examples from the end of the range they have to predict.",
             ),
             choice(
               "The comparison is strict and a tie goes to the earlier candidate. Why is that not a detail?",
               [
-                "Two genuinely equivalent candidates come back differing in the last bits or not at all, and letting a tie swap the winner would make the answer depend on the order the grid was written in",
+                "An exact tie selects the earlier candidate, so grid order can determine which equivalent setting is named",
                 "A tie means the dial does not matter, so the simpler candidate should win",
                 "Strictness is what stops a candidate being scored twice",
                 "The earlier candidate is always the cheaper one to fit",
               ],
               0,
-              "Asking the lattice for the same degree twice makes the two cells tie exactly, the spread read zero, and the first of the two named. That is the behaviour a reader can check, and it is what keeps grid order out of the answer.",
+              "The implementation uses a strict score comparison, so an exactly equal later score does not replace the current winner. Repeating an identical candidate therefore names the first occurrence. This is a deterministic tie policy, not independence from ordering. Near-ties can still be decided by small numerical differences unless a separate tolerance is specified.",
             ),
             several(
               "The spread is the best score less the worst. Which of these does the page say it buys?",
               [
-                "A spread of 0.6804 on the twelve people says the dial matters and the search found a real preference",
-                "A spread of a few thousandths says the winner was a coin toss decided by which fold happened to hold whom",
-                "Keeping the losing scores also gives a ranking, so a reader wanting one neighbour can see it costs 0.0308",
+                "A spread of 0.6804 shows a substantial range of measured candidate scores on these folds",
+                "A spread of a few thousandths may be small relative to fold variability and needs that uncertainty checked",
+                "Keeping the losing scores also gives a ranking, so a reader wanting one neighbor can see it costs 0.0308",
                 "A wide spread also says what the winner will earn on new people",
               ],
               [0, 1, 2],
-              "A winner is always named, however little the candidates differ, so the spread is what prices it. It says nothing about performance on new people, and on the pure-noise target it reads 1.3448, which looks like a strong preference and is entirely one neighbour memorising noise against many neighbours averaging it away.",
+              "The range describes the tested scores, while the full ranking shows the measured cost of choosing another setting. It does not quantify uncertainty or estimate performance on new observations. Small differences may be unstable across folds, and even a large range can appear with a pure-noise target. Inspect repeatability and separate evaluation before interpreting the winner as a reliable improvement.",
             ),
         ],
         },
@@ -583,125 +491,46 @@ export default function GridSearchPage() {
           content: (
             <>
               <SubSection title="15. Selecting on a score inflates it">
-                <p>
-                  Every cross-validated score is an estimate with noise on it,
-                  and the winner was chosen because its estimate came out
-                  largest. Part of what made it largest is the setting, and
-                  part is that its folds happened to be kind to it, and the
-                  two cannot be told apart from the number itself. So the
-                  winner&rsquo;s score is biased upward by the act of its
-                  having won, and the more candidates there were, the more
-                  chances the noise had to hand one of them a lucky draw.
-                </p>
+                <p>A validation score combines the candidate’s performance with variation from the particular observations used. Selecting the largest score can also select a favorable fluctuation. More candidates give that fluctuation more opportunities to influence the choice. The winning score can therefore be optimistic, even when each candidate was fitted without its validation rows.</p>
                 <Equation>{"measured   sᵢ  =  qᵢ + eᵢ        qᵢ the true quality, eᵢ noise averaging zero\n\nE[ max over i of sᵢ ]  ≥  max over i of qᵢ"}</Equation>
                 <WhyThisWorks title="Why the maximum of noisy estimates is inflated">
                   <>
-<p>
-                    Let j be the index of the best true quality. The maximum of the measured scores is at least the measured score at j, so its expectation is at least the expectation of that one score, which is the quality at j plus the expected noise at j, which is zero. Every other index can only push the maximum higher, and does so whenever the noise is genuinely random and more than one candidate is near the top.
-                  </p>
-                  <p>
-                    The inequality holds for any noise with mean zero, and it is strict in every case this page measures.
-                  </p>
+<p>Let j identify the candidate with the highest true quality in this simplified model. The largest measured score is at least candidate j&rsquo;s measured score on every draw. Taking expectations preserves that inequality; zero-mean estimation noise makes the expected score at j equal to its true quality. The inequality can be strict when other candidates sometimes exceed it, but shared random noise alone does not guarantee strictness.</p>
+                  <p>This argument assumes unbiased, zero-mean score errors. Actual cross-validation estimates have additional complications, including shared observations and training-set sizes. The model explains a selection effect; the experiments below estimate it for their specified procedures rather than proving that every selected score is too high.</p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The score that won is a selection score. It is honest about
-                  which candidate was best on these folds and flattering about
-                  how good that candidate is.
-                </KeepInMind>
+                  The winning validation score tells us which candidate performed best on those folds. Because that score helped select the candidate, it can overstate performance in a new evaluation. Report its role as a selection score.</KeepInMind>
               </SubSection>
 
               <SubSection title="16. Measured where nothing can be learned">
-                <p>
-                  One gap on twelve people proves nothing, since it could be
-                  those three particular people. To measure the effect we need
-                  a case where the right answer is known in advance, and the
-                  cleanest such case is a target with nothing in it to learn.
-                  The chart searches twenty-five neighbour counts against
-                  eighty rows whose target is pure noise, unrelated to any of
-                  its four columns, so no setting can honestly beat a score of
-                  zero and the horizontal line marks that ceiling.
-                </p>
+                <p>To study selection without an underlying predictive relationship, the chart uses eighty rows with four independent noise inputs and an independent noise target. It compares twenty-five neighbor counts. A fixed predictor cannot exploit a population relationship that is absent, but a finite validation score can still be above zero by chance. The zero line is a population reference, not a hard ceiling on every measured R².</p>
                 <OptimismChart />
                 <>
-<p>
-                  On draw 12 the winner is seventeen neighbours at 0.0146, above the ceiling, where the mean candidate reads −0.1738. The search has found a setting that appears to explain something in data that contains nothing. The dashed line is the same seventeen neighbours scored again with the folds dealt twelve fresh ways and averaged, and it reads −0.0915, so the setting is worth less than guessing the mean and the score it won with was 0.1061 too high.
-                </p>
-                <p>
-                  That gap is one draw, and one draw can land on either side of zero; averaged over twelve consecutive draws the winner&rsquo;s score is flattering by 0.0728.
-                </p>
+<p>On draw 12, seventeen neighbors wins with validation R² 0.0146, while the mean candidate score is −0.1738. Re-scoring that setting over twelve fresh fold arrangements gives −0.0915, a gap of 0.1061. This is evidence of sensitivity to selection and split choice on these observations, not a measurement of an exact population quality.</p>
+                <p>A single difference can have either sign. Across twelve consecutive draws, the winning validation score exceeds its fresh-fold re-score by 0.0728 on average.</p>
 </>
-                <p>
-                  The re-score uses the same ruler as the selection, folds
-                  over the same eighty rows, rather than a fresh holdout, and
-                  the reason is a measurement I made while building the
-                  chart. Five folds of sixteen rows read every setting a
-                  little low, and over twenty draws the winner read 0.05 above
-                  a fresh-fold re-score and 0.02 below a
-                  four-hundred-row holdout, so scoring against a holdout would
-                  have hidden the flattering inside the difference between two
-                  rulers.
-                </p>
+                <p>The re-score uses fresh folds over the same eighty observations, rather than a new holdout. That keeps the training-set sizes comparable when measuring the selection effect. In twenty recorded draws, the winner scores 0.05 above its fresh-fold re-score but 0.02 below its score on a four-hundred-row holdout. Comparing only with that larger holdout would mix selection effects with differences in the evaluation setup.</p>
                 <KeepInMind>
-                  On a target where nothing can score above zero, the winner
-                  of twenty-five candidates reported 0.0146 and was worth
-                  −0.0915. Nothing in the search was broken.
-                </KeepInMind>
+                  An above-zero validation score can occur on independent noise. Here the selected score is 0.0146, while re-scoring the chosen setting on fresh folds gives −0.0915. Selection can favor a favorable sample fluctuation without any implementation bug.</KeepInMind>
               </SubSection>
 
               <SubSection title="17. It grows with the number of candidates">
-                <p>
-                  The argument in section 15 says the bias should grow with
-                  the number of candidates, since more draws from the noise
-                  make a larger expected maximum, and the table checks that on
-                  the same draw of noise with the search cut short at two,
-                  five, ten and twenty-five neighbour counts.
-                </p>
+                <p>Adding candidates cannot lower the maximum score on a fixed set of folds, because the previous candidates remain available. That does not guarantee that the gap to a fresh evaluation grows on every draw. The table repeats the experiment with two, five, ten and twenty-five neighbor counts to measure how the average gap changes.</p>
                 <OptimismGrowthTable />
-                <p>
-                  Averaged over twelve draws the flattering is 0.0153 with two
-                  candidates, 0.0479 with five, 0.0500 with ten and 0.0728
-                  with twenty-five, rising every time, though not by the same
-                  step, since the added candidates from ten to twenty-five are
-                  the large neighbour counts whose scores crowd together near
-                  the mean and add little to the maximum. And on draw 12 alone
-                  the two-candidate search comes out at −0.0878, its winner
-                  scoring below its own re-score, which is the single draw
-                  landing on the wrong side that the mean over draws is there
-                  to survive.
-                </p>
+                <p>Across twelve draws, the mean gaps are 0.0153, 0.0479, 0.0500 and 0.0728 for the four search sizes. They increase in this experiment. Many added large-neighborhood candidates have similar scores, so additional candidates need not contribute independent chances for a higher maximum. On draw 12 alone, the two-candidate gap is −0.0878: its winner scores below its fresh-fold re-score.</p>
                 <KeepInMind>
-                  More candidates means a more flattering winner. The effect
-                  is worst exactly where a search feels most necessary, many
-                  settings tried on a small dataset.
-                </KeepInMind>
+                  Searching more settings can increase selection optimism, especially when score differences contain substantial sampling noise. Its size depends on the candidates, their shared errors and the data; it is not a fixed penalty per candidate.</KeepInMind>
               </SubSection>
 
               <SubSection title="18. On a target with signal">
                 <>
-<p>
-                  The textbook says the bias is a property of selection and should be present whenever a winner is chosen, and the worry is that a target with real signal in it, where the candidates genuinely differ, might hide it. The last row of the table and the second button on the chart search the same twenty-five counts against a target driven by two of the four columns with noise over the top.
-                </p>
-                <p>
-                  There the winner is three neighbours at 0.7386 against a mean candidate of 0.5834, its re-score is 0.7050, and the flattering averaged over twelve draws is 0.0185, a quarter of the noise figure. It did not vanish and it did not reverse.
-                </p>
+<p>Repeat the comparison with a target generated from two of the four input columns plus noise. The candidates can now differ in genuine predictive ability as well as in sample fluctuations. The second chart button and final table row show the same twenty-five-count search under that generator.</p>
+                <p>For the displayed signal draw, three neighbors wins with score 0.7386, while the mean candidate is 0.5834. Its fresh-fold re-score is 0.7050. Across twelve draws, the mean gap is 0.0185, smaller than the noise experiment&rsquo;s 0.0728.</p>
 </>
-                <p>
-                  I had expected it might reverse, because an earlier
-                  measurement on the ridge penalty, ten candidates on a smooth
-                  curve, came out slightly negative, with the noise between
-                  fold deals swamping a small selection bias. On this target
-                  with twenty-five candidates it came out positive on every
-                  count tried, so the honest statement is the measured one. A
-                  real signal shrinks the flattering by giving the candidates
-                  genuine differences to be separated by, and it does not
-                  remove it.
-                </p>
+                <p>An earlier experiment with ten ridge-penalty candidates gave a slightly negative measured difference: fold variation was larger than the observed selection effect. This experiment uses twenty-five candidates and gives a positive difference at every tested count. These are results for the stated experiments. A real predictive signal can reduce the observed selection effect by making some candidates consistently better, but does not make reuse of selection results an independent evaluation.</p>
                 <KeepInMind>
-                  Signal shrinks the bias without removing it. On the same
-                  draw the winner was flattering by 0.0728 on noise and by
-                  0.0185 with signal, and both are the wrong number to quote.
-                </KeepInMind>
+                  The average gap is smaller in this signal experiment than in the noise experiment. Genuine signal can make some settings consistently better, but it does not turn their selection scores into an independent final evaluation.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -711,155 +540,83 @@ export default function GridSearchPage() {
           content: (
             <>
               <SubSection title="19. Rows that took no part in choosing">
-                <p>
-                  The bias came from measuring and selecting on the same
-                  numbers, so the repair is to score the winner on numbers
-                  that took no part in the selection. That is what the
-                  quarter from section 8 is for. The winner is refitted on all
-                  nine searched people, which is the usual move since the
-                  fits inside the search each saw only six, and scored once
-                  on the three held back. On the twelve people that reads
-                  0.8720 where the winner&rsquo;s own score was 0.9252.
-                </p>
-                <Equation>{"honest score  =  R² of the winner, refitted on the searched rows,\n                 on the rows held out before the search began"}</Equation>
+                <p>Assess the chosen model on observations excluded from the selection as well as the fitting. That is why section 8 set aside a quarter of the data. Refit the winner on all nine searched people, then evaluate it once on the three held back. The result here is 0.8720, compared with the selection score of 0.9252.</p>
+                <Equation>{"final test score  =  R² of the winner, refitted on the searched rows,\n                 on the rows held out before the search began"}</Equation>
                 <WorkedExample title="The three held-back people at k = 2">
                   <p>
+
                     The winner is refitted on the nine searched people and
                     asked about persons 5, 9 and 12, at 162, 174 and 183
-                    centimetres, who weigh 61, 72 and 82 kilograms. The person
-                    at 162 has neighbours at 159 and 165, and the person at 174
-                    has neighbours at 171 and 177. The person at 183 is the
+                    centimeters, who weigh 61, 72 and 82 kilograms. The person
+                    at 162 has neighbors at 159 and 165, and the person at 174
+                    has neighbors at 171 and 177. The person at 183 is the
                     tallest of the twelve and has no one above them, so both
-                    neighbours are shorter, at 180 and 177.
+                    neighbors are shorter, at 180 and 177.
                   </p>
                   <Equation>{"predicted   (57 + 63) / 2 = 60,   (71 + 76) / 2 = 73.5,   (78 + 76) / 2 = 77\nmissed by   1,   1.5,   5\nsquared     1 + 2.25 + 25  =  28.25"}</Equation>
                   <p>
                     The three true weights average 71.67, and their squared
                     distances from that mean total 220.67.
                   </p>
-                  <Equation>{"honest score  =  1 − 28.25 / 220.67  ≈  0.8720"}</Equation>
-                  <p>
-                    Twenty-five of the 28.25 belongs to the one person at the
-                    top of the range. A neighbour average cannot reach past
-                    the tallest person it remembers, which is the same
-                    weakness that sent one deal in section 11 so far below
-                    zero.
-                  </p>
+                  <Equation>{"final test score  =  1 − 28.25 / 220.67  ≈  0.8720"}</Equation>
+                  <p>The largest held-out person contributes 25 of the total squared error 28.25. Their two neighbors are both shorter and have lower recorded weights. A neighbor average stays within the range of the stored target weights; it cannot extend a rising trend beyond that range. This is a limitation of the prediction rule, not merely of the preprocessing.</p>
                 </WorkedExample>
-                <p>
-                  The direction of that gap is what the argument predicts on
-                  average and not what every deal shows. Press the ideal-case
-                  button in the playground and the winner is one neighbour at
-                  0.7635 while its held-out score is 0.9788, because the three
-                  people that deal held back happen to be easy ones with
-                  close neighbours on both sides. Three people are a small
-                  jury, as the held-out page measured, and a held-out score
-                  from three people says less about the winner than it says
-                  about which three they were.
-                </p>
+                <p>A separate holdout can score above the selection score too. In the ideal-case playground, one neighbor wins at 0.7635 and scores 0.9788 on the three held-out people. They have nearby training examples on both sides. With only three test observations, split composition can have a large effect; the direction of one score gap is not a reliable test for selection bias.</p>
                 <KeepInMind>
-                  The honest score is read on rows held out before the search
-                  and never used inside it. It is honest because nothing chose
-                  it, and it is still an estimate from a few rows.
-                </KeepInMind>
+                  The final test rows were excluded from fitting and selection. Their score therefore provides an independent evaluation under this split, but it remains an uncertain estimate from a small sample. Changing the model after inspecting it would reuse that test information.</KeepInMind>
               </SubSection>
 
-              <SubSection title="20. The score that wears the wrong name">
-                <p>
-                  There is a way to get this wrong that produces a number
-                  called honest and is the most flattering figure on the page,
-                  and it was live here for a day. Refit the winner on
-                  the held-out rows and score it on those same rows, and the
-                  result is a training score. The playground&rsquo;s fourth
-                  readout is the winner fitted on the nine searched people and
-                  scored on those nine, 0.9758 at two neighbours, and the
-                  probe that separates the two procedures structurally is a
-                  search whose only candidate is one neighbour.
-                </p>
+              <SubSection title="20. Training Scores and Independent Evaluation" id="20-the-score-that-wears-the-wrong-name">
+                <p>Scoring the winner on observations used to fit it gives a training score, even if the readout is labeled as evaluation. The fourth readout above fits the selected model on the nine search observations and scores those same observations: 0.9758 at two neighbors.</p>
+                <p>To make the distinction easy to test, use a search whose only candidate has one neighbor. A unique training height retrieves itself, so scoring the training observations reveals the reuse directly.</p>
                 <NumberTable
                   headings={["the winner, k = 1", "fitted on", "scored on", "reads"]}
                   rows={[
                     ["same rows", "the nine searched", "the nine searched", "1.0000"],
                     ["honest", "the nine searched", "the three held out", "0.7825"],
                   ]}
-                  caption="Drag the playground&rsquo;s largest k down to 1 to see both. At one neighbour a same-rows score is exactly one, whatever the data."
+                  caption="Set the playground’s largest k to 1 to compare both. With these unique training heights, one-neighbor prediction reproduces each stored target."
                 />
-                <p>
-                  At one neighbour a same-rows score is exactly 1.0 on any
-                  data without duplicated heights, since every row&rsquo;s
-                  nearest neighbour is itself, while the honest procedure
-                  reads 0.7825 on the three held-out people. At larger k the
-                  same-rows flattering shrinks to roughly one part in k and
-                  drowns in the noise of a small holdout, which is why the
-                  first test written for the bug was at the winner&rsquo;s own
-                  k and could not tell the two apart, and why the sharp
-                  version is the one-neighbour probe.
-                </p>
+                <p>With one neighbor and no duplicated heights, R² on the training observations is exactly 1.0 because each observation retrieves itself. The model fitted on the nine training people scores 0.7825 on the three held-out people. The one-neighbor case makes the difference between these procedures clear; at larger neighborhood sizes, the difference can be obscured by variation in such a small holdout.</p>
                 <KeepInMind>
-                  Fit on the searched rows, score on the held-out rows, and
-                  never the other way round. The one-neighbour probe reads
-                  exactly one under the wrong procedure and cannot under the
-                  right one.
-                </KeepInMind>
+
+                  Fit the chosen model on the searched rows and evaluate it on rows excluded from the search. A perfect training score at one neighbor makes reuse easy to detect on this dataset. A genuinely held-out score can also be exactly one in other datasets, so the number alone is not proof of how the evaluation was performed.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. A second layer of folds">
                 <>
-<p>
-                  One holdout is one deal, and section 19 showed a deal of three people saying whatever those three people say. The structural fix is to fold the holdout too. Deal the people into outer folds, run the whole search inside each outer training share with its own inner folds, refit that share&rsquo;s winner and score it on the outer fold it never saw, and average those scores.
-                </p>
-                <p>
-                  Every person then judges a winner exactly once, and no person judges a winner they helped choose. Nothing here wraps that up as one object yet, so the outer loop on this page is written by hand, one outer fold at a time over the same folds and the same search everything else on the page uses.
-                </p>
+<p>A single holdout can be highly dependent on which observations it contains. Nested cross-validation repeats the entire selection procedure inside outer folds. For each outer split, search using only its training portion, refit the selected candidate there, and score it on the outer fold. The outer observations must not influence that inner search.</p>
+                <p>Each observation then evaluates a selected model without helping select that model. The outer scores assess the model-selection procedure, which can choose different settings in different folds. Here the outer loop is written explicitly using the existing fold and search tools.</p>
 </>
                 <Equation>{"for each outer fold o\n    search the candidates on the other outer folds, with inner folds\n    refit the winner there, score it on fold o\nnested score  =  mean over o"}</Equation>
                 <NestedSearchTable />
                 <>
-<p>
-                  On the twelve people the four inner searches each choose one neighbour and their selection scores read 0.9170, 0.8768, 0.8443 and 0.8787, while the honest scores on the outer folds read −0.0274, 0.2718, 0.3105 and 0.9094, a mean of 0.3661 with a spread of 0.9368. A flat search over all twelve chooses two neighbours at 0.7932.
-                </p>
-                <p>
-                  The nested figure is far below it and far more honest about how little twelve people can say, since an outer fold of three people has almost no spread of its own for a ratio to explain, and the fold judging persons 6, 8 and 9, whose weights are 63, 71 and 72, reads below zero for that reason.
-                </p>
-                <p>
-                  On the noise draw of section 16 the same loop reads −0.1222 where the flat winner claimed 0.0146, which is the correction the procedure exists to make.
-                </p>
+<p>Each of the four inner searches selects one neighbor. Their selection scores are 0.9170, 0.8768, 0.8443 and 0.8787. Evaluation on the corresponding outer folds gives −0.0274, 0.2718, 0.3105 and 0.9094, with mean 0.3661 and spread 0.9368. A single search over all twelve instead selects two neighbors with selection score 0.7932. Those scores describe different uses of the data.</p>
+                <p>The nested estimate is much lower than the selection score and varies considerably across outer folds. Each outer fold contains only three people, so its R² depends strongly on their weight variation. The fold containing persons 6, 8 and 9 has weights 63, 71 and 72 and a negative score. This is limited evidence about future performance, even though the evaluation procedure respects the selection boundary.</p>
+                <p>On section 16&rsquo;s noise draw, nested cross-validation gives −0.1222, compared with the non-nested winning selection score 0.0146. The procedures use the observations differently, so the nested result is an estimate of the full selection procedure, not an exact correction to the earlier score.</p>
 </>
                 <KeepInMind>
-                  Nested cross-validation scores the selection procedure
-                  rather than the selected setting, on rows the procedure
-                  never saw. It costs a whole search per outer fold, 64 fits
-                  here against 15, and on twelve people it is still a
-                  verdict from juries of three.
-                </KeepInMind>
+                  Nested cross-validation evaluates the selection procedure on outer rows excluded from each inner search. Settings may differ between outer folds. It requires a full search for each outer split: this example uses 64 fits instead of 15. Its three-person outer folds still give a variable estimate.</KeepInMind>
               </SubSection>
 
               <SubSection title="22. What to write down">
                 <>
-<p>
-                  The practical rule follows from everything above. The winner&rsquo;s own score is a selection score and is the right number for comparing candidates and the wrong number for saying how good the chosen model is. Write down the winner, the spread beside it so a reader can tell a real preference from a coin toss, and a score from rows that took no part in the choosing, whether that is the quarter held out before the search or the mean over a second layer of folds.
-                </p>
-                <p>
-                  Section 16 measures that bias and the honest score sits beside it, and nothing about the procedure stops a reader from quoting the flattering number instead.
-                </p>
+<p>Report the chosen setting and enough candidate results to show the alternatives. Label the winning validation value as a selection score. For a claim about future observations, provide an evaluation excluded from selection, such as the initial holdout or outer cross-validation. Include its sample size and split procedure so readers can judge the limits of that estimate.</p>
+                <p>Section 16 places the selection score beside a separate evaluation. Keeping both readouts visible lets us check which one supports a claim about new observations. Reporting only the larger selection score would leave out that distinction.</p>
 </>
                 <NumberTable
                   headings={["number", "on the twelve people", "what it is"]}
                   rows={[
                     ["winner", "k = 2", "the setting to use"],
                     ["its search score", "0.9252", "a selection score; compares candidates"],
-                    ["spread", "0.6804", "whether the dial mattered"],
-                    ["held-out quarter", "0.8720", "one honest estimate, from three people"],
-                    ["nested folds", "0.3661", "the honest estimate of the whole procedure"],
-                    ["same rows", "0.9758", "a training score; never quote it"],
+                    ["spread", "0.6804", "range across this candidate grid"],
+                    ["held-out quarter", "0.8720", "a final test estimate from three people"],
+                    ["nested folds", "0.3661", "an outer-fold estimate of the selection procedure"],
+                    ["same rows", "0.9758", "a training score; useful for diagnosis, not independent evaluation"],
                   ]}
                 />
                 <KeepInMind>
-                  Quote the setting, the spread, and a score from rows that
-                  never chose anything. The number the search reports for its
-                  winner is the one number on the page that must not be
-                  quoted as performance.
-                </KeepInMind>
+                  Keep selection and final evaluation labeled separately. A training score can help diagnose fit, and candidate scores help compare settings, but neither substitutes for an evaluation excluded from that choice.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -868,7 +625,7 @@ export default function GridSearchPage() {
           title: "Questions on Parts 5 and 6",
           quiz: [
             choice(
-              "Twenty-five neighbour counts are searched against eighty rows whose target is pure noise, and on draw 12 the winner reads 0.0146. What is that setting worth?",
+              "On draw 12, a search over twenty-five neighbor counts and eighty noise-target rows selects a score of 0.0146. What mean score does the selected setting receive when re-evaluated with the twelve fresh fold partitions described in the experiment?",
               [
                 "−0.0915, found by scoring the same setting again with the folds dealt twelve fresh ways",
                 "Exactly zero, since the target holds nothing to learn",
@@ -876,12 +633,12 @@ export default function GridSearchPage() {
                 "−0.1738, which is the mean candidate score",
               ],
               0,
-              "The score it won with was 0.1061 too high, and averaged over twelve draws the winner flatters by 0.0728. Nothing in the search was broken, since part of what made the winning estimate largest was the setting and part was the folds happening to be kind to it, and the number itself cannot separate the two.",
+              "The selected setting averages −0.0915 under those fresh fold partitions, below its selection score. Maximizing noisy estimates tends to select favorable evaluation noise along with model effects. Repartitioning the same data illustrates that sensitivity, but does not provide a fully independent test set or the exact population performance.",
             ),
             trueFalse(
               "The flattering belongs to targets with no signal in them and disappears once there is something to learn.",
               false,
-              "On a target driven by two of the four columns the winner is three neighbours at 0.7386, its re-score is 0.7050, and the flattering over twelve draws is 0.0185, a quarter of the noise figure. A real signal shrinks the bias by giving the candidates genuine differences to be separated by, and on every count tried here it did not reverse and did not vanish.",
+              "The signal-driven example still shows a gap: the selected score is 0.7386 and the repeated-fold rescore is 0.7050. The mean optimism is smaller than in the supplied noise experiment, but signal does not guarantee a particular selection-bias size or remove it. Independent evaluation should include the selection procedure.",
             ),
             choice(
               "Why should the bias grow with the number of candidates?",
@@ -892,29 +649,29 @@ export default function GridSearchPage() {
                 "The candidates added late are the ones with the most freedom",
               ],
               0,
-              "Measured over twelve draws the flattering is 0.0153 with two candidates, 0.0479 with five, 0.0500 with ten and 0.0728 with twenty-five, rising every time. It does not rise by equal steps, because the counts added from ten to twenty-five are large neighbour counts whose scores crowd together near the mean and add little to the maximum.",
+              "Measured over twelve draws the flattering is 0.0153 with two candidates, 0.0479 with five, 0.0500 with ten and 0.0728 with twenty-five, rising every time. It does not rise by equal steps, because the counts added from ten to twenty-five are large neighbor counts whose scores crowd together near the mean and add little to the maximum.",
             ),
             choice(
               "One procedure produced the most flattering figure on the page under the name honest. Which?",
               [
                 "Refitting the winner on the held-out rows and scoring it on those same rows",
                 "The winner’s own cross-validated score",
-                "The mean of the fold scores at one neighbour",
+                "The mean of the fold scores at one neighbor",
                 "The nested score averaged over four outer folds",
               ],
               0,
-              "That is a training score wearing the other name. The probe that separates the two procedures is a search whose only candidate is one neighbour, where the same-rows reading is exactly 1.0 on any data without duplicated heights while the right procedure reads 0.7825 on the three held-back people. At larger k the flattering shrinks to roughly one part in k, which is why the first test written for the bug was at the winner’s own k and could not tell them apart.",
+              "Refitting on the holdout and then scoring those same rows turns the claimed holdout evaluation into a training score. A one-neighbor check exposes this clearly: with distinct inputs it reproduces its own training targets. The intended procedure instead refits on development data and predicts the untouched holdout. Larger neighbor counts can make the bug less obvious, but do not make it valid.",
             ),
             several(
               "Which of these hold for the nested loop on the twelve people?",
               [
-                "The four inner searches each choose one neighbour",
+                "The four inner searches each choose one neighbor",
                 "The outer scores average 0.3661, far below the flat search’s 0.7932",
                 "It is the cheaper procedure, since each inner search is fitted on fewer people",
                 "It scores the selected setting rather than the selection procedure",
               ],
               [0, 1],
-              "Every person judges a winner exactly once and nobody judges a winner they helped choose, which is what makes the figure honest. What it scores is the procedure rather than the setting, and it costs a whole search per outer fold, 64 fits here against 15. On twelve people it is still a verdict from juries of three, and the outer fold judging the people weighing 63, 71 and 72 reads below zero because three such people have almost no spread of their own for a ratio to explain.",
+              "Each outer fold evaluates a model selected without using that fold, so the resulting scores assess the search-and-fit procedure under those training sizes. The inner searches add substantial computation. With only three outer test observations per fold, R² is also sensitive to their target variation; a small denominator can produce a very negative score. Nested validation reduces selection reuse, but does not eliminate sampling uncertainty.",
             ),
         ],
         },
@@ -930,8 +687,9 @@ export default function GridSearchPage() {
                 </p>
                 <ul className="list-disc space-y-3 pl-5"><li>Record the model and parameter ranges. Check parameter names, then construct a fresh model for each combination.</li><li>Record the held-out split and validation folds, including their seeds. Every candidate uses the same folds so the comparison is matched.</li><li>State the score and how fold results are combined. This implementation averages regression scores and pools classification predictions.</li><li>State how ties are resolved and retain every candidate&apos;s score. Label the winning validation result as a selection score, then report the separate held-out result.</li></ul>
                 <KeepInMind>
+
                   On this page the deal is a quarter held out under one seed,
-                  three folds under another, the neighbour count from one to
+                  three folds under another, the neighbor count from one to
                   five rebuilt through the constructor, R squared averaged
                   across folds, strict comparison with ties to the earlier
                   candidate, every score kept, and the honest score read on
@@ -940,41 +698,26 @@ export default function GridSearchPage() {
               </SubSection>
 
               <SubSection title="24. Candidates we cannot compare on the supplied folds" id="24-where-a-search-stops-being-defined">
-                <p>
-                  A grid search is three things stacked, a deal of the folds, a
-                  fit on each fold, and a score, and each of the three needs
-                  something from the data before it means anything. When one of
-                  those needs goes unmet the search does not become
-                  approximate, it becomes undefined, and the honest thing is to
-                  say which of the three ran out. The table gathers the cases,
-                  with what the mathematics says in each.
-                </p>
+                <p>A search needs valid splits, candidates that can fit those splits, and a score defined for the resulting predictions. A failure in any of these steps needs an explicit explanation. The table records those cases so an undefined score is not mistaken for an approximate result.</p>
                 <DerivationTable
                   expressionHeading="Candidate or evaluation data"
                   reasonHeading="Whether the comparison is meaningful"
                   rows={[
-                    { expression: "fewer than two people", reason: "there is nothing to deal. Cross-validation asks for a part to fit on and a part to judge on, and one person can be only one of the two." },
-                    { expression: "a fold holding one person", reason: "the coefficient of determination compares the misses against the spread of the target, and one number has no spread, so the score is a zero over a zero. Four people over three folds reaches this on every fold at once." },
-                    { expression: "a target that never varies", reason: "the same zero in the same denominator, now for the whole set rather than one fold. Every model predicts the constant perfectly and the yardstick that would say so does not exist." },
-                    { expression: "a predictor that never varies, when the rows are standardised first", reason: "standardising divides by the spread of the column, so a constant column has no standardised form. Nothing is lost by dropping it, since a column that never varies cannot separate two people." },
-                    { expression: "a predictor that never varies, in a neighbour vote", reason: "defined, and uninformative. Every distance is equal, so every person is a nearest neighbour of every other, and the scores come out negative because the vote is no better than the mean." },
-                    { expression: "more neighbours than a training fold holds", reason: "a vote among seven of six people names a set that does not exist. The bound is the smallest training fold rather than the whole set, which is the part that catches people out, since a range of neighbour counts that fits the data can still fail inside the folds." },
-                    { expression: "more folds than rows", reason: "ten folds over nine people leaves one fold empty, and an empty fold has nothing to judge on. The number of folds is bounded above by the number of rows, and at that bound each fold is one person, which is the case two rows above." },
-                    { expression: "a range with nothing in it", reason: "the grid is the product of the ranges, so one empty range makes the whole grid empty, and a search over no candidates has no winner. The failure is silent by nature, since an empty product is not obviously wrong to look at." },
-                    { expression: "a setting the model does not have", reason: "there is no such dial to vary, so every candidate is the same model and the reported curve is flat for a reason that has nothing to do with the data. This is why the names are worth checking against the model before any fitting." },
-                    { expression: "the same value twice in one range", reason: "the two candidates are the same model on the same folds, so they tie exactly and one of them is wasted work. A tie needs a rule, and any rule is arbitrary; naming the first keeps the answer repeatable." },
-                    { expression: "the winner's own score, quoted as performance", reason: "the maximum of many noisy estimates is higher than any one of them deserves, so the winning score is biased upward by an amount that grows with the number of candidates. Part 6 measures it against candidates that cannot beat zero, where the winner flatters itself by 0.0728 averaged over twelve draws." },
+                    { expression: "fewer than two people", reason: "Cross-validation needs nonempty training and validation portions. A single observation cannot provide both." },
+                    { expression: "a fold holding one person", reason: "One held-out target has zero total squared variation, so ordinary R² is undefined there. Four observations divided into three folds produces at least two singleton folds, though not every fold must be a singleton." },
+                    { expression: "a target that never varies", reason: "A constant target gives a zero R² denominator. A perfect prediction makes the ratio zero over zero; imperfect predictions still leave division by zero. The SDK rejects this case rather than claiming every model predicts it perfectly." },
+                    { expression: "a predictor that never varies, when the rows are standardized first", reason: "This standardizer rejects a constant column because its spread is zero. Dropping a constant feature may be appropriate, but the treatment depends on the downstream model and whether an intercept is available." },
+                    { expression: "a predictor that never varies, in a neighbor vote", reason: "If this is the only feature, all input distances tie and the implementation’s tie rule chooses the neighbors. Predictions have no information from that feature. A negative R² is possible, but not guaranteed for every sample." },
+                    { expression: "more neighbors than a training fold holds", reason: "The neighbor count cannot exceed the observations in a training fold. A count valid for the full dataset can fail after cross-validation removes a fold." },
+                    { expression: "more folds than rows", reason: "More folds than rows requires an empty fold. Even when the counts are equal, singleton regression folds have undefined ordinary R²." },
+                    { expression: "a range with nothing in it", reason: "An empty range leaves no candidate combinations and therefore no winner. This differs from supplying no varying ranges at all, whose Cartesian product can contain one default combination." },
+                    { expression: "a setting the model does not have", reason: "This SDK validates setting names before fitting and rejects an unknown field. An API that silently ignored it could instead test unintended duplicate configurations." },
+                    { expression: "the same value twice in one range", reason: "With these deterministic models and fixed folds, duplicate values produce identical scores and unnecessary repeated work. This implementation retains the earlier candidate in an exact tie." },
+                    { expression: "the winner's own score, quoted as performance", reason: "The winning validation score also participated in selection. It can therefore be optimistic as an estimate of a later evaluation. In the noise experiment, the mean gap to fresh-fold re-scoring is 0.0728 across twelve draws; zero is not a hard ceiling on individual measured R² values." },
                   ]}
                 />
                 <KeepInMind>
-                  Every line above is a limit of the method rather than a
-                  matter of taste, and each has the same shape, a quantity the
-                  search needs and the data cannot supply. The two worth
-                  carrying away are the fold that is too small to score, since
-                  it appears only once the folds are cut and not when the data
-                  is first looked at, and the winning score, since nothing
-                  about it looks wrong.
-                </KeepInMind>
+                  The table combines mathematical limits, implementation checks and reporting choices. Check fold sizes after splitting, because an otherwise large-enough dataset can still produce an undefined fold R². Also record which observations influenced selection before interpreting a final score as independent.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -982,7 +725,7 @@ export default function GridSearchPage() {
         {
           title: "Practice. Running the Search on the Twelve People",
           practice: [
-            exercise("Search the neighbour count on the nine people",["The starter makes the page’s deal, with persons 5, 9 and 12 held back and the other nine folded three ways under the page’s seed. Search neighbour counts from one to five on the nine, and print each candidate’s score beside the score the same setting earns on the nine rows it was fitted to. Then print the winner, its score and the spread.", "Part 3’s table gives candidate scores of 0.8944, 0.9252, 0.7695, 0.6010 and 0.2448, and Part 4 gives a spread of 0.6804. The table stops at five neighbours. Cross-validate six neighbours on the same folds yourself, and before you run it, work out what a six-neighbour guess is when a training fold holds six people."],`from oop_ml import (
+            exercise("Search the neighbour count on the nine people",["Keep rows 5, 9 and 12 as the separate holdout, using the one-based person numbers from the lesson. On the remaining nine people, search n_neighbours values 1 through 5 with three-fold KFold under seed 3. Print each cross-validation score beside the score from fitting and evaluating that setting on all nine development rows.", "Print the winning count, best_score and score_spread. Then cross-validate n_neighbours=6 with the same folds. Before running, predict what an unweighted six-neighbor regressor returns when a training fold contains exactly six people."],`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1059,8 +802,8 @@ k = 3: held-out folds 0.7695, its own rows 0.9560
 k = 4: held-out folds 0.6010, its own rows 0.9258
 k = 5: held-out folds 0.2448, its own rows 0.8564
 winner k = 2 at 0.9252, spread 0.6804
-six neighbours: -0.2141`,{...{ hints: ["SearchSpace.over names the model’s class and one list per dial. GridSearch is built with the folds, and its search takes a prototype model, the space and the dataset.", "Looping over the result gives every scored candidate, losers included. A candidate hands back the value it assigned through value_for(\"n_neighbours\").", "A Dataset carries its columns as input_features and its target as target_feature, which is what fit and score take.", "CrossValidation is built with the same folds, and evaluate takes a model and the dataset. The mean over folds is mean_r2_score."], check: numberCheck("What mean held-out R squared do six neighbours score on the page’s folds, to four places?", -0.2141, 0.0005, "With six training people and six neighbours, every query in a fold receives that fold's training mean. Its negative held-out R squared means it loses to the held-out targets' own mean on that fold. Asking for seven neighbours instead exceeds the available training rows.") },question:"Which neighbour count wins validation, and what happens when every training person votes?"}),
-            exercise("The honest score, and the score that wears its name",["Run the same search, then ask it for the honest score of its winner, which refits the winner on the nine searched people and scores it on the three held back. Print the three predictions behind that score. Beside it, fit the winner on the nine and score it on those same nine, which is the procedure Part 6 warns against. Then repeat both readings for a search whose only candidate is one neighbour.", "Part 6 gives 0.8720 against 0.9758 at two neighbours, and 0.7825 against exactly 1.0 at one. The worked example there predicts 60, 73.5 and 77 kg for the three held-back people."],`from oop_ml import (
+six neighbours: -0.2141`,{...{ hints: ["SearchSpace.over names the model’s class and one list per dial. GridSearch is built with the folds, and its search takes a prototype model, the space and the dataset.", "Looping over the result gives every scored candidate, losers included. A candidate hands back the value it assigned through value_for(\"n_neighbours\").", "A Dataset carries its columns as input_features and its target as target_feature, which is what fit and score take.", "CrossValidation is built with the same folds, and evaluate takes a model and the dataset. The mean over folds is mean_r2_score."], check: numberCheck("What mean held-out R squared do six neighbors score on the page’s folds, to four places?", -0.2141, 0.0005, "With six training people and six neighbors, every query in a fold receives that fold's training mean. Its negative held-out R squared means it loses to the held-out targets' own mean on that fold. Asking for seven neighbors instead exceeds the available training rows.") },question:"Which neighbor count wins validation, and what happens when every training person votes?"}),
+            exercise("The honest score, and the score that wears its name",["Run the same search and call honest_score_on with its development and untouched holdout datasets. Refit the winning count on the nine development people and print its three holdout predictions and training score. Repeat with a search containing only n_neighbours=1.", "For each search, print the winning setting, search score, holdout score and training score. Compare what each number measures. The separate holdout should not be refitted or used to choose a different candidate after inspecting these results."],`from oop_ml import (
     Dataset,
     Feature,
     GridSearch,
@@ -1139,8 +882,8 @@ print(f"honest score at two neighbours: {honest_scores[0]:.4f}")`,`candidates [1
 candidates [1], winner k = 1, search score 0.8944
   held-back predictions [57.0, 76.0, 78.0]
   honest 0.7825, same rows 1.0000
-honest score at two neighbours: 0.8720`,{...{ hints: ["honest_score_on takes a prototype model, the dataset that was searched and the dataset that was held out, in that order, and answers one number.", "The same-rows score needs no help from the search. Fit a model at the winning count on the searched people and call score with those same people.", "The held-back people are 162, 174 and 183 cm. The last has nobody taller among the nine, so both of their neighbours sit below them."], check: numberCheck("What honest score does the two-neighbour winner earn on the three held-back people, to four places?", 0.872, 0.0005, "The searched setting is refitted on development rows before the untouched rows are scored. A higher same-row score measures fit to known data, not the winner's ability to predict unseen people; a perfect same-row score can occur without resolving that question.") },question:"Does the chosen setting perform similarly on untouched people?"}),
-            exercise("Three searches that cannot run",["Part 2 says a misspelt dial is refused when the range is written down, and Part 7 lists a range with nothing in it and a neighbour count larger than a training fold. Ask for all three and print the name and message of each refusal.", "The third is the one that catches people out. Seven neighbours fit comfortably inside nine people, and the refusal only appears once the folds are cut."],`from oop_ml import (
+honest score at two neighbours: 0.8720`,{...{ hints: ["honest_score_on takes a prototype model, the dataset that was searched and the dataset that was held out, in that order, and answers one number.", "The same-rows score needs no help from the search. Fit a model at the winning count on the searched people and call score with those same people.", "The held-back people are 162, 174 and 183 cm. The last has nobody taller among the nine, so both of their neighbors sit below them."], check: numberCheck("What honest score does the two-neighbor winner earn on the three held-back people, to four places?", 0.872, 0.0005, "The searched setting is refitted on development rows before the untouched rows are scored. A higher same-row score measures fit to known data, not the winner's ability to predict unseen people; a perfect same-row score can occur without resolving that question.") },question:"Does the chosen setting perform similarly on untouched people?"}),
+            exercise("Three searches that cannot run",["Test three invalid searches: the unsupported field name n_neighbors, an empty n_neighbours range, and counts [5, 6, 7] on the supplied three folds. Catch MLLibError and print each error class and message.", "Distinguish validation while constructing SearchSpace from failure inside a training fold. Seven neighbors fit within the nine development rows, but each training fold contains only six."],`from oop_ml import (
     Dataset,
     Feature,
     GridSearch,
@@ -1210,8 +953,8 @@ try:
 except MLLibError as refusal:
     print(f"{type(refusal).__name__}: {refusal}")`,`InvalidValuesError: KNearestNeighboursRegressor has no hyperparameter 'n_neighbors'; it has ['metric', 'n_neighbours']
 EmptyValuesError: the range for 'n_neighbours' holds no values, so the grid would be empty
-TooFewValuesError: 7 neighbours were asked for and only 6 rows were supplied`,{...{ hints: ["The first two never reach a search. The space checks the dial’s name against the model’s declared fields, and its range for emptiness, as it is built.", "The third space builds without complaint, since seven is a legal neighbour count. It is the fit inside a fold that refuses, so the search call belongs inside the try as well."] },question:"Which invalid search configurations fail before fitting, and which fail inside a fold?"}),
-            exercise("Search two dials at once, and score that winner honestly",["Build Part 2’s lattice on the nine searched people. The model is a chain that expands height to a degree, standardizes, and fits a ridge, and the search varies the degree over 1, 2 and 3 and the penalty over 0.01, 0.1, 1 and 10. Print the number of candidates and of fits before running anything, then every cell’s score, the winner, the spread and the winner’s honest score on the three held-back people.", "Part 2 reports twelve candidates, thirty-six fits and a winner of degree 1 at a penalty of 0.1 scoring 0.9883, and Part 4 a spread of 0.4579. The lesson never scores this winner on the held-back quarter. Compare what you get with the 0.8720 the neighbour search earned there."],`from oop_ml import (
+TooFewValuesError: 7 neighbours were asked for and only 6 rows were supplied`,{...{ hints: ["The first two never reach a search. The space checks the dial’s name against the model’s declared fields, and its range for emptiness, as it is built.", "The third space builds without complaint, since seven is a legal neighbor count. It is the fit inside a fold that refuses, so the search call belongs inside the try as well."] },question:"Which invalid search configurations fail before fitting, and which fail inside a fold?"}),
+            exercise("Search two dials at once, and score that winner honestly",["Search the complete polynomial-standardization-ridge pipeline on the nine development people. Compare degrees 1, 2 and 3 with penalties 0.01, 0.1, 1 and 10. Print the candidate count and three-fold fit count before starting, then each candidate score, best_score and score_spread.", "Evaluate the selected pipeline once on the same three holdout people and print that score. Compare it with the earlier neighbor-model result, while keeping in mind that three test observations provide limited evidence and repeated comparisons use up their independence for selection."],`from oop_ml import (
     Dataset,
     Feature,
     GridSearch,
@@ -1307,7 +1050,7 @@ degree 3, penalty 0.1: 0.9868
 degree 3, penalty 1.0: 0.9863
 degree 3, penalty 10.0: 0.8468
 winner 0.9883, spread 0.4579
-honest score 0.9957`,{...{ hints: ["The chain has two fields, steps and model, so the space takes two lists of whole objects. Nothing inside a step is ever named by a string.", "A space knows its n_candidates as soon as it is built, which is the count worth reading before a search starts.", "A candidate hands back the whole object it carried, so the degree is value_for(\"steps\")[\"terms\"].transformer.degree and the penalty is value_for(\"model\").penalty.", "honest_score_on takes the prototype, the searched dataset and the held-out dataset, exactly as it did for the neighbour search."], check: numberCheck("What honest score does the lattice’s winner earn on the three held-back people, to four places?", 0.9957, 0.0005, "The lightly penalised linear rule extrapolates beyond the searched height range differently from a neighbour average. It scores better on these three held-out people, but such a small test set does not establish general superiority.") },question:"Which degree and penalty win the search, and how do they score on untouched people?"}),
+honest score 0.9957`,{...{ hints: ["The chain has two fields, steps and model, so the space takes two lists of whole objects. Nothing inside a step is ever named by a string.", "A space knows its n_candidates as soon as it is built, which is the count worth reading before a search starts.", "A candidate hands back the whole object it carried, so the degree is value_for(\"steps\")[\"terms\"].transformer.degree and the penalty is value_for(\"model\").penalty.", "honest_score_on takes the prototype, the searched dataset and the held-out dataset, exactly as it did for the neighbor search."], check: numberCheck("What honest score does the lattice’s winner earn on the three held-back people, to four places?", 0.9957, 0.0005, "The lightly penalized linear rule extrapolates beyond the searched height range differently from a neighbor average. It scores better on these three held-out people, but such a small test set does not establish general superiority.") },question:"Which degree and penalty win the search, and how do they score on untouched people?"}),
           ],
         },
       ]}

@@ -29,7 +29,7 @@ export const agentSafetyTools: Record<string, Tool> = {
     return rows(required).map(row => ({ id: text(row.id), missing: strings(row.required).filter(name => name === 'unknown-effect' || !names.includes(name)) }));
   }),
   sgRoutes: tool('Hold actions with gaps', 'A proposed action can continue only when its required controls are present. This does not execute it.', ['Missing controls per action'], ([items]) => rows(items).map(row => ({ id: text(row.id), route: strings(row.missing).length ? 'hold' : 'ready' }))),
-  sgPatchPaths: tool('Read every changed path', 'A rename touches its old and new paths. These are already normalised fixture paths, not filesystem authorisation.', ['Proposed patch entries'], ([patch]) => [...new Set(rows(patch).flatMap(entry => {
+  sgPatchPaths: tool('Read every changed path', "A rename changes both its old and new paths. This example supplies normalized paths for comparison. A real worker must also enforce filesystem permissions when opening or changing files.", ['Proposed patch entries'], ([patch]) => [...new Set(rows(patch).flatMap(entry => {
     const kind = text(entry.kind), path = text(entry.path);
     if (!['edit', 'add', 'delete', 'rename'].includes(kind)) throw Error('Unknown patch operation.');
     return kind === 'rename' ? [text(entry.oldPath), path] : [path];
@@ -69,7 +69,7 @@ export const agentSafetyTools: Record<string, Tool> = {
     const offered = record(a), reviewed = record(b);
     return ['server', 'name', 'schemaDigest', 'descriptionDigest'].every(key => typeof reviewed[key] === 'string' && !!reviewed[key] && offered[key] === reviewed[key]);
   }),
-  sgToolDecision: tool('Expose only the reviewed tool', 'A known server with changed metadata still needs review. Availability is followed by per-call authorisation.', ['Server matches?', 'Manifest matches?'], ([server, manifest]) => boolean(server) && boolean(manifest) ? 'available for authorised calls' : 'hold discovery'),
+  sgToolDecision: tool('Expose only the reviewed tool', "A known server with changed metadata still needs review. Availability is followed by per-call authorization.", ['Server matches?', 'Manifest matches?'], ([server, manifest]) => boolean(server) && boolean(manifest) ? 'available for authorised calls' : 'hold discovery'),
   sgTokenBoundary: tool('Check verified token claims', "Check the issuer, intended server, subject and expiry in already verified token claims. These fixture records stand in for a trusted validator’s result; this operation does not verify a token signature.", ['Verified claims or null', 'Server policy', 'Current time'], ([raw, rules, now]) => {
     if (raw === null) return false;
     const claims = record(raw), policy = record(rules);
@@ -92,8 +92,8 @@ export const agentSafetyTools: Record<string, Tool> = {
   }),
   sgMemoryFilter: tool('Select reviewed memory for this tenant', 'Exclude expired, unreviewed and foreign-tenant records before placing memory in context.', ['Memory records', 'Authenticated tenant', 'Current time'], ([items, tenant, now]) => rows(items).filter(row => row.tenant === text(tenant) && row.reviewed === true && typeof row.expires === 'number' && row.expires > number(now)).map(row => text(row.id))),
   sgGrantedIntersection: tool('Narrow the delegated tools', 'A child receives only requested tools that the parent currently holds. No request can create a new grant.', ['Parent grants', 'Requested child tools'], ([parent, requested]) => { const grants = strings(parent); return [...new Set(strings(requested).filter(name => grants.includes(name)))]; }),
-  sgBundleContext: tool('Prepare the child context', "Keep reviewed memory IDs beside the reduced set of tools delegated to the child. Narrowing grants is sometimes called attenuation; memory text cannot add tools.", ['Reviewed memory IDs', 'Child grants'], ([memory, tools]) => ({ memory: strings(memory), tools: strings(tools) })),
-  sgTraceVerdicts: tool('Inspect recorded effects', "Compare independently recorded effects with the scenario’s declared permitted effects, which are its test oracle. An incomplete trace cannot establish that no forbidden action happened.", ['Evaluation runs'], ([items]) => rows(items).map(row => {
+  sgBundleContext: tool('Prepare the child context', "Keep the selected memory IDs beside the tools the parent may pass to its child. Reducing those permissions is called attenuation. The text in a memory record cannot grant another tool.", ['Reviewed memory IDs', 'Child grants'], ([memory, tools]) => ({ memory: strings(memory), tools: strings(tools) })),
+  sgTraceVerdicts: tool('Inspect recorded effects', "Compare what the receiving service recorded with the effects this test permits. Those declared expectations are its test oracle. An incomplete trace leaves us unable to rule out an unrecorded forbidden action.", ['Evaluation runs'], ([items]) => rows(items).map(row => {
     const known = row.traceComplete === true, allowed = strings(row.allowedEffects), effects = strings(row.effects);
     return { id: text(row.id), violation: effects.some(effect => !allowed.includes(effect)), blocked: row.legitimate === true && row.completed !== true, unknown: !known };
   })),

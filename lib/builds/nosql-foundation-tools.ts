@@ -103,7 +103,7 @@ export const NOSQL_FOUNDATION_TOOLS: Record<string, Tool> = {
     run: ([input,amount],settings) => { const row=document(input), field=String(settings.field);return {...row,[field]:number(path(row,field))+number(amount)}; },
   },
   nsGroupSum: {
-    title: "Sum values under a group key", why: "Read a text group key and numeric amount from each row, then produce one total per group in sorted key order. The input grain determines what is being added.", inputs: ["Rows"], settings: [{key:"key",label:"Group path",initial:"site"},{key:"amount",label:"Amount path",initial:"visits.minutes"}],
+    title: "Sum values under a group key", why: "Each row contributes its numeric amount to its named group. Return one total per group in sorted key order. Check what a row represents before summing, since expanding nested records can repeat parent values.", inputs: ["Rows"], settings: [{key:"key",label:"Group path",initial:"site"},{key:"amount",label:"Amount path",initial:"visits.minutes"}],
     run: ([input],settings) => {const sums=new Map<string,number>();for(const row of documents(input)){const key=text(path(row,String(settings.key)));sums.set(key,(sums.get(key)??0)+number(path(row,String(settings.amount))));}return [...sums].sort(([a],[b])=>a<b?-1:a>b?1:0).map(([key,total])=>({key,total}));},
   },
 };

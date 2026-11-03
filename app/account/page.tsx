@@ -4,6 +4,9 @@ import Link from "next/link";
 import { PracticeReturn } from "@/components/practice/PracticeReturn";
 import { MembershipSummary } from "@/components/membership/PracticeMembership";
 import { JourneyResume } from "@/components/site/JourneyResume";
+import { AchievementJournal } from "@/components/site/AchievementJournal";
+import { LearningStreak } from "@/components/site/LearningStreak";
+import { LearningReminders } from "@/components/site/LearningReminders";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { refreshAccount, signOut, syncProgress, useAccount } from "@/lib/accounts";
 import { finishedCount, lessonFinished, useProgress } from "@/lib/progress";
@@ -90,13 +93,13 @@ export default function AccountPage() {
   const billingReturn = hydrated ? new URLSearchParams(window.location.search).get("billing") : null;
   const done = finishedCount(progress, lessonOrder);
   const started = lessonOrder.filter(lesson => milestones(lesson).started);
-  const syncLabel = { idle: "Opening your progress…", saving: "Saving your work…", saved: "All work synced", error: "Your changes have not saved yet. Keep this tab open. Sync will retry when the connection returns; reloading would discard unsaved changes." }[account.sync];
+  const syncLabel = { idle: "Opening your progress…", saving: "Saving your work…", saved: "All work saved", error: "Your changes have not saved yet. Keep this tab open. Saving will retry when the connection returns; reloading would discard unsaved changes." }[account.sync];
 
   return <div className="mx-auto max-w-3xl space-y-8 px-6 py-12">
     <PracticeReturn />
     <div className="space-y-3">
       <h1 className="text-3xl font-semibold">Your account</h1>
-      <p className="text-muted">Sign in to save your answers, code and workshop constructions. You can use the course without an account.</p>
+      {!account.user && <p className="text-muted">Sign in to save your answers, code and workshop constructions. You can use the course without an account.</p>}
     </div>
     <JourneyResume />
     {account.user && billingReturn === "success" && <CheckoutConfirmation owner={account.user.id} />}
@@ -105,7 +108,7 @@ export default function AccountPage() {
       {account.user ? <>
         <p>{account.status === "ready" ? "Signed in as" : "Reconnecting account for"} <strong>{account.user.name}</strong>{account.user.email && <span className="block break-words text-sm text-muted">{account.user.email}</span>}</p>
         <p role="status" className="text-sm text-muted">{account.syncMessage ?? syncLabel}</p>
-        <p className="text-sm text-muted">Your current work saves to your account automatically while connected. Saved work opens when you sign in again. Learning results and drafts are not stored in this browser.</p>
+        <p className="text-sm text-muted">Your work saves automatically while connected and opens when you sign in again.</p>
         <div className="flex flex-wrap gap-3">
           {account.sync === "error" && <button className={button} onClick={() => { void syncProgress(); }} disabled={busy}>Sync now</button>}
           {account.membership.practiceAccess && <Link href="/practice" className="game-button game-button-primary">Extra practice →</Link>}
@@ -130,8 +133,11 @@ export default function AccountPage() {
       {message && <p role="status" className="text-sm text-muted">{message}</p>}
       {authError && !account.user && <p role="alert">{authError} Guest work is not saved across the sign-in redirect.</p>}
     </section>
+    <AchievementJournal />
+    <LearningStreak />
+    <LearningReminders />
     <MembershipSummary />
-    <section aria-label="Course progress" className="space-y-4">
+    <section id="course-progress" aria-label="Course progress" className="scroll-mt-28 space-y-4">
       <h2 className="text-xl font-semibold">{done} of {lessonOrder.length} lessons finished</h2>
       <p className="text-sm text-muted">{account.user ? "Answers, code drafts, workshop constructions, and experiment settings save with your account progress." : "This progress lasts for the current visit and resets on reload."}</p>
       {started.length ? <ul className="divide-y divide-line rounded-xl border border-line">
@@ -144,7 +150,7 @@ export default function AccountPage() {
     </section>
     {account.user && <details className="border-t border-line pt-5 text-sm text-muted">
       <summary className="cursor-pointer">Your data</summary>
-      <p className="mt-3 leading-6">If two devices edit the same activity, unsynced changes from this visit become the current work after revision checks. A recovery copy of the previous version remains in memory for this visit and is included in your download.</p>
+      <p className="mt-3 leading-6">If you edit the same activity on two devices, this visit&apos;s pending changes become the current work when saving finishes. The previous version remains available in memory during this visit and is included in your download.</p>
       <button className={`${button} mt-4`} onClick={() => {
         const url = URL.createObjectURL(new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), progress, work: exportLearnerWork() }, null, 2)], { type: "application/json" }));
         const link = document.createElement("a"); link.href = url; link.download = "perceptron-lab-learning-data.json"; link.click();

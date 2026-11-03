@@ -179,7 +179,7 @@ export function KernelRidgePlayground() {
         ))}
         <text x={FRAME.left + plotWidth / 2} y={FRAME.height - 8} textAnchor="middle" className="fill-slate-500 text-xs dark:fill-slate-400">{labels.x}</text>
         <text x={14} y={FRAME.top + plotHeight / 2} textAnchor="middle" transform={`rotate(-90 14 ${FRAME.top + plotHeight / 2})`} className="fill-slate-500 text-xs dark:fill-slate-400">{labels.y}</text>
-        <text x={FRAME.left + plotWidth} y={FRAME.top + 12} textAnchor="end" className="fill-slate-500 text-[10px] dark:fill-slate-400">bold, the kernel fit · grey, ordinary ridge · dotted, the target mean</text>
+        <text x={FRAME.left + plotWidth} y={FRAME.top + 12} textAnchor="end" className="fill-slate-500 text-[10px] dark:fill-slate-400">bold, the kernel fit · gray, ordinary ridge · dotted, the target mean</text>
       </svg>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -197,7 +197,7 @@ export function KernelRidgePlayground() {
         <div className="mt-3">
           <div className="mb-1 text-xs text-slate-500 dark:text-slate-400">
             Dual weights, one per point in the order drawn
-            {answer.implied_slope !== null ? `, adding up through the centred inputs to a slope of ${answer.implied_slope.toFixed(4)}` : ", with no slope to add up to"}
+            {answer.implied_slope !== null ? `, adding up through the centered inputs to a slope of ${answer.implied_slope.toFixed(4)}` : ", with no slope to add up to"}
           </div>
           <div className="flex flex-wrap gap-1 font-mono text-xs">
             {answer.dual_weights.map((weight, index) => (

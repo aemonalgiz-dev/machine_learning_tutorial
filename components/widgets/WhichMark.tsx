@@ -89,7 +89,7 @@ export function WhichMark() {
           Both tables hold {late.learned} rows and {limits.shared_rows} of them
           agree once the mark is written the same way, so{" "}
           {late.learned - limits.shared_rows} rows on each side exist only under
-          one mark. The coloured rows above are those. The word{" "}
+          one mark. The colored rows above are those. The word{" "}
           {limits.unseen_word}, which the four words never contained, is cut the
           same way either way.
         </p>

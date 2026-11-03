@@ -55,7 +55,10 @@ export function LossStart() {
         <Stat label="Loss slope at the starting parameters" value={step ? show(step.loss_gradient) : "…"} colour={AMBER} />
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        At a prediction of 5 the loss is 8 and its slope is 4. The 8 is how wrong the network is; the 4 is how fast that wrongness changes if the prediction moves, and it is the 4 that travels backward, not the 8.
+        At a prediction of 5, the loss is 8 and its slope is 4. The loss measures
+        the prediction error under the chosen formula. The slope describes how
+        that loss would change after a small change in the prediction.
+        Backpropagation starts from this slope to calculate the parameter gradients.
       </p>
     </div>
   );

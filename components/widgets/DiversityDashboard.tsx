@@ -87,7 +87,7 @@ export function DiversityDashboard() {
         {column(forest, "Random forest, one feature at every split", "#10b981")}
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The two maps disagree on {disagreeingCells} of {bagging.sizes[24].regions.cells ** 2} cells. Agreement and error correlation are averaged over every pair of members on the rows both omitted, so nobody is judged on a row they memorised.
+        The two maps disagree on {disagreeingCells} of {bagging.sizes[24].regions.cells ** 2} cells. Agreement and error correlation are averaged over every pair of members on the rows both omitted, so nobody is judged on a row they memorized.
       </p>
     </div>
   );

@@ -116,9 +116,9 @@ export function ExtentProbe() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The last three buttons are refusals. Nothing was fitted and no data was
-        sent; a shape is integers, and so is everything that can go wrong with
-        one.
+        The last three buttons supply invalid shapes. The program checks the
+        dimensions before fitting or processing any data, so these errors can
+        be found from the shape alone.
       </p>
     </div>
   );

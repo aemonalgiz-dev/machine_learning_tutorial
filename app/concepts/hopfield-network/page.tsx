@@ -24,9 +24,9 @@ import { UnstoredRests } from "@/components/widgets/UnstoredRests";
 import { UpdateRuleRace } from "@/components/widgets/UpdateRuleRace";
 
 export const metadata: Metadata = {
-  title: "Hopfield Networks · oop_ml",
+  title: "Hopfield Networks · Perceptron Lab",
   description:
-    "We can often recognise a familiar pattern even when part of it is damaged. A Hopfield network stores patterns in its connections and uses repeated updates to try to recover a stable pattern from a noisy input.",
+    "A Hopfield network uses repeated updates to settle toward a stable pattern. Its connections can store associations that help recover a familiar pattern from incomplete or noisy input, though other stable states can also occur.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -41,21 +41,8 @@ export default function HopfieldNetworkPage() {
       playgroundTitle="Can a damaged pattern settle back into memory?"
       playgroundIntro="Damage a stored pattern and follow recall one update at a time. Check the final pattern as well as the energy, since settling is not the same as recalling correctly."
       title="Hopfield Networks"
-      tagline={"We can often recognise a familiar pattern even when part of it is damaged. A Hopfield network stores patterns in its connections and uses repeated updates to try to recover a stable pattern from a noisy input."}
-      prerequisites={
-        <>
-          The weights form a matrix and every cell reads a weighted sum of the others, which is the{" "}
-          <Link href="/primers/linear-algebra" className={link}>
-            linear algebra primer
-          </Link>
-          &rsquo;s dot product, and the argument that the walk must stop is the one the{" "}
-          <Link href="/concepts/k-means" className={link}>
-            k-means page
-          </Link>{" "}
-          made, that a total which can only fall over finitely many states has to come to rest. Nothing here descends a
-          gradient, so the calculus primer can sit this one out.
-        </>
-      }
+      tagline={"A Hopfield network uses repeated updates to settle toward a stable pattern. Its connections can store associations that help recover a familiar pattern from incomplete or noisy input, though other stable states can also occur."}
+      prerequisites={<>The <Link href="/primers/linear-algebra" className={link}>linear algebra primer</Link> explains the matrix and weighted sums used for the connections. The settling argument resembles the finite-state reasoning in <Link href="/concepts/k-means" className={link}>k-means</Link>: under the conditions specified here, every actual change strictly lowers a quantity called energy. With finitely many states, that cannot continue indefinitely. Recall uses discrete cell updates rather than gradient descent.</>}
 
       playground={<HopfieldPlayground />}
       sections={[
@@ -69,17 +56,10 @@ export default function HopfieldNetworkPage() {
 <p>
                   The network has been shown the T, L and cross displayed above, each on twenty-five cells. It does not retain a separate picture to look up during recall. Instead, it stores a weight for each pair of cells, based on how those cells agreed or disagreed across the training shapes. Let&apos;s see how that table of relationships can help recover a damaged pattern.
                 </p>
-                <p>
-                  Recall starts from whatever state the network is handed and lets each cell ask the others what it should be, until no cell wants to change, and the place it stops is the answer.
-                </p>
+                <p>Recall begins with the supplied pattern, including any damaged cells. Each update uses the other cells and the stored weights to choose a cell’s next state. A pattern is stable when the update rule would leave every cell unchanged. That stable pattern is the recall result, which still needs to be compared with what we hoped to recover.</p>
 </>
-                <p>
-                  Press scramble in the playground, which flips five cells of the T, then recall. The five come back in
-                  one pass, a second pass moves nothing, and the number beside the grid falls from −3.36 to −11.2 and
-                  holds there. That number is an energy, and the whole page is about why it only ever falls and what
-                  it falls into. Picture a landscape with a valley at each stored shape. A damaged copy is a point part
-                  way up a slope, and recall is a ball rolling down.
-                </p>
+                <p>Press scramble to flip five cells of the T, then run recall. In this example, the original cells return in one pass and the next pass changes nothing. The displayed energy falls from −3.36 to −11.2.</p>
+                <p>Energy is a numerical function of the current cell pattern and the stored connections. Under the update conditions explained below, an update cannot increase it. That helps explain why recall settles, but it does not yet tell us whether the stable pattern will be the one we wanted.</p>
                 <KeepInMind>
                   A stable state is a pattern that no single-cell update changes. Starting from a damaged pattern, recall follows updates until it settles. It may recover a stored shape, but it can also reach another stable pattern. There is no guarantee that the result is the nearest stored shape. This ability to recover from a partial or damaged cue is what we mean by associative memory.
                 </KeepInMind>
@@ -102,9 +82,7 @@ export default function HopfieldNetworkPage() {
                   rounded, because it describes a state the network cannot be in.
                 </p>
                 <KeepInMind>
-                  Bipolar values are a choice of units, and the choice is what makes &ldquo;these two cells agree&rdquo;
-                  come out as the same number whether they agree by both being lit or both being dark.
-                </KeepInMind>
+                  Encoding the two cell states as −1 and +1 makes their product indicate agreement: positive for either kind of agreement and negative for disagreement. This is why the representation suits the storage rule.</KeepInMind>
               </SubSection>
             </>
 </>),
@@ -114,12 +92,7 @@ export default function HopfieldNetworkPage() {
           content: (
             <>
               <SubSection title="3. One number per pair of cells">
-                <p>
-                  Storing is one shot, with no loop and no error to chase. For every pair of cells, multiply their values
-                  in each stored shape, which gives +1 when the two agree and −1 when they disagree, add up over the
-                  shapes, and divide by the number of cells. A cell is never wired to itself, and the next steps say why
-                  that clause is the one to get right.
-                </p>
+                <p>This storage rule calculates the connection matrix directly, without iterative error minimization. For each pair of different cells, multiply their states within each stored pattern, add those products across patterns, and divide by the cell count. Set self-connections to zero. The following examples unpack that calculation.</p>
                 <Equation>{"wᵢⱼ = (1/n) · Σ over patterns p of pᵢ · pⱼ        wᵢᵢ = 0"}</Equation>
                 <>
 <p>
@@ -159,23 +132,12 @@ export default function HopfieldNetworkPage() {
 </>
                 <OuterProductBuilder example="fourCells" />
                 <WorkedExample title="What the row of zeros says">
-                  <p>
-                    The network holds no opinion about cell 4 at all. The two patterns agree everywhere but there, so
-                    their votes about that cell cancel exactly, and a cell wired to nothing can never be repaired. It is
-                    the first sign of a network asked to hold more than it can, two patterns that are nearly the same over
-                    only four cells, at a load of 0.5 patterns per cell.
-                  </p>
+                  <p>Cell 4 has no nonzero connections in this example. With the tie rule used here, recall leaves its supplied value unchanged. The two stored patterns disagree only at that cell, so the remaining cells do not identify whether A or B was intended. This shows an ambiguous cue under this storage rule; the load of 0.5 alone is not proof that neither pattern can be stored.</p>
                 </WorkedExample>
               </SubSection>
 
               <SubSection title="5. Dividing by the cell count, and what the sum leaves on the diagonal">
-                <p>
-                  The division by the number of cells is a choice of units. The sum a cell reads from its connections
-                  becomes an average over the other cells rather than a total, so it stays the same size as the network
-                  grows, and since the update rule only ever looks at the sign of that sum, the division changes no
-                  answer anywhere. It scales every energy by the same factor too, so comparisons between states are
-                  untouched.
-                </p>
+                <p>Dividing all weights by the positive cell count sets their numerical scale. Removing that common factor would leave every nonzero local-field sign unchanged, so the discrete recall updates would be the same in exact arithmetic. Energies would also be scaled by a common factor. The normalization helps compare scales; it does not guarantee identical field magnitudes as more patterns or cells are added.</p>
                 <p>
                   Before the diagonal is cleared it holds one particular number. A cell always agrees with itself, so its
                   product with itself is +1 in every pattern, and the sum over the patterns divided by the cell count is
@@ -185,19 +147,13 @@ export default function HopfieldNetworkPage() {
                 </p>
                 <Equation>{"before clearing   wᵢᵢ = (1/n) · Σ over patterns of pᵢ · pᵢ = (number of patterns) / n = the load"}</Equation>
                 <KeepInMind>
-                  The load is patterns stored per cell, 0.12 for three shapes on twenty-five cells and 0.24 for six, and
-                  it is the number that predicts failure in Part 6.
-                </KeepInMind>
+                  Load is the number of stored patterns divided by the cell count: 0.12 for three shapes on twenty-five cells and 0.24 for six. It is a useful summary, but recall also depends on the patterns and the starting cue. Part 6 measures those effects.</KeepInMind>
               </SubSection>
 
               <SubSection title="6. The diagonal is cleared, and what happens when it is not">
                 <>
-<p>
-                  Leave the diagonal at its summed value and the network stops recalling anything, and the reason is worth stating carefully because the obvious reason is wrong. A self weight does not change the energy landscape at all. Every cell&rsquo;s value squares to one, so a self weight adds the same constant to every state&rsquo;s energy and reorders nothing.
-                </p>
-                <p>
-                  What it changes is the update. The sum a cell reads gains a term that is the self weight times the cell&rsquo;s own value, and that term always agrees with the sign the cell already has, so it is a vote for staying put that grows with the self weight.
-                </p>
+<p>Keeping self-connections adds support for a cell’s current value and can prevent corrections. The energy effect alone does not explain this. Since a binary cell’s value squares to one, a self-weight adds the same constant to every state’s energy. It changes the stated update without changing the relative energy ordering of the states.</p>
+                <p>A positive self-weight adds a term with the cell’s current sign to its local field. That reinforces its present state and can prevent a correction. The effect grows with the positive self-weight. This is the case explored by the dial below.</p>
 </>
                 <Equation>{"with a self weight   hᵢ = wᵢᵢ · sᵢ + Σⱼ≠ᵢ wᵢⱼ · sⱼ        and wᵢᵢ · sᵢ has the sign of sᵢ"}</Equation>
                 <>
@@ -210,33 +166,17 @@ export default function HopfieldNetworkPage() {
 </>
                 <SelfConnectionDial />
                 <KeepInMind>
-                  Nothing raises and nothing looks wrong when the diagonal is left in. The network fits, answers, and
-                  hands back whatever it was given, which is why the storage rule clears the diagonal itself rather than
-                  trusting a caller to.
-                </KeepInMind>
+                  A self-connection need not raise an error, but a sufficiently large positive value can make damage persist. The Hebbian storage method clears its diagonal so the stated recall rule uses only other cells’ contributions. The separate matrix interface permits the experiment shown here.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. Nothing was propagated">
                 <>
-<p>
-                  Notice what is absent from the rule. There is no target, no loss and no gradient. The change to the weight between two cells is computed from those two cells and nothing else, which is Hebb&rsquo;s proposal and the reason this part of the site exists. A weight deep inside every earlier model on the site was corrected by a signal that began at the loss and travelled back through everything in between, and the two units the weight joins had very little to do with the size of its correction.
-                </p>
-                <p>
-                  Here a synapse reads the two neurons it joins, and that is all a piece of tissue could plausibly do.
-                </p>
+<p>The storage update uses the activities of the two cells joined by a weight. It does not compare the recalled pattern with a supplied target or propagate a prediction error backward. This is a Hebbian storage rule: the accumulated agreements and disagreements determine the connection.</p>
+                <p>That local calculation helps explain the biological motivation, but the network remains a simplified mathematical model. Its storage and recall guarantees come from the specified weights and update rules.</p>
 </>
-                <p>
-                  The{" "}
-                  <Link href="/concepts/hebbian-pca" className={link}>
-                    Hebbian principal components page
-                  </Link>{" "}
-                  used the same locality to find a direction; this page uses it to store a memory, and neither of them
-                  ever sees a target.
-                </p>
+                <p>The <Link href="/concepts/hebbian-pca" className={link}>Hebbian principal-components page</Link> also updates connections from locally available activity. Here the activities come from the patterns we want to associate. The rule accumulates pairwise products rather than calculating an error between a prediction and a separate supervised target.</p>
                 <KeepInMind>
-                  Storage is local and one shot. There is nothing to converge, and a fit that reports how many passes it
-                  took would be describing an event that did not happen.
-                </KeepInMind>
+                  The current fit computes the connection matrix directly from the supplied patterns. It has no iterative loss-convergence criterion. Recall, by contrast, repeats cell updates and reports whether those updates settled.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -246,23 +186,13 @@ export default function HopfieldNetworkPage() {
           content: (
             <>
               <SubSection title="8. What a cell reads, and the sign rule">
-                <p>
-                  Recall is each cell asking its neighbours what it should be. A cell adds up what every other cell is
-                  telling it, each vote weighted by how strongly the two are wired, and takes the sign of the total. A
-                  cell wrongly flipped finds most of its connections voting against it and flips back, while a cell that
-                  was right finds them voting to keep it. A total of exactly zero leaves the cell as it was, so a tie is
-                  never a coin toss.
-                </p>
+                <p>A cell sums the current states of the other cells, each multiplied by its connection weight. It takes the sign of that total. A damaged cell is corrected if those weighted contributions favor the original state; that is a possible result, rather than a guarantee for every cue. A zero total leaves the cell unchanged under the tie rule used here.</p>
                 <Equation>{"hᵢ = Σⱼ wᵢⱼ · sⱼ        sᵢ ← sign(hᵢ), and sᵢ stays if hᵢ = 0"}</Equation>
                 <p>
                   Damage A by flipping its first cell, giving the probe (−1, +1, −1, −1), and let cell 1 read its sum.
                 </p>
                 <Equation>{"h₁ = w₁₂·s₂ + w₁₃·s₃ + w₁₄·s₄\n   = 0.5·(+1) + (−0.5)·(−1) + 0·(−1) = 1"}</Equation>
-                <p>
-                  The sum is positive, so cell 1 becomes +1 and the damage is undone. The literature calls the sum the
-                  local field, and because the diagonal is zero a cell&rsquo;s own value contributes nothing to its own
-                  sum, which is the fact Part 4 leans on.
-                </p>
+                <p>The positive total makes cell 1 become +1, correcting this damaged cell. That weighted sum is called its local field. With a zero diagonal, the cell’s current value does not contribute to its own field. The energy argument in Part 4 depends on this detail.</p>
                 <KeepInMind>
                   A cell moves only when its own value disagrees with the sign of what its connections tell it. The rule
                   reads the sign and nothing else, which is why scaling every weight alike changes no answer.
@@ -280,10 +210,7 @@ export default function HopfieldNetworkPage() {
 </>
                 <FourCellVisits />
                 <KeepInMind>
-                  Settling is detected by a pass that changes nothing, so even a probe that is already a memory costs one
-                  pass to discover that. The walk reports which of its two exits it took, settled or the pass limit, and
-                  the two mean opposite things about the state that came back.
-                </KeepInMind>
+                  A pass with no changes confirms that this sequential recall has reached a fixed point. If the pass limit is reached first, the run has not confirmed settling. The final state could already be stable after the last change, so check it explicitly if that distinction matters.</KeepInMind>
               </SubSection>
 
               <SubSection title="10. The scrambled T, five flips in fifty visits">
@@ -305,7 +232,8 @@ export default function HopfieldNetworkPage() {
               <SubSection title="11. Each cell reads the state the previous one left">
                 <>
 <p>
-                  Look at what cell 8 read. At the probe its sum was +0.48, and when it was visited, at visit 12, it read +0.56, because cell 9 had moved at visit 11 in between and cell 9 is one of the cells wired to it. Cell 6 read −0.72 at the probe and −0.96 by visit 19, after three of its neighbours had been repaired.
+
+                  Look at what cell 8 read. At the probe its sum was +0.48, and when it was visited, at visit 12, it read +0.56, because cell 9 had moved at visit 11 in between and cell 9 is one of the cells wired to it. Cell 6 read −0.72 at the probe and −0.96 by visit 19, after three of its neighbors had been repaired.
                 </p>
                 <p>
                   On the second pass cell 8 reads +0.96 and cell 6 reads −1.04, since by then every damaged cell has moved and every vote points the same way. That is the meaning of one cell at a time. Each visit sees the state the previous visit left behind, and the repairs reinforce one another as they land.
@@ -358,7 +286,7 @@ export default function HopfieldNetworkPage() {
                               "Every weight touching cell 4 of the four-cell example is zero, so that cell can never be repaired",
                             ],
               [0, 1, 2, 3],
-              "All four hold. A synapse reads the two neurons it joins, which is Hebb’s proposal and the whole of the rule, and it fires once rather than iterating, so a fit reporting passes would describe an event that did not happen. The division by the cell count is a choice of units that turns each sum into an average and scales every energy alike. The two four-cell patterns agree everywhere but cell 4, so their votes about it cancel exactly and the network holds no opinion there.",
+              "Each connection accumulates products of the two cells it joins across stored patterns. This implementation calculates that sum directly and divides by the number of cells. That factor scales the weights; it is not an average over stored patterns unless those counts happen to agree. In the four-cell example, the stored patterns give opposite contributions for connections to cell 4, so those contributions cancel.",
               {
                 "description": "Store A = (+1, +1, −1, −1) and B = (+1, +1, −1, +1).\nFor i ≠ j, use wᵢⱼ = sum over stored patterns p of pᵢpⱼ / 4. Set the diagonal to zero. Recall reads only the sign of each weighted sum; a zero sum leaves the cell unchanged. Storage computes the matrix directly without iterative fitting."
               },
@@ -370,12 +298,7 @@ export default function HopfieldNetworkPage() {
           content: (
             <>
               <SubSection title="12. One number for the whole state">
-                <p>
-                  The staircase in the playground is a single number computed from the state and the weights. For every
-                  pair of cells, multiply the weight joining them by the two values, add up over all pairs, and take
-                  minus a half of the total. Low energy means many pairs agree with the sign of the weight between them,
-                  which is what &ldquo;this state resembles the stored shapes&rdquo; amounts to.
-                </p>
+                <p>Energy combines the state and connection weights into one number. Multiply each connection weight by the two cell states, sum over both matrix indices, and multiply by minus one half. Configurations that satisfy more strongly weighted pairwise agreements tend to have lower energy. That measures compatibility with the connection matrix, rather than directly measuring distance from the nearest stored pattern.</p>
                 <Equation>{"E = −½ · Σᵢ Σⱼ wᵢⱼ · sᵢ · sⱼ"}</Equation>
                 <p>
                   Under the three shapes the T and the L each have an energy of −11.2 and the cross −11.04, and the
@@ -419,28 +342,16 @@ export default function HopfieldNetworkPage() {
                 </p>
                 <RecallStepper panels={["energy"]} />
                 <KeepInMind>
-                  The argument leans on the symmetry and on the zero diagonal, and on nothing else. The matrix is checked
-                  for symmetry when it is built, and the diagonal is the storage rule&rsquo;s own responsibility.
-                </KeepInMind>
+                  The strict-decrease argument uses symmetric weights, a zero diagonal, one-cell-at-a-time updates and a rule that leaves a cell unchanged at zero field. These conditions belong together. Changing the update schedule or tie behavior requires checking the convergence argument again.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. Finitely many states, so the walk has to stop">
                 <>
-<p>
-                  Every flip is a strict fall, so a state can never be revisited, and there are only 33,554,432 states on twenty-five cells, so the walk has to run out of places to go. Where it runs out is a state no single cell wants to change, a local minimum of the energy and a fixed point of the rule, and for a lightly loaded network that is one of the stored shapes.
-                </p>
-                <p>
-                  It is the k-means argument again with the inertia swapped for an energy, and it is unusually short for a convergence result about a network.
-                </p>
+<p>Every actual flip strictly lowers the energy. With only 33,554,432 states on twenty-five cells, sequential recall cannot keep visiting new states indefinitely. It eventually reaches a fixed point where no individual cell changes. That point may be a stored shape or an unwanted stable pattern; convergence alone does not establish correct recall.</p>
+                <p>Like the k-means argument, this proof combines a nonincreasing quantity with finitely many states. The guarantee concerns settling under the specified sequential updates. It does not identify which stable result a particular cue will reach.</p>
 </>
                 <Equation>{"sᵢ · hᵢ ≥ 0 for every cell i        which is what a fixed point is"}</Equation>
-                <p>
-                  That condition can be checked in one pass without settling at all, and it is stronger than one settling
-                  run, since it is a statement about every visiting order at once. The pass limit on a recall, twenty
-                  here, is therefore a guard rather than the stopping condition. The scrambled T under three shapes took
-                  two passes and fifty visits and reports that it settled, and no probe on this page under the
-                  one-at-a-time rule has ever reached the limit.
-                </p>
+                <p>A fixed-point check evaluates every cell’s current local field without changing the state. If no cell would move, the pattern stays fixed under any visiting order. The recall pass limit, twenty here, is a separate computation budget. The displayed damaged T settles in two passes and fifty visits; an insufficient budget could stop another run before settling was confirmed.</p>
                 <KeepInMind>
                   The guarantee is that recall stops at a local minimum, and nothing in it says the minimum is a shape
                   that was stored. Part 5 is about the minima that were not.
@@ -458,10 +369,7 @@ export default function HopfieldNetworkPage() {
 </>
                 <EnergyPath />
                 <KeepInMind>
-                  On the paths to the negation and to the L only the two ends are fixed points. Every state in between
-                  has at least one cell that wants to move, which is what makes each end a memory and the ridge between
-                  them the reason a probe on one side falls one way.
-                </KeepInMind>
+                  On the two displayed paths to the negated T and to the L, only the endpoints are fixed points. The intermediate energies show one cross-section through the state space. They do not describe all starting cues that reach either endpoint; that region depends on the recall dynamics.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -471,54 +379,33 @@ export default function HopfieldNetworkPage() {
           content: (
             <>
               <SubSection title="16. The negation is stored for free">
-                <p>
-                  The energy multiplies two cell values in every term, so reversing every cell leaves every product, and
-                  the energy, exactly where it was. Every weighted sum reverses along with the cell it belongs to, so a
-                  state where every cell agrees with its sum becomes another such state. If a shape is a fixed point then
-                  so is the shape with every cell reversed, at the identical energy, and no implementation can avoid it,
-                  because it follows from the form of the energy and not from anything the storage rule did.
-                </p>
+                <p>In this zero-bias quadratic energy, reversing every cell leaves every pairwise product unchanged. The local fields reverse too, so a fixed point has a negated fixed point at the same energy. This symmetry follows from the current model form. Adding biases or using a different energy can break it.</p>
                 <Equation>{"E(−s) = −½ · Σᵢ Σⱼ wᵢⱼ · (−sᵢ)(−sⱼ) = E(s)"}</Equation>
                 <NegationCheck />
-                <p>
-                  The reversed T has the T&rsquo;s own energy of −11.2, no cell wants to move, its first five cells read −0.80, −0.96,
-                  −0.96, −0.96 and −1.04 where the T&rsquo;s read the same numbers positive, and it shares no cell at all
-                  with the T. Which valley a probe falls into is decided by which is nearer. Reverse the first eighteen
-                  cells of the T, which can be done by clicking them in the playground, and the probe starts at −1.12,
-                  seven cells move, and it comes to rest in the T inverted.
-                </p>
+                <p>The reversed T has energy −11.2 and is a fixed point. Its first five fields are −0.80, −0.96, −0.96, −0.96 and −1.04, the negatives of the T’s corresponding fields. If we reverse the first eighteen T cells, the cue starts at energy −1.12; recall changes seven cells and reaches the reversed T.</p>
+<p>This cue is closer in cell count to the reversed pattern, but that does not establish a general nearest-pattern rule. The full connection matrix and update path determine the result.</p>
                 <KeepInMind>
-                  Storing three shapes stores six memories, and a probe more than half wrong comes back reversed. A caller
-                  who needs the original has to compare the answer with its negation, since the network cannot tell them
-                  apart.
-                </KeepInMind>
+                  For these three stable shapes, their negations are stable as well. A cue with many reversed cells may reach a negated shape, another stored shape or a spurious state. If the application distinguishes original from inverted images, it needs an external convention or comparison; this symmetric model alone does not supply one.</KeepInMind>
               </SubSection>
 
               <SubSection title="17. The odd mixture is a memory nobody gave it">
                 <>
-<p>
-                  Fixed points that were never stored exist too, and the reliable family is the mixture. Take the three shapes, add them cell by cell, and keep the sign, so a cell is lit where at least two of the three are lit. On the T, the L and the cross that gives six lit cells, the four corners, the centre and the middle of the bottom row.
-                </p>
+<p>Additional stable patterns can appear even though they were not supplied for storage. One candidate is an odd mixture: add three patterns cell by cell and keep the sign, equivalent to a majority vote. For the T, L and cross, that produces six lit cells: the four corners, center and middle of the bottom row. We can then test whether this candidate is stable.</p>
                 <p>
                   Score it and no cell wants to move; it is a fixed point at an energy of −7.84, where the shapes themselves are at −11.2, −11.2 and −11.04, and it shares 18, 18 and 20 cells with the three of them, so it equals none.
                 </p>
 </>
                 <UnstoredRests variant="mixture" />
-                <p>
-                  The smallest sum any cell of the mixture reads is 0.16 in absolute value, against 0.72 for the least
-                  sure cell of the T, so the valley is shallow as well as high, and a probe has to be nearer the mixture
-                  than any shape to fall into it.
-                </p>
+                <p>The mixture’s smallest absolute local field is 0.16, compared with 0.72 for the T. Those values describe resistance to changing an individual cell. They do not determine the whole region of cues that will reach each pattern: that also depends on the other fields and the updates taken during recall.</p>
                 <KeepInMind>
-                  A spurious state is a minimum like any other, only shallower while the load is light. The network has no
-                  way to tell a caller which kind of rest it found, since it kept no copy of what it stored.
-                </KeepInMind>
+                  This mixture is a stable state that was not supplied as a memory. Its energy is higher than the three shapes’ energies in this example, but spurious states are not universally shallower. Since the fitted network retains only the weight matrix, a caller must compare recall with separately retained targets to determine whether the intended memory was recovered.</KeepInMind>
               </SubSection>
 
               <SubSection title="18. Under six shapes the extra rests are as deep as the real ones">
                 <>
 <p>
-                  Tick store three more shapes in the playground, so the load is 0.24, and scramble the T once, which flips the same five cells as before. The probe now starts at −7.04, five cells move, and it comes to rest at −14.24 in a state with the top row, the bottom row and the centre lit, which nobody stored.
+
+                  Tick store three more shapes in the playground, so the load is 0.24, and scramble the T once, which flips the same five cells as before. The probe now starts at −7.04, five cells move, and it comes to rest at −14.24 in a state with the top row, the bottom row and the center lit, which nobody stored.
                 </p>
                 <p>
                   Only two of the five cells that moved were among the five damaged. The rest shares 19 cells with the T and 23 with the Z, and its energy is exactly the Z&rsquo;s own, −14.24, so the network is as content there as it is resting in a shape it was given.
@@ -532,9 +419,7 @@ export default function HopfieldNetworkPage() {
                   of the other five can outvote the truth.
                 </p>
                 <KeepInMind>
-                  Overloading is not an error. Nothing raises, the walk settles, and the state it settles in is a perfectly
-                  good fixed point. The only sign is the load, which is why the playground reports it.
-                </KeepInMind>
+                  Storage accepts the larger pattern set, and recall can still settle. Correct recall must be checked separately. Load helps describe the configuration, while exact-pattern stability and corrupted-cue recovery tests reveal different failures.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -551,17 +436,17 @@ export default function HopfieldNetworkPage() {
                 "By an amount that depends on every other cell’s sum as well",
               ],
               0,
-              "Symmetry and the zero diagonal collect every term mentioning the cell into one product of its value with its own weighted sum, and that sum does not mention the cell. Reversing the value reverses the product, so the drop is twice the sum. Cell 9 read −0.72 and dropped the energy by 1.44, from −3.36 to −4.80.",
+              "For symmetric weights with a zero diagonal, flipping a cell against its weighted input lowers energy by twice the magnitude of that input. The sign of the input determines the preferred state, while its magnitude determines this drop. In the displayed visit, an input of −0.72 produces an energy decrease of 1.44.",
             ),
             trueFalse(
               "Every flip strictly lowers the energy and there are finitely many states, so recall must stop in one of the stored shapes.",
               false,
-              "The argument gets as far as a local minimum and no further. Where recall stops is a state no single cell wants to change, and nothing says that state was ever stored. The mixture of the three shapes rests at −7.84 and nobody stored it.",
+              "Under sequential updates with symmetric zero-diagonal weights and no flips at a zero input, each actual flip lowers energy. Finitely many states then imply settling at a state with no permitted improving flip. That state need not be one of the stored patterns. The demonstrated mixture is another fixed point.",
             ),
             trueFalse(
               "The T with every cell reversed is a fixed point at the T’s own energy of −11.2.",
               true,
-              "Every term of the energy multiplies two cell values, so reversing all of them leaves each product where it was, and every weighted sum reverses along with the cell it belongs to. No implementation can avoid this, because it follows from the form of the energy rather than from the storage rule. Storing three shapes therefore stores six memories.",
+              "For this zero-bias bipolar energy, reversing every cell preserves every pairwise product and reverses each weighted input. A fixed point’s negation is therefore also a fixed point with the same energy. These three shapes have distinct negations, giving six such states. Adding biases or changing the energy model can break that symmetry.",
             ),
             several(
               "The three shapes are added cell by cell and the sign kept, giving a state with six lit cells. Which of these hold for it?",
@@ -572,7 +457,7 @@ export default function HopfieldNetworkPage() {
                               "The smallest sum any of its cells reads is 0.16, against 0.72 for the least sure cell of the T",
                             ],
               [0, 1, 3],
-              "It is a minimum like any other, only shallower while the load is light, and it shares 18, 18 and 20 cells with the three shapes, so it equals none of them. Being both higher and shallower is why a probe has to start nearer the mixture than any shape to fall into it. The network cannot tell a caller which kind of rest it found, since it kept no copy of what it stored.",
+              "The mixture settles at a state different from every stored shape. Its overlap counts describe resemblance, but they do not determine its attraction region. Recall depends on the local weighted inputs encountered during updates. A probe can therefore settle in an unintended mixture even when a stored shape appears close by a simple cell-agreement count.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "25-cell three-shape memory; majority-sign mixture has 6 lit cells.\nCells whose update would change: 0\nMixture energy: −7.84\nStored-shape energies: −11.20 / −11.20 / −11.04\nCells agreeing with the three shapes: 18 / 18 / 20, out of 25\nSmallest sign-aligned field magnitude: mixture 0.16; T 0.72"
@@ -581,7 +466,7 @@ export default function HopfieldNetworkPage() {
             trueFalse(
               "Under six shapes the T is still a fixed point, although the scrambled T no longer comes back to it.",
               true,
-              "All six stored shapes are still fixed points, the T at −11.36, so what the extra shapes eroded is the valleys around them and not the shapes themselves. The same five flips now start at −7.04 and come to rest at −14.24 in a state nobody stored, and only two of the five cells that moved were among the five damaged. Nothing raises, and the only sign is the load of 0.24.",
+              "In this six-shape store, the intact T remains fixed while the damaged T reaches an unintended state. Storing a fixed point and recovering it from nearby damage are separate requirements. The higher load is a warning to investigate, not a diagnosis by itself. Comparing the recovered pattern with the intended T and inspecting the update trace reveals the failed recall directly.",
             ),
         ],
         },
@@ -602,7 +487,7 @@ export default function HopfieldNetworkPage() {
                     { expression: "hᵢ = (1/n) · Σⱼ≠ᵢ Σ over patterns q of qᵢ · qⱼ · pⱼ", reason: "the storage rule written into the sum, with j ≠ i because the diagonal is zero" },
                     { expression: "   = pᵢ · (n − 1)/n  +  (1/n) · Σ over q ≠ p of qᵢ · (Σⱼ≠ᵢ qⱼ · pⱼ)", reason: "the q = p term has every pⱼ · pⱼ equal to one, leaving n − 1 of them" },
                     { expression: "first term has the sign of pᵢ, size (n − 1)/n", reason: "with one pattern stored this is the whole sum, so p is a fixed point by construction" },
-                    { expression: "second term is the crosstalk, one overlap with each other pattern", reason: "small when the patterns are nearly orthogonal, growing with every pattern added" },
+                    { expression: "second term is the crosstalk, one overlap with each other pattern", reason: "determined by signed overlaps with the other patterns; added contributions can reinforce or cancel one another" },
                   ]}
                 />
                 <>
@@ -623,27 +508,13 @@ export default function HopfieldNetworkPage() {
                   </p>
                 </>
                 <KeepInMind>
-                  Capacity is the point at which the crosstalk in some cell&rsquo;s sum outgrows that cell&rsquo;s own
-                  term. It is a statement about overlap between the stored patterns, and it is why the answer depends on
-                  which patterns were stored as well as on how many.
-                </KeepInMind>
+                  A stored pattern loses exact fixed-point stability if an opposing crosstalk term reverses one of its local fields. That is one capacity criterion. Recovering corrupted cues is another, and it can deteriorate even while every stored pattern remains stable. Both depend on the chosen patterns and the update rule.</KeepInMind>
               </SubSection>
 
               <SubSection title="20. Capacity measured on twenty-five cells">
-                <p>
-                  I measured it rather than quoting it. At the playground&rsquo;s size, twenty-five cells, the measurement stores
-                  from one to twelve random bipolar patterns, ten independent sets at each count, and asks two questions
-                  of every stored pattern, whether it comes back unchanged when presented exactly and whether it comes
-                  back when five cells are reversed first, which is what the scramble does.
-                </p>
+                <p>The recorded experiment uses twenty-five cells, matching the playground. For each stored-pattern count from one to twelve, it draws ten independent sets of random bipolar patterns. It then checks recall from each exact stored pattern and from a version with five cells flipped. Those two tests separate whether a pattern remains stable from whether the network can repair that amount of corruption.</p>
                 <CapacityCurve units={25} />
-                <p>
-                  Every pattern is a fixed point up to four stored, a load of 0.16, and with five cells reversed the
-                  recovery is 0.90 at three patterns and 0.85 at four. At five patterns exact recall drops to 0.86 and
-                  corrupted recall to 0.62; at six, the playground&rsquo;s overloaded case, they are 0.683 and 0.383; at
-                  twelve, a load of 0.48, an exact probe comes back unchanged 0.117 of the time. The fixed-point column
-                  is the exact question asked without settling, and it tracks the exact column within a few hundredths.
-                </p>
+                <p>In these sampled sets, every exact pattern is stable up to four patterns stored, a load of 0.16. With five cells reversed, recovery is 0.90 at three patterns and 0.85 at four. At five patterns, exact recall is 0.86 and corrupted recall 0.62; at six they are 0.683 and 0.383. At twelve, load 0.48, exact recall succeeds 0.117 of the time. These are finite-sample results. The separate fixed-point column tests local stability without running recall.</p>
                 <KeepInMind>
                   At twenty-five cells the collapse is gradual. There is no load at which recall is fine and the next at
                   which it fails, which is why the page reports the curve rather than a number.
@@ -652,34 +523,20 @@ export default function HopfieldNetworkPage() {
 
               <SubSection title="21. A hundred cells and the 0.138 figure">
                 <>
-<p>
-                  The figure in the literature, 0.138 patterns per cell, is the load at which errorless recall breaks down as the network grows without bound, and a hundred cells is where it starts to mean something. The same measurement there, with ten of the hundred cells reversed for the corrupted probe, gives every pattern back at five and eight patterns stored, 0.94 of them at ten, a load of 0.10, and 0.958 at twelve, which is higher than at ten and is sampling noise with ten sets per point.
-                </p>
+<p>The often quoted value near 0.138 patterns per cell comes from large-network analyses of random, unbiased patterns under the classic Hebbian model. It describes a retrieval regime with attractors strongly correlated with the stored patterns. It is not a guarantee that every stored pattern is an exact fixed point or that every recalled bit is correct.</p>
+<p>The hundred-cell experiment also tests cues with ten cells reversed. It recovers every tested pattern at five and eight stored patterns, 0.94 at ten and 0.958 at twelve. Different sampled pattern sets can give nonmonotone estimates at individual points, so the increase from ten to twelve does not establish that storing more patterns improves recall.</p>
                 <p>
                   At fourteen, a load of 0.14 and the literature&rsquo;s line, exact recall is 0.721; at twenty it is 0.49 and corrupted recall 0.40; at thirty it is 0.037, and at forty a corrupted probe never comes back.
                 </p>
 </>
                 <CapacityCurve units={100} />
-                <p>
-                  So the textbook claim did not hold as written here. Recall is already imperfect at a load of 0.10 and is
-                  still working half the time at 0.20, and 0.138 is a fair marker for where it starts going badly rather
-                  than a description of what happens at a hundred cells. The honest summary is that the capacity is
-                  linear in the number of cells with a constant near a seventh, and that the failure is an erosion rather
-                  than a cliff.
-                </p>
+                <p>The finite example shows a gradual loss of recall as more patterns are stored. Recall is already imperfect at load 0.10 and still succeeds about half the time at 0.20. The value 0.138 describes an asymptotic capacity result under its assumptions; it is not an exact cutoff for this hundred-cell experiment. The roughly linear growth with network size and the changing error rate need to be interpreted separately.</p>
                 <KeepInMind>
-                  The 0.138 is an asymptotic result about random patterns and an exact probe. At any size that can be
-                  drawn, and for any patterns a person would choose, the measured curve is the number to use.
-                </KeepInMind>
+                  The asymptotic value concerns a specified random-pattern retrieval model and success criterion. Exact stability, exact corrupted-cue recovery and approximate recovery are different criteria. For a finite set of chosen patterns, report which one was measured alongside the observed recall curve.</KeepInMind>
               </SubSection>
 
               <SubSection title="22. Shapes against random patterns, and what overlap did not predict">
-                <p>
-                  The derivation says crosstalk is overlap, so patterns that resemble one another should recall worse than
-                  patterns that do not. The measurement takes the mean absolute overlap of each pair of stored patterns, their
-                  inner product over the cell count, so 0 is orthogonal and 1 is identical or opposite, beside how often
-                  a five-cell corruption of each pattern settles back into it, twenty corruptions per pattern.
-                </p>
+                <p>Other stored patterns contribute through their overlaps, but one mean overlap value may hide important signed interactions. This comparison reports mean absolute pairwise overlap, the absolute inner product divided by cell count. Zero means orthogonal; one means identical or negated patterns. It also measures recovery over twenty five-cell corruptions per pattern. We can compare the summary with actual recall rather than treating it as a complete predictor.</p>
                 <NumberTable
                   headings={["stored", "load", "mean overlap", "still fixed points", "recovered from five flips"]}
                   rows={[
@@ -694,9 +551,7 @@ export default function HopfieldNetworkPage() {
 <p>
                   At three patterns the claim held, since the shapes overlap less than random patterns and recover better, 0.983 against 0.955. At six it did not. The six shapes overlap more on average, 0.195 against 0.157, and every one of them is still a fixed point where only 0.717 of the random patterns are, with recovery at 0.617 against 0.380.
                 </p>
-                <p>
-                  A mean over pairs is too coarse a summary of crosstalk, because what turns a cell is the sum of overlaps arriving at that one cell with their signs, and six random patterns on twenty-five cells will by chance contain some pair, or some cell, where that sum is large.
-                </p>
+                <p>The mean discards where and with which signs the contributions reach each cell. Random patterns can also contain unusually large local interference even when the average overlap is modest. Those details help explain why a coarse pairwise summary need not rank two pattern sets by recall performance.</p>
 </>
                 <KeepInMind>
                   Correlated patterns produce crosstalk, and the crosstalk is what eats the valleys, but the average
@@ -713,9 +568,7 @@ export default function HopfieldNetworkPage() {
             <>
               <SubSection title="23. All at once can loop forever">
                 <>
-<p>
-                  The obvious way to implement recall is to compute every cell&rsquo;s sum from the current state and move all of them together, and the settling argument does not cover it, because two cells can each move in a direction that would have lowered the energy on its own while together they raise it. No contrived matrix is needed.
-                </p>
+<p>Updating every cell simultaneously uses the old state for all of the weighted sums. Two changes that would separately lower energy can interact when made together. The sequential proof therefore does not apply, and simultaneous recall can cycle instead of settling. The next small network demonstrates that failure.</p>
                 <p>
                   Store the single two-cell pattern (+1, −1), whose only weight is −0.5 between the two cells, and hand the network (+1, +1), whose energy is 0.5. Both cells read −0.5, both flip, and the state is (−1, −1) at the same 0.5. Both now read +0.5, both flip back, and it goes on until the pass limit stops it.
                 </p>
@@ -730,48 +583,27 @@ export default function HopfieldNetworkPage() {
                   order is what decides.
                 </p>
                 <KeepInMind>
-                  The all-at-once failure is a two-state loop that runs forever, and its energy never falls. A walk that
-                  ends at the pass limit under that rule is not a walk that needed more passes.
-                </KeepInMind>
+                  The displayed simultaneous-update run enters a verified two-state cycle. Raising its pass limit would repeat that cycle rather than repair it. A pass-limit exit in an arbitrary run is not by itself proof of cycling; inspect the recorded states or use a separate cycle check.</KeepInMind>
               </SubSection>
 
               <SubSection title="24. All at once can also settle in the wrong place">
                 <>
-<p>
-                  The loop is the failure the theory predicts, and it is not the only one. On the scrambled T under three shapes the all-at-once rule moves the five damaged cells in one pass and reaches the T, so it often works. Reverse the first fifteen cells of the T instead, a probe that shares ten cells with the T and fifteen with its negation, and the two rules part company.
-                </p>
+<p>Simultaneous updates can also settle, including at an unwanted pattern. For the five-cell-damaged T, they restore the T in one changing pass. That example establishes success for this cue, not a general success rate. Reversing the first fifteen T cells creates another cue, sharing ten cells with the T and fifteen with its negation, on which the two update rules reach different results.</p>
                 <p>
                   One cell at a time moves ten cells in a single pass, from 0.48 down to −11.2, and rests in the T inverted, the nearer memory. All at once takes four passes, moving 16, 12, 5 and then no cells, with the energy going 0.48, −5.28, −5.44, −8.8, and rests in a state nobody stored that is nonetheless a fixed point.
                 </p>
 </>
                 <UpdateRuleRace variant="halfT" />
                 <KeepInMind>
-                  The energy fell at every pass in that second walk, and the rule still ended somewhere worse, because
-                  sixteen cells acting on one stale picture overshot the valley they were all aiming at. The
-                  one-at-a-time rule cannot overshoot, since each visit sees the last.
-                </KeepInMind>
+                  Both procedures lower energy on this particular cue, but they reach different fixed points. Sequential updates have the one-cell strict-decrease guarantee. That guarantee still does not select the intended stored shape; simultaneous updates can interact in ways the sequential proof does not cover.</KeepInMind>
               </SubSection>
 
               <SubSection title="25. Why one at a time is the default, and why the fit has no convergence">
                 <>
-<p>
-                  Both rules are offered, because refusing to implement the broken one would hide the single most instructive fact about this model, and the caller has to name the one they mean rather than flip a switch, since the two are different algorithms with different guarantees. The default is the one with a proof behind it.
-                </p>
-                <p>
-                  Every other iterative model on this site reports whether its fit converged; this one deliberately does not, because its fit is one shot and there is nothing to converge. The thing that iterates is recall, which happens once per probe and can settle for one probe and hit the pass limit for another in the same call, so whether a settling converged is a fact about one recall and is reported on the walk that recorded it.
-                </p>
+<p>The interface exposes the two recall procedures by name because their behavior and guarantees differ. Sequential recall is the default. Simultaneous recall remains available so the cycle can be observed and compared with the proof’s assumptions.</p>
+                <p>Storage computes the weights directly; recall is the iterative operation. Whether a run settled therefore belongs to a particular supplied cue. The same stored network can settle for one cue and reach the pass limit for another, so the recall record reports that outcome separately.</p>
 </>
-                <p>
-                  One more thing an implementation should not do is stand a{" "}
-                  <Link href="/concepts/restricted-boltzmann-machine" className={link}>
-                    restricted Boltzmann machine
-                  </Link>{" "}
-                  in for this model. It also takes a state and answers with a state, but it has no weight between two
-                  visible units, so there is no symmetric matrix over the cells and no diagonal to clear, and summing
-                  out its hidden units leaves an energy that is not quadratic in the state, so a state and its negation
-                  no longer share an energy and the negation is no longer a fixed point, which is the check in
-                  step 16 failing on a model that otherwise looks the part.
-                </p>
+                <p>The <Link href="/concepts/restricted-boltzmann-machine" className={link}>restricted Boltzmann machine</Link> on the next page is a different associative model. It introduces hidden units and connections between visible and hidden groups, with stochastic conditional updates. Its energy and recall behavior therefore require their own explanation. The symmetric quadratic energy and sequential convergence proof used here cannot simply be transferred to it.</p>
                 <KeepInMind>
                   Which rule, which seed, and how many passes are all facts about a recall rather than about the fit, and
                   an implementation should keep them there.
@@ -816,13 +648,7 @@ export default function HopfieldNetworkPage() {
                     { expression: "an asymmetric matrix handed to the weights", reason: "refused, because without symmetry the settling argument does not hold." },
                   ]}
                 />
-                <p>
-                  Two rows deserve the emphasis. More patterns than cells is accepted and nothing warns, because the load
-                  is a number a caller can read and the failure is a gradual erosion rather than a state the fit can
-                  detect. And a self-connected matrix is accepted by the container while the storage rule never produces
-                  one, since refusing it there would move the lesson out of the rule and into the container, leaving
-                  nothing able to show what a self connection does.
-                </p>
+                <p>The implementation accepts more patterns than cells; that does not promise correct retrieval. Test exact stability and representative corrupted cues rather than relying only on load. The separate weight-matrix interface also accepts self-connections for the dial experiment, while the Hebbian fit clears the diagonal. State which construction produced the matrix before applying the recall guarantee.</p>
               </SubSection>
             </>
           ),
@@ -833,7 +659,7 @@ export default function HopfieldNetworkPage() {
             trueFalse(
               "The measurement at a hundred cells found recall perfect below a load of 0.138 and broken above it.",
               false,
-              "The collapse is an erosion rather than a cliff. Recall is already imperfect at a load of 0.10, where 0.94 of patterns come back, and is still working half the time at 0.20. The 0.138 is an asymptotic result about random patterns, and it marks where things start going badly rather than describing what happens at a hundred cells.",
+              "In this hundred-cell experiment, exact recall is already imperfect at load 0.10, where 0.94 of patterns return, and still succeeds about half the time at 0.20. The value near 0.138 concerns approximate retrieval in the asymptotic random-pattern model. It does not guarantee perfect bitwise recall below that load or complete failure above it.",
             ),
             choice(
               "Crosstalk is overlap, so patterns that resemble one another should recall worse. What happened at six stored patterns?",
@@ -860,7 +686,7 @@ export default function HopfieldNetworkPage() {
             trueFalse(
               "A walk that ends at the pass limit under the all-at-once rule is a walk that needed more passes.",
               false,
-              "Under that rule the limit is reached by a loop whose energy never falls, so more passes would buy nothing. There is a second failure too, where the energy does fall at every pass and the walk still ends somewhere worse, because sixteen cells acting on one stale picture overshoot the valley they were all aiming at.",
+              "A pass limit does not distinguish a slow recall from a repeating cycle. In the two-cell simultaneous-update example, the states alternate, so increasing the limit only repeats them. The sequential energy-decrease argument does not apply when all cells update from the previous full state. Inspect the state sequence and stopping reason before deciding whether more passes would help.",
             ),
             several(
               "Which of these does the implementation accept without raising?",
@@ -871,7 +697,7 @@ export default function HopfieldNetworkPage() {
                               "A weight matrix that is not symmetric",
                             ],
               [0, 1],
-              "More patterns than cells fits and nothing warns, because the load is a number a caller can read and the failure is an erosion the fit cannot detect, with 5 of the 6 patterns still fixed points. A matrix with a self connection is accepted on purpose and reported as self-connected, so that what a self connection does can be shown rather than forbidden. A 0 is not a state the network can be in, and without symmetry the settling argument does not hold, so those two are refused.",
+              "This implementation accepts a store with more patterns than cells and exposes its load for inspection. That does not guarantee that stored patterns remain fixed or that damaged probes recover. It also permits inspecting a self-connected weight matrix. Non-bipolar state values and asymmetric matrices are rejected under this API’s contract.",
               {
                 "description": "This implementation requires pattern entries −1 or +1 and a symmetric weight matrix. Directly supplied matrices may have diagonal self-connections. It reports memory load but imposes no upper bound on the number of stored patterns."
               },
@@ -1135,7 +961,7 @@ one at a time
   seed 7 rests in [-1, 1] at -0.50, settled
 seeds resting in the stored pattern reversed 4`,
               { hints: [
-  "Simultaneous updates use the previous full state for both cells; sequential updates can use the just-changed neighbour.",
+  "Simultaneous updates use the previous full state for both cells; sequential updates can use the just-changed neighbor.",
   "A symmetric bipolar memory also gives its negated pattern the same energy. Settling therefore need not choose the originally named orientation."
 ], check: numberCheck("How many of the eight seeds rest in (−1, +1)?", 4, 0, "Four seeds settle in the stored pattern’s negation. Sequential order determines the first flip, while the simultaneous update keeps oscillating in this probe."), question: "Why can simultaneous updates loop while sequential updates settle?" },
             ),

@@ -62,7 +62,7 @@ function Onboarding({ originalBuild }: { originalBuild: Build }) {
         (stage === 0 ? setConnected : setConstructed)(outcome.passed);
         progress.touch(stages[stage]);
         if (outcome.passed) {
-          if (stage === 0) progress.markExplored();
+          if (stage === 0) { progress.markExplored(); progress.markConnected(); }
           else progress.markBuilt(true);
         }
       }}

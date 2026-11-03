@@ -246,8 +246,8 @@ export function DerivativeExplorer() {
         {message
           ? message
           : closed
-            ? "The gap is tiny, so the secant has all but become the tangent, and the average slope has reached the derivative."
-            : "The solid secant is the average slope across the gap. Shrink the gap and it rotates onto the dashed tangent, the derivative at the base."}
+            ? "The two positions are close, so the slope between them closely approximates the derivative at the base position."
+            : "The solid line joins two points on the curve. Its slope is the average rate of change between them. Reduce the gap to see that slope approach the dashed tangent's slope at the base position."}
       </p>
     </div>
   );

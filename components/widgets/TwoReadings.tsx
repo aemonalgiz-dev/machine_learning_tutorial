@@ -126,7 +126,7 @@ export function TwoReadings() {
             = {top} / {bottom} = <span className="font-semibold text-indigo-600 dark:text-indigo-400">{value === null ? "undefined" : value.toFixed(4)}</span>
           </p>
           <p className="mt-2 text-xs font-sans text-slate-500 dark:text-slate-400">
-            Indigo cells are counted on top, amber cells are added underneath, and grey cells play no part in this question.
+            Indigo cells are counted on top, amber cells are added underneath, and gray cells play no part in this question.
           </p>
         </div>
       </div>

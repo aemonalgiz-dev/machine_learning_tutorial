@@ -20,9 +20,9 @@ import { PatchExplorer } from "@/components/widgets/PatchExplorer";
 import { UncertaintyProfile } from "@/components/widgets/UncertaintyProfile";
 
 export const metadata: Metadata = {
-  title: "Patching Without a Vocabulary · oop_ml",
+  title: "Patching Without a Vocabulary · Perceptron Lab",
   description:
-    "Bytes let us represent text without a learned word vocabulary, but they can produce long sequences. Grouping nearby bytes into patches gives later parts of a model fewer positions to process.",
+    "Representing text as bytes avoids dependence on a learned word vocabulary. Grouping nearby bytes into patches reduces the number of positions processed by later layers, changing how local information is combined.",
 };
 
 const link =
@@ -38,28 +38,18 @@ export default function PatchingWithoutAVocabularyPage() {
       playgroundTitle="Group the byte stream without looking up words"
       playgroundIntro="Compare the byte count with the patch count. Inspect fixed and adaptive boundaries, especially around stretches whose next bytes are difficult to predict."
       title="Patching Without a Vocabulary"
-      tagline={"Bytes let us represent text without a learned word vocabulary, but they can produce long sequences. Grouping nearby bytes into patches gives later parts of a model fewer positions to process."}
+      tagline={"Representing text as bytes avoids dependence on a learned word vocabulary. Grouping nearby bytes into patches reduces the number of positions processed by later layers, changing how local information is combined."}
       prerequisites={
         <>
-          Two pages from earlier in this section, and this one finishes the
-          argument they start. The page on{" "}
+          {"The earlier lesson on "}{" "}
           <Link href="/concepts/bytes-and-characters" className={link}>
             bytes and characters
           </Link>{" "}
-          reads a text as the units it is already made of, which removes the
-          unfamiliar piece completely and charges two to three times the
-          sequence length for it, and it ends by saying that the readings there
-          are usually paired with something that groups the bytes back together
-          before the expensive part of the model. This is that something. The
-          page on{" "}
+          {" shows how UTF-8 byte IDs cover unfamiliar spellings. That coverage can produce longer sequences than a fitted subword vocabulary. Here we will group bytes before the larger network processes them. The lesson on "}{" "}
           <Link href="/concepts/hashing-characters" className={link}>
             hashing characters
           </Link>{" "}
-          is the other way of doing without a stored table, and it attacks the
-          width of the table rather than the length of the sequence, so the two
-          answers are to two different halves of the same bill. The sentence and
-          the eighteen English sentences here are the ones both those pages use.
-        </>
+          {" addresses embedding-table size. Patching addresses the number of positions passed to later layers. We will use the same eighteen English sentences so the counts remain comparable. "}</>
       }
 
       playground={<PatchExplorer />}
@@ -93,57 +83,29 @@ export default function PatchingWithoutAVocabularyPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="2. The repair that is not available">
-                <p>
-                  There is an obvious way to shorten a sequence of bytes, and we
-                  have already spent two pages refusing it. Find the runs that
-                  recur, give each of them an entry in a table, and read a
-                  frequent word as one number instead of three. That is what
-                  merging does, it is why the merged reading is three times
-                  shorter, and it is exactly the thing being given up, since a
-                  table learned from a corpus is what fails on writing the corpus
-                  never met.
-                </p>
+              <SubSection title="2. Grouping Bytes Without New Vocabulary Entries" id="2-the-repair-that-is-not-available">
+                <p>Merging frequent byte sequences would shorten the representation by giving repeated strings vocabulary entries. We have already seen that benefit and its dependence on the fitted corpus. Here we want to investigate grouping bytes without requiring every group to be a stored vocabulary item. Choosing patch boundaries is a different operation from assigning a dictionary ID to a recurring string.</p>
                 <p>
                   Could we group bytes without assigning each possible group a permanent vocabulary entry? We can choose boundaries for the current text, then pass the resulting blocks to the next stage. The model would process one representation per block instead of one per byte. Those blocks have no reusable vocabulary IDs; their boundaries and representations are computed for this input.
                 </p>
                 <KeepInMind>
-                  Grouping and naming are separable, and this page keeps only the
-                  first. Everything a vocabulary bought beyond shortening the
-                  sequence stays given up, which is the subject of Part 6.
+                  {"A patch needs no dedicated vocabulary entry, but the byte embeddings and the models that encode and process patches still have parameters. Grouping bytes changes the interface; it does not eliminate learned representations."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="3. What a block is, and why it is not an entry in a table">
                 <p>
-                  A piece here is a run of consecutive bytes with a start and an
-                  end, and it is several numbers rather than one. That is the
-                  difference from everything earlier in this section. When a
-                  merged vocabulary reads the word cost as one piece, that piece
-                  has an identity, a number, and a row of its own that the model
-                  learns; when this method groups the four bytes of cost into one
-                  block, the block is still four byte values and what the model
-                  gets is a single vector it works out from them.
+                  {"A patch is a consecutive run of bytes with recorded start and end offsets. A subword token such as cost selects one row from a learned embedding table. A patch containing the four bytes of cost instead supplies those byte values to an encoder, which computes its representation. The SDK here returns the grouped bytes; it does not train that encoder."}
                 </p>
                 <Equation>
                   {"a merged piece   =  one number, looked up in a table\n" +
                     "a block          =  a run of byte values, and where it starts"}
                 </Equation>
                 <p>
-                  So the arrangement has two halves. A small model reads the
-                  bytes inside a block and produces one vector for it, and a
-                  large model reads the sequence of those vectors and never sees
-                  a byte at all. Only the second of those is charged the square
-                  of the sequence length, which is why the length that matters
-                  is the number of blocks and not the number of bytes. This page
-                  is about where the boundaries go, which is the whole of the
-                  question a tokenizer would have answered.
+                  {"A local encoder combines byte representations into patch representations. The larger network then processes fewer positions. A generative model also needs a decoder to produce individual bytes. Patching reduces work in the larger network, but byte-level processing and the boundary predictor have costs too. Choosing boundaries is only one part of replacing a vocabulary-based input pipeline."}
                 </p>
                 <KeepInMind>
-                  Nothing on this page produces a table, a number for a piece, or
-                  anything that could be looked up. Two occurrences of the same
-                  word are two runs of bytes that happen to agree, and no part of
-                  the method notices that they do.
+                  {"Repeated byte strings do not receive a reusable patch ID here. They can still share byte embeddings and encoder parameters, so a trained model can learn recurring patterns across their occurrences."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -155,21 +117,16 @@ export default function PatchingWithoutAVocabularyPage() {
             <>
               <SubSection title="4. The simplest rule there is">
                 <p>
-                  Start with the rule that reads nothing. Take the bytes in
-                  order, cut after every fourth one, and let the last block be
-                  short if the count does not divide. Ten bytes at a block size
-                  of four are blocks of four, four and two, beginning at offsets
-                  0, 4 and 8. There is nothing to fit, nothing to store and
-                  nothing that can go stale, and the number of blocks is the
-                  number of bytes divided by the size, which is known before the
-                  text is read.
+                  {"Take the bytes in order and cut after every fourth one. The final patch may be shorter. For ten bytes, the boundaries and sizes are shown below. This rule needs no fitted corpus; record the patch size with the model so the same input is grouped consistently."}
                 </p>
+                <Equation>{"10 bytes, patch size 4\nstart offsets: 0, 4, 8\npatch sizes: 4, 4, 2"}</Equation>
                 <Equation>
                   {"blocks  =  ⌈ bytes ∕ size ⌉"}
                 </Equation>
                 <p>
-                  Fixed-size byte blocks are also used in MegaByte&apos;s multiscale architecture. Regular cuts make the block layout predictable, while its local model processes bytes within each block. Whether the resulting model can handle awkward cuts is an empirical question. This page inspects the segmentation itself and does not reproduce a full MegaByte training experiment.
+                  {"In 2023, Yu and colleagues introduced MegaByte to model long sequences of bytes using local and global networks. Fixed-size patches let the larger network operate less often while a smaller network handles byte-level details. Our example demonstrates its grouping rule, rather than reproducing the trained architecture."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://arxiv.org/abs/2305.07185">{"Yu et al., MEGABYTE (2023)"}</Link></p>
                 <KeepInMind>
                   A fixed size gives an exactly predictable sequence length,
                   which nothing else on this page does, and that turns out to
@@ -179,11 +136,7 @@ export default function PatchingWithoutAVocabularyPage() {
 
               <SubSection title="5. Cut the Alvarez sentence into four-byte patches" id="5-the-running-sentence-cut-every-four-bytes">
                 <p>
-                  Here is the whole of it on our sentence, which is 51 bytes and
-                  therefore comes to 13 blocks, twelve of four bytes and a last
-                  one of three. Read the blocks across and the sentence is
-                  perfectly recoverable, since nothing has been lost, but read
-                  each block on its own and almost none of them is anything.
+                  {"The 51-byte sentence produces thirteen patches: twelve contain four bytes and the last contains three. Joining their raw bytes recovers the sentence. Individual patches often contain fragments of words, which lets us inspect what the local encoder would need to handle."}
                 </p>
                 <WorkedExample title="Fifty-one bytes in thirteen blocks">
                   <Equation>
@@ -206,24 +159,15 @@ export default function PatchingWithoutAVocabularyPage() {
                   block and the small model has been handed the whole sentence.
                 </p>
                 <KeepInMind>
-                  The cuts are not bad in a way that loses information. Every
-                  byte is still there, in order, exactly once, and the sentence
-                  can be read straight back off the blocks. What has been lost is
-                  any correspondence between where a block ends and where
-                  anything in the writing ends.
+                  {"Grouping alone preserves every byte and its order. Fixed boundaries often split words, but this does not prove the eventual model loses information. That depends on how its encoder represents each group."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="6. Where those cuts land, counted against cutting anywhere">
                 <p>
-                  One sentence is an anecdote, so put the rule to all eighteen
-                  and count. There are 763 bytes across them, which leaves 745
-                  positions a cut could fall in, and 489 of those 745 have a
-                  letter or a digit on both sides. Cutting at a position chosen
-                  with no regard for the text therefore lands inside a word 65.6
-                  per cent of the time, and that number is the thing every rule
-                  on this page has to beat.
+                  {"Count the possible cuts across all eighteen sentences. Of the 745 internal byte boundaries, 489 have a letter or digit on both sides. Uniformly selecting one of these boundaries gives the reference rate below. We will use it to compare alignment with this particular definition of a word interior. That is a diagnostic, rather than the objective of a trained patch model."}
                 </p>
+                <Equation>{"Inside-word reference rate = 489 / 745\n                           ≈ 65.6%"}</Equation>
                 <NumberTable
                   headings={[
                     "cut every",
@@ -242,10 +186,10 @@ export default function PatchingWithoutAVocabularyPage() {
                 <CutLandingChart />
                 <>
 <p>
-                  The orange line is the fixed rule at every block size from one to twelve, and it stays between 57.0 and 74.5 per cent, with the baseline of 65.6 running through the middle of that range. Some sizes are a little better than cutting anywhere and some are worse. That is not a failure of tuning.
+                  {"The orange line shows fixed patch sizes from one to twelve. The inside-word cut rate ranges from 57.0% to 74.5%, around the 65.6% reference. Some sizes align better with these sentences than others. The rule itself does not inspect letters or spaces."}
                 </p>
                 <p>
-                  A rule that does not read the text cannot know where the words are, so picking a different block size moves the number of blocks without moving the quality of a single cut. The blue line, which is the next Part, is what happens when the text is allowed a say.
+                  {"Changing the patch size moves the boundaries, so it can change their alignment with words. It does not teach the rule where words begin. The blue line uses predictions from the text to choose boundaries instead."}
                 </p>
 </>
                 <KeepInMind>
@@ -258,13 +202,7 @@ export default function PatchingWithoutAVocabularyPage() {
 
               <SubSection title="7. A block can also stop part way through a letter">
                 <p>
-                  There is a second cost, and it is the one that surprises people
-                  who have only tested on English. A character can take more than
-                  one byte, so a boundary that falls at a fixed offset can land
-                  in the middle of one, and neither side of that cut spells
-                  anything at all. Take our sentence with a Scandinavian unit of
-                  length written into it, 38 characters and 40 bytes, and cut it
-                  every four bytes.
+                  {"UTF-8 characters can use several bytes, so a fixed cut can divide one character. The 38-character example below uses 40 bytes. Cutting it into four-byte groups illustrates why decoding each patch separately can display replacement marks even though the complete byte sequence is valid."}
                 </p>
                 <WorkedExample title="Two positions that stand for no letter">
                   <Equation>
@@ -279,21 +217,10 @@ export default function PatchingWithoutAVocabularyPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  This is the design rather than a defect, and MegaByte&rsquo;s
-                  blocks do exactly the same. The bytes are all still there and
-                  the text comes back whole when the blocks are read in order;
-                  what has happened is that the small model reading one block is
-                  sometimes handed half a letter, and it has to learn to work
-                  with that. On the eighteen English sentences the case never
-                  arises, which is the point worth carrying, since a measurement
-                  taken only on English reports that this cost is zero.
+                  {"Join the original bytes before decoding and the accented letters return intact. The separate replacement marks come from the patch preview. MegaByte permits these byte-level cuts; a local network must handle the resulting fragments. Our all-ASCII corpus contains no multibyte characters, so it cannot measure this case."}
                 </p>
                 <KeepInMind>
-                  The uncertainty rule in the next Part can do this too, since it
-                  also cuts between bytes and knows nothing about characters.
-                  What it does not do is cut at a position chosen without regard
-                  for the text, so it reaches the case less often rather than not
-                  at all.
+                  {"An entropy-based boundary can divide a UTF-8 character too. Whether it does so more or less often depends on its predictor and the text. The eighteen ASCII sentences cannot establish that comparison."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -305,39 +232,39 @@ export default function PatchingWithoutAVocabularyPage() {
             trueFalse(
               "A block under this method has an identity and a row the model learns, the way a merged vocabulary’s piece does.",
               false,
-              "A block is still several byte values, and what the model gets is a single vector it works out from them. Nothing on this page produces a table, a number for a piece, or anything that could be looked up, so two occurrences of the same word are two runs of bytes that happen to agree and no part of the method notices that they do.",
+              "This patcher selects boundaries around runs of bytes. It does not assign every possible patch a vocabulary ID or a dedicated learned embedding row. A later encoder must calculate a vector from the bytes inside each patch. Identical patches can receive identical results from that encoder, but the boundary procedure alone does not create a stored patch vocabulary.",
             ),
             choice(
-              "Why is the length that matters the number of blocks rather than the number of bytes?",
+              "Why can grouping bytes into patches reduce the large sequence model’s pairwise attention work?",
               [
-                "Only the large model, which reads the sequence of block vectors, is charged the square of the length",
+                "The large model’s full pairwise attention table uses patch positions rather than individual byte positions",
                 "The small model reading inside a block is the slower of the two",
                 "A block stores fewer bytes than it was handed",
                 "The bytes are discarded once a block has been formed",
               ],
               0,
-              "The arrangement has two halves. A small model reads the bytes inside a block and produces one vector for it, and a large model reads the sequence of those vectors and never sees a byte at all.",
+              "In the proposed architecture, a local encoder turns each byte group into one vector. The larger sequence model then processes those patch vectors, so its position count is the number of patches. Work still occurs inside the patches. This lesson implements the boundary selection, not the complete local encoder and sequence model.",
             ),
             choice(
               "How often does a cut at a fixed block size land inside a word, across the eighteen sentences?",
               [
-                "Between 57.0 and 74.5 per cent depending on the size, around a baseline of 65.6 per cent",
-                "28.8 per cent, which is what makes it a real method",
+                "Between 57.0 and 74.5 percent depending on the size, around a baseline of 65.6 percent",
+                "28.8 percent, which is what makes it a real method",
                 "Never, because the cuts are regular",
                 "It falls steadily as the block size rises",
               ],
               0,
-              "Of the 745 positions a cut could fall in, 489 have a letter or a digit on both sides, which is the 65.6 per cent an uninformed cut gives. A rule that does not read the text cannot know where the words are, so moving the block size moves the number of blocks without moving the quality of a single cut.",
+              "Of the 745 possible cut positions inspected here,489 lie between letters or digits, giving the 65.6-percent baseline. The fixed-size rule does not use those character categories when choosing a boundary. A particular width can happen to align better or worse with a particular sentence; changing width does not make it a word-boundary learner.",
             ),
             trueFalse(
               "Cutting at a fixed byte offset can split one character across two blocks, and the text still reads back whole.",
               true,
-              "A character can take more than one byte, and in the sentence with Ångström in it the two bytes of one letter fall either side of the boundary at offset 12, so neither side of that cut spells anything. Every byte is still there in order, and what has happened is that the small model reading one block is sometimes handed half a letter. On the eighteen English sentences the case never arises, which is why a measurement taken only on English reports this cost as zero.",
+              "A UTF-8 character may span two blocks. Decoding the blocks separately can show replacement characters because a byte fragment is incomplete. The original bytes remain ordered, so joining those bytes before decoding restores the text. The accented probe demonstrates this at the boundary near offset twelve; the ASCII-only training sentences do not test that case.",
             ),
             trueFalse(
-              "The fixed rule is the one rule here whose sequence length is known before the text is read.",
+              "Once byte length is known, does fixed-size grouping determine patch count without inspecting the byte values?",
               true,
-              "The number of blocks is the number of bytes divided by the size, with nothing to fit, nothing to store and nothing that can go stale. At a size of one it is the byte reading again, 51 blocks for 51 bytes, and past the length of the text it is one block with the whole sentence handed to the small model.",
+              "Once the byte length and patch size are known, divide the length into fixed-size groups and retain any final partial group. That determines the patch count without fitting. Size one returns one patch per byte. A size at least as large as a nonempty input returns one patch. Character count is insufficient when a character occupies several bytes.",
             ),
         ],
         },
@@ -347,30 +274,14 @@ export default function PatchingWithoutAVocabularyPage() {
             <>
               <SubSection title="8. The idea, before any arithmetic">
                 <p>
-                  Read the sentence about the report one letter at a time and ask
-                  yourself, after each, what comes next. After The r you are
-                  fairly sure of an e, and after The repor you are practically
-                  certain of a t. Then the word ends, and what follows is a space
-                  and then anything at all, because the sentence could have gone
-                  on to say almost any word. The difficulty of the guess falls
-                  through a word and jumps at the join between two.
+                  {"Try predicting the next character as you read The repor. The final t may be easier to guess than the first letter of the next word. This suggests a way to allocate work: combine predictable runs, then begin a new patch when the model faces more alternatives. The pattern will not hold at every word boundary."}
                 </p>
                 <p>
-                  That is Harris&rsquo;s observation, and it gives a rule that
-                  needs no list. Begin a new piece wherever the next thing is hard
-                  to guess. Nothing about it is specific to words or to English;
-                  it says only that a boundary is a place where what has gone
-                  before stops determining what comes next, which is a statement
-                  about the writing rather than about a language, and it works on
-                  a script with no spaces for the same reason it works on one
-                  with them.
+                  {"This resembles the earlier branching idea discussed in the Harris lesson: use changes in possible continuations to help locate boundaries. Pagnoni and colleagues used next-byte prediction uncertainty in the 2024 Byte Latent Transformer. A learned predictor lets the grouping depend on context without requiring a dictionary entry for every patch. The rule can operate on writing without spaces, but its usefulness still depends on the predictor."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://arxiv.org/abs/2412.09871">{"Pagnoni et al., Byte Latent Transformer (2024)"}</Link></p>
                 <KeepInMind>
-                  Notice what this needs before it can run. Somebody has to be
-                  doing the guessing, and how good the pieces are is entirely a
-                  fact about how good that guesser is. Nothing has to be stored,
-                  and something has to be trained, which is a swap rather than a
-                  saving.
+                  {"The boundary rule needs a predictor and its saved parameters. This demonstration stores counts of which bytes followed each context. BLT uses a trained byte-level network. Both avoid a vocabulary of complete patches, while retaining a fitted model."}
                 </KeepInMind>
               </SubSection>
 
@@ -398,31 +309,17 @@ export default function PatchingWithoutAVocabularyPage() {
                 </p>
                 <WhyThisWorks title="Why a stretch nobody has seen scores the highest possible number">
                   <p>
-                    The counts after an unseen stretch are all zero, so after the
-                    small amount is added every one of the 256 values has the same
-                    probability, and a spread with 256 equally likely outcomes is
-                    8 bits by the definition above. That is arithmetic rather
-                    than a modelling choice. What it means in practice is that the
-                    quantity being thresholded confuses two entirely different
-                    situations, a position where the text genuinely could go
-                    several ways and a position where the guesser has nothing to
-                    say, and reports both as maximum uncertainty.
-                  </p>
+                  {"For an unseen context, every count is zero. Adding the same positive amount to all 256 counts creates a uniform distribution with entropy 8 bits. Uniform smoothing is a modeling choice; the entropy then follows from that choice. The boundary score alone cannot distinguish this lack of evidence from a genuinely broad predicted distribution."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  Eight bits is the ceiling and it means one of two things, either
-                  that anything could come next or that nobody knows. The method
-                  cuts at both and cannot tell them apart.
+                  {"The score measures uncertainty under the predictor. To investigate why it is high, inspect how often that context was observed and how its continuations were distributed."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="10. Why four byte positions receive nearly the same uncertainty" id="10-four-bytes-worked-by-hand">
                 <p>
-                  Before anything at scale, here is the smallest example that
-                  contains the whole calculation. Count over the single text aab,
-                  looking back one byte, and credit every unseen byte value with
-                  one observation. Two stretches were seen. The start of a text
-                  was followed by a once, and a was followed by a once and b once.
+                  {"Fit a one-byte context model to aab, adding one pseudo-observation to every possible continuation, including those already observed. The padded start context was followed by a once. The context a was followed by a once and b once. The resulting probabilities are shown below."}
                 </p>
                 <WorkedExample title="The text aabb under a model that read aab">
                   <Equation>
@@ -435,8 +332,8 @@ export default function PatchingWithoutAVocabularyPage() {
                       "7.99784   7.99572   7.99572   8.00000"}
                   </Equation>
                   <p>
-                    We can check these values using the logarithm in section 9. The fourth is exactly 8 because its preceding context was unseen. The other three differ from it by less than three thousandths.
-                  </p>
+                  {"Substitute these probabilities into the entropy formula in section 9. The fourth value is 8 bits because its context was unseen. The other values are within five thousandths of that ceiling."}
+                </p>
                   <p>
                     Here is the first of them written out. One value holds
                     2∕257 of the probability and each of the other 255 holds
@@ -455,21 +352,10 @@ export default function PatchingWithoutAVocabularyPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  So the ordering is right. The position after a is less uncertain
-                  than the position after nothing, which is less uncertain than
-                  the position after b. And the ordering is useless, because the
-                  three numbers a threshold would have to separate differ in the
-                  third decimal place. A threshold of 7.996 does cut this text
-                  once, between the third byte and the fourth, giving aab and b,
-                  and a threshold anywhere a person would think to put one gives
-                  either one block or four.
+                  {"The position after a has lower entropy than the start context; the unseen b context has the highest. A threshold of 7.996 separates them and produces aab followed by b. The differences are small, so a tiny threshold change can alter the cuts. Small numerical differences do not by themselves make the score unusable; we still need to test the resulting groups."}
                 </p>
                 <KeepInMind>
-                  The arithmetic is correct and the answer is unusable, which is
-                  a different kind of problem from a bug and is the subject of
-                  Part 4. Nothing about the definition of uncertainty guarantees
-                  that its values are spread out enough for a threshold to fall
-                  between them.
+                  {"A correct entropy calculation does not guarantee useful patches. Smoothing, context counts and the selected threshold determine which distinctions the rule actually makes."}
                 </KeepInMind>
               </SubSection>
 
@@ -490,7 +376,7 @@ export default function PatchingWithoutAVocabularyPage() {
                 </Equation>
                 <>
 <p>
-                  On text the model knows well the two usually agree, since a word start is both high and higher than the letter before it. They part company on a flat stretch. Where the uncertainty stays at 8 bits for a long run, which is what happens on writing the model has never seen, the first rule cuts at every single position and the second cuts at none of them, because a plateau has no rises.
+                  {"The rules can select different boundaries even on familiar text, because a high level need not be a large rise. On a flat stretch at 8 bits, a global threshold below 8 cuts at every position. A positive relative-increase threshold selects no internal position on that plateau."}
                 </p>
                 <p>
                   On our held-out sentence that is 30 blocks under the first rule and 7 under the second, from the identical set of numbers.
@@ -506,11 +392,7 @@ export default function PatchingWithoutAVocabularyPage() {
 
               <SubSection title="12. A sentence the model read, cut">
                 <p>
-                  Now the case where it works. The model here counted the
-                  eighteen sentences, so one of them is text it knows thoroughly,
-                  and the sentence about a report expected on Monday is 34
-                  bytes. Cutting wherever the uncertainty passes one bit gives six
-                  blocks, and five of them are words.
+                  {"Start with a sentence included in the fitted corpus. It contains 34 bytes. At the displayed one-bit threshold, the model produces six patches. Several boundaries align with word starts, but the groups do not reproduce a one-word-per-patch segmentation."}
                 </p>
                 <WorkedExample title="Thirty-four bytes in six blocks">
                   <Equation>
@@ -526,23 +408,11 @@ export default function PatchingWithoutAVocabularyPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  Compare that with the fixed rule on the same 34 bytes, which
-                  gives nine blocks and puts six of its eight cuts inside a word.
-                  The uncertainty rule makes fewer pieces and better ones at the
-                  same time, which is the claim the whole method rests on. The
-                  chart below is the number the cut is made from, one bar per
-                  byte, and the pattern is what to look at rather than any
-                  individual bar.
+                  {"The four-byte rule produces nine patches on this sentence, with six of its eight internal cuts inside words. The entropy rule produces fewer patches with better word-start alignment in this example. That is evidence about these groupings, rather than proof of a better language model. Use the bars below to see which predicted entropies triggered each cut."}
                 </p>
                 <UncertaintyProfile />
                 <p>
-                  On the sentence it read the bars fall through each word and
-                  jump at every space, and the blue bars land on the jumps. Switch
-                  to the sentence it did not read and the shape is gone; more
-                  than half the bars stand flat against the ceiling, the green
-                  ticks marking word starts no longer line up with anything, and
-                  the rule cuts at almost every position because almost every
-                  position is above one bit.
+                  {"On the fitted sentence, several entropy rises line up with word starts. Others do not: report is split, and was stays with the preceding fragment. Switch to the held-out sentence and many bars reach 8 bits because the contexts were unseen. Compare those bars with the marked boundaries."}
                 </p>
                 <KeepInMind>
                   Across all eighteen sentences the rule makes 129 blocks and puts
@@ -561,26 +431,13 @@ export default function PatchingWithoutAVocabularyPage() {
             <>
               <SubSection title="13. Why every uncertainty comes out near its ceiling">
                 <p>
-                  The four numbers in section 10 were all within three
-                  thousandths of 8, and that was not an accident of a tiny
-                  corpus. It is what crediting every unseen byte value with one
-                  observation does. There are 256 values, so a stretch seen once
-                  with one continuation arrives at a spread where the observed
-                  value holds two shares and the other 255 hold one each, and
-                  that is barely distinguishable from flat.
+                  {"The four values in section 10 are all within five thousandths of 8 bits. Add-one smoothing contributes substantial probability across the 256 outcomes when a context has few observations. A continuation seen once receives two shares, while the other 255 outcomes each receive one."}
                 </p>
                 <Equation>
                   {"p(the value that was seen)  =  (n + 1) ∕ (n + 256)"}
                 </Equation>
                 <p>
-                  Solve that for nine tenths and the answer is 2,294. A stretch of
-                  bytes has to be observed with the same continuation two thousand
-                  times before the model is ninety per cent sure of it, and no
-                  teaching corpus and very few real ones give any particular
-                  four-byte stretch two thousand occurrences. So at the ordinary
-                  setting every position of every text comes out near 8 bits, every
-                  position looks equally uncertain, and there is no threshold that
-                  separates anything from anything.
+                  Under this smoothed counting model, the displayed threshold requires 2,294 matching observations before that continuation receives probability nine tenths. The small teaching corpus supplies far fewer observations for the relevant four-byte contexts, so its predicted uncertainty stays high at many positions. That leaves little separation for a threshold to use. It is a limitation demonstrated for this predictor and corpus, rather than a bound on repetition in real text generally.
                 </p>
                 <WorkedExample title="Solving for nine tenths">
                   <p>
@@ -603,11 +460,7 @@ export default function PatchingWithoutAVocabularyPage() {
                   </p>
                 </WorkedExample>
                 <KeepInMind>
-                  This is a property of how much an unseen byte is credited with
-                  and of how many byte values there are, rather than of the
-                  corpus. Reading a hundred times more text does not fix it for a
-                  stretch that is still rare, and every stretch of four bytes is
-                  rare when there are 256 to the fourth of them.
+                  {"The amount of smoothing matters relative to the observations for each context. More data can increase those counts, but rare or unseen contexts may remain. The number of possible four-byte contexts does not imply that every context is rare in a real corpus."}
                 </KeepInMind>
               </SubSection>
 
@@ -623,40 +476,29 @@ export default function PatchingWithoutAVocabularyPage() {
                 <CorpusConditionChart />
                 <>
 <p>
-                  The left panel is the ordinary setting. Twenty copies of the sentence put the position inside a word at 7.4674 bits and the word start at 7.5862, a gap of 0.1189 bits at a height where everything is nearly maximal, and the text comes out as 22 blocks for 22 bytes at every threshold that cuts anything at all.
+                  {"The left panel uses add-one smoothing. With twenty copies, the displayed inside-word position has entropy 7.4674 bits and the word start has 7.5862 bits. The gap is 0.1189 bits using unrounded values. A low threshold splits this sentence into 22 patches; a threshold between these two scores can separate these positions."}
                 </p>
                 <p>
                   The right panel credits an unseen byte with a thousandth instead. At twenty copies the same two positions are 0.106 and 1.099, a gap of nearly a whole bit, and a threshold at half a bit falls cleanly between them.
                 </p>
 </>
                 <KeepInMind>
-                  I did not expect the difference to be this stark. The two
-                  panels come from the same corpus under the same rule, and the
-                  only thing that changed between them is a number nothing in the
-                  method tells you how to set.
+                  {"Both panels use the same sentence and boundary rule. Changing the smoothing changes how strongly the observed counts affect the predicted distribution. Tune that choice using held-out behavior, rather than interpreting a cleaner-looking segmentation as sufficient evidence."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. Eight copies recover the words and seven do not">
                 <p>
-                  The green markers under the right panel say which corpus sizes
-                  produced blocks that are the sentence&rsquo;s words. There is a
-                  sharp edge and it is between seven copies and eight. At seven
-                  the sentence still comes to 16 blocks, letters and fragments; at
-                  eight it comes to five, and they are the words.
+                  {"At the displayed half-bit threshold, seven copies produce sixteen patches. Eight copies produce five larger groups with better word-start alignment. These groups still combine on and the, so they are not a recovered list of the sentence’s words."}
                 </p>
                 <WorkedExample title="One copy either side of the edge">
                   <Equation>
-                    {"seven copies    16 blocks, and none of them is a word\n" +
+                    {"seven copies    16 blocks, mixing single bytes and longer fragments\n" +
                       "eight copies     5 blocks, the │cat │sat │on the │mat"}
                   </Equation>
                   <p>
-                    The word on is swallowed into the block with the that follows
-                    it, at both sizes and at every larger one, because on was only
-                    ever followed by the in this corpus. Nothing was uncertain
-                    there, so nothing was cut, which is precisely what the rule
-                    promises to do.
-                  </p>
+                  {"The block on the contains two words. In this corpus, the context before the makes its first byte predictable enough to remain below the threshold. Smoothing leaves positive uncertainty; the score is low rather than exactly zero."}
+                </p>
                 </WorkedExample>
                 <p>
                   The edge is sharp because of where the threshold of half a
@@ -683,54 +525,28 @@ export default function PatchingWithoutAVocabularyPage() {
                   Eight exact copies of one sentence supply 176 bytes, with a very strong repeated pattern. The eighteen varied sentences supply 763 bytes and behave differently: this rule needs a four-byte context, rather than two, before its blocks resemble words. Repetition in a tiny example can make the method look more decisive than it is on varied text.
                 </p>
                 <KeepInMind>
-                  The threshold and the amount credited to an unseen byte are two
-                  free numbers, and whether the method produces words or letters
-                  depends on both of them together with how much text was read.
-                  None of the three has a value the mathematics prefers.
+                  {"Smoothing and the threshold interact with context counts. Select them against the intended task and held-out data. A boundary that matches a word is useful for this diagnostic, but it need not be the best allocation of work in a trained model."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. Repeating a corpus is lowering that credit and nothing else">
                 <p>
-                  The chart in section 14 sweeps how many copies of the sentence
-                  were read, and it is fair to ask whether reading the same text
-                  twice can possibly teach a model anything. It cannot, and the
-                  arithmetic says so exactly. Multiplying every count by a number
-                  and then adding a fixed amount to each is the same spread as
-                  leaving the counts alone and adding that amount divided by the
-                  number.
+                  {"Repeating the entire corpus adds no new observed continuations, but it changes this smoothed estimator’s balance between counts and pseudo-counts. For this counting model, multiplying all counts by the same factor is exactly equivalent to dividing the smoothing by that factor. Repeated training passes in other models can have different effects."}
                 </p>
                 <Equation>
                   {"(k·c + s) ∕ (k·n + 256 s)  =  (c + s∕k) ∕ (n + 256 s∕k)"}
                 </Equation>
                 <p>
-                  Measured, twenty copies of the sentence with a thousandth
-                  credited to each unseen byte and one copy with a twenty
-                  thousandth credited agree at every one of the 22 positions to
-                  1.7 parts in 10¹⁶, and cut the sentence into identical blocks.
-                  So the horizontal axis of that chart is really the credit axis
-                  in disguise, and the honest reading of the whole Part is that
-                  the model has to be either confident or badly calibrated before
-                  its uncertainties separate anything, and a small corpus can only
-                  buy the second.
+                  {"Twenty copies with smoothing 0.001 agree with one copy at smoothing 0.00005 to the reported floating-point tolerance, producing identical patches. This checks the identity above. It does not establish that a small corpus must be badly calibrated: calibration requires comparing predictions with outcomes, rather than inspecting entropy alone."}
                 </p>
                 <KeepInMind>
-                  A real model of this kind is a small transformer trained on a
-                  great deal of text, and its confidence comes from having read
-                  the text. The demonstration on this page arrives at a similar
-                  shape by turning a dial instead, and that is worth saying out
-                  loud beside the numbers it produces.
+                  {"BLT uses a trained byte-level network for the entropy estimates. Here we use a counting model so the probabilities can be inspected. Similar-looking patch boundaries do not establish that the predictors have similar accuracy on new text."}
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="17. And repeating one phrase does not help at all">
+              <SubSection title="17. When Every Continuation Is Predictable" id="17-and-repeating-one-phrase-does-not-help-at-all">
                 <p>
-                  It would be convenient if a bigger corpus were the whole answer,
-                  and it is not, which the smallest possible case shows. Count
-                  twenty copies of the phrase the cat sat, at the same context
-                  length and the same credit that recovered the words in section
-                  15, and score the phrase itself. Every position comes out at
-                  0.198144 bits. Not close to each other; equal.
+                  {"A repeated phrase shows why low entropy need not reveal word boundaries. Fit twenty copies of the cat sat with the same context length and smoothing used above. Each scored position has entropy 0.198144 bits, despite some positions starting words and others falling inside them."}
                 </p>
                 <WorkedExample title="Eleven positions, one number">
                   <Equation>
@@ -738,25 +554,19 @@ export default function PatchingWithoutAVocabularyPage() {
                       "0.198 0.198 0.198 0.198 0.198 0.198 0.198 0.198 0.198 0.198 0.198"}
                   </Equation>
                   <p>
-                    The phrase comes out as one block whatever threshold is
-                    chosen, since a flat run has no position above the others and
-                    no rise for the second rule to find.
-                  </p>
+                  {"A global threshold at or above this constant value leaves one patch. Set it below the value and every byte starts a patch. A positive relative-increase threshold leaves one patch because there are no rises. Neither rule picks out the word boundaries in this flat profile."}
+                </p>
                 </WorkedExample>
                 <>
 <p>
                   The reason is that in this corpus the start of a word is exactly as predictable as the inside of one. After the space in the cat the only thing that ever came was a c, so the model is as certain there as it is between the t and the h of the. What made section 15 work was that two different words followed the same short stretch, since e followed by a space led sometimes to cat and sometimes to mat.
                 </p>
                 <p>
-                  So the uncertainty at a word start measures how many different words the corpus put after that stretch, and a corpus with one word there produces none of it.
+                  {"For this counting model, the distribution of next-byte continuations determines entropy. It depends on their relative frequencies and smoothing, not simply on the number of following words. A context with one observed continuation can still have positive entropy."}
                 </p>
 </>
                 <KeepInMind>
-                  A corpus can be arbitrarily large and still fail this. The
-                  model fits it perfectly and reports low uncertainty everywhere,
-                  which is exactly what a well-fitted model should do, and the
-                  only thing that has gone wrong is that the quantity being
-                  thresholded is flat.
+                  {"Repeating the phrase can lower its smoothed entropy without creating different scores at its word boundaries. The predictor can fit a repetitive sequence well while providing no useful boundary signal for this word-alignment task."}
                 </KeepInMind>
               </SubSection>
 
@@ -786,10 +596,10 @@ export default function PatchingWithoutAVocabularyPage() {
                 />
                 <>
 <p>
-                  A byte of context is one letter, and one letter does not tell you where you are in a word, so the first row is close to the uninformed rate for the same reason the fixed rule is. By four bytes the model is looking at most of a short word and the cuts are more than twice as good, and the fifth byte adds little, which is roughly where the improvement stops on a corpus this small.
+                  {"Each character in this ASCII corpus uses one byte. With a one-byte context, the predictor has little evidence about its location in a word. In the displayed sweep, a four-byte context reduces the inside-word cut rate below half the one-byte rate. Five bytes improve that rate further. These are results on the fitted corpus, not a general limit on useful context length."}
                 </p>
                 <p>
-                  It stops because a longer stretch occurs less often, so each extra byte of context leaves more of the text scored under stretches the corpus never contained.
+                  {"Longer contexts divide observations among more specific patterns. On new text, more contexts may be unseen. We would need a held-out context-length sweep to measure that tradeoff; the table above scores the same sentences used for fitting."}
                 </p>
 </>
                 <KeepInMind>
@@ -816,39 +626,39 @@ export default function PatchingWithoutAVocabularyPage() {
                 "Positions a learned table has marked as boundaries",
               ],
               0,
-              "The difficulty of the guess falls through a word and jumps at the join between two, which is Harris’s observation. Nothing about it is specific to words or to English, and it works on a script with no spaces for the same reason it works on one with them. Nothing has to be stored and something has to be trained, which is a swap rather than a saving.",
+              "The rule estimates uncertainty about the next byte from the preceding context and places cuts according to a stated threshold policy. Uncertainty can rise at word boundaries, but it can also rise because a context was absent from training. The operation does not require spaces or guarantee linguistic word boundaries. It stores a fitted predictor even though it has no vocabulary of patch identities.",
             ),
             trueFalse(
               "A reading of exactly 8 bits means the text genuinely could go several ways at that position.",
               false,
-              "A stretch the corpus never contained comes out flat, since after the small amount is added every one of the 256 values has the same probability, and a flat spread over 256 outcomes is 8 bits by the definition. The ceiling means either that anything could come next or that nobody knows, and the method cuts at both and cannot tell them apart.",
+              "An unseen context receives a uniform distribution over 256 bytes under this smoothing policy, which has entropy eight bits. A genuinely ambiguous observed context can also have high entropy. The displayed uncertainty alone cannot tell us which source produced it, so a cut at that value is not evidence that the text truly had many equally plausible continuations.",
             ),
             choice(
-              "On a run that stays at 8 bits, how do the two cutting rules differ?",
+              "With the displayed one-bit thresholds, how do the rules treat internal positions on a flat eight-bit plateau?",
               [
-                "The level rule cuts at every position and the rise rule at none, which is 30 blocks against 7 on the held-out sentence",
+                "The level rule cuts at each internal plateau position while the rise rule adds no internal cut there; the full held-out example has 30 versus seven blocks",
                 "They agree, since both are read off the same numbers",
                 "The rise rule cuts at every position and the level rule at none",
                 "Neither cuts, because a plateau carries no information",
               ],
               0,
-              "On text the model knows well the two usually agree, since a word start is both high and higher than the letter before it. A plateau has no rises, so on the case that actually arises they are opposites, and neither answer is obviously the right one.",
+              "The level rule tests the entropy itself, while the rise rule tests its increase from the previous position. On a high flat plateau, the level can stay above its threshold even though the increase is zero. The rules therefore place different cuts on the same estimated distributions. Which is useful needs a downstream comparison, not merely the fact that one yields fewer patches.",
             ),
             several(
               "Which of these hold for the guesser of Part 4?",
               [
-                "With one observation credited to every unseen value, a stretch has to be seen with the same continuation 2,294 times before the guesser is ninety per cent sure of it",
-                "Twenty copies of the phrase the cat sat score every one of its eleven positions at 0.198144 bits, so the phrase is one block at any threshold",
+                "With one observation credited to every unseen value, a stretch has to be seen with the same continuation 2,294 times before the guesser is ninety percent sure of it",
+                "Twenty copies of the phrase the cat sat score every one of its eleven positions at 0.198144 bits, so the phrase is one block at the displayed half-bit level threshold",
                 "Reading a hundred times more text repairs the flatness, even for a stretch that is still rare",
                 "Looking back one byte cuts better than looking back four, since a shorter stretch has been seen more often",
               ],
               [0, 1],
-              "Seen once with one continuation, the observed value holds two shares against one each for the other 255, which is barely distinguishable from flat. That is a property of the credit and of there being 256 values rather than of the corpus, so more text does not fix it for a stretch that is still rare. The repeated phrase fails the other way, since the start of a word there is exactly as predictable as the inside of one. And on the eighteen sentences context helps, with one byte back putting 63.0 per cent of its cuts inside a word and four bytes back 28.8 per cent.",
+              "Seen once with one continuation, the observed value holds two shares against one each for the other 255, which is barely distinguishable from flat. That is a property of the credit and of there being 256 values rather than of the corpus, so more text does not fix it for a stretch that is still rare. The repeated phrase fails the other way, since the start of a word there is exactly as predictable as the inside of one. And on the eighteen sentences context helps, with one byte back putting 63.0 percent of its cuts inside a word and four bytes back 28.8 percent.",
             ),
             trueFalse(
               "Reading twenty copies of one sentence gives the guesser something that one copy with a smaller credit for unseen bytes could not.",
               false,
-              "Multiplying every count by a number and then adding a fixed amount to each gives the same spread as leaving the counts alone and adding that amount divided by the number. Measured, twenty copies with a thousandth credited to each unseen byte and one copy with a twenty thousandth agree at every one of the 22 positions to 1.7 parts in 10¹⁶ and cut the sentence into identical blocks, so the corpus-size axis is the credit axis in disguise.",
+              "Repeating the identical corpus multiplies its observed counts. In additive smoothing, reducing the per-byte smoothing amount by the same factor gives the same normalized distributions. The twenty-copy and one-copy settings here agree within 1.7e−16 and produce identical patches. This equivalence concerns repeating the same evidence, not collecting varied new observations.",
             ),
         ],
         },
@@ -858,14 +668,9 @@ export default function PatchingWithoutAVocabularyPage() {
             <>
               <SubSection title="19. Length against the bytes and against a learned vocabulary">
                 <p>
-                  Now the number the whole exercise is for. Across the eighteen
-                  sentences, 763 bytes become 129 blocks when they are cut by
-                  uncertainty, which is a factor of 5.9, and 197 blocks when they
-                  are cut every four bytes. The merged vocabulary on the same
-                  eighteen sentences takes 263 numbers, so on this text the
-                  uncertainty rule produces a shorter sequence than the learned
-                  table does, while holding no table at all.
+                  {"Across the fitted corpus, entropy-based grouping produces 129 patches from 763 bytes. Fixed four-byte groups produce 197 patches, and the fitted merged vocabulary produces 263 IDs. The patcher has no dictionary of complete patches, but its context-count predictor still needs storage."}
                 </p>
+                <Equation>{"Mean bytes per entropy patch = 763 / 129 ≈ 5.9"}</Equation>
                 <NumberTable
                   headings={[
                     "reading",
@@ -883,15 +688,9 @@ export default function PatchingWithoutAVocabularyPage() {
                 />
                 <InAModel>
                   <p>
-                    Read the corpus column and the case is made. A model comparing
-                    every position with every other does work in proportion to the
-                    square of the length, so 129 against 763 is around 35 times
-                    less of it, and the small model that reads the bytes inside a
-                    block is cheap because it only ever looks at one block. That
-                    is the arrangement the Byte Latent Transformer is built on,
-                    and its claim is that at a fixed budget the blocks scale better
-                    than a learned vocabulary&rsquo;s pieces do.
-                  </p>
+                  {"For a full pairwise attention table, fewer positions mean fewer position pairs. The comparison below counts those pairs only. It excludes local encoding, prediction and decoding, so it is not a measured overall speedup. BLT’s larger network processes patches while smaller networks handle bytes; its performance must be assessed as a complete architecture."}
+                </p>
+                <Equation>{"Pair-count ratio = 763² / 129²\n                 ≈ 35"}</Equation>
                 </InAModel>
                 <KeepInMind>
                   The two columns disagree and the corpus column is the flattering
@@ -914,38 +713,20 @@ export default function PatchingWithoutAVocabularyPage() {
                     {"Dr. A│l│v│a│r│e│z│ │d│i│d│n│'│t│ expect │t│h│e │low-│c│o│st│ │r│e│-│a│n│a│lysis."}
                   </Equation>
                   <p>
-                    Two stretches survive. The run expect appears in the corpus
-                    inside expected and comes through as one block with its
-                    spaces, and low with its hyphen comes through as another. The
-                    surname is one byte to a block from beginning to end, because
-                    none of the four-byte stretches inside it occurs anywhere in
-                    the eighteen sentences.
-                  </p>
+                  {"Several familiar fragments stay together, including expect with its surrounding spaces and low with its hyphen. Other patches contain st or lysis. Most of the unfamiliar surname splits into individual bytes because its preceding four-byte contexts were absent from the corpus. Inspect the displayed cuts rather than assuming each surviving patch is a word."}
+                </p>
                 </WorkedExample>
                 <p>
-                  So the method has not degraded gracefully. On text it knows it
-                  gives 5.9 bytes to a block; on text one sentence away from that
-                  it gives 1.7, which is worse than cutting every four bytes and
-                  is most of the way back to reading the raw bytes. A model would
-                  be paying nearly the full byte-level cost on exactly the writing
-                  that a byte-level model exists to handle.
+                  {"The average falls from 5.9 bytes per patch on the fitted corpus to 1.7 on this held-out sentence. This predictor therefore reduces the sequence less effectively here than the fixed four-byte rule. Thirty patch positions still differ substantially from 51 byte positions, and total computation would also depend on the surrounding model."}
                 </p>
                 <KeepInMind>
-                  The failure is quiet. Nothing goes wrong, nothing is lost, and
-                  the sentence reads back perfectly from its blocks. The only
-                  symptom is 30 blocks where the same rule gives 6 on a 34-byte
-                  sentence it has read, and a count is not something anything
-                  downstream complains about.
+                  {"The bytes still reconstruct correctly. To detect reduced compression, track the patch count or average patch size alongside model quality and runtime. More patches can also affect batching, memory use and context limits."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="21. Where the obvious alternative is simply better">
                 <p>
-                  On that sentence the merged vocabulary from two pages ago reads
-                  it as 25 numbers and the uncertainty rule as 30 blocks, so the
-                  thing this page is describing loses to the thing it was meant to
-                  replace, on the case that matters. And it loses to the fixed rule
-                  too, which takes 13 blocks and has no model behind it at all.
+                  {"On the held-out sentence, the merged vocabulary produces 25 IDs, the entropy rule produces 30 patches and the fixed rule produces thirteen patches. Fixed grouping gives the shortest sequence in this comparison. The representations differ, so sequence length alone does not rank their trained-model quality or total cost."}
                 </p>
                 <NumberTable
                   headings={["on this sentence", "pieces", "needed a corpus"]}
@@ -955,22 +736,18 @@ export default function PatchingWithoutAVocabularyPage() {
                     ["cut where the next byte was hard to guess", "30", "yes, and no table"],
                     ["one number per byte", "51", "no"],
                   ]}
-                  caption="A sentence none of the three fitted methods was built from, ordered by what it costs."
+                  caption="The held-out sentence, ordered by number of positions. The merged vocabulary and entropy predictor were fitted; the fixed and raw-byte rules were not."
                 />
                 <>
 <p>
-                  I want to be careful about what this does and does not show. The guesser here read 763 bytes, and a real one reads billions, so the honest statement is that the method needs a model good enough that its uncertainty is informative on text it has not seen, and that nothing on this page establishes how much text that takes.
+                  The predictor here was fitted from 763 bytes. Its uncertainty therefore needs to be judged against that limited evidence, rather than treated as the output of a large trained model. Useful adaptive boundaries require a predictor whose uncertainty differentiates positions on new text. These examples do not establish how much training data or computation that capability requires.
                 </p>
                 <p>
-                  What the measurement does establish is the direction of the failure. When the guesser is out of its depth the blocks get shorter rather than worse, so the cost lands on the sequence length, which is the one thing the method was bought for.
+                  {"Unseen contexts become uniform under this predictor’s smoothing rule, triggering more global-threshold cuts. That explains the shorter patches here. Other predictors may respond differently to unfamiliar text, and patch quality still depends on the model that processes them."}
                 </p>
 </>
                 <KeepInMind>
-                  A fixed block size is the safe choice in exactly the case the
-                  uncertainty rule is worst in, since its sequence length is the
-                  same on writing the model knows and writing it has never met.
-                  That is a real argument for MegaByte&rsquo;s rule, and it is
-                  the argument the measurements here support most strongly.
+                  {"A fixed patch size makes the position count predictable for a given byte length. That can simplify resource planning. It does not adapt to differences in prediction difficulty, so test the tradeoff against the full model and expected inputs."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -982,12 +759,7 @@ export default function PatchingWithoutAVocabularyPage() {
             <>
               <SubSection title="22. The blocks belong to the guesser, not to the text">
                 <p>
-                  Everything else in this section produces pieces that are a
-                  property of the text and of a table somebody can inspect. Here
-                  the pieces are a property of a model, and changing the model
-                  changes them with nothing to say that either answer is the
-                  right one. Take one sentence the guesser knows and read it under
-                  four of them.
+                  {"Adaptive boundaries depend on the input, the fitted predictor and the boundary settings. Vocabulary-based tokenizers also depend on saved configuration and a fitted vocabulary. The following models illustrate how changing the predictor can change patch boundaries for one sentence."}
                 </p>
                 <NumberTable
                   headings={["the guesser", "blocks", "the last word comes out as"]}
@@ -1000,21 +772,10 @@ export default function PatchingWithoutAVocabularyPage() {
                   caption="The same 34 bytes, four models, four different sets of pieces. The last two make the same number of blocks and not the same blocks."
                 />
                 <p>
-                  The fourth row is the one worth stopping at. Half the corpus was
-                  removed, the sentence still comes to six blocks, and the pieces
-                  are different, so a downstream model trained on one of these is
-                  reading a different sequence from a model trained on the other
-                  even where the counts agree. A learned vocabulary has no
-                  equivalent of this, since a table is a small artefact somebody
-                  can ship and read, whereas a guesser&rsquo;s uncertainty on a
-                  particular stretch cannot be recovered from anything smaller
-                  than the whole model.
+                  {"The last two models produce six patches with different boundaries. Keeping the count unchanged therefore does not keep the downstream input unchanged. Save the predictor and boundary settings with the model. A fixed text’s boundaries can also be cached; reproducing every possible text requires the configured procedure, just as vocabulary-based tokenization does."}
                 </p>
                 <KeepInMind>
-                  Nothing here is undefined in the sense of a division by zero.
-                  What is undefined is the question &ldquo;what are the pieces of
-                  this text&rdquo;, which has no answer until a model is named,
-                  and a different answer for every model.
+                  {"Name the predictor and its settings when reporting a segmentation. Different predictors can produce different boundaries, but they can also agree. An unspecified configuration leaves the result underspecified, rather than mathematically undefined."}
                 </KeepInMind>
               </SubSection>
 
@@ -1034,45 +795,22 @@ export default function PatchingWithoutAVocabularyPage() {
                   caption="All eighteen sentences, looking back four bytes. At three bits every sentence is one block, so there are no cuts to sort."
                 />
                 <p>
-                  The row at two bits is the interesting one. Not a single cut
-                  falls inside a word, which sounds ideal until you notice that
-                  the eighteen sentences have 115 word starts and this setting
-                  found 39 boundaries, so the reason none of them is wrong is that
-                  there are too few of them for any to be. There is no setting at
-                  which the method reports how confident it is in a boundary, and
-                  no quantity it produces that a person could threshold on
-                  instead.
+                  {"At two bits, all 39 selected cuts avoid word interiors under this diagnostic. That does not establish that every useful boundary was found. There are 115 word starts across the corpus, and missing a boundary is different from placing one inside a word. Next-byte entropy is not a calibrated probability that a boundary is correct. To estimate boundary accuracy directly, we would need an appropriate target and evaluation."}
                 </p>
                 <KeepInMind>
-                  A free parameter that trades two things off is ordinary. This
-                  one has no scale attached, since a bit of uncertainty means
-                  something different for every guesser, so a threshold tuned for
-                  one model says nothing about what to use for another.
+                  {"Entropy has a common unit: bits. Different predictors can assign different distributions to the same context, so their score ranges and useful thresholds may differ. Retest a threshold when the predictor changes."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. A block has no identity, which is what a vocabulary was for">
                 <p>
-                  The deepest limit here is not a degenerate input. It is the
-                  method working exactly as designed. Across the eighteen
-                  sentences the rule produces 129 blocks with 77 distinct
-                  spellings between them, and the run The followed by a space is
-                  one of those blocks twelve separate times. Nothing in the method
-                  notices. There are twelve runs of four bytes that happen to
-                  agree, and each of them is presented to the model afresh.
+                  {"The 129 patches have 77 distinct byte spellings; The followed by a space occurs twelve times. The patcher does not assign that group a reusable vocabulary ID. An encoder can still process all twelve occurrences with shared parameters and learn their recurring structure."}
                 </p>
                 <Equation>
                   {"129 blocks    77 distinct spellings    The␣ appears 12 times"}
                 </Equation>
                 <p>
-                  A vocabulary is exactly the thing that would have said those
-                  twelve are one word, which is what makes a frequent piece cheap
-                  and what lets a model gather up everything it has learned about
-                  a word across all its occurrences into one row. Nothing
-                  downstream here can count how often a piece appeared or look up
-                  what was learned about it, because there is no piece to look up.
-                  Handing that job to the model is a real design and it is not a
-                  free one.
+                  A vocabulary entry gives a recurring piece a stable address for looking up one learned row. This patching stage instead supplies grouped representations without assigning each observed group a reusable piece ID. A later model can still learn from those representations, but it is receiving a different interface. Whether that design works well must be evaluated alongside the encoder and downstream model, not inferred from patch counts alone.
                 </p>
                 <KeepInMind>
                   The small model reading a block does the work a table row would
@@ -1088,67 +826,10 @@ export default function PatchingWithoutAVocabularyPage() {
                 <DerivationTable
                   expressionHeading="Bytes or patch-boundary choice"
                   reasonHeading="What the patcher needs to decide"
-                  rows={[
-                    {
-                      expression: "a stretch of bytes nobody has seen",
-                      reason:
-                        "defined, and it says the wrong thing. With no counts every value is equally likely, so the uncertainty is exactly 8 bits, which is also what a position genuinely open to anything gives. The two are indistinguishable in the number the cut is made from, and 26 of the 51 positions of our sentence are the first kind.",
-                    },
-                    {
-                      expression: "where to put the threshold",
-                      reason:
-                        "a decision with no scale attached. On the same eighteen sentences it spans 188 blocks down to 18, and 18 is one whole sentence per block. A bit of uncertainty means something different for every guesser, so a value tuned against one says nothing about another.",
-                    },
-                    {
-                      expression: "what counts as high",
-                      reason:
-                        "a decision between two rules that are opposites on the case that arises. Above a level cuts at every position of a flat run; risen by a step cuts at none of them. On our held-out sentence the identical numbers give 30 blocks one way and 7 the other, and neither is obviously right.",
-                    },
-                    {
-                      expression: "the first byte of a text",
-                      reason:
-                        "not decided by the rule, since there is no previous position to compare it with and no context in front of it. It is made the start of a block by convention, which every implementation does and none derives.",
-                    },
-                    {
-                      expression: "a block that stops part way through a letter",
-                      reason:
-                        "not text, and both rules can produce it, since both cut between bytes and neither has any notion of a character. On a sentence with two accented letters a fixed size of four leaves two positions where neither side of the cut spells anything.",
-                    },
-                    {
-                      expression: "how long a block may be",
-                      reason:
-                        "unbounded under the uncertainty rule, and that is a problem rather than a freedom. A stretch the guesser is sure of is never cut, so a wholly predictable text is a single block however long it is, and whatever reads the bytes inside a block has to be sized for a length nothing bounds.",
-                    },
-                    {
-                      expression: "how many blocks a text will come to",
-                      reason:
-                        "not a function of the text at all, so it cannot be known before the guesser has read it. A fixed size gives the byte count divided by the size; here two texts of equal length differ by a factor of three depending on whether the model has met writing like them.",
-                    },
-                    {
-                      expression: "which pieces a text has",
-                      reason:
-                        "undefined until a guesser is named, and different for each one. Four models cut the same 34 bytes four ways, and two of them make six blocks that are not the same six. A table can be shipped and inspected; the pieces here can only be recovered by running the model.",
-                    },
-                    {
-                      expression: "how often a piece occurs",
-                      reason:
-                        "outside the method entirely, which is what was given up. No block has a name, so two occurrences of the same run of bytes share nothing, and 12 of the 129 blocks in the corpus are the same four bytes with no part of the method aware of it.",
-                    },
-                    {
-                      expression: "a text with nothing in it",
-                      reason:
-                        "defined, and it is no blocks at all under either rule. A single byte is one block, since the first byte always starts one, and this is the one place the two rules and the fixed size cannot disagree.",
-                    },
-                  ]}
+                  rows={[{"expression":"a stretch of bytes nobody has seen","reason":"With no context counts, this smoothed predictor returns a uniform distribution and 8 bits of entropy. The boundary score alone does not distinguish missing evidence from a broad predicted distribution. In the held-out sentence, 26 of 51 contexts were unseen."},{"expression":"where to put the threshold","reason":"Entropy is measured in bits. Select a threshold against a useful criterion, such as the quality and compute budget of the downstream model. A threshold tuned for one predictor needs checking with another."},{"expression":"what counts as high","reason":"A global threshold below a flat plateau cuts at every position on it. A positive rise threshold selects no internal position. With the displayed settings, the held-out sentence produces 30 patches one way and 7 the other."},{"expression":"the first byte of a text","reason":"A nonempty sequence needs an initial patch. This SDK makes offset zero its start. The global entropy rule can score the first byte using a padded start context; the relative rule needs a separate convention because no preceding entropy exists."},{"expression":"a block that stops part way through a letter","reason":"Either rule can divide a UTF-8 character. Separate patch previews may then contain replacement marks. Joining the original bytes before decoding restores the text; joining replacement-mark previews need not."},{"expression":"how long a block may be","reason":"Without an explicit length cap, a predictable run may stay in one patch. Set a maximum if the encoder or memory budget requires one. This is an implementation choice, not an unavoidable limit of every entropy-patching system."},{"expression":"how many blocks a text will come to","reason":"Fixed grouping gives the ceiling of byte count divided by patch size. Adaptive grouping depends on the byte sequence and predictor as well as its length. Compute the entropies or use cached boundaries to obtain the count."},{"expression":"which pieces a text has","reason":"Specify the predictor and boundary settings. The four configurations shown produce different segmentations of the same 34 bytes. Reproducing them requires that configuration or cached boundary results."},{"expression":"how often a piece occurs","reason":"Repeated patch byte strings can be counted without vocabulary IDs. Here The followed by a space occurs twelve times. A learned encoder can share parameters across those occurrences even though the grouping stage assigns no reusable patch ID."},{"expression":"a text with nothing in it","reason":"defined, and it is no blocks at all under either rule. A single byte is one block, since the first byte always starts one, and this is the one place the two rules and the fixed size cannot disagree."}]}
                 />
                 <KeepInMind>
-                  Two of these are worth carrying. The quantity being thresholded
-                  cannot tell a genuinely open position from a position the
-                  guesser knows nothing about, and it reports both at the ceiling.
-                  And the pieces are a property of the guesser rather than of the
-                  text, so &ldquo;how is this text cut up&rdquo; is a question
-                  with no answer until somebody says which model is doing the
-                  cutting.
+                  {"Keep the predictor and boundary settings with the model. Check patch counts on unfamiliar text, then test the encoder and downstream model. The segmentation examples explain how boundaries are chosen; they do not measure language-model quality."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1160,7 +841,7 @@ export default function PatchingWithoutAVocabularyPage() {
             trueFalse(
               "On the eighteen sentences the uncertainty rule produces a shorter sequence than the merged vocabulary does.",
               true,
-              "763 bytes become 129 blocks, a factor of 5.9, where the merged vocabulary on the same text takes 263 numbers, and the uncertainty rule holds no table at all. A model comparing every position with every other does work in proportion to the square of the length, so 129 against 763 is around 35 times less of it.",
+              "The measured corpus has 763 bytes,129 entropy-selected patches and 263 BPE tokens. That is a shorter sequence for the later patch-level model. A full pairwise-attention term would shrink with the square of the position count, giving the reported approximate 35-fold comparison against byte positions. The complete runtime also includes the fitted boundary predictor, local encoding and decoding, so this is not a measured end-to-end speedup.",
             ),
             choice(
               "On the held-out sentence about Dr Alvarez, how do the three readings compare?",
@@ -1171,34 +852,34 @@ export default function PatchingWithoutAVocabularyPage() {
                 "The fixed rule gives the longest, since it reads nothing",
               ],
               0,
-              "26 of the sentence’s 51 positions come out at exactly 8 bits, because the four-byte stretch in front of each never occurred in 763 bytes of text. On text it knows the rule gives 5.9 bytes to a block and here it gives 1.7, so it loses both to the thing it was meant to replace and to a rule with no model behind it at all.",
+              "For the held-out sentence,26 of 51 positions have unseen four-byte contexts and receive the uniform eight-bit distribution. The rule therefore cuts more often than on the familiar corpus: about 1.7 bytes per patch rather than 5.9. This measures reduced compression for this new text. It does not by itself measure the eventual model's quality or total compute.",
             ),
             trueFalse(
               "Across the eighteen sentences the rule produces 129 blocks with 77 distinct spellings, and the run The followed by a space is one of those blocks twelve separate times.",
               true,
-              "Nothing in the method notices. There are twelve runs of four bytes that happen to agree, and each is presented to the model afresh. A vocabulary is exactly the thing that would have said those twelve are one word, which is what makes a frequent piece cheap and what lets a model gather what it has learned about a word into one row.",
+              "The patcher returns twelve occurrences of the same byte run; it does not merge them into one vocabulary entry. A downstream encoder can reuse its parameters on those repeated bytes, but that is different from storing one learned row per distinct patch. Counting distinct patch spellings therefore measures repetition without turning the patcher into a tokenizer vocabulary learner.",
             ),
             choice(
               "At a threshold of two bits, not one cut on the eighteen sentences falls inside a word. Why is that not the ideal setting?",
               [
-                "The eighteen sentences hold 115 word starts and the setting found 39 boundaries, so there are too few cuts for any to be wrong",
+                "All 39 selected cuts avoid word interiors, but there are 115 word starts; missing many boundaries is different from placing a wrong cut",
                 "Two bits is outside the range the entropy can take",
                 "Those sentences hold no words long enough to cut inside",
-                "Two bits sits below the uninformed baseline of 65.6 per cent",
+                "Two bits sits below the uninformed baseline of 65.6 percent",
               ],
               0,
               "The threshold sweep ranges from 188 blocks to 18, where each sentence becomes one block. The threshold therefore controls how much internal segmentation we obtain. It does not turn the cut score into a calibrated probability that a proposed boundary is correct.",
             ),
             several(
-              "Which of these follow from the pieces being a property of the guesser rather than of the text?",
+              "Which consequences follow from boundaries depending on the fitted predictor and cut policy?",
               [
-                "A threshold tuned for one model says nothing about what to use for another",
+                "A threshold tuned for one predictor needs validation when used with another",
                 "Removing half the corpus can leave the same number of blocks with different pieces",
-                "A guesser’s uncertainty on a stretch cannot be recovered from anything smaller than the whole model",
+                "Reproducing boundaries requires the configured predictor or appropriate cached per-input results",
                 "The text can no longer be read back from its blocks",
               ],
               [0, 1, 2],
-              "Nothing here is undefined in the sense of a division by zero, and the bytes are all still there in order. What is undefined is the question of what the pieces of a text are, which has no answer until a model is named and a different answer for every model. A bit of uncertainty means something different for every guesser, so the threshold has no scale attached.",
+              "The boundaries are well defined once the fitted predictor, context length, smoothing and cut policy are fixed. Entropy still has the unit bits. What changes across predictors is the distribution being measured and how well it reflects the data. A one-bit threshold is therefore a reproducible setting, but not a calibrated probability that a word boundary is correct.",
             ),
         ],
         },
@@ -1479,7 +1160,7 @@ question: "Does a longer byte context help unfamiliar text as much as familiar t
  hints: [
   "order is the preceding-byte count for this patcher. Create and fit a fresh model for every order.",
   "Keep the near-eight tolerance used in the preceding exercise. Count the held-out positions independently of its final blocks."
-], check: numberCheck("How many blocks does the sentence about Dr. Alvarez come to when the guesser looks back two bytes?", 25, 0.0, "The held-out sentence uses 25 blocks at a two-byte context. Longer contexts reduce familiar-corpus blocks here while leaving more held-out contexts unobserved.") },
+], check: numberCheck("How many patches represent the Dr. Alvarez sentence when the predictor conditions on the previous two bytes?", 25, 0.0, "The held-out sentence uses 25 blocks at a two-byte context. Longer contexts reduce familiar-corpus blocks here while leaving more held-out contexts unobserved.") },
             ),
             exercise(
               "Find the edge between seven copies and eight",

@@ -7,6 +7,8 @@ import { AccountSync } from "@/components/site/AccountSync";
 import { LearningInteractionGuard } from "@/components/site/LearningInteractionGuard";
 import { SupportMessage } from "@/components/site/SupportMessage";
 import { Botie } from "@/components/site/Botie";
+import { RewardCelebration } from "@/components/site/RewardCelebration";
+import { LearningHabitsSync } from "@/components/site/LearningHabitsSync";
 import { REPOSITORY, SITE_NAME, SITE_ORIGIN, SITE_TITLE, SITE_DESCRIPTION, SITE_SOCIAL } from "@/lib/site";
 import "./globals.css";
 
@@ -79,6 +81,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <CourseBreadcrumbs />
           <LearningInteractionGuard>{children}</LearningInteractionGuard>
         </main>
+
+        <RewardCelebration />
+        <LearningHabitsSync />
 
         <footer className="border-t border-line">
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-6 text-sm text-muted">

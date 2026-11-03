@@ -120,7 +120,7 @@ export function DivergingGrowth({ seeds }: { seeds: [number, number] }) {
         })}
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Strong colour marks the cells where the two partitions currently disagree, {differing} of {CELLS * CELLS}. Tree A finishes at {first.n_splits} splits and {first.n_leaves} leaves, tree B at {second.n_splits} and {second.n_leaves}.
+        Strong color marks the cells where the two partitions currently disagree, {differing} of {CELLS * CELLS}. Tree A finishes at {first.n_splits} splits and {first.n_leaves} leaves, tree B at {second.n_splits} and {second.n_leaves}.
       </p>
     </div>
   );

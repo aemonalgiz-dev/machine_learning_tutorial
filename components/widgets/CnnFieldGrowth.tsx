@@ -89,7 +89,7 @@ export function CnnFieldGrowth() {
               <tr className="border-b border-slate-200 text-left text-xs text-slate-600 dark:border-slate-800 dark:text-slate-400">
                 <th className="py-1.5 pr-3 font-semibold">{report.variant === "reference" ? "the network" : "pooling taken away"}</th>
                 <th className="py-1.5 pr-3 font-semibold">window, pixels a side</th>
-                <th className="py-1.5 font-semibold">neighbours sit apart by</th>
+                <th className="py-1.5 font-semibold">neighbors sit apart by</th>
               </tr>
             </thead>
             <tbody>

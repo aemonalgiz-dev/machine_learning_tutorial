@@ -53,7 +53,7 @@ export function FoldPinningTable() {
           Search again
         </button>
         <span>
-          two neighbours, twice over, on the nine searched people in three
+          two neighbors, twice over, on the nine searched people in three
           folds
         </span>
       </div>
@@ -70,8 +70,8 @@ export function FoldPinningTable() {
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
             {answer
               ? answer.scores_tie
-                ? "Equal to the last bit, and the deal itself was drawn fresh for this search."
-                : "The two copies differ, which the pinned deal is meant to make impossible."
+                ? "The two scores are identical. Both candidates used the same fold assignment, drawn once for this search."
+                : "The two scores differ despite using the same fold assignment. This check expected identical results for the duplicated candidate."
               : "…"}
           </p>
         </div>

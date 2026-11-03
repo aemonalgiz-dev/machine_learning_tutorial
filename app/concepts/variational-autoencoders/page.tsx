@@ -10,15 +10,15 @@ import { lessonIntuitions } from "@/lib/intuition";
 import { TinyVaeExperiment } from "@/components/widgets/TinyVaeExperiment";
 
 export const metadata: Metadata = {
-  title: "Variational Autoencoders · oop_ml",
-  description: "A model that reconstructs known examples does not necessarily give us a good way to generate new ones. A variational autoencoder also shapes a distribution of compressed representations from which we can draw new codes.",
+  title: "Variational Autoencoders · Perceptron Lab",
+  description: "A variational autoencoder learns a distribution of intermediate representations as well as a reconstruction procedure. Relating those representations to a prior distribution provides a basis for sampling codes that generate new examples.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="variational-autoencoders"
     title="Variational Autoencoders"
-    tagline={"A model that reconstructs known examples does not necessarily give us a good way to generate new ones. A variational autoencoder also shapes a distribution of compressed representations from which we can draw new codes."}
+    tagline={"A variational autoencoder learns a distribution of intermediate representations as well as a reconstruction procedure. Relating those representations to a prior distribution provides a basis for sampling codes that generate new examples."}
     openingTitle="Which Hidden Codes Should We Use to Create Something New?"
     intuition={lessonIntuitions["variational-autoencoders"]}
     technicalStart="Part 2. Sampling and the Variational Objective"
@@ -30,8 +30,8 @@ export default function Page() {
 { title: "Part 1. Describe a Distribution Before Drawing From It", content: <>
 <SubSection title="1. Distinguish the inferred distribution from the prior">
 <p>{"An ordinary autoencoder can reconstruct a digit from the code its encoder supplies. That leaves a question for generation: if we choose a fresh code ourselves, has the decoder learned what to do with it? We want a source of codes we can sample without first supplying a digit image."}</p>
-<p>{"A variational autoencoder lets the encoder describe a distribution of codes for each input. Imagine a centre and an amount of variation around it, rather than one fixed point. A sampled code goes to the decoder. Because that distribution was inferred from a particular observation, it is called an approximate posterior. The prior is the separate distribution we choose as a source of codes before seeing an observation."}</p>
-<p>{"A common choice uses a bell-shaped Gaussian distribution for each coordinate. The encoder supplies its centre, called the mean, and its variance, which controls the spread. In the diagonal Gaussian setup these coordinates are independent within the distribution for this input. Implementations often predict log variance so exponentiation gives a positive variance."}</p>
+<p>{"A variational autoencoder lets the encoder describe a distribution of codes for each input. Imagine a center and an amount of variation around it, rather than one fixed point. A sampled code goes to the decoder. Because that distribution was inferred from a particular observation, it is called an approximate posterior. The prior is the separate distribution we choose as a source of codes before seeing an observation."}</p>
+<p>{"A common choice uses a bell-shaped Gaussian distribution for each coordinate. The encoder supplies its center, called the mean, and its variance, which controls the spread. In the diagonal Gaussian setup these coordinates are independent within the distribution for this input. Implementations often predict log variance so exponentiation gives a positive variance."}</p>
 
 </SubSection>
 <SubSection title="2. Give reconstruction and regularization different jobs">
@@ -43,7 +43,9 @@ export default function Page() {
 </> },
 { title: "Part 2. Sampling and the Variational Objective", content: <>
 <SubSection title="3. Separate the random draw from the encoder's parameters">
-<p>{"Let μ be the mean, σ the standard deviation, and ε a standard normal noise draw. Instead of asking an opaque sampler to draw directly from the encoder's Gaussian, express the sample as a transformation of independent noise."}</p>
+<p>
+                  {"Let μ be the mean and σ the standard deviation. Draw ε from a standard normal distribution independently of the encoder’s parameters. We can then obtain a code by transforming that noise, as below."}
+                </p>
 <Equation>{"ε ~ Normal(0, 1)\nz = μ + σ ⊙ ε\n\nIllustrative coordinate:\nμ = 1,  σ = 0.5,  ε = −0.4\nz = 1 + (0.5 × (−0.4)) = 0.8"}</Equation>
 <p>{"The symbol ⊙ means coordinate-by-coordinate multiplication. For a fixed noise draw, the code changes smoothly with the mean and deviation, so gradients can pass from the decoder back into those parameters. This is the reparameterization trick."}</p>
 </SubSection>
@@ -55,8 +57,14 @@ export default function Page() {
 <WorkedExample title="The KL term for the illustrative coordinate">
 <p>Take the coordinate from step 3, with a mean of 1 and a deviation of 0.5. Its variance is 0.25, and the logarithm of a number below one is negative, so the last term inside the bracket adds to the total rather than taking from it.</p>
 <Equation>{"μ² = 1,  σ² = 0.25,  log(σ²) ≈ −1.3863\n\nKL = ½ (1 + 0.25 − 1 − (−1.3863))\n   = ½ × 1.6363\n   ≈ 0.8181"}</Equation>
-<p>Every noise draw leaves this number where it is. A draw of −2 gives a sample of 0, a draw of 0 gives the mean itself, and a draw of 2 gives a sample of 2, while the KL term stays at 0.8181 for all three, because the distribution they were drawn from has not moved.</p>
-<p>Holding the deviation at one and moving only the mean, the term grows with the square of the mean. A mean of 1 or −1 costs 0.5, and a mean of 2 or −2 costs 2.0. The term reaches zero only where the mean is zero and the deviation is one together, so a posterior pays for being off-center and for being the wrong width, and the reconstruction term is what has to make either worth paying for.</p>
+<p>
+                  {"Changing the noise draw changes the sampled code but leaves the chosen Gaussian distribution unchanged. Its KL divergence therefore stays fixed."}
+                </p>
+                <Equation>{"μ = 1, σ = 0.5\n\nε = −2: z = 0, KL ≈ 0.8181\nε = 0:  z = 1, KL ≈ 0.8181\nε = 2:  z = 2, KL ≈ 0.8181"}</Equation>
+<p>
+                  {"With deviation fixed at one, the KL term depends on the square of the mean. Moving the mean away from zero increases it. Changing the deviation also contributes to the penalty. Reconstruction and KL must be evaluated together: a more informative code may help reconstruct the input while increasing this penalty."}
+                </p>
+                <Equation>{"σ = 1:\nμ = 1 or −1: KL = 0.5\nμ = 2 or −2: KL = 2.0\n\nKL = 0 only when μ = 0 and σ = 1"}</Equation>
 </WorkedExample>
 </SubSection>
 
@@ -90,7 +98,7 @@ export default function Page() {
               "For the illustrative coordinate, with a mean of 1 and a deviation of 0.5, what is the KL term to four places?",
               ["0.8181", "0.5", "0.0", "2.0"],
               0,
-              "The variance is 0.25 and its logarithm is about −1.3863, so the bracket comes to 1.6363 and half of it is 0.8181. A mean of 1 with the deviation left at one would cost 0.5 and a mean of 2 would cost 2.0, while 0.0 belongs to a mean of zero with a deviation of one, where the posterior is the prior.",
+              "For one Gaussian coordinate, substitute the mean and variance into the KL expression.\n\n```math\nKL = 0.5 × [1² + 0.5² − 1 − ln(0.5²)] ≈ 0.8181\n```\n\nThis compares the whole posterior with the standard-normal prior. It is zero when the mean is zero and the standard deviation is one, regardless of the sample drawn.",
             ),
             trueFalse(
               "Making the KL term small is enough to establish a useful representation.",
@@ -106,9 +114,11 @@ export default function Page() {
         },
 { title: "Part 3. From the Latent Operation to a VAE", content: <>
 <SubSection title="5. Inspect one posterior directly">
-<p>{"The SDK object exposes the reparameterized sample and exact Gaussian KL. The live example keeps the chosen draw visible so the distinction between sample and distribution is testable."}</p>
+<p>{"The SDK returns the sampled code separately from the Gaussian KL value. The sample changes with the chosen noise draw; the KL compares the entire inferred code distribution with the prior. Holding the draw visible lets us test that distinction instead of confusing a favorable sample with a better distribution."}</p>
 <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm leading-relaxed text-slate-100"><code>{"import numpy as np\nfrom oop_ml.numpy.modern import DiagonalGaussian\n\nposterior = DiagonalGaussian(\n    mean=np.array([1.0]), deviation=np.array([0.5]),\n)\nprint(posterior.sample(np.array([-0.4])))\nprint(posterior.kl_to_standard_normal)"}</code></pre>
-<p>{"This is the latent-distribution operation, not a trained VAE. A complete implementation must connect it to an encoder and decoder, define the reconstruction likelihood, sample during training, and propagate the resulting gradients."}</p>
+<p>
+                  {"A complete VAE connects this operation to an encoder and decoder, defines an observation likelihood and propagates gradients through the training objective. For nonlinear decoders, the reconstruction expectation is usually estimated with sampled codes. Parts 4 and 5 use a linear Gaussian model where that expectation can be calculated exactly."}
+                </p>
 </SubSection>
 <SubSection title="6. Use the prior when generating">
 <p>{"After fitting the model, draw a new code from the prior and decode it. There is no input image to encode on this route. Sampling more codes produces a distribution of outputs rather than a single reconstruction."}</p>
@@ -130,7 +140,7 @@ export default function Page() {
                 "An exact Gaussian KL",
               ],
               [0, 1],
-              "The object behind the page already exposes the reparameterized sample and the exact Gaussian KL, and the KL needs no draw at all, since it is computed from the mean and the deviation and compares distributions rather than points. What is missing is everything that makes those two numbers part of a trained model, which also means sampling during training and propagating the resulting gradients.",
+              "The Gaussian object supplies a reparameterized sample and an analytic KL term. A complete VAE also needs an encoder that produces the posterior parameters, a decoder and an observation model, plus training that connects reconstruction and KL gradients to their parameters. Sampling is one way to estimate the reconstruction expectation; the final linear Gaussian exercise can calculate that expectation exactly.",
             ),
             trueFalse(
               "Generating a new output from the prior needs no input image, because a code is drawn from the prior and decoded.",
@@ -164,7 +174,7 @@ export default function Page() {
           content: <>
             <p>The decoder should be able to reconstruct the observations from sampled codes. For this linear decoder with Gaussian codes, we can calculate the expected squared reconstruction error exactly. The code variance contributes to that expectation: getting the mean&apos;s reconstruction right does not make every sampled reconstruction right.</p>
             <Equation>{"μ = a × x + b\nv = exp(c)\ne = x - (w × μ + d)\n\nExpected reconstruction term = ½(e² + w²v)\nKL term = ½(μ² + v - 1 - c)\nLoss = average of both terms over the observations"}</Equation>
-            <p>This is the negative evidence lower bound with a constant omitted. Ordinary nonlinear VAEs estimate the reconstruction expectation using sampled codes. Here the exact expectation lets us investigate the same two competing terms without sampling noise in the training curve.</p>
+            <p>{"The objective combines expected reconstruction error with the KL penalty on the inferred code distribution. Up to the omitted constant, it is the negative evidence lower bound, the training objective usually abbreviated as negative ELBO. A nonlinear VAE ordinarily estimates the reconstruction expectation using sampled codes. This linear Gaussian example calculates it exactly, allowing us to compare the two terms without sampling noise in the training curve."}</p>
             <p>Each parameter needs the derivative of this complete objective. First calculate the signal arriving at the encoder mean. Then apply the chain rule to the slope and bias that produced it. Average per-observation derivatives before updating.</p>
             <Equation>{"Signal at μ: r = -w × e + μ\n\ndL/da = average(r × x)\ndL/db = average(r)\ndL/dw = average(-e × μ + w × v)\ndL/dd = average(-e)\ndL/dc = ½(w²v + v - 1)\n\nparameter_new = parameter - learning_rate × derivative"}</Equation>
             <p>The final derivative uses the fact that the derivative of exp(c) is exp(c). A numerical gradient check can perturb each of the five parameters independently and compare the resulting loss change with these expressions.</p>
@@ -211,7 +221,7 @@ KL to the standard normal 0.8181`,
             ),
             exercise(
               "Move the draw, then widen the code",
-              ["Keep the same posterior and sample it with three draws, −2, 0 and 2, printing the sample and the KL term each time. Then build a posterior of two coordinates, both with a mean of 1 and a deviation of 0.5, and print its KL term.", "The worked example says the three draws move the sample from 0 to 2 and leave the term alone. The two-coordinate term is a number the lesson does not print, and the formula sums over coordinates, so there is only one value it can be."],
+              ["Keep the same posterior and sample it with three draws, −2, 0 and 2, printing the sample and the KL term each time. Then build a posterior of two coordinates, both with a mean of 1 and a deviation of 0.5, and print its KL term.", "Compare the sampled points with the unchanged one-coordinate KL term. For the wider posterior, the two independent coordinates contribute separate KL terms. Compute from the original parameters rather than doubling an already rounded display value."],
               `import numpy as np
 from oop_ml import DiagonalGaussian
 
@@ -259,7 +269,7 @@ mean 0  deviation 0.5  KL 0.3181
 mean 0  deviation 1.0  KL 0.0000
 mean 0  deviation 2.0  KL 0.8069
 log of 0.01 -4.6052`,
-              { hints: ["Each deviation needs its own posterior, since the deviation is fixed at construction and there is nothing to set afterwards.", "With the mean at zero the term is half of the variance, less one, less the logarithm of the variance. The logarithm is what dominates for a narrow posterior."], check: numberCheck("What KL term does a deviation of 0.1 report, to four places?", 1.8076, 0.0005, "With a zero mean and unit standard deviation, this posterior equals the prior and its KL term is zero. Narrower and wider distributions both differ from that prior. The cost is asymmetric: reciprocal changes in standard deviation do not receive equal penalties, and widening by a given factor can cost more than narrowing by its reciprocal.") , question: "Which posterior spread matches the standard-normal prior when the mean is zero?" },
+              { hints: ["Each deviation needs its own posterior, since the deviation is fixed at construction and there is nothing to set afterwards.", "At zero mean, first form the variance minus one minus the natural logarithm of the variance. The KL term is half of that entire result. A very small variance makes its logarithm strongly negative."], check: numberCheck("What KL term does a deviation of 0.1 report, to four places?", 1.8076, 0.0005, "With a zero mean and unit standard deviation, this posterior equals the prior and its KL term is zero. Narrower and wider distributions both differ from that prior. The cost is asymmetric: reciprocal changes in standard deviation do not receive equal penalties, and widening by a given factor can cost more than narrowing by its reciprocal.") , question: "Which posterior spread matches the standard-normal prior when the mean is zero?" },
             ),
             exercise(
               "Ask for a deviation of zero",
@@ -279,11 +289,11 @@ except MLLibError as refusal:
     print(refusal)`,
               `InvalidValuesError
 deviations must be strictly positive`,
-              { hints: ["The refusal comes from the constructor, before any sample is drawn, because a posterior that cannot be scored should not exist at all."] , question: "Why does this Gaussian posterior reject a zero standard deviation?" },
+              { hints: ["The constructor checks that every standard deviation is positive, so the error occurs before any call to sample."] , question: "Why does this Gaussian posterior reject a zero standard deviation?" },
             ),
             exercise(
               "Can you train the complete one-coordinate model?",
-              ["Write loss_and_grad(p, x). The parameter vector p contains a, b, w, d and c in that order; x is a nonempty one-dimensional array of observations. Return the average objective and its five derivatives, using the exact expectation from Part 5. Do not change p or x in place.", "The supplied loop uses your derivatives to train all five parameters. Print the initial and final objectives to four places, then the decoder means for codes minus one, zero and one. Additional tests compare your derivatives with numerical differences and use another dataset."],
+              ["Write loss_and_grad(p, x) for the one-coordinate model in Part 5. The five parameters are encoder slope a, encoder intercept b, decoder slope w, decoder intercept d, and shared log variance c, in that order. x is a nonempty one-dimensional array. Return the mean objective and a gradient array of shape (5,), using the exact expectation with unit observation variance. Do not modify either input array.", "The supplied loop uses your derivatives to train all five parameters. Print the initial and final objectives to four places, then the decoder means for codes minus one, zero and one. Additional tests compare your derivatives with numerical differences and use another dataset."],
               `import numpy as np
 
 def loss_and_grad(p, x):

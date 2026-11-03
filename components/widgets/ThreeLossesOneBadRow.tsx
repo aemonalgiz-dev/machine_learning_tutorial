@@ -161,7 +161,7 @@ export function ThreeLossesOneBadRow() {
         ))}
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Four hundred steps at a rate of 0.1 on standardised heights, from a flat line at the mean weight. The closed-form least squares line is {lines ? `${show(lines.least_squares.slope, 4)}, ${show(lines.least_squares.intercept, 2)}` : "…"}, and the squared-error walk is within {lines ? lines.descent_gap.toExponential(1) : "…"} of it.
+        Four hundred steps at a rate of 0.1 on standardized heights, from a flat line at the mean weight. The closed-form least squares line is {lines ? `${show(lines.least_squares.slope, 4)}, ${show(lines.least_squares.intercept, 2)}` : "…"}, and the squared-error walk is within {lines ? lines.descent_gap.toExponential(1) : "…"} of it.
       </p>
       {message && <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>}
     </div>

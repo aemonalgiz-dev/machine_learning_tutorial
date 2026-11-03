@@ -67,10 +67,9 @@ export function MarkedSentence() {
       </div>
 
       <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        The mark is {MARK}, codepoint {marking.mark_codepoint}, chosen because
-        it looks like a space and turns up in no ordinary text. Nothing above
-        this line is learned, and nothing about English was consulted to
-        produce it.
+        The marker {MARK}, code point {marking.mark_codepoint}, makes spaces
+        visible in the displayed text. Adding it is a fixed preprocessing step.
+        No word boundaries have been learned from English at this stage.
       </p>
     </div>
   );

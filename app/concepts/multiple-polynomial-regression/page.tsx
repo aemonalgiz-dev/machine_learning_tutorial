@@ -27,9 +27,9 @@ import { PolynomialPlayground } from "@/components/widgets/PolynomialPlayground"
 import { ResidualPatternChart } from "@/components/widgets/ResidualPatternChart";
 
 export const metadata: Metadata = {
-  title: "Multiple & Polynomial Regression · oop_ml",
+  title: "Multiple & Polynomial Regression · Perceptron Lab",
   description:
-    "One measurement may not be enough to explain the outcome. We can give a regression model several inputs, including transformed inputs, and work out how much each contributes to the prediction.",
+    "A prediction may depend on several measurements and how they interact. Multiple regression combines their contributions, while polynomial terms allow curved relationships in the original inputs.",
 };
 
 const linkClass =
@@ -45,7 +45,7 @@ export default function MultiplePolynomialRegressionPage() {
       playgroundTitle="Give the prediction another useful input"
       playgroundIntro="Compare how the prediction changes when another input or a higher polynomial degree is available. A closer fit to the displayed points is only the first check."
       title="Multiple & Polynomial Regression"
-      tagline={"One measurement may not be enough to explain the outcome. We can give a regression model several inputs, including transformed inputs, and work out how much each contributes to the prediction."}
+      tagline={"A prediction may depend on several measurements and how they interact. Multiple regression combines their contributions, while polynomial terms allow curved relationships in the original inputs."}
       prerequisites={
         <>
           This page builds directly on{" "}
@@ -68,12 +68,7 @@ export default function MultiplePolynomialRegressionPage() {
           content: (<>
 <>
               <SubSection title="1. Why one input may not be enough">
-                <p>
-                  Simple regression predicted weight from height alone, and
-                  height alone runs out quickly. People of the same height
-                  weigh different amounts, and a line that only reads height
-                  has to give all of them the same answer.
-                </p>
+                <p>A rule using only height must give the same prediction to people of the same height. Additional measurements can distinguish those people when they contain relevant information. Multiple regression gives each supplied measurement its own coefficient.</p>
                 <WorkedExample>
                   <p>
                     Two of the twenty people in the box above are 168 cm tall.
@@ -81,12 +76,7 @@ export default function MultiplePolynomialRegressionPage() {
                     74.3 kg. A line fitted on height alone predicts 67.24 kg
                     for both, because 168 is all it can see.
                   </p>
-                  <p>
-                    Let the model read age as well and the two predictions
-                    part company, 64.95 kg for the younger person and 69.41 kg
-                    for the older one. Neither is exact. Both are closer than
-                    the single number the line was forced to give.
-                  </p>
+                  <p>Adding age gives the model a way to distinguish the two people. It predicts 64.95 kilograms for the younger person and 69.41 for the older one. Both predictions are closer to their observations than 67.24, although neither is exact. This improvement describes these examples; it does not establish that age causes the weight difference.</p>
                 </WorkedExample>
                 <p>
                   Age gives us another possible source of information about these two people. Multiple regression lets several measured inputs contribute to the prediction, so people with the same height no longer have to receive the same answer.
@@ -157,8 +147,9 @@ export default function MultiplePolynomialRegressionPage() {
 
               <SubSection title="4. Reading one coefficient">
                 <p>
+
                   Take the height coefficient first. Hold age at one value,
-                  raise height by one centimetre, and read the prediction
+                  raise height by one centimeter, and read the prediction
                   again.
                 </p>
                 <WorkedExample>
@@ -172,27 +163,9 @@ export default function MultiplePolynomialRegressionPage() {
                     caption="A to B changes height alone and the prediction moves by 0.651 kg, the height coefficient. A to C changes age alone and it moves by 0.154 kg, the age coefficient."
                   />
                 </WorkedExample>
-                <p>
-                  So a coefficient describes how the prediction changes with
-                  one input while the other inputs in the model stay where they
-                  are. Any two records that differ in one input only will
-                  differ in prediction by exactly that input&rsquo;s
-                  coefficient.
-                </p>
+                <p>A coefficient gives the prediction change for a one-unit increase in its input while all other supplied input columns remain fixed. For a different-sized change, multiply by that coefficient. This describes the prediction rule rather than a causal effect.</p>
                 <KeepInMind>
-                  <p>
-                    &ldquo;Holding the others fixed&rdquo; describes the
-                    coefficient mathematically. It does not promise that the
-                    dataset contains that comparison. If height and age are
-                    strongly related in the data, or if some combinations barely
-                    occur, then the coefficient is resting on comparisons the
-                    data represents thinly, and it can swing a long way when a
-                    few rows change. In the twenty people here, taller people
-                    are on the whole younger, with a correlation of −0.46, so
-                    &ldquo;same age, one centimetre taller&rdquo; is a
-                    comparison the data supports less well than the arithmetic
-                    suggests.
-                  </p>
+                  <p>Holding the other inputs fixed is a mathematical comparison. The dataset may contain few observations with those combinations, making the coefficient sensitive to which records are present. Height and age have correlation −0.46 in this group. Inspect their joint coverage before treating a same-age height comparison as well supported.</p>
                 </KeepInMind>
               </SubSection>
             </>
@@ -240,9 +213,10 @@ export default function MultiplePolynomialRegressionPage() {
                   cuts through it.
                 </p>
                 <p>
+
                   Fix an age and the plane seen against height is a straight
                   line, drawn in indigo on the wireframe, and its slope is the
-                  height coefficient, 0.651 kg per centimetre. Fix a height and
+                  height coefficient, 0.651 kg per centimeter. Fix a height and
                   the plane seen against age is another straight line, in amber,
                   with slope 0.154 kg per year. Slide either fixed value and
                   the cut moves across the plane while its slope does not
@@ -282,11 +256,7 @@ export default function MultiplePolynomialRegressionPage() {
               </SubSection>
 
               <SubSection title="8. Fitting coefficients together">
-                <p>
-                  It is tempting to imagine the fit working one input at a
-                  time, fitting height, locking it, then fitting age on what is
-                  left. It does not, and the twenty people show why it cannot.
-                </p>
+                <p>Fitting height alone, fixing its coefficient permanently, then fitting age to the remaining error generally does not give the joint least-squares solution. The inputs can share variation, so adding age can change the best height coefficient too.</p>
                 <WorkedExample>
                   <NumberTable
                     headings={["Model", "kg per cm of height", "kg per year of age"]}
@@ -389,21 +359,15 @@ export default function MultiplePolynomialRegressionPage() {
                   </p>
                 </>
                 <p>
+
                   Below, the five basic shapes 1, t, t², t³ and t⁴ are drawn
                   unscaled along the top. Each slider scales one of them, the
-                  scaled shapes are dashed in their own colours, and the solid
+                  scaled shapes are dashed in their own colors, and the solid
                   line is their sum. The sliders start on the coefficients
                   recovered from the ideal throw.
                 </p>
                 <PolynomialAssembler />
-                <p>
-                  Every curve this widget can draw is assembled by adding
-                  scaled copies of fixed shapes, and the only things a fit
-                  chooses are the amounts. Polynomial regression produces a
-                  curved prediction while remaining a linear model in the
-                  parameters it learns, and that is why the straight
-                  line&rsquo;s solver handles it without modification.
-                </p>
+                <p>The expanded columns are fixed functions of the input. Fitting chooses the coefficients that multiply those columns. The resulting curve can be nonlinear in the original input while remaining linear in its fitted coefficients, allowing a linear least-squares solver to fit it.</p>
               </SubSection>
             </>
           ),
@@ -425,18 +389,18 @@ export default function MultiplePolynomialRegressionPage() {
             trueFalse(
               "A coefficient describes how the prediction changes with one input while the others stay where they are, so the dataset must contain that comparison.",
               false,
-              "Holding the others fixed describes the coefficient mathematically and promises nothing about the data. Among these twenty people taller people are on the whole younger, with a correlation of −0.46, so same age and one centimetre taller is a comparison the data supports less well than the arithmetic suggests. A coefficient resting on thinly represented comparisons can swing a long way when a few rows change.",
+              "Holding the others fixed describes the coefficient mathematically and promises nothing about the data. Among these twenty people taller people are on the whole younger, with a correlation of −0.46, so same age and one centimeter taller is a comparison the data supports less well than the arithmetic suggests. A coefficient resting on thinly represented comparisons can swing a long way when a few rows change.",
             ),
             several(
               "Which of these hold for the plane fitted to the twenty people?",
               [
-                              "Fix an age and read the plane against height, and the cut is a straight line whose slope is the height coefficient, 0.651 kg per centimetre",
+                              "Fix an age and read the plane against height, and the cut is a straight line whose slope is the height coefficient, 0.651 kg per centimeter",
                               "The residual is the vertical gap between a person’s measured weight and the plane’s prediction, and squaring and adding those gaps gives 214.2 for the twenty people",
                               "Sliding the fixed age across its range changes the slope of the height cut",
                               "The fit works one input at a time, fitting height, locking it, then fitting age on what is left",
                             ],
               [0, 1],
-              "A plane tilts by the same amount everywhere, so moving the cut changes where it sits and never its slope, and 0.651 is section 4’s one centimetre taller at a fixed age made literal. The fit cannot go one input at a time because changing one coefficient changes what the others need to do, so least squares chooses all of them at once as the single lowest point of one bowl over every coefficient together. Residuals, RSS and the least-squares rule carry over from the straight line untouched.",
+              "Without an interaction term, fixing age leaves a straight height-versus-predicted-weight line with the same height coefficient at every age. The residual sum of squares measures the squared target-coordinate errors. Least squares chooses coefficients to minimize their joint total; changing one coefficient can affect the best values of the others. Some solvers update coefficients one at a time, but that does not make the objective a sequence of independent fits.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "Fit an unpenalised least-squares plane to 20 people using height and age together.\nHeight coefficient: 0.651 kg/cm\nAge coefficient and intercept are also fitted.\nSum of squared vertical weight residuals over those 20 people: 214.2 kg²\nNo height × age interaction is included."
@@ -465,9 +429,7 @@ export default function MultiplePolynomialRegressionPage() {
           content: (
             <>
               <SubSection title="12. The ball's physical relationship">
-                <p>
-                  Physics writes the height of a thrown ball as
-                </p>
+                <p>For an ideal vertical throw with constant gravitational acceleration and no air resistance, the height before impact is</p>
                 <Equation>{"h(t) = h₀ + v₀·t − ½·g·t²"}</Equation>
                 <p>
                   with h₀ the starting height, v₀ the vertical launch speed and
@@ -484,8 +446,9 @@ export default function MultiplePolynomialRegressionPage() {
                 />
                 <>
                   <p>
+
                     The simulated throw starts at ground level with an upward speed of
-                    twenty metres per second.
+                    twenty meters per second.
                   </p>
                   <Equation>{"height h(t) = 20t − 4.9t²\ngravity magnitude g = −2 × coefficient on t²\n                    = −2 × (−4.9) = 9.8 m/s²"}</Equation>
                   <p>
@@ -514,10 +477,11 @@ export default function MultiplePolynomialRegressionPage() {
                     ]}
                   />
                   <p>
+
                     The steps were exactly the ones Part 3 described. Generate
                     exact heights, construct the t² column, fit two inputs,
                     read off the coefficients. Nothing in the fit knows any
-                    physics. It minimised squared misses over a table with a t
+                    physics. It minimized squared misses over a table with a t
                     column and a t² column, and the physics came out because
                     the physics is what generated the data.
                   </p>
@@ -547,14 +511,7 @@ export default function MultiplePolynomialRegressionPage() {
                   ]}
                   caption="Degree 0 is the mean of the heights, the baseline R² measures against. Drag the degree slider above between 1 and 2 to see the middle two."
                 />
-                <p>
-                  The straight line barely improves on the mean, because the
-                  best line through a symmetric arc is almost flat. The
-                  parabola explains everything. The difference between a
-                  useless model and a perfect one was one manufactured column,
-                  and the lesson is that a model can fail because the inputs
-                  it was given cannot express the pattern in the data.
-                </p>
+                <p>The straight line improves little on the mean because it cannot describe the rise and fall of this nearly symmetric arc. The quadratic recovers the ideal generating relationship. One constructed column changes what the model can represent; the improvement here follows from the known form of the simulated data.</p>
               </SubSection>
 
               <SubSection title="15. Residual patterns and underfitting">
@@ -565,12 +522,7 @@ export default function MultiplePolynomialRegressionPage() {
                 <p>
                   The parabola has zero residuals on the ideal throw. On the noisy throw, its residuals have no obvious remaining curve. That is consistent with having captured the main pattern, though it is not proof that the remaining errors contain no structure. Residual plots are useful for checking many fitted models, including these polynomial ones.
                 </p>
-                <p>
-                  This has a name. A model too rigid to represent the pattern
-                  in the data is underfitting. It shows large systematic
-                  residuals, a poor training score and poor predictions, and
-                  on the ball the straight line is the textbook case.
-                </p>
+                <p>A model underfits when its available relationships are too limited to describe the relevant pattern. Systematic residuals can provide evidence of that mismatch. On this trajectory, the straight line cannot represent the curve visible in the observations.</p>
               </SubSection>
             </>
           ),
@@ -593,29 +545,11 @@ export default function MultiplePolynomialRegressionPage() {
                     ["d", "tᵈ", "d − 1"],
                   ]}
                 />
-                <p>
-                  The word is permits. A higher degree allows a more complex
-                  shape and does not require it. A degree-4 curve may turn
-                  three times, and the fitted coefficients decide how many of
-                  those turns actually appear. On the ideal throw a degree-4
-                  fit puts 0.00 on t³ and 0.00 on t⁴ and draws the same
-                  parabola as degree 2, because the extra turns would not help.
-                  Section 11&rsquo;s sliders are the place to feel this. Every
-                  shape is available and the amounts decide which powers contribute to the curve
-                  up.
-                </p>
+                <p>A higher degree permits additional turning points without requiring them. A degree-four fit to the ideal quadratic data places 0.00 on the displayed cubic and fourth-power coefficients and recovers the same parabola. Use the sliders in section 11 to see how individual coefficients change the combined curve.</p>
               </SubSection>
 
               <SubSection title="17. Adding measurement noise">
-                <p>
-                  Real readings of a thrown ball carry error, a wobble of the
-                  hand or the ruler that says nothing about the next throw.
-                  The noise slider in section 13&rsquo;s box adds exactly that.
-                  It takes fifteen exact readings of the same 20t − 4.9t²
-                  throw and shifts each by its own draw, scaled to the amount
-                  you choose, and the &ldquo;show the true throw&rdquo; box
-                  draws the arc the readings came from.
-                </p>
+                <p>The noise slider simulates measurement error by adding a separately drawn perturbation to each of fifteen ideal trajectory readings. Its size is controlled by the slider. The true-throw option shows the generating arc. Real measurements can also contain systematic errors; this demonstration models only the specified random perturbations.</p>
                 <p>
                   What you see with noise on is three things at once. There is
                   the true height, dashed. There is the noise, the vertical gap
@@ -633,16 +567,7 @@ export default function MultiplePolynomialRegressionPage() {
                   refitting at each step and scoring on the same fifteen.
                 </p>
                 <DegreeSweepChart />
-                <p>
-                  The bars can only rise or hold still, and there is a formal
-                  reason. The degree-3 model contains every degree-2 model,
-                  since it can set the coefficient on t³ to zero and reproduce
-                  the degree-2 fit exactly, and the same holds one degree up
-                  from any degree. So the best degree-3 fit is at least as good
-                  on the training rows as the best degree-2 fit, and it may use
-                  the new column to do better. Training R² for nested models
-                  can only rise or stay unchanged as terms are added.
-                </p>
+                <p>For nested models fitted by unregularized least squares on the same observations, the minimum training error cannot increase as powers are added. The higher-degree model can reproduce the smaller one by setting its new coefficient to zero. Its best achievable training R² is therefore at least as large. A finite-precision solve can introduce small departures from that mathematical result.</p>
                 <p>
                   Degree 2 reads 0.996 here and degree 9 reads 0.997, with 10
                   coefficients doing the work of 3. Every step past 2 bought
@@ -684,16 +609,9 @@ export default function MultiplePolynomialRegressionPage() {
                   arrives in one chart.
                 </p>
                 <GapCurveChart />
+                <p>Training R² rises from 0.222 at degree one to 0.999 at degree nine. Held-out R² reaches 0.989 at degree two, stays near that through degree five, then falls to 0.693 at degree six. At degrees eight and nine it is −104 and −5479. The small training residuals therefore coexist with very large errors on the four excluded readings.</p>
                 <p>
-                  Training R² climbs from 0.222 at degree 1 to 0.999 at degree
-                  9 and never falls. The held-out score rises to 0.989 at
-                  degree 2, holds near there through degree 5, drops to 0.693
-                  at degree 6, and then collapses, −104 at degree 8 and −5479
-                  at degree 9. A curve that scores 0.999 on the eleven readings
-                  it was fitted to is wrong by street widths on the four it was
-                  not.
-                </p>
-                <p>
+
                   That is overfitting. Flexibility improves the reproduction
                   of the training sample while harming predictions on new
                   observations. The signs are very low training error, large
@@ -701,17 +619,13 @@ export default function MultiplePolynomialRegressionPage() {
                   measurements and residuals on the training data that are
                   tiny while errors elsewhere grow. At degree 9 the
                   coefficient on t⁴ is −229.5 and on t⁵ is +169.5, two huge
-                  terms cancelling each other almost everywhere and not quite
-                  cancelling between the points.
+                  terms canceling each other almost everywhere and not quite
+                  canceling between the points.
                 </p>
               </SubSection>
 
               <SubSection title="21. When a perfect training score is meaningful">
-                <p>
-                  Section 13 scored 1.000 and was right to. Section 20 is
-                  heading toward 1.000 and is wrong. The number is the same
-                  and the situations are not.
-                </p>
+                <p>The ideal quadratic gives a near-perfect score because it recovers the generating relationship. The flexible noisy-data fit approaches the same training score while predicting the excluded readings badly. The training score alone cannot distinguish those cases.</p>
                 <NumberTable
                   headings={["Case", "Training R² = 1", "What it means"]}
                   rows={[
@@ -725,15 +639,7 @@ export default function MultiplePolynomialRegressionPage() {
               </SubSection>
 
               <SubSection title="22. Balancing model flexibility">
-                <p>
-                  Set the three fits from section 19 beside each other in your
-                  head, degree 1, degree 2 and degree 9, all on the same
-                  eleven training points and judged by the same four hidden
-                  ones. The first is too stiff to follow the arc and misses
-                  both groups. The second follows the arc and scores well on
-                  both. The third follows the eleven exactly and misses the
-                  four badly.
-                </p>
+                <p>Compare degree one, degree two and degree nine on the same eleven training readings and four held-out readings. The line cannot follow the arc and predicts both groups poorly. The quadratic performs well on both. Degree nine comes very close to the training observations but predicts the held-out group badly.</p>
                 <p>
                   Too little flexibility leaves structure unfitted. Too much
                   reacts to the particular sample it was handed, noise
@@ -763,7 +669,7 @@ export default function MultiplePolynomialRegressionPage() {
                 "20 m/s², which is the launch speed",
               ],
               0,
-              "Physics writes the squared-time term as minus half g, so the coefficient’s value is not the acceleration itself. Doubling it and changing the sign recovers 9.8. Nothing in the fit knows any physics, and the physics came out because the physics is what generated the data.",
+              "For an ideal vertical trajectory with upward height positive, the squared-time coefficient is −g/2. Recover the downward acceleration magnitude from the fitted coefficient:\n\n```math\ng = −2 × (−4.9) = 9.8 m/s²\n```\n\nThat interpretation comes from the motion equation used to generate these exact observations, rather than from least squares alone.",
             ),
             trueFalse(
               "On the ideal throw the degree-2 fit scores an R² of exactly 1, and that is the correct answer rather than a warning sign.",
@@ -779,7 +685,7 @@ export default function MultiplePolynomialRegressionPage() {
                               "The straight line through the five ideal readings improves substantially on the mean",
                             ],
               [0, 1],
-              "Each power buys the curve the possibility of one more turn, and the fitted coefficients decide how many appear, which is why the extra turns stay at zero on the ideal throw. A degree-3 model contains every degree-2 model, since it can put zero on t³, so its best training fit is at least as good, but on the noisy readings degree 2 reads 0.996 and degree 9 reads 0.997, ten coefficients doing the work of three. And the best line through a symmetric arc is almost flat, so on the ideal throw degree 1 scores 0.005 against the mean’s 0.000.",
+              "A higher-degree model includes the lower-degree one by allowing added coefficients to be zero. Its exact minimum training squared error cannot increase, though numerical fitting may not reach that optimum. On the ideal throw the extra cubic and quartic coefficients are zero to the printed precision. On the full noisy readings, degrees two and nine have training R² values 0.996 and 0.997, a small gain for seven additional coefficients. The straight-line fit explains very little of the ideal curved trajectory, with R² 0.005.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "All models use unpenalised least squares with an intercept and nested polynomial powers.\nIdeal 5-point throw: degree-4 coefficients on t³ and t⁴ round to 0.00.\nIdeal throw training R²: degree 1 = 0.005; degree 2 = 1.000.\nNoisy 15-point throw training R²: degree 2 = 0.996; degree 9 = 0.997."
@@ -794,7 +700,7 @@ export default function MultiplePolynomialRegressionPage() {
                 "Falls steadily from degree 1 onward",
               ],
               0,
-              "The training score climbs from 0.222 at degree 1 to 0.999 at degree 9 and never falls, while the held-out score drops to 0.693 at degree 6 and then collapses, reaching −104 at degree 8. A curve scoring 0.999 on the eleven readings it was fitted to is wrong by street widths on the four it was not.",
+              "Training R² rises from 0.222 to 0.999 across these degrees. Held-out R² reaches 0.993 at degree four, but later drops to 0.693 at degree six and about −104 at degree eight. The degree-nine model closely fits the eleven training readings while making very large errors on the four held-out readings. The training score alone does not describe those prediction errors.",
             ),
             several(
               "Which observations justify investigating overfitting, rather than proving it by themselves?",
@@ -805,7 +711,7 @@ export default function MultiplePolynomialRegressionPage() {
                 "Residuals negative at both ends and positive in the middle"
               ],
               [0, 1, 2],
-              "The training-versus-held-out divergence is the strongest sign here. Unstable coefficients are another reason to investigate sensitivity and conditioning. Low training error by itself can occur in a model that generalises well. Residuals with the same curved pattern across the input range instead suggest that a straight line has missed systematic structure.",
+              "The training-versus-held-out divergence is the strongest sign here. Unstable coefficients are another reason to investigate sensitivity and conditioning. Low training error by itself can occur in a model that generalizes well. Residuals with the same curved pattern across the input range instead suggest that a straight line has missed systematic structure.",
             ),
         ],
         },
@@ -897,17 +803,7 @@ export default function MultiplePolynomialRegressionPage() {
                   ]}
                   caption="Each multiplication is legal because the inner dimensions agree, and the normal equations are p equations in p unknowns."
                 />
-                <p>
-                  The normal equations describe the condition the least-squares
-                  solution satisfies. They do not say to compute (XᵀX)⁻¹Xᵀy by
-                  forming the inverse, and in practice nobody should. A working
-                  implementation solves the system directly, and numerical
-                  libraries usually go further and avoid forming XᵀX at all,
-                  using a QR decomposition or a singular value decomposition of
-                  X, which are better behaved when columns are nearly
-                  dependent. A unique solution also needs enough independent
-                  information in the columns, which is the next section.
-                </p>
+                <p>The normal equations specify a condition for a least-squares minimum. We can solve a suitable system without explicitly forming an inverse. Numerical libraries often avoid forming XᵀX as well: QR decomposition separates the matrix into perpendicular directions and a triangular system, while singular value decomposition separates directions according to their scale. These methods can reduce numerical difficulties when columns are nearly dependent. A unique coefficient vector still requires independent columns.</p>
               </SubSection>
 
               <SubSection title="26. Dependent feature columns">
@@ -964,17 +860,10 @@ export default function MultiplePolynomialRegressionPage() {
                       ["8 s", "−153.5 m", "1,130,430 m"],
                       ["−2 s", "−58.8 m", "−18,516 m"],
                     ]}
-                    caption="Both fits score above 0.995 on the readings between 0 and 4 seconds. Neither has any idea what happens after."
+                    caption="Both fits score above 0.995 on observations between 0 and 4 seconds. That training agreement does not validate predictions outside the interval."
                   />
                 </WorkedExample>
-                <p>
-                  Even the parabola&rsquo;s answers are wrong, since a real ball
-                  stops at the ground rather than continuing below it, and the
-                  degree-9 curve is wrong by a kilometre within two seconds of
-                  the last reading. A curve that fits well within the measured
-                  interval may be unreliable the moment it leaves it, and
-                  nothing in the training score can warn you.
-                </p>
+                <p>The ideal free-flight equation is valid only until the ball hits the ground; later motion needs a model of the collision and any bounce. Neither polynomial includes that event. The degree-nine prediction is also over twenty kilometers high at six seconds. A good fit on the observed interval does not establish accuracy beyond it.</p>
                 <p>
                   A quieter problem comes from the columns themselves. The
                   powers of t live on very different scales.
@@ -983,13 +872,14 @@ export default function MultiplePolynomialRegressionPage() {
                   headings={["", "t", "t²", "t³", "t⁴"]}
                   rows={[
                     ["at t = 4", "4", "16", "64", "256"],
-                    ["at t = 4 after centring t on 2", "2", "4", "8", "16"],
+                    ["at t = 4 after centering t on 2", "2", "4", "8", "16"],
                   ]}
-                  caption="Centring shifts the time axis so its middle is zero. The same throw, the same curve, and the largest column entry falls from 256 to 16."
+                  caption="Centering shifts the time axis so its middle is zero. The same throw, the same curve, and the largest column entry falls from 256 to 16."
                 />
                 <p>
+
                   Wide differences in scale make XᵀX badly conditioned, so its
-                  solution swings on the last digits of the data. Centring and
+                  solution swings on the last digits of the data. Centering and
                   scaling the input before raising it to powers is the usual
                   remedy, and the{" "}
                   <Link href="/concepts/feature-scaling" className={linkClass}>
@@ -1019,25 +909,16 @@ export default function MultiplePolynomialRegressionPage() {
                   </Link>{" "}
                   pages do.
                 </p>
-                <p>
-                  How do we restrain a flexible model without throwing away
-                  the inputs it needs? Keep the degree-9 columns and penalise
-                  large coefficients, so the t⁴ and t⁵ terms cannot reach
-                  −229 and +169 in the first place. That is{" "}
-                  <Link href="/concepts/ridge-lasso" className={linkClass}>
-                    ridge and lasso
-                  </Link>
-                  , and it also answers section 26&rsquo;s nearly-dependent
-                  columns.
-                </p>
+                <p>How can we limit the fitted response while retaining useful polynomial inputs? A penalty discourages large coefficients instead of imposing a fixed upper bound. The <Link href="/concepts/ridge-lasso" className={linkClass}>ridge and lasso</Link>{" "}page explains these objectives. Ridge can also stabilize coefficients when input columns are nearly dependent.</p>
                 <InAModel>
                   <p>
-                    Regularisation is one response to overfitting and not the
+
+                    Regularization is one response to overfitting and not the
                     only one. Choosing a smaller degree, gathering more
                     readings, or selecting columns are all responses too, and
                     which is right depends on the question. What every one of
                     them needs is a way of scoring a model on data it did not
-                    see, which is why evaluation comes before regularisation in
+                    see, which is why evaluation comes before regularization in
                     the order of this site.
                   </p>
                 </InAModel>
@@ -1062,7 +943,7 @@ export default function MultiplePolynomialRegressionPage() {
             trueFalse(
               "If one column holds t and another holds 2t, the normal equations have infinitely many solutions.",
               true,
-              "The second column says nothing the first did not, so every pair of coefficients along that trade gives identical predictions, identical residuals and the same RSS. The bowl has a flat valley floor instead of a single lowest point and XᵀX has no inverse. The fit behind this page refuses such a table outright rather than picking one of the answers.",
+              "Changing the two coefficients while keeping their combined contribution to t fixed gives identical predictions and squared error. The design matrix therefore has fewer independent columns than coefficients, and XᵀX is singular in exact arithmetic. A numerical solver may report an error or return one coefficient vector despite that dependence. The exercise checks matrix rank directly because returned coefficients do not establish uniqueness.",
             ),
             trueFalse(
               "The normal equations say to compute the solution by forming the inverse of XᵀX.",
@@ -1072,16 +953,16 @@ export default function MultiplePolynomialRegressionPage() {
             choice(
               "A degree-9 fit on the full throw is read beyond the interval it was fitted on. What happens?",
               [
-                "It is wrong by a kilometre within two seconds of the last reading, and nothing in the training score warns you",
+                "It is wrong by a kilometer within two seconds of the last reading, and nothing in the training score warns you",
                 "It flattens out, because the high powers lose their influence",
                 "It stays reliable, since it fitted the training points so closely",
                 "It cannot be read outside the fitted range at all",
               ],
               0,
-              "High-degree polynomials behave dramatically outside the interval they were fitted on. Even the parabola’s answers are wrong out there, since a real ball stops at the ground rather than continuing below it, so the fitted interval is a boundary on both models rather than only on the flexible one.",
+              "High-degree terms can grow rapidly outside the training interval, producing large extrapolation errors despite a close training fit. The ideal parabola also has a physical limit: it models free flight, not what happens after the ball reaches the ground. Reliable prediction requires checking both the data range and the assumptions of the physical process.",
             ),
             choice(
-              "Why does the lesson say to centre and scale the input before raising it to powers?",
+              "Why does the lesson say to center and scale the input before raising it to powers?",
               [
                 "The powers of t live on very different scales, which makes XᵀX badly conditioned, so its solution swings on the last digits of the data",
                 "So that the degree-9 curve stays bounded beyond the last reading",
@@ -1089,7 +970,7 @@ export default function MultiplePolynomialRegressionPage() {
                 "So that the fitted curve passes through the origin",
               ],
               0,
-              "At t = 4 the columns t, t², t³ and t⁴ read 4, 16, 64 and 256, and centring t on 2 brings the largest entry down to 16, the same throw and the same curve. This is a quieter problem than extrapolation and separate from it. Scaling does nothing about a curve read beyond the fitted interval, where even the parabola is wrong because a real ball stops at the ground.",
+              "Powers of an unscaled input can have very different numerical magnitudes:\n\n```math\nat t = 4: t = 4, t² = 16, t³ = 64, t⁴ = 256\n```\n\nCentering these times on 2 reduces the largest fourth-power entry to 16. Centering and scaling can improve numerical conditioning, although dependent columns and high-degree sensitivity can remain. This changes the representation; it does not justify extrapolating beyond the observed process.",
             ),
         ],
         },
@@ -1258,7 +1139,7 @@ print("unique coefficients", bool(rank == design.shape[1]))`,
               `columns 3
 independent columns 2
 unique coefficients False`,
-              {"hints":["np.column_stack puts the three arrays beside each other. Its shape tells you the row and column counts.","np.linalg.matrix_rank counts independent columns. The time column and twice-time column contribute only one independent direction between them."],"question":"Can the fit tell time apart from twice the same time?"},
+              {"hints":["np.column_stack puts the three arrays beside each other. Its shape tells you the row and column counts.","np.linalg.matrix_rank counts independent columns. The time column and twice-time column contribute only one independent direction between them."],"question":"Do the columns t and 2t provide enough independent information to determine unique coefficients?"},
             ),
           ],
         },

@@ -23,7 +23,7 @@ function binary(value: Data): number[][] {
 }
 function morphology(value: Data, shape: Data, erode: boolean): number[][] {
   const input = binary(value), footprint = binary(shape), h = footprint.length, w = footprint[0].length;
-  if (h % 2 !== 1 || w % 2 !== 1 || h > 9 || w > 9) throw Error("Use odd footprint dimensions no larger than nine, with the anchor at the centre.");
+  if (h % 2 !== 1 || w % 2 !== 1 || h > 9 || w > 9) throw Error("Use odd footprint dimensions no larger than nine, with the anchor at the center.");
   if (!footprint.some(row => row.some(Boolean))) throw Error("Select at least one position in the footprint.");
   if (!footprint.every((row, r) => row.every((x, c) => x === footprint[h - 1 - r][w - 1 - c]))) throw Error("This teaching tool uses centrally symmetric footprints. Match each selected offset with its opposite.");
   const offsets = footprint.flatMap((row, r) => row.flatMap((x, c) => x ? [[r - (h - 1) / 2, c - (w - 1) / 2]] : []));
@@ -58,7 +58,7 @@ export const GAP_TOOLS: Record<string, Tool> = {
     return likelihoods;
   }),
   rowproduct: define("Multiply conditional probabilities in each row", "Combines a row's conditional evidence terms by multiplication. This is appropriate for the naive Bayes example only under its conditional-independence assumption.", ["Conditional probability rows"], ([value]) => grid(value).map(row => row.map(probability).reduce((a, b) => a * b, 1))),
-  rowtotal: define("Add each row", "Adds across each row and returns one total per row. For a neighbour mask, the total counts neighbours, including the point itself when its diagonal is one.", ["Rows of numbers"], ([value]) => grid(value).map(row => row.reduce((a, b) => a + b, 0))),
+  rowtotal: define("Add each row", "Adds across each row and returns one total per row. For a neighbor mask, the total counts neighbors, including the point itself when its diagonal is one.", ["Rows of numbers"], ([value]) => grid(value).map(row => row.reduce((a, b) => a + b, 0))),
   crossDistances: define("Compare two sets of positions", "Returns absolute distances from every one-dimensional position in the first group to every position in the second group. Rows belong to the first group and columns to the second.", ["First group's positions", "Second group's positions"], ([a, b]) => {
     const first = numbers(a), second = numbers(b);
     if (first.length > 100 || second.length > 100) throw Error("Use at most 100 positions in each group for this small example.");
@@ -68,15 +68,15 @@ export const GAP_TOOLS: Record<string, Tool> = {
     const positions = grid(value);
     return positions.map(a => positions.map(b => Math.hypot(...a.map((x, i) => x - b[i]))));
   }),
-  withinRadius: define("Mark neighbours within a radius", "Marks a distance with one when it is no larger than the radius, otherwise zero. Equality is included, so a zero self-distance belongs to the neighbourhood.", ["Distance grid", "Neighbour radius"], ([value, radiusValue]) => {
+  withinRadius: define("Mark neighbors within a radius", "Marks a distance with one when it is no larger than the radius, otherwise zero. Equality is included, so a zero self-distance belongs to the neighborhood.", ["Distance grid", "Neighbor radius"], ([value, radiusValue]) => {
     const distances = grid(value), radius = scalar(radiusValue);
     if (!Number.isFinite(radius) || radius < 0) throw Error("Use a finite, non-negative neighbour radius.");
     if (distances.some(row => row.some(x => x < 0))) throw Error("Distances cannot be negative.");
     return distances.map(row => row.map(x => Number(x <= radius)));
   }),
-  erodeMask: define("Erode a binary mask", "A foreground value is 1. Keeps a position only when every selected footprint offset lands on foreground, so a narrow object may disappear. The footprint is centred, odd-sized and centrally symmetric; positions outside the image are zero.", ["Binary mask", "Footprint"], ([value, footprint]) => morphology(value, footprint, true)),
-  dilateMask: define("Dilate a binary mask", "Sets a position to foreground when any selected footprint offset reaches foreground, expanding surviving shapes. Uses the same centred symmetric footprint and outside-image zeros as Erode a binary mask.", ["Binary mask", "Footprint"], ([value, footprint]) => morphology(value, footprint, false)),
-  labelRegions: define("Label connected foreground regions", "Flood-fills each reachable foreground group under four- or eight-neighbour connectivity. Scans rows in order, assigns consecutive positive IDs, and reserves zero for background.", ["Binary mask", "Connectivity: 4 or 8"], ([value, kind]) => {
+  erodeMask: define("Erode a binary mask", "A foreground value is 1. Keeps a position only when every selected footprint offset lands on foreground, so a narrow object may disappear. The footprint is centered, odd-sized and centrally symmetric; positions outside the image are zero.", ["Binary mask", "Footprint"], ([value, footprint]) => morphology(value, footprint, true)),
+  dilateMask: define("Dilate a binary mask", "Sets a position to foreground when any selected footprint offset reaches foreground, expanding surviving shapes. Uses the same centered symmetric footprint and outside-image zeros as Erode a binary mask.", ["Binary mask", "Footprint"], ([value, footprint]) => morphology(value, footprint, false)),
+  labelRegions: define("Label connected foreground regions", "Flood-fills each reachable foreground group under four- or eight-neighbor connectivity. Scans rows in order, assigns consecutive positive IDs, and reserves zero for background.", ["Binary mask", "Connectivity: 4 or 8"], ([value, kind]) => {
     const input = binary(value), connectivity = scalar(kind);
     if (connectivity !== 4 && connectivity !== 8) throw Error("Choose four or eight neighbours by supplying 4 or 8.");
     const offsets = [[-1,0],[1,0],[0,-1],[0,1], ...(connectivity === 8 ? [[-1,-1],[-1,1],[1,-1],[1,1]] : [])];

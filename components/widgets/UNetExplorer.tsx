@@ -115,7 +115,11 @@ export function UNetExplorer() {
         <Stat label="mean overlap, 240 held-out pictures" value={fixed(showing.held_out.mean_overlap)} />
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        A pixel is called shape where its probability is above one half. The overlap is the pixels called shape and truly shape, over the pixels that are either. The rings are a kind neither network was trained on.
+        A pixel is predicted to belong to a shape when its probability exceeds
+        0.5. The overlap score compares the pixels that both the prediction and
+        the label mark as shape with those marked by either one. This is
+        intersection over union. Ring images were excluded from both networks&apos;
+        labeled training data.
       </p>
     </div>
   );

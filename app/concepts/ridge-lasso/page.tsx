@@ -25,9 +25,9 @@ import { ShrinkagePathChart } from "@/components/widgets/ShrinkagePathChart";
 import { SoftThresholdSlider } from "@/components/widgets/SoftThresholdSlider";
 
 export const metadata: Metadata = {
-  title: "Ridge & Lasso · oop_ml",
+  title: "Ridge & Lasso · Perceptron Lab",
   description:
-    "A flexible model can fit accidental details in the training data. Penalising large coefficients gives us a way to discourage that behaviour, with ridge and lasso making different kinds of adjustment.",
+    "A model can fit details in the training data that do not hold elsewhere. Ridge and lasso penalize coefficient size in different ways, changing how the fit balances prediction error against complexity.",
 };
 
 const linkClass =
@@ -43,7 +43,7 @@ export default function RidgeLassoPage() {
       playgroundTitle="What happens when large coefficients have a cost?"
       playgroundIntro="Increase the penalty and compare the curve and its coefficients. Notice what the model gives up in training fit as the coefficients shrink."
       title="Ridge & Lasso"
-      tagline={"A flexible model can fit accidental details in the training data. Penalising large coefficients gives us a way to discourage that behaviour, with ridge and lasso making different kinds of adjustment."}
+      tagline={"A model can fit details in the training data that do not hold elsewhere. Ridge and lasso penalize coefficient size in different ways, changing how the fit balances prediction error against complexity."}
       prerequisites={
         <>
           This page answers the problem{" "}
@@ -67,8 +67,8 @@ export default function RidgeLassoPage() {
           content: (<>
 <>
               <SubSection title="1. Revisit the overfit polynomial">
-                <p>In the polynomial lesson, a degree-9 curve follows the fifteen noisy ball readings closely. Its training score is 0.997. On four readings held out in that lesson, the corresponding fit scores about -5479. A good match to the fitted observations has not produced a reliable curve between them.</p>
-              <p>Ridge and lasso change what fitting rewards. They retain the error term but add a cost for the coefficient values. That additional cost is a regularisation penalty. We will inspect how it changes the fitted terms, then use held-out evidence to decide whether the change helps.</p>
+                <p>The polynomial lesson fits a degree-nine curve to fifteen noisy ball readings and obtains training R² of 0.997. In a separate held-out comparison, it fits eleven readings and evaluates four excluded readings; that fit gives held-out R² of about −5479. Closely matching a training sample has not guaranteed reliable predictions for other readings.</p>
+              <p>Fitting can account for coefficient size as well as prediction error. The added cost is a regularization penalty. Ridge and lasso use different penalties, so they make different compromises between matching the observations and limiting the fitted coefficients.</p>
                 <p>
                   Look at the bars below the curve. They show the nine coefficients chosen by the fit. Each coefficient multiplies one power of the input, and their combined contributions determine the curve between the readings.
                 </p>
@@ -84,29 +84,22 @@ export default function RidgeLassoPage() {
                 </p>
                 <ContributionTugOfWar />
                 <WorkedExample title="At t = 2, with no penalty">
-                  <p>
-                    The positive terms add up to 77,446 metres. The negative
-                    terms add up to −77,438. The intercept is 12.76, and the
-                    prediction is 20.39, a sensible height for a ball two
-                    seconds into a throw, assembled out of pieces the size of
-                    mountains that cancel to within eight metres of each other.
-                  </p>
-                  <p>
-                    At a penalty of 1 the same prediction is 17.69, built from
-                    positives totalling 5.2 and negatives totalling −0.2.
-                  </p>
+                  <p>At two seconds, the positive terms total 77,446 meters and the negative terms total −77,438 meters. The intercept is 12.76 meters, and the final prediction is 20.39 meters. The totals are rounded here. Opposing contributions much larger than the prediction nearly cancel.</p>
+                  <p>At penalty one, the prediction is 17.69 meters, with positive contributions totaling 5.2 and negative contributions totaling −0.2, in addition to the intercept.</p>
                 </WorkedExample>
                 <p>
-                  Here large opposing contributions produce a moderate final prediction. Increasing the t⁶ coefficient by a hundredth of a percent moves the prediction by more than four metres. That sensitivity gives us a concrete reason to try a penalty on coefficient size.
+
+                  Here large opposing contributions produce a moderate final prediction. Increasing the t⁶ coefficient by a hundredth of a percent moves the prediction by more than four meters. That sensitivity gives us a concrete reason to try a penalty on coefficient size.
                 </p>
               </SubSection>
 
               <SubSection title="3. Sensitivity to the training sample">
                 <p>
+
                   Coefficient size matters because of what it does when the
                   data changes. Below, the same degree-9 model is fitted three
                   times, on the noisy throw, on the same readings with one of
-                  them moved a metre and a half, and on a fresh set of readings
+                  them moved a meter and a half, and on a fresh set of readings
                   of the same throw with its own noise.
                 </p>
                 <RefitSensitivityPlayground />
@@ -117,7 +110,7 @@ export default function RidgeLassoPage() {
                     ["B, one reading moved", "0.993", "76,525", "7.80"],
                     ["C, fresh noise", "0.999", "28,206", "7.81"],
                   ]}
-                  caption="Three excellent training scores, three sets of coefficients that agree on nothing, and one penalty that brings them within two percent of each other."
+                  caption="The unpenalized fits have high training scores but very different largest coefficients. With penalty one, those largest coefficients range from 7.64 to 7.81."
                 />
                 <p>
                   A small change in the data has produced large changes in the coefficients and in the curve between observations. That is evidence of instability. It gives us a reason to test a penalty: can we make the fitted rule less sensitive to which noisy measurements happen to appear in the sample?
@@ -140,27 +133,30 @@ export default function RidgeLassoPage() {
                   coefficient of 7.64.
                 </p>
                 <p>
+
                   So the question is not whether the second model fits worse.
                   It does. The question is how much training error you would
                   accept in exchange for a model that does not fall apart when
                   one reading moves, and that is a trade rather than a
-                  correction. Regularisation makes the trade deliberately.
+                  correction. Regularization makes the trade deliberately.
                 </p>
               </SubSection>
 
-              <SubSection title="5. The regularised objective">
+              <SubSection title="5. The regularized objective" id="5-the-regularised-objective">
                 <p>
-                  Write the trade down as one number to minimise, made of two
+
+                  Write the trade down as one number to minimize, made of two
                   parts.
                 </p>
                 <Equation>{"total objective = data error + coefficient cost\ntotal objective = RSS + λ · penalty"}</Equation>
                 <p>
+
                   RSS is the residual sum of squares from every regression
                   page so far, and asks how well the model fits the readings.
                   The penalty asks how costly the coefficients are. λ sets the
                   relative price of the two. Below, the objective is drawn at
-                  every λ on the path in its two halves, grey for RSS and
-                  colour for λ times the penalty, and the fit at each λ is the
+                  every λ on the path in its two halves, gray for RSS and
+                  color for λ times the penalty, and the fit at each λ is the
                   set of coefficients that made the whole bar shortest.
                 </p>
                 <RegularisationPathDashboard model="ridge" panels={["objective", "curve"]} />
@@ -186,7 +182,7 @@ export default function RidgeLassoPage() {
                   rows={[
                     ["0", "training error only", "ordinary least squares comes back exactly"],
                     ["moderate", "error and coefficient size", "coefficients shrink, RSS rises a little"],
-                    ["very large", "coefficient size dominates", "the penalised coefficients head to zero and the curve toward the intercept alone"],
+                    ["very large", "coefficient size dominates", "the penalized coefficients head to zero and the curve toward the intercept alone"],
                   ]}
                 />
                 <p>
@@ -198,16 +194,7 @@ export default function RidgeLassoPage() {
                   its length past the point where anything interesting happens.
                 </p>
                 <KeepInMind>
-                  <p>
-                    A value of λ means nothing on its own. It is a price, and
-                    the same number buys a different amount of restraint
-                    depending on the scale of the features, the scale of the
-                    target, whether the error is summed or averaged, and any
-                    constant the objective carries. The λ that works here is
-                    not the λ that works on other data, or on this data written
-                    as mean squared error rather than RSS. It only ever means
-                    something relative to the objective it sits inside.
-                  </p>
+                  <p>Interpret λ with the complete objective. Summing rather than averaging the residual error changes its scale relative to the penalty, and rescaling features changes coefficient magnitudes. Ridge and lasso also use different coefficient costs, so their numerical λ values are not directly comparable. Target rescaling affects the required relative penalty differently for those two objectives.</p>
                 </KeepInMind>
               </SubSection>
             </>
@@ -220,9 +207,10 @@ export default function RidgeLassoPage() {
               <SubSection title="7. Why feature scale matters">
                 <>
                   <p>
-                    The regression page’s slope is 0.8 kilograms per centimetre.
-                    Expressing height in metres makes the slope eighty kilograms per
-                    metre. The height contribution to the prediction stays the same.
+
+                    The regression page’s slope is 0.8 kilograms per centimeter.
+                    Expressing height in meters makes the slope eighty kilograms per
+                    meter. The height contribution to the prediction stays the same.
                   </p>
                   <Equation>{"in centimetres: 0.8 × 170 = 136\nin metres:      80 × 1.70 = 136\n\ncoefficient ratio = 80 / 0.8 = 100\nsquared-penalty ratio = 100² = 10,000"}</Equation>
                   <p>
@@ -234,22 +222,16 @@ export default function RidgeLassoPage() {
                   <NumberTable
                     headings={["Height in", "Ordinary slope", "β²", "Ridge slope at λ = 50"]}
                     rows={[
-                      ["centimetres", "0.8 kg per cm", "0.64", "0.667 kg per cm"],
-                      ["metres", "80 kg per m", "6400", "0.040 kg per m"],
+                      ["centimeters", "0.8 kg per cm", "0.64", "0.667 kg per cm"],
+                      ["meters", "80 kg per m", "6400", "0.040 kg per m"],
                     ]}
-                    caption="0.040 kg per metre is 0.0004 kg per centimetre. The same data, the same λ, and one fit is shrunk by a sixth while the other is all but switched off."
+                    caption="0.040 kg per meter is 0.0004 kg per centimeter. The same data, the same λ, and one fit is shrunk by a sixth while the other is all but switched off."
                   />
                 </WorkedExample>
-                <p>
-                  A large coefficient can mean a feature matters a great deal,
-                  or it can mean the feature was measured in small units.
-                  Penalising raw coefficients charges for units rather than for
-                  complexity, and the choice of units ends up choosing the
-                  model.
-                </p>
+                <p>A coefficient’s magnitude depends on the numerical scale of its input as well as the fitted relationship. A small numerical input can require a large coefficient to make the same prediction. Penalizing that raw coefficient therefore also expresses a preference about the input’s units.</p>
               </SubSection>
 
-              <SubSection title="8. Standardizing before regularisation">
+              <SubSection title="8. Standardizing before regularization" id="8-standardizing-before-regularisation">
                 <p>
                   The repair is the{" "}
                   <Link href="/primers/statistics" className={linkClass}>
@@ -259,38 +241,20 @@ export default function RidgeLassoPage() {
                   fit.
                 </p>
                 <Equation>{"zⱼ = (xⱼ − x̄ⱼ) / sⱼ"}</Equation>
+                <p>Subtracting the mean centers each nonconstant column. Dividing by its training standard deviation expresses input changes in standard-deviation units. A coefficient of two then describes a two-unit prediction change per input standard deviation, holding the other columns fixed. The polynomial widgets use these standardized columns, allowing the coefficient bars to be compared despite large differences in the raw powers.</p>
                 <p>
-                  Subtracting the mean centres the column. Dividing by its
-                  standard deviation puts every column on a common spread, so a
-                  coefficient of 2 means the same thing whichever column it
-                  sits on, and the penalty can compare them. Every fit on this
-                  page does this. The bars in the box at the top are
-                  coefficients on standardized columns, which is why t⁹, whose
-                  raw values reach 262,144, can be drawn beside t.
-                </p>
-                <p>
-                  Centring also settles the intercept. On centred features the
+
+                  Centering also settles the intercept. On centered features the
                   intercept is the prediction at the average of every input,
-                  which for the throw is the mean height, 12.76 metres. That
+                  which for the throw is the mean height, 12.76 meters. That
                   number sets the overall level of the predictions rather than
-                  how they respond to any feature, and penalising it would pull
+                  how they respond to any feature, and penalizing it would pull
                   every prediction toward zero rather than toward the data.
                   So the coefficients are charged and the intercept is not,
                   on both of this page&rsquo;s models.
                 </p>
                 <KeepInMind>
-                  <p>
-                    That is a convention rather than a law, and libraries
-                    differ on it. And the means and standard deviations must
-                    be learned from the training rows only, then applied
-                    unchanged to any held-out rows. Recomputing them on the
-                    held-out data lets the judge see the answers, which is the
-                    leak the{" "}
-                    <Link href="/concepts/pipelines" className={linkClass}>
-                      pipelines page
-                    </Link>{" "}
-                    measures.
-                  </p>
+                  <p>The unpenalized intercept is a convention used by these models. Fit any feature means and standard deviations on training observations, then reuse them on validation inputs. Using validation inputs to fit those references changes the procedure being evaluated, even without reading their targets. The <Link href="/concepts/pipelines" className={linkClass}>pipelines page</Link>{" "}explains how to keep preparation inside the training split.</p>
                 </KeepInMind>
               </SubSection>
             </>
@@ -300,7 +264,7 @@ export default function RidgeLassoPage() {
           title: "Questions on Parts 1 to 3",
           quiz: [
             choice(
-              "At no penalty the positive terms at one moment total 77,446 metres and the negative terms −77,438. What does the lesson take from that?",
+              "At no penalty the positive terms at one moment total 77,446 meters and the negative terms −77,438. What does the lesson take from that?",
               [
                 "A moderate prediction built from large opposing pieces is sensitive to the smallest change in any of them",
                 "The prediction must be wrong, since the pieces are the size of mountains",
@@ -308,15 +272,15 @@ export default function RidgeLassoPage() {
                 "The degree is too low for the shape of a throw",
               ],
               0,
-              "The prediction there is 20.39, a sensible height for a ball two seconds into a throw, so the answer itself is not what is wrong. Nudge the t⁶ coefficient by a hundredth of a percent and the prediction moves by more than four metres, and that sensitivity is the problem regularisation is for.",
+              "The prediction there is 20.39, a sensible height for a ball two seconds into a throw, so the answer itself is not what is wrong. Nudge the t⁶ coefficient by a hundredth of a percent and the prediction moves by more than four meters, and that sensitivity is the problem regularization is for.",
             ),
             trueFalse(
               "The λ that works on this data written as RSS is not the λ that works on the same data written as mean squared error.",
               true,
-              "λ is a price rather than an amount, and it only ever means something relative to the objective it sits inside. Dividing the error by the number of readings changes the trade the same λ buys, as do the scale of the features, the scale of the target and any constant the objective carries, which is also why a λ cannot be carried over to other data.",
+              "The penalty strength is relative to the error term. Dividing RSS by the observation count without scaling the penalty changes the tradeoff. Feature units and the chosen penalty formula matter too, so compare objective definitions before transferring a value between implementations. Target rescaling also affects some conventions, including the relative strength of an absolute-value penalty.",
             ),
             choice(
-              "Expressing height in metres rather than centimetres multiplies that slope by a hundred. What happens to its squared penalty?",
+              "Expressing height in meters rather than centimeters multiplies that slope by a hundred. What happens to its squared penalty?",
               [
                 "It is multiplied by ten thousand",
                 "It is unchanged, as the prediction is",
@@ -324,29 +288,29 @@ export default function RidgeLassoPage() {
                 "It is divided by a hundred",
               ],
               0,
-              "The contribution to the prediction is the coefficient times the column, so the prediction stays at 136 either way. The penalty charges the coefficient alone, and squaring a hundredfold gives ten thousand, which is how penalising raw coefficients charges for units rather than for complexity and lets the choice of units choose the model.",
+              "The prediction depends on the product of an input and its coefficient, so converting centimeters to meters requires a hundredfold coefficient. Its squared penalty then changes by:\n\n```math\n100² = 10,000\n```\n\nWithout a corresponding adjustment, the same numeric penalty imposes a different preference after changing units.",
             ),
             several(
               "Which of these hold once every column is standardized?",
               [
                 "The means and standard deviations are learned from the training rows only and applied unchanged to held-out rows",
-                "On centred features the intercept is the prediction at the average of every input, which for the throw is 12.76 metres",
+                "On centered features the intercept is the prediction at the average of every input, which for the throw is 12.76 meters",
                 "A coefficient of 2 on t⁹ and a coefficient of 2 on t still mean different things, since t⁹’s raw values reach 262,144",
                 "The intercept has to be charged too, since every parameter in the objective is",
               ],
               [0, 1],
-              "Dividing each column by its standard deviation puts every column on a common spread, so a coefficient of 2 means the same thing whichever column it sits on and the penalty can compare them, which is what lets t⁹ be drawn beside t. The intercept sets the overall level of the predictions rather than how they respond to any feature, so penalising it would pull every prediction toward zero rather than toward the data, and it goes uncharged on both of this page’s models. Recomputing the means on the held-out data lets the judge see the answers, which is the leak the pipelines page measures.",
+              "After each input column is standardized, a coefficient describes a one-standard-deviation change in that column, making penalty sizes comparable across columns. The effect still depends on which feature it multiplies. With centered inputs and an unpenalized intercept, the fitted intercept equals the mean target, 12.76 meters here. Keep the training means and scales for later data; recomputing them changes the coordinates the fitted coefficients expect.",
             ),
             choice(
-              "The same degree-9 model is fitted to the noisy throw, to the same readings with one moved a metre and a half, and to a fresh set of readings of the same throw. What does section 3’s table show?",
+              "The same degree-9 model is fitted to the noisy throw, to the same readings with one moved a meter and a half, and to a fresh set of readings of the same throw. What does section 3’s table show?",
               [
-                "Three excellent training scores, three largest coefficients that agree on nothing, 85,263, 76,525 and 28,206, and a penalty of 1 that brings them within two percent of each other",
+                "Three close training fits with largest coefficients 85,263, 76,525 and 28,206; a penalty of 1 brings those largest magnitudes to within roughly two percent",
                 "Three fits that agree on their coefficients, because the data barely changed",
                 "Training scores that collapse when one reading moves",
                 "A curve that changes only near the reading that moved",
               ],
               0,
-              "The training scores are 0.997, 0.993 and 0.999, all excellent, and the coefficients behind them disagree by tens of thousands. Small change in the data, large change in the coefficients, large change in the curve between the readings, which is what an unstable model is. At λ = 1 the three largest coefficients are 7.64, 7.80 and 7.81, and that is a stronger case for restraint than the curve looking implausible, because it says the free fit will not survive contact with the next sample.",
+              "The unpenalized fits have high training R² but very different large coefficients. That sensitivity is a reason to inspect predictions between observations and on new samples. At penalty 1 the largest coefficient magnitudes are 7.64, 7.80 and 7.81, much closer across these samples. This supports regularization as a stability improvement here; it does not prove every coefficient or future prediction is stable.",
             ),
         ],
         },
@@ -366,34 +330,32 @@ export default function RidgeLassoPage() {
                   including at zero.
                 </p>
                 <PenaltyCurvesPlayground />
-                <p>
-                  The slope readout is the part to notice now and use later.
-                  The slope of β² is 2β, which at zero is zero. Near zero,
-                  ridge barely pushes at all, and that is why its coefficients
-                  approach zero without arriving. The other panel is Part 5.
-                </p>
+                <p>The derivative of the squared penalty becomes small as its coefficient approaches zero. Ridge therefore shrinks coefficients without creating the threshold interval of exact zeros that lasso creates. A ridge coefficient can still be exactly zero when the data terms or other contributions balance that way.</p>
               </SubSection>
 
               <SubSection title="10. Ridge shrinkage by hand">
                 <p>
+
                   For one feature the ridge answer can be worked out
                   completely, and the conditions are worth stating because
                   the formula depends on them. One feature. Feature and target
-                  both centred, so the intercept is handled separately and
+                  both centered, so the intercept is handled separately and
                   drops out. And the objective written as RSS, not a mean and
                   not halved.
                 </p>
                 <Equation>{"Σ (yᵢ − βxᵢ)² + λβ²"}</Equation>
                 <p>
-                  Ordinary least squares on centred data gives the slope as a
+
+                  Ordinary least squares on centered data gives the slope as a
                   ratio of two sums, and ridge changes exactly one thing about
                   it.
                 </p>
                 <Equation>{"β = Σxᵢyᵢ / Σxᵢ²          ordinary\nβ = Σxᵢyᵢ / (Σxᵢ² + λ)    ridge"}</Equation>
                 <>
                   <p>
-                    For the five-person dataset, the centred cross-product is 200 and
-                    the centred sum of height squares is 250.
+
+                    For the five-person dataset, the centered cross-product is 200 and
+                    the centered sum of height squares is 250.
                   </p>
                   <Equation>{"ridge slope = 200 / (250 + λ)"}</Equation>
                   <p>
@@ -413,12 +375,7 @@ export default function RidgeLassoPage() {
                     caption="The λ of zero row is the regression page's fit, recovered exactly. The numerator never changes; the denominator grows without limit, so the slope drains toward zero and never reaches it."
                   />
                 </WorkedExample>
-                <p>
-                  The whole objective is drawn below over the slope, RSS as a
-                  parabola with its floor at 0.8, the penalty as a second
-                  parabola with its floor at zero, and their sum. Slide λ and
-                  the sum&rsquo;s lowest point slides toward zero.
-                </p>
+                <p>The plot separates the prediction-error term from the penalty. Their sum is the objective being minimized. Increasing the penalty strength changes the minimizing coefficient; whether that improves prediction still needs evaluation on separate observations.</p>
                 <OneCoefficientObjective />
                 <p>
                   The indigo curve on the shrinkage path below is that formula
@@ -431,7 +388,8 @@ export default function RidgeLassoPage() {
               <SubSection title="11. Ridge with correlated features">
                 <>
 <p>
-                  With several features the coefficients are fitted together, and the one-feature picture needs care to generalise. What ridge does is discourage large overall coefficient magnitude. It generally keeps every feature with a nonzero coefficient, and it steadies the fit when features are correlated, which is the case Hoerl built it for. What it does not do is shrink every coefficient at the same rate, or shrink the noisiest first, or hold an opinion about which features deserve a say.
+
+                  With several features the coefficients are fitted together, and the one-feature picture needs care to generalize. What ridge does is discourage large overall coefficient magnitude. It generally keeps every feature with a nonzero coefficient, and it steadies the fit when features are correlated, which is the case Hoerl built it for. What it does not do is shrink every coefficient at the same rate, or shrink the noisiest first, or hold an opinion about which features deserve a say.
                 </p>
                 <p>
                   The path below is every one of the nine polynomial coefficients against log λ, and they cross each other, change sign and shrink at nine different speeds.
@@ -465,18 +423,11 @@ export default function RidgeLassoPage() {
                     the floor to (5.99, −0.57), a move of one and a half in the
                     first coefficient from a change that barely dented the fit.
                   </p>
-                  <p>
-                    Ridge at λ = 1 sits at (1.21, 1.78), and after the same
-                    jostle at (1.31, 1.73). It moved a tenth. The circle is the
-                    set of coefficient pairs with the same squared penalty as
-                    the solution, and the solution is where an RSS contour first
-                    touches that circle. A long valley meets a circle at one
-                    well-defined place; it meets nothing at all along its own
-                    floor.
-                  </p>
+                  <p>At λ = 1, ridge gives (1.21, 1.78), changing to (1.31, 1.73) under the same perturbation. It is less sensitive in this comparison. The circle shows coefficient pairs with the same squared penalty as the solution. At the optimum, its boundary is tangent to the corresponding residual-error contour. The added positive quadratic penalty removes the shallow unconstrained direction.</p>
                 </WorkedExample>
                 <p>
-                  Notice where ridge moves in the coefficient plot. It favours a pair that shares the effect across the two correlated inputs. Large coefficients with opposing signs can nearly cancel in the predictions while still incurring a large squared penalty. More moderate coefficients can make similar predictions at a lower penalty cost. That explains the movement here; it does not tell us that either input has a particular causal role.
+
+                  Notice where ridge moves in the coefficient plot. It favors a pair that shares the effect across the two correlated inputs. Large coefficients with opposing signs can nearly cancel in the predictions while still incurring a large squared penalty. More moderate coefficients can make similar predictions at a lower penalty cost. That explains the movement here; it does not tell us that either input has a particular causal role.
                 </p>
               </SubSection>
             </>
@@ -507,7 +458,8 @@ export default function RidgeLassoPage() {
 
               <SubSection title="13. Lasso shrinkage by hand">
                 <p>
-                  Same conditions as section 10, one centred feature, RSS
+
+                  Same conditions as section 10, one centered feature, RSS
                   without a half. Write the two sums as S for short.
                 </p>
                 <Equation>{"Sₓᵧ = Σxᵢyᵢ = 200        Sₓₓ = Σxᵢ² = 250"}</Equation>
@@ -561,38 +513,21 @@ export default function RidgeLassoPage() {
                     the only pull is the data&rsquo;s, and the minimum cannot
                     sit there unless the data has no pull at all.
                   </p>
-                  <p>
-                    The lasso penalty has no single slope at zero. Just to the
-                    right its slope is +λ, just to the left it is −λ, and every
-                    value between −λ and +λ counts as a slope at the corner.
-                    Zero is the minimum whenever the data&rsquo;s pull, 2Sₓᵧ,
-                    lies inside that range, which is whenever λ ≥ 2Sₓᵧ, or
-                    λ/2 ≥ Sₓᵧ. A whole range of data pulls is balanced at the
-                    corner, and that range is what the flat stretch in section
-                    13&rsquo;s map draws.
-                  </p>
+                  <p>The lasso penalty has no single derivative at zero. Its slope immediately to the right is +λ and immediately to the left is −λ. The interval between them is its subgradient at the corner. For this positive-cross-product example, zero minimizes the objective once the data term can be balanced within that interval, giving the threshold below.</p>
                 </WhyThisWorks>
-                <p>
-                  Lasso can remove a coefficient because a penalty with a
-                  corner can overpower a weak data contribution at a finite λ.
-                  A penalty that is smooth at zero never can.
-                </p>
+                <p>Lasso’s corner allows a range of small data contributions to give an exact zero coefficient at a finite λ. Ridge lacks that threshold mechanism because its penalty derivative is zero at the origin. This explains their different sparsity behavior, rather than ruling out every exact ridge zero.</p>
               </SubSection>
 
               <SubSection title="15. Sparse models and feature selection">
-                <p>
-                  On the nine polynomial terms the lasso paths below do what
-                  the one-feature arithmetic predicts. Coefficients arrive at
-                  the zero line and stay, the count of active terms falls, and
-                  the fitted curve keeps its shape on fewer and fewer terms.
-                </p>
+                <p>The polynomial lasso paths show coefficients entering and leaving zero as λ changes. Increasing the penalty often reduces the active coefficient count, but correlated inputs can cause a coefficient to become nonzero again. Read the full path rather than assuming that a term removed once stays removed.</p>
                 <RegularisationPathDashboard model="lasso" panels={["paths", "scores"]} />
                 <p>
+
                   Two things on that chart are easy to over-read. The active
                   count is not monotone. It falls from 9 to 6 by λ = 0.056, to
                   4 by 0.178 and to 2 by 3.2, then rises to 3 at 5.6 before
                   falling back to 2 at 10, because a term that was switched off
-                  came back when a correlated neighbour was shrunk and its share
+                  came back when a correlated neighbor was shrunk and its share
                   of the work needed picking up. And the first term to reach
                   zero is not the least important term in any objective sense.
                   It is the term whose contribution the others could most
@@ -626,7 +561,7 @@ export default function RidgeLassoPage() {
           title: "Questions on Parts 4 and 5",
           quiz: [
             choice(
-              "With a centred cross-product of 200 and a centred sum of squares of 250, what does the one-feature ridge slope do as λ grows?",
+              "With a centered cross-product of 200 and a centered sum of squares of 250, what does the one-feature ridge slope do as λ grows?",
               [
                 "It shrinks toward zero, because λ is added to the denominator",
                 "It reaches zero at λ = 400 and stays there",
@@ -650,10 +585,10 @@ export default function RidgeLassoPage() {
                 "It slides along the floor of the valley as least squares does",
               ],
               0,
-              "The RSS forms a long shallow valley, because raising one coefficient and lowering the other by half as much barely changes any prediction, and least squares slides along the floor. A long valley meets a circle at one well-defined place, and it meets nothing at all along its own floor. Notice also where ridge went, across to a pair where both coefficients carry some of the effect rather than toward the origin, because two moderate shared coefficients cost less in β² than two large opposing ones while predicting nearly the same.",
+              "When two inputs track each other, increasing one coefficient and reducing the other can leave predictions nearly unchanged. The training error then determines those separate coefficients weakly. Ridge adds a cost for coefficient magnitude, making large opposing values less favorable. Its coefficients respond less to the supplied data perturbation, though they still change.",
             ),
             choice(
-              "Why can lasso put a coefficient at exactly zero where ridge cannot?",
+              "Why can lasso set this one-feature slope exactly to zero at a finite penalty while ridge only approaches zero?",
               [
                 "At the corner every value between −λ and +λ counts as a slope, so zero is the minimum whenever the data’s pull lies inside that range",
                 "Its penalty is larger than the squared penalty at every coefficient",
@@ -675,12 +610,7 @@ export default function RidgeLassoPage() {
           content: (
             <>
               <SubSection title="16. Ridge and lasso side by side">
-                <p>
-                  Everything above used the same data, the same
-                  standardization, the same degree-9 columns, the same
-                  held-out split and the same λ scale, so the two can be set
-                  beside each other fairly.
-                </p>
+                <p>The polynomial comparisons use the same inputs, standardization and validation split. Those shared conditions help compare the fitted methods. A given numerical λ has different effects under squared and absolute-value penalties, so choose a suitable strength for each rather than equating their λ values.</p>
                 <NumberTable
                   headings={["", "Ridge", "Lasso"]}
                   rows={[
@@ -715,12 +645,8 @@ export default function RidgeLassoPage() {
                   coefficient is zero.
                 </p>
                 <>
-<p>
-                  An ellipse meeting a circle touches it at a point with no special relationship to the axes, so both coefficients come out nonzero. An ellipse meeting a diamond very often touches it at a corner first, because corners stick out, and a corner is a solution with one coefficient at exactly zero. Slide the λ control with lasso selected and watch the green dot ride the diamond&rsquo;s edge until it snaps onto the vertical axis at λ ≈ 3, where the first coefficient is zero from then on.
-                </p>
-                <p>
-                  Lasso produces zeros because the shape of its penalty has corners on the coefficient axes, and ridge does not because a circle has none.
-                </p>
+<p>A circular penalty boundary has no special preference for a coordinate axis, so ridge does not generally select exact zeros. A diamond has corners on those axes, allowing a range of residual-error contours to meet the boundary where a coefficient is zero. With lasso selected, the displayed solution reaches the vertical axis near λ = 3.</p>
+                <p>The corners explain why lasso often gives exact zeros. Ridge’s smooth boundary lacks the same threshold behavior, although a particular dataset can still give a zero ridge coefficient.</p>
 </>
               </SubSection>
             </>
@@ -742,9 +668,10 @@ export default function RidgeLassoPage() {
                   allowModelToggle
                 />
                 <p>
+
                   The pattern to see is in the scores panel. Training R² only
                   falls as λ grows. Held-out R² rises first, because the
-                  unpenalised fit was memorising the eleven training readings,
+                  unpenalized fit was memorizing the eleven training readings,
                   and then falls, because too much restraint stops the curve
                   from following the arc at all. Under ridge the turn is near
                   λ = 0.0001 on this split, and under lasso near 0.1. Those
@@ -759,15 +686,7 @@ export default function RidgeLassoPage() {
               </SubSection>
 
               <SubSection title="19. Choosing λ">
-                <p>
-                  The old rule on this page said the right penalty is past the
-                  wiggle and short of the flatline, and the box at the top
-                  still shows what that means. Keep it as a picture of the
-                  trade and not as a procedure. A curve that looks moderate is
-                  not evidence that it will predict well, and two λ values that
-                  produce curves you could not tell apart by eye can differ by a
-                  tenth in held-out score.
-                </p>
+                <p>The curve’s appearance can help identify behavior worth investigating, but it is not a validation procedure. Two penalties can produce visually similar curves with different errors on excluded observations. Use those prediction errors when choosing a strength.</p>
                 <p>
                   The procedure is the one section 18 previews. Fit several
                   candidate values of λ on the training rows. Score each on
@@ -787,7 +706,7 @@ export default function RidgeLassoPage() {
                 </p>
               </SubSection>
 
-              <SubSection title="20. Degree selection versus regularisation">
+              <SubSection title="20. Degree selection versus regularization" id="20-degree-selection-versus-regularisation">
                 <p>
                   Both reduce overfitting and they make different choices.
                   Choosing a lower degree removes whole columns from the model.
@@ -804,7 +723,7 @@ export default function RidgeLassoPage() {
                       ["5", "0.988", "0.966", "−0.272", "−1.642"],
                       ["9", "0.929", "0.936", "−0.317", "−1.405"],
                     ]}
-                    caption="Flexibility has two controls, and validation can choose both. The best cell here is degree 2 with a small penalty, and degree 9 with the right penalty is close behind."
+                    caption="Degree and penalty both affect validation results. Among these displayed cells, degree two with penalty 0.01 has the highest held-out score."
                   />
                 </WorkedExample>
                 <p>
@@ -836,53 +755,28 @@ export default function RidgeLassoPage() {
                   ]}
                 />
                 <p>
-                  With one centred feature XᵀX is the single number Σx², and
+
+                  With one centered feature XᵀX is the single number Σx², and
                   the last line is section 10&rsquo;s formula. With the
                   intercept in play it is either kept out of β and fitted
-                  separately on centred data, as this page does, or the
+                  separately on centered data, as this page does, or the
                   identity matrix gets a zero in the intercept&rsquo;s position
                   so that it alone goes uncharged. And as on the polynomial
                   page, the system is solved directly rather than by forming
                   an inverse.
                 </p>
                 <WhyThisWorks title="Why λI steadies the solution">
-                  <p>
-                    XᵀX for the standardized degree-9 columns on the fifteen
-                    readings has eigenvalues running from 0 up to 125.7. Two of
-                    them are zero to machine precision and the next is one
-                    millionth, so the ratio of largest to smallest is about
-                    7.6 trillion, and solving the plain normal equations means
-                    dividing by numbers that are effectively noise. That is
-                    where the coefficients of 85,263 come from.
-                  </p>
-                  <p>
-                    Adding λI adds λ to every eigenvalue and changes nothing
-                    else about the matrix. At λ = 1 the smallest becomes 1 and
-                    the ratio falls to 126.7. The directions the data could
-                    not pin down are pinned to zero instead of to noise, and
-                    the directions it could pin down are barely touched.
-                  </p>
+                  <p>For the standardized degree-nine columns, XᵀX has a largest eigenvalue of 125.7 and very small eigenvalues at the other end. Two round to zero at the displayed precision; using the underlying values gives a largest-to-smallest ratio of about 7.6 trillion. Small changes in the data or arithmetic can then produce large changes in the fitted coefficients, as the coefficient of 85,263 illustrates.</p>
+                  <p>Adding λI shifts every eigenvalue by λ while preserving the eigenvectors. At λ = 1, the smallest is approximately one and the largest-to-smallest ratio is about 126.7. Contributions along weakly supported directions are strongly reduced; contributions along directions with much larger eigenvalues change less. The positive penalty also makes the feature-coefficient system invertible.</p>
                 </WhyThisWorks>
               </SubSection>
 
               <SubSection title="22. Why lasso requires a different solver">
                 <Equation>{"J(β) = ‖y − Xβ‖² + λ‖β‖₁"}</Equation>
-                <p>
-                  The same first step fails on the second term. |β| has no
-                  ordinary derivative at zero, so there is no gradient to set to
-                  zero and no linear system to solve, and lasso has no
-                  normal-equations solution with many features. It does have
-                  one with a single standardized feature, which is section 13,
-                  and in a few special designs, but nothing that plays the role
-                  of (XᵀX + λI)⁻¹.
-                </p>
+                <p>The absolute-value penalty has no ordinary derivative at zero, so setting an ordinary gradient to zero everywhere does not produce a single linear system for general lasso problems. The one-feature case has the threshold formula from section 13, and some special multifeature designs also simplify. In general we use a solver that handles the corners explicitly.</p>
                 <>
-<p>
-                  What it has instead is the corner. At zero the absolute value admits every slope between −λ and +λ, a subgradient rather than a gradient, and zero is optimal whenever the data&rsquo;s pull on that coefficient lies inside the range. The solver used here is coordinate descent. It sweeps the coefficients one at a time, and for each it holds the others fixed, which reduces the problem to section 13&rsquo;s one-feature case on the current residual, applies the soft threshold, and moves on.
-                </p>
-                <p>
-                  Repeated until nothing moves, that arrives at the lasso solution, one soft threshold at a time.
-                </p>
+<p>At zero, the penalty λ times absolute value has subgradient interval from −λ to +λ. The coordinate-descent solver updates one coefficient at a time while holding the others fixed. Each update uses the current residual after accounting for the other coefficients, solves the corresponding one-feature threshold problem, and then moves to the next coefficient.</p>
+                <p>Repeated sweeps approach a lasso minimum under the solver’s conditions. The implementation stops according to a numerical tolerance or iteration limit. Check that status before treating the returned coefficients as a sufficiently converged solution.</p>
 </>
               </SubSection>
             </>
@@ -891,7 +785,7 @@ export default function RidgeLassoPage() {
         {
           title: "Part 9. Boundaries and Forward Connections",
           content: (
-            <SubSection title="23. What regularisation does and does not tell us">
+            <SubSection title="23. What regularization does and does not tell us" id="23-what-regularisation-does-and-does-not-tell-us">
               <p>
                 After standardization and shrinkage a coefficient is not the
                 number it was on the earlier pages. It is biased toward zero on
@@ -904,14 +798,15 @@ export default function RidgeLassoPage() {
               </p>
               <InAModel>
                 <p>
-                  Regularisation helps with the problems this page showed,
+
+                  Regularization helps with the problems this page showed,
                   excessive variance, correlated features, unstable
                   coefficients and a model more flexible than its data can
                   support. It does not repair a missing feature, a biased
                   sample, a wrongly recorded target, data whose distribution
                   has shifted since it was collected, a leak between the
                   training rows and the held-out rows, or a model of the wrong
-                  form altogether. A penalised fit on the wrong columns is a
+                  form altogether. A penalized fit on the wrong columns is a
                   stable fit on the wrong columns.
                 </p>
                 <p>
@@ -931,7 +826,7 @@ export default function RidgeLassoPage() {
           title: "Questions on Parts 6 to 9",
           quiz: [
             choice(
-              "Why does lasso produce zeros where ridge does not?",
+              "Why does the lasso penalty tend to produce more exactly zero coefficients than ridge?",
               [
                 "Its penalty is a diamond whose corners lie on the axes, and an expanding ellipse very often touches a corner first",
                 "Its penalty is larger, so more coefficients are pushed past zero",
@@ -939,7 +834,7 @@ export default function RidgeLassoPage() {
                 "Ridge rounds its smallest coefficients up rather than down",
               ],
               0,
-              "A corner is a solution with one coefficient at exactly zero, and corners stick out. An ellipse meeting a circle touches it at a point with no special relationship to the axes, so both coefficients come out nonzero, and a circle has no corners for the contour to meet.",
+              "In two coefficient dimensions, a fixed absolute-value penalty has a diamond-shaped boundary whose corners lie on the axes. A training-error contour can first touch a corner, producing an exactly zero coefficient. The squared penalty has a smooth circular boundary, with no special corner at zero. This explains lasso's tendency toward sparse solutions, rather than a guarantee that every ridge coefficient is nonzero.",
             ),
             several(
               "Which of these hold for the lasso paths on the nine polynomial terms?",
@@ -950,7 +845,7 @@ export default function RidgeLassoPage() {
                 "A model that ends with most coefficients at zero is a list of which features matter",
               ],
               [0, 1, 2],
-              "A term that was switched off can come back when a correlated neighbour is shrunk and its share of the work needs picking up. What survives is not a tidy polynomial of some lower degree, and the result is a sparse predictive representation rather than a ranking of importance, since the first term out is the cheapest to absorb on this sample.",
+              "A term that was switched off can come back when a correlated neighbor is shrunk and its share of the work needs picking up. What survives is not a tidy polynomial of some lower degree, and the result is a sparse predictive representation rather than a ranking of importance, since the first term out is the cheapest to absorb on this sample.",
             ),
             trueFalse(
               "The penalty can be chosen by reading the training score.",
@@ -958,7 +853,7 @@ export default function RidgeLassoPage() {
               "Training R² only falls as λ grows, since every penalty is a constraint the free fit did not have, so that side of the chart always prefers λ = 0. The penalty is chosen by performance on data that did not determine the coefficients, and where it matters the choice is confirmed once on data that took no part in choosing it. The same held-out score can choose the degree too. On this split a small penalty lifted degree 2 from 0.989 to 0.996, while λ = 1 was a heavy penalty whatever the degree.",
             ),
             choice(
-              "XᵀX on the standardized degree-9 columns has eigenvalues from 0 up to 125.7, a ratio of about 7.6 trillion. What does adding λI at λ = 1 do?",
+              "On the standardized degree-nine columns, XᵀX has eigenvalues from nearly zero up to 125.7 and a ratio of about 7.6 trillion. What does adding λI at λ=1 do?",
               [
                 "It adds λ to every eigenvalue, so the smallest becomes 1 and the ratio falls to 126.7",
                 "It removes the two zero eigenvalues from the matrix",
@@ -966,19 +861,19 @@ export default function RidgeLassoPage() {
                 "It leaves the ratio alone and shrinks the coefficients separately",
               ],
               0,
-              "Two of the eigenvalues are zero to machine precision and the next is one millionth, so solving the plain normal equations means dividing by numbers that are effectively noise, which is where the coefficient of 85,263 came from. Adding λI changes nothing else about the matrix, so the directions the data could not pin down are pinned to zero instead of to noise while the ones it could are barely touched.",
+              "Adding λI raises every eigenvalue by λ. At λ=1 the smallest is approximately one and the largest approximately 126.7, greatly reducing the ratio. In an eigendirection, ridge uses the shifted denominator when solving for the coefficients. Weakly determined directions are damped most strongly; they are not all set exactly to zero.",
             ),
             trueFalse(
               "A penalty is the right repair for a biased sample or a leak between the training and held-out rows.",
               false,
-              "Regularisation helps with excessive variance, correlated features, unstable coefficients and a model more flexible than its data can support. A penalised fit on the wrong columns is a stable fit on the wrong columns, and a missing feature, a shifted distribution or a leak belong to evaluation and to data preparation instead.",
+              "Regularization helps with excessive variance, correlated features, unstable coefficients and a model more flexible than its data can support. A penalized fit on the wrong columns is a stable fit on the wrong columns, and a missing feature, a shifted distribution or a leak belong to evaluation and to data preparation instead.",
             ),
         ],
         },
         {
           title: "Practice. Restraining the Degree-9 Curve With the Library",
           practice: [
-            exercise("Tame the degree-9 curve",["Fit the fifteen noisy readings at degree 9 the way every fit on this page does, power columns from PolynomialFeatures and then every column standardized, and fit RidgeRegression at no penalty and at λ = 1. For each, print the training R squared, the largest coefficient in size, the intercept, and the objective in its two halves, RSS plus λ times the sum of squared coefficients.", "Part 2 quotes 0.997 and a largest coefficient of 85,263 at no penalty, 0.846 and 7.64 at λ = 1, an intercept of 12.76, and an objective at λ = 1 of about 101 plus 79. The page gives the residual cost there only to the nearest whole number."],`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
+            exercise("Tame the degree-9 curve",["Expand the fifteen noisy throw times to degree nine with PolynomialFeatures, then standardize each expanded column. Fit RidgeRegression at penalties 0 and 1. Print training R², the largest absolute coefficient and the intercept for each fit.", "Also print the residual sum of squares, the penalty multiplied by the sum of squared coefficients, and their total objective. Leave the intercept out of the penalty. Compare the reduction in coefficient sizes with the increase in training error."],`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2])
@@ -1007,8 +902,8 @@ for penalty in [0.0, 1.0]:
     print(f"  RSS {evaluation.residual_sum_of_squares:.2f} + penalty cost {penalty * squares:.2f} = objective {evaluation.residual_sum_of_squares + penalty * squares:.2f}")`,`penalty 0.0: R squared 0.997, largest coefficient 85,263.31, intercept 12.76
   RSS 1.68 + penalty cost 0.00 = objective 1.68
 penalty 1.0: R squared 0.846, largest coefficient 7.64, intercept 12.76
-  RSS 101.04 + penalty cost 79.17 = objective 180.21`,{...{ hints: ["PolynomialFeatures and Standardizer are both fitted and then asked to transform, and the standardized columns keep the power columns’ names, t through t^9. RidgeRegression takes them like any other features, and its penalty is a constructor field.", "The coefficients iterate as named pairs with a value each, so the largest in size is a max over abs(coefficient.value) and the penalty’s sum is a sum over coefficient.value squared.", "evaluate answers an object carrying residual_sum_of_squares and r2_score. The penalty cost is λ times the sum of squares, which the fit minimised together with the RSS, and the intercept is uncharged so it stays at 12.76 whatever λ is."], check: numberCheck("What residual sum of squares does the ridge fit at λ = 1 report?", 101.04, 0.01, "The ridge fit accepts greater residual error in exchange for much smaller coefficients under the stated RSS-plus-penalty objective. That training tradeoff does not by itself choose the penalty for new observations.") },question:"How does the coefficient penalty trade training fit for smaller weights?"}),
-            exercise("Shrink one slope by hand and by library",["Sections 10 and 13 work the one-feature case on the five people, heights centred so the cross-product is 200 and the sum of squares is 250. Fit RidgeRegression and LassoRegression on the centred heights at penalties of 0, 100, 250, 400 and 500, and print each slope beside the formula the page gives for it.", "Ridge should follow 200 / (250 + λ) and lasso should follow max(0, 200 − λ/2) / 250, reaching exactly zero at λ = 400 and staying there. The page says ridge passes 0.31 at that λ and keeps gliding."],`from oop_ml import Feature, LassoRegression, RidgeRegression
+  RSS 101.04 + penalty cost 79.17 = objective 180.21`,{...{ hints: ["PolynomialFeatures and Standardizer are both fitted and then asked to transform, and the standardized columns keep the power columns’ names, t through t^9. RidgeRegression takes them like any other features, and its penalty is a constructor field.", "The coefficients iterate as named pairs with a value each, so the largest in size is a max over abs(coefficient.value) and the penalty’s sum is a sum over coefficient.value squared.", "evaluate answers an object carrying residual_sum_of_squares and r2_score. The penalty cost is λ times the sum of squares, which the fit minimized together with the RSS, and the intercept is uncharged so it stays at 12.76 whatever λ is."], check: numberCheck("What residual sum of squares does the ridge fit at λ = 1 report?", 101.04, 0.01, "The ridge fit accepts greater residual error in exchange for much smaller coefficients under the stated RSS-plus-penalty objective. That training tradeoff does not by itself choose the penalty for new observations.") },question:"How does the coefficient penalty trade training fit for smaller weights?"}),
+            exercise("Shrink one slope by hand and by library",["Fit RidgeRegression and LassoRegression to the five centered heights and weights below at penalties 0, 100, 250, 400 and 500. For each penalty, print the fitted slope beside its one-feature formula. Use the RSS-plus-penalty convention from the lesson.", "The ridge formula divides the centered cross-product by the sum of squared centered heights plus the penalty. The lasso formula first reduces the positive cross-product by half the penalty and clips it at zero. Use the supplied cross-product 200 and sum of squares 250, then compare where each fitted slope becomes zero."],`from oop_ml import Feature, LassoRegression, RidgeRegression
 
 centred_heights = Feature("height", [-10, -5, 0, 5, 10])
 weights = Feature("weight", [58, 66, 68, 74, 74])
@@ -1030,8 +925,8 @@ for penalty in [0, 100, 250, 400, 500]:
 penalty 100: ridge 0.5714 (formula 0.5714), lasso 0.6000 (formula 0.6000)
 penalty 250: ridge 0.4000 (formula 0.4000), lasso 0.3000 (formula 0.3000)
 penalty 400: ridge 0.3077 (formula 0.3077), lasso 0.0000 (formula 0.0000)
-penalty 500: ridge 0.2667 (formula 0.2667), lasso 0.0000 (formula 0.0000)`,{...{ hints: ["Both models take the same list of one feature and the same target, and both read their slope by name, coefficients['height']. Neither charges the intercept, which stays at the mean weight of 68.", "The five heights are 160, 165, 170, 175 and 180, so centring on 170 gives −10 to 10, and the sums the page quotes follow: squares of 100, 25, 0, 25, 100 add to 250, and the cross-products with the centred weights add to 200.", "Lasso at exactly zero prints 0.0000 and not a small number. The corner holds the minimum once λ/2 reaches 200, so from 400 on the slope is exactly zero rather than merely tiny."], check: numberCheck("What slope does ridge report at λ = 400, to four places?", 0.3077, 0.0005, "For this nonzero one-feature cross-product, ridge approaches zero as the penalty grows but does not reach it at a finite penalty. Lasso's threshold can remove the slope exactly under the supplied objective convention.") },question:"Why can lasso remove the slope while ridge only shrinks it in this example?"}),
-            exercise("Find where the held-out score turns",["Section 18 traces two scores across the penalty. Reproduce the ridge half on the page’s split, which keeps back the readings at t = 0, 0.29, 2.86 and 3.43 and fits on the other eleven, with the power columns and the standardization both learned from the eleven alone. Fit at penalties of 0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1 and 10 and print both scores each time.", "The training score should only fall as λ grows. The held-out score should climb from ruin at no penalty to 0.993 near λ = 0.0001 and then fall, reaching −0.317 at λ = 1 and −1.405 at 10, which are the degree-9 row of section 20’s table. The page does not say what it reads at 0.001."],`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
+penalty 500: ridge 0.2667 (formula 0.2667), lasso 0.0000 (formula 0.0000)`,{...{ hints: ["Both models take the same list of one feature and the same target, and both read their slope by name, coefficients['height']. Neither charges the intercept, which stays at the mean weight of 68.", "The centered heights are −10, −5, 0, 5 and 10. Sum their squares to check the supplied 250. Multiplying those heights by the centered weights and summing gives the cross-product 200.", "Lasso at exactly zero prints 0.0000 and not a small number. The corner holds the minimum once λ/2 reaches 200, so from 400 on the slope is exactly zero rather than merely tiny."], check: numberCheck("What slope does ridge report at λ = 400, to four places?", 0.3077, 0.0005, "For this nonzero one-feature cross-product, ridge approaches zero as the penalty grows but does not reach it at a finite penalty. Lasso's threshold can remove the slope exactly under the supplied objective convention.") },question:"Why can lasso remove the slope while ridge only shrinks it in this example?"}),
+            exercise("Find where the held-out score turns",["Hold out the readings at times 0, 0.29, 2.86 and 3.43. Fit degree-nine power columns and their standardization using only the eleven training rows. Fit ridge at each supplied penalty and print training and held-out R².", "Compare the two score sequences. Increasing the penalty restricts coefficient sizes, but the best held-out result need not occur at the smallest penalty. Use this split to compare candidates rather than treating its selected best score as a final independent test."],`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
 heights = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1075,8 +970,8 @@ penalty 0.001: training R squared 0.996, held-out R squared 0.992
 penalty 0.01: training R squared 0.993, held-out R squared 0.936
 penalty 0.1: training R squared 0.975, held-out R squared 0.638
 penalty 1: training R squared 0.876, held-out R squared -0.317
-penalty 10: training R squared 0.731, held-out R squared -1.405`,{...{ hints: ["The means and standard deviations have to be learned from the training rows only and applied unchanged to the hidden rows, which is why the Standardizer is fitted once on the training terms and then transforms both shares.", "score takes features and a target and answers R squared, so one call on each share gives the two curves of section 18.", "The ruin at no penalty is the polynomial page’s collapse seen again on standardized columns, and a held-out score below zero means the curve is worse on those four readings than a flat guess at their mean."], check: numberCheck("What held-out R squared does ridge reach at λ = 0.001?", 0.992, 0.001, "The held-out score improves over part of this penalty range and then deteriorates. Training fit alone would favour too little restraint here, so use separate validation evidence when choosing the penalty.") },question:"Which penalties predict the held-out readings best?"}),
-            exercise("Move one reading and refit",["Section 3 fits the same degree-9 model on the noisy throw and on the same readings with one of them moved a metre and a half. Sample B is sample A with the reading at t = 2.0 lifted from 21.0 to 22.5. Fit both samples at no penalty and at λ = 1, and print the training R squared and the largest coefficient in size each time.", "The table in section 3 reads 0.997 and 85,263 for sample A and 0.993 and 76,525 for sample B at no penalty, and 7.64 against 7.80 at λ = 1. It does not give sample B’s training score at λ = 1."],`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
+penalty 10: training R squared 0.731, held-out R squared -1.405`,{...{ hints: ["The means and standard deviations have to be learned from the training rows only and applied unchanged to the hidden rows, which is why the Standardizer is fitted once on the training terms and then transforms both shares.", "score takes features and a target and answers R squared, so one call on each share gives the two curves of section 18.", "A negative held-out R² means the squared prediction error exceeds the squared error from predicting those held-out targets' own mean. Inspect those predictions as well as their summary score."], check: numberCheck("What held-out R squared does ridge reach at λ = 0.001?", 0.992, 0.001, "The held-out score improves over part of this penalty range and then deteriorates. Training fit alone would favor too little restraint here, so use separate validation evidence when choosing the penalty.") },question:"Which penalties predict the held-out readings best?"}),
+            exercise("Move one reading and refit",["Compare the same degree-nine model on sample A and sample B, where the height at t=2.0 changes from 21.0 to 22.5 meters. Fit both target samples at penalties 0 and 1. Print training R² and the largest absolute coefficient for all four fits.", "Keep the time features and their fitted standardization fixed between samples. Compare how much the coefficients change with and without regularization. A close training fit alone does not establish that the coefficients are stable."],`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 sample_a = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1103,7 +998,7 @@ for label, readings in [("A, the noisy throw", sample_a), ("B, one reading moved
         print(f"sample {label}, penalty {penalty}: training R squared {model.score(standardized, heights):.3f}, largest coefficient {largest:,.2f}")`,`sample A, the noisy throw, penalty 0.0: training R squared 0.997, largest coefficient 85,263.31
 sample A, the noisy throw, penalty 1.0: training R squared 0.846, largest coefficient 7.64
 sample B, one reading moved, penalty 0.0: training R squared 0.993, largest coefficient 76,524.72
-sample B, one reading moved, penalty 1.0: training R squared 0.840, largest coefficient 7.80`,{...{ hints: ["The times are the same in both samples, so the power columns and their standardization are built once and only the target changes between the two fits.", "A target is a Feature like any other, so sample B is Feature('h', sample_b), and the two fits read the same way as the first problem’s.", "The largest coefficient is a max over abs(coefficient.value). Printing it with a thousands separator, the format :,.2f, makes 85,263.31 readable beside the page’s 85,263."], check: numberCheck("What training R squared does sample B score at λ = 1?", 0.84, 0.001, "The penalised fits respond more similarly to this changed measurement than the unpenalised high-degree fits. This is a measured stability improvement on these two samples, not a guarantee that every coefficient or prediction stays fixed.") },question:"Does regularisation reduce the response to one changed measurement?"}),
+sample B, one reading moved, penalty 1.0: training R squared 0.840, largest coefficient 7.80`,{...{ hints: ["The times are the same in both samples, so the power columns and their standardization are built once and only the target changes between the two fits.", "A target is a Feature like any other, so sample B is Feature('h', sample_b), and the two fits read the same way as the first problem’s.", "The largest coefficient is a max over abs(coefficient.value). Printing it with a thousands separator, the format :,.2f, makes 85,263.31 readable beside the page’s 85,263."], check: numberCheck("What training R squared does sample B score at λ = 1?", 0.84, 0.001, "The penalized fits respond more similarly to this changed measurement than the unpenalized high-degree fits. This is a measured stability improvement on these two samples, not a guarantee that every coefficient or prediction stays fixed.") },question:"Does regularization reduce the response to one changed measurement?"}),
           ],
         },
       ]}

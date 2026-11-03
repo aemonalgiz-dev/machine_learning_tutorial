@@ -239,9 +239,10 @@ export function Word2vecPlayground() {
         occurrences and {fit.n_words} distinct words, half the sentences drawn
         from a list of verb forms (
         <span style={{ color: VERB }}>indigo</span>) and half from a list of
-        words about money (<span style={{ color: MONEY }}>amber</span>). Nothing
-        told the fit which list a word came from, so a neighbour in the other
-        colour is the fit getting it wrong.
+        words about money (<span style={{ color: MONEY }}>amber</span>). Training
+        uses the word contexts without these group labels. The colors let us
+        check whether the learned neighbors reflect the two groups in this
+        constructed corpus.
       </Legend>
       {message && <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>}
     </div>

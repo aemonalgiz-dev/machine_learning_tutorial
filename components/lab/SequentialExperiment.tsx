@@ -63,7 +63,7 @@ export function ActionSequence({lesson}: {lesson:string}) {
   return <section aria-label="Learn through actions" className="space-y-4 rounded-xl border border-line bg-raised p-4 sm:p-6">
     <h3 className="text-lg font-semibold">Choose an action and watch one Q entry change</h3>
     <BotieSays>In this toy environment, watering makes the bed moist and costs one reward unit. Waiting while dry earns minus two. Waiting while moist completes the task and earns three. Try an episode, keep the learned table, and try again.</BotieSays>
-    <p className="text-sm leading-6">The learning rate is 0.5 and discount is 0.9. You choose the behaviour actions; the Q-learning target uses the largest next-state estimate. This deterministic teaching environment is not a real watering controller.</p>
+    <p className="text-sm leading-6">The learning rate is 0.5 and discount is 0.9. You choose the behavior actions; the Q-learning target uses the largest next-state estimate. This deterministic teaching environment is not a real watering controller.</p>
     <p role="status" className="font-semibold">{done ? "Episode complete. Start another to reuse what was learned." : `Current state: ${state === 0 ? "dry" : "moist"}.`} Updates made: {steps}.</p>
     <div className="flex flex-wrap gap-3">
       <button className={button} disabled={done} onClick={() => choose(0)}>Water</button>

@@ -63,8 +63,8 @@ export function PracticeMembership({ accessDenied = false, onAccessRetry }: { ac
     <Link href="/#course" className="game-button game-button-primary">Explore the free course →</Link>
   </div>;
   if (!account.user) return <div className="space-y-5 rounded-xl border border-line bg-surface p-6">
-    <h2 className="text-2xl font-semibold">Try the same idea on different data</h2>
-    <p className="leading-7 text-muted">After a lesson, it helps to work through another example yourself. The additional practice library has more problems for that. Sign in to see the monthly and annual membership options.</p>
+    <h2 className="text-2xl font-semibold">Additional practice</h2>
+    <p className="leading-7 text-muted">The practice library adds quizzes, programming challenges and workshops based on the course material. Problems include different sets of inputs, so you can check whether your solution works when the data changes. Sign in to see the monthly and annual membership options.</p>
     <Link className="game-button game-button-primary" href="/account?returnTo=%2Fmembership">Sign in or create an account</Link>
     <p className="text-sm leading-6 text-muted">The course and its existing exercises are free. A free account also keeps your learning progress and drafts.</p>
   </div>;
@@ -127,7 +127,7 @@ function AccountMembership({ owner, accessDenied, onAccessRetry }: { owner: stri
   return <section aria-label="Practice membership" className="space-y-5 rounded-xl border border-line bg-surface p-6 sm:p-8">
     <div className="space-y-3">
       <h2 className="text-2xl font-semibold">{alreadySubscribed ? "Your extra practice membership" : "Extra practice"}</h2>
-      <p className="leading-7 text-muted">Once you&apos;ve worked through a lesson, try its method on different data. These extra problems give you more cases to work through, with tests and feedback as you go.</p>
+      <p className="leading-7 text-muted">The practice library adds quizzes, programming challenges and workshops based on the course material. Problems use different sets of inputs, and the programming challenges and workshops test your solution on changed data.</p>
     </div>
     {error && <div role="alert" className="space-y-3"><p>{error}</p><button className={button} onClick={() => { setBilling(null); setError(""); setAttempt(value => value + 1); }} disabled={Boolean(busy)}>Try membership details again</button></div>}
     {!billing && !error && <p role="status" className="text-sm text-muted">Loading membership options…</p>}

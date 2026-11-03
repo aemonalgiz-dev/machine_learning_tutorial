@@ -50,7 +50,7 @@ export function PictureCells({
       width={size}
       height={size}
       role="img"
-      aria-label={title ?? "A sixteen by sixteen picture, one grey square per pixel"}
+      aria-label={title ?? "A sixteen by sixteen picture, one gray square per pixel"}
       shapeRendering="crispEdges"
       className="max-w-full shrink-0 rounded-sm"
       style={{

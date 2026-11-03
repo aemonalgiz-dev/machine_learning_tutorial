@@ -150,10 +150,11 @@ export function Word2vecRareWord() {
 
       <Legend>
         The rare word was put into two sentences of the same corpus and appears
-        nowhere else, so everything about its position comes from those two
-        windows and from wherever it happened to start. Nothing in the answer
-        says so; it is a vector of the same width, reported with the same
-        confidence as any other.
+        nowhere else. Its learned position therefore depends on those windows
+        and its random starting values. It has the same number of coordinates
+        as a common word, but that width tells us nothing about how much
+        evidence supported the position. The returned vector has no uncertainty
+        estimate attached.
       </Legend>
       {message && <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>}
     </div>

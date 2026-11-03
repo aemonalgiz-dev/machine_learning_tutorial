@@ -26,9 +26,9 @@ import { TreeWalkPlayground } from "@/components/widgets/TreeWalkPlayground";
 import { UnitConversion } from "@/components/widgets/UnitConversion";
 
 export const metadata: Metadata = {
-  title: "Decision Trees · oop_ml",
+  title: "Decision Trees · Perceptron Lab",
   description:
-    "A series of simple questions can narrow down a decision. A decision tree learns which questions to ask from the examples and places a prediction at the end of each route.",
+    "A decision tree divides observations through a sequence of questions about their measurements. Each route ends in a prediction, making the fitted decisions traceable while leaving their reliability dependent on the examples used.",
 };
 
 const linkClass =
@@ -57,7 +57,7 @@ export default function DecisionTreesPage() {
       playgroundTitle="Follow a person through the tree's questions"
       playgroundIntro="Follow one point from the first question to its final leaf. Then compare how changing the tree's depth changes its prediction regions."
       title="Decision Trees"
-      tagline={"A series of simple questions can narrow down a decision. A decision tree learns which questions to ask from the examples and places a prediction at the end of each route."}
+      tagline={"A decision tree divides observations through a sequence of questions about their measurements. Each route ends in a prediction, making the fitted decisions traceable while leaving their reliability dependent on the examples used."}
       prerequisites={
         <>
           Only the idea of classifying, predicting which of two groups someone
@@ -78,11 +78,7 @@ export default function DecisionTreesPage() {
           content: (<>
 <>
               <SubSection title="1. A prediction made from questions">
-                <p>
-                  Press the ideal case button in the box above. Eleven people,
-                  five children and six adults, and the whole model is one
-                  question.
-                </p>
+                <p>Load the ideal case above. It contains eleven people, five labeled children and six labeled adults. In these measurements, one height threshold separates the groups. We can read the entire prediction rule as a single question.</p>
                 <Equation>{"Is height less than 151.5 cm?\n  yes → predict child\n  no  → predict adult"}</Equation>
                 <p>
                   That is a decision tree with one question in it. The plane
@@ -112,12 +108,7 @@ export default function DecisionTreesPage() {
               </SubSection>
 
               <SubSection title="3. Walking one observation through the tree">
-                <p>
-                  A grown tree is a route map, and the way to feel that is to
-                  send someone down it. The crowd below is sixteen people
-                  chosen so that both questions matter, and the tree is kept
-                  two questions deep so the whole map fits in one look.
-                </p>
+                <p>We can understand a fitted tree by following one observation through its questions. The example below uses sixteen people arranged so that both height and weight matter. Keeping the tree two questions deep lets us see every possible route.</p>
                 <TreeWalkPlayground />
                 <p>
                   A person&rsquo;s height reaches the root question. The
@@ -138,13 +129,7 @@ export default function DecisionTreesPage() {
                   weight is asked. Same tree, one question for one person and
                   two for another.
                 </p>
-                <p>
-                  Path length varies across observations, and a shorter path is
-                  not a better or more confident answer. It is a cheaper one.
-                  The tree asked as much as it needed to reach a leaf and no
-                  more, which is a quiet efficiency, and it says nothing about
-                  which prediction is more likely to be right.
-                </p>
+                <p>Some observations reach a prediction after fewer questions than others. That makes their prediction cheaper to compute. It does not make it more reliable: the path length tells us how much work the tree did, while reliability depends on the evidence behind the prediction.</p>
               </SubSection>
             </>
 </>),
@@ -225,35 +210,14 @@ export default function DecisionTreesPage() {
                     ["height < 151.5", "5 children", "6 adults", "both sides pure"],
                   ]}
                 />
-                <p>
-                  The best of these three questions is easy to spot because its two groups have clearer labels. A computer needs a numerical comparison to choose it. There are seventeen other candidate splits here too, so in the next part we will build a score that can compare all of them.
-                </p>
+                <p>The third question gives the clearest division among these three candidates. A computer needs a numerical criterion to compare it with the other candidates. There are nineteen candidate splits in all for this dataset. Next we will build the score used to compare them.</p>
                 <p>A leaf predicts its majority class for everyone who reaches it. Every minority observation in that leaf is therefore a training mistake under this rule. A useful split sends observations into groups where that majority prediction makes fewer errors or where class mixing is reduced.</p>
               <p>In this example, the third question leaves no minority on either side and correctly classifies all eleven people. The first leaves three children on a side with six adults. The second leaves one minority observation. We now have concrete groups to compare before introducing a numerical impurity score.</p>
               </SubSection>
 
               <SubSection title="9. Pure and mixed nodes">
-                <p>
-                  A node is pure when every observation in it has the same
-                  label. Five children and no adults is pure. Four children and
-                  one adult is mildly mixed. Five and five is as mixed as two
-                  classes can be. The split score has to measure the degree of
-                  mixture, so that a question can be scored by how much
-                  mixture it removes, and section 10 is that measure.
-                </p>
-                <p>
-                  The measure has to be a number rather than a judgement, so
-                  that nineteen candidates can be ranked rather than three
-                  compared by eye, and two things are fixed about it before
-                  any formula is chosen. It must be zero for a pure node,
-                  since there is no mixture left to remove, and it must be
-                  largest at an even split, since five and five is the most
-                  mixed two classes can be. Any measure with those two
-                  properties, rising as the mixture does, ranks the three
-                  questions above the same way. Which one is used decides the
-                  arithmetic in between, and the next Part picks the one with
-                  the simplest story behind it.
-                </p>
+                <p>A node is called pure when all its observations have the same label. Five children and no adults is pure; four children and one adult still contains a mixture. Five and five is the most even mixture possible for two classes. To compare questions, we need a number that increases as the labels become more mixed. Section 10 introduces that measure.</p>
+                <p>A numerical measure lets the computer rank nineteen candidate questions instead of comparing three by eye. We want a pure node to receive zero, because its labels already agree. For two classes, the largest value should occur at an even mixture. Measures that increase with mixing agree on the three questions above, although their values between those cases can differ. The next Part explains the measure used here.</p>
               </SubSection>
             </>
           ),
@@ -301,28 +265,14 @@ export default function DecisionTreesPage() {
                   settles on the Gini value as the pairs accumulate.
                 </p>
                 <KeepInMind>
-                  <p>
-                    The draw is from the class distribution with replacement,
-                    so the same person can be drawn twice. Picking two
-                    different people out of the node without replacement is
-                    a slightly different calculation, and for a node of five
-                    children and six adults it gives 6/11 rather than 60/121.
-                    Gini is the first of these, and the difference vanishes as
-                    nodes get large.
-                  </p>
+                  <p>These are independent draws with replacement, so the same observation can be selected twice. Gini is the disagreement probability under that rule: 60/121 for five children and six adults. Drawing two different observations without replacement instead gives 6/11. The distinction becomes smaller as the node grows.</p>
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="12. Calculating root impurity">
                 <p>Five children and six adults.</p>
                 <Equation>{"p_child = 5/11        p_adult = 6/11\nG_root = 1 − (5/11)² − (6/11)² = 1 − 25/121 − 36/121 = 60/121 ≈ 0.496"}</Equation>
-                <p>
-                  Close to the two-class maximum of 0.5, so the root is highly
-                  mixed, which is right. What the number does not yet say is
-                  which question to ask. It describes the mixture before any
-                  question, and a question is scored by how much of it is
-                  removed.
-                </p>
+                <p>The result is close to the two-class maximum of 0.5, reflecting a highly mixed root. It describes the data before a question is asked. We still need to compare that starting mixture with the groups each candidate question would create.</p>
               </SubSection>
             </>
           ),
@@ -369,11 +319,7 @@ export default function DecisionTreesPage() {
 
               <SubSection title="15. Impurity reduction">
                 <Equation>{"gain = G_parent − (n_left / n)·G_left − (n_right / n)·G_right"}</Equation>
-                <p>
-                  Parent impurity is the mixture before the question. Weighted
-                  child impurity is what remains after it. The gain is what
-                  the question removed.
-                </p>
+                <p>The parent is the group before a split; its children are the resulting groups. Parent impurity measures the original mixture. Weighted child impurity measures the mixture that remains, accounting for how many observations enter each group. Their difference is the impurity gain.</p>
                 <NumberTable
                   headings={["question", "G_after", "gain"]}
                   rows={[
@@ -397,8 +343,9 @@ export default function DecisionTreesPage() {
             <>
               <SubSection title="16. Generating candidate thresholds">
                 <p>
+
                   For a continuous feature, sort the observations by it, find
-                  each pair of neighbouring distinct values, and put a
+                  each pair of neighboring distinct values, and put a
                   candidate threshold halfway between them. A threshold
                   anywhere else in the same gap divides the observations
                   identically, so it cannot score differently, and a threshold
@@ -488,10 +435,10 @@ export default function DecisionTreesPage() {
                 "The two-person node is too small to count",
               ],
               0,
-              "A plain average gives the two-person node as much say as the nine-person one. Weighting by share asks what the node of a randomly chosen person looks like, and most people land in the mixed node, which is why the weighted figure comes out higher than the average. The containers in the inspector are drawn at the width of their share for the same reason.",
+              "The split score weights each resulting node by the number of observations reaching it. The nine-person mixed node therefore has more influence than the two-person pure node:\n\n```math\nweighted impurity ≈ (2/11) × 0 + (9/11) × 0.444 ≈ 0.364\n```\n\nA plain average would give the nodes equal weight despite their different sizes.",
             ),
             trueFalse(
-              "Eleven distinct heights offer ten candidate thresholds, one at the midpoint of each gap between neighbouring values.",
+              "Eleven distinct heights offer ten candidate thresholds, one at the midpoint of each gap between neighboring values.",
               true,
               "A threshold anywhere else inside the same gap divides the observations identically and so cannot score differently, and one beyond the ends divides nothing, so the midpoints are the whole of what there is to try. The nine from the weights make nineteen questions in all, which is the whole search space for this crowd.",
             ),
@@ -531,11 +478,7 @@ export default function DecisionTreesPage() {
                     caption="Each split is chosen from its own node's people alone. The root's gain is modest, since this crowd was built so that no single question separates it."
                   />
                 </WorkedExample>
-                <p>
-                  A decision tree is built by applying one local search, over
-                  and over, to smaller and smaller subsets of the data. There
-                  is no global step anywhere in it.
-                </p>
+                <p>The tree repeats the same search within smaller subsets of observations. Each question is chosen using the data that reached its node. The procedure never evaluates all the questions in the completed tree together.</p>
               </SubSection>
 
               <SubSection title="20. Greedy construction">
@@ -547,24 +490,9 @@ export default function DecisionTreesPage() {
                   construction makes locally strong choices, and locally strong
                   is not globally optimal.
                 </p>
-                <p>
-                  The crowd below is the case that shows it. Four children on
-                  one diagonal, four adults on the other, so the classes are
-                  perfectly separable by two questions, height and then weight.
-                  But the root cannot see that far.
-                </p>
+                <p>The crossed example has four children on one diagonal and four adults on the other. A height question followed by a weight question on each branch can separate all eight. Each prediction path needs two questions, although the completed tree has three split nodes.</p>
                 <RootGainChart points={CROSSED_CROWD} />
-                <p>
-                  Every one of the six candidate questions leaves both sides
-                  exactly as mixed as the parent, so every gain is zero, the
-                  search admits nothing, and the tree stays one leaf calling
-                  everyone the same class at an accuracy of 0.5. A search with
-                  one step of lookahead would find the two-question tree that
-                  gets all eight right. The greedy search cannot, because the
-                  first question earns nothing on its own, and it is only
-                  worth asking for what it makes the second question able to
-                  do.
-                </p>
+                <p>All six candidate root questions have zero immediate gain. The implementation requires positive gain, so it stops with one leaf and accuracy 0.5. A lookahead search could recognize the useful second level. An algorithm permitted to take a zero-gain first split could also continue. This failure follows from the greedy criterion together with this stopping policy.</p>
               </SubSection>
             </>
           ),
@@ -591,16 +519,7 @@ export default function DecisionTreesPage() {
                   several leaves are mixed.
                 </p>
                 <KeepInMind>
-                  <p>
-                    Those shares are estimates from the training observations
-                    that happened to reach the leaf. A leaf of four people
-                    gives shares in steps of a quarter, and a leaf of one gives
-                    certainty about a single person, which is not certainty
-                    about anything. Small leaves produce unstable and
-                    overconfident estimates, and when the probabilities matter
-                    rather than the majority, smoothing or calibration on
-                    held-out data is the usual repair.
-                  </p>
+                  <p>The shares come from the training observations that reached this leaf. Four people give shares in steps of a quarter. A leaf containing one person reports complete agreement because it has no other observations to compare. Those estimates can change considerably with another sample. If probability estimates matter, consider larger leaves, smoothing, or calibration checked on held-out data.</p>
                 </KeepInMind>
               </SubSection>
 
@@ -633,19 +552,8 @@ export default function DecisionTreesPage() {
           content: (
             <>
               <SubSection title="23. Why tree growth must stop">
-                <p>
-                  With no restriction a tree keeps dividing until every leaf
-                  is pure, or every observation is alone in its own rectangle,
-                  or no eligible split is left. On the muddled crowd that takes
-                  ten splits and eleven leaves, seven questions deep, to reach
-                  a training accuracy of 1.000, with the last two splits each
-                  fencing off a single person at depth six. The growth widget
-                  below caps the depth at six, so it stops two splits short of
-                  that, at nine leaves and 0.857 with its two deepest leaves
-                  still mixed. Pure training leaves do not mean good
-                  predictions for new observations, and a tree needs rules for
-                  when more specialisation is no longer justified.
-                </p>
+                <p>An unrestricted tree keeps splitting while an eligible improvement is available. It may stop at pure leaves or because no candidate split is accepted. On the overlapping fourteen-person dataset, it reaches eleven leaves and depth seven with perfect training accuracy.</p>
+<p>The growth widget caps depth at six. It therefore stops at nine leaves and training accuracy 0.857, with two leaves still mixed. Restricting depth limits specialization; held-out predictions are needed to check whether the extra splits would help.</p>
               </SubSection>
 
               <SubSection title="24. Pre-pruning controls">
@@ -686,13 +594,7 @@ export default function DecisionTreesPage() {
                   objective.
                 </p>
                 <Equation>{"adjusted objective = training leaf error + α × number of leaves"}</Equation>
-                <p>
-                  A larger α buys fewer leaves, and the sequence of trees as α
-                  grows is a sequence of ever simpler candidates to judge on
-                  held-out data. Pruning simplifies an already grown tree by
-                  removing branches that do not earn their complexity, where
-                  the controls above stop them being grown at all.
-                </p>
+                <p>Increasing α makes each additional leaf more costly in the objective, so simpler trees become preferable. The resulting pruning sequence gives us candidates to compare on held-out data. Pruning removes branches from a tree that has already grown; the earlier controls prevent some branches from growing in the first place.</p>
                 <InAModel>
                   <p>
                     Every tree on this page grows under the controls of section
@@ -748,16 +650,7 @@ export default function DecisionTreesPage() {
                   spent to fence off one observation, and the cap is the only
                   reason more were not.
                 </p>
-                <p>
-                  Whether that was worth spending depends on what the
-                  observation is, and the tree cannot know. It might be a
-                  measurement error, a mislabelled person, a genuine rare
-                  case, a sign that a feature is missing, or a sign that the
-                  real pattern is complicated. A tree spends questions on an
-                  observation either way. What the held-out score in section
-                  26 measures is whether the fence around it turned out to be
-                  a repeatable pattern.
-                </p>
+                <p>An observation that needs several extra questions might be a measurement error or a genuine rare case. It might also indicate a missing feature or a complicated underlying relationship. The tree cannot tell which explanation is correct merely by fitting that observation. Held-out performance helps us check whether the extra distinctions also help with new cases.</p>
               </SubSection>
 
               <SubSection title="28. Bias, variance, and tree depth">
@@ -766,7 +659,7 @@ export default function DecisionTreesPage() {
                   rows={[
                     ["regions", "few and simple", "many and specific"],
                     ["can represent", "coarse structure only", "detailed interactions"],
-                    ["misses", "real interactions, higher bias", "less on the training set, lower bias"],
+                    ["approximation tendency", "limited flexibility can leave systematic patterns unrepresented", "more flexibility can represent finer patterns; training error alone does not measure bias"],
                     ["changes with the sample", "usually little, lower variance", "usually a lot, higher variance"],
                   ]}
                 />
@@ -790,7 +683,7 @@ export default function DecisionTreesPage() {
             trueFalse(
               "A leaf reporting shares of 0.75 and 0.25 is reporting counts of the training observations that happened to reach it.",
               true,
-              "That is all a leaf’s shares are. A leaf of four people gives them in steps of a quarter, and a leaf of one gives certainty about a single person, which is not certainty about anything. Small leaves produce unstable and overconfident estimates, and smoothing or calibration on held-out data is the usual repair when the probabilities matter rather than the majority.",
+              "The shares are empirical class proportions among the training observations in that leaf. Four observations give proportions in steps of one quarter. A leaf containing one adult reports an adult share of one, but that is limited evidence about a new observation. Larger leaves, smoothing and held-out calibration are options to evaluate when probability estimates matter.",
             ),
             choice(
               "How does cost-complexity pruning differ from the growth controls?",
@@ -807,7 +700,7 @@ export default function DecisionTreesPage() {
               "The two extra leaves that took training accuracy from 0.935 to perfect did what to the thirteen held-out people?",
               ["Nothing, since they only touched training rows", "Cost two of them", "Gained one of them", "Cost all thirteen"],
               1,
-              "Those leaves fenced off rectangles around individual training observations that the held-out observations do not respect. At a cap of one or two the tree scores 0.935 on the thirty-one people it grew from and 0.846 on the thirteen it never saw, and at a cap of three, six leaves and a perfect training score, the held-out accuracy falls to 0.692. Whether a fence was worth building depends on what the observation inside it is, and the tree cannot know.",
+              "At depth caps one and two, this fixed split has training accuracy 0.935 and held-out accuracy 0.846. At cap three, training accuracy becomes perfect while held-out accuracy falls to 0.692. The additional partitions fit details of the training observations that do not help these held-out people. That is evidence to compare growth restrictions on separate validation data.",
             ),
             choice(
               "The growth widget sits at its defaults and the leaf minimum is raised to four people. What happens to the muddled crowd’s tree?",
@@ -832,39 +725,11 @@ export default function DecisionTreesPage() {
                   again.
                 </p>
                 <TreeStability />
-                <p>
-                  A single relabelled person can move the root question, and
-                  everything beneath the root is decided inside the halves it
-                  made, so the branches reorganise and large regions of the
-                  map change their prediction. The second mode grows a tree on
-                  each of five random four-fifths of the crowd and overlays
-                  their root cuts, which land in different places for a reason
-                  that is mostly which people happened to be left out. A single
-                  decision tree is unstable because an early split changes
-                  every decision below it.
-                </p>
+                <p>Changing one label can change the selected root split. Later questions are then fitted on different subsets, so parts of the tree and prediction map may change too. The second mode fits five random four-fifths subsets and overlays their root thresholds. Differences between those fits show sensitivity to the sample; a changed early split need not change every later prediction.</p>
               </SubSection>
 
               <SubSection title="30. Why forests average many trees">
-                <p>
-                  That instability is the motivation for the next page, and
-                  the motivation is more precise than a crowd of memorisers
-                  somehow generalising. Individual deep trees have high
-                  variance. Train many of them on deliberately varied samples
-                  and feature subsets, so their errors are not the same errors,
-                  and average their predictions or take their vote. Averaging
-                  reduces variance when the trees are diverse enough, and
-                  random forests are engineered to make them diverse. How the
-                  varying is done is{" "}
-                  <Link href="/concepts/bagging" className={linkClass}>
-                    bagging
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="/concepts/random-forests" className={linkClass}>
-                    random forests
-                  </Link>
-                  , and belongs there.
-                </p>
+                <p>Bagging and random forests use varied trees to reduce sensitivity to a single training sample. If their prediction errors are not perfectly correlated, averaging can reduce variance compared with one member. Forests add feature randomness to the varied samples, encouraging trees to differ. The <Link href="/concepts/bagging" className={linkClass}>bagging</Link>{" "}and <Link href="/concepts/random-forests" className={linkClass}>random forests</Link>{" "}pages examine how much that variation helps.</p>
               </SubSection>
             </>
           ),
@@ -875,22 +740,15 @@ export default function DecisionTreesPage() {
             <>
               <SubSection title="31. Why trees usually do not need scaling">
                 <p>
-                  Measure the heights in metres instead of centimetres and the
+
+                  Measure the heights in meters instead of centimeters and the
                   question becomes height less than 1.515. The same people are
                   on each side of it, because dividing every value by a hundred
                   keeps their order, and a threshold question reads nothing
                   but the order.
                 </p>
                 <UnitConversion />
-                <p>
-                  So an ordinary tree generally does not need standardisation,
-                  and any monotonic transformation of a feature leaves the tree
-                  it grows unchanged apart from the numbers printed at the
-                  thresholds. Preprocessing can still be needed for other
-                  reasons, missing values and encodings among them, and the
-                  gradient-descent models on earlier pages needed scaling for
-                  reasons that do not apply here at all.
-                </p>
+                <p>Positive affine unit conversions preserve the equivalent midpoint thresholds in an exact split search. More generally, strictly increasing transformations preserve the possible partitions of the training observations. A nonlinear transformation can still change the midpoint behavior between observed values, and finite precision or approximate search can change fitted results. Standardization is therefore usually unnecessary for ordinary threshold trees, while missing values and encodings still require explicit handling.</p>
               </SubSection>
 
               <SubSection title="32. Conditional feature interactions">
@@ -907,9 +765,10 @@ export default function DecisionTreesPage() {
 
               <SubSection title="33. Categories and missing values">
                 <p>
+
                   Everything on this page is a numeric threshold. Categorical
                   features and missing values are handled differently by
-                  different implementations, and there is no single behaviour
+                  different implementations, and there is no single behavior
                   to describe. Categories may be one-hot encoded, ordered, or
                   partitioned natively. Missing values may be imputed, sent a
                   learned default direction, routed by a surrogate question, or
@@ -926,16 +785,7 @@ export default function DecisionTreesPage() {
           content: (
             <>
               <SubSection title="34. The limits of interpretability">
-                <p>
-                  A one-question tree can be read in a glance. The nine-leaf
-                  tree on the muddled crowd can be read with effort. A tree
-                  with twenty levels and thousands of leaves is still
-                  technically a list of rules, and nobody reads it in full.
-                  Depth, leaf count, average path length and the number of
-                  rules all grow, and past a point the structure is explicit
-                  without being understandable. A tree is readable when it is
-                  small, and being a tree does not keep it small.
-                </p>
+                <p>A small tree can be followed by reading its questions. As depth and leaf count increase, that becomes difficult, even though every rule remains available to inspect. Thousands of explicit rules can still be too many to understand together. Readability depends on the size of the fitted tree, rather than on the model family alone.</p>
               </SubSection>
 
               <SubSection title="35. Prediction rules versus causal explanations">
@@ -988,7 +838,8 @@ export default function DecisionTreesPage() {
                 </p>
               </WorkedExample>
               <p>
-                A positive gain means the split reduces expected impurity; zero means it leaves impurity unchanged, as in section 20&apos;s crossed example. A larger gain favours a cleaner immediate division under this criterion. It does not by itself tell us how the full tree will perform on new observations.
+
+                A positive gain means the split reduces expected impurity; zero means it leaves impurity unchanged, as in section 20&apos;s crossed example. A larger gain favors a cleaner immediate division under this criterion. It does not by itself tell us how the full tree will perform on new observations.
               </p>
             </SubSection>
           ),
@@ -1042,10 +893,7 @@ export default function DecisionTreesPage() {
           title: "Part 16. Making Thresholds, Ties and Stopping Rules Explicit" , id: "part-16-implementation-and-failure-contracts",
           content: (
             <SubSection title="39. Specify the split search, leaf predictions and stopping rules" id="39-implementation-and-failure-contracts">
-              <p>
-                A complete tree implementation has to define what it does with
-                the cases the tidy description passes over.
-              </p>
+              <p>The growth procedure also needs rules for inputs and ties. These details decide whether the implementation can fit a given dataset and whether repeated fits reproduce the same tree.</p>
               <NumberTable
                 headings={["case", "what has to be decided"]}
                 rows={[
@@ -1097,9 +945,9 @@ export default function DecisionTreesPage() {
           title: "Questions on Parts 11 to 16",
           quiz: [
             trueFalse(
-              "Measuring the heights in metres rather than centimetres changes which people a threshold question separates.",
+              "Measuring the heights in meters rather than centimeters changes which people a threshold question separates.",
               false,
-              "Dividing every value by a hundred keeps the order, and a threshold question reads nothing but the order, so the question becomes height less than 1.515 and the same people stand on each side. Any monotonic transformation leaves the tree unchanged apart from the numbers printed at the thresholds. Preprocessing can still be needed for missing values and encodings, which is a separate matter.",
+              "Converting centimeters to meters divides every height and the corresponding threshold by one hundred. The split therefore sends the same people down each branch. For a strictly increasing nonlinear transformation, candidate training partitions remain available, but stored midpoint thresholds may classify unseen values differently. A transformation that merges distinct values can also change the available partitions.",
             ),
             choice(
               "Weight is never consulted for anyone under 153.5 cm and decides everything above it. What is that?",
@@ -1110,12 +958,12 @@ export default function DecisionTreesPage() {
                 "A monotonic transformation of the weight column",
               ],
               0,
-              "A later question is only asked inside the region an earlier answer selected, so the structure gives the interaction away for free. A linear model would need it built into its columns by hand.",
+              "The weight comparison applies only in the height region selected by the earlier branch. Its contribution to the prediction therefore depends on height. A plain additive linear model cannot represent that conditional rule without additional features or another change to its form.",
             ),
             several(
               "The tree asks about weight after height. What does that path establish?",
               [
-                "The question improved prediction on the training data inside that branch",
+                "The question reduced the chosen training impurity inside that branch",
                 "Changing someone’s weight would change their class",
                 "55 kilograms is a natural line in the world",
                 "How the model produced its prediction",
@@ -1137,20 +985,20 @@ export default function DecisionTreesPage() {
             choice(
               "Change one label in the muddled crowd and grow the tree again. What does the page say happens?",
               [
-                "The root question can move, and everything beneath it is decided inside the halves it made, so the branches reorganise and large regions of the map change their prediction",
-                "Only the leaf holding the relabelled person changes, since the other leaves never saw it",
+                "The root question can move, and everything beneath it is decided inside the halves it made, so the branches reorganize and large regions of the map change their prediction",
+                "Only the leaf holding the relabeled person changes, since the other leaves never saw it",
                 "Nothing changes until several labels move, since one person cannot shift a split’s gain",
                 "The root is fixed by the crowd’s shape and cannot move, so only the lower splits change",
               ],
               0,
-              "A single decision tree is unstable because an early split changes every decision below it, and the five trees grown on random four-fifths of the crowd put their root cuts in different places for a reason that is mostly which people happened to be left out. Individual deep trees have high variance, which is why the next pages train many of them on deliberately varied samples and feature subsets and average, since averaging reduces variance when the trees are diverse enough.",
+              "Changing one label changes the scores of candidate splits. If an early choice changes, later splits are fitted to different subsets and many predictions can change. Deep trees can therefore be sensitive to small data changes. Bagging and random forests fit varied trees and combine their predictions to reduce that sensitivity; the benefit depends partly on how correlated their errors are.",
             ),
         ],
         },
         {
           title: "Practice. Growing the Crowds With the Library",
           practice: [
-            exercise("Grow the one-question tree",["Grow a tree on the eleven people of the ideal case, five children and six adults, with no restriction at all, and read the whole tree back as text. Then read the root question, its Gini and its gain off the root node, and the depth, leaf count and training accuracy off the model.", "Section 22 lists what should come back: height below 151.5, a root Gini of 0.496, a gain of 0.496, two pure leaves, a depth of one and a training accuracy of 1.000. The tree stops after one question because no question inside a pure node can remove any mixture."],`from oop_ml import DecisionTreeClassifier, Feature
+            exercise("Grow the one-question tree",["Fit an unrestricted DecisionTreeClassifier to the eleven people below, with child labeled 0 and adult labeled 1. Print tree.describe(), then inspect the root split: its feature, threshold, Gini impurity and impurity reduction.", "Print the fitted depth, leaf count and training accuracy. Use the leaf impurities to explain why this dataset needs no further split."],`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78])
@@ -1176,7 +1024,7 @@ print(f"depth {tree.depth}, leaves {tree.n_leaves}, training accuracy {tree.scor
 root question height < 151.5
 root Gini 0.496, gain 0.496
 depth 1, leaves 2, training accuracy 1.000`,{...{ hints: ["The classes are a feature like the others, 0 for a child and 1 for an adult, and describe answers the grown tree as indented text, one question or one answer per line.", "root is the top node. A node that asks a question carries split, with feature_name, threshold and gain, and its own impurity, which is the Gini of the people who reached it.", "depth and n_leaves are properties of the fitted model, and score answers the share of people it labels correctly."], check: numberCheck("What gain does the root question earn, to three places?", 0.496, 0.0005, "The root split sends the two classes to pure leaves, removing all of the parent node's impurity. There is no remaining mixture for another split to reduce.") },question:"Which question separates the supplied children and adults?"}),
-            exercise("Grow the muddled crowd to purity, then hold it back",["Grow the fourteen people of the muddled crowd four ways: with no restriction, under the growth widget’s default depth cap of six, under a depth cap of two, and with a leaf minimum of four people. For each print the depth reached, the number of leaves and the training accuracy.", "Section 23 says the unrestricted tree needs eleven leaves and a depth of seven to reach 1.000 and that the cap of six stops it at nine leaves and 0.857, section 24 says the leaf minimum of four stops it at three leaves and 0.714, and Part 1 says the cap of two gives four leaves. The page does not say what the four-leaf tree scores."],`from oop_ml import DecisionTreeClassifier, Feature
+            exercise("Grow the muddled crowd to purity, then hold it back",["Fit the fourteen-person overlapping dataset four ways: unrestricted, max_depth=6, max_depth=2 and min_samples_leaf=4. Print the depth, leaf count and training accuracy of each fitted tree.", "Compare where each restriction stops the tree. A mixed leaf predicts its majority class; its remaining mistakes are allowed by that restricted model. These are training scores, so they cannot decide which restriction predicts new people best."],`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = Feature("height", [145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1196,7 +1044,7 @@ for label, controls in [("no restriction", {}), ("depth cap 6", {"max_depth": 6}
 depth cap 6: depth 6, leaves 9, training accuracy 0.857
 depth cap 2: depth 2, leaves 4, training accuracy 0.643
 leaf minimum 4: depth 2, leaves 3, training accuracy 0.714`,{...{ hints: ["The growth controls are constructor fields, max_depth, min_samples_leaf, min_samples_split and min_impurity_decrease, and an unrestricted tree is the constructor with none of them set.", "The same crowd and the same two features go to every fit, so only the controls change between the four lines.", "A tree at the cap of two is a root with two questions beneath it and four leaves, which is the tree Part 1 describes, and its accuracy is what those four leaves’ majorities get right."], check: numberCheck("What training accuracy does the tree capped at a depth of two reach on the muddled crowd?", 0.643, 0.0005, "The depth-two tree leaves mixed classes in some leaves and predicts each leaf's majority. Its training score describes that restricted rule; held-out observations are needed to assess whether more splits help.") },question:"What changes when we restrict how far the tree can grow?"}),
-            exercise("Sweep the depth cap on the overlapping crowd",["Reproduce section 26. The page holds back thirteen of the forty-four people by a seeded shuffle, the positions listed in the script, grows a tree on the other thirty-one at every depth cap from one to six, and scores each tree on both shares. Print the depth cap, the leaves, the training accuracy and the held-out accuracy for each.", "The table in section 26 reads 0.935 and 0.846 at caps of one and two, then 1.000 and 0.692 from three onward, where two extra leaves took the training score to perfect and cost two of the thirteen held-out people."],`from oop_ml import DecisionTreeClassifier, Feature
+            exercise("Sweep the depth cap on the overlapping crowd",["Use the supplied thirteen held-out row positions and the remaining thirty-one training people. Fit one tree per max_depth value from one through six. For each, print the cap, fitted leaf count, training accuracy and held-out accuracy.", "Compare when additional depth improves training accuracy and whether the held-out predictions improve with it. If the tree stops changing before the maximum cap, inspect whether its existing leaves are already pure."],`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = [142, 135, 162, 136, 143, 152, 136, 145, 147, 142, 150, 144, 128, 165, 119, 150, 153, 143, 138, 126, 143, 131, 158, 162, 143, 177, 167, 166, 193, 162, 173, 163, 173, 147, 179, 183, 156, 164, 154, 169, 162, 176, 156, 154]
 weights = [39, 16, 59, 54, 38, 41, 35, 44, 38, 34, 47, 50, 54, 25, 27, 47, 54, 48, 55, 40, 67, 32, 80, 84, 82, 51, 83, 80, 71, 59, 66, 67, 55, 39, 69, 68, 74, 53, 89, 73, 60, 67, 66, 70]
@@ -1232,8 +1080,8 @@ cap 2: leaves 4, training accuracy 0.935, held-out accuracy 0.846
 cap 3: leaves 6, training accuracy 1.000, held-out accuracy 0.692
 cap 4: leaves 6, training accuracy 1.000, held-out accuracy 0.692
 cap 5: leaves 6, training accuracy 1.000, held-out accuracy 0.692
-cap 6: leaves 6, training accuracy 1.000, held-out accuracy 0.692`,{...{ hints: ["The tree is grown on the training share alone, so the training features and target are what go to fit, and the hidden share is only ever handed to score.", "score takes a list of features and a target and answers the share labelled correctly, so one call on each share gives the two columns of the table.", "From a cap of three onward the tree is the same tree, six leaves and a perfect training score, because every leaf is already pure and nothing is left to split, which is why the cap stops mattering."], check: numberCheck("What held-out accuracy does the tree reach at a depth cap of three?", 0.692, 0.0005, "The deeper tree gains training accuracy while losing accuracy on these held-out people. That result belongs to this split; it is evidence to examine model flexibility, not a guarantee about every deeper tree.") },question:"Does a deeper tree improve predictions for the people held out?"}),
-            exercise("Ask for trees that cannot be grown",["Grow a tree on the crossed crowd of section 20, four children on one diagonal and four adults on the other, and read it back. Then hand the library two cases Part 16 says it refuses by name, a target holding one class only and a height that is not a number, and print the name and message of each refusal.", "On the crossed crowd every candidate question earns a gain of zero, so the search admits nothing and the tree should be one leaf at an accuracy of 0.5. The two refusals should arrive before any growth, one from the fit and one from the feature itself."],`from oop_ml import DecisionTreeClassifier, Feature, MLLibError
+cap 6: leaves 6, training accuracy 1.000, held-out accuracy 0.692`,{...{ hints: ["The tree is grown on the training share alone, so the training features and target are what go to fit, and the hidden share is only ever handed to score.", "score takes a list of features and a target and answers the share labeled correctly, so one call on each share gives the two columns of the table.", "From a cap of three onward the tree is the same tree, six leaves and a perfect training score, because every leaf is already pure and nothing is left to split, which is why the cap stops mattering."], check: numberCheck("What held-out accuracy does the tree reach at a depth cap of three?", 0.692, 0.0005, "The deeper tree gains training accuracy while losing accuracy on these held-out people. That result belongs to this split; it is evidence to examine model flexibility, not a guarantee about every deeper tree.") },question:"Does a deeper tree improve predictions for the people held out?"}),
+            exercise("Ask for trees that cannot be grown",["Fit a tree to the eight people arranged in the crossed pattern below, then print its text description, leaf count, depth and training accuracy. Next try an all-child target and a Feature containing NaN, catching MLLibError for each and printing the error class and message.", "For the crossed pattern, inspect whether any first split reduces impurity. Notice that the NaN error can occur while constructing Feature, before a model is fitted. Place each try block around the operation that can raise it."],`from oop_ml import DecisionTreeClassifier, Feature, MLLibError
 
 heights = Feature("height", [130, 135, 170, 175, 130, 135, 170, 175])
 weights = Feature("weight", [30, 35, 70, 75, 70, 75, 30, 35])
@@ -1264,7 +1112,7 @@ except MLLibError as refusal:
     print(f"{type(refusal).__name__}: {refusal}")`,`predict 0  [n=8, impurity=0.5000]
 leaves 1, depth 0, training accuracy 0.500
 SingleClassError: feature_values holds only class [0.0], so there is nothing to discriminate between
-InvalidValuesError: feature_values must contain only finite values`,{...{ hints: ["A tree that admits no split is a single leaf predicting the majority, and with four of each the majority is a tie broken toward the lower class, so describe prints one line and depth is zero.", "The non-finite value is refused by the feature before any model sees it, which is the coercion boundary doing its job once, so the second try block needs no fit in it at all."] },question:"When does this tree stop growing, and which inputs does the library reject?"}),
+InvalidValuesError: feature_values must contain only finite values`,{...{ hints: ["A tree that admits no split is a single leaf predicting the majority, and with four of each the majority is a tie broken toward the lower class, so describe prints one line and depth is zero.", "Feature checks that its values are finite when it is created. The NaN case therefore needs only Feature construction inside its try block."] },question:"When does this tree stop growing, and which inputs does the library reject?"}),
           ],
         },
       ]}

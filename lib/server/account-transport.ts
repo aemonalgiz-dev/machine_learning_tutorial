@@ -5,6 +5,7 @@ const routes: Record<string, string[]> = {
     session: ["GET"], progress: ["GET", "PUT"], "learner-state": ["GET", "PUT"],
     "auth/login": ["GET"], "auth/register": ["GET"], "auth/callback": ["GET"], "auth/logout": ["POST"],
     billing: ["GET"], "billing/checkout": ["POST"], "billing/portal": ["POST"], "billing/webhook": ["POST"],
+    streak: ["GET"], activity: ["POST"], "learning-preferences": ["GET", "PUT"], "reminders/unsubscribe": ["GET", "POST"],
 };
 const headers = { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" };
 function unavailable(path: string) {
@@ -22,6 +23,8 @@ export async function accountProxy(request: NextRequest, context: {
     const path = (await context.params).path.join("/");
     if (!Object.hasOwn(routes, path) || !routes[path].includes(request.method))
         return new Response(null, { status: 404, headers });
+    if (path === "reminders/unsubscribe" && request.nextUrl.search.length > 4096)
+        return new Response(null, { status: 413, headers });
     const base = process.env.OOP_ML_ACCOUNTS_URL?.trim();
     if (!base)
         return path === "session"
@@ -39,7 +42,8 @@ export async function accountProxy(request: NextRequest, context: {
         const target = `${base.replace(/\/$/, "")}/${path}${region ? query && `?${query}` : request.nextUrl.search}`;
         const forwarded = new Headers();
         const webhook = path === "billing/webhook";
-        for (const name of webhook ? ["content-type", "stripe-signature"] : ["cookie", "origin", "content-type", "x-fitlab-account"]) {
+        const unsubscribe = path === "reminders/unsubscribe";
+        for (const name of webhook ? ["content-type", "stripe-signature"] : unsubscribe ? ["origin", "content-type"] : ["cookie", "origin", "content-type", "x-fitlab-account"]) {
             const value = request.headers.get(name);
             if (value)
                 forwarded.set(name, value);
@@ -55,7 +59,7 @@ export async function accountProxy(request: NextRequest, context: {
                     if (chunk.done)
                         break;
                     size += chunk.value.length;
-                    if (size > (path === "learner-state" || webhook ? 1048576 : 131072)) {
+                    if (size > (unsubscribe ? 4096 : path === "learner-state" || webhook ? 1048576 : 131072)) {
                         await reader.cancel();
                         return new Response(null, { status: 413, headers });
                     }
@@ -102,7 +106,7 @@ export async function accountProxy(request: NextRequest, context: {
             if (value)
                 resultHeaders.set(name, value);
         }
-        for (const cookie of upstream.headers.getSetCookie())
+        if (!unsubscribe) for (const cookie of upstream.headers.getSetCookie())
             resultHeaders.append("set-cookie", cookie);
         return new Response(upstream.body, { status: upstream.status, headers: resultHeaders });
     }

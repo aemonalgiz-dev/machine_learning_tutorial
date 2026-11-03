@@ -210,7 +210,7 @@ export function SelfOrganisingMapPlayground() {
           An Ideal Case
         </button>
         <button onClick={() => setPoints(CROWD)} className={BUTTON_CLASS}>
-          The crowd, unlabelled
+          The crowd, unlabeled
         </button>
         <button onClick={() => setPoints(TWO_CLUMPS)} className={BUTTON_CLASS}>
           Two clumps of four
@@ -399,7 +399,7 @@ export function SelfOrganisingMapPlayground() {
           value={answer ? answer.final_movement.toFixed(3) : "…"}
         />
         <Stat
-          label="Quantisation error"
+          label="Quantization error"
           value={answer ? answer.quantisation_error.toFixed(2) : "…"}
         />
       </div>

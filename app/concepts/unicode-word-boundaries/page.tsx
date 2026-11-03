@@ -21,9 +21,9 @@ import { ScriptCoveragePanel } from "@/components/widgets/ScriptCoveragePanel";
 import { WordBreakPlayground } from "@/components/widgets/WordBreakPlayground";
 
 export const metadata: Metadata = {
-  title: "Unicode Word Boundaries · oop_ml",
+  title: "Unicode Word Boundaries · Perceptron Lab",
   description:
-    "Rules written around English letters and spaces do not cover every writing system. Unicode character information gives us a broader basis for deciding where boundaries should fall, though it does not settle every linguistic question.",
+    "Writing systems use different kinds of characters and boundary conventions. Unicode information supports more general splitting rules than English letters and spaces alone, while some language-specific boundaries still need other methods.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function UnicodeWordBoundariesPage() {
       playgroundTitle="Where should this text be split?"
       playgroundIntro="Inspect the character classes on either side of a proposed break. Compare the resulting segments with a whitespace split of the same text."
       title="Unicode Word Boundaries"
-      tagline={"Rules written around English letters and spaces do not cover every writing system. Unicode character information gives us a broader basis for deciding where boundaries should fall, though it does not settle every linguistic question."}
+      tagline={"Writing systems use different kinds of characters and boundary conventions. Unicode information supports more general splitting rules than English letters and spaces alone, while some language-specific boundaries still need other methods."}
       prerequisites={
         <>
           The{" "}
@@ -90,47 +90,34 @@ export default function UnicodeWordBoundariesPage() {
                     ["nine characters of Chinese", "9", "1"],
                     ["seven characters of Thai", "7", "1"],
                   ]}
-                  caption="The first row is the sentence the rule was designed for and the last three are writing it cannot read at all. Section 10 puts those last three to the rules this page is about."
+                  caption="Whitespace splitting returns one uninterrupted piece for each unspaced example. Section 10 compares those outputs with this Unicode-based implementation."
                 />
                 <KeepInMind>
-                  A rule that cuts at spaces encodes one writing system&rsquo;s
-                  typographic habit, and there is no reason a rule for finding
-                  words should have to. The question this page takes up is what a
-                  rule looks like when it is written without that assumption, by
-                  somebody obliged to consider every script at once.
+                  {"A broader boundary rule can use character properties as well as spaces. Unicode supplies a default convention intended for many kinds of text. It is a starting point that applications can tailor, rather than a complete word analysis for every language."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. What it means for a standards body to say where a word breaks">
                 <p>
+
                   A committee cannot answer &ldquo;what is a word&rdquo; for
                   every language, and the Unicode word boundary rules do not try.
                   They answer a narrower question that turns out to be answerable.
-                  Between any two neighbouring characters of a text there is a
+                  Between any two neighboring characters of a text there is a
                   position, and the rules say, for that position, whether a word
                   is allowed to end there. Nothing more.
                 </p>
                 <>
 <p>
-                  The definition therefore has two halves and no third. The first half is a table that puts every character in the world into one of a small number of classes, so that a rule never has to talk about a character and can talk about a kind of character. The second half is a numbered list of rules, each of which looks at the classes on either side of one position and says break or do not break.
+                  {"The method uses character properties and ordered rules. Properties classify letters, digits, joining marks and other units. Rules inspect those classes around a proposed boundary, sometimes looking beyond the two immediately adjacent characters. This SDK approximates the property mapping; later examples show where that approximation matters."}
                 </p>
                 <p>
                   The rules are tried in their published order, the first that applies decides, and the last one applies to everything.
                 </p>
 </>
-                <Equation>
-                  {"a text of n characters  has  n − 1  positions between characters\n" +
-                    "each position  is  the pair of classes on either side of it\n" +
-                    "the answer  =  the first numbered rule that matches that pair"}
-                </Equation>
+                <Equation>{"a nonempty text of n characters has n − 1 internal boundary positions\neach decision inspects the surrounding character classes and rule context\nthe answer is the first numbered rule that matches that context"}</Equation>
                 <p>
-                  Two things follow immediately and are worth having before any
-                  detail. The rules never disagree with each other, because the
-                  order settles every conflict by construction, so there is no
-                  tie to break and no scoring. And the whole calculation is one
-                  pass along the text asking a fixed question at each position,
-                  so it costs what reading the text costs, which is what a rule
-                  that has to run while somebody is typing needs.
+                  {"Rule order resolves cases where several descriptions could apply, so no numerical score or learned tie-break is needed. We make a decision at each boundary. Efficient implementations can track the context as they scan; the simple SDK implementation sometimes scans backward through ignored marks, so its runtime is not always one constant amount of work per boundary."}
                 </p>
                 <KeepInMind>
                   The Unicode rules identify boundary positions using character properties. They do not promise a linguistic analysis of every word. We will see both what these rules handle and where a language-specific method is still needed.
@@ -244,19 +231,15 @@ export default function UnicodeWordBoundariesPage() {
                 <WhyThisWorks title="Why the catch-all breaks rather than joins">
                   <>
 <p>
-                    The last rule in the list applies to every pair of classes that reached it, and it says break. That choice is what makes the list short. If the catch-all joined, then every pair of classes that should be separated would need a rule of its own, and the number of pairs grows with the square of the number of classes; because it breaks, only the pairs that must be held together need naming, and there are around a dozen of those.
-                  </p>
+                  {"The final rule breaks wherever an earlier rule has not kept or separated a boundary. That gives the specification a defined default without listing every possible pair separately. Earlier rules handle particular contexts, including letters across certain punctuation and paired regional indicators."}
+                </p>
                   <p>
-                    It also means an unfamiliar character, or one from a script added to the standard later, gets separated from its neighbours rather than silently glued to them, which is the less damaging of the two errors when nothing is known.
-                  </p>
+                  {"A code point assigned no special joining behavior falls through to the default break. That supplies a defined boundary, but it does not establish that separating it is better for every task. New Unicode properties may also require an updated data table."}
+                </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  One pass, one question per position, first matching rule wins,
-                  and a catch-all that breaks. The segments tile the text
-                  exactly, so nothing is lost at this stage and the losses on the
-                  rest of this page all happen when the segments that are not
-                  words are dropped.
+                  {"The rules produce segments that tile the source. Filtering those segments into a word-only result is a separate operation and can discard punctuation or whitespace. A decision per boundary does not itself guarantee linear runtime in this teaching implementation."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -268,18 +251,18 @@ export default function UnicodeWordBoundariesPage() {
             choice(
               "What do the Unicode word boundary rules define?",
               [
-                "Whether a word is allowed to end at a position between two neighbouring characters",
+                "Whether a word is allowed to end at a position between two neighboring characters",
                 "What a word is in each language the standard covers",
                 "Which of the resulting stretches count as words",
                 "A score for each candidate boundary, with ties broken by rule order",
               ],
               0,
-              "The narrow question is the one that turns out to be answerable, and the standard answers nothing beyond it. Deciding which segments are words is a separate step outside the standard, which is where two implementations of it can part company.",
+              "The boundary rules decide where a sequence may be divided into segments. The tokenizer then applies its word-only filter to choose which segments to return. That filter is why complete segmentation and returned word count can differ, even when the same boundaries were used.",
             ),
             trueFalse(
-              "Two rules can both apply at one position, so the rules need a way to break the tie.",
+              "When several boundary rules could match a position, this implementation leaves their conflict unresolved.",
               false,
-              "The rules are tried in their published order and the first that applies decides, so the order settles every conflict by construction. There is no tie to break and no scoring, and the whole calculation is one pass along the text asking a fixed question at each position.",
+              "The rules are applied in order, and the first matching rule decides the boundary. Overlapping conditions therefore have a defined outcome. There is no learned score or later vote among matching rules.",
             ),
             choice(
               "Why does the last rule in the list break rather than join?",
@@ -290,7 +273,7 @@ export default function UnicodeWordBoundariesPage() {
                 "Because the standard has no class for an unfamiliar character",
               ],
               0,
-              "If the catch-all joined, every pair of classes that should be separated would need a rule of its own, and the number of pairs grows with the square of the number of classes. Breaking also means a character from a script added later is separated from its neighbours rather than silently glued to them, which is the less damaging error when nothing is known.",
+              "The catch-all supplies a boundary when no earlier rule joins the surrounding classes. This lets the rule list state specific joining patterns without listing every possible separated pair. It is a default policy; whether its output is useful for an unfamiliar script still needs to be checked.",
             ),
             several(
               "The sentence about Dr. Alvarez gives nine words to the boundary rules and seven pieces to the space rule. Which of these are true of the difference?",
@@ -317,17 +300,14 @@ export default function UnicodeWordBoundariesPage() {
               <SubSection title="5. Eighteen classes, and the seven that six sentences reach">
                 <>
 <p>
-                  Naming the classes is what turns the rules from a table of characters into something a person can read and argue with. There are eighteen of them. Most describe what a character is, so there is one for letters, one for digits, one for the spaces that separate words, one for the ends of lines.
+                  {"This SDK uses eighteen class names. Some identify letters, digits, spaces or line endings; others distinguish marks whose joining behavior depends on context. These are the implementation’s categories, not a claim that every Unicode version or library exposes exactly this same table."}
                 </p>
                 <p>
                   The interesting ones describe what a character is allowed to do, so there is a class for marks that may stand between two letters, another for marks that may stand between two digits, and another for marks that may do either.
                 </p>
 </>
                 <p>
-                  Eighteen sounds like a lot for something this small, and on
-                  ordinary English it is. I counted the class of every character
-                  in the six sentences this section shares, 375 characters in
-                  all, and seven classes account for the lot.
+                  The rule set uses eighteen classes, but not every class appears in every input. Across the six shared sentences, all 375 characters fall into seven of them. That count explains which parts of the rule our English fixture exercises; it leaves the other classes untested rather than showing that they are unnecessary.
                 </p>
                 <NumberTable
                   headings={["class", "characters", "which characters those are"]}
@@ -351,14 +331,11 @@ export default function UnicodeWordBoundariesPage() {
                   The eleven that never turn up are the point of the exercise rather than an inefficiency. They are there for Hebrew and katakana, for the marks that combine with the letter before them and the invisible formatting characters, for the halves of a flag and the ends of lines, and for three joining marks these six sentences happen never to use, a quotation mark, a colon and a low line.
                 </p>
                 <p>
-                  A rule written for the seven classes that do turn up would look complete on this corpus and would be wrong on the first document that was not in English.
+                  {"Testing only these seven classes would leave the other cases unchecked. A later input could introduce an unseen class in English or another language, so passing this small corpus does not establish complete boundary behavior."}
                 </p>
 </>
                 <KeepInMind>
-                  The class of a character is decided once, before any rule runs,
-                  and every rule is then written about classes. That is what
-                  keeps the list of rules to about a dozen lines while the table
-                  underneath covers every script.
+                  {"Grouping code points by class lets the rules apply to many characters without naming each one. The property mapping and the contextual rules both matter, and this SDK’s approximations limit how closely it matches a complete implementation."}
                 </KeepInMind>
               </SubSection>
 
@@ -378,60 +355,18 @@ export default function UnicodeWordBoundariesPage() {
                   is a change of class where no word ended, which is what the
                   next section is about.
                 </p>
-                <p>
-                  One honest note about how these classes were arrived at. The
-                  standard publishes them as a property in its own data files,
-                  and what is shown here is worked out instead from each
-                  character&rsquo;s general category together with the character
-                  lists the standard prints in the annex. That is an
-                  approximation. It is why a character from a script none of the
-                  examples on this page reaches could in principle be placed in a
-                  different class than a complete implementation would place it,
-                  and it is a limitation of what you are looking at rather than
-                  of the method.
-                </p>
+                <p>The Unicode standard publishes word-break properties in its data files. This teaching implementation instead derives classes from general character categories and selected lists in the annex. That approximation can assign an unfamiliar character differently from a complete implementation. The limitation belongs to this implementation’s coverage, rather than to the standard’s boundary method.</p>
                 <KeepInMind>
-                  A class per character, then a decision per position between two
-                  characters. Everything else on this page is a consequence of
-                  which class a particular mark was put in.
+                  {"The output depends on both the character classes and the rules that inspect their context. Changing a mark’s class can alter a boundary, but the surrounding letters, digits or other marks still matter."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="7. One mark between two letters, and the same mark between two digits">
-                <p>
-                  This is the experiment that makes the classes legible. I took
-                  twelve marks, put each between the letters a and b, then put
-                  the same mark between the digits 1 and 2, and read both by the
-                  rules.
-                </p>
+                <p>Place each of twelve marks between a and b, then between 1 and 2. Comparing those contexts shows how the assigned classes interact with their neighboring characters.</p>
                 <MarkBetweenTable />
-                <p>
-                  The three rows where the two columns differ are the argument
-                  for having classes at all. A colon holds two letters together,
-                  so <span className="font-mono">a:b</span> is one word, and it
-                  separates two digits, so a time written as{" "}
-                  <span className="font-mono">12:30</span> comes back as two.
-                  The comma does exactly the reverse, separating{" "}
-                  <span className="font-mono">a,b</span> and holding{" "}
-                  <span className="font-mono">1,000</span> together, and the
-                  third row that differs is a middle dot, which behaves exactly
-                  as the colon does because it was put in the same class. Neither
-                  of those answers is a rule about the colon or about the comma.
-                  Each is one general rule about a class, applied to a character
-                  somebody put in that class.
-                </p>
-                <p>
-                  The rows that look alike and are not are worth as much. A
-                  hyphen and a low line are both a mark between two letters, and
-                  the hyphen is in none of the joining classes so it separates,
-                  while the low line is in the class that joins whatever it finds
-                  on both sides, so{" "}
-                  <span className="font-mono">snake_case_name</span> is one word.
-                  A narrow no-break space is in that same joining class, so a
-                  thousands group written with it stays whole, which is a
-                  character that every rule reading white space calls a separator
-                  and this table calls glue.
-                </p>
+                <p>A colon joins the letters in <span className="font-mono">a:b</span> but separates the digits in <span className="font-mono">12:30</span>. A comma does the reverse for <span className="font-mono">a,b</span> and <span className="font-mono">1,000</span>. The middle dot follows the colon because it has the same relevant boundary class.</p>
+<p>The character’s class stays fixed. The joining rules inspect that class together with the classes around it, which is why changing letters to digits can change the boundary.</p>
+                <p>The hyphen and underscore are both punctuation, but these rules assign them different joining behavior. The underscore can connect neighboring letters and digits, keeping <span className="font-mono">snake_case_name</span> whole. The hyphen separates the surrounding runs. A narrow no-break space can also join the numeric groups here, even though the whitespace tokenizer treats it as a separator.</p>
                 <InAModel>
                   <p>
                     Those two rows are why a file name comes apart under these
@@ -446,22 +381,13 @@ export default function UnicodeWordBoundariesPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  What a mark does is decided entirely by the class it was put
-                  in, and the same mark can join on one side of the table and
-                  separate on the other. A reader who wants to predict what these
-                  rules will do to a piece of writing needs the classes of its
-                  marks and nothing else.
+                  {"To predict a boundary, inspect the classes around it and the matching rule. The same mark can join letters in one context and separate digits in another. Its appearance or name alone is not enough."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="8. The characters the rules make invisible first">
                 <p>
-                  One class is applied before any of the others and changes how
-                  they are read. Combining marks, the characters that attach to
-                  the letter in front of them, together with the invisible
-                  formatting characters, are hidden from every later rule, so a
-                  rule that asks about the character on the left gets the last
-                  character that was not one of these.
+                  {"Some rules ignore combining marks and formatting characters while examining surrounding context. Ignoring them for that decision does not delete them from the segment. Start-of-text and newline cases have exceptions, so this is not a separate preprocessing pass applied unconditionally before every rule."}
                 </p>
                 <p>
                   The reason is that one word can be written two ways. The word{" "}
@@ -477,11 +403,11 @@ export default function UnicodeWordBoundariesPage() {
                 <WhyThisWorks title="Why hiding beats listing">
                   <>
 <p>
-                    The alternative is to write every rule twice, once for the plain case and once allowing a run of marks in the middle, and then a third time for two runs, and the list stops being readable. Hiding the marks once, at the start, means the dozen rules underneath can be stated about the characters a reader sees.
-                  </p>
+                  {"Rules can treat a run of ignored marks as transparent when they compare the relevant neighbors. That avoids spelling out every possible number of intervening marks in each letter or numeric rule. The marks remain in the returned source span."}
+                </p>
                   <p>
-                    The cost is that each decision has to look back over any run of hidden characters to find its real neighbour, so a very long run of marks costs more than a short one, and that is a price nobody pays because a run of marks long enough to matter is not a word anybody has written.
-                  </p>
+                  {"This implementation repeatedly looks backward through ignored marks. Long runs can therefore make the work grow quadratically in the run length. Tracking the previous relevant position is one way to avoid repeating that scan. Ordinary short examples may hide the cost, so do not infer a runtime bound from them."}
+                </p>
 </>
                 </WhyThisWorks>
                 <>
@@ -489,14 +415,11 @@ export default function UnicodeWordBoundariesPage() {
                   Our simplified implementation mishandles the zero-width joiner in some emoji sequences. The Unicode word-boundary rules give it special treatment, while this implementation treats it like ordinary ignored formatting. It attaches to the preceding emoji and allows a break after it, returning two segments for a joined sequence. This is an implementation limitation, not a claim about the full standard.
                 </p>
                 <p>
-                  That is a real difference from a complete implementation and it is on the classes rather than on the rules.
+                  {"The joined-emoji discrepancy involves the simplified class mapping and special handling that the complete rules provide for zero-width joiners. Compare this implementation with the specified version before treating its output as the standard’s exact behavior."}
                 </p>
 </>
                 <KeepInMind>
-                  Two spellings of one word, six characters and eight, and one
-                  answer from the rules. The mechanism that gets that right is
-                  one clause applied before everything else, and the same clause
-                  is where the emoji case goes wrong.
+                  {"Both spellings of résumé remain one word even though they use six and eight code points. Ignoring combining marks for boundary decisions explains that agreement. The joined-emoji example shows why ignoring every format character in the same way is insufficient."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -525,7 +448,7 @@ export default function UnicodeWordBoundariesPage() {
                 "A low line has no white space around it",
               ],
               0,
-              "Both are a mark standing between two letters, so nothing about their appearance separates them, and what each does is decided entirely by the class it was put in. The same pair is why re-analysis_2019.csv comes apart into three words while analysis_2019 survives whole in the middle of it.",
+              "The underscore belongs to a connector class that can join the surrounding letters and digits. The hyphen does not receive that joining behavior under these default rules. Their broad punctuation role is not enough to predict the result; the assigned classes and ordered rules determine the cuts.",
             ),
             choice(
               "Seven classes account for every character in the six sentences. What does the page say about the eleven that never turn up?",
@@ -553,7 +476,7 @@ export default function UnicodeWordBoundariesPage() {
               "Which of these follow from hiding combining marks and invisible formatting characters before any other rule runs?",
               [
                 "Both spellings of résumé, six characters and eight, come back as one word",
-                "Each decision has to look back over a run of hidden characters to find its real neighbour",
+                "Each decision has to look back over a run of hidden characters to find its real neighbor",
                 "The dozen rules underneath can be stated about the characters a reader sees",
                 "Two emoji joined by the character that joins them come back as one segment",
               ],
@@ -568,13 +491,7 @@ export default function UnicodeWordBoundariesPage() {
             <>
               <SubSection title="9. Punctuation stops riding on the word in front of it">
                 <p>
-                  The failure the previous page measures is that a mark of
-                  punctuation is not white space, so a run of non-space characters
-                  carries it along, and a word that reaches the end of a clause
-                  becomes a different entry from the same word inside one. These
-                  rules put every mark in a class, and a mark in none of the
-                  joining classes is separated from the letters beside it, so the
-                  failure does not arise.
+                  {"Whitespace splitting keeps attached punctuation inside its runs. The Unicode-based rule can instead separate marks that lack a joining role in their context. In the word-only output, those punctuation segments are then omitted. Separating and omitting are distinct decisions."}
                 </p>
                 <BoundaryCostPanel />
                 <p>
@@ -591,20 +508,8 @@ export default function UnicodeWordBoundariesPage() {
                   direction, and the 12 are the whole of what these rules are
                   for.
                 </p>
-                <p>
-                  Both rules come to 47 entries over these six sentences, and
-                  that equality is worth naming so it is not misread as a
-                  result. Separating the marks shrinks a table only where the
-                  same word turns up both inside a clause and at the end of one,
-                  so that its two spellings can collapse into a single entry, and
-                  on this corpus that happens exactly once. It is visible in the
-                  list on the right, which holds both{" "}
-                  <span className="font-mono">re-analysis</span> and{" "}
-                  <span className="font-mono">re-analysis.</span>, and no other
-                  pair there differs only by a mark. Six sentences give most
-                  words one chance to appear at all, so there is almost nothing
-                  available to collapse.
-                </p>
+                <p>Both rules produce 47 distinct entries in these six sentences, although they use different spellings. The whitespace table contains both <span className="font-mono">re-analysis</span> and <span className="font-mono">re-analysis.</span>; removing attached punctuation can let such variants share entries.</p>
+<p>Other cuts create new entries for compound parts and punctuation policies remove others. Those changes balance here. A larger corpus may repeat more variants, but its vocabulary saving still depends on which spellings and components occur.</p>
                 <KeepInMind>
                   On this corpus the repair is visible in which entries the two
                   rules hold rather than in how many, since exactly one word
@@ -615,12 +520,7 @@ export default function UnicodeWordBoundariesPage() {
 
               <SubSection title="10. A script that puts nothing between its words">
                 <p>
-                  This is the case the rules were written for, and it is also
-                  where they are most often described inaccurately. The claim is
-                  not that the rules segment Chinese. The annex says the opposite
-                  in as many words. What the rules do is give an answer that is
-                  honest about the writing rather than one that looks like a
-                  success.
+                  This example marks a limit of the default boundary rules. They provide consistent boundaries based on the character classes, but the annex does not claim that those boundaries supply complete Chinese word segmentation. A language-specific segmenter needs further evidence about which adjacent characters belong to the same word.
                 </p>
                 <ScriptCoveragePanel />
                 <>
@@ -643,18 +543,15 @@ export default function UnicodeWordBoundariesPage() {
                 <WhyThisWorks title="Why cutting everywhere is the better failure">
                   <>
 <p>
-                    Faced with a script it cannot segment, a rule has two ways to fail. It can return the whole run as one word, which is what the space rule does, or it can cut at every character, which is what these rules do. The second is worse as a segmentation and better as a signal, since a caller who sees nine words of one character each has been told something about the writing, while a caller who sees one word of nine characters has been told nothing and has a piece that no vocabulary will ever hold.
-                  </p>
+                  {"Character-by-character boundaries give a later segmenter smaller units to combine. One uninterrupted run can also be segmented later. Neither output alone establishes word boundaries, and a vocabulary can contain a multi-character run. Choose the representation the next stage expects rather than treating either shape as an automatic failure signal."}
+                </p>
                   <p>
-                    It is also the answer that composes, because a character is at least a unit something downstream can work with. Neither is the answer, and the answer needs a dictionary or a model, which is what the next section of this site is about.
-                  </p>
+                  {"For the word task in these examples, we need additional language-specific evidence, such as a dictionary or learned boundaries. The default output can be used as input to that procedure, but the procedure still needs its own validation."}
+                </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The rules do not solve the script without spaces and were never
-                  claimed to. What they buy there is an answer that is wrong in a
-                  visible way rather than an answer that is wrong while reporting
-                  perfect coverage.
+                  {"These defaults provide defined boundaries on unspaced input. They do not certify complete word segmentation. A caller needs to know that limitation; a list of single-character pieces is not itself an error flag."}
                 </KeepInMind>
               </SubSection>
 
@@ -672,10 +569,10 @@ export default function UnicodeWordBoundariesPage() {
                 </p>
                 <>
 <p>
-                  The flags run the other way and are stranger. A flag is two characters, neither of them a letter, and there is a rule that counts them in pairs so that a flag is never cut in half. Two flags in a row therefore give two segments, correctly, where the space rule gives one piece holding both.
+                  {"The displayed regional flags each use two regional-indicator code points. A rule pairs those indicators, so two such flags form two segments rather than one uninterrupted run. Other flag emoji, including tag-based flags, use different sequences."}
                 </p>
                 <p>
-                  Neither segment is a word by the ordinary test, since a word has to hold a letter or a digit and a flag holds neither, so the count of words for that text is zero. The rules found the right boundary and then the word test threw both pieces away, which is the two halves of the method disagreeing rather than either being wrong.
+                  {"The SDK’s word-only filter discards both displayed flag segments because they contain neither a letter nor a number. The boundary and filter operations have different purposes: the first finds segments, and the second selects which ones this caller wants to count as words."}
                 </p>
 </>
                 <KeepInMind>
@@ -702,7 +599,7 @@ export default function UnicodeWordBoundariesPage() {
                     ["everything that is not spacing", "13", "84"],
                     ["only what holds a letter or a digit", "9", "69"],
                   ]}
-                  caption="The same rules, read three ways. The middle row keeps each mark of punctuation as a piece of its own, since the rules already break between any two marks."
+                  caption="The same segmentation, filtered three ways. The middle row keeps non-whitespace segments, including the punctuation segments in this sentence. Other mark sequences can have joining rules."
                 />
                 <p>
                   Keeping the marks costs 15 more pieces on the six sentences and
@@ -730,29 +627,15 @@ export default function UnicodeWordBoundariesPage() {
             <>
               <SubSection title="13. More pieces, and everything downstream pays per piece">
                 <p>
-                  The repair is not free and the first bill is length. Over the
-                  six sentences the boundary rules produce 69 words where cutting
-                  at spaces produces 63, which is about a tenth more, and the
-                  extra pieces are the halves of the compounds. Anything reading
-                  the text afterwards pays per piece, and for a model that
-                  compares every position with every other position it pays
-                  roughly with the square of that count.
+                  {"On these six sentences, the word-only boundary result has 69 pieces compared with 63 whitespace pieces. A model that processes one position per piece receives a longer sequence. Dense all-position attention has quadratic pair counts within a sequence; total runtime also depends on the other operations and how the text is grouped."}
                 </p>
                 <InAModel>
                   <p>
-                    A tenth on a corpus of six sentences is a rounding error and
-                    on a training run it is not. The same effect is the reason
-                    the methods later in this section, which cut words into
-                    pieces rather than joining them, are always reported with a
-                    piece count beside their vocabulary size. The choice is
-                    always the same shape, and it is between a table with fewer
-                    entries and a corpus with more positions in it.
-                  </p>
+                  {"The difference is small in absolute terms here, but its impact on a large dataset depends on how often the same patterns recur. Compare sequence lengths and vocabulary entries on representative text. Neither measure necessarily moves in the opposite direction to the other."}
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  63 pieces against 69 on identical writing. That is what
-                  separating the marks and splitting the compounds costs per
-                  corpus, and it is paid every time the corpus is read.
+                  {"The supplied corpus gives 63 whitespace pieces and 69 word-only Unicode pieces. These are counts for this representation, not a measured model runtime."}
                 </KeepInMind>
               </SubSection>
 
@@ -785,11 +668,8 @@ export default function UnicodeWordBoundariesPage() {
                   , which is a line with the abbreviation&rsquo;s stop gone, both
                   compounds pulled apart and the sentence&rsquo;s own full stop
                   missing. The space rule&rsquo;s seven pieces glue back exactly.
-                  So the choice between the two is a choice about which loss is
-                  cheaper, and a vocabulary is glad to be rid of the marks while
-                  anything that has to hand the reader back their own text is
-                  not.
-                </p>
+                  This word-only output omits punctuation. An application that needs the reader’s original text must retain it elsewhere.
+                  </p>
                 <p>
                   The loss is recoverable while the source is still in hand,
                   because every word carries the offsets it came from and the
@@ -798,39 +678,24 @@ export default function UnicodeWordBoundariesPage() {
                   most things downstream are given.
                 </p>
                 <KeepInMind>
-                  80.8 per cent of the writing against 84.8. Neither number says
-                  anything about whether the words are good words, and the panel
-                  in section 10 shows the space rule reaching every one of the
-                  nine characters of the Chinese line while returning them as a
-                  single word.
+                  {"The two word-only outputs retain 80.8 percent and 84.8 percent of this corpus’s source characters. Those percentages measure coverage, not agreement with intended words. The Chinese example demonstrates the distinction: one unsegmented piece can retain every character."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. Where splitting on spaces is the better rule">
                 <>
 <p>
-                  There are texts where the simpler rule wins outright, and they are not exotic. Three of them are in the panel in section 10. An address comes back as two words with the character that makes it an address gone, so 18 of its 19 characters survive and the thing itself does not. A file name comes back as three.
+                  {"If an application wants an address or file name as one unit, the whitespace output may fit that requirement better. In the shown address, word-only filtering leaves 18 of 19 characters. The file name becomes three pieces. Those outcomes need a task decision rather than a universal ranking of the rules."}
                 </p>
                 <p>
                   A text holding a single approving hand and nothing else comes back as no words at all, because the rules found the segment correctly and then the word test refused it for holding no letter and no digit.
                 </p>
 </>
                 <p>
-                  What those three have in common is that they were not written
-                  as prose. The rules were designed for what a person reading a
-                  document would call a word, and a message identifier, a path
-                  and a picture are none of them prose. The space rule keeps them
-                  whole for the uninteresting reason that it keeps everything
-                  whole, which is the right answer here by accident rather than
-                  by design.
+                  {"Addresses, paths and emoji also occur inside ordinary prose. A caller may want them preserved as whole units even while splitting surrounding words. The whitespace rule retains any uninterrupted run; a tailored tokenizer can protect selected spans or keep the complete segmentation."}
                 </p>
                 <KeepInMind>
-                  Pointed at writing that is not prose, these rules come apart in
-                  a way the cruder rule does not, and a text of one emoji becomes
-                  zero words rather than one. Anything reading text that has
-                  addresses or paths in it should either keep the segments rather
-                  than the words or protect those spans before the rules see
-                  them.
+                  {"For tasks involving addresses, paths or emoji, compare the complete segments with the word-only result. Keeping non-whitespace segments, protecting special spans or applying tailored rules are possible choices. The default word filter may otherwise drop a segment the application needs."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -851,37 +716,16 @@ export default function UnicodeWordBoundariesPage() {
                   outside it, and the annex says as much by calling its own rules
                   a default and inviting tailoring.
                 </p>
-                <p>
-                  The measurement in section 9 says the same thing without any
-                  appeal to the document. Two careful rules put 35 of 47 entries
-                  in the same place and 12 in different places, and nothing in
-                  the writing decides the 12. Whether{" "}
-                  <span className="font-mono">low-cost</span> is one unit or two
-                  depends on whether a dictionary, a search index or a typesetter
-                  is asking, and all three are right about their own purpose. A
-                  standard can make every implementation give the same answer,
-                  and this one did, which is why a double-click selects the same
-                  characters in two different programs. It cannot make that
-                  answer correct, because there is nothing here for it to be
-                  correct about.
-                </p>
+                <p>The two rules share 35 of their 47 vocabulary spellings and differ on 12 each. Whether <span className="font-mono">low-cost</span> should be one retrieval unit or two depends on the application’s task.</p>
+<p>Programs using the same boundary version and settings can agree on the cuts. Other programs may tailor them, including for text selection. Conformance to a shared convention and usefulness for a particular language or search task are separate checks.</p>
                 <KeepInMind>
-                  Where the standard is silent it is silent deliberately, and the
-                  silence is where the disagreements between real tools live. The
-                  thing to ask of an implementation is which choices it made
-                  after the rules ran, not whether it followed them.
+                  {"Check both the boundary specification and the application’s filtering or tailoring. Programs can disagree because one implements the standard differently, or because they make different documented choices around it. Both kinds of difference deserve investigation."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="17. It reads characters, so an abbreviation is beyond it">
                 <p>
-                  The rules see classes of characters and nothing else, so any
-                  question whose answer lives in a language rather than in the
-                  writing is outside what they can decide. The full stop is the
-                  clearest case, and it already appears twice in the running
-                  sentence doing two different jobs. A sentence carrying an
-                  abbreviation written with two stops shows all three readings at
-                  once.
+                  {"These default rules do not consult an abbreviation dictionary or infer sentence roles. The running sentence shows a period after an abbreviation and one at the sentence end. The example below makes their character contexts easier to compare."}
                 </p>
                 <WorkedExample title="The same character, three appearances, two answers">
                   <Equation>
@@ -900,54 +744,31 @@ export default function UnicodeWordBoundariesPage() {
                     so the same rule does not apply and it is separated. The stop
                     that ends the sentence is separated too, by the same
                     reasoning, and the two are indistinguishable to the rules
-                    because they are indistinguishable in the characters.
+                    because neither has a following letter for the relevant joining rule.
                   </p>
                 </WorkedExample>
                 <p>
-                  That is not a defect to be patched. The information that would
-                  separate the two is a list of the abbreviations of a particular
-                  language, and the moment a rule carries such a list it is a
-                  rule for that language and has given up the property that
-                  brought us here. Worse, the case has no correct answer even with
-                  the list, since a sentence ending in an abbreviation is written
-                  with one stop doing both jobs and no division of the characters
-                  assigns it to both.
+                  {"Abbreviation knowledge can support a tailored rule. A separate sentence-boundary annotation can also mark a period that belongs to an abbreviation. One nonoverlapping token split need not carry every annotation by itself, so keeping both roles does not require an unavoidable loss."}
                 </p>
                 <KeepInMind>
-                  Reading only characters is what lets one rule run on every
-                  script, and it is the same thing that puts the abbreviation out
-                  of reach. The sentence about Dr. Alvarez loses the stop after{" "}
-                  <span className="font-mono">Dr</span> for exactly the reason
-                  the Chinese line was cut nine ways, which is that nothing in
-                  the characters said otherwise.
-                </KeepInMind>
+                  These default class rules do not consult abbreviation knowledge. The period after {" "}
+                  <span className="font-mono">Dr</span>  is separated because its joining context does not match. The Chinese character-level output is a different limitation: it does not supply complete linguistic word segmentation.</KeepInMind>
               </SubSection>
 
               <SubSection title="18. The scripts the standard declines by name">
                 <p>
-                  The most unusual thing about this standard, read next to most
-                  standards, is that it names its own limits in the document. The
-                  scripts written without spaces are not handled badly by
-                  accident. Their letters are deliberately left out of the class
-                  that holds letters together, so the catch-all applies on both
-                  sides of every one of them, and the annex states that finding
-                  words in those scripts requires a dictionary or a model and
-                  that these rules are not a substitute.
+                  {"The annex explicitly limits the default rules for several languages without routine word spaces. Applications needing reliable word segmentation there should use more sophisticated language-specific procedures. The SDK’s simplified class mapping produces the illustrated character-level results, which should not be mistaken for a complete language analysis."}
                 </p>
                 <>
 <p>
-                  What follows is a statement about the method rather than about any text. Where the writing separates its words with characters the rules can see, whether that is a space in English or a change of class in a Japanese sentence, the answer is determined by the writing. Where it does not, the answer is determined by nothing, and cutting at every character is a refusal written as an answer.
+                  A boundary produced by the default rules records the convention those rules implement. It is not automatically a claim about a linguistic word. Where the task needs word segmentation beyond those conventions, an application must add the appropriate language-specific procedure and check its output against that task.
                 </p>
                 <p>
                   The nine words the Chinese line came back as are nine correct applications of a rule that says break when nothing else applies, and there were four words there.
                 </p>
 </>
                 <KeepInMind>
-                  Naming the decline in the document is worth more than a silent
-                  failure would be, since it tells a reader that seven pieces
-                  from seven Thai characters is the standard refusing rather than
-                  the standard answering. Where the other half comes from is the
-                  subject of the next section of this site.
+                  {"The documented limitation tells us when to add another procedure. Returning seven pieces from seven Thai code points is still a defined result here, not a refusal message. A word-segmentation application must evaluate it against the desired words."}
                 </KeepInMind>
               </SubSection>
 
@@ -962,20 +783,14 @@ export default function UnicodeWordBoundariesPage() {
                 </p>
                 <>
 <p>
-                  Two independent programs following the annex select the same thing when a reader double-clicks, so a document behaves the same way in both. The rules are published with a version, so an answer can be reproduced years later by saying which version produced it. They cover every script the standard covers rather than the one their author reads, so a program does not fail when it meets a language nobody tested it on.
+                  {"Programs using the same version, complete property data, rules and tailoring can reproduce boundaries. Text-selection behavior may use additional application choices. Versioning helps preserve that convention, but it does not guarantee useful segmentation for every untested language."}
                 </p>
                 <p>
-                  And because the rules are stated on classes rather than on characters, a script added to the standard later gets sensible behaviour without any program being rewritten.
+                  {"Newly assigned characters can require an updated Unicode data table or implementation. Class-based rules make those updates easier to share; they do not guarantee sensible behavior from every older binary without an update."}
                 </p>
 </>
                 <p>
-                  None of those is a claim that a word ends where the annex says
-                  it ends. They are claims about agreement, and agreement is what
-                  a person actually needs from the piece of a system that decides
-                  where words are, since the decision is going to be made
-                  identically millions of times and the cost of two parts of one
-                  pipeline making it differently is far larger than the cost of
-                  either being slightly wrong.
+                  Agreement matters when one stage creates pieces and another expects to receive them in the same form. Recording the rule version and implementation makes that agreement testable. It also lets us distinguish an implementation mismatch from a boundary that follows the agreed convention but does not meet a particular linguistic task.
                 </p>
                 <KeepInMind>
                   The useful question to put to these rules is whether everything
@@ -1005,7 +820,7 @@ export default function UnicodeWordBoundariesPage() {
                     {
                       expression: "a full stop ending an abbreviation",
                       reason:
-                        "outside what a rule reading characters can decide, since the stop inside an abbreviation and the stop ending a sentence are the same character in the same surroundings. At the end of a sentence it is undecidable even with a list of abbreviations, because one character is closing both.",
+                        "The default rules do not identify every abbreviation or sentence role. A tailored procedure can use language evidence, and a separate sentence annotation can record a period with both roles. The token split alone need not represent every annotation.",
                     },
                     {
                       expression: "a script written without spaces",
@@ -1025,7 +840,7 @@ export default function UnicodeWordBoundariesPage() {
                     {
                       expression: "the spacing between the words",
                       reason:
-                        "discarded, along with every mark, unless the segments are kept instead. The words hold 303 of the 375 characters of six sentences, and gluing them back with one space each does not reproduce any of them. The offsets are the only place the rest survives.",
+                        "The word-only filter omits whitespace and some punctuation. Its words contain 303 of 375 source characters. Exact restoration needs retained segments or the source plus spans; offsets alone do not preserve the discarded characters.",
                     },
                     {
                       expression: "which version of the rules ran",
@@ -1040,12 +855,7 @@ export default function UnicodeWordBoundariesPage() {
                   ]}
                 />
                 <KeepInMind>
-                  Two of these are worth carrying past this page. The rules never
-                  refuse, so a text they cannot segment comes back looking like a
-                  text they could, and only the words themselves say which
-                  happened. And the step that turns segments into words is not
-                  part of the standard at all, which is where most of the
-                  disagreement between real implementations actually lives.
+                  {"Keep the boundary version and implementation visible in reproducible results. Check the segment filter separately from the cuts. If the application needs language-specific words, validate that task directly instead of inferring success from a returned list."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1069,29 +879,29 @@ export default function UnicodeWordBoundariesPage() {
               "Which of these are true of what the boundary rules cost over the six sentences?",
               [
                 "They produce 69 words where cutting at spaces produces 63, about a tenth more",
-                "They keep 80.8 per cent of the writing inside a word, against 84.8",
+                "They keep 80.8 percent of the writing inside a word, against 84.8",
                 "Keeping every mark as a piece of its own would cost 15 more pieces again, 84 against 69",
                 "They leave more distinct entries than the space rule does",
                 "The nine words of the sentence about Dr. Alvarez glue back to it exactly, as the seven pieces do",
               ],
               [0, 1, 2],
-              "Both rules come to 47 entries on this corpus, so the table is no larger, and that equality is worth naming so it is not misread as a result. Separating the marks shrinks a table only where the same word turns up both inside a clause and at the end of one, which happens exactly once here. The glue fails too, since the nine words come back as a line with the abbreviation’s stop gone, both compounds pulled apart and the sentence’s own stop missing. The length and the lost characters are real bills, and the lost characters are recoverable only while the source is still in hand, since every word carries the offsets it came from.",
+              "Both filtered rules produce 47 distinct entries here, but their entries and occurrence counts differ. The boundary filter separates compound parts and omits punctuation, increasing the total piece count while losing characters needed for a literal reconstruction. Equal vocabulary sizes therefore establish neither equal representations nor equal processing cost. Offsets locate omissions, but exact source characters still need to be retained separately.",
             ),
             choice(
               "In a sentence carrying U.S., why does the stop inside the abbreviation survive into a word while the stop closing it does not?",
               [
                 "The one inside has a letter on each side, so the rule for a letter reaching across a mark applies, and the closing one has a space after it",
-                "The rules hold a list of abbreviations and recognise U.S. among them",
+                "The rules hold a list of abbreviations and recognize U.S. among them",
                 "The closing stop is also the sentence’s own stop, which the rules treat separately",
                 "A stop is in none of the joining classes, so neither of them survives",
               ],
               0,
-              "The stop that closes the abbreviation and the stop that ends a sentence are indistinguishable to the rules because they are indistinguishable in the characters. A list of abbreviations would make this a rule for one language, and even with the list a sentence ending in an abbreviation writes one stop doing both jobs and no division of the characters assigns it to both.",
+              "The period inside U.S. sits between letters and is retained by the joining rule. Its final period has no following letter, so it becomes a separate segment and the default word filter omits it. The rule does not label abbreviation or sentence-ending roles. An application needing those roles must add suitable context, rules or a model.",
             ),
             trueFalse(
               "Two flags in a row give two correct segments and a word count of zero.",
               true,
-              "A rule counts the flag characters in pairs so a flag is never cut in half, and both boundaries come out right. Then the word test asks for a letter or a digit, a flag holds neither, and both pieces are thrown away, which is the two halves of the method disagreeing rather than either being wrong.",
+              "The segmentation rule groups the regional-indicator characters into two flag segments. The default word filter then excludes both because they contain no qualifying letter or digit. Those operations answer different questions: preserving segment boundaries and selecting word-like segments. Keep all segments if the application needs the flags.",
             ),
             choice(
               "What does the page name as the actual reason to use these rules?",
@@ -1102,7 +912,7 @@ export default function UnicodeWordBoundariesPage() {
                 "That they are quicker than a dictionary or a model",
               ],
               0,
-              "None of the properties claimed is a claim that the annex is correct about where a word ends, because there is nothing here for it to be correct about. The cost of two parts of one pipeline reading the text differently is far larger than the cost of either being slightly wrong, and on these six sentences the two readings would disagree about 12 of 47 entries.",
+              "A published boundary convention lets separate programs divide the same text consistently. That consistency is useful for indexing, selection and downstream processing. It does not guarantee the boundaries match every language’s linguistic words or every application’s needs. Evaluate those goals separately from conformance to the stated rules.",
             ),
         ],
         },
@@ -1176,14 +986,14 @@ question: "What does a word-boundary filter omit that whitespace splitting retai
   "Each piece exposes start and end. Sum their half-open lengths for coverage.",
   "For the corpus sum lengths over all supplied sentences as the denominator.",
   "Compare a single-space join with the original sentence separately from counting retained characters."
-], check: numberCheck("What share of the six sentences’ characters do the boundary rules keep inside a word, in per cent to one place?", 80.8, 0.05, "The word-boundary filter covers 80.8 percent of notebook characters. That describes source retention for this output policy, rather than an accuracy score for its word choices.") },
+], check: numberCheck("What percentage of the notebook’s source characters lies inside the word-only pieces, to one decimal place?", 80.8, 0.05, "The word-boundary filter covers 80.8 percent of notebook characters. That describes source retention for this output policy, rather than an accuracy score for its word choices.") },
             ),
             exercise(
               "Put one mark between two letters, then between two digits",
               [
   "For each of the twelve supplied marks, build a/mark/b and 1/mark/2 probes using chr(code). Split both with UnicodeWordPreTokenizer.",
   "Print the code point, name and whether each probe remains one word. Then print totals for marks joining letters, marks joining digits and marks whose two decisions differ.",
-  "The same visible punctuation can belong to different boundary classes depending on its neighbours. Keep those two contexts side by side in the report."
+  "A mark has a fixed boundary class in this implementation, but joining rules also inspect its neighbors. Keep letter and digit contexts side by side to see how the same class behaves in each."
 ],
               `from oop_ml import UnicodeWordPreTokenizer
 
@@ -1328,7 +1138,7 @@ question: "How does cutting the full text differ from selecting only its word se
               "Writing that separates the two rules, in both directions",
               [
   "The starter supplies nine contrasting texts, including unspaced scripts, flags, an address, a file name and an emoji. Keep every supplied code point unchanged.",
-  "For each labelled text print default Unicode word count, whitespace piece count and complete Unicode segment count. Preserve the listed order.",
+  "For each labeled text print default Unicode word count, whitespace piece count and complete Unicode segment count. Preserve the listed order.",
   "Compare words with segments: a symbol can form a segment while the default word-only filter returns no word. These default rules are not a dictionary-based linguistic word segmenter for every language."
 ],
               `from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer

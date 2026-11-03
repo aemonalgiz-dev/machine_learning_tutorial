@@ -57,7 +57,7 @@ export function LengthAgainstUse() {
         }))}
       />
       <Panel
-        heading="learned by predicting neighbours"
+        heading="learned by predicting neighbors"
         note={`${view.predicting_dimension} numbers a word`}
         correlation={view.predicting_correlation}
         points={view.rows.map((row) => ({

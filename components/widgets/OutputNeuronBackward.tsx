@@ -71,7 +71,7 @@ export function OutputNeuronBackward() {
             <p>a bias is a weight whose input is always 1</p>
             <p className="mt-1 font-semibold" style={{ color: AMBER }}>∂L/∂b = δ × 1 = {show(delta)}</p>
             <p className="mt-2 font-sans text-xs text-slate-500 dark:text-slate-400">
-              <span style={{ color: INDIGO }}>The delta is shared by every parameter of the neuron</span>; each weight&rsquo;s gradient is the delta scaled by the input that travelled across that edge, and the bias&rsquo;s input is one.
+              <span style={{ color: INDIGO }}>The delta is shared by every parameter of the neuron</span>; each weight&rsquo;s gradient is the delta scaled by the input that traveled across that edge, and the bias&rsquo;s input is one.
             </p>
           </>
         )}

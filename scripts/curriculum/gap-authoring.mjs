@@ -1,10 +1,10 @@
 import { choice, truth, view } from "./authoring.mjs";
 
 export const question = (data, prompt, options, answer, because) => ({
-  ...choice(prompt, options, answer, because), given: { description: "Use the information below.", data },
+  ...choice(prompt, options, answer, because), given: { description: "Question data", data },
 });
 export const claim = (data, prompt, answer, because) => ({
-  ...truth(prompt, answer, because), given: { description: "Consider this example.", data },
+  ...truth(prompt, answer, because), given: { description: "Question data", data },
 });
 export const picture = (title, explanation, panels) => view(title, explanation, [], {
   kind: "tiles", caption: "Invented pixel values. Row and column addresses start at zero; the numbers show the stored values.", showValues: true,

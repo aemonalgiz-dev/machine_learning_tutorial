@@ -158,7 +158,7 @@ export function FasttextPieces() {
       <Legend>
         A piece in <span style={{ color: TAUGHT }}>green</span> is one some word of
         the corpus owns as well, so the corpus taught its row; a piece in{" "}
-        <span style={{ color: UNTAUGHT }}>grey</span> is one no sentence ever
+        <span style={{ color: UNTAUGHT }}>gray</span> is one no sentence ever
         contained. Hover a piece to see which words share it and which row it is
         kept in.
       </Legend>

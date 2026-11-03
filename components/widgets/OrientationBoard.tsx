@@ -87,7 +87,7 @@ export function OrientationBoard() {
             <circle cx={centre} cy={centre} r={4} fill={ARROW} />
           </svg>
           <Caption>
-            The disc of radius {report.radius} around the corner, and the arrow to its centre of
+            The disc of radius {report.radius} around the corner, and the arrow to its center of
             brightness.
           </Caption>
         </div>

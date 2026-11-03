@@ -158,7 +158,7 @@ export function PenaltyGeometryPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Darker is a larger RSS, the white lines are contours of equal RSS. The black dot is least squares, the coloured dot the {model} solution, and the shape is the {model === "ridge" ? "circle" : "diamond"} the penalty draws through it. Hollow markers are the jostled sample.
+        Darker is a larger RSS, the white lines are contours of equal RSS. The black dot is least squares, the colored dot the {model} solution, and the shape is the {model === "ridge" ? "circle" : "diamond"} the penalty draws through it. Hollow markers are the jostled sample.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-3">

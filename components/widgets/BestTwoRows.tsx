@@ -103,10 +103,10 @@ export function BestTwoRows() {
         />
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The first two readouts are shares of the best coverage reachable at that
-        budget. The last two are what the six word occurrences cost under each
-        pair of pieces, which is the same forfeit measured in the thing that is
-        actually paid for.
+        The first two readouts compare the rule&apos;s coverage with the best
+        coverage possible using the same number of pieces. The last two count
+        the tokens needed to encode the six word occurrences. A choice that
+        covers fewer positions can leave us with more tokens to process.
       </p>
     </div>
   );

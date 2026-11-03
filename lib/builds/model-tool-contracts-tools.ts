@@ -56,12 +56,12 @@ export const modelToolContractsTools: Record<string, Tool> = {
   },
   contractTemperatureScale: {
     title: 'Read the temperature conversion scale', inputs: ['Declared unit: C or F'],
-    why: "Read the scale associated with the supplied C or F unit. Combine it with the separate offset before subtracting the training centre. The lesson shows how the two temperature scales are related.",
+    why: "Read the scale associated with the supplied C or F unit. Combine it with the separate offset before subtracting the training center. The lesson shows how the two temperature scales are related.",
     run: ([unit]) => { if (unit === 'C') return 1; if (unit === 'F') return 5 / 9; throw Error('This contract supports only C and F.'); },
   },
   contractTemperatureOffset: {
     title: 'Read the temperature conversion offset', inputs: ['Declared unit: C or F'],
-    why: 'Supplies the offset needed after scaling into Celsius. Apply conversion before the stored training centre; the lesson works through the complete Fahrenheit calculation.',
+    why: "Supplies the offset needed after scaling into Celsius. Apply conversion before the stored training center; the lesson works through the complete Fahrenheit calculation.",
     run: ([unit]) => { if (unit === 'C') return 0; if (unit === 'F') return -160 / 9; throw Error('This contract supports only C and F.'); },
   },
   contractOutcomeKinds: {

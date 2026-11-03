@@ -9,15 +9,15 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Supervised Fine-Tuning · oop_ml",
-  description: "A model that can continue text may not respond in the way a task requires. Fine-tuning on examples of prompts and desired responses gives it demonstrations of the behaviour we want.",
+  title: "Supervised Fine-Tuning · Perceptron Lab",
+  description: "Supervised fine-tuning adapts a model using examples of prompts and desired responses. The examples determine which response patterns are reinforced, so their coverage and quality affect the resulting behavior.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="supervised-fine-tuning"
     title="Supervised Fine-Tuning"
-    tagline={"A model that can continue text may not respond in the way a task requires. Fine-tuning on examples of prompts and desired responses gives it demonstrations of the behaviour we want."}
+    tagline={"Supervised fine-tuning adapts a model using examples of prompts and desired responses. The examples determine which response patterns are reinforced, so their coverage and quality affect the resulting behavior."}
     openingTitle="How Do We Teach a Text Predictor to Respond the Way We Need?"
     intuition={lessonIntuitions["supervised-fine-tuning"]}
     technicalStart="Part 2. Calculate Response-Only Loss"
@@ -34,13 +34,17 @@ export default function Page() {
 <p>{"This page follows one pair all the way through. The prompt is a start token and two words, and the response is one word and an end token."}</p>
 <Equation>{"Prompt:    <start>  the  cat\nResponse:  sat  <end>"}</Equation>
 <p>{"Small as it is, the pair demonstrates two behaviors. The first is which word should follow the prompt. The second is that the response then stops. The end token is part of the target, so a model that produces sat and carries on has not reproduced the demonstrated response."}</p>
-<p>{"That is why the behavior has to be defined before training and not discovered afterward. Training pulls the model toward whatever the responses contain, and it cannot tell an intended pattern from an accidental one. If some responses end with the end token and others trail off, both are being taught. If two responses answer the same kind of prompt in different formats, the model is pulled toward each in turn. Deciding what a good response looks like, including its format and where it stops, is the part of fine-tuning that happens before any gradient is computed. The collection of pairs is where that decision is written down."}</p>
+<p>
+                  {"The objective rewards matching the supplied responses, including their formatting and stopping tokens. An accidental pattern in those targets is rewarded in the same way as an intended one. Conflicting response formats give conflicting guidance unless the input explains when to use each. Define those choices and review the examples before fitting; a low training loss cannot tell us whether the demonstrations express the behavior we wanted."}
+                </p>
 
 </SubSection>
 <SubSection title="2. Keep the prompt visible while scoring the response">
 <p>{"The prompt needs to remain available because it tells the model what response is appropriate. The causal attention mask prevents a response position from reading future response tokens. A separate loss mask decides which next-token predictions contribute to the training objective."}</p>
 <p>{"Response-only loss excludes prompt-token predictions while including the assistant response targets. Some training setups score additional positions; this is an explicit objective choice rather than a universal requirement. The checkbox exposes that choice."}</p>
-<p>{"The two masks are easy to confuse, because both are rows of zeros and ones laid over the same sequence. They answer different questions."}</p>
+<p>
+                  {"Both masks use permission flags, but they act in different places. For one sequence, a causal attention mask describes allowed query/key pairs. The loss mask supplies one flag per target position."}
+                </p>
 <NumberTable headings={["Mask", "The question it answers", "In the pair above"]} rows={[["Causal attention mask", "What may this position read?", "itself and everything before it"], ["Loss mask", "Is this prediction graded?", "only the predictions of sat and <end>"]]} caption="Neither mask does the other’s job. Changing the loss mask leaves what every position reads exactly as it was." />
 <p>{"Why leave the prompt predictions ungraded? In use, the prompt is written by someone else and handed to the model. The model is never asked to produce it. Grading the predictions of the two prompt words, the and cat, would spend part of every update on teaching the model to guess the wording of prompts, which is not the behavior being defined. The response predictions are the ones the model will have to make by itself, so those are the ones this objective grades."}</p>
 <p>{"The prompt still does its work either way. The prediction of sat is made by a position that has read the whole prompt, and the prediction of the end token is made by a position that has read the prompt and sat. Removing the prompt would leave those predictions with nothing to respond to."}</p>
@@ -70,7 +74,9 @@ export default function Page() {
 <p>{"Where the mask does show is in the derivatives, which are what training acts on. The derivative of the mean loss with respect to a scored target’s own logit is its probability minus one, divided by the number of included targets. For an excluded target it is zero."}</p>
 <Equation>{"Response-only:  (0.312 − 1) / 2 ≈ −0.344\nAll targets:    (0.312 − 1) / 4 ≈ −0.172"}</Equation>
 <NumberTable headings={["Target", "Token loss", "Derivative, response only", "Derivative, all targets"]} rows={[["the", "1.165", "0", "−0.172"], ["cat", "1.165", "0", "−0.172"], ["sat", "1.165", "−0.344", "−0.172"], ["<end>", "1.165", "−0.344", "−0.172"]]} caption="The derivative of the mean loss with respect to each target’s own logit, at an assigned target logit of 1. The two derivative columns are the two settings of the live example’s checkbox." />
-<p>{"A negative derivative says that raising the logit lowers the loss, so descent raises it. Under response-only scoring the two response targets are each pulled twice as hard as under all-targets scoring, because the same mean is now shared between two positions and not four. The two prompt targets are not pulled at all. The whole update goes toward the response."}</p>
+<p>
+                  {"For this assigned score table, gradient descent on the logits would raise each scored target logit. The response-target derivatives have twice the magnitude under response-only scoring because the mean averages two included positions instead of four. Excluded positions have zero output-logit derivatives. Backpropagation determines how these signals combine at the model’s shared parameters."}
+                </p>
 <p>{"The derivative with respect to an excluded position’s output logits is zero. This does not mean prompt embeddings or earlier hidden states receive no gradient: scored response positions can depend on them through attention and other shared computation."}</p>
 <p>{"The example uses assigned logits and calculates the objective only. Updating a real model requires backpropagating this loss to the selected parameters, followed by optimizer steps."}</p>
 </SubSection>
@@ -124,18 +130,24 @@ export default function Page() {
 <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm leading-relaxed text-slate-100"><code>{"import numpy as np\nfrom oop_ml.numpy.modern import TokenCrossEntropy\n\nlogits = np.zeros((4, 7))\ntargets = np.array([1, 2, 4, 6])\nscored = np.array([False, False, True, True])\nresult = TokenCrossEntropy().measure(logits, targets, scored)\nprint(result.value)\nprint(result.gradient)"}</code></pre>
 <p>{"All 28 logits in that snippet are zero, so every position spreads its probability evenly over the seven tokens. Both things it prints can be worked out before running it."}</p>
 <Equation>{"p(target) = 1 / 7 ≈ 0.143\nLoss = −log(1 / 7) = log 7 ≈ 1.946\n\nDerivative at a scored target   = ((1 / 7) − 1) / 2 ≈ −0.429\nDerivative at each other token  = (1 / 7) / 2 ≈ 0.071"}</Equation>
-<p>{"The printed gradient has one row for each of the four positions and one column for each of the seven tokens. The rows for the two prompt targets are all zero. In each of the two response rows the target’s entry is −0.429 and the other six entries are 0.071, so the row sums to zero. Read as an instruction to an optimizer, a response row says to raise the target’s logit and lower the other six by the same total amount. A prompt row says nothing."}</p>
+<p>
+                  {"The printed gradient has four rows and seven columns. The two excluded target rows are zero. In each response row, the target entry is about −0.429 and each alternative is about 0.071. These displayed values are rounded; the gradient formula makes the row sum to zero in exact arithmetic. If the logits were adjusted independently, descent would raise the target score and lower the alternatives."}
+                </p>
 <p>{"Real training also needs an unambiguous chat or completion format, boundary tokens, padding handling, held-out examples, and an optimizer. These define the concrete learning task around the objective."}</p>
 </SubSection>
 <SubSection title="6. Separate fine-tuning, prompting, and retrieval">
 <p>{"Fine-tuning changes parameters. Prompting supplies instructions or demonstrations as input for the current response. Retrieval supplies selected source passages as additional input. These approaches can be combined, but they modify different parts of the system."}</p>
-<NumberTable headings={["Route", "What it changes", "How long the change lasts"]} rows={[["Fine-tuning", "the model’s parameters", "every later request"], ["Prompting", "the input, by adding instructions or demonstrations", "the current response"], ["Retrieval", "the input, by adding selected source passages", "the current response"]]} caption="Three ways to change what a model produces. Only fine-tuning leaves the model itself different afterward." />
-<p>{"The toy behavior shows how the routes differ. A prompt could ask for one more word and then a stop, and it would have to ask again on every request. Fine-tuning trains on pairs like the one above until the model does that without being asked, which costs a training run and removes the instruction from every later prompt. Retrieval does not fit this behavior at all, because a habit of formatting is not a fact that some source passage states. It suits answers that live in documents."}</p>
-<p>{"Supervised fine-tuning imitates demonstrated target responses. Preference training uses comparisons or feedback about outputs and introduces a different training objective. A few demonstrations of good behavior do not guarantee that behavior on unfamiliar inputs."}</p>
-<p>{"Imitation has a blind spot, and the loss in Part 2 shows where it is. Every term asks how much probability the model gave the one demonstrated token. A different response that would have served the reader equally well earns no credit, because it is not the response in the pair. Preference training exists for the cases where it is easier to say which of two outputs is better than to write the single best one."}</p>
+<NumberTable headings={["Route", "What it changes", "How long the change lasts"]} rows={[["Fine-tuning","the model’s parameters","persists in the updated model version"],["Prompting","the input, by adding instructions or demonstrations","while those inputs remain in context"],["Retrieval","the input, by adding selected source passages","while those passages remain in context"]]} caption="Only fine-tuning changes learned parameters in these three procedures. Prompting and retrieval change the supplied context." />
+<p>
+                  {"A prompt can ask for one more word and then a stop; retained messages can carry that instruction across turns. Fine-tuning can make the response pattern more likely, but its reliability still needs testing and explicit instructions may remain useful. Retrieval could supply demonstrations or formatting rules as context, although this tiny example does not need a document search."}
+                </p>
+<p>{"Supervised fine-tuning increases the probability of demonstrated responses under its training objective. Preference training instead uses comparisons or feedback about candidate outputs. These are different sources of guidance, and neither a small set of good demonstrations nor a good training score establishes the behavior on unfamiliar requests."}</p>
+<p>
+                  {"The supervised objective scores the demonstrated tokens. A different but equally useful response is not separately labeled as good in that training pair, although other demonstrations can support alternatives. Preference-based training adds comparisons or feedback about candidate responses. Such guidance can be useful when relative judgments are easier to supply than a single target response."}
+                </p>
 <p>{"Evaluate both the target task and capabilities the original model should retain. Repeated training on a narrow dataset can overfit or weaken other behavior. Full-parameter updates are one option; the next lesson describes a smaller trainable update."}</p>
 <KeepInMind>
-<p>{"Nothing on this page was trained. The example assigns logits and computes the objective and its derivatives, which is the part of fine-tuning that can be checked by hand. A real model’s logits all come from shared parameters, so pulling on the response targets also moves everything else those parameters produce. That is the reason to evaluate capabilities the examples never mention."}</p>
+<p>{"The example assigns logits and calculates their loss and derivatives; it does not update a model. In an actual network, shared parameters produce the logits across many requests. Training on the selected response targets can therefore affect behavior outside those examples, which is why evaluation also needs capabilities the model should retain."}</p>
 </KeepInMind>
 
 </SubSection>
@@ -154,7 +166,7 @@ export default function Page() {
                 "The gradient would be unbounded",
               ],
               0,
-              "The objective divides by the number of included positions, and with nothing included that count is zero. Rejecting the batch is the honest answer, since there is no loss to report rather than a loss of zero.",
+              "The loss averages over included positions. An all-False mask includes none, so its denominator would be zero. The library raises an error rather than reporting zero, which would misleadingly suggest a perfectly predicted batch.",
             ),
             choice(
               "Of fine-tuning, prompting and retrieval, which change the model’s parameters?",
@@ -165,7 +177,7 @@ export default function Page() {
                 "All three",
               ],
               0,
-              "Prompting supplies instructions or demonstrations as input for the current response, and retrieval supplies selected source passages as additional input, so both act on what the model reads rather than on what it holds. The three can be combined, but they modify different parts of the system.",
+              "Fine-tuning updates selected model parameters from training examples. Prompting supplies instructions or demonstrations as input, and retrieval adds selected source material to that input. In the standard setup described here, prompting and retrieval do not update model weights. They can be combined with fine-tuning because they change different parts of the system.",
             ),
             several(
               "Which of these does the lesson say a real training run needs around the objective?",
@@ -181,7 +193,7 @@ export default function Page() {
             trueFalse(
               "With every logit at zero over the seven-token vocabulary, the snippet in step 5 reports a loss of about 1.946, which is log 7.",
               true,
-              "Equal logits give every token a probability of one seventh, so every token loss is −log(1 / 7), and a mean of equal losses is that same number whichever targets the mask includes. The mask shows in the gradient instead. The two prompt rows are all zero, and each response row holds −0.429 at its target and 0.071 at each of the other six tokens.",
+              "Equal logits assign every token probability one seventh, giving the same loss at every scored position.\n\n```math\n−ln(1/7) = ln(7) ≈ 1.946\n```\n\nAny nonempty selection of these equal losses has the same mean. The gradient still depends on the mask: prompt-target rows are zero, while each scored response row has about −0.429 at its target and 0.071 at the other six entries.",
             ),
             trueFalse(
               "Evaluating the target task alone is enough, since that is what the demonstrations describe.",
@@ -234,7 +246,7 @@ the    response only +0.0000  all targets -0.1721
 cat    response only +0.0000  all targets -0.1721
 sat    response only -0.3441  all targets -0.1721
 <end>  response only -0.3441  all targets -0.1721`,
-              { hints: ["measure takes the logits, the target ids and, as an optional third argument, one boolean per row saying whether that row is scored. Leave the third argument out to score every row.", "The answer carries value, which is the mean over the scored rows, and gradient, which has the same shape as the logits.", "The derivative at a target’s own logit is the gradient entry in that target’s row and that target’s column, so gradient[row, target].", "A masked entry is a negative number multiplied by zero, which Python prints with a minus sign in front of the zero. Adding 0.0 to the entry before formatting prints it as a plain zero."], check: numberCheck("What derivative does the sat target’s own logit receive under the response-only mask?", -0.3441, 0.0005, "The mask removes prompt-target contributions and averages the remaining loss over the response targets. That also changes the gradient’s denominator. The equal reported means in this toy example come from equal target probabilities; they do not mean the two gradient arrays are equivalent.") , question: "Which token predictions should contribute to learning the response?" },
+              { hints: ["measure takes the logits, the target ids and, as an optional third argument, one boolean per row saying whether that row is scored. Leave the third argument out to score every row.", "The answer carries value, which is the mean over the scored rows, and gradient, which has the same shape as the logits.", "The derivative at a target’s own logit is the gradient entry in that target’s row and that target’s column, so gradient[row, target].", "A masked gradient may be stored as signed zero. Add 0.0 before formatting, as the output example does, to print +0.0000 consistently."], check: numberCheck("What derivative does the sat target’s own logit receive under the response-only mask?", -0.3441, 0.0005, "The mask removes prompt-target contributions and averages the remaining loss over the response targets. That also changes the gradient’s denominator. The equal reported means in this toy example come from equal target probabilities; they do not mean the two gradient arrays are equivalent.") , question: "Which token predictions should contribute to learning the response?" },
             ),
             exercise(
               "Build the mask from the input row and see what it drops",

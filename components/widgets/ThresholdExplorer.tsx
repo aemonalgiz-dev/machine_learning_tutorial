@@ -130,7 +130,7 @@ export function ThresholdExplorer() {
         <text x={PAD.left + PLOT.width / 2} y={VIEW.height - 4} textAnchor="middle" className="fill-slate-500 text-[11px] font-medium dark:fill-slate-400">hours studied</text>
       </svg>
       <p className="mt-1 text-center text-xs text-slate-500 dark:text-slate-500">
-        Large dots are the students at their outcomes, small dots the curve&rsquo;s probability for them, coloured by the cell they land in.
+        Large dots are the students at their outcomes, small dots the curve&rsquo;s probability for them, colored by the cell they land in.
       </p>
 
       <div className="mt-3 grid gap-4 sm:grid-cols-[1fr_1fr]">

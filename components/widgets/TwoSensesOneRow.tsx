@@ -158,10 +158,10 @@ export function TwoSensesOneRow() {
 
       <Legend>
         The chips are the words nearest {report.word} in the refitted space,
-        commonest use first. It has landed exactly on the line marked neither
-        half, and its nearest neighbours are the three words that carry no topic
-        at all, which is a spelling with two senses being described as a word
-        that means nothing.
+        commonest use first. Its vector lies on the line marked neither half,
+        near the words shared by both topics. One vector has combined the
+        spelling&apos;s two uses, so it no longer distinguishes the senses in
+        this comparison.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">

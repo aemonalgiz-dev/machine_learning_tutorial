@@ -23,7 +23,10 @@ export interface ExpandedLesson {
   topic: string;
   blurb: string;
   openingTitle: string;
+  openingId?: string;
   opening: string[];
+  openingBeforeHistory?: boolean;
+  bookmarkRedirects?: Record<string, string>;
   technicalStart?: string;
   reading: {
     experimentTitle: string;

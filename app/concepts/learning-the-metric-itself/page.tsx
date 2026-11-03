@@ -23,9 +23,9 @@ import { SharedWeightsCheck } from "@/components/widgets/SharedWeightsCheck";
 import { WorkedPairBoard } from "@/components/widgets/WorkedPairBoard";
 
 export const metadata: Metadata = {
-  title: "Learning the Metric Itself · oop_ml",
+  title: "Learning the Metric Itself · Perceptron Lab",
   description:
-    "What makes two pictures similar depends on the task. By training on examples of useful matches, we can learn a representation in which the differences we care about affect the distance.",
+    "Similarity depends on which differences matter for a task. Metric learning uses examples of matches and nonmatches to shape a representation in which distances reflect those distinctions.",
 };
 
 const link =
@@ -43,7 +43,7 @@ export default function LearningTheMetricPage() {
       playgroundTitle="Move matching examples closer together"
       playgroundIntro="Compare the distances of matching and nonmatching pairs. Change the margin and inspect both groups, since pulling everything together would make matching distances small too."
       title="Learning the Metric Itself"
-      tagline={"What makes two pictures similar depends on the task. By training on examples of useful matches, we can learn a representation in which the differences we care about affect the distance."}
+      tagline={"Similarity depends on which differences matter for a task. Metric learning uses examples of matches and nonmatches to shape a representation in which distances reflect those distinctions."}
       prerequisites={
         <>
           The borrowed vector this page is measured against is the one read off a
@@ -63,9 +63,11 @@ export default function LearningTheMetricPage() {
           <Link href="/concepts/distance-and-similarity" className={link}>
             distance and similarity
           </Link>
-          , and the question asked of every space is the one-neighbour vote of{" "}
+
+          , and the question asked of every space is the one-neighbor vote of{" "}
           <Link href="/concepts/k-nearest-neighbours" className={link}>
-            k-nearest neighbours
+
+            k-nearest neighbors
           </Link>
           .
         </>
@@ -80,20 +82,14 @@ export default function LearningTheMetricPage() {
 <>
               <SubSection title="1. Four kinds of picture, and a question about sameness">
                 <>
-<p>
-                  Every picture on this page is sixteen pixels on a side with one brightness per pixel, and holds one of four shapes, a cross, the outline of a square, a filled disc or a diagonal bar, drawn at a random position and size against a random background with a little noise on every pixel. A fifth kind, a ring, is drawn only when asked for, as a kind no network here is ever shown.
-                </p>
+<p>Our sixteen-by-sixteen images contain a cross, square outline, filled disc or diagonal bar. Position, size, background and pixel noise vary. A fifth shape, a ring, is available for testing but is excluded from training. We will use these controlled differences to inspect what a learned distance considers similar.</p>
                 <p>
-                  We want a distance between two pictures that is small when they are the same kind and large when they are not, and the method on this page trains that distance directly from pairs, where the usual route borrows it from a network trained to name the kinds.
+                  {"We want two pictures of the same kind to have nearby representations, while pictures of different kinds should be farther apart. One option is to reuse features from a classifier. Here we give the network that comparison problem directly: show it pairs and tell it whether they match."}
                 </p>
 </>
                 <>
-<p>
-                  The page asks six questions, in order. What goes wrong with the distance a classifier leaves behind, and why train a distance from pairs at all? What does the contrastive loss ask of one pair, worked by hand? How does one network serve both pictures of a pair, and is the slope of a weight used twice really the sum of its two uses?
-                </p>
-                <p>
-                  Trained on pairs of three kinds, does the distance carry to the fourth kind and to rings, against the vector borrowed from a classifier? What does the margin do, and what happens with no pairs of different kinds at all? And what does the method cost in pairs, before the last Part asks where it stops being defined.
-                </p>
+<p>We will start with one pair of images. The loss should bring their vectors closer when they share a label and separate them when their labels differ. Then we can follow the gradient through the network used for both images. Because that network shares its weights, the update must account for both uses.</p>
+                <p>After training on three shape classes, we will test whether the distance remains useful for the fourth class and for rings. We will also change the margin and remove different-class pairs. These comparisons show what supervision the distance depends on, before we examine the number of pairs and the method’s limits.</p>
 </>
                 <NumberTable
                   headings={["the collection", "on this page"]}
@@ -105,7 +101,7 @@ export default function LearningTheMetricPage() {
                     ["a fifth kind, never trained on", "ring, 60 drawn"],
                     ["pictures every distance is measured among", "300, the 240 held out and the 60 rings"],
                   ]}
-                  caption="The same drawn collection the other picture pages use. Every nearest neighbour below is searched among the 300 evaluation pictures unless a step says otherwise."
+                  caption="The same drawn collection the other picture pages use. Every nearest neighbor below is searched among the 300 evaluation pictures unless a step says otherwise."
                 />
                 <KeepInMind>
                   The question throughout is whether a picture&rsquo;s nearest
@@ -120,60 +116,41 @@ export default function LearningTheMetricPage() {
                   <Link href="/concepts/a-vector-for-a-picture" className={link}>
                     a vector for a picture
                   </Link>{" "}
+
                   trained a network to name the four kinds and kept the sixteen
                   numbers of the layer before its answer as a picture&rsquo;s
                   position. It found that a held-out picture&rsquo;s nearest
-                  neighbour there is its own kind for 230 to 235 of 240 across
+                  neighbor there is its own kind for 230 to 235 of 240 across
                   three weight seeds, which is a very good ruler for the kinds the
                   network was taught. It also found that the ruler is worse at the
                   one thing it was never asked about, since 43 to 45 of 60 rings
                   find another ring by it where the raw pixels manage 46.
                 </p>
                 <p>
+
                   Searched among all 300 pictures by straight-line distance, the
-                  same network&rsquo;s layer gives a nearest neighbour of the right
+                  same network&rsquo;s layer gives a nearest neighbor of the right
                   kind to 56 crosses, 58 discs and 59 bars of 60, and to only 40
                   squares, because the rings it was never shown land among the
-                  squares and take their places as nearest neighbours. The pixels
+                  squares and take their places as nearest neighbors. The pixels
                   give 45, 38, 50 and 54, and 44 rings of 60.
                 </p>
                 <KeepInMind>
-                  A classifier&rsquo;s layer is a good ruler for the kinds it was
-                  trained to name and nobody asked it about anything else, which
-                  shows as soon as a kind it never saw joins the search.
+                  {"A classifier is trained to separate its supplied categories. Its features may also help compare an unseen category, but that is an additional use to test. Adding rings changes which pictures become nearest neighbors here."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="3. What a pair asks for that a label does not">
+                <p>The supervised classifier here chooses among the labels supplied during training. Some applications instead provide evidence that two examples belong together or differ, without expecting every future identity to have its own fixed class. Signature or face comparisons can use those pair relationships. We can therefore ask the network to learn a comparison directly, while still testing whether it generalizes beyond the training pairs.</p>
                 <p>
-                  A classifier needs every example named, and it can only ever
-                  answer with one of the names it was given. A great many real
-                  problems do not come like that. A bank verifying signatures has
-                  pairs known to be by one person and pairs known not to be, and
-                  a photograph collection has pictures known to show one face, and
-                  in both the people who matter tomorrow are not among the names
-                  today. What they have is sameness, and sameness is exactly what
-                  a distance is supposed to encode.
-                </p>
-                <p>
-                  So the method asks for it directly. Show the network two
-                  pictures and a single bit, one kind or two, and adjust the
-                  weights so that the distance between the two answers agrees
-                  with the bit.
+                  {"For each training pair, supply two pictures and a bit indicating whether they belong to the same kind. The network maps each picture to a position. The loss then checks the distance between those positions against the pair label."}
                 </p>
                 <Equation>
                   {"d(a, b) as small as it can be, when a and b are one kind\nd(a, b) ≥ m, when they are two kinds"}
                 </Equation>
-                <p>
-                  The hope, and the claim the method is usually sold on, is that a
-                  distance trained this way describes what makes pictures alike
-                  rather than which name to give them, and so should serve kinds
-                  the training never contained. Part 4 tests exactly that.
-                </p>
+                <p>Pair training gives the representation an explicit reason to bring labeled matches closer and separate labeled nonmatches. Whether that learned relationship also helps with new kinds is an empirical question. The held-back bars and rings test that question here rather than assuming that a distance objective guarantees it.</p>
                 <KeepInMind>
-                  Training on pairs needs only a judgement of one kind or two for
-                  each pair, never a name, and aims straight at the distance
-                  rather than hoping it falls out of naming.
+                  {"Pair training needs a match or nonmatch judgment for each pair. We can derive that judgment from category labels, as we do here, or obtain it directly. A separate output category for every future identity is not required."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -197,51 +174,31 @@ export default function LearningTheMetricPage() {
                   {"p(x) = W₂ tanh(W₁ f(x) + b₁) + b₂      f(x) the 128 numbers the convolutions hand on\n                                         W₁ is 16 × 128, W₂ is 8 × 16\nd(a, b) = ‖p(a) − p(b)‖ = √( Σᵢ (p(a)ᵢ − p(b)ᵢ)² )"}
                 </Equation>
                 <p>
-                  Before any training the mean distance between two of the 300
-                  evaluation pictures&rsquo; positions is 0.7325. The margin used
-                  throughout is 1, chosen before any margin was compared because
-                  it is a distance the untrained network nearly reaches already,
-                  so training does not have to drag the positions to a new scale
-                  before it can start arranging them.
+                  {"Before training, the mean distance between the 300 evaluation positions is 0.7325. The reference margin is 1. It is on a similar scale to those initial distances, so different-kind pairs can begin near the separation the loss asks for. We will test other margins later."}
                 </p>
                 <KeepInMind>
-                  The tower answers with eight numbers, a position, and starts
-                  from the reference network&rsquo;s weights, with its positions
-                  0.7325 apart on average.
+                  {"Each picture becomes an eight-number position. Before training, the mean distance between evaluation positions is 0.7325; the reference margin is 1."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="5. A pair of one kind is pulled together">
                 <p>
-                  For two pictures of one kind the loss is half their squared
-                  distance. It is zero only when the two positions coincide, and
-                  its slope at either position points along the line to the other,
-                  growing with the distance, so a far-apart pair is pulled hard
-                  and a close pair gently, the way a spring behaves.
+                  {"For two pictures of the same kind, the loss is half their squared distance. It reaches zero when the positions coincide. The gradient at either position points away from the other position, so a descent step moves against it and brings them together. A larger gap produces a larger gradient."}
                 </p>
                 <Equation>
                   {"L_same(a, b) = ½ d(a, b)²\n∂L_same / ∂p(a) = p(a) − p(b)"}
                 </Equation>
                 <p>
-                  A step of descent moves p(a) against that slope, which is
-                  towards p(b), and moves p(b) by the opposite amount, towards
-                  p(a). The half is there only so the slope comes out as the gap
-                  itself.
+                  {"If we could update the positions directly, descent would move each toward the other by opposite amounts. In the network, these position gradients are instead passed backward to update shared weights. The factor of one half makes the derivative equal to the position difference shown above."}
                 </p>
                 <KeepInMind>
-                  A pair of one kind is pulled together by a force proportional
-                  to its distance, and is satisfied only when the two positions
-                  are the same point.
+                  {"For a same-kind pair, the loss reaches zero when the positions coincide. Its position gradient grows in proportion to their separation."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="6. A pair of two kinds is pushed to the margin and no further">
                 <p>
-                  For two pictures of different kinds the loss is half the squared
-                  amount by which they fall short of the margin. Closer than the
-                  margin they are pushed apart, hardest when they are closest;
-                  once they are a margin apart the loss is zero and so is its
-                  slope, and they are left alone.
+                  {"For different-kind pictures, the loss measures how far their distance falls short of the margin. Inside the margin, descent asks their positions to move apart. At or beyond the margin, this pair contributes zero loss and zero gradient. At exact coincidence, the direction needs a convention; we will return to that case."}
                 </p>
                 <Equation>
                   {"L_different(a, b) = ½ max(0, m − d)²\n∂L_different / ∂p(a) = −((m − d) / d) (p(a) − p(b))   when d < m,   and 0 when d ≥ m"}
@@ -256,15 +213,8 @@ export default function LearningTheMetricPage() {
                 </Equation>
                 <WhyThisWorks title="Why the push stops at a margin">
                   <p>
-                    The obvious alternative is to reward distance without limit,
-                    a loss of minus the squared distance for a pair of two kinds.
-                    That loss has no minimum. The network can always lower it by
-                    making every position larger, so the weights grow without end
-                    and the pulls, which are bounded by how close a pair can get,
-                    are swamped. The margin turns the push into a demand that can
-                    be met, after which a pair contributes nothing, and it is what
-                    makes the loss bounded below by zero.
-                  </p>
+                  {"Suppose we used a negative squared distance for different-kind pairs. That term could keep decreasing as the pair moves farther apart, with no point at which the separation is enough. The margin gives the demand a stopping point. Each different-kind term becomes zero once its distance reaches the margin, and both terms in the contrastive loss remain nonnegative."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
                   A pair of two kinds is pushed apart only while it is closer than
@@ -311,18 +261,13 @@ export default function LearningTheMetricPage() {
                   dashed; the dot is the answer for the pair on the left.
                 </p>
                 <KeepInMind>
-                  At a distance of 0.6 and a margin of 1, the pair costs 0.18 as
-                  one kind and 0.08 as two, and the slopes point the first
-                  position towards the second and away from it respectively.
+                  {"At distance 0.6 with margin 1, the same-kind loss is 0.18 and the different-kind loss is 0.08. Descent on the positions would bring the same-kind pair together and move the different-kind pair apart; the gradients point in the opposite directions."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="8. Two real pairs through the trained network">
                 <p>
-                  The same arithmetic on real pictures, placed by the network
-                  once it has been trained on pairs. Two held-out crosses land
-                  close together and a cross and a square land far apart, and the
-                  loss treats each pair the way its label says.
+                  {"Now apply the same calculation to two selected pairs of held-out pictures after training. Two crosses have nearby positions, while a cross and a square are farther apart. Compare each distance with the margin to see which term still contributes a gradient."}
                 </p>
                 <WorkedPairBoard />
                 <p className={caption}>
@@ -360,26 +305,10 @@ export default function LearningTheMetricPage() {
           content: (
             <>
               <SubSection title="9. Both pictures go through the same weights">
-                <p>
-                  The loss needs a position for each picture of a pair, so each
-                  picture is run through the network, and it is the same network
-                  both times. Drawn out, that looks like two identical towers
-                  joined at the top by the distance, which is why the arrangement
-                  is called a Siamese network, though there is only one set of
-                  weights and nothing about it is doubled except the drawing.
-                </p>
-                <p>
-                  Using one set of weights is forced by what a distance has to
-                  be. If the two pictures
-                  went through different networks, the distance from a to b would
-                  differ from the distance from b to a, and a picture&rsquo;s
-                  position would depend on which side of a pair it happened to be
-                  shown on, so there would be no single place to put it when it is
-                  later searched for.
-                </p>
+                <p>Each picture passes through the same network to obtain its position. Drawing the two evaluations side by side gives the arrangement its Siamese name: there are two sets of activations for a pair, but one shared parameter set. Training must combine the contribution from both evaluations before updating those shared weights.</p>
+                <p>Sharing weights makes one picture have the same representation whichever side of a pair it occupies. That supports this design&apos;s single embedding space, where Euclidean distance is symmetric. Other retrieval systems can deliberately use different query and document encoders, but their two spaces need a compatible comparison; they do not automatically provide the single-map arrangement assumed here.</p>
                 <KeepInMind>
-                  A Siamese network is one network used twice, which keeps the
-                  distance symmetric and gives every picture one position.
+                  {"The same network processes both pictures. Each picture therefore has one representation, and swapping the pair leaves its Euclidean distance unchanged."}
                 </KeepInMind>
               </SubSection>
 
@@ -437,10 +366,7 @@ export default function LearningTheMetricPage() {
                   only ever one copy of every weight to step.
                 </p>
                 <KeepInMind>
-                  The slope of a weight used by both pictures is the sum of its
-                  two slopes, and a finite difference of the pair loss agrees with
-                  that sum to about 10&#8315;&sup1;&sup1; while either copy alone
-                  is off by as much as 0.1462.
+                  {"For each checked parameter, the two route contributions add to the shared gradient. The finite-difference estimates agree with those sums to about 10⁻¹¹ in this test; using one route alone differs by as much as 0.1462."}
                 </KeepInMind>
               </SubSection>
 
@@ -501,7 +427,7 @@ export default function LearningTheMetricPage() {
             trueFalse(
               "Searched among all 300 pictures, the reference classifier’s layer finds the right kind for far fewer squares than for crosses, discs or bars.",
               true,
-              "The nearest neighbour has the correct known class for 56 crosses, 58 discs and 59 bars out of sixty each, but only 40 squares. The unseen rings often become the squares' nearest neighbours. This shows a limitation of using a classifier's representation as a distance: it was trained to distinguish its known classes, while our retrieval question includes another shape.",
+              "The nearest neighbor has the correct known class for 56 crosses, 58 discs and 59 bars out of sixty each, but only 40 squares. The unseen rings often become the squares' nearest neighbors. This shows a limitation of using a classifier's representation as a distance: it was trained to distinguish its known classes, while our retrieval question includes another shape.",
             ),
             choice(
               "Both pictures of a pair go through one set of weights. What forces that?",
@@ -512,7 +438,7 @@ export default function LearningTheMetricPage() {
                 "Only one of the two pictures of a pair carries a label",
               ],
               0,
-              "A distance has to be symmetric and a picture has to have one position, or there is no single place to put it when it is later searched for. The cost argument is real but secondary, and the loss would differentiate perfectly well through two towers. Nothing about the arrangement is doubled except the drawing.",
+              "This design assigns each image one vector through a shared encoder, then measures Euclidean distance between the vectors. The distance is symmetric and both training and retrieval use the same coordinate system. Other systems can use separate query and item encoders, but they need an objective that makes those outputs compatible. Sharing is the design choice used here, not a mathematical requirement of every similarity model.",
             ),
             trueFalse(
               "The slope of a weight for one pair can be taken from either picture’s backward pass, since both pass through the same weights.",
@@ -528,12 +454,12 @@ export default function LearningTheMetricPage() {
                 "0.18 as one kind and nothing as two, since the pair is past the margin",
               ],
               0,
-              "As one kind the loss is half the squared distance, half of 0.36, and as two it is half the squared shortfall from the margin, half of 0.4 squared. The slopes at the first position are the gap itself, (−0.36, −0.48), pulling it towards the second, and (0.24, 0.32), pushing it away. Only past the margin does a pair of two kinds cost nothing, which at this margin takes a distance of 1 or more, and moving the second position out to a distance of 2 does it.",
+              "For a same-kind pair, this objective uses half the squared distance. For a different-kind pair, it uses half the squared shortfall inside the margin:\n\n```math\nSame kind: 0.5 × 0.6² = 0.18\nDifferent kinds: 0.5 × (1 − 0.6)² = 0.08\n```\n\nA descent update attracts the same-kind vectors and repels a different-kind pair that is still inside the margin. At or beyond the margin, this repulsive term is zero.",
             ),
             trueFalse(
               "The margin of 1 was chosen before any margin was compared, because the untrained positions already sit 0.7325 apart on average.",
               true,
-              "A margin of 1 is a distance the network nearly reaches before training starts, so the positions do not have to be dragged to a new scale before they can be arranged. Part 5 then compares margins, and finds the comparison only works once the step size is divided by the square of the margin, which is a reason not to have picked the margin by training several and keeping the best.",
+              "A margin near the initial distance scale gives this experiment a useful starting comparison. The later margin sweep also changes the learning rate, because margin and update scale interact in this setup. Dividing the rate by the squared margin is the tested adjustment here, not a universal rule for every encoder. Margins can still be selected using a separate validation task.",
             ),
         ],
         },
@@ -543,24 +469,20 @@ export default function LearningTheMetricPage() {
             <>
               <SubSection title="14. Training on three kinds and holding the bar back">
                 <p>
+
                   To ask whether a distance learned from sameness reaches new
                   kinds, the network is trained on pairs of crosses, squares and
                   discs only, 180 training pictures, and the bar is held back
                   along with the ring. For a fair comparison a classifier of the
                   reference design is trained on the same 180 pictures to name the
                   same three kinds, from the same starting weights, and its layer
-                  of sixteen is read the way the neighbouring page reads it.
+                  of sixteen is read the way the neighboring page reads it.
                 </p>
                 <p>
-                  Both train properly. The pair loss falls from 0.1351 in the first
-                  epoch to 0.0122 in the fortieth, and the three-kind classifier
-                  names 0.9778 of the held-out pictures of its three kinds
-                  correctly. So four spaces are compared, the pixels, the
-                  reference classifier&rsquo;s layer (which was shown bars), the
-                  three-kind classifier&rsquo;s layer and the positions trained on
-                  pairs, and every number depending on training is given for
-                  weight seeds 0, 1 and 2. The widgets draw seed 0 unless a button
-                  says otherwise.
+                  {"Both training objectives improve in the reported runs. The pair loss falls from 0.1351 in the first epoch to 0.0122 in the fortieth. The three-kind classifier gets 0.9778 of the held-out labels correct among its three trained kinds."}
+                </p>
+                <p>
+                  {"We compare four representations: raw pixels, the reference classifier trained with bars, the three-kind classifier, and the eight positions trained on pairs. Training-dependent results use weight seeds 0, 1 and 2. Widgets show seed 0 unless another seed is selected."}
                 </p>
                 <KeepInMind>
                   Two networks learn from the same 180 pictures of three kinds,
@@ -571,19 +493,18 @@ export default function LearningTheMetricPage() {
 
               <SubSection title="15. Among the kinds it was trained on, it keeps up">
                 <p>
-                  First the easy question. Searching only among the 180 held-out
-                  pictures of crosses, squares and discs, so that no picture of an
-                  unseen kind can be anyone&rsquo;s nearest, the positions trained
-                  on pairs do about as well as the classifier&rsquo;s layer.
+                  {"First restrict the search to the 180 held-out crosses, squares and discs. Every candidate then belongs to one of the trained kinds. The classifier and pair-trained positions can be compared without bars or rings changing the candidate set."}
                 </p>
                 <MetricComparisonLedger view="seen" />
                 <p className={caption}>
-                  Nearest neighbours of the right kind among the held-out pictures
+
+                  Nearest neighbors of the right kind among the held-out pictures
                   of the three trained kinds only, for each seed.
                 </p>
                 <p>
+
                   On seed 0 the positions give 171 of 180 pictures a nearest
-                  neighbour of their own kind against the three-kind
+                  neighbor of their own kind against the three-kind
                   classifier&rsquo;s 179, and on seed 2 they are ahead, 178 against
                   176. Seed 1 is the weak one, 157 against 174. The pixels manage
                   144 and the reference classifier 174.
@@ -597,12 +518,7 @@ export default function LearningTheMetricPage() {
 
               <SubSection title="16. The held-back bar lands among the crosses">
                 <p>
-                  Now the bars and rings join the search, 300 pictures in all.
-                  This is where the claim for the method is made, and on these
-                  pictures it did not hold. A held-back bar finds another bar as
-                  its nearest picture far less often in the positions trained on
-                  pairs than in the three-kind classifier&rsquo;s layer, and the
-                  bars also spoil the crosses.
+                  {"Add bars and rings to the search, bringing the collection to 300 pictures. Neither appeared in pair training. In these runs, bars retrieve their own kind less often with the pair-trained positions than with the three-kind classifier features. They also become neighbors of some crosses, reducing cross agreement."}
                 </p>
                 <MetricComparisonLedger />
                 <p className={caption}>
@@ -626,12 +542,7 @@ export default function LearningTheMetricPage() {
               </SubSection>
 
               <SubSection title="17. The rings do worse than by pixels">
-                <p>
-                  The ring is the stricter test, since no network on this page
-                  saw one, the classifiers included. It is also the place where
-                  the method is plainly worse than doing nothing, which is worth
-                  stating as found rather than explaining away.
-                </p>
+                <p>Rings are held out from every network in this comparison, including the classifiers. Their nearest-neighbor results therefore provide a separate test from the trained kinds. In this experiment, direct pair training performs worse on that test than the raw-pixel baseline, which limits the generalization claim supported by these data.</p>
                 <p>
                   In the positions trained on pairs 33, 33 and 39 rings of 60 find
                   another ring across the three seeds. The three-kind
@@ -649,10 +560,7 @@ export default function LearningTheMetricPage() {
 
               <SubSection title="18. Whichever kind is held back">
                 <p>
-                  The bar might simply be a hard kind to hold back. It is not the
-                  reason. Holding back the cross, the disc or the square instead,
-                  each on seed 0, gives the same picture, and a wider answer does
-                  not rescue it either.
+                  {"Holding out bars is one test of a new category. Repeat it with cross, disc or square held out instead, using seed 0. The comparison below asks whether the weaker retrieval is specific to bars. A separate width control tests sixteen output values instead of eight."}
                 </p>
                 <NumberTable
                   headings={["held back", "finds its own kind, pairs", "finds its own kind, classifier", "rings, pairs", "rings, classifier"]}
@@ -664,50 +572,27 @@ export default function LearningTheMetricPage() {
                   ]}
                   caption="Seed 0, searched among all 300. The classifier is the one trained to name the same three kinds. The study buttons on the table in step 16 show each row in full."
                 />
-                <p>
-                  The positions have eight numbers where the classifier&rsquo;s
-                  layer has sixteen, so I retrained the pair network on seed 0
-                  answering with sixteen. Its bars find a bar 31 times of 60 where
-                  the eight-number version managed 33, and its crosses 37 times
-                  where it managed 39. Its rings do better, 43 of 60 against 33,
-                  which matches the reference classifier and is still below the
-                  pixels. So the narrower answer costs the rings something and is
-                  not what goes wrong with the held-back kind.
-                </p>
+                <p>The width control retrains the pair network at seed 0 with sixteen outputs instead of eight. Bars retrieve their own kind 31 times rather than 33, and crosses 37 times rather than 39. Rings improve to 43 of 60 from 33, matching the reference classifier but remaining below raw pixels. Width affects these results, but this comparison does not make it the sole explanation of the held-out-kind failures.</p>
                 <KeepInMind>
-                  Whichever of the four kinds is held back, it finds its own kind
-                  21 to 33 times of 60 in the positions trained on pairs against 44
-                  to 52 in the classifier&rsquo;s layer, and sixteen numbers
-                  instead of eight does not change that.
+                  {"For each held-back kind at seed 0, pair-trained positions return that kind 21 to 33 times out of 60; classifier features return it 44 to 52 times. Widening the pair output to sixteen values changes the counts, but does not reverse the bar comparison."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. A reading on which the pairs win, and why it misleads">
                 <p>
-                  There is a way of reading the same positions that makes the
-                  method look as advertised. Take a kind&rsquo;s mean distance
-                  between its own pictures and divide it by its mean distance to
-                  every other picture. Lower is tighter, and on that reading the
-                  rings are tighter in the positions trained on pairs than in the
-                  three-kind classifier&rsquo;s layer in all six studies.
+                  {"A different measure gives the pair-trained positions a better result. For a kind, divide its mean within-kind distance by its mean distance to other kinds. A smaller ratio means that within-kind distances are smaller relative to between-kind distances. Rings have a lower ratio in the pair representation than in the three-kind classifier representation in all six studies."}
                 </p>
                 <Equation>
                   {"ratio(kind) = mean d inside the kind / mean d from the kind to everything else"}
                 </Equation>
                 <>
 <p>
-                  On seed 0 the ratio for rings is 0.5230 against 0.5984, on seed 1 0.4431 against 0.6945, and on seed 2 0.3532 against 0.7923, the opposite verdict to the nearest-neighbour count. The ratio has a confound. The pair loss pushes the three trained kinds a margin apart from each other, which makes the whole collection larger, and that enlarges every kind&rsquo;s distance to everything else, so the ratio falls for a kind that did not gather at all.
+                  {"For rings, the ratios are 0.5230 against 0.5984 on seed 0, 0.4431 against 0.6945 on seed 1, and 0.3532 against 0.7923 on seed 2. These averages give a different comparison from the nearest-neighbor counts. A ratio can improve because distances to other kinds grow, even if nearby nonrings still interrupt ring retrieval. It does not tell us the category of the closest picture."}
                 </p>
-                <p>
-                  The nearest-neighbour count cannot be moved that way, and it is the question a search actually asks, which is why this page reads it first. The reading buttons on the table in step 16 show all three.
-                </p>
+                <p>A uniform rescaling does not change which neighbor is closest. Nearest-neighbor agreement therefore tests a different property from the ratio of average within-kind and between-kind distances. For a retrieval task, checking the returned neighbors directly helps us see failures that an improved aggregate ratio can hide.</p>
 </>
                 <KeepInMind>
-                  Divided by its distance to everything else, the ring&rsquo;s own
-                  spread looks tighter in the positions trained on pairs on every
-                  study, while its nearest neighbour is a ring less often, because
-                  pushing the trained kinds apart lowers the ratio for every other
-                  kind as well.
+                  {"The ring ratio improves in every study while ring nearest-neighbor agreement gets worse. For this retrieval task, we need to inspect the returned neighbors as well as average distances."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -719,11 +604,7 @@ export default function LearningTheMetricPage() {
             <>
               <SubSection title="20. The margin is a unit of length">
                 <p>
-                  The margin looks like a setting that says how far apart kinds
-                  should be, and it is less than that. Nothing about a position
-                  has a natural size, so a network trained at a margin of 2 can
-                  reach exactly the arrangement it would reach at a margin of 1,
-                  with every position doubled.
+                  {"A margin specifies separation in the output coordinates. Those coordinates have no fixed physical unit. If we double every position and double the margin, the loss changes by the common scale factor derived below. That is a relation between arrangements; it does not guarantee that two training runs will reach matching arrangements."}
                 </p>
                 <DerivationTable
                   expressionHeading="expression"
@@ -747,28 +628,15 @@ export default function LearningTheMetricPage() {
                     },
                   ]}
                 />
-                <p>
-                  The loss surface at a margin of 2 is the one at a margin of 1,
-                  stretched. What does not stretch is everything else. The
-                  starting positions are the same size whatever the margin, and
-                  the slopes reaching the lower layers grow with the margin, so at
-                  one step size a larger margin takes larger steps. Dividing the
-                  step size by the square of the margin undoes the c² and is the
-                  fair way to compare margins.
-                </p>
+                <p>Changing the margin from 1 to 2 and rescaling all output positions accordingly rescales this distance-based loss. It does not automatically make the two optimization runs equivalent: their initialization and parameter gradients also matter. The experiments use division of the step size by the squared margin as an explicit comparison policy, then measure its effect rather than treating it as a universal correction for every architecture.</p>
                 <KeepInMind>
-                  Scaling the margin by c scales the whole loss by c², so the
-                  margin only sets a unit of length, and the step size has to be
-                  divided by c² to compare margins fairly.
+                  {"Rescaling all positions and the margin by the same positive factor rescales this loss by the square of that factor. The experiments also adjust the step size, but that policy does not make every parameter update or final arrangement equivalent."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="21. At one step size, a larger margin freezes everything onto one point">
                 <p>
-                  Ignoring that has a striking consequence. Trained at the step
-                  size that suits a margin of 1, a margin of 2 or 4 does not give
-                  a wider arrangement. It gives none at all, because every
-                  picture&rsquo;s position lands on the same point.
+                  {"In the tested runs, keeping the reference step size while raising the margin to 2 or 4 makes the positions collapse toward one point. The wider margin alone does not produce a wider useful arrangement. Inspect the distances as well as the loss to see this failure."}
                 </p>
                 <MarginSweep />
                 <p className={caption}>
@@ -795,20 +663,12 @@ export default function LearningTheMetricPage() {
                   <Equation>{"collapsed loss at margin 0.5 = (192 / 276) × ½ × 0.5² ≈ 0.0870"}</Equation>
                 </>
                 <KeepInMind>
-                  Too large a step, whether from a larger margin or a larger step
-                  size, can put every position on one point, where the loss is
-                  stuck at the share of two-kind pairs times half the margin
-                  squared, 1.3913 at a margin of 2.
+                  {"These runs collapse to nearly coincident positions. At exact coincidence, this implementation returns zero position gradients, so the different-kind loss can remain positive without providing an update. The stalled loss at margin 2 is about 1.3913."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="22. With the step size scaled, the margin changes little that holds up">
-                <p>
-                  With the step size divided by the margin squared, every margin
-                  trains. The arrangement then really does scale with the margin,
-                  and whatever else changes is small and changes its direction
-                  from one seed to the next.
-                </p>
+                <p>The scaled-step comparisons show that changing the optimization setting can avoid several collapsed runs and produce arrangements that broadly follow the changed margin. That is a result for the tested runs. The remaining seed sensitivity matters, so a successful example does not guarantee that every margin and initialization will train reliably.</p>
                 <NumberTable
                   headings={["margin, seed 0", "step size", "mean distance, one kind", "mean distance, two kinds", "rings finding a ring"]}
                   rows={[
@@ -828,10 +688,7 @@ export default function LearningTheMetricPage() {
                   trust any trend in the margin from three seeds of this size.
                 </p>
                 <KeepInMind>
-                  With the step size scaled, a larger margin gives a larger
-                  arrangement of much the same shape, and the one improvement seen
-                  on seed 0, 49 rings of 60 at a margin of 4, did not hold on the
-                  other seeds.
+                  {"With the tested scaled step sizes, the margin affects both scale and retrieval. Seed 0 reaches 49 correct ring neighbors out of 60 at margin 4, but the improvement does not hold across the other seeds."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -843,49 +700,35 @@ export default function LearningTheMetricPage() {
             <>
               <SubSection title="23. With pairs of one kind only, everything falls onto one point">
                 <p>
-                  Pairs of one kind are the ones that say what sameness is, so it
-                  is natural to wonder whether the pairs of two kinds are needed at
-                  all. They are, and the measurement is immediate. Trained on the
-                  same batches with every two-kind pair left out, from the same
-                  starting weights, the network does the one thing that satisfies
-                  every pull at once, which is to give every picture the same
-                  position.
+                  {"If we keep same-kind pairs and remove every different-kind pair, what stops all pictures from receiving one position? Nothing in the remaining loss penalizes that answer. The controlled run below uses the same starting weights and batches to show how the positions change when the separating term is removed."}
                 </p>
                 <CollapseChart />
                 <p className={caption}>
                   The two runs share their starting weights and their batches.
                   Only the pairs of two kinds differ.
                 </p>
-                <p>The mean distance between positions starts at 0.7325 in both runs. With pulls only it is 0.0393 after one epoch and 0.0018 after forty; the ordinary run ends at 0.8284. The collapsed positions still differ in their last digits, so a nearest neighbour can be returned even after most separation has disappeared. The same-kind shares among ten neighbours fall to 0.2917 for crosses, 0.3000 for squares and 0.2633 for discs. Compare those with roughly one-third for random neighbours among the 300 training pictures, which contain 100 of each of these three kinds. A numerical neighbour list alone does not show useful separation.</p>
+                <p>
+                  {"The mean distance between evaluation positions starts at 0.7325 in both runs. With same-kind pairs only, it reaches 0.0393 after one epoch and 0.0018 after forty; the ordinary run ends at 0.8284. The positions still differ in their last digits, so the search can return neighbors even though their overall separation is small. The same-kind shares among ten neighbors are 0.2917 for crosses, 0.3000 for squares and 0.2633 for discs. The search includes 300 evaluation pictures, with 60 in each of five kinds. Random neighbors would therefore give roughly one-fifth agreement. These results exceed that rough baseline, but a small overall spread alone neither establishes nor rules out useful neighbor ordering."}
+                </p>
                 <KeepInMind>
-                  Without pairs of two kinds the positions shrink from 0.7325
-                  apart to 0.0018 in forty epochs, and what order is left among
-                  them is barely better than chance.
+                  {"Same-kind-only training shrinks the mean separation from 0.7325 to 0.0018 in forty epochs. Some same-kind neighbor preference remains. The loss has no term requiring different kinds to stay apart."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. The loss calls the collapse a success">
-                <p>
-                  The alarming part is what the loss says while this happens. The
-                  run with pulls only reaches a mean loss of 0.0000078 by the
-                  fortieth epoch, where the ordinary run ends at 0.0122, so by its
-                  own measure the collapsed network is more than a thousand times
-                  better trained.
-                </p>
+                <p>The pull-only run reaches mean loss 0.0000078 at epoch forty, compared with 0.0122 for the ordinary run. Those values come from different objectives: the first omits the term that penalizes collapse. Its smaller value therefore does not establish better learning or more useful distances.</p>
                 <WhyThisWorks title="Why every constant answer is a perfect answer">
                   <>
 <p>
-                    With pulls only, the loss is a sum of squared distances, so it is never negative, and it is exactly zero for any network that gives every picture one and the same position, whatever that position is. Such a network exists in this design without any help, since setting the last layer&rsquo;s weights to zero does it, and descent finds its way towards one.
-                  </p>
+                  {"With same-kind pairs only, the loss is a sum of squared distances. It is nonnegative and reaches zero if every picture has the same position. This network can produce that answer by setting its final layer weights to zero. The measured run moves toward collapse, although the objective also permits other zero-loss arrangements that keep each connected group of same-kind examples together."}
+                </p>
                   <p>
                     The push is the only term that a constant answer fails, since it charges half the margin squared for every pair of two kinds sitting on top of each other. Hadsell, Chopra and LeCun gave exactly this argument for including it.
                   </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  With pulls only, a network that answers every picture with one
-                  point has a loss of zero, so a falling loss is no evidence that
-                  a distance has been learned.
+                  {"A constant representation is a zero-loss answer for same-kind pairs alone. A falling value of that objective therefore does not establish useful separation between different kinds."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -903,12 +746,12 @@ export default function LearningTheMetricPage() {
                 "About level with both, within a few pictures of 60",
               ],
               2,
-              "This is where the claim for the method is made and on these pictures it did not hold. The crosses suffer as well, falling from 56 to 39 once the bars join the search, because a network never asked where a bar should go puts many of them where the crosses are. The rings are worse still, 33 to 39 of 60 against the 44 of raw pixels on every seed, and answering with sixteen numbers instead of eight does not change the verdict, 31 bars of 60 against the eight-number version’s 33.",
+              "Adding held-back bars to the retrieval collection reduces the pair-trained model’s same-kind matches, including matches for crosses. The reported ring results also fail to improve on raw pixels. These measurements show that success on trained categories did not transfer reliably to these unseen ones. The chosen tower, pair objective and training data all contribute to that result.",
             ),
             several(
               "Searched only among the 180 held-out pictures of crosses, squares and discs, so that no unseen kind can be anyone’s nearest, which of these hold?",
               [
-                              "On seed 0 the positions trained on pairs give 171 of 180 pictures a nearest neighbour of their own kind, against 179 for the three-kind classifier’s layer",
+                              "On seed 0 the positions trained on pairs give 171 of 180 pictures a nearest neighbor of their own kind, against 179 for the three-kind classifier’s layer",
                               "On seed 2 the positions are ahead of the three-kind classifier, 178 against 176",
                               "The raw pixels do better than either network on this search",
                               "Seed 1 is the pair tower’s strongest seed",
@@ -926,10 +769,10 @@ export default function LearningTheMetricPage() {
                               "The ratio is a confound, since pushing the three trained kinds a margin apart enlarges every kind’s distance to everything else and so lowers the ratio for a kind that did not gather at all",
                               "The ratio was only measured on seed 0, so it says nothing about the other seeds",
                               "A ratio of distances is not a distance and cannot be compared across spaces",
-                              "The ratio excludes the rings’ nearest neighbours, which is the quantity a search reads",
+                              "The ratio excludes the rings’ nearest neighbors, which is the quantity a search reads",
                             ],
               0,
-              "The denominator averages distances to all other kinds. Moving the trained kinds farther from the rings can lower this ratio even when the ring cloud itself does not tighten. Nearest-neighbour matches answer the retrieval question more directly. They too can change when relative group positions move; only a uniform rescaling of every distance leaves their order unchanged.",
+              "The denominator averages distances to all other kinds. Moving the trained kinds farther from the rings can lower this ratio even when the ring cloud itself does not tighten. Nearest-neighbor matches answer the retrieval question more directly. They too can change when relative group positions move; only a uniform rescaling of every distance leaves their order unchanged.",
             ),
             choice(
               "Trained at the step size that suits a margin of 1, a margin of 2 puts every position on one point by the fifteenth epoch. What has gone wrong?",
@@ -940,12 +783,12 @@ export default function LearningTheMetricPage() {
                 "The margin of 2 leaves the different-kind pairs satisfied from the first epoch, so nothing pushes",
               ],
               0,
-              "The margin only sets a unit of length, so the arrangement reachable at a margin of 2 is the one at a margin of 1 with every position doubled. What does not stretch is the starting positions and the step size, which is why the step size has to be divided by the square of the margin to compare margins fairly. The stalled run sits at a mean loss of 1.3913, the share of two-kind pairs times half the squared margin.",
+              "Changing the margin changes the target distance scale and the gradients encountered during this training run. The rate used at margin one is unstable in the reported margin-two experiment. The page’s inverse-square rate adjustment is a useful tested control, but scaling all output vectors also changes how gradients reach earlier parameters, so it is not a universal learning-rate identity. Inspect optimization and retrieval after the change.",
             ),
             trueFalse(
               "With every different-kind pair left out, the loss fell to 0.0000078 by the fortieth epoch because every picture had been given nearly the same position, not because a better distance had been learned.",
               true,
-              "With pulls only the loss is a sum of squared distances, so zero is reached by any network that answers one point for every picture, and setting the last layer’s weights to zero does it. The mean distance between positions dropped from 0.7325 to 0.0018 while the ordinary run ended at 0.8284, and the share of a picture’s ten nearest that are its own kind fell to around 0.26 to 0.30, close to what a picture chosen at random would give. A falling loss is no evidence that a distance has been learned.",
+              "With only attractive same-kind pairs, assigning every picture the same vector makes every pair loss zero. The objective has no term requiring different kinds to stay apart. The observed loss reduction can therefore accompany worse retrieval. A falling objective shows progress on the stated optimization problem; it does not establish that the representation supports the retrieval task.",
             ),
         ],
         },
@@ -955,11 +798,7 @@ export default function LearningTheMetricPage() {
             <>
               <SubSection title="25. Pairs grow with the square of the pictures">
                 <p>
-                  A classifier learns from each picture once per epoch. A loss over
-                  pairs has one term for every two pictures, and the number of
-                  pairs grows with the square of the number of pictures, which is
-                  harmless at the scale of this page and decisive at the scale of
-                  a real collection.
+                  {"If we compare every pair in a collection, the number of loss terms grows roughly with the square of the picture count. That can make exhaustive pair training expensive even when each picture representation is computed once and reused. Large collections usually need a policy for choosing which pairs to train on."}
                 </p>
                 <Equation>
                   {"pairs among n pictures = n (n − 1) / 2"}
@@ -977,40 +816,19 @@ export default function LearningTheMetricPage() {
                   decision rather than a detail.
                 </p>
                 <KeepInMind>
-                  180 pictures make 16,110 pairs and a million make nearly half a
-                  trillion, so a loss over pairs can only ever be trained on a
-                  chosen fraction of its terms.
+                  {"The 180 training pictures contain 16,110 pairs. A million pictures contain nearly half a trillion. At that scale, selecting informative pairs is far more practical than evaluating every pair in every training pass."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="26. What one training computed">
-                <p>
-                  At this size the training can afford to visit almost every
-                  pair. Forty epochs of seven batches of 276 pairs compute 77,280
-                  pair losses, and those cover 16,015 of the 16,110 different pairs,
-                  0.9941 of them. In the run I measured the forty epochs took
-                  about 1.4 seconds against about 2.3 for the three-kind
-                  classifier, since batching every pair makes each step one pass
-                  over 24 pictures; the widget above reports the times on whatever
-                  machine answers, and they will differ.
-                </p>
+                <p>Forty epochs with seven batches of 276 pairs evaluate 77,280 pair losses, covering 16,015 of the 16,110 possible pairs, or 0.9941. Each batch reuses the computations from its 24 pictures across their pairs. The reference timing is about 1.4 seconds for this pair run versus 2.3 for the three-kind classifier. These are environment-dependent measurements; the widget reports timings for its current machine.</p>
                 <KeepInMind>
-                  One training computed 77,280 pair losses covering 0.9941 of all
-                  16,110 pairs, which is possible only because the collection is
-                  small.
+                  {"This small run evaluates 77,280 pair losses and covers 0.9941 of the 16,110 distinct possible pairs. Repeated pair evaluations and distinct pair coverage measure different costs."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="27. Most pairs of two kinds stop teaching">
-                <p>
-                  Of the pairs that are computed, most soon contribute nothing. A
-                  pair of two kinds past the margin has a loss of zero and a slope
-                  of zero, and once training has done its work that describes
-                  most of them. At the end, 0.7909 of all two-kind pairs among the
-                  training pictures are past the margin, and 0.6620 among the
-                  held-out ones, so roughly four in five of the pushes each batch
-                  computes are multiplications by zero.
-                </p>
+                <p>A different-kind pair beyond the margin contributes zero loss and zero positional gradient. At the end of this fit, that covers 0.7909 of training different-kind pairs and 0.6620 of held-out ones. Many evaluated pairs therefore supply no further separating update. Finding that fact still requires work unless the training procedure selects useful pairs in advance.</p>
                 <p>
                   That is the problem FaceNet met at scale and answered with a
                   change of loss and a search. Its loss takes a triplet, a picture,
@@ -1042,40 +860,22 @@ export default function LearningTheMetricPage() {
           content: (
             <>
               <SubSection title="28. What the loss leaves undecided">
-                <p>
-                  A loss that reads only distances cannot tell apart two
-                  arrangements that have the same distances. Shifting every
-                  position by one amount, turning the whole arrangement, or
-                  reflecting it leaves every distance unchanged and so every loss,
-                  and step 12 measured the first of these as a slope of exactly
-                  zero on the last layer&rsquo;s biases. A trained position is
-                  therefore defined only up to a rigid motion, and a single
-                  coordinate of it means nothing.
-                </p>
-                <p>Independent fits can choose different orientations and origins for their representations. Directly comparing their coordinates or taking a cross-fit distance is therefore unreliable unless we establish a shared alignment. Within one fit, translating or rotating all positions together leaves pair distances unchanged. The drawing measures directions from the collection&apos;s centre so a change of origin does not determine what it shows.</p>
+                <p>Translating, rotating or reflecting every position together preserves pairwise Euclidean distances and this loss. The zero shared-bias gradient above measures the translation case for this output arrangement. Training on distances alone therefore does not fix an origin or orientation. A coordinate may be useful within a fitted system, but its interpretation is not automatically shared by an independently trained one.</p>
+                <p>Independent fits can choose different orientations and origins for their representations. Directly comparing their coordinates or taking a cross-fit distance is therefore unreliable unless we establish a shared alignment. Within one fit, translating or rotating all positions together leaves pair distances unchanged. The drawing measures directions from the collection&apos;s center so a change of origin does not determine what it shows.</p>
                 <KeepInMind>
-                  The pair loss fixes distances and nothing else, so a position is
-                  defined only up to a shift, a turn and a reflection of the whole
-                  arrangement.
+                  {"Training on pair distances leaves the coordinate origin and orientation undecided. It also leaves freedom wherever the supplied pairs and margin constraints do not determine an arrangement. A low loss does not uniquely specify every pairwise distance."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="29. The degenerate cases, one by one">
-                <p>
-                  The method asks for two things of its data, pairs of both
-                  labels, and labels that some arrangement of points could satisfy.
-                  Where either fails, the loss does not become an approximation.
-                  It becomes a quantity with no single minimiser, or a slope that
-                  is not defined, and the table says which and what has to be
-                  decided.
-                </p>
+                <p>The remaining cases distinguish inadequate supervision from undefined calculations. Contradictory pair labels can prevent all constraints being satisfied without making the loss itself undefined. Coincident positions can instead require an explicit gradient convention, and an empty pair set needs an aggregation policy. The table states the response used by this implementation.</p>
                 <DerivationTable
                   expressionHeading="Pairs, labels or margin"
                   reasonHeading="Effect on the learned distance"
                   rows={[
                     {
                       expression: "two kinds at distance zero",
-                      reason: "the loss is ½ m², and its slope, −((m − d)/d) times a gap of zero, is a zero over a zero. The push has a size and no direction, and by symmetry any function of distance alone has none there. The choices are to return no slope, which leaves a frozen arrangement frozen, as Part 5 measured, or to pick a direction at random, which breaks the tie and makes the step depend on the draw.",
+                      reason: "The different-kind loss is ½ m² and is defined. For positive margin, its gradient with respect to coincident positions has no unique direction. This implementation returns zero; a chosen perturbation or direction is another possible policy. A differentiable radial loss can instead have a well-defined zero gradient at coincidence.",
                     },
                     {
                       expression: "a margin of zero",
@@ -1083,15 +883,15 @@ export default function LearningTheMetricPage() {
                     },
                     {
                       expression: "no pairs of two kinds",
-                      reason: "every constant answer has a loss of exactly zero, so the minimiser is not unique and none of the minimisers is a distance. Measured here, the positions fell from 0.7325 apart to 0.0018 in forty epochs.",
+                      reason: "Every constant representation has zero same-kind loss. Other zero-loss arrangements may keep separate same-kind groups at different positions. The objective does not require those groups to be separated. Here the mean distance fell from 0.7325 to 0.0018 in forty epochs.",
                     },
                     {
                       expression: "no pairs of one kind",
-                      reason: "the loss is zero as soon as every pair of two kinds is a margin apart, and nothing asks pictures of one kind to be near each other, so a kind can be spread anywhere that keeps its distance from the others. Many arrangements are perfect, and most of them are useless for search.",
+                      reason: "The loss reaches zero when all supplied different-kind pairs meet the margin. Without same-kind pairs, no term asks matching pictures to stay close. Zero loss alone therefore does not establish useful same-kind retrieval.",
                     },
                     {
                       expression: "a kind with one picture",
-                      reason: "that picture has no pair of one kind, so only pushes act on it. It is kept a margin from everything else and never gathered with anything, which is the previous row for a single kind.",
+                      reason: "That picture has no same-kind pair. Its supplied different-kind pairs ask for margin separation, but do not give it a matching example to approach. A training run may still fail to satisfy those requests.",
                     },
                     {
                       expression: "sameness that is not transitive",
@@ -1099,7 +899,7 @@ export default function LearningTheMetricPage() {
                     },
                     {
                       expression: "a margin without a scale",
-                      reason: "the loss at margin c m is c² times the loss at m for positions scaled by c, so a margin has no meaning apart from the scale of the starting weights and the step size. Quoting a margin alone says nothing about how far apart kinds end up.",
+                      reason: "Scaling positions and a positive margin together rescales this loss by c². Interpreting a margin requires the output coordinate scale; predicting the final distances also requires understanding the training setup and whether it satisfies the pair constraints.",
                     },
                     {
                       expression: "a kind that appears in no pair",
@@ -1107,21 +907,16 @@ export default function LearningTheMetricPage() {
                     },
                     {
                       expression: "positions from two trainings",
-                      reason: "undefined as a comparison, since each training fixes its arrangement only up to a rigid motion of its own.",
+                      reason: "A cross-fit distance is numerically defined, but the two learned coordinate systems need not align. Establish a shared alignment before treating it as evidence of similarity.",
                     },
                     {
                       expression: "two pictures exactly as near",
-                      reason: "a nearest neighbour is not unique, so a rule must choose, and any rule is arbitrary. In a collapsed arrangement nearly every nearest neighbour is such a tie.",
+                      reason: "An exact tie needs a rule if one result must be returned. This API chooses the first minimum in collection order. Nearly coincident positions can have tiny unequal distances, so small spread does not itself prove an exact tie.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Every row comes from the same fact, that the contrastive loss is a
-                  statement about distances between pairs it was shown. It is
-                  undefined where a distance is zero and has no direction, has no
-                  single answer where one label is missing or the labels cannot
-                  all be met, and says nothing about pictures of kinds no pair
-                  contained.
+                  {"The loss evaluates the labeled pairs it is given. At coincident positions its value is defined, while a different-kind gradient needs a direction convention. Missing or conflicting labels can leave many acceptable arrangements or prevent zero loss. Unseen kinds still receive positions, but their retrieval behavior needs its own evaluation."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1139,7 +934,7 @@ export default function LearningTheMetricPage() {
                 "The margin should be widened until every pair contributes again",
               ],
               0,
-              "A two-kind pair past the margin has a loss of zero and a slope of zero, so computing it teaches nothing. That is the problem FaceNet met at scale and answered with a triplet loss and a search for the different-kind pictures still violating the margin. None of that is built here, because with 180 pictures every pair can simply be visited.",
+              "Under this objective, a different-kind pair currently at or beyond the margin contributes zero loss and gradient. Selecting pairs that still violate the margin can concentrate training on active comparisons. A pair may become active again after other updates change the vectors. Larger collections make pair selection important because evaluating every possible pair becomes expensive.",
             ),
             choice(
               "How many pairs do the 180 training pictures make?",
@@ -1161,7 +956,7 @@ export default function LearningTheMetricPage() {
             trueFalse(
               "Positions from two separate trainings of this network can be compared with each other directly.",
               false,
-              "They cannot be compared at all, because each training settles on its own orientation and a position is pinned down only up to a shift, a turn and a reflection. A direction measured from the origin is an accident of the starting weights, which is why the drawing at the top of the page moves the middle of the collection to the origin before measuring any direction.",
+              "Separate fits need not use compatible coordinates. A common translation, rotation or reflection preserves within-fit distances while changing the stored vectors. Cross-fit distances are therefore not automatically meaningful. Use one consistent fitted encoder, or estimate and validate an alignment from corresponding examples before combining representations. Centering removes a translation but does not resolve every possible mismatch.",
             ),
         ],
         },
@@ -1248,7 +1043,7 @@ the two crosses are 0.8736 apart
 as one kind the pair costs 0.3816
 as two kinds it costs 0.0080`,
               { hints: [
-  "The same-kind term pulls vectors together; the different-kind term penalises distances inside the margin.",
+  "The same-kind term pulls vectors together; the different-kind term penalizes distances inside the margin.",
   "Keep the pair label separate from the vectors so the same distance can be evaluated under both requested rules."
 ], check: numberCheck("What is the mean distance between two positions before any training?", 0.7209, 0.001, "The initial mean distance is 0.7209 over these sixty-six picture pairs. The initial tower already creates a distance scale before the pair objective trains it."), question: "What distances and pair losses exist before the image tower learns?" },
             ),
@@ -1351,7 +1146,7 @@ hidden weight (np.int64(2), np.int64(115)): summed -0.3928, first tower 0.0814, 
               "Train on every pair of the dozen",
               [
   "Use the supplied forty-pass training loop over all sixty-six pairs of the twelve pictures, accumulating each picture’s pair contributions before a shared backward pass.",
-  "Print mean within-kind and cross-kind distances, fraction of cross-kind pairs at or beyond the margin, and same-kind nearest-neighbour count excluding self. This evaluates training pictures, not unseen retrieval."
+  "Print mean within-kind and cross-kind distances, fraction of cross-kind pairs at or beyond the margin, and same-kind nearest-neighbor count excluding self. This evaluates training pictures, not unseen retrieval."
 ],
               `import numpy as np
 from oop_ml import BackwardPass, Conv2d, DenseLayer, Flatten, HyperbolicTangent, Identity, LayerStack, MaxPool2d, Neuron, PassPurpose, RectifiedLinear
@@ -1476,7 +1271,7 @@ nearest neighbour is its own kind for 12 of 12`,
               "Leave out the pairs of two kinds",
               [
   "Restrict the supplied training loop to same-kind pairs, leaving out every different-kind pair. Keep the pictures, starting tower and forty-pass settings unchanged.",
-  "Print mean distance over all pictures before/after training, final objective and same-kind nearest-neighbour count. Compare this objective’s missing repulsion with the earlier full-pair experiment."
+  "Print mean distance over all pictures before/after training, final objective and same-kind nearest-neighbor count. Compare this objective’s missing repulsion with the earlier full-pair experiment."
 ],
               `import numpy as np
 from oop_ml import BackwardPass, Conv2d, DenseLayer, Flatten, HyperbolicTangent, Identity, LayerStack, MaxPool2d, Neuron, PassPurpose, RectifiedLinear

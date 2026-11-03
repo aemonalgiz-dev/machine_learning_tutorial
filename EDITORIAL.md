@@ -29,8 +29,158 @@ case must supply its data, and the programming and construction checks must
 include changed inputs. A larger count is useful only when learners still have
 a clear problem, an explanation of mistakes, and a way to test their reasoning.
 
+## Points and achievements
+
+Points and achievements recognise completed learning activities. Use the
+canonical course activity IDs and saved account progress, with credit awarded
+once per activity. Existing saved work counts when the learner returns. Guest
+rewards last for the current visit, and signing in keeps future work with the
+account. Keep the reward collection on the account page and the level display
+small enough to leave room for the lesson and workshop.
+
+The compact level and XP display in the navigation is sufficient as the shared
+summary. Do not repeat it with level bars or next-award panels in the homepage
+workbench. Keep detailed rewards and learning streaks on the account page.
+
+Avoid generic readiness labels on untouched lessons, such as "Ready to explore".
+A status label should communicate actual progress or the learner's current
+location. Omit an unused label row rather than leaving empty space above a title.
+
+Botie can celebrate a tested construction or a completed exercise. Describe
+the evidence accurately: finishing a quiz means working through its questions,
+not answering them all correctly. A changed-input workshop pass records that
+test, not mastery. Give the same credit when the learner asks for help. Paid
+practice does not multiply the shared course score. Derive totals from completed
+milestones rather than saving an independently editable points balance. Revisiting
+pages, retrying tests or opening a solution does not add more XP.
+
+Daily streaks use server-received learning activity in the account's IANA time
+zone. Count a quiz worked through after fresh answers, a passing programming
+check or a passing workshop construction. Practice on another day can extend
+the streak; the same day counts once. Page visits, restored work and opening a
+solution do not count. Do not invent earlier dates from completion flags. Pending
+activity can retry in this visit's memory, with the same event identity, but must
+not become a persistent browser cache.
+
+Reminder emails are optional and off until the learner explicitly enables them.
+Use the verified account email, selected time zone and reminder hour. Skip a day
+with recorded practice, keep a durable daily delivery claim, and provide a signed
+unsubscribe action that does not require login. A GET link must never change
+consent. Keep course access and shared XP independent of reminder settings.
+
+## Voice and lesson structure
+
 The site teaches novice and technical readers in the author's direct,
 example-led voice. These rules reflect the author's stated preferences.
+
+Use American English in authored copy, including headings, questions, workshop
+instructions and interface labels: center, color, behavior, normalize, labeled
+and modeling. Preserve exact API names, quoted data and published source titles.
+Keep existing URLs, bookmark IDs and saved-work keys when changing their visible
+labels. The spelling correction also applies to previously approved live copy;
+the original author samples remain recorded as they were provided.
+
+For homepage course descriptions, explain the subject and its practical value.
+Describe principles that apply to software and data generally without narrowing
+every explanation to machine learning. Connect them to models and agents where
+useful, while keeping claims within the actual curriculum. Read the author's approved
+examples and the selection record in
+[Author voice and course description choices](audits/author-voice-and-course-descriptions.md).
+Keep proposed wording distinct from approved wording. When the author chooses
+or rewrites an option, record that text and update the matching description.
+Use these examples as guidance rather than repeating one sentence structure
+across every course. Describe the concepts and their practical consequences
+directly. Avoid framing such as "This course covers" or "This course explains";
+let the subject itself carry the description. A course card needs a broad
+account of the subject; lesson openings still need their concrete problems
+and historical context.
+
+The author used a selection process to establish the voice for section and
+lesson descriptions, then authorized applying that voice to the remaining
+descriptions on 2026-10-31. Preserve individually approved wording and record
+the broader rewrite in
+[Section and lesson description choices](audits/section-and-lesson-description-voice.md).
+The later authorization supersedes the earlier requirement to obtain a choice
+for every item. If the author requests choices again, present one item at a time.
+
+Approved lesson titles are recorded in
+[Lesson title choices](audits/lesson-title-voice.md). On 2026-11-02 the author
+chose “Building and Running Spark Queries” for the first Databricks lesson.
+Prefer clear names for the subject or activity over titles that read like a
+sentence from the explanation. Keep the problem-first teaching inside the lesson.
+
+The author subsequently requested an individual review of all lesson titles.
+Track selections and rewrites in `audits/lesson-title-review.json`, presenting
+one lesson at a time in course order. Keeping an existing title counts as a
+reviewed choice. Do not infer approval of other titles from a single selection.
+
+On 2026-11-02 the author separately authorized applying this voice to all course
+section titles. The review includes the topic and area-group headings that
+organize those sections. Name the subject or a concrete operation directly;
+retain already clear technical names. Avoid indirect discovery sentences and
+vague qualifiers such as "modern", "trustworthy" or "putting the pieces together".
+Use a technical term when it identifies the material accurately, with its
+explanation still introduced through fundamentals inside the lesson.
+The full review is recorded in
+[Section title voice review](audits/section-title-voice-review.md).
+These editorial changes do not count as individually approved lesson titles.
+Display-title revisions live in `lib/curriculum.ts`; canonical authoring keys
+remain stable. Preserve section and topic IDs whenever changing their titles,
+and keep the first learning activity selected by its stable section ID.
+
+The author subsequently asked to skip ahead to the later sections, retaining
+the primer titles. Their Databricks feedback also exposed a missing platform
+introduction. Introduce a named platform and the problems its components address
+before teaching specialized operations. The author clarified that this requires
+a full introductory section, not one overview lesson. “Introduction to Databricks”
+therefore precedes “Databricks for ML Pipelines” and contains separate lessons
+on the platform, storage, workspaces and compute, table naming, Spark, jobs and
+MLflow. Keep the approved “The Basics of Spark” title focused on Spark within
+that sequence.
+For these platform introductions, explain what the subject is before its history.
+`openingBeforeHistory` places that definition first while retaining the history
+as the next page and preserving the normal order of existing lessons.
+When a topic moves to a dedicated lesson, use `bookmarkRedirects` to send its
+old fragment to the same subject. Do not retain an old fragment on unrelated
+replacement content merely to keep the URL responding.
+
+On 2026-11-01 the author extended this direction to the lesson content itself:
+retain the history and technical depth, explain fundamentals before introducing
+jargon, and avoid forcing every subject into a machine-learning application.
+The review and examples of the resulting revisions are recorded in
+[Lesson content voice review](audits/lesson-content-voice-review.md). These are
+editorial revisions under that authorization, not additional individually
+approved samples of the author's writing. Keep the author's accepted token
+introduction and kernel-trick walkthrough as pacing references.
+
+On 2026-11-02 the author requested another review of every content surface,
+including the lesson bodies, widgets, workshop guidance, quizzes, coding
+instructions, membership and account screens. The scope and verification are
+recorded in [Full-site voice review](audits/full-site-voice-review.json).
+An inventory or phrase scan is useful coverage evidence, but does not establish
+that every paragraph has received a contextual reading. Record that distinction
+and the actual passages revised. Keep approved author samples separate from
+editorial revisions.
+
+The subsequent full contextual reading of all 384 lesson narratives is recorded
+in [Full narrative review](audits/full-site-voice-deep-review.json), with separate
+source-owner logs for the native and generated lessons. That continuation adds
+complete body reading to the earlier surface review. Keep its scope and runtime
+checks distinct from a claim that every example program was newly executed.
+
+Describe what an experiment shows without judging a score as "honest", calling
+a fit "splendid", or telling readers what they should know by now. Name the
+training and evaluation data, explain the observation and state its limits.
+A training/evaluation gap does not measure a quantity of memorized data, and
+matching a few examples does not establish a general guarantee. Check captions
+against the calculation that actually produces them: an uncentered singular
+value decomposition's squared-value shares are not centered variances.
+
+Workshop predictions must ask for the complete result the checker expects.
+If the result is a record, name its fields; if it is a matrix, explain its row
+and column meanings. Do not ask for one count while checking an entire record.
+Describe account saving and membership access according to their actual scope.
+Avoid decorative slogans and repeated introductions around those controls.
 
 Write as someone who enjoys working out how these methods work and wants the
 reader to be able to work them out too. Let that interest show through a useful
@@ -177,6 +327,14 @@ existing fragment IDs when changing section titles.
 - Botie delivers quiz feedback and the closing summary. State whether the
   answer is correct, explain why, and offer relevant lesson sections after a
   mistake. Keep the tone helpful and preserve the question's full explanation.
+- Quiz and numeric-check feedback can use blank lines between paragraphs and
+  fenced `text` or `math` blocks for calculations. `FeedbackExplanation` renders
+  these with the shared `Equation` treatment, which displays plain text rather
+  than interpreting LaTeX. Use readable arithmetic or Unicode symbols in those
+  blocks and interpret the result in the surrounding prose. Matched single
+  backticks display program names as inline code in tasks, hints and feedback;
+  preserve the exact spelling of dictionary keys and other program literals.
+  Other Markdown syntax and HTML are not interpreted in these strings.
 - A practice section comes last, titled `Practice. ...` in the register of
   the part titles, and holds the problems needed to apply and investigate the method, worked in Python with
   NumPy or oop_ml. In mathematical and model lessons, this is where the library's
@@ -205,8 +363,9 @@ existing fragment IDs when changing section titles.
 - Every coding challenge has runnable Python tests. State the required output
   clearly, expose expected and actual results, and allow rounding at the stated
   precision. Test the meaningful result, not one spelling of the solution.
-  Report test results as feedback on the work. Do not add rewards, achievement
-  language or locked steps. Viewing a solution does not mark tests as passed.
+  Report test results as feedback on the work. Award points only for the
+  completed activity and keep help and later lessons accessible. Viewing a
+  solution does not mark tests as passed.
   Run reference solutions in browser Python before publishing.
   When a challenge asks for a reusable procedure, declare the function's inputs,
   outputs and failure behaviour, then test it on additional inputs. Do not use
@@ -267,7 +426,8 @@ existing fragment IDs when changing section titles.
   and check the earlier examples too. A variation is practice evidence, not proof
   of mastery. Keep guidance, original workspaces and Python challenges accessible.
   Record assistance honestly, and distinguish an explored explanation from a
-  construction that has passed its checks. Do not add points or completion quotas.
+  construction that has passed its checks. Recognise each completed milestone
+  once, with no completion quota or requirement to replay it for points.
 - Each workshop has an authored plan in `lib/builds/journeys/`. Choose its opening,
   intermediate calculation and changed case for a reason specific to that lesson.
   Do not infer the learning sequence from the number of operations or automatically

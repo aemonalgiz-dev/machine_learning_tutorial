@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, NumberTable, SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { EmbeddingExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Embedding Layers · oop_ml", description: "A token ID needs to lead to the vector associated with that token. An embedding layer provides the lookup table, and training adjusts its rows so the retrieved vectors become useful for the task." };
+export const metadata: Metadata = { title: "Embedding Layers · Perceptron Lab", description: "An embedding layer maps each ID to a row in a table of vectors. Training changes those rows according to the task, while repeated occurrences of the same ID use the same learned representation." };
 
 export default function EmbeddingLayersPage() {
   return <ConceptPage
       lessonId="embedding-layers"
-      intuition={lessonIntuitions["embedding-layers"]} title="Embedding Layers" tagline={"A token ID needs to lead to the vector associated with that token. An embedding layer provides the lookup table, and training adjusts its rows so the retrieved vectors become useful for the task."}
+      intuition={lessonIntuitions["embedding-layers"]} title="Embedding Layers" tagline={"An embedding layer maps each ID to a row in a table of vectors. Training changes those rows according to the task, while repeated occurrences of the same ID use the same learned representation."}
     openingTitle="An ID Tells Us Which Word, but What Can We Do with It?"
     technicalStart="Part 2. Training the Table"
     prerequisites={<>Begin with <Link href="/concepts/what-a-token-is">what a token is</Link>. An ID identifies a piece of text; it does not measure its meaning.</>}
@@ -26,7 +26,7 @@ export default function EmbeddingLayersPage() {
       { title: "Part 1. A Lookup Before the Network", defaultOpen: true, content: <>
         <SubSection title="1. Separate an identifier from a measurement">
           <p>A tokenizer hands a model whole numbers. In this lesson&rsquo;s small vocabulary cat is 0, dog is 1 and mat is 2. Those numbers say which word is meant and nothing else. Hand them to a neuron as they are and the arithmetic treats them as amounts. Mat would count for twice as much as dog, and cat, at zero, would add nothing to any weighted sum, although the three words could have been numbered in any other order.</p>
-          <p>We need numerical values that training can adjust independently of the arbitrary IDs. An embedding layer stores a vector for each ID in a table. Reading it is a lookup: ID zero selects row zero, and ID two selects row two. The selected values then enter the model&apos;s calculations, where a training signal can tell us how to change them.</p>
+          <p>{"The vocabulary ID can remain an arbitrary label if we use it to select a row rather than treating its size as a measurement. An embedding layer stores a vector in each row, and training can adjust those vector entries. ID zero selects row zero; ID two selects row two. The selected coordinates enter the later calculations, where the task's loss supplies the signal for changing them."}</p>
           <p>For a small example, use three vocabulary entries: cat, dog, and mat. Assign each a two-number vector. The entries begin as chosen values here; another model might initialize them randomly or start from pretrained vectors.</p>
           <Equation>{`ID  Word  Starting vector\n0   cat   [ 0.2,  0.0]\n1   dog   [-0.2,  0.0]\n2   mat   [ 0.0, -0.2]\n\nInput IDs: [0, 1, 0]\nLookups:   [[0.2, 0.0], [-0.2, 0.0], [0.2, 0.0]]`}</Equation>
           <p>No arithmetic happens in the lookup. Row 0 is copied out wherever ID 0 appears, so three IDs become three vectors of two numbers each. The layers that follow work with those vectors and not with the IDs.</p>
@@ -50,7 +50,7 @@ export default function EmbeddingLayersPage() {
           <p>Looking the three words up again in the updated table gives a loss of 1.7138, down from 2.46. Replace the third word with mat and the cat row has one occurrence to learn from. Its gradient halves to [−0.8, −1.0] and the row lands on [0.28, 0.1]. The mat row, now read once, moves from [0.0, −0.2] to [0.0, −0.28].</p>
         </WorkedExample>
         <SubSection title="3. Accumulate by ID">
-          <p>In the general case, each occurrence can have a different arriving gradient because its context and prediction differ. We still add all contributions for a particular ID. In NumPy, repeated advanced indices require explicit accumulation.</p>
+          <p>{"Each occurrence receives a gradient from its own context and prediction. Repeated IDs still select the same parameter row, so all their contributions need to be added there even when those gradients differ. NumPy advanced indexing requires an explicit accumulation step to preserve contributions at repeated positions."}</p>
           <Equation>{`table_slopes = np.zeros_like(table)\nnp.add.at(table_slopes, token_ids, arriving_gradients)\nupdated_table = table - learning_rate * table_slopes`}</Equation>
           <p>Ordinary indexed addition can lose contributions at repeated indices. On the default sequence it would leave the cat row&rsquo;s slope at [−0.8, −1.0], one occurrence&rsquo;s worth, and the row would land on [0.28, 0.1] where the correct step lands on [0.36, 0.2]. Nothing would fail and the loss would still fall, only by less. This is why the implementation is checked both with repeated tokens and by numerical differentiation of the table entries.</p>
         </SubSection>
@@ -62,20 +62,20 @@ export default function EmbeddingLayersPage() {
         trueFalse(
           "In the sequence [0, 1, 0] the two cat occurrences come back as different vectors, since they sit in different positions.",
           false,
-          "This layer has not read their neighbours, so both occurrences receive exactly the same row. Later layers, attention among them, can use the context to produce different representations for the two.",
+          "This layer has not read their neighbors, so both occurrences receive exactly the same row. Later layers, attention among them, can use the context to produce different representations for the two.",
         ),
         choice(
           "The targets are [1, 1] for cat and [−1, 1] for dog. With the starting table and the sequence cat, dog, cat, what loss does the playground report before its step?",
           ["2.46", "4.92", "1.64", "1.7138"],
           0,
-          "Each cat lookup misses its target by [−0.8, −1.0] and the dog lookup by [0.8, −1.0], so the six squared differences add to 4.92 and half of that is 2.46. One lookup on its own contributes 1.64 to the sum, and 1.7138 is the loss after the step. The targets are chosen for the exercise so that an update can be made visible without a second network, since a lookup alone has nothing to compare itself with.",
+          "The two cat occurrences each have error vector [−0.8, −1.0]. Dog has error vector [0.8, −1.0]. Square every coordinate error, add them across the sequence, and take half that total.\n\n```math\nL = 0.5 × [2 × (0.8² + 1²) + (0.8² + 1²)] = 2.46\n```\n\nThese targets were supplied so we can study the lookup update without building a second network.",
               {"description":"Use these values and conventions.","data":"Starting rows: cat = [0.2,0.0]; dog = [-0.2,0.0]\nTarget rows: cat = [1,1]; dog = [-1,1]\nSequence: cat, dog, cat\nLoss rule: half the sum of squared coordinate errors across all occurrences."},
         ),
         choice(
           "With the target for cat a vector of ones, half the sum of squared errors, and a learning rate of 0.1, where does the cat row move from [0.2, 0.0]?",
           ["[0.28, 0.1]", "[0.36, 0.2]", "[0.12, −0.2]", "[1.0, 1.0]"],
           1,
-          "The derivative at each looked-up coordinate is its current value minus its target, and both occurrences of cat contribute to the same row, so the contribution of [−0.8, −1.0] is added to itself before the step is taken. [0.28, 0.1] is where one occurrence alone would have left it. The mat row receives nothing in that sequence, because it was never read.",
+          "Each occurrence of cat contributes [−0.8, −1.0] to the same stored row. Add the two contributions before updating the parameters.\n\n```math\n[0.2, 0.0] - 0.1[-1.6, -2.0] = [0.36, 0.2]\n```\n\nUsing just one occurrence would produce [0.28, 0.1]. Mat is absent from this sequence and receives no update.",
               {"description":"Use these values and conventions.","data":"Sequence: cat, dog, cat\nStarting cat row: [0.2,0.0]\nTarget at each cat occurrence: [1,1]\nLoss: half the sum of squared errors over occurrences\nLearning rate: 0.1"},
         ),
         choice(
@@ -101,7 +101,9 @@ export default function EmbeddingLayersPage() {
           <p>The starting rows for cat and dog are [0.2, 0.0] and [−0.2, 0.0], which point in exactly opposite directions. Nothing about cats and dogs put them there. The values were chosen for the exercise. The playground&rsquo;s targets describe a different arrangement, in which cat at [1, 1] and dog at [−1, 1] agree in their second coordinate and differ in their first. Repeat the playground&rsquo;s step on the sequence cat, dog, cat, each time starting from the table the last step left.</p>
           <NumberTable headings={["Steps taken", "cat row", "dog row", "mat row", "Loss"]} rows={[["0", "[0.2, 0.0]", "[−0.2, 0.0]", "[0.0, −0.2]", "2.4600"], ["1", "[0.36, 0.2]", "[−0.28, 0.1]", "[0.0, −0.2]", "1.7138"], ["5", "[0.7379, 0.6723]", "[−0.5276, 0.4095]", "[0.0, −0.2]", "0.4620"], ["20", "[0.9908, 0.9885]", "[−0.9027, 0.8784]", "[0.0, −0.2]", "0.0123"]]} caption="The same step repeated at a learning rate of 0.1. The playground itself takes the first of these steps." />
       <p>In this example the cat row receives two identical contributions because the sequence reads it twice and both occurrences are given the same target. Both contributions update the same stored row, while the dog row receives one contribution. Repeated IDs generally accumulate all their gradient contributions, but those contributions need not be equal or even point the same way in a larger model. The unused mat row receives no update from this lookup. What a rare word learns depends on its training signals, not its count alone.</p>
-          <p>The second coordinate came to hold something cat and dog share only because these targets were written that way. Turn every target by the same angle and the rows would settle on different numbers with the same distances between them, so no single coordinate can be said to mean anything by itself.</p>
+          <p>
+                  {"The second coordinate agrees for cat and dog because their chosen targets make it agree. That gives the coordinate a defined role in this exercise. A general learned embedding does not automatically provide such named axes; its interpretation depends on the objective and coordinate system."}
+                </p>
         </WorkedExample>
         <KeepInMind><p>There is no fixed dictionary meaning for each coordinate. Changing the vocabulary order requires changing the corresponding table rows. Unknown tokens need an explicit vocabulary policy, and sequence position requires additional information. The layer itself only performs lookup and learning of the selected rows.</p></KeepInMind>
         <p>The SDK fixes the number of tokens per sequence when the layer is constructed. Its output has one vector per token, with a leading axis for the batch. For the default sequence that is one sequence of three vectors of two numbers each, an arrangement of 1 by 3 by 2. Padding and the treatment of padding tokens belong to the surrounding data and model design.</p>
@@ -110,7 +112,7 @@ export default function EmbeddingLayersPage() {
         trueFalse(
           "Each coordinate of an embedding vector carries a fixed dictionary meaning.",
           false,
-          "There is no such meaning to read off a coordinate. Vector similarity becomes useful when the training objective makes it useful, as predicting neighbouring words does by encouraging related contexts to produce related representations. Changing the vocabulary order means changing the corresponding table rows.",
+          "There is no such meaning to read off a coordinate. Vector similarity becomes useful when the training objective makes it useful, as predicting neighboring words does by encouraging related contexts to produce related representations. Changing the vocabulary order means changing the corresponding table rows.",
         ),
         several(
               "Which jobs belong to a plain trainable embedding lookup?",
@@ -146,12 +148,12 @@ export default function EmbeddingLayersPage() {
             "The table is updated in vocabulary order and the steps ran out first",
           ],
           0,
-          "A row is changed only by the occurrences that looked it up, and this sequence holds cat twice, dog once and mat never. Mat has a target of [0, −1] like any other word, and with mat in the third position one step moves its row to [0.0, −0.28]. A word the training data never contains keeps the vector it started with.",
+          "The sequence never selects mat, so this lookup sends no gradient to its row. It stays at [0.0, −0.2] through all twenty steps. If mat replaces the last cat, its supplied target is [0, −1], and one step changes its row to [0.0, −0.28]. This conclusion assumes the update shown here; a separate regularization or weight-decay rule could also change unused parameters.",
         ),
         trueFalse(
           "After twenty repeated steps on cat, dog, cat the cat row is closer to its target than the dog row is to its own.",
           true,
-          "Cat is at [0.9908, 0.9885] against a target of [1, 1], and dog at [−0.9027, 0.8784] against [−1, 1]. Both cat occurrences add to the same row, so its gradient is twice one occurrence’s and each step closes a fifth of what remains, where the dog row, read once, closes a tenth. How often a word is read is part of what decides where its row ends up.",
+          "After twenty steps cat is at [0.9908, 0.9885], close to its target [1, 1]. Dog is at [−0.9027, 0.8784], farther from its target [−1, 1]. In this exercise both cat occurrences have the same target, so their gradients reinforce each other. Each update removes a fifth of cat's remaining coordinate error and a tenth of dog's. Repeated occurrences in a larger model can have different gradients, so frequency alone does not guarantee this result.",
         ),
       ] },
         {
@@ -219,7 +221,7 @@ loss after the step 1.7138`,
             exercise(
               "Replace the second cat with mat",
               [
-  "Start separately from the same supplied embedding table for cat/dog/cat and cat/dog/mat. Take one learning-rate-0.1 step against the same position targets.",
+  "Compare cat/dog/cat with cat/dog/mat. Start each run from the supplied embedding table and take one step at learning rate 0.1. Look up each word's target in target_table, so replacing cat with mat also changes the target at that position.",
   "For each sequence print every updated row, loss before the step and loss after it. Do not carry the first experiment’s updated layer into the second."
 ],
               `import numpy as np
@@ -272,7 +274,7 @@ cat dog mat
   loss after 1.5876`,
               { hints: [
   "Rebuild with with_parameters(table) inside the comparison loop.",
-  "Keep positional targets fixed while changing only the third lookup ID."
+  "Use target_table[identifiers] for each sequence. Cat and mat select different rows in both the embedding table and the target table."
 ], check: numberCheck("On cat, dog, mat, what is the loss after the step?", 1.5876, 5e-05, "The cat/dog/mat loss after its step is 1.5876. Replacing a lookup changes both which row receives a derivative and the initial loss being compared."), question: "Which table rows change when the last cat becomes mat?" },
             ),
             exercise(

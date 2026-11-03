@@ -75,7 +75,7 @@ export function ReparameterisationCheck() {
         </table>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Stat label="answers, weight-normalised to dense" value={formatMagnitude(check.output_gap)} />
+        <Stat label="answers, weight-normalized to dense" value={formatMagnitude(check.output_gap)} />
         <Stat label="direction slope to finite difference" value={formatMagnitude(check.direction_gap)} />
         <Stat label="unprojected form to finite difference" value={check.unprojected_gap.toFixed(4)} />
         <Stat label="largest true direction slope" value={check.largest_direction_slope.toFixed(4)} />

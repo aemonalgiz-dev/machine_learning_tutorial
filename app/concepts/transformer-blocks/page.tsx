@@ -9,15 +9,15 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Transformer Blocks · oop_ml",
-  description: "Attention lets tokens exchange information, but that is only part of a transformer. We will put it together with per-token processing, normalisation, and residual connections, explaining the job of each component.",
+  title: "Transformer Blocks · Perceptron Lab",
+  description: "A transformer block combines attention with processing applied to individual positions. Residual connections and normalization regulate how those operations change the representations passed between blocks.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="transformer-blocks"
     title="Transformer Blocks"
-    tagline={"Attention lets tokens exchange information, but that is only part of a transformer. We will put it together with per-token processing, normalisation, and residual connections, explaining the job of each component."}
+    tagline={"A transformer block combines attention with processing applied to individual positions. Residual connections and normalization regulate how those operations change the representations passed between blocks."}
     openingTitle="How Do We Build a Model Around Attention?"
     intuition={lessonIntuitions["transformer-blocks"]}
     technicalStart="Part 2. Calculating One Decoder Block"
@@ -34,7 +34,9 @@ export default function Page() {
 <p>Attention has mixed information from the available positions into this row. What should we calculate from that mixture? The feed-forward network transforms the row&apos;s coordinates before the next block uses them.</p>
 <ol className="list-decimal space-y-3 pl-5"><li>A learned projection makes a wider intermediate row. Each entry can combine several coordinates from the input.</li><li>In this example, ReLU replaces negative intermediate entries with zero. Which entries survive depends on the row.</li><li>Another learned projection combines the surviving entries into a row with the original width.</li></ol>
 <p>The input-dependent activation matters. Without it, the two projections could be combined into one affine transformation. With it, changing the input can change which intermediate contributions reach the output.</p>
-<p>{"The same weights serve every position because the network’s question is the same wherever a row came from. Where a token sits is already written into its row by the position step, so the network reads the position out of the row rather than needing a separate set of weights for each place. That is also what lets one block read a longer prefix with the same parameters. The live example reads three tokens, and a fourth token would meet the same expansion and contraction matrices."}</p>
+<p>
+                  {"The feed-forward weights are shared across positions. Each token row uses the same expansion, activation and contraction, while its values carry the content and positional information available there. Training can learn to use those differences. Sharing parameters avoids a separate network for each location and allows the same row operation at another sequence length."}
+                </p>
 <p>{"Separate heads give attention several independently learned comparison spaces. They are not assigned grammatical roles in advance. A head might learn a useful relationship, but its role must be investigated rather than inferred from its name."}</p>
 
 </SubSection>
@@ -48,7 +50,9 @@ export default function Page() {
 <p>{"The first sum is the second entry after attention; the second is the entry leaving the block. The inputs shown are rounded to four places, so another coordinate's final digit can differ from the table by one. The residual route means the incoming row is added directly to each branch's contribution. It does not guarantee that every piece of information survives: a contribution can oppose or cancel a value already present. The direct addition is what distinguishes this arrangement from replacing the entire row with the branch output."}</p>
 </WorkedExample>
 <p>{"Layer normalization standardizes coordinates within each token row. Our block normalizes before attention and before the feed-forward network. This is a pre-normalization arrangement; the original Transformer paper placed normalization after its residual additions."}</p>
-<p>{"Each addition can change the scale of a row, so a branch reads a standardized copy and meets values on the same scale whatever the earlier additions did. The copy is only what the branch reads. Its contribution is added to the un-normalized row, so the direct route is never rescaled inside the block, and the row is normalized once more only before the vocabulary projection in Part 3."}</p>
+<p>
+                  {"Residual additions can change a row’s scale. In this pre-normalization block, each branch reads a normalized copy, while the shortcut bypasses that normalization and adds the branch contribution to the original row. The resulting row can still have a different scale. Part3 applies a final normalization before vocabulary projection."}
+                </p>
 
 </SubSection>
 
@@ -73,7 +77,7 @@ export default function Page() {
             trueFalse(
               "The feed-forward network uses a different set of weights at each position in the sequence.",
               false,
-              "It uses the same weights at every position and transforms the coordinates within each row, because its question is the same wherever a row came from and the position is already written into the row. Moving information between positions is attention’s job, not the feed-forward network’s.",
+              "The position-wise feed-forward network uses the same weights for every token row. It transforms the coordinates within that row; attention is the part that combines information from different positions. Sharing weights is an architectural choice, not a consequence of positional encoding being present.",
             ),
             trueFalse(
               "Because each branch’s contribution is added to its input, the branch can learn an adjustment rather than recreating the whole incoming representation.",
@@ -100,7 +104,7 @@ export default function Page() {
                 "Each attention head is assigned a grammatical role before training",
               ],
               [0, 1],
-              "The block is H = X + Attention(LN(X)) and then Y = H + F with F computed from LN(H), so both branches read a normalized copy, and attention reading X directly contradicts the first line. Heads are several independently learned comparison spaces, and whether one learned a useful relationship has to be investigated after training rather than read off a name.",
+              "Each branch reads a normalized copy, while its output is added to the state before that normalization.\n\n```math\nH = X + Attention(LN(X))\nF = FFN(LN(H))\nY = H + F\n```\n\nAttention therefore does not read raw X in this arrangement. The heads have separate learned projections, but useful relationships must be established by training and evaluation rather than assigned by a head's name.",
             ),
             choice(
               "The live block uses four coordinates per token and eight intermediate feed-forward coordinates. What shape is the contraction matrix W₂?",
@@ -120,7 +124,7 @@ export default function Page() {
 <p>{"This object implements inference with fixed seeded parameters. It does not implement whole-decoder training, cross-attention, padding masks, or a key/value cache. The attention primitive itself already supports differentiation; composing a complete training pipeline is a further step."}</p>
 </SubSection>
 <SubSection title="6. Distinguish the architecture from the learned behavior">
-<p>{"Stacking blocks creates repeated opportunities to gather and transform information. Training determines which representations and comparisons are useful. Randomly initialized blocks have the structure of the computation but have not learned grammar, facts, or instruction following."}</p>
+<p>{"Stacking blocks repeats two kinds of work: gathering information across positions and transforming the resulting coordinates at each position. Training determines which comparisons and features help the task. Random parameters let us inspect this structure, but the resulting outputs have not learned grammar, facts or instruction following."}</p>
 <p>{"A decoder-only language model is one transformer arrangement. Encoders can use unmasked attention, and encoder-decoder models add cross-attention to another sequence. The causal decoder here is the arrangement we need for the next lessons."}</p>
 
 </SubSection>
@@ -160,7 +164,7 @@ export default function Page() {
                 "It has no residual additions",
               ],
               0,
-              "Causal self-attention is the restriction that makes this block a decoder, and lifting it is what an encoder can do. Adding cross-attention to another sequence is the encoder-decoder arrangement rather than what makes something an encoder.",
+              "The encoder arrangement discussed here allows attention to use positions on both sides of a token. This decoder uses a causal mask so each position reads only itself and earlier positions. Cross-attention to an encoder's outputs is an additional feature of an encoder-decoder model; it is not required by this decoder-only example.",
             ),
         ],
         },
@@ -169,7 +173,7 @@ export default function Page() {
           practice: [
             exercise(
               "Follow the cat row through the block",
-              ["Build the lesson’s decoder, a seven-token vocabulary read with four coordinates and two heads, and run the default prompt <start> the cat through it with respond_to. The trace it answers holds the rows at every connection. Read the third row out of it after the position step, after the attention addition, in the feed-forward contribution and in the final hidden row.", "Part 1 followed the second coordinate of that row from -0.7264 to -0.8269 to -0.9483. The trace holds every coordinate, so add the feed-forward contribution to the row after attention yourself and print the largest difference from the hidden row the block answers."],
+              ["Run <start> the cat through the supplied decoder. It uses a seven-token vocabulary, four coordinates per token and two attention heads. Read the trace arrays for the third token, cat: positioned, after_attention, feed_forward and hidden. Print each four-coordinate row.", "Add cat's feed_forward contribution to its after_attention row yourself. Compare the full-precision sum with its hidden row and print the largest absolute difference. Also print the first hidden coordinate to four decimal places."],
               `import numpy as np
 from oop_ml import CausalLanguageModel
 
@@ -250,7 +254,7 @@ head 1 shares for the last position, dog [0.1624 0.4041 0.4335]`,
             ),
             exercise(
               "Check the shapes and count the parameters",
-              ["Part 2 states the expansion matrix as (4, 8) and the contraction as (8, 4). Read the shape of every parameter array off the decoder and confirm those two, then add up how many numbers the whole model holds.", "The lesson never gives that total. The five arrays are the token embeddings, the attention projections, the two feed-forward matrices and the vocabulary projection, and the attention projections stack their output units as rows, which is why that array is taller than it is wide."],
+              ["Inspect the shapes and sizes of the five parameter arrays supplied in arrays. Confirm that expansion maps four coordinates to eight and contraction maps eight back to four. Print each array's name, shape and size, then the total number of stored scalar parameters.", "Count stored parameters rather than intermediate token activations. The attention array stacks four projection matrices with output units as rows; the feed-forward arrays use the row-vector multiplication shapes shown in the lesson."],
               `from oop_ml import CausalLanguageModel
 
 model = CausalLanguageModel(7, n_model=4, n_heads=2)
@@ -290,7 +294,7 @@ total parameters 184`,
             ),
             exercise(
               "Ask for heads that cannot share the width",
-              ["The live block has four coordinates per token and two heads, so each head works in two of the four. Ask the library for three heads over the same four coordinates and see what it does.", "A block whose heads cannot divide the width evenly cannot be built, and the refusal should come at construction, before any token is read. Catch the library’s own error and print the name of its class and its message."],
+              ["The live block has four coordinates per token and two heads, so each head works in two of the four. Ask the library for three heads over the same four coordinates and see what it does.", "This SDK requires the model width to divide evenly among its configured heads. The four-coordinate, three-head request should fail at construction, before a token is read. Catch the library’s error and print its class name and message."],
               `from oop_ml import CausalLanguageModel, MLLibError
 
 # Try to build a decoder with n_model=4 and n_heads=3. Catch the

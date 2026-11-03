@@ -2,7 +2,7 @@ import { additionalQuestions } from './agent-safety-questions.mjs';
 export { part as p, example, history, source, before, sample, s, op } from './authoring.mjs';
 export { table, flow, challenge, q, tf } from './design-authoring.mjs';
 export const section = 'Agent Guardrails and Secure Development';
-export const simulation = 'These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.';
+export const simulation = "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.";
 export function lesson(record) {
   const { technicalIndex, checkpointAfter, checkpoint, ...rest } = record;
   const parts = record.parts.map((entry, i) => ({ ...entry, title: `${i + 1}. ${entry.title}` }));

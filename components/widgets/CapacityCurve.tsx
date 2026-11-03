@@ -84,7 +84,7 @@ export function CapacityCurve({ units }: { units: 25 | 100 }) {
       </svg>
       <Caption>
         Indigo, the share of stored patterns that come back unchanged when presented exactly; amber, the share that come back when{" "}
-        {sweep.n_flipped} of the {units} cells are reversed first. Each point averages {sweep.n_sets} independent sets of random patterns.
+        {sweep.n_flipped} of the {units} cells are reversed first. Each point averages {sweep.n_sets} independent sets of random patterns. The dashed 0.138 line is an asymptotic reference for approximate retrieval in the classic random-pattern model; it is not an exact-recall cutoff for these curves.
       </Caption>
       <div className="mt-3 overflow-x-auto">
         <table className="w-full border-collapse">

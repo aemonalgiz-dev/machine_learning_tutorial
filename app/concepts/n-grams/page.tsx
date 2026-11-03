@@ -23,9 +23,9 @@ import { NGramSmoothingSweep } from "@/components/widgets/NGramSmoothingSweep";
 import { NGramWindows } from "@/components/widgets/NGramWindows";
 
 export const metadata: Metadata = {
-  title: "N-Grams · oop_ml",
+  title: "N-Grams · Perceptron Lab",
   description:
-    "The words immediately before a position give us clues about what might come next. An n-gram model uses counts of short sequences to make that prediction, with adjustments for sequences missing from its training data.",
+    "An n-gram model estimates a continuation from counts of short sequences. Its predictions depend on the context length and how probability is assigned to sequences absent from the training data.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function NGramsPage() {
       playgroundTitle="Predict a word from the words just before it"
       playgroundIntro="Compare predictions with shorter and longer contexts. Inspect an unseen continuation and observe how smoothing changes its probability."
       title="N-Grams"
-      tagline={"The words immediately before a position give us clues about what might come next. An n-gram model uses counts of short sequences to make that prediction, with adjustments for sequences missing from its training data."}
+      tagline={"An n-gram model estimates a continuation from counts of short sequences. Its predictions depend on the context length and how probability is assigned to sequences absent from the training data."}
       prerequisites={
         <>
           The words counted here are whatever a splitting rule handed over, so{" "}
@@ -75,7 +75,8 @@ export default function NGramsPage() {
                   Once we have chosen text pieces, we can ask which pieces tend to occur together. Does knowing the preceding word help us predict the next one? We will count runs of adjacent tokens at different lengths and use those counts to build a prediction rule. The tokenizer is fixed for this experiment, so we can focus on what the counts tell us.
                 </p>
                 <p>
-                  Context can help a speech recogniser choose between words
+
+                  Context can help a speech recognizer choose between words
                   that sound similar. A count-based language model supplies
                   one source of that contextual evidence.
                 </p>
@@ -128,33 +129,15 @@ export default function NGramsPage() {
                 </p>
                 <NGramWindows />
                 <KeepInMind>
-                  Because the full stop travelled with the word, re-analysis.
-                  and re-analysis are two different words as far as the counting
-                  is concerned, and a corpus containing one teaches nothing about
-                  the other. That is a decision the splitting rule made, inherited
-                  here without appeal.
+                  {"The tokens re-analysis. and re-analysis have separate entries. With these count features, observing one does not directly increment the other’s count. A different tokenizer could separate the period before fitting."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="3. Framing the edges">
                 <p>
-                  A sentence has a beginning and an end, and both have to be
-                  written down or the counting cannot see them. The first word of
-                  a sentence has nothing before it, so if the model is to predict
-                  it at all there must be something standing in for the place
-                  where the sentence starts. A model reading two words back needs
-                  two such markers, one for each empty position, which is why the
-                  count of them changes with the width of the window.
+                  {"To predict the first word, this implementation supplies special start markers as its context. A model that reads two positions back receives two start markers. Other designs could use shorter contexts at sentence edges; explicit padding is the convention used here."}
                 </p>
-                <p>
-                  The end matters for a different reason. A marker after the last
-                  word is predicted exactly like a word, so the model learns
-                  which words tend to end a sentence, and a model that has learned
-                  that is a model that knows when to stop. Without it the
-                  probabilities of all the sentences of a given length would sum
-                  to one separately for each length, and the model would have no
-                  way of preferring a short sentence to a long one.
-                </p>
+                <p>An end marker lets the model assign probability to finishing after a given context. It is predicted like another token, so observed endings contribute to the counts. A generation procedure still needs a stopping rule, and the learned transition structure determines whether an end marker will eventually be reached.</p>
                 <p>
                   The start markers are the mirror image. They are never
                   predicted, only ever read back from, since the beginning of a
@@ -196,13 +179,7 @@ export default function NGramsPage() {
                   is allowed to answer with.
                 </p>
                 <p>
-                  Sixty-four words allow 4,096 different pairs and 262,144
-                  different triples. The forty-four sentences produced 141 pairs
-                  and 202 triples. That is the ordinary condition of the method
-                  rather than a shortage of text, and it gets worse as the window
-                  widens, since the number of possible runs is multiplied by the
-                  vocabulary each time while the number of positions in the corpus
-                  stays where it was.
+                  {"The prediction vocabulary allows 4,096 pairs and 262,144 triples. These forty-four sentences contain 141 distinct counted pairs and 202 triples. Some counted contexts also contain start markers, which are not prediction-vocabulary words, so the two columns are a scale comparison rather than exact coverage fractions. Longer contexts greatly increase the possible combinations."}
                 </p>
                 <NumberTable
                   headings={[
@@ -227,12 +204,7 @@ export default function NGramsPage() {
                   Part 3.
                 </p>
                 <InAModel>
-                  Adding more text does not fix this. Going from eleven of the
-                  sentences to all forty-four took the word occurrences from 78 to
-                  326, a little over four times as many, and took the distinct
-                  pairs from 54 to 141 and the distinct triples from 62 to 202.
-                  The table of counts grows roughly as fast as the text does,
-                  which is what it looks like when a table is nowhere near full.
+                  {"Increasing the sample from eleven sentences to forty-four raises word occurrences from 78 to 326, distinct pairs from 54 to 141 and distinct triples from 62 to 202. More data does reveal additional runs, but these samples still cover only a small part of the possible combinations. This finite comparison does not prove that a larger corpus can never help."}
                 </InAModel>
                 <KeepInMind>
                   A run seen once is a run whose probability is being estimated
@@ -250,13 +222,7 @@ export default function NGramsPage() {
             <>
               <SubSection title="5. The assumption that makes the question answerable">
                 <p>
-                  The probability of a sentence is the probability of its first
-                  word, times the probability of its second given the first,
-                  times the probability of its third given the first two, and so
-                  on to the end. That is exact and it is useless, because by the
-                  fourth or fifth word the thing being conditioned on is a phrase
-                  that has never been written before, so there is nothing to
-                  count and no estimate to make.
+                  {"The probability chain rule conditions each word on all earlier words. It is exact, but directly estimating every full-history conditional from counts becomes difficult as histories grow. Many new contexts may have no observations. Restricting the context is one way to share evidence across sentences."}
                 </p>
                 <Equation>
                   {"P(w₁ … wₘ)  =  Π over i of  P(wᵢ | w₁ … wᵢ₋₁)"}
@@ -270,8 +236,9 @@ export default function NGramsPage() {
                   change its answer once those final two words are fixed.
                 </p>
                 <p>
+
                   That fixed-context restriction is a Markov assumption. It is a
-                  modelling choice, not a claim that language really forgets
+                  modeling choice, not a claim that language really forgets
                   everything earlier. A subject, topic or reference can matter
                   from farther away, so the short context can miss information
                   that a reader uses.
@@ -305,14 +272,7 @@ export default function NGramsPage() {
               </SubSection>
 
               <SubSection title="6. One count divided by another">
-                <p>
-                  With the history cut down to a fixed length, the estimate is
-                  the obvious one. Count how often the run occurred, count how
-                  often its first words stood before anything at all, and divide.
-                  Nothing about it is a choice; it is the estimate that makes the
-                  training text as probable as it can be, which is why it is
-                  called the maximum-likelihood estimate.
-                </p>
+                <p>For the unsmoothed count model, the estimated probability is the observed continuation count divided by the total count for that context. This is a maximum-likelihood estimate within that fixed model: it maximizes the probability assigned to the observed training continuations. Unseen continuations receive zero until an additional smoothing rule changes the estimator.</p>
                 <Equation>
                   {"P(word | context)  =  C(context word) ⁄ C(context)"}
                 </Equation>
@@ -326,22 +286,14 @@ export default function NGramsPage() {
                 <NGramCountTable />
                 <WorkedExample title="One sentence by hand">
                   <p>
-                    The word the started two of the three sentences, so the
-                    probability of the after the start marker is 2 ⁄ 3. The
-                    followed by report happened twice out of the two times the
-                    stood before anything, so that step is 1. Report was is the
-                    same, and was late happened twice out of the three times was
-                    stood before anything, so that step is 2 ⁄ 3. Late ended the
-                    sentence both times it occurred, so the last step is 1 again.
-                  </p>
+                  {"In the three-sentence corpus, the starts two sentences. Every observed the is followed by report, and every report by was. The word was is followed by late twice and short once. Every late ends its sentence. The equation below multiplies those observed continuation probabilities."}
+                </p>
                   <Equation>
                     {"P(the report was late)  =  (2⁄3)(1)(1)(2⁄3)(1)  =  4⁄9  =  0.4444"}
                   </Equation>
                   <p>
-                    Five steps went into that product, the four words and the
-                    end, so the score reported in Part 5 is the fifth root of
-                    9 ⁄ 4, which is 1.1761.
-                  </p>
+                  {"The product covers five predicted positions: four words and the end marker. Part 5 converts it to a per-position perplexity of 1.1761, so sentence length does not determine the reported scale on its own."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
                   The denominator is how often the context stood before a next
@@ -400,14 +352,7 @@ export default function NGramsPage() {
 
               <SubSection title="8. A whole answer, not one number">
                 <p>
-                  Asking the probability of one word is asking one entry of a
-                  larger answer. For any context the model has a number for every
-                  word it knows, the numbers sum to one, and it is only together
-                  that they say anything. The largest is the model&rsquo;s guess.
-                  How evenly the rest are spread is how unsure it is, and that
-                  spread has a standard measurement in bits, with two to the
-                  power of the bits being the number of equally likely words the
-                  answer is worth.
+                  {"For a given context, a normalized model supplies a probability for every vocabulary item. Together they form a distribution. Its most probable word is one possible prediction. Entropy measures how concentrated the distribution is, in bits; raising two to that entropy gives its effective number of equally likely choices. Concentration alone does not establish whether the predictions are accurate or calibrated."}
                 </p>
                 <Equation>
                   {"bits  =  −Σ over words of  P(word) log₂ P(word)"}
@@ -422,9 +367,7 @@ export default function NGramsPage() {
                 </p>
 </>
                 <KeepInMind>
-                  Six bits over 64 words is what having no information looks
-                  like, and it is the ceiling for this model. Any context the
-                  model has actually seen has to come in below it.
+                  {"A uniform distribution over 64 words has entropy six bits, the maximum for this vocabulary. Observed contexts can have lower entropy, but can also reach the same maximum if their smoothed counts are uniform."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -447,7 +390,7 @@ export default function NGramsPage() {
                 "Start markers are predicted as well, but always with probability one",
               ],
               0,
-              "Predicting the end marker is what teaches the model which words tend to end a sentence, which is what it means for a model to know when to stop. Without it the probabilities of all the sentences of a given length would sum to one separately for each length, and the model would have no way of preferring a short sentence to a long one.",
+              "The start markers supply context before the first predicted word. Predicting an end marker models when a sequence terminates. Without it, a next-word model needs another stopping or length rule; the SDK also imposes a generation cap. These are distinct from pretending a start marker is a possible next word.",
             ),
             several(
               "Sixty-four words allow 4,096 pairs and 262,144 triples, and the forty-four sentences produced 141 and 202. Which of these does Part 1 go on to measure about that table of counts?",
@@ -458,7 +401,7 @@ export default function NGramsPage() {
                 "The share of runs seen exactly once falls as the window widens",
               ],
               [0, 1],
-              "At three words 109 of the 202 runs were seen once, and that share rises with the width, to 164 of 236 at four words and 185 of 248 at five. Every width sees the same 370 predicted positions, the 326 words and the 44 end markers, so a wider window spreads the same evidence over more possible runs. More text does not fill the table either, since a little over four times the words took the pairs from 54 to 141 and the triples from 62 to 202, which is what a table nowhere near full looks like.",
+              "At width three, 109 of 202 distinct runs were seen once; at widths four and five the counts are 164 of 236 and 185 of 248. Each width covers the same 370 predicted positions. Increasing the finite sample from eleven to forty-four sentences expands distinct pairs from 54 to 141 and triples from 62 to 202. That illustrates sparse coverage here, without proving that additional data cannot help.",
             ),
             choice(
               "In the three sentences the step from was to late is worth 2 ⁄ 3, where the step from the to report is worth 1. Where does the 3 come from?",
@@ -469,10 +412,10 @@ export default function NGramsPage() {
                 "The end marker takes a third of every context’s probability",
               ],
               0,
-              "The estimate is the count of the run over how often its context stood before anything at all. Was is followed by late twice and by short once, so the step is 2 ⁄ 3, while the was followed by report both times it stood before a word. Those two steps and three steps of 1 give the sentence (2 ⁄ 3)(1)(1)(2 ⁄ 3)(1), which is 4 ⁄ 9 or 0.4444.",
+              "The denominator counts all observed continuations of was: two late and one short. The report continuation after the occurred every time in this tiny corpus. Including the start and end steps, the sentence weight is:\n\n```math\n(2/3) × 1 × 1 × (2/3) × 1 = 4/9 ≈ 0.4444\n```\n\nThese are conditional counts under this fitted bigram model.",
             ),
             choice(
-              "After a word it never saw, the model’s whole answer costs exactly 6 bits. What is that number saying?",
+              "After an unseen context, the model’s uniform distribution over 64 possible outputs has entropy 6 bits. What does that mean?",
               [
                 "Every one of the 64 words gets the same probability, which is what having no information looks like",
                 "The six likeliest words share the probability between them",
@@ -480,7 +423,7 @@ export default function NGramsPage() {
                 "The context was seen six times in the forty-four sentences",
               ],
               0,
-              "Two to the power of the bits is the number of equally likely words the answer is worth, and two to the sixth is 64, the whole vocabulary. That is the ceiling for this model, so any context it has seen comes in below it, 4.9775 bits at the start of a sentence and 5.6283 after the. The 0.0156 in two rows of the sentence about Dr. Alvarez is the same fact as one probability, one divided by 64.",
+              "A uniform distribution over 64 outputs has six bits of entropy, the largest entropy any distribution over those same outputs can have. That is uncertainty averaged over the whole predicted distribution. A particular unlikely observed word can have more than six bits of surprisal, so the entropy ceiling is not a ceiling on every individual prediction error.",
             ),
         ],
         },
@@ -498,30 +441,15 @@ export default function NGramsPage() {
                   zero in it is zero.
                 </p>
                 <p>
-                  The model is not saying that sentence is unlikely. It is saying
-                  the sentence cannot happen, which is a claim of a different
-                  kind, and a false one about a sentence a reader has just read.
-                  The same thing happens to a report was short, whose every word
-                  and every idea is in the three sentences and whose pair a
-                  report is not.
+                  {"The unsmoothed model assigns zero probability to that sentence, even though a reader can form it from familiar words. This is a failure of the count estimate as a predictive model, rather than evidence that the sentence is linguistically impossible. The same issue affects a report was short because the pair a report is absent."}
                 </p>
                 <WorkedExample title="Two sentences the three cannot contain">
                   <p>
-                    The report was late, which the corpus holds, comes out at
-                    0.4444 and scores 1.1761. The summary was late and a report
-                    was short both come out at exactly zero, and the score in
-                    Part 5, which is a probability inverted and rooted, is
-                    therefore infinite for both. Under the repair of the next
-                    Part the same two sentences come back finite, at 5.0321 and
-                    5.8064 against the held sentence&rsquo;s 3.7965, which is the
-                    ordering a reader would have wanted all along.
-                  </p>
+                  {"The training sentence the report was late receives probability 0.4444 and perplexity 1.1761. The two new sentences receive zero probability and infinite perplexity. With the next section’s smoothing, their perplexities become 5.0321 and 5.8064, while the training sentence scores 3.7965. All three are then scorable; that ranking is a property of this fit."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
-                  A zero anywhere in a text makes the whole text impossible, so a
-                  single unseen pair ruins a document of any length. This is not
-                  a rounding problem that a longer corpus fixes; it is a
-                  statement the estimate is making.
+                  {"One zero continuation probability makes the entire sentence’s probability zero. Adding relevant training examples can remove a particular zero, but unseen combinations can remain. Smoothing changes the estimate so that it can assign probability beyond observed runs."}
                 </KeepInMind>
               </SubSection>
 
@@ -549,12 +477,7 @@ export default function NGramsPage() {
                   caption="At three words per run, two fifths of a new text is made of runs this corpus never contained. Each of those would be a zero, and any one of them is enough."
                 />
                 <p>
-                  The single-word row is the only one that is small, and even
-                  there three words of the new text were never seen. Everything
-                  above one word is a model that would refuse most of what it is
-                  shown. This is the ordinary condition of the method rather than
-                  a symptom of a small corpus, and it is worse at the widths that
-                  would otherwise be the most informative.
+                  {"Even the unigram evaluation contains three unseen vocabulary items. Wider runs have more unseen combinations in this sample. That creates a coverage problem for unsmoothed prediction, especially at larger widths; its severity depends on the corpus, vocabulary and evaluation text."}
                 </p>
                 <KeepInMind>
                   A wider window knows more about the runs it has seen and has
@@ -566,28 +489,25 @@ export default function NGramsPage() {
 
               <SubSection title="11. Why the estimate does this on purpose">
                 <p>
+
                   Dividing one count by another is not a careless choice that a
                   more careful one would improve on. It is the estimate that
-                  maximises the probability of the training text, and it is the
+                  maximizes the probability of the training text, and it is the
                   best possible estimate by that standard. Every scrap of
                   probability it gives to a run it never saw would have to be
                   taken from a run it did see, and that would lower the number it
-                  was maximising.
+                  was maximizing.
                 </p>
                 <p>
-                  So the failure is exactly the success viewed from outside. On
-                  the forty-four sentences it was fitted to, a two-word model
-                  scores 2.9970 and a five-word model 1.6025, both far better
-                  than anything else on this page. On the six sentences it was
-                  not fitted to, the same models have no score at all, at every
-                  width from one to five.
+                  {"On its own training sentences, the unsmoothed bigram model has perplexity 2.9970 and the five-gram model 1.6025. On the six held-out sentences, each tested width encounters a zero and has infinite perplexity. Infinite is a defined evaluation result here, rather than no score."}
                 </p>
-                <WhyThisWorks title="Why relative counts maximise the training likelihood">
+                <WhyThisWorks title="Why relative counts maximize the training likelihood">
                   <p>
+
                     Write the probability of the training text as a product over
                     contexts, and for one context the terms are the counts of
                     each following word as exponents on that word&rsquo;s
-                    probability. Maximising that product subject to the
+                    probability. Maximizing that product subject to the
                     probabilities summing to one gives each word its own count
                     over the total, and gives zero to anything with a count of
                     zero, because raising a probability of zero to the power of
@@ -597,10 +517,7 @@ export default function NGramsPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The 2.9970 on the training text and the missing score on the
-                  six sentences come from the same estimate, and the first is what
-                  buys the second. Everything in Part 4 is a deliberate move away
-                  from the best possible number on the training text.
+                  {"The same unsmoothed estimate can fit the training text well and assign zero probability to new combinations. Smoothing changes that estimator to support prediction on new text, accepting a reduction in training likelihood."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -612,40 +529,21 @@ export default function NGramsPage() {
             <>
               <SubSection title="12. Adding one to every count">
                 <p>
-                  The repair every method here is a version of is to pretend the
-                  counting saw a little more than it did. Before dividing, add
-                  the same constant to every count, and add the matching amount
-                  to the denominator so that the numbers still sum to one, which
-                  means adding the constant once for every word the model is
-                  allowed to answer with. A run that never occurred now has a
-                  small numerator instead of nothing.
+                  {"Add the same positive constant to each possible continuation count. To keep the resulting probabilities normalized, add the constant once per vocabulary item to the denominator. An unobserved continuation then has a positive numerator. This is additive smoothing; other smoothing methods can use different rules."}
                 </p>
                 <Equation>
                   {"P(word | context)  =  ( C(context word) + k ) ⁄ ( C(context) + k V )"}
                 </Equation>
                 <p>
-                  V there is the size of the vocabulary and k is how many times
-                  every word is pretended to have followed every context. Setting
-                  k to one is the oldest version, and it is Laplace&rsquo;s rule
-                  of succession from the Essai philosophique sur les
-                  probabilit&eacute;s of 1814, which is where anyone reading
-                  about this for the first time starts.
+                  {"V is the prediction-vocabulary size, and k is the added count per possible continuation. The familiar add-one case is associated with Laplace’s rule of succession. The historical idea is to allow for outcomes missing from a finite observation set."}
                 </p>
                 <WorkedExample title="What adding one does to the three sentences">
                   <p>
-                    The vocabulary is nine words. The probability of the after the
-                    start marker was 2 ⁄ 3 and becomes 3 ⁄ 12, which is 0.25. The
-                    probability of report after the was 1 and becomes 3 ⁄ 11,
-                    which is 0.2727. And the probability of summary after the was
-                    0 and becomes 1 ⁄ 11, which is 0.0909. The sentence the
-                    summary was late is now possible.
-                  </p>
+                  {"With nine vocabulary items, add-one smoothing reduces the start-context probability of the to 0.25 and the probability of report after the to 0.2727. It gives summary after the a positive probability of 0.0909. The previously zero-probability sentence can now be scored."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
-                  The whole family of repairs has this shape. Probability is
-                  taken from the runs that occurred and given to the runs that
-                  did not, and the methods differ only in how much is taken and
-                  how it is shared out.
+                  {"Smoothing reallocates probability rather than creating extra probability mass. Methods differ in how they estimate that allocation, including how they use shorter contexts and evidence about rare events."}
                 </KeepInMind>
               </SubSection>
 
@@ -657,12 +555,7 @@ export default function NGramsPage() {
                   the context is rare that swamps the evidence completely.
                 </p>
                 <p>
-                  In the forty-four sentences, Dr. occurs seven times and is
-                  followed by Alvarez all seven. The counts are as certain as
-                  counts get. Adding one leaves the probability of Alvarez at
-                  0.1127, because the denominator went from 7 to 71, and the
-                  answer as a whole costs 5.8117 bits, which is very close to the
-                  6 bits of knowing nothing at all.
+                  {"All seven observed occurrences of Dr. are followed by Alvarez. Add-one smoothing lowers that continuation probability to 0.1127 because it also allocates a count to every other vocabulary item. The resulting entropy is 5.8117 bits, close to the six-bit uniform maximum. Agreement among seven observations is still limited evidence, rather than certainty about all future text."}
                 </p>
                 <NumberTable
                   headings={[
@@ -679,13 +572,10 @@ export default function NGramsPage() {
                     ["0.5", "0.1923", "5.5341"],
                     ["1", "0.1127", "5.8117"],
                   ]}
-                  caption="Seven observations, all agreeing. Adding one to every count leaves the model less than an eighth as sure as its evidence, and nearly as unsure as a model with no evidence at all."
+                  caption="Seven observed continuations all name Alvarez. Add-one smoothing reduces its predicted probability to 0.1127 and raises entropy to 5.8117 bits. This measures the estimator’s concentration, not its calibrated certainty about future text."
                 />
                 <KeepInMind>
-                  A constant added per word of the vocabulary is a fixed amount of
-                  invented evidence, and how much damage it does depends entirely
-                  on how much real evidence it is competing with. Rare contexts
-                  are exactly the ones a wider window is full of.
+                  {"At fixed vocabulary size, the added counts have more influence when a context has few observations. That can make the prediction less concentrated than the raw counts suggest. Whether that allocation improves held-out probability is an evaluation question."}
                 </KeepInMind>
               </SubSection>
 
@@ -698,41 +588,20 @@ export default function NGramsPage() {
                   on text the counts were not taken from.
                 </p>
                 <p>
-                  Six sentences are held back for the choosing and six more are
-                  held back from that too, so the number reported is a number
-                  nothing selected. The indigo curve below is the choosing text
-                  and the amber curve is the reporting text; the ring marks the
-                  lowest point of the indigo curve, which is the setting a person
-                  would take away.
+                  {"Use six validation sentences to select the constant, then report performance on six separate test sentences. The indigo curve shows validation performance and the amber curve shows test performance. The marked validation minimum selects a candidate without using the test score to choose it."}
                 </p>
                 <NGramSmoothingSweep />
                 <p>
-                  At two words the chosen constant is 0.005, two hundred times
-                  smaller than the textbook one. It scores 8.9626 on the reporting
-                  text where adding one scores 23.6179, so the textbook setting is
-                  more than two and a half times worse than a setting nobody had to be
-                  clever to find. The same shape holds at three, four and five
-                  words, with the chosen constant drifting up as the counts thin
-                  out.
+                  {"For bigrams, validation selects 0.005, two hundred times smaller than add one. Its test perplexity is 8.9626, compared with 23.6179 for add one. The same evaluation procedure tests other widths; their selected constants increase as contexts become sparser."}
                 </p>
                 <KeepInMind>
-                  The curve is choosing between two ways of being wrong. Too small
-                  a constant and a run never seen gets almost nothing, so a text
-                  containing one is nearly impossible; too large and a run seen
-                  seven times out of seven is treated as a rumour. Neither end is
-                  safe and the bottom is not at a round number.
+                  {"Very small constants leave unseen continuations with little probability. Large constants give the added counts more influence, reducing distinctions supported by observed counts. Validation measures that trade-off for the supplied candidates and text."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. The two ends of the dial">
                 <p>
-                  The constant has a limit in each direction, and both limits are
-                  models we have already met. Send it towards zero and the added
-                  amount stops mattering beside the real counts, so the answer
-                  approaches one count divided by another and the zeroes come
-                  back. Send it upwards and the real counts stop mattering beside
-                  the added amount, so every word of the vocabulary gets the same
-                  number whatever stands before it.
+                  {"For an observed context, reducing the positive constant toward zero approaches the relative-count estimate. For an unseen context, positive additive smoothing stays uniform even as the constant approaches zero; the unsmoothed quotient has no positive denominator. Increasing the constant without bound makes all contexts approach the uniform distribution."}
                 </p>
                 <NumberTable
                   headings={[
@@ -746,22 +615,13 @@ export default function NGramsPage() {
                     ["1,000", "63.75"],
                     ["100,000", "64.00"],
                   ]}
-                  caption="The vocabulary is 64 words, and a model that has been pretended into knowing nothing scores exactly that. The number a model has to beat is the size of its own vocabulary."
+                  caption="At large positive constants, the fitted distribution approaches the uniform vocabulary distribution. Its perplexity approaches 64 on this representation."
                 />
                 <p>
-                  The upper limit is more useful than it looks, because it is the
-                  yardstick. A model over 64 words that knows nothing scores 64,
-                  and any real model has to come in under that to have earned
-                  anything. It also has a sting in it, which Part 5 comes back to,
-                  since a model over a smaller vocabulary starts from a smaller
-                  number without having done anything better.
+                  {"A uniform distribution over 64 predicted items has perplexity 64. It is a useful baseline when the evaluation uses the same vocabulary and tokenization. A fitted model can score worse on a particular test set, so beating the baseline is evidence for that evaluation rather than proof of general understanding."}
                 </p>
                 <KeepInMind>
-                  Adding a constant is a dial between two models that already
-                  exist, one that memorises the training text and one that scores
-                  64 by knowing nothing. Every useful setting is somewhere in
-                  between, and on this corpus at two words per run the useful part
-                  of the range turned out to lie around 0.005.
+                  {"The additive constant controls the influence of observed counts relative to a uniform distribution. On this corpus, the selected bigram value is 0.005. Other corpora or candidate rules can favor another value."}
                 </KeepInMind>
               </SubSection>
 
@@ -782,10 +642,7 @@ export default function NGramsPage() {
                 </p>
 </>
                 <KeepInMind>
-                  Everything on this page below the first Part is true of the
-                  better rules as well. They change how much is taken and where it
-                  goes; they do not change that something has to be taken, or that
-                  the amount cannot be read off the data without a further choice.
+                  {"Alternative smoothing rules still need a defined vocabulary, context policy and evaluation. Their estimates can differ from additive smoothing in ways beyond the total mass assigned to unseen events, so the specific numerical results above belong to the rule measured here."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -814,12 +671,12 @@ export default function NGramsPage() {
               "Why is giving an unseen run a probability of zero not a careless choice that a more careful one would improve on?",
               [
                 "It is the estimate that makes the training text as probable as it can be, and any probability given to an unseen run has to be taken from a seen one",
-                "The zeroes are a rounding artefact that a longer corpus removes",
+                "The zeroes are a rounding artifact that a longer corpus removes",
                 "No other estimate can be read in constant time",
                 "A zero is what the Markov assumption requires",
               ],
               0,
-              "By that standard it is the best possible estimate, which is why the failure is exactly the success viewed from outside. On the forty-four sentences it was fitted to, a two-word model scores 2.9970 and a five-word model 1.6025, and on six sentences it was not fitted to the same models have no score at all at every width from one to five.",
+              "Without smoothing, relative counts maximize the likelihood of the observed continuations for each fixed context. An outcome never observed after that context receives probability zero at that optimum. That answers a training-objective question, not whether the outcome is impossible in future text. Smoothing changes the estimator to reserve probability for missing evidence.",
             ),
             trueFalse(
               "Adding one to every count leaves Dr. followed by Alvarez, seven times out of seven, at a probability of 0.1127.",
@@ -831,11 +688,11 @@ export default function NGramsPage() {
               [
                 "Sending it towards zero brings the zeroes back",
                 "At two words it was chosen on six sentences held back for the choosing, and the score was then reported on six more",
-                "Sending it upwards makes the model memorise the training text",
+                "Sending it upwards makes the model memorize the training text",
                 "The right amount can be read off the counts without a further choice",
               ],
               [0, 1],
-              "The constant is a dial between two models that already exist. Towards zero the answer approaches one count over another, the model that memorises, and upwards every word gets the same number whatever stands before it, which scores 64 over 64 words. The amount is not in the counts, so it is found by scoring candidates on further text. That sweep took 0.005 at two words, two hundred times smaller than adding one, and it scores 8.9626 on the reporting text where adding one scores 23.6179.",
+              "Near zero, the additive constant approaches unsmoothed relative counts. At a very large value, its added mass dominates the observed counts and predictions approach uniform over the fixed output vocabulary. Validation text can select a useful strength between those limits. The reported optimum is specific to this training corpus, vocabulary and evaluation split.",
             ),
         ],
         },
@@ -845,32 +702,16 @@ export default function NGramsPage() {
             <>
               <SubSection title="17. Perplexity, and the same number in bits">
                 <p>
-                  There is one way of scoring a model of this kind and it is the
-                  obvious one. Take text the model has never seen, ask it for the
-                  probability of each word in turn given what came before, and
-                  multiply. A model that gives the actual text a high probability
-                  is a model that would have guessed well.
+                  {"One useful evaluation asks how much probability the model assigns to held-out text. Score each observed word using its preceding context, then combine the log probabilities. This tests probabilistic prediction; it is not the only way to evaluate a language model."}
                 </p>
                 <p>
-                  Multiplying thousands of numbers below one underflows, and the
-                  result depends on how long the text is, so the reported figure
-                  is the geometric mean of the inverses. Ask over how many equally
-                  likely words a model would have to be guessing to do this well,
-                  and that number is the perplexity. A model with one chance in a
-                  hundred at every word has a perplexity of 100, a model certain of
-                  every word has 1, and lower is better because a smaller number of
-                  effective choices is a better-informed guess.
+                  {"For a length-normalized score, take the geometric mean of the inverse continuation probabilities. That is perplexity. A model assigning one chance in a hundred to each observed token has perplexity 100; assigning probability one throughout gives perplexity one. Implementations sum log probabilities to avoid underflow from long products."}
                 </p>
                 <Equation>
                   {"perplexity  =  exp( −(1⁄M) Σ over positions of  ln P(word | context) )"}
                 </Equation>
                 <p>
-                  The same quantity in bits per word is the cross-entropy, and
-                  perplexity is two to that power. A reader of the literature meets
-                  both and neither is more fundamental. On the six reporting
-                  sentences a two-word model with one added scores 4.5618 bits per
-                  word, and two to that power is 23.6179, which is the perplexity
-                  quoted above.
+                  {"Cross-entropy reports the same average prediction loss in bits per predicted position. Perplexity is two raised to that value. Here 4.5618 bits per position corresponds to perplexity 23.6179 for the add-one bigram model on the six test sentences."}
                 </p>
                 <KeepInMind>
                   M is the number of predicted positions, and on this page that
@@ -889,37 +730,24 @@ export default function NGramsPage() {
                 </p>
                 <NGramOrderCurve />
                 <p>
-                  The grey line falls all the way, from 35.06 at one word to
+
+                  The gray line falls all the way, from 35.06 at one word to
                   1.6025 at five, and it is the score on the sentences the counts
                   came from, so it is measuring how much of the corpus the model
-                  has memorised. The indigo line, on text nothing was fitted to,
+                  has memorized. The indigo line, on text nothing was fitted to,
                   turns immediately. One word scores 46.73, two words 8.9626, and
                   from there it rises through 13.00, 20.09 and 23.40. Two words is
                   the best this corpus supports, and every wider window is worse
                   despite having strictly more information available to it.
                 </p>
                 <p>
-                  The reason is Part 3&rsquo;s table. At three words per run, two
-                  fifths of the reporting text is runs that never occurred, so most
-                  of what a three-word model says comes from the constant rather
-                  than from the counts. The extra context it could use is context it
-                  has almost never seen.
+                  {"At width three, about two fifths of the held-out predicted runs are unseen in training. Those positions rely on smoothing, while observed contexts can still use counts. The proportion helps explain the sparse-data problem; it does not mean most predictions at every context ignore the data."}
                 </p>
                 <InAModel>
-                  Real systems do not stop at two. Trigram and four-gram models
-                  were the working standard in speech recognition and machine
-                  translation for thirty years, fitted to hundreds of millions of
-                  words rather than 326, and with a fallback rule that lets an
-                  unseen triple use the pair inside it instead of the constant.
-                  The width the curve here prefers is a fact about a corpus of
-                  forty-four sentences, and the shape of the curve is not.
+                  {"Larger corpora and interpolation allow useful n-gram models with contexts wider than this tiny corpus supports. The best tested width here is two. That numerical result and this curve’s exact shape should not be generalized to every language-modeling task."}
                 </InAModel>
                 <KeepInMind>
-                  The score on the text a model was fitted to only ever falls as
-                  the window widens, so it cannot be used to choose the width. At
-                  five words that score reads 1.6025 while the score on new text
-                  reads 23.40, and a reader with only the first of those numbers
-                  would take five words as the answer.
+                  {"The displayed training perplexity falls as the width increases, while test perplexity eventually rises. Training scores therefore give a poor selection rule in this experiment. At width five, 1.6025 on training text contrasts with 23.40 on held-out text. With arbitrary smoothing choices, monotonic training improvement is not a universal guarantee."}
                 </KeepInMind>
               </SubSection>
 
@@ -951,12 +779,7 @@ export default function NGramsPage() {
                   is arranged, so the two columns could not have differed.
                 </p>
                 <p>
-                  The third row is the part worth noticing. A three-word model is
-                  less offended by the scrambling than a two-word model, at
-                  111.8429 against 1715.1308, and the reason is the smoothing
-                  rather than any weaker grasp of order. Most of what a three-word
-                  model says about any text at all comes from the constant, so it
-                  was never very confident about the original either.
+                  {"The trigram model assigns the reversed text perplexity 111.8429, compared with the bigram model’s 1715.1308. This measures their different distributions under the chosen smoothing. A less severe penalty does not establish that the trigram model understands order less well in general."}
                 </p>
                 <KeepInMind>
                   A model that counts one word at a time knows which words are
@@ -970,20 +793,10 @@ export default function NGramsPage() {
 
               <SubSection title="20. When two perplexities cannot be compared">
                 <p>
-                  A perplexity is a number about one model reading one text with
-                  one vocabulary, and moving any of those three moves the number
-                  for reasons that have nothing to do with how good the model is.
-                  The vocabulary is the one that catches people, because a smaller
-                  vocabulary makes every guess easier without making any guess
-                  better informed.
+                  {"Compare perplexities on the same text representation and evaluation convention. Changing the vocabulary can collapse distinct words into the same unknown token, changing the prediction task as well as the number of possible outputs. A smaller vocabulary does not automatically improve every fitted model’s score."}
                 </p>
                 <p>
-                  This corpus can be made to show it. Fitted to eleven of the
-                  forty-four sentences the model has a vocabulary of 36 words, and
-                  a model over 36 words that knows nothing scores 35.9998. Fitted
-                  to all forty-four it has 64 words, and knowing nothing there
-                  scores 63.9975. The ignorant model looks nearly twice as good on
-                  the smaller vocabulary, and it is the same model.
+                  {"With eleven training sentences, the vocabulary has 36 items; with all forty-four it has 64. At a very large smoothing constant, their measured perplexities approach the uniform baselines, 35.9998 and 63.9975. The lower number reflects a smaller output space rather than better recovery of the original words."}
                 </p>
                 <NumberTable
                   headings={[
@@ -999,16 +812,10 @@ export default function NGramsPage() {
                     ["33", "59", "5 of 53", "11.93", "59.00"],
                     ["44", "64", "3 of 53", "8.96", "64.00"],
                   ]}
-                  caption="The last two columns have to be read together. A model whose score is above the score of knowing nothing over its own vocabulary has learned nothing useful, and the eleven-sentence model, at 52.03 against 36.00, is in that position."
+                  caption="The eleven-sentence fit scores worse than its uniform baseline on this test set. That is evidence against this fitted predictor for the evaluated task, rather than proof that it learned no useful regularities."
                 />
                 <p>
-                  That first row is worth naming plainly. A two-word model fitted
-                  to eleven sentences, at the constant chosen for the full corpus,
-                  is worse on the reporting text than a model that gives every
-                  word of its vocabulary the same probability. The counting only
-                  starts to pay once there is enough text for the counts to mean
-                  something, and on the way there it can be beaten by the crudest
-                  thing available.
+                  {"At the constant selected for the full corpus, the eleven-sentence bigram model scores 52.03 on test text, worse than its uniform baseline of 36.00. That result concerns this training size, smoothing choice and test set. It does not prove that every pattern learned from those sentences is useless."}
                 </p>
                 <KeepInMind>
                   Quote a perplexity with the vocabulary it was computed over, the
@@ -1026,12 +833,7 @@ export default function NGramsPage() {
             <>
               <SubSection title="21. Drawing a word instead of scoring one">
                 <p>
-                  The answer in step 8 is a distribution, and there are two things
-                  to do with a distribution. One is to look up the probability of
-                  a word somebody else wrote, which is everything above. The other
-                  is to draw a word from it at random in proportion to the
-                  numbers, write that word down, slide the window along, and draw
-                  again. Stop when the end marker is drawn.
+                  {"To generate, sample the next word according to the distribution, append it to the context and repeat. The SDK stops when it samples the end marker or reaches a configured word limit. Scoring and sampling use the same probabilities but answer different questions."}
                 </p>
                 <p>
                   This is worth doing because it makes the model&rsquo;s opinion
@@ -1041,31 +843,16 @@ export default function NGramsPage() {
                 </p>
                 <NGramGenerator />
                 <p>
-                  A one-word model produces the right words in no order, since it
-                  has no notion of order to have. Two words gives phrases that
-                  hold together for three or four words and then wander. Three
-                  gives sentences that are mostly grammatical, and by five and six
-                  the sentences are grammatical because they are the training
-                  sentences.
+                  {"The displayed samples gain longer familiar phrases as the context widens. At the widest settings, many outputs reproduce training sentences. Those samples illustrate this fit; a wide n-gram model can still generate new combinations when its observed contexts permit them."}
                 </p>
                 <KeepInMind>
-                  Drawing and scoring use the same numbers, so a model that
-                  generates something absurd was going to score that thing highly
-                  too. Reading a page of what a model writes is another way of
-                  looking at the table that produced the 8.9626.
+                  {"Sampling exposes combinations the probability tables can produce. A sampled sentence need not have high total probability: random sampling can select rare continuations too. Read generated samples alongside probability-based evaluation rather than treating either as a complete quality check."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="22. Flattening or sharpening the draw">
                 <p>
-                  The draw can be reshaped before a word is taken. Raise every
-                  probability to the power of one over a temperature and
-                  renormalise, and the answer becomes more or less peaked without
-                  any word being ruled in or out. Below a temperature of one the
-                  likely words become likelier and the text more predictable;
-                  above one the tail comes up and the text more surprising. At a
-                  temperature of exactly one the draw is the model&rsquo;s own
-                  answer untouched.
+                  {"Before sampling, raise each positive probability to the inverse temperature and normalize. Temperatures below one concentrate the positive mass; values above one flatten it. A zero probability remains zero, and temperature one leaves the distribution unchanged. The change applies to the sampling distribution, not the stored counts."}
                 </p>
                 <p>
                   At a temperature of a quarter a three-word model draws The
@@ -1078,10 +865,7 @@ export default function NGramsPage() {
                   occasionally takes it.
                 </p>
                 <KeepInMind>
-                  A temperature is a knob on the sampling and not on the model. The
-                  probabilities the model reports are unchanged by it, so a
-                  perplexity computed at one temperature is the perplexity at every
-                  temperature.
+                  {"The SDK applies temperature during sampling without changing the model’s reported probabilities. Its ordinary evaluation therefore stays unchanged. Evaluating the temperature-transformed distributions instead would define a different predictor and could change perplexity."}
                 </KeepInMind>
               </SubSection>
 
@@ -1095,19 +879,10 @@ export default function NGramsPage() {
                   fifty.
                 </p>
                 <p>
-                  A six-word model on this corpus draws nothing that was not
-                  already written down, which is the same fact as the grey line in
-                  step 18 falling to 1.6025, seen from the other side. What it has
-                  learned is the forty-four sentences, and its excellent score on
-                  those sentences is a report of that and not of anything else.
+                  {"All fifty sampled outputs at width six reproduce training sentences. This is strong duplication in that finite sample, rather than proof that no new sentence can ever be generated. The low training perplexity measures prediction on familiar data; it does not on its own quantify the entire generator’s support."}
                 </p>
                 <KeepInMind>
-                  Memorisation shows up as an excellent score on the text the
-                  model was fitted to, and the only way to tell it apart from
-                  having learned something is to score the model on text it was
-                  never shown. The drawn sentences are a second, cheaper way of
-                  noticing, since a draw that reproduces its source is not
-                  ambiguous about what it was doing.
+                  {"Check held-out prediction and sample duplication separately. Reproducing a training sentence shows that this sample is a duplicate, but does not reveal whether the model also learned reusable patterns. A good training score alone cannot settle how it behaves on new text."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1145,17 +920,10 @@ export default function NGramsPage() {
                     ["4", "0.5", "0.5"],
                     ["5", "1.0", "0.0"],
                   ]}
-                  caption="The deciding word is five back. At four words of context the model splits its answer exactly in half, and no amount of further text of this kind would move it, since the word that settles the question is not in the description."
+                  caption="The subject needed for agreement is five words back. Under the balanced constructed corpus, models retaining at most four words assign equal probabilities to was and were. Repeating this same balanced evidence would not identify which subject occurred outside the retained window. Changing the corpus balance could move the average without recovering that missing distinction."
                 />
                 <p>
-                  Widening the window until it reaches is not a general answer.
-                  Every extra word multiplies the number of possible contexts by
-                  the size of the vocabulary, which is Part 1&rsquo;s table, so the
-                  width that would reach a dependency of ten words describes a
-                  space no corpus can populate. English has agreements and
-                  references that reach much further than that, and a fixed window
-                  cannot be widened to cover them without the counting collapsing
-                  first.
+                  {"Widening the window lets the model use more distant words, but rapidly increases the number of possible contexts. A corpus need not populate every context to be useful; interpolation can share evidence. A fixed-width count model still cannot distinguish histories that have the same retained context."}
                 </p>
                 <KeepInMind>
                   A fixed window is a claim that nothing outside it matters. Where
@@ -1176,49 +944,25 @@ export default function NGramsPage() {
                   one corpus, including the ones that are accidents of that corpus.
                 </p>
                 <p>
-                  The measurement in step 20 is the same point in another form.
-                  Changing which sentences were counted changed the vocabulary from
-                  36 words to 64, changed how many of a new text&rsquo;s 53 predicted
-                  positions were recognised at all from 38 to 50, and changed the
-                  score from 52.03 to 8.96. None of that is the method working
-                  better or worse; it is
-                  the model being a different model because the text was different.
+                  {"Changing the training subset changes the fitted vocabulary and counts. Here it changes recognized test positions from 38 to 50 out of 53 and perplexity from 52.03 to 8.96. Part of that change is the prediction representation, so it cannot be read as a clean comparison of accuracy on the original words."}
                 </p>
                 <p>
                   The count table reflects the corpus from which it was estimated. We can inspect individual entries to see that dependence directly. Other fitted language models also depend on their training data, although their learned relationships may be harder to read entry by entry.
                 </p>
                 <KeepInMind>
-                  A model of this kind will happily predict text from a domain
-                  nothing like the one it counted, at a score that says how badly.
-                  Read the score before trusting the prediction, and read the
-                  vocabulary before trusting the score.
+                  {"A model can assign probabilities to mapped input from another domain, but those scores do not certify that its predictions are suitable there. Check the unknown-token share and evaluate on representative text from the intended domain."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="26. A rule the data cannot supply">
                 <p>
-                  The deepest gap is the one Part 4 measured without naming. The
-                  counts say how often each run occurred. They cannot say how much
-                  probability the runs that did not occur ought to share, because
-                  that is a question about events the counting has no observations
-                  of, and no amount of counting produces observations of them.
+                  {"Counts record observed continuations. Assigning probability to unobserved combinations requires an estimator that generalizes beyond those observations. New data can inform that choice, including through validation, but the count table alone does not select a unique smoothing procedure."}
                 </p>
                 <p>
-                  So a smoothing rule is an assumption brought in from outside, and
-                  the choice among rules is not settled by the data. Adding one
-                  assumes every unseen run is as plausible as every other, which is
-                  why a certainty of seven out of seven falls to 0.1127. Choosing
-                  0.005 instead assumes far less, and it was chosen by scoring
-                  candidate values on further text, which is a measurement of the
-                  consequence rather than a derivation of the rule. Somebody had to
-                  decide what to sweep over and which text to sweep on.
+                  {"Additive smoothing assigns the same added count to every continuation within a context. Choosing k controls the strength of that uniform contribution. The 0.005 choice was selected by validation, while add one gives P(Alvarez after Dr.) of 0.1127 here. A selected estimator still reflects choices about its candidate family and evaluation data."}
                 </p>
                 <p>
-                  That the sweep found 0.005 at two words and 0.02 at four is
-                  itself the evidence. An amount that followed from the counts
-                  would not have to be searched for, and it would not have moved
-                  by a factor of four when the only thing that changed was how
-                  many words the model reads back.
+                  {"Validation selected 0.005 for bigrams and 0.02 for four-grams. That difference shows that the tested widths favored different candidates on this data. It does not prove that every useful smoothing parameter must be found by a sweep; other estimators derive parameters from statistics or optimize them directly."}
                 </p>
                 <KeepInMind>
                   Every estimate here is a count plus a choice, and the choice is
@@ -1238,10 +982,10 @@ export default function NGramsPage() {
                     {
                       expression: "a context that never occurred",
                       reason:
-                        "the estimate is a count over a total and the total is zero, so the quotient is undefined rather than small. Adding a constant makes it defined and makes it flat, one over the vocabulary for every word alike, which is 0.0156 here and carries no information about the context at all.",
+                        "The raw count quotient has a zero denominator. This SDK’s MaximumLikelihood policy returns zero; it does not raise an undefined-quotient error. Positive additive smoothing returns a uniform distribution, about 0.0156 per vocabulary item here.",
                     },
                     {
-                      expression: "a run that occurred with a context that did",
+                      expression: "an unseen continuation after an observed context",
                       reason:
                         "defined, and zero. That is a real number rather than an absence, and it is the number that makes a whole text impossible, which is the difference between this row and the one above.",
                     },
@@ -1253,32 +997,32 @@ export default function NGramsPage() {
                     {
                       expression: "a word outside the vocabulary",
                       reason:
-                        "the model has no entry for it, so something must be decided. Either the vocabulary is closed and the word becomes a single stand-in, which is what happens here, or the model refuses the text. Closing it makes every text scorable and makes the score depend on how many words were folded into the stand-in.",
+                        "This SDK maps it to the unknown token before scoring. That makes the lookup available, but the unknown token can still have zero probability under an unsmoothed estimate. Mapping changes which prediction task is being evaluated.",
                     },
                     {
                       expression: "the stand-in itself never occurring in training",
                       reason:
-                        "then the model has never seen an unfamiliar word and has no opinion about what surrounds one, so both of the sentence about Dr. Alvarez’s unfamiliar words are answered from the smoothing alone. Relabelling the rarest training words as the stand-in before counting is the repair, and it costs those words their own entries.",
+                        "then the model has never seen an unfamiliar word and has no opinion about what surrounds one, so both of the sentence about Dr. Alvarez’s unfamiliar words are answered from the smoothing alone. Relabeling the rarest training words as the stand-in before counting is the repair, and it costs those words their own entries.",
                     },
                     {
                       expression: "a smoothing constant of exactly zero",
                       reason:
-                        "the rule becomes one count over another, so it is defined wherever the context occurred and undefined where it did not. Every positive constant is defined everywhere, so zero is a boundary rather than a small value.",
+                        "AdditiveSmoothing requires a strictly positive constant. To use the unsmoothed relative-count rule, select MaximumLikelihood, whose explicit unseen-context policy returns zero. For an unseen context, every positive additive constant instead gives a uniform distribution.",
                     },
                     {
                       expression: "a window wider than the sentence",
                       reason:
-                        "defined, because the framing supplies as many start markers as the width asks for, so a sentence of two words under a six-word window is read entirely out of markers. The counts it produces are about the framing rather than about the language.",
+                        "Start padding supplies missing context positions, so prediction remains defined. A two-word sentence still contributes its two words and end marker; its contexts combine those words with start markers rather than consisting entirely of framing.",
                     },
                     {
                       expression: "no end marker in the framing",
                       reason:
-                        "the model can never predict that a sentence has finished, so generation does not terminate and the probabilities of the sentences of each length sum to one separately. A distribution over sentences of all lengths needs the end to be an event.",
+                        "Without a predicted end event, the word model alone does not define when to stop. An external length limit can still terminate generation. A distribution over variable-length complete sentences needs a termination model, supplied by an end marker here.",
                     },
                     {
                       expression: "an empty text",
                       reason:
-                        "there are no predicted positions, so the average in the exponent is a division by zero and the perplexity is undefined. A text of no words is not a text with a perfect score.",
+                        "The SDK rejects an entirely blank evaluation corpus, including evaluate([\" \"]). A blank sentence inside an otherwise nonblank corpus is retained and contributes its end marker. log_probability_of can also score a blank string through that marker. A hypothetical evaluation with zero predicted positions has an undefined average; the implemented entry-point policies should be stated separately.",
                     },
                     {
                       expression: "two perplexities over different vocabularies",
@@ -1293,12 +1037,7 @@ export default function NGramsPage() {
                   ]}
                 />
                 <KeepInMind>
-                  Two of these are worth carrying away. A probability of zero is
-                  defined and ruinous, while a context that never occurred is
-                  undefined and merely uninformative, and the two failures need
-                  different repairs. And a perplexity is only a number about a
-                  model once the vocabulary, the counted positions and the text are
-                  all stated beside it.
+                  {"Separate an unobserved continuation in an observed context from an entirely unseen context. The first has a well-defined zero relative frequency; the second has a zero denominator in the raw quotient. The SDK returns zero for both under MaximumLikelihood, while positive additive smoothing supplies probabilities for both. Report evaluation conventions alongside perplexity."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1321,7 +1060,7 @@ export default function NGramsPage() {
             trueFalse(
               "On the six reporting sentences the score keeps improving as the window widens from one word to five.",
               false,
-              "The score on new text turns immediately, 46.73 at one word and 8.9626 at two, then rising through 13.00, 20.09 and 23.40. Two words is the best this corpus supports and every wider window is worse despite having strictly more information available to it. The score on the text the counts came from falls all the way, from 35.06 to 1.6025, which is exactly why it cannot be used to choose the width. That falling score is memorisation, and the drawn sentences show it from the other side, since 45 of 50 draws at five words and all fifty at six are training sentences word for word.",
+              "On this split, held-out perplexity improves at the bigram setting and worsens at the wider tested orders. Training perplexity continues falling, so it cannot select the order by itself. The many exact training-sentence samples at high orders give another view of repetition in the fitted distribution. They do not make every training-loss reduction a direct measurement of memorization.",
             ),
             several(
               "Which of these have to be stated before one perplexity can be compared with another?",
@@ -1332,12 +1071,12 @@ export default function NGramsPage() {
                 "The temperature the model was sampled at",
               ],
               [0, 1, 2],
-              "A temperature is a knob on the sampling and not on the model, so the probabilities reported are unchanged and a perplexity computed at one temperature is the perplexity at every temperature. The vocabulary is the one that catches people, since fitted to eleven sentences the model has 36 words and knowing nothing there scores 35.9998, where at 64 words knowing nothing scores 63.9975.",
+              "Compare perplexities only when the tokenization, output vocabulary, unknown-word handling, sentence framing and evaluation text are compatible. In this SDK, the sampling-temperature option does not alter the probabilities used by evaluate. If another system explicitly applies temperature to its evaluated probabilities, that can change perplexity and must also be stated.",
             ),
             trueFalse(
               "A model that counts words one at a time gives the six reporting sentences and the same sentences with their words reversed exactly the same score.",
               true,
-              "It scores 57.5683 both ways, because a product does not depend on the order of its factors and the factors are the same words either way. A two-word model scores 8.9626 as written and 1715.1308 reversed, 191 times more surprised, so every claim about word order needs a run of at least two. The three-word model’s smaller gap, 14.0173 against 111.8429, is the smoothing and not a weaker grasp of order.",
+              "A unigram model assigns the same sequence probability when the same word counts are rearranged, because it has no preceding-word context. The bigram model changes its score substantially when these sentences are reversed. A smaller reversal gap at another order can reflect smoothing and sparse counts as well as the context definition; it is not a direct scale of language understanding.",
             ),
             trueFalse(
               "Where a dependency reaches further back than the window, the model becomes approximate about it.",
@@ -1354,7 +1093,7 @@ export default function NGramsPage() {
               [
   "Train a model that predicts each next word from the preceding word on the three supplied sentences. First use MaximumLikelihood, which estimates each next-word probability directly from observed pair counts.",
   "Print the five next-word probabilities for the report was late, including its end marker. Then report perplexity for each of the four supplied test sentences with raw counts and with AdditiveSmoothing(pretended_count=1.0).",
-  "Perplexity summarises how much probability the model assigns to the whole sequence, including sentence endings here. A zero-probability step gives infinite perplexity. The fourth test combines observed pairs into a sentence absent from training."
+  "Perplexity summarizes how much probability the model assigns to the whole sequence, including sentence endings here. A zero-probability step gives infinite perplexity. The fourth test combines observed pairs into a sentence absent from training."
 ],
               `from oop_ml.core.natural_language_processing.n_grams.language_model import (
     NGramLanguageModel,

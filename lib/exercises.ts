@@ -74,15 +74,34 @@ const challengeQuestions: Record<string, string> = {
   "Four vectors against three entries": "Which of the three entries should represent each vector?",
   "One draw, and then four hundred": "What does one dropout draw tell us, and what changes over four hundred?",
   "Five rulers on five readings, then on an outlier": "How do five scaling rules treat the same readings and an outlier?",
-  "The same six hundred vectors at three scales": "What changes when we quantise the same six hundred vectors at three scales?",
+  "The same six hundred vectors at three scales": "What changes when we quantize the same six hundred vectors at three scales?",
   "The seventy-two words on the thousand-code grid": "Where do the seventy-two words land on a thousand-code grid?",
   "The honest score, and the score that wears its name": "Does the winning search score hold up on rows the search never saw?",
   "Three searches that cannot run": "Can you find why these three searches cannot run?",
   "Three routes against a nudge": "Do all three gradient calculations agree with a small nudge?",
-  "One row, three layers": "What do the three normalisation layers do with one row?",
+  "One row, three layers": "What do the three normalization layers do with one row?",
   "Two sentences, one run of numbers, and a table that refuses": "Can two different sentences produce the same run of token IDs?",
   "Writing that separates the two rules, in both directions": "Can you find text that separates the two boundary rules in both directions?",
 };
+
+// Presentation labels only. Canonical titles still identify drafts and fixtures.
+const exerciseDisplayTitles: Record<string, string> = {
+  "Four vectors against three entries": "Assigning vectors to codebook entries",
+  "One draw, and then four hundred": "Dropout over repeated draws",
+  "Five rulers on five readings, then on an outlier": "Outliers and feature scaling",
+  "The same six hundred vectors at three scales": "Quantization and input scale",
+  "The seventy-two words on the thousand-code grid": "Word-vector quantization",
+  "The honest score, and the score that wears its name": "Search scores and holdout performance",
+  "Three searches that cannot run": "Invalid search settings",
+  "Three routes against a nudge": "Normalization gradient checks",
+  "One row, three layers": "Normalization for one row",
+  "Two sentences, one run of numbers, and a table that refuses": "Unknown tokens and ID collisions",
+  "Writing that separates the two rules, in both directions": "Comparing word-boundary rules",
+};
+
+export function displayExerciseTitle(problem: Pick<Exercise, "title">): string {
+  return exerciseDisplayTitles[problem.title] ?? problem.title;
+}
 
 export function challengeQuestion(problem: Exercise): string {
   if (problem.question) return problem.question;

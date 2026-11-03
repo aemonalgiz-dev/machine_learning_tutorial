@@ -81,7 +81,7 @@ export function CoordinateChange() {
       </div>
       <div className="mt-3 overflow-x-auto rounded-md bg-slate-100 px-3 py-2 font-mono text-xs text-slate-800 dark:bg-slate-800 dark:text-slate-200">
         <p>
-          person {selected + 1}, centred <span className="text-slate-500">(d height, d weight)</span> = ({deviation.x.toFixed(1)}, {deviation.y.toFixed(1)})
+          person {selected + 1}, centered <span className="text-slate-500">(d height, d weight)</span> = ({deviation.x.toFixed(1)}, {deviation.y.toFixed(1)})
         </p>
         <p className="mt-1">
           <span className="text-slate-500">[ d height  d weight ]</span>{" × "}

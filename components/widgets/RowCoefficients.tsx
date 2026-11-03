@@ -107,7 +107,7 @@ export function RowCoefficients() {
         <Stat label="coefficients' squared length, first" value={tidy(first.row_coefficients.reduce((sum, value) => sum + value * value, 0), 4)} />
         <Stat label="one over the raw eigenvalue" value={tidy(1 / first.raw_eigenvalue, 4)} />
         <Stat label="largest dot product between two directions' coefficients" value={lifted.largest_coefficient_dot_product.toExponential(1)} />
-        <Stat label="coefficients through the centred table, gap from identity" value={lifted.largest_kernel_metric_gap.toExponential(1)} />
+        <Stat label="coefficients through the centered table, gap from identity" value={lifted.largest_kernel_metric_gap.toExponential(1)} />
         <Stat label="inner coefficients, first, from and to" value={cloud === "ring" ? `${tidy(Math.min(...first.row_coefficients.slice(0, innerCount)), 3)}, ${tidy(Math.max(...first.row_coefficients.slice(0, innerCount)), 3)}` : "…"} />
         <Stat label="outer coefficients, first, from and to" value={cloud === "ring" ? `${tidy(Math.min(...first.row_coefficients.slice(innerCount)), 3)}, ${tidy(Math.max(...first.row_coefficients.slice(innerCount)), 3)}` : "…"} />
       </div>

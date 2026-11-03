@@ -219,8 +219,8 @@ export function OrientedGradientPlayground() {
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-950">
           <p className="mb-1 text-[11px] text-slate-500 dark:text-slate-400">
-            the cell at row {row}, column {column}, bucket by bucket, labelled
-            by the direction each bucket is centred on
+            the cell at row {row}, column {column}, bucket by bucket, labeled
+            by the direction each bucket is centered on
           </p>
           <BucketBars
             weights={cell}

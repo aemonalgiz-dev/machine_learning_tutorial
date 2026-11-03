@@ -11,7 +11,7 @@ export function SqlData({ tables, label = "Tables for this query" }: { tables: S
         </table>
         {!table.rows.length && <p className="p-3 text-sm text-muted">No rows.</p>}
       </div>
-      {table.truncated && <p className="border-t border-line px-3 py-2 text-xs text-muted">Showing the first 50 rows of this fixture. Open the setup below for the full dataset.</p>}
+      {table.truncated && <p className="border-t border-line px-3 py-2 text-xs text-muted">Showing the first 50 rows. The database setup below contains the full dataset.</p>}
     </div>)}
   </div>;
 }

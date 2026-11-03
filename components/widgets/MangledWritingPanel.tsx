@@ -67,9 +67,10 @@ export function MangledWritingPanel() {
         </div>
       ))}
       <p className="text-xs text-slate-500 dark:text-slate-400">
-        The marked piece in each row is the one the difficulty lives in. Nothing
-        in any row is a special case; every piece is a run of characters that are
-        not white space.
+        The highlighted pieces show where splitting only at whitespace leaves
+        punctuation or joined words unresolved. The rule treats each row in the
+        same way: every uninterrupted run of non-whitespace characters becomes
+        one piece.
       </p>
     </div>
   );

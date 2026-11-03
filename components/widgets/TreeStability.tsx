@@ -115,7 +115,7 @@ export function TreeStability() {
     <div>
       <div className="flex gap-1 pb-3">
         {[
-          { key: "nudge" as const, label: "one person relabelled" },
+          { key: "nudge" as const, label: "one person relabeled" },
           { key: "samples" as const, label: "five samples of the crowd" },
         ].map((choice) => (
           <button key={choice.key} onClick={() => setMode(choice.key)} className={`rounded-md border px-3 py-1 text-sm font-medium transition ${mode === choice.key ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-400 dark:bg-indigo-950/40 dark:text-indigo-200" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"}`}>
@@ -128,7 +128,7 @@ export function TreeStability() {
         <>
           <div className="grid gap-4 sm:grid-cols-2">
             {drawMap(original, MUDDLED_CROWD, "The crowd as it stands", NUDGED_INDEX)}
-            {drawMap(nudged, nudgedCrowd, "The ringed person relabelled as an adult", NUDGED_INDEX)}
+            {drawMap(nudged, nudgedCrowd, "The ringed person relabeled as an adult", NUDGED_INDEX)}
           </div>
           <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
             One label changed. The root asks {rootOf(original).feature} &lt; {rootOf(original).threshold} before and {rootOf(nudged).feature} &lt; {rootOf(nudged).threshold} after, the leaf count goes from {original.n_leaves} to {nudged.n_leaves}, and the two maps disagree on {changedCells.changed} of {changedCells.total} cells of the window.

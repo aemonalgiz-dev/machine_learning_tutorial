@@ -17,7 +17,7 @@ export const practiceTools: Record<string, Tool> = {
     pbEqual: tool("Compare matching entries", "Return 1 for each equal pair, preserving row order.", ["First list", "Second list"], ([a, b]) => { const x = list(a), y = list(b); if (x.length !== y.length)
         throw Error("Lists need the same length."); return x.map((v, i) => Number(v === y[i])); }),
     pbRatio: tool("Divide with a zero-count rule", "Return zero when the count denominator is zero; otherwise divide. Use only when this rule matches the task.", ["Numerator", "Count denominator"], ([a, b]) => num(b) === 0 ? 0 : num(a) / num(b)),
-    pbStandardise: tool("Scale centred readings", "Divide centred values by their population spread. A zero spread produces zeros.", ["Centred readings", "Population standard deviation"], ([a, b]) => vec(a).map(x => num(b) === 0 ? 0 : x / num(b))),
+    pbStandardise: tool("Scale centered readings", "Divide centered values by their population spread. A zero spread produces zeros.", ["Centered readings", "Population standard deviation"], ([a, b]) => vec(a).map(x => num(b) === 0 ? 0 : x / num(b))),
     pbPowers: tool("Discount by position", "Build powers from exponent zero through count minus one.", ["Discount factor", "Count"], ([a, b]) => { const n = num(b); if (!Number.isInteger(n) || n < 0 || n > 100)
         throw Error("Use a count from 0 to 100."); return Array.from({ length: n }, (_, i) => num(a) ** i); }),
     pbLast: tool("Read the latest observation", "Keep the last value in a nonempty time-ordered series.", ["History"], ([x]) => { const v = list(x); if (!v.length)

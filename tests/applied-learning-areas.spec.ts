@@ -2,10 +2,11 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { LEARNING_AREAS } from '../lib/learning-areas';
-import { lessonLocations } from '../lib/course-navigation';
+import { displaySectionTitle } from '../lib/curriculum';
+import { lessonLocations, lessonOrder } from '../lib/course-navigation';
 import { labLessons } from '../lib/labs';
 import { TOOLS } from '../lib/builds/tools';
-import { assemble, evaluate, same, type Build } from '../lib/builds/engine';
+import { assemble, evaluate, same, type Build, type Data } from '../lib/builds/engine';
 import { buildById } from '../lib/builds/catalog';
 import { expandedLessonById } from '../lib/lessons';
 import plans from '../lib/lessons/applied-journeys.json';
@@ -18,12 +19,67 @@ import { journeyFor } from '../lib/builds/journey';
 const freshCases = fresh as unknown as Record<string, Build['cases'][number]>;
 
 const databricksBookmarks = [
-  ['1-begin-with-the-records-not-a-cluster-diagram', 'Begin with the records, not a cluster diagram'],
+  ['1-begin-with-the-records-not-a-cluster-diagram', 'Read the Sensor Records Before Building the Query'],
   ['2-give-the-proposed-result-its-own-name', 'Give the proposed result its own name'],
   ['3-ask-when-the-rows-are-actually-needed', 'Ask when the rows are actually needed'],
   ['4-read-a-spark-plan-before-collecting-a-result', 'Read a Spark plan before collecting a result'],
   ['5-reuse-the-procedure-not-an-accidentally-captured-answer', 'Reuse the procedure, not an accidentally captured answer'],
 ] as const;
+
+test('Databricks begins with the platform basics before query plans and uneven workloads', () => {
+  const introduction = '/concepts/what-is-databricks';
+  const basics = '/concepts/databricks-basics';
+  const queries = '/concepts/databricks-lazy-dataframes';
+  const shuffle = '/concepts/databricks-shuffle-skew';
+  expect(lessonOrder.indexOf(introduction)).toBeGreaterThanOrEqual(0);
+  expect(lessonOrder.indexOf(introduction)).toBeLessThan(lessonOrder.indexOf(basics));
+  expect(lessonOrder.indexOf(introduction)).toBeLessThan(lessonOrder.indexOf(queries));
+  expect(lessonOrder.indexOf(queries)).toBeLessThan(lessonOrder.indexOf(shuffle));
+  expect(lessonLocations[introduction].position).toBe(1);
+  expect(lessonLocations[introduction].next?.href).toBe('/concepts/databricks-data-lakes');
+  expect(expandedLessonById['databricks-basics'].topic).toBe('Databricks Fundamentals');
+  expect(expandedLessonById['databricks-lazy-dataframes'].prerequisites.map(link => link.href)).toContain(basics);
+  expect(plans['databricks-lazy-dataframes'].connections.map(connection => connection.lessonId)).toContain('databricks-basics');
+});
+
+test('the Spark basics construction counts every record when partition boundaries change', () => {
+  const graph = assemble(buildById['databricks-basics'].recipe, TOOLS);
+  const records = [
+    { pump: 'A', temperature: 10 },
+    { pump: 'A', temperature: 10 },
+    { pump: 'B', temperature: 3 },
+    { pump: 'C', temperature: 8 },
+    { pump: 'A', temperature: 10 },
+  ];
+  const arrangements: [Data[], number[]][] = [
+    [[records.slice(0, 2), [], records.slice(2)], [2, 0, 3]],
+    [[[], records, []], [0, 5, 0]],
+    [[records.slice(0, 1), records.slice(1, 4), records.slice(4)], [1, 3, 1]],
+  ];
+  const before = JSON.stringify(records);
+  for (const [partitions, counts] of arrangements) {
+    const result = evaluate(graph, { partitions }, TOOLS);
+    expect(result.error).toBeUndefined();
+    expect(result.output).toEqual([counts, 5]);
+  }
+  const empty = evaluate(graph, { partitions: [[], [], []] }, TOOLS);
+  expect(empty.error).toBeUndefined();
+  expect(empty.output).toEqual([[0, 0, 0], 0]);
+  expect(JSON.stringify(records)).toBe(before);
+});
+
+test('the Databricks section opens its introduction before asking readers to build queries', async ({ page }) => {
+  const lesson = expandedLessonById['what-is-databricks'];
+  await page.goto(lessonLocations['/concepts/what-is-databricks'].sectionHref);
+  const introduction = page.getByRole('link', { name: 'What Is Databricks?', exact: true });
+  await expect(introduction).toHaveAttribute('href', '/concepts/what-is-databricks');
+  await introduction.click();
+  await expect(page.getByRole('heading', { level: 1, name: lesson.title, exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: lesson.openingTitle, exact: true })).toBeVisible();
+  await expect(page.getByText(lesson.opening[0], { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: `Next page ${lesson.history.title}`, exact: true }).click();
+  await expect(page.getByRole('heading', { level: 2, name: lesson.history.title, exact: true })).toBeVisible();
+});
 
 test('Databricks foundations retain existing reading and quiz bookmarks', () => {
   const lesson = expandedLessonById['databricks-lazy-dataframes'];
@@ -51,7 +107,7 @@ test('old Databricks links open the intended pages after the new introductions',
 
 test('applied paths preserve agent URLs and publish complete ML-specific lessons', () => {
   expect(LEARNING_AREAS).toHaveLength(11);
-  expect(Object.keys(plans)).toHaveLength(55);
+  expect(Object.keys(plans)).toHaveLength(62);
   expect(lessonLocations['/concepts/agent-or-workflow'].areaHref).toBe('/learn/ai-agents-and-applications');
   for (const id of Object.keys(plans) as (keyof typeof plans)[]) {
     const lesson = expandedLessonById[id];
@@ -119,7 +175,7 @@ test('new learning areas and one lesson in each render without browser errors', 
   for (const [area,id,section] of paths) {
     await page.goto(`/learn/${area}`);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(LEARNING_AREAS.find(item => item.id === area)!.title);
-    await expect(page.locator('#sections').getByRole('link', { name: section, exact: true })).toHaveAttribute('href', lessonLocations[`/concepts/${id}`].sectionHref);
+    await expect(page.locator('#sections').getByRole('link', { name: displaySectionTitle(section), exact: true })).toHaveAttribute('href', lessonLocations[`/concepts/${id}`].sectionHref);
     await page.goto(`/concepts/${id}`);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(expandedLessonById[id].title);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), id).toBe(true);
@@ -177,7 +233,7 @@ test('all new lesson and workshop routes respond and new areas fit a phone', asy
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/learn/ai-agents-and-applications');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('AI Agents and Applications');
-  await expect(page.locator('#sections').getByRole('link', { name: 'Agents', exact: true })).toHaveAttribute('href', lessonLocations['/concepts/agent-introduction'].sectionHref);
+  await expect(page.locator('#sections').getByRole('link', { name: 'AI Agents', exact: true })).toHaveAttribute('href', lessonLocations['/concepts/agent-introduction'].sectionHref);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: '.practice-checks/applied-agents-mobile.png', fullPage: true });
 });

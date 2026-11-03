@@ -197,9 +197,9 @@ export function AssociationGrid() {
       </div>
 
       <Legend>
-        Green is above chance, red below, and the flat grey cells are the pairs
+        Green is above chance, red below, and the flat gray cells are the pairs
         that never occurred, where nothing was computed at all. A word is never
-        its own neighbour in these counts, so the diagonal is grey throughout.
+        its own neighbor in these counts, so the diagonal is gray throughout.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">

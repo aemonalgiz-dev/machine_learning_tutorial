@@ -44,7 +44,7 @@ export const agentObservabilityJourneys: Record<string, JourneyPlan> = {
       { lessonId: 'agent-tracing', skill: 'Identify the request behind an observation', why: 'Trace IDs let the score refer back to the execution being judged.' },
       { lessonId: 'agent-prompts', skill: 'Keep the instructions and task boundaries explicit', why: 'A prompt revision identifies the instructions actually used in a run.' },
     ],
-    reflection: { prompt: 'Why does a low score belong in the mean while a missing score needs a coverage report, and what would make two rubric revisions incomparable?', carryForward: 'Keep run identity, prompt revision and evaluator revision attached to scores. Missing evaluation is a distinct state that a mean alone cannot explain.' },
+    reflection: { prompt: "Why should a recorded low score count in the mean while a missing score be reported as missing? What would change if the scoring rubric changed?", carryForward: 'Keep run identity, prompt revision and evaluator revision attached to scores. Missing evaluation is a distinct state that a mean alone cannot explain.' },
   },
   'agent-evaluation-datasets': {
     premise: 'The technician asked about an inspection. Botie’s response can sound right while his tool calls do something the case forbids. The evaluator must inspect both.',
@@ -62,7 +62,7 @@ export const agentObservabilityJourneys: Record<string, JourneyPlan> = {
     },
     connections: [
       { lessonId: 'agent-langfuse', skill: 'Attach results to identified runs and cases', why: 'Each contract must be checked against the execution of that same maintenance task.' },
-      { lessonId: 'agent-human-approval', skill: 'Separate a proposed action from an authorised write', why: 'The evaluation checks whether that approval boundary survived the agent’s actual trajectory.' },
+      { lessonId: 'agent-human-approval', skill: "Separate a proposed action from an authorized write", why: 'The evaluation checks whether that approval boundary survived the agent’s actual trajectory.' },
     ],
     reflection: { prompt: 'Which failures can a tool-name allowlist detect, and which still require inspecting arguments, order or the resulting state?', carryForward: 'Evaluate a task’s outcome and actions together. Be explicit about the part of correctness each deterministic check leaves untested.' },
   },
@@ -81,10 +81,10 @@ export const agentObservabilityJourneys: Record<string, JourneyPlan> = {
       outcome: 'The review queue retains conflicting-manuals and missing-page. A separate case where only the reordered judgement changes must also remain detectable.',
     },
     connections: [
-      { lessonId: 'agent-evaluation-datasets', skill: 'Keep expected behaviour separate from the output being tested', why: 'Human reference labels and the judge’s input need a defined evidence boundary.' },
-      { lessonId: 'agent-prompts', skill: 'Specify an operation rather than a vague quality request', why: 'A judge needs a rubric with meaningful label boundaries and uncertainty behaviour.' },
+      { lessonId: 'agent-evaluation-datasets', skill: "Keep expected behavior separate from the output being tested", why: 'Human reference labels and the judge’s input need a defined evidence boundary.' },
+      { lessonId: 'agent-prompts', skill: 'Specify an operation rather than a vague quality request', why: "A judge needs a rubric with meaningful label boundaries and uncertainty behavior." },
     ],
-    reflection: { prompt: 'Why does the queue flag a problem without supplying a corrected verdict, and what can still be wrong when every available label agrees?', carryForward: 'Use model judgements as fallible evidence. Preserve uncertainty and inspect the evaluator as well as the agent.' },
+    reflection: { prompt: 'Why does the queue flag a problem without supplying a corrected verdict, and what can still be wrong when every available label agrees?', carryForward: "Use model judgments as fallible evidence. Preserve uncertainty and inspect the evaluator as well as the agent." },
   },
   'agent-release-checks': {
     premise: 'The new maintenance assistant improves average answers, but Botie must still respect approval requirements and the technician’s waiting budget. A release decision needs all of those requirements.',
@@ -102,7 +102,7 @@ export const agentObservabilityJourneys: Record<string, JourneyPlan> = {
     },
     connections: [
       { lessonId: 'agent-evaluation-datasets', skill: 'Define task contracts and retain failed cases', why: 'The release comparison uses the same case identities and preserves critical trajectory failures.' },
-      { lessonId: 'agent-model-judges', skill: 'Know what an evaluation score can establish', why: 'A favourable semantic judgement cannot replace permission checks or settle every uncertainty.' },
+      { lessonId: 'agent-model-judges', skill: 'Know what an evaluation score can establish', why: "A favorable semantic judgment cannot replace permission checks or settle every uncertainty." },
     ],
     reflection: { prompt: 'Which input could change the release decision without changing any answer score, and why does a pass on these cases still require observation after rollout?', carryForward: 'Version the system and evaluator, compare matched cases, and keep release policy explicit. Fresh failures should become replayable cases before claiming a repair.' },
   },

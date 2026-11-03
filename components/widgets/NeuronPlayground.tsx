@@ -726,7 +726,7 @@ export function NeuronPlayground() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Left, the neuron&rsquo;s output over the plane of standardised height
+        Left, the neuron&rsquo;s output over the plane of standardized height
         and weight, the dashed line where its score is zero, and the probe you
         can drag. Right, the chosen activation function in indigo and its slope in amber,
         marked at the probe&rsquo;s score.

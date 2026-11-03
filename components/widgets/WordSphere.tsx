@@ -140,7 +140,7 @@ export function WordSphere() {
                   : "bg-white text-slate-700 dark:bg-slate-900 dark:text-slate-300"
               }`}
             >
-              {option === "subject" ? "colour by subject" : "colour by token number"}
+              {option === "subject" ? "color by subject" : "color by token number"}
             </button>
           ))}
         </div>
@@ -247,7 +247,7 @@ export function WordSphere() {
           </>
         ) : (
           <span>
-            Dark to light is token number 0 upward, and the colours are scattered
+            Dark to light is token number 0 upward, and the colors are scattered
             over the sphere rather than gathered anywhere.
           </span>
         )}
@@ -271,8 +271,9 @@ export function WordSphere() {
         The table has {answer.dimension} coordinates per word and the drawing has
         three, so the two figures above are measured in the full space rather
         than in the picture. The picture keeps{" "}
-        {(answer.kept_share * 100).toFixed(1)}% of the spread, which is why the
-        caps it shows are the caps that are really there.
+        {(answer.kept_share * 100).toFixed(1)}% of the spread. Use that share to
+        judge how much the projection leaves out. Distances and angles in the
+        picture need not match those in the full space.
       </p>
     </div>
   );

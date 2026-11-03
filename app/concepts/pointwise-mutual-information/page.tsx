@@ -22,9 +22,9 @@ import { ScoreSpectrum } from "@/components/widgets/ScoreSpectrum";
 import { SmoothingTracks } from "@/components/widgets/SmoothingTracks";
 
 export const metadata: Metadata = {
-  title: "Pointwise Mutual Information · oop_ml",
+  title: "Pointwise Mutual Information · Perceptron Lab",
   description:
-    "Two common words can appear together often simply because both appear everywhere. Pointwise mutual information compares their observed association with what we would expect if their occurrences were independent.",
+    "Frequent co-occurrence can arise simply because two words are common. Pointwise mutual information compares observed co-occurrence with the level expected under independence, distinguishing frequency from relative association.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function PointwiseMutualInformationPage() {
       playgroundTitle="Which word pairs occur more often than chance suggests?"
       playgroundIntro="Compare a pair's observed frequency with its independence baseline. Check how a rare pair can receive a large score despite having little supporting evidence."
       title="Pointwise Mutual Information"
-      tagline={"Two common words can appear together often simply because both appear everywhere. Pointwise mutual information compares their observed association with what we would expect if their occurrences were independent."}
+      tagline={"Frequent co-occurrence can arise simply because two words are common. Pointwise mutual information compares observed co-occurrence with the level expected under independence, distinguishing frequency from relative association."}
       prerequisites={
         <>
           Every word here ends up as a short list of numbers, and two words are
@@ -48,9 +48,7 @@ export default function PointwiseMutualInformationPage() {
           <Link href="/concepts/a-vector-for-a-word" className={link}>
             cosine
           </Link>{" "}
-          between their lists, which is an angle rather than a distance. The last
-          step of the method squeezes a wide table down to a few directions, the
-          same operation{" "}
+          {" of their directions. The final dimension-reduction step uses singular-value decomposition, also used by "}{" "}
           <Link href="/concepts/pca" className={link}>
             principal components
           </Link>{" "}
@@ -63,9 +61,8 @@ export default function PointwiseMutualInformationPage() {
           <Link href="/concepts/word2vec" className={link}>
             word2vec
           </Link>{" "}
-          turns out to be factorising a shifted version of the very matrix built
-          here, which Part 3 comes back to.
-        </>
+
+          {" has a negative-sampling objective related to a shifted PMI matrix under the assumptions explained in Part 3."}</>
       }
 
       playground={<MutualInformationPlayground />}
@@ -84,40 +81,17 @@ export default function PointwiseMutualInformationPage() {
                   The two topic lists do not overlap. Both halves also use and, the and we. In this constructed corpus, those shared words do not identify the topic. That makes them useful for comparing frequent co-occurrence with an association that tells us something about the subject.
                 </p>
 </>
+                <p>The constructed notes contain 144 word occurrences over 23 distinct words. Rotating five of a topic&apos;s ten words through each note makes their contexts deliberately similar. That gives us a known topic distinction to investigate; it does not reproduce all the relationships present in natural writing.</p>
                 <p>
-                  That comes to 144 word occurrences over 23 distinct words. The
-                  notes are arranged rather than written, so that each note uses
-                  five of its topic&rsquo;s ten words in a rotating order and
-                  every topic word therefore keeps the same company as every
-                  other. The arrangement matters because it removes any structure
-                  inside a half that might be stronger than the difference between
-                  the halves, which is what would otherwise be found first and
-                  reported as a success.
-                </p>
-                <p>
-                  A second, much smaller corpus turns up wherever the arithmetic
-                  has to be followed by hand. It is three sentences, the cat sat,
-                  the dog sat and the cat ran, and it has five words and twelve
-                  counted neighbourings in all, so every number on the page can be
-                  checked with a pencil.
+                  {"For the hand calculation, use three sentences: the cat sat, the dog sat and the cat ran. Counting adjacent pairs in both directions gives 12 ordered context events over five words. We can reconstruct each count from these sentences."}
                 </p>
                 <KeepInMind>
-                  The one fact hidden from every calculation here is that the
-                  corpus has two halves. Nothing is told which half a word came
-                  from, so the two quantities this page keeps reporting, how alike
-                  two words of one half come out and how alike a word of each come
-                  out, are the whole score.
+                  {"The calculations receive no topic labels. We use the known cooking and sailing groups to inspect within-topic and cross-topic similarities. Those measurements evaluate one property of this constructed representation, rather than its complete quality."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. Why a count cannot tell a function word from a topic word">
-                <p>
-                  Take the word flour and ask what it keeps company with. Walking
-                  the notes and counting every word that falls within five
-                  positions of it gives a row of counts, and reading that row
-                  from the top is the obvious way to answer the question. It is
-                  also wrong in a way that a small corpus makes easy to see.
-                </p>
+                <p>A context-count row tells us how often other words occur near flour. Raw counts can be dominated by words that are common everywhere. To assess a particular association, we need to compare the observed count with what those overall frequencies would lead us to expect.</p>
                 <p>
                   The word and stood beside flour three times, and so did dough.
                   The word the stood beside flour twice, and so did whisk. By
@@ -140,26 +114,15 @@ export default function PointwiseMutualInformationPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  A raw count answers how often, and the question worth asking is
-                  how much more often than nothing in particular would explain. On
-                  this corpus the difference between those two questions is
-                  already large enough to reorder a word&rsquo;s company, and on
-                  real text, where the commonest word occurs thousands of times
-                  more often than the rarest, it decides the whole ordering.
+                  {"Raw counts and relative association answer different questions. Compare both before choosing which one the application needs. On this corpus, normalizing for the marginal frequencies changes the ordering of flour’s context words."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="3. Dividing out what frequency alone would predict">
                 <p>
-                  Suppose the two words had nothing whatever to do with each
-                  other. They would still fall near each other sometimes, and how
-                  often is a question with an answer. If one word takes a fifth of
-                  all the company handed out in the corpus and the other takes a
-                  tenth, then a fiftieth of all the pairings would involve both of
-                  them by accident alone. Compare what actually happened against
-                  that number, and what is left is what the two words have to do
-                  with each other.
+                  {"Under an independence baseline, multiply the word and context marginal probabilities to obtain an expected joint probability. Compare the observed joint rate with that baseline. Pointwise mutual information, or PMI, is the logarithm of their ratio. Church and Hanks used this information-theoretic comparison for lexical association in their 1990 paper: frequent words should not receive high association scores merely because they have many opportunities to occur together."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://aclanthology.org/J90-1003/">{"Church and Hanks: Word Association Norms, Mutual Information, and Lexicography (1990)"}</Link></p>
                 <Equation>{"score(w, c) = log( rate of the pair ÷ (rate of w × rate of c) )"}</Equation>
                 <>
 <p>
@@ -186,20 +149,22 @@ export default function PointwiseMutualInformationPage() {
             <>
               <SubSection title="4. Three sentences, counted by hand">
                 <p>
+
                   The three sentences are the cat sat, the dog sat and the cat
                   ran, and near means the word immediately next door, on either
-                  side. From the first sentence, the and cat are neighbours and
-                  cat and sat are neighbours. Every pair is counted from both ends,
+                  side. From the first sentence, the and cat are neighbors and
+                  cat and sat are neighbors. Every pair is counted from both ends,
                   so the row for the records cat and the row for cat records the,
                   and the resulting square is symmetric.
                 </p>
-                <WorkedExample title="Five words, twelve counted neighbourings">
+                <WorkedExample title="Five words and twelve ordered context events">
                   <>
 <p>
                     The row for the reads cat 2 and dog 1. The row for cat reads the 2, sat 1 and ran 1. The row for sat reads cat 1 and dog 1. The row for dog reads the 1 and sat 1, and the row for ran reads cat 1. Adding each row gives 3, 4, 2, 2 and 1, the columns give the same five numbers because the square is symmetric, and everything together adds to 12.
                   </p>
                   <p>
-                    Of the 25 cells the five words can form, 10 hold a count and 15 are empty, including all five on the diagonal, since no word here is ever its own neighbour.
+
+                    Of the 25 cells the five words can form, 10 hold a count and 15 are empty, including all five on the diagonal, since no word here is ever its own neighbor.
                   </p>
 </>
                 </WorkedExample>
@@ -212,20 +177,13 @@ export default function PointwiseMutualInformationPage() {
                   wide.
                 </p>
                 <KeepInMind>
-                  Two decisions have already been taken before a single score
-                  exists, how far near reaches and whether a word further away
-                  counts for less. Nothing computed afterwards can revisit either,
-                  and changing one means counting the corpus again from the start.
+                  {"Choose the context window and any distance weighting before constructing these counts. To change those choices, recount the text or retain richer positional counts that can be recombined later. The single aggregated table does not retain all that information."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="5. Compare one observed word pair with its independence baseline" id="5-one-pair-worked-all-the-way-through">
                 <p>
-                  Take the and cat. They were counted together twice out of twelve
-                  counted neighbourings in all. The word the took three of those
-                  twelve on its own, and cat took four. So chance alone, with the
-                  two words having nothing to do with each other, would put them
-                  together a quarter of a third of the time.
+                  {"The ordered event (the,cat) occurs twice among twelve context events. The’s row total is 3 and cat’s column total is 4. Their product of marginal rates gives the independence baseline shown below."}
                 </p>
                 <DerivationTable
                   expressionHeading="Quantity"
@@ -264,24 +222,13 @@ export default function PointwiseMutualInformationPage() {
                   ]}
                 />
                 <KeepInMind>
-                  Read the ratio rather than the score whenever the score is hard
-                  to feel. A score of 0.693147 says the pair occurred twice as
-                  often as it would have by accident, and a score of 1.098612 says
-                  three times as often, since the score is only the logarithm of
-                  that multiplier.
+                  {"Exponentiating a natural-log PMI recovers the observed-to-baseline ratio. A score near 0.693 corresponds to twice the independence expectation, and one near 1.099 to three times it. These are empirical association ratios, not evidence that a particular occurrence was caused rather than accidental."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="6. What the sign means, and why the zero is exact">
                 <p>
-                  A positive score says the two words were found together more
-                  often than their separate rates predict, a negative score says
-                  less often, and zero says exactly as often. That last statement
-                  is stronger than it sounds. Most quantities on this site have a
-                  zero that is a convention or an artefact of where a scale was
-                  put; this one has a zero that is a statement about the corpus,
-                  namely that the rate of the pair is the product of the two
-                  rates, to the last decimal place.
+                  {"For positive marginal rates, positive PMI means above the independence baseline, negative PMI means below it, and zero means the joint rate equals the product. This is a property of the estimated distribution. It does not establish population independence from a finite sample, and floating-point zero may involve rounding."}
                 </p>
                 <Equation>{"score > 0  more often than chance      score = 0  exactly chance      score < 0  less often"}</Equation>
                 <>
@@ -293,11 +240,7 @@ export default function PointwiseMutualInformationPage() {
                 </p>
 </>
                 <KeepInMind>
-                  The sign is interpretable in a way that almost nothing else here
-                  is, which is why the rest of the page spends so much effort on
-                  what happens when half of it is thrown away. A pair scoring near
-                  zero is not a pair the corpus is silent about; it is a pair the
-                  corpus has spoken about and found unremarkable.
+                  {"Interpret the sign against the stated baseline. A value near zero indicates little departure under that estimate; assessing the strength of evidence also requires the counts and sampling conditions."}
                 </KeepInMind>
               </SubSection>
 
@@ -311,7 +254,7 @@ export default function PointwiseMutualInformationPage() {
                 <ScoreSpectrum />
                 <>
 <p>
-                  Of the 529 pairs 23 words can form, 280 were actually seen together and have a score. Of those, 224 are above chance and 56 below, so four fifths of what the corpus said is a statement that two words seek each other out. The positive side reaches +1.5278 and the negative side only −0.5108, and that lopsidedness is in the arithmetic rather than in this corpus.
+                  {"Among 529 possible ordered word–context pairs, 280 have positive observed counts: 224 score above the independence baseline and 56 below it. The observed range is −0.5108 to 1.5278. That asymmetry describes this corpus; PMI can have very large negative values in other distributions."}
                 </p>
                 <p>
                   The smallest count a pair can carry and still be on the picture at all is one, so the furthest a score can fall below zero is fixed by how common its two words are, and on a corpus where nothing is very common that is not far. Above zero there is no such squeeze, and two rare words that always occur together can reach a ratio of hundreds.
@@ -336,25 +279,22 @@ export default function PointwiseMutualInformationPage() {
                 </p>
                 <Equation>{"score(w, c) ≤ −log( the larger of the two rates )"}</Equation>
                 <p>
+
                   The ceiling is reached exactly when the rarer word occurs
                   nowhere except beside the commoner one. In the three sentences,
-                  ran appears once and its only neighbour is cat, so the pair cat
+                  ran appears once and its only neighbor is cat, so the pair cat
                   and ran attains its ceiling of 1.098612 precisely, and the same
                   ceiling applies to cat and sat, which reaches only 0.405465
                   because sat also stands beside dog.
                 </p>
                 <WhyThisWorks title="Why the ceiling makes rare words loud">
                   <p>
-                    A rare word can receive a very large PMI score from a single co-occurrence because its expected count under independence is so small. A frequent word has a lower ceiling under the corresponding probability constraint. This gives PMI a tendency to favour rare pairs, but it does not guarantee which pair will rank highest in every corpus. We need to inspect the evidence behind a large score.
+
+                    A rare word can receive a very large PMI score from a single co-occurrence because its expected count under independence is so small. A frequent word has a lower ceiling under the corresponding probability constraint. This gives PMI a tendency to favor rare pairs, but it does not guarantee which pair will rank highest in every corpus. We need to inspect the evidence behind a large score.
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The ceiling is a fact about the arithmetic rather than about
-                  language, and it means two scores computed from words of very
-                  different frequencies are not on comparable scales. A score of
-                  1.0 between two rare words is unremarkable; the same score
-                  between two of the commonest words in the corpus would be
-                  impossible.
+                  {"Different marginals give different upper bounds. The same PMI still represents the same log ratio to independence, but a high score may be supported by very different amounts of data. Interpret the ratio and evidence together instead of treating a different ceiling as a different unit."}
                 </KeepInMind>
               </SubSection>
 
@@ -400,7 +340,7 @@ export default function PointwiseMutualInformationPage() {
             trueFalse(
               "On the three sentences, 10 of the 25 cells hold a count and all five diagonal cells are empty.",
               true,
-              "No word in those three sentences is ever its own neighbour, so the diagonal is empty, and 15 cells in all hold nothing. The row sums are 3, 4, 2, 2 and 1, the column sums are the same five numbers because every pair is counted from both ends, and everything together adds to 12.",
+              "No word in those three sentences is ever its own neighbor, so the diagonal is empty, and 15 cells in all hold nothing. The row sums are 3, 4, 2, 2 and 1, the column sums are the same five numbers because every pair is counted from both ends, and everything together adds to 12.",
             ),
             choice(
               "A pair scores 0.693147. What does that say about it?",
@@ -411,15 +351,15 @@ export default function PointwiseMutualInformationPage() {
                 "It occurred about seven tenths as often as chance predicts",
               ],
               0,
-              "The score is only the logarithm of the multiplier, so reading the ratio rather than the score is the way to feel it. On the three sentences this is the and cat, counted together twice where their separate rates, a quarter of the twelve neighbourings and a third, predict one. Cat and ran were counted once where chance predicts a third of a time, so they score 1.098612, three times as often. Neither number is a count, a share or a fraction of chance.",
+              "The natural-log score 0.693147 corresponds to an association ratio of about two. For the/cat, the observed count is two while the independence baseline predicts one. Cat/ran has a ratio of about three and score 1.098612. These scores compare observed and baseline rates; they are neither occurrence counts nor probabilities.",
             ),
             trueFalse(
               "The zero of this score is a convention about where the scale was placed.",
               false,
-              "Most quantities on this site have a zero that is a convention or an artefact of where a scale was put. This one has a zero that is a statement about the corpus, namely that the rate of the pair is the product of the two separate rates, to the last decimal place.",
+              "Raw PMI has a defined zero: the estimated joint rate matches the product of the estimated marginal rates. Changing the logarithm base changes the scale but preserves that zero. Positive PMI then clips negative scores to zero as a separate operation, so a zero in the clipped table has more than one possible origin.",
             ),
             several(
-              "Which decisions are taken before any score exists, and cannot be revisited afterwards?",
+              "Which choices require rebuilding the context counts in this implementation, rather than changing only later scoring or reduction?",
               [
                 "How far near reaches",
                 "Whether a word further away counts for less",
@@ -427,7 +367,7 @@ export default function PointwiseMutualInformationPage() {
                 "How many numbers a word is finally described by",
               ],
               [0, 1],
-              "The reach and the weighting are fixed while the corpus is being counted, and changing either means counting the corpus again from the start. The clip and the width are applied to the table after the counting, so both can be changed without a second pass.",
+              "Window reach and distance weighting determine which context events enter the stored aggregate counts. This implementation needs the source text again to change those counts. Clipping and retained width operate later and can be changed using the count table. Richer retained statistics could support other recalculations; the limitation here concerns what this table stores.",
             ),
         ],
         },
@@ -437,26 +377,18 @@ export default function PointwiseMutualInformationPage() {
             <>
               <SubSection title="10. Why a score below chance is the half you cannot afford">
                 <p>
-                  Church and Hanks warned about the negative side of the scale in
-                  the paper that introduced the score, and the argument is about
-                  evidence rather than about arithmetic. To observe that two words
-                  occur together far more often than chance, you need to see them
-                  together a few times, which a modest corpus provides. To observe
-                  that two words avoid each other, you need to have seen enough of
-                  both words that their absence together is surprising, and that
-                  takes far more text.
+                  {"Church and Hanks discussed why negative association needs substantial evidence: a missing or uncommon pairing is informative only relative to how often both words could have appeared. Positive association can also be unstable when based on a few observations. Compare observed and expected counts before drawing a conclusion from either sign."}
                 </p>
                 <p>
                   Here the lowest score is −0.5108, and every pair at that score occurred together once. These estimates rely on little evidence. That is a property of this small corpus, however: a pair can occur below its independence expectation even when its observed count is large. We should consider both the observed count and the expected count when interpreting a negative score.
                 </p>
                 <p>
-                  The usual response is to keep the positive half and set
-                  everything else to zero, which is what the rest of this page
-                  does and what almost every published use of the score does.
+                  {"A common representation is positive PMI, or PPMI: retain positive values and clip negative ones to zero. That is a further modeling choice, not part of PMI’s definition."}
                 </p>
                 <Equation>{"kept(w, c) = the larger of  score(w, c)  and  0"}</Equation>
                 <KeepInMind>
-                  The clip is a judgement about how much a small corpus can
+
+                  The clip is a judgment about how much a small corpus can
                   support rather than a step in the derivation. Nothing in the
                   definition of the score asks for it, and the two things it buys,
                   a matrix with no negative entries and a matrix with a great many
@@ -481,61 +413,30 @@ export default function PointwiseMutualInformationPage() {
                   every cell of it.
                 </p>
                 <KeepInMind>
-                  A fifth of the observations discarded is the cost of the clip on
-                  a corpus of 144 words. The published argument is that on a corpus
-                  of billions the negative half is mostly noise anyway, which
-                  cannot be checked here, so the honest reading of this measurement
-                  is that the clip is expensive at small sizes and defended at
-                  large ones.
+                  {"Clipping maps 56 negative scores to zero in this table. That discards their sign and magnitude. Whether the resulting PPMI representation helps the task must be tested; neither corpus size alone nor the word noise proves that every discarded association was unreliable."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="12. Two zeros that mean different things">
                 <p>
-                  There is a second cost, and it is not a quantity. After the clip,
-                  a cell holding zero can have arrived there two ways. Either the
-                  two words were seen together and scored below chance, which is
-                  the corpus saying something, or they were never seen together at
-                  all, which is the corpus saying nothing. Nothing downstream can
-                  tell the 56 from the 249.
+                  {"After clipping, a zero can represent an empirical below-baseline pair, an exactly baseline pair, or an unseen pair assigned zero in PPMI. The clipped matrix alone cannot recover which case produced it. Retaining the counts makes that distinction available."}
                 </p>
-                <p>
-                  That distinction is real and it points in opposite directions. A
-                  pair below chance is evidence, however thin, that the two words
-                  keep apart. A pair never seen together is the absence of
-                  evidence, and on a corpus of 24 notes almost half of every
-                  possible pair is in that state, including flour and bake, which
-                  are both cooking words and simply never landed within five
-                  positions of each other.
-                </p>
+                <p>A pair observed less often than the independence baseline receives a negative finite PMI. An unobserved pair has zero empirical joint probability, so unsmoothed PMI reaches negative infinity. That does not establish that the words can never occur together. On this corpus of 24 notes, almost half the possible pairs were never observed, including flour and bake within the five-position window. We need the counts and sampling context to judge how much evidence a missing pair provides.</p>
                 <InAModel title="The two kinds of zero, counted">
                   <p>
-                    Of the 529 cells, 224 keep a score, 56 held a score below
-                    chance and were set to zero, and 249 never had a score to set.
-                    The first group is what the method works with; the other two
-                    are indistinguishable to everything that comes afterwards, and
-                    together they are more than half the table.
-                  </p>
+                  {"Of 529 cells, 224 retain positive scores, 56 finite negative scores are clipped, and 249 unobserved pairs receive zero in PPMI. These last two groups are indistinguishable in this matrix alone, even though their empirical counts differ."}
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  Substituting zero for undefined is the single most consequential
-                  decision on this page, and it is made in one line. Part 6 says
-                  what the alternatives to it are and what each would cost, since
-                  every implementation has to decide something there and none of
-                  the choices is derived from the definition.
+                  {"PPMI maps nonpositive PMI values to zero, including the negative-infinity limit for an unseen pair with positive marginals. This loses distinctions the original counts retain. It does not assert that every zero-valued pair is independent."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="13. Taking a little more off, and what the emptiness buys">
                 <p>
-                  Once the clip is in place, a natural knob appears. Subtract a
-                  constant from every score before clipping and more of the table
-                  goes to zero, so the amount subtracted controls how sparse the
-                  result is. This is not an arbitrary invention; word2vec trained
-                  against a certain number of drawn negatives is, in effect,
-                  factorising this matrix with the logarithm of that number taken
-                  off, which is what Levy and Goldberg showed in 2014.
+                  {"Subtracting a constant before clipping gives shifted PPMI and can make the matrix sparser. Levy and Goldberg’s 2014 analysis connects SGNS dot-product targets to PMI minus the log number of negative samples when the noise distribution follows the context marginal. Finite-dimensional SGNS is not identical to taking an SVD of this clipped matrix; smoothing the noise distribution changes the relation too."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://papers.neurips.cc/paper_files/paper/2014/hash/b78666971ceae55a8e87efb7cbfd9ad4-Abstract.html">{"Levy and Goldberg: Neural Word Embedding as Implicit Matrix Factorization (2014)"}</Link></p>
                 <Equation>{"kept(w, c) = the larger of  score(w, c) − s  and  0"}</Equation>
                 <p>
                   The rows under the bar in step 11 are what that costs here. At
@@ -548,12 +449,7 @@ export default function PointwiseMutualInformationPage() {
                   two words to report.
                 </p>
                 <KeepInMind>
-                  Every amount subtracted made this corpus worse, monotonically,
-                  which is what a corpus of 144 words should be expected to show,
-                  since there is no noise here to suppress and every entry
-                  discarded is evidence removed. The setting exists for corpora
-                  where the matrix is too large to hold and most of its small
-                  entries really are noise.
+                  {"Every tested shift reduces topic separation on this constructed corpus. That result does not establish that the data contain no noise or that every removed association was useful. A shift changes which associations survive and can reduce storage in a sparse implementation. Its value needs evaluation for the corpus and intended comparison."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -565,19 +461,14 @@ export default function PointwiseMutualInformationPage() {
             <>
               <SubSection title="14. A rare word in the denominator is flattered">
                 <p>
-                  Look again at where the two rates sit. Both are in the
-                  denominator, so a word with a small rate makes the whole ratio
-                  large, and the rarest words in a corpus therefore produce the
-                  largest scores whatever they do. That is the ceiling of step 8
-                  seen from the other side, and it is a genuine problem, because a
-                  word counted twice has an estimated rate that is mostly an
-                  accident of which text was collected.
+                  {"A small marginal rate can make a positive observed association score large, but it does not force every pair involving a rare word to have a large score. The joint count still matters. Rare events can produce unstable rate estimates, so one or two co-occurrences may receive a large score without providing strong evidence that the association will persist in new text."}
                 </p>
                 <p>
+
                   The published repair is to raise every context count to a power
                   below one before turning the counts into rates. Raising to a
                   power below one pulls large numbers down towards small ones, and
-                  after everything is renormalised the rare contexts hold a larger
+                  after everything is renormalized the rare contexts hold a larger
                   share than they did and the common ones a smaller share. The
                   power used is three quarters, which is the same three quarters
                   word2vec uses when it draws its negative samples.
@@ -593,12 +484,7 @@ export default function PointwiseMutualInformationPage() {
 
               <SubSection title="15. Which way the score actually moves">
                 <p>
-                  Here is where I got it wrong, and where writing down the
-                  direction before computing it would have left a plausible
-                  sentence in place of a true one. Flattening lifts a rare
-                  context&rsquo;s rate. It is easy to read that as lifting a rare
-                  context&rsquo;s score, and I did. The rate is in the
-                  denominator, so lifting it pushes the score down.
+                  {"Flattening raises a rare context’s normalized rate. Since that rate is in the denominator, the adjustment lowers that pair’s score when the other quantities are fixed. Following the formula avoids reversing the effect in a verbal explanation."}
                 </p>
                 <SmoothingTracks />
                 <p>
@@ -618,11 +504,7 @@ export default function PointwiseMutualInformationPage() {
                   another of the rarer contexts.
                 </p>
                 <KeepInMind>
-                  What the adjustment does is hold back pairs whose only
-                  distinction is that one of the two words is rare. It reads as a
-                  correction for thin evidence, and it is applied through the
-                  denominator, so the description of it has to be read carefully in
-                  either direction.
+                  {"Context smoothing reduces some scores involving rare contexts and increases some involving common contexts. It changes the baseline; it does not directly estimate how trustworthy a pair’s evidence is."}
                 </KeepInMind>
               </SubSection>
 
@@ -666,10 +548,9 @@ export default function PointwiseMutualInformationPage() {
 
               <SubSection title="17. What the flattening is worth on this corpus">
                 <p>
-                  The 2015 paper reported this as the single most useful of its
-                  adjustments. On the twenty-four notes it makes things very
-                  slightly worse, and both halves of that are worth reporting.
+                  {"Levy, Goldberg and Dagan found context-distribution smoothing useful across the evaluations in their 2015 study. On this small constructed corpus, the reported topic-separation measure decreases slightly instead. These are different tasks and data, so inspect the result under its own protocol."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://aclanthology.org/Q15-1016/">{"Levy, Goldberg and Dagan: Improving Distributional Similarity with Lessons Learned from Word Embeddings (2015)"}</Link></p>
                 <NumberTable
                   headings={[
                     "the context rates",
@@ -687,25 +568,13 @@ export default function PointwiseMutualInformationPage() {
                   caption="Every row is a fit at a width of four on the twenty-four notes. The last column is the second figure taken from the first, and a larger number means the two halves of the corpus were told further apart."
                 />
                 <p>
-                  The interesting column is the third rather than the last. Words
-                  of different topics come out at 0.0016 with nothing flattened
-                  and drift up to 0.0264 as the flattening is pushed, so flattening
-                  is pulling the two halves of this corpus together. The reason it
-                  can is the three shared words. They are the commonest contexts,
-                  so flattening lowers their rates and therefore raises the score
-                  of every pair whose context is one of them, and those three
-                  columns are the only company a cooking word and a sailing word
-                  have in common, so raising them is raising exactly the part of
-                  two rows that makes words of different topics look alike.
+                  {"In the third column, cross-topic cosine rises from 0.0016 without context smoothing to 0.0264 at the strongest tested smoothing. On this collection, that setting makes words from the two topics more alike by this measure."}
+                </p>
+                <p>
+                  {"The three shared function words help explain the change. Smoothing reduces their relative context probabilities, raising association scores in those shared columns. Because cooking and sailing rows both use those contexts, increasing their contribution can raise cross-topic similarity. The effect depends on the corpus; it is not a guarantee that context smoothing always reduces useful separation."}
                 </p>
                 <KeepInMind>
-                  The published claim did not hold here, and the size of the effect
-                  is 0.0072 on a quantity of 0.67, so this is a corpus too small
-                  and too clean to test the claim on rather than evidence against
-                  it. The measurement is worth reporting because the direction is
-                  consistent across the whole sweep and because it is the sort of
-                  adjustment that gets carried from paper to paper without being
-                  checked at the size it is being applied at.
+                  {"The tested smoothing settings do not improve this topic-separation measure. That limits the claim we can make for this example; it neither reproduces nor overturns the paper’s broader evaluations. Use development data that reflects the actual application before adopting the setting."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -717,18 +586,18 @@ export default function PointwiseMutualInformationPage() {
             trueFalse(
               "Subtracting the logarithm of two from every score before the clip leaves 96 entries standing instead of 224, and the two halves of the corpus come apart by 0.5789 instead of 0.6646.",
               true,
-              "Every amount subtracted made this corpus worse, monotonically. Taking off 1.0 leaves 64 entries and 0.4901, and taking off the logarithm of five, which is 1.6094 and larger than every score in the table, leaves nothing at all, so every word points nowhere. The setting exists for corpora where the matrix is too large to hold and most of its small entries really are noise. On 144 words there is no noise to suppress, so every entry discarded is evidence removed.",
+              "In this constructed corpus, the tested shifts reduce the topic-separation measure. Subtracting the logarithm of two leaves 96 positive entries and separation 0.5789; a shift of one leaves 64 and 0.4901. A shift larger than every score removes all positive entries. This is evidence about these settings and this task, not proof that small corpora contain no noise or that every discarded association was useful.",
             ),
             choice(
-              "After the clip, a cell holding zero can have arrived there two ways. What are they, and what can be done about it?",
+              "Looking only at this experiment’s clipped matrix, what do its zero entries combine?",
               [
-                "56 pairs scored below chance and 249 were never seen together, and nothing downstream can tell them apart",
+                "56 observed below-baseline cells and 249 unseen cells, which the clipped matrix alone cannot distinguish",
                 "56 pairs were never seen and 249 scored below chance, and the two are distinguished by the row sums",
                 "A cell is zero only when the pair was never seen, so there is no ambiguity",
                 "Both groups can be recovered from the counts, which the table keeps alongside the scores",
               ],
               0,
-              "A pair below chance is evidence, however thin, that the two words keep apart. A pair never seen together is the absence of evidence, and here that includes flour and bake, both cooking words that simply never landed within five positions of each other. The 56 discarded scores are a fifth of everything the corpus observed and average −0.2562, so they were not all sitting near zero where the loss would be small. Of the 529 cells, 224 keep a score and the other two groups are indistinguishable to everything that comes afterwards.",
+              "An unseen pair and an observed pair below its independence baseline both become zero after clipping. The raw counts distinguish them, but the clipped matrix alone does not. Here 56 observed cells lose their negative scores, with mean −0.2562, while 249 cells were never observed. Retain the counts or another missingness indicator if the later application needs that distinction.",
             ),
             trueFalse(
               "Flattening the context rates lifts the score of a pair whose context is rare.",
@@ -744,7 +613,7 @@ export default function PointwiseMutualInformationPage() {
                 "It removes the need to clip, since no score falls below chance",
               ],
               0,
-              "While nothing is flattened the scores are symmetric, because the same three quantities appear whichever way round the pair is read. Flattening one of the two rates ends that, and 176 of the 224 surviving entries are affected. The largest disagreement is and beside crew, 0.3057 one way and 0.4232 the other, and the count in the numerator is the same both ways.",
+              "The unflattened scores are symmetric here because the counts and the two marginal roles are symmetric. Changing only the context marginal can make the result directional. For and/crew, the two orders become 0.3057 and 0.4232 while the observed pair count stays the same. Directionality comes from the changed baseline, not from a new asymmetry in the raw context events.",
             ),
             choice(
               "The 2015 paper called flattening its most useful adjustment. On the twenty-four notes it makes things slightly worse. What explains that?",
@@ -755,7 +624,7 @@ export default function PointwiseMutualInformationPage() {
                 "The clip removes every pair the flattening would have helped",
               ],
               0,
-              "Words of different topics come out at 0.0016 with nothing flattened and drift up to 0.0264 as the flattening is pushed, and those three columns are the only company a cooking word and a sailing word have in common. The effect is 0.0072 on a quantity of 0.67, so this reads as a corpus too small and too clean to test the claim on rather than as evidence against it.",
+              "The shared words are contexts for both topic groups. Flattening raises their contribution in this example, increasing cross-topic similarity from 0.0016 toward 0.0264. The resulting separation change is only 0.0072 on a value around 0.67. This small constructed comparison does not establish how the setting performs on a broader task, and a reported benefit on another evaluation need not hold for every corpus.",
             ),
         ],
         },
@@ -773,42 +642,20 @@ export default function PointwiseMutualInformationPage() {
                   without any further machinery.
                 </p>
                 <p>
-                  That description is 23 numbers wide here and would be four
-                  hundred thousand wide on a real vocabulary, which is the first
-                  reason to squeeze it. The second is that the row is mostly zero.
-                  Flour was never seen beside twelve of the 23 words, so twelve of
-                  its 23 numbers carry nothing, and two cooking words that never
-                  happened to fall near each other have no direct evidence
-                  connecting them at all.
+                  {"Each score row has one coordinate per context word. Such rows can be compared directly, but a large vocabulary makes them wide. Many entries may be zero, so sparse storage is an alternative to reducing dimensions. A direct word pair can be unobserved even when their separate context rows have shared patterns."}
                 </p>
                 <KeepInMind>
-                  The squeeze is doing two jobs and only one of them is about size.
-                  Filling in the pairs the corpus never saw, from the pairs it did
-                  see, is the job that changes the answers, and the widest fit on
-                  this page loses that job entirely by keeping every direction.
+                  {"Dimension reduction changes the comparisons as well as their storage. It can capture shared context patterns while discarding other distinctions. A full-rank representation retains the original matrix geometry; lower rank is useful only when its changes suit the task."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. Squeezing the table, and the power on the sizes">
                 <p>
-                  The square of kept scores is broken into directions, each with a
-                  size attached, ordered so the first direction accounts for as
-                  much of the table as any single direction can. Keeping the first
-                  few and discarding the rest gives every word a short list of
-                  numbers, and the discarded directions are the ones the table
-                  leans on least.
+                  {"Use SVD to express the scored matrix in paired word and context directions with singular values. Keep a selected number of directions, then scale each word coordinate by a chosen power of its singular value. This gives a lower-dimensional representation whose cosine geometry depends on that power."}
                 </p>
                 <Equation>{"the numbers for word w = (its part of each kept direction) × (that direction’s size)^p"}</Equation>
                 <p>
-                  On this corpus the four largest sizes are 6.6440, 6.1406, 2.8430
-                  and 2.8325, so two directions stand well clear of the rest,
-                  which is what a table made of two blocks with almost nothing
-                  between them would be expected to give. The power p
-                  is a choice with no derivation behind it. At p of one, the
-                  products of two words&rsquo; numbers reproduce the table&rsquo;s
-                  own entries; at p of zero the directions are kept at equal
-                  strength; the 2015 paper reports a half as consistently best on
-                  word similarity and that is the value the rest of this page uses.
+                  {"The four leading singular values are 6.6440,6.1406,2.8430 and2.8325. The exponent p controls their relative contribution. At p=1, word–word dot products reproduce row dot products of the rank-k reconstructed matrix, not its individual word–context entries. Other powers change that geometry. The 2015 study motivates testing such settings; the value used here is a choice for comparison."}
                 </p>
                 <NumberTable
                   headings={[
@@ -827,11 +674,7 @@ export default function PointwiseMutualInformationPage() {
                   caption="A fit at a width of four on the twenty-four notes, at five powers. The published half is in the middle of the range and is not the best of the five here."
                 />
                 <KeepInMind>
-                  A power of one separates these two halves furthest, and it is not
-                  the published choice. That is a second published setting this
-                  corpus disagrees with, and the reason is the same in both cases,
-                  since a setting chosen to work across many corpora of billions of
-                  words is not the setting that works on 144.
+                  {"Here p=1 gives greater separation of the constructed topic groups than p=0.5. A setting that performs well on published word-similarity tasks need not maximize this measure. That is a reason to evaluate the choice, not to infer corpus size as the sole cause."}
                 </KeepInMind>
               </SubSection>
 
@@ -845,27 +688,16 @@ export default function PointwiseMutualInformationPage() {
                   they existed.
                 </p>
                 <p>
-                  The first of those neighbours is worth pausing on. Flour and bake
-                  never once fell within five positions of each other in the whole
-                  corpus, so their cell in the table is one of the 249 that never
-                  had a score. Four numbers a word place them at a cosine of
-                  1.0000, which is to say the squeeze has concluded they are the
-                  same word from the company they each keep separately.
+                  {"Flour and bake never occur within the five-position window, but their reduced vectors have cosine near 1. They have strongly aligned context-based representations. This does not mean the algorithm has concluded that they are the same word: their IDs remain distinct and cosine ignores vector length."}
                 </p>
                 <KeepInMind>
-                  That is the squeeze earning its keep and overreaching in the same
-                  measurement. Connecting two words the corpus never put together
-                  is the job; concluding they are identical is more than the
-                  evidence supports, and step 22 counts how often it happens.
+                  {"The reduced representation can connect words through shared context patterns without direct co-occurrence. It may also remove distinctions needed by a later task, so inspect strongly aligned vectors as well as topic separation."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="21. Where reading the counts beats scoring them">
                 <p>
-                  The whole argument for this page is that a count is a poor
-                  measure of association and a score is a good one. On a corpus
-                  this size that argument loses, on one of the two questions, and
-                  it would be dishonest to leave it out.
+                  {"Compare raw counts, PPMI rows and reduced PPMI vectors under the same topic measure. An association score can be useful without improving every later similarity statistic."}
                 </p>
                 <ReadingComparison />
                 <>
@@ -904,25 +736,10 @@ export default function PointwiseMutualInformationPage() {
                   the full 23 does it reproduce the table exactly.
                 </p>
                 <p>
-                  The second is the collapse. Five pairs of cooking words and five
-                  pairs of sailing words come out at a cosine of exactly 1.0000
-                  under four numbers, which means the fit cannot tell them apart at
-                  all. Flour and bake are one such pair, and their full rows of
-                  scores sit at a cosine of 0.5356, so the squeeze has taken two
-                  words that were half alike and declared them identical. That is
-                  the price of describing 23 words with four directions, and it is
-                  paid whether or not the collapse is noticed.
+                  {"Ten within-topic pairs have cosine near1 at four dimensions. Their directions become difficult to distinguish under cosine, even when the full score rows differ. This is loss of angular distinction, not proof that the words or complete vectors are identical."}
                 </p>
                 <p>
-                  The third is what it costs to compute. The table is as wide as
-                  the vocabulary on both sides, so it holds the square of the
-                  vocabulary size whether or not the cells are filled, and breaking
-                  it into directions costs the cube. At 23 words that is 529
-                  numbers and no time worth measuring; at four hundred thousand
-                  words, which is the vocabulary a published set of vectors covers,
-                  the same square would hold a hundred and sixty billion cells, and
-                  every implementation at that size holds the filled cells alone
-                  and asks a solver for a few directions rather than all of them.
+                  {"A dense vocabulary-by-vocabulary table stores quadratically many values, and a full dense SVD has cubic-order cost for a square matrix. Sparse storage and truncated solvers can reduce the practical work. Their benefit depends on the nonzero pattern, retained width and algorithm; a sparse representation does not allocate every absent cell."}
                 </p>
                 <NumberTable
                   headings={[
@@ -940,19 +757,10 @@ export default function PointwiseMutualInformationPage() {
                   caption="Measured on the twenty-four notes at the published flattening and power. The two columns move in opposite directions, which is the whole difficulty of choosing a width."
                 />
                 <p>
-                  Read those two columns together. A wider fit reproduces the table
-                  more faithfully and separates the two halves less well, and at
-                  the full width, where the table is reproduced exactly, the halves
-                  are barely apart at all. Reproducing the table is not the goal,
-                  since the table is mostly substituted zeros; the narrow fits do
-                  better precisely because they are unable to reproduce them.
+                  {"The wider fits reconstruct this clipped association matrix more accurately but separate the known topics less clearly by the reported measure. At full width, the reconstruction includes the matrix's substituted zeros as well as its positive scores. A smaller reconstruction error is therefore not automatically a better topic representation. The table shows a task tradeoff; it does not isolate which discarded entries caused the improvement."}
                 </p>
                 <KeepInMind>
-                  Nothing computed during the fit turns over as the width passes a
-                  good value. The width that works here was found by trying widths
-                  and looking at a quantity that depends on knowing which half each
-                  word came from, which is exactly the fact a real corpus does not
-                  come with.
+                  {"Choose the width using evidence relevant to the intended task. Known topic labels provide one development criterion here. Other applications may use judged similarities or downstream results; raw corpora do not always lack such evaluation data."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -964,16 +772,11 @@ export default function PointwiseMutualInformationPage() {
             <>
               <SubSection title="23. A pair that never occurred has no logarithm">
                 <p>
-                  The score is the logarithm of a ratio whose numerator is the rate
-                  of the pair. If the two words were never seen together, that rate
-                  is zero, the ratio is zero, and the logarithm of zero is not a
-                  number. It does not fall off towards a large negative value in
-                  any useful sense either; it is undefined, and every implementation
-                  has to decide something in its place.
+                  {"With positive marginals and zero joint probability, ordinary real-valued PMI is not finite; its extended limit is negative infinity. That is meaningful as an empirical distribution statement, but a finite vector representation needs a policy such as clipping or smoothing. It does not prove that the pair is impossible in future text."}
                 </p>
                 <>
 <p>
-                  There are three honest choices and each costs something. Put zero there, which is what almost everybody does, and the cell then says the two words are independent, which is a claim the corpus never made and is the same value a pair scoring slightly below chance receives. Leave the cell out, keeping only the pairs that occurred, which is what GloVe does, and the objective then makes no claim about those pairs at all, though nothing downstream that wants a square table can be handed the result.
+                  {"PPMI clips that negative-infinity limit to zero along with all other nonpositive values. The resulting zero is a clipped value, not a declaration of independence. GloVe instead fits an objective over observed positive-count pairs; its learned factors can still supply comparisons involving pairs absent from that objective."}
                 </p>
                 <p>
                   Add a small count to every cell before dividing, which makes every score defined and makes the rarest pairs the ones the added count moves most.
@@ -1007,14 +810,7 @@ export default function PointwiseMutualInformationPage() {
                   the arithmetic is correct.
                 </p>
                 <p>
-                  It is correct and it is not what anyone wants, because a pair
-                  seen once is mostly an accident of which text was collected. The
-                  usual responses are to drop words below a count threshold before
-                  scoring anything, which declines to answer for a rare word rather
-                  than answering badly, and to flatten the context rates as Part 4
-                  does, which holds back the pairs whose only distinction is
-                  rarity. Neither removes the effect and neither is derived from
-                  the definition.
+                  {"A high score supported by one event may be unstable, but it is not necessarily an accident or unwanted. Minimum-count filters and context smoothing change how rare observations affect the representation. Check whether they improve the task, and report which rare words or associations they remove."}
                 </p>
               </SubSection>
 
@@ -1023,86 +819,10 @@ export default function PointwiseMutualInformationPage() {
                 <DerivationTable
                   expressionHeading="Pair count or clipped value"
                   reasonHeading="What the association score means"
-                  rows={[
-                    {
-                      expression: "a pair that never occurred together",
-                      reason:
-                        "undefined. The rate of the pair is zero and the logarithm of zero is not a number, so there is nothing to compute and something has to be put in its place. Here that is 249 of 529 cells, which is 47.1% of the table.",
-                    },
-                    {
-                      expression: "a pair scoring below chance",
-                      reason:
-                        "defined, and the value is negative and small in size, since the ratio is bounded below by zero and cannot carry the score far down. It is also the value computed from the thinnest evidence, which is the argument for discarding it. Here it is 56 of the 280 scores that exist, averaging −0.2562.",
-                    },
-                    {
-                      expression: "a zero in the table after the clip",
-                      reason:
-                        "ambiguous by construction. It stands for a pair below chance and for a pair never seen at all, and nothing afterwards can separate the 56 from the 249. The clip is what creates the ambiguity; the score itself distinguishes them perfectly.",
-                    },
-                    {
-                      expression: "a word that occurs once in the whole corpus",
-                      reason:
-                        "defined, and its scores are the largest the corpus can produce, because its rate sits in the denominator and is as small as a rate can be. The ceiling on a score is one over the larger of the two rates, so a rare word’s ceiling is high and one co-occurrence reaches it.",
-                    },
-                    {
-                      expression: "a word that occurs everywhere",
-                      reason:
-                        "defined, and its scores are pressed towards zero from above, since its own rate is large and the ceiling on any score involving it is correspondingly low. That is the score working as intended rather than a limitation.",
-                    },
-                    {
-                      expression: "comparing two scores from words of different frequencies",
-                      reason:
-                        "permitted by the arithmetic and misleading. The two are bounded by different ceilings, so the same number means something different in each case, and an ordering of scores across a whole table is partly an ordering by rarity.",
-                    },
-                    {
-                      expression: "a word absent from the corpus",
-                      reason:
-                        "no row and no column, so no score with anything. The refusal is the honest answer, since a default position would be one the corpus never implied.",
-                    },
-                    {
-                      expression: "which of the two words stood first",
-                      reason:
-                        "outside what the table represents. Each pair is counted from both ends, so the counts cannot tell the cat sat from sat the cat. Order is discarded when the corpus is counted rather than when it is scored.",
-                    },
-                    {
-                      expression: "the two directions of one pair, once the contexts are flattened",
-                      reason:
-                        "no longer one number. Only the context rate is adjusted, so the score of a word given a context and the score of the context given the word come apart, here for 88 pairs, the widest by 0.1175. Reading the rows and reading the columns are then two different descriptions and the definition prefers neither.",
-                    },
-                    {
-                      expression: "how far near reaches, and what a distant neighbour is worth",
-                      reason:
-                        "a real choice made before any score exists and unrevisable afterwards. It decides which cells have a score at all, since a reach of one leaves 112 entries here and separates the halves by 0.4238, five leaves 224 and 0.6646, and beyond five nothing changes, because five positions already reach every word of a six-word note.",
-                    },
-                    {
-                      expression: "how much to subtract before the clip",
-                      reason:
-                        "a real choice about how sparse the result should be, with nothing inside the calculation to settle it. Every value tried made this corpus worse, from 0.6646 at nothing down to 0.4901 at one; past 1.6094 the table is empty, every word points nowhere, and the angle between two words is undefined rather than large.",
-                    },
-                    {
-                      expression: "how many numbers to give a word",
-                      reason:
-                        "a real choice with no quantity turning over at a good value. Reproducing the table and separating the topics pull opposite ways, 0.6579 missed and 0.9885 apart at two numbers against 0.0000 missed and 0.1997 apart at all 23, and the faithful end is the worse end precisely because the table is mostly substituted values.",
-                    },
-                    {
-                      expression: "the individual numbers a word ends up with",
-                      reason:
-                        "undefined as quantities. Turning every word’s numbers by one rotation leaves every angle between two words where it was, so the coordinates are one arbitrary choice among infinitely many, and only readings that survive a rotation, such as a cosine, mean anything.",
-                    },
-                    {
-                      expression: "which sense of a word is meant",
-                      reason:
-                        "outside what the method represents. One row per spelling, so a word used two ways contributes both sets of company to one row and settles somewhere between them, and there is no second row for the second sense.",
-                    },
-                  ]}
+                  rows={[{"expression":"a pair that never occurred together","reason":"With positive marginals, zero empirical joint probability has PMI limit−infinity. PPMI maps it to zero; count smoothing gives a different finite estimate. Here249 of529 cells are unobserved."},{"expression":"a pair scoring below chance","reason":"A below-baseline pair has negative finite PMI. It can be strongly negative or supported by many observations; this corpus’s56 such entries average−0.2562."},{"expression":"a zero in the table after the clip","reason":"A clipped zero can come from an unseen, below-baseline or exactly-baseline pair. The clipped matrix alone loses the distinction; retained counts can recover its provenance."},{"expression":"a word that occurs once in the whole corpus","reason":"One co-occurrence can give a high score relative to a small independence expectation. The context marginal also bounds it, so not every pair involving a singleton reaches the global maximum."},{"expression":"a word that occurs everywhere","reason":"A large marginal lowers the positive ceiling but does not prevent negative PMI. Occurring in every document is also different from having probability1 among ordered context events."},{"expression":"comparing two scores from words of different frequencies","reason":"All unsmoothed PMI scores use the same log-ratio scale. Their ceilings and sample support differ, so equal values need not have equal reliability."},{"expression":"a word absent from the corpus","reason":"The fitted vocabulary provides no row for an absent word. Rejecting it or supplying a documented fallback is an interface choice; the corpus supplies no measured association for it."},{"expression":"which of the two words stood first","reason":"outside what the table represents. Each pair is counted from both ends, so the counts cannot tell the cat sat from sat the cat. Order is discarded when the corpus is counted rather than when it is scored."},{"expression":"the two directions of one pair, once the contexts are flattened","reason":"no longer one number. Only the context rate is adjusted, so the score of a word given a context and the score of the context given the word come apart, here for 88 pairs, the widest by 0.1175. Reading the rows and reading the columns are then two different descriptions and the definition prefers neither."},{"expression":"how far near reaches, and what a distant neighbor is worth","reason":"a real choice made before any score exists and unrevisable afterwards. It decides which cells have a score at all, since a reach of one leaves 112 entries here and separates the halves by 0.4238, five leaves 224 and 0.6646, and beyond five nothing changes, because five positions already reach every word of a six-word note."},{"expression":"how much to subtract before the clip","reason":"a real choice about how sparse the result should be, with nothing inside the calculation to settle it. Every value tried made this corpus worse, from 0.6646 at nothing down to 0.4901 at one; past 1.6094 the table is empty, every word points nowhere, and the angle between two words is undefined rather than large."},{"expression":"how many numbers to give a word","reason":"Rank changes reconstruction and topic separation differently in this experiment. It does not isolate which individual removed entries caused the improvement; evaluate a width against the intended task."},{"expression":"the individual numbers a word ends up with","reason":"Coordinates are defined within a chosen basis. Pairwise cosines survive a shared orthogonal rotation, so a coordinate’s interpretation needs a basis convention and supporting evidence."},{"expression":"which sense of a word is meant","reason":"One static row combines a spelling’s contexts. It does not choose a separate sense for each occurrence, and it need not be a geometric midpoint between sense groups."}]}
                 />
                 <KeepInMind>
-                  Two of those lines carry most of the weight. Nearly half the
-                  table has no score at all and is filled with a substituted value
-                  that the machinery reading it cannot distinguish from a real one,
-                  and the score rewards rarity strongly enough that its largest
-                  values sit on its thinnest evidence. Everything the method does
-                  well, it does in spite of both.
+                  {"The empirical counts, clipping and representation choices all affect the result. Keep enough provenance to distinguish a strong association from a high score with little support, then evaluate whether the resulting comparisons answer the intended question."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1120,12 +840,12 @@ export default function PointwiseMutualInformationPage() {
                 "As a bug, since an unobserved pair should stay at zero",
               ],
               0,
-              "Connecting two words the corpus never put together is the job the decomposition is there for, and concluding they are identical is more than the evidence supports. Their full rows of scores sit at a cosine of 0.5356, so the fit has taken two words that were half alike and declared them the same, and five pairs of cooking words and five of sailing words collapse that way under four numbers.",
+              "The full score rows have cosine 0.5356, but their four-coordinate projections have cosine one. The reduction removed directions that distinguished their contexts. A cosine of one means their retained vectors point in the same direction; it does not prove the words have identical meanings or that their magnitudes are equal. Inspect what lower rank discarded before treating the resulting neighbors as interchangeable.",
             ),
             trueFalse(
               "At a width of 23 numbers a word, scoring the counts separates the two halves of the corpus better than reading the raw counts does.",
               false,
-              "The counts win at that width. Raw counts give 0.6629 within a topic and 0.1192 across, a gap of 0.5438, while the scores give 0.5228 and 0.0292, a gap of 0.4936. Scoring lowered both figures rather than only the second, because the three shared words are company for every word here and dividing by their rates deflates every angle. What recovers it is the squeeze, which at four numbers a word reaches a gap of 0.6646.",
+              "At full width, the raw counts give topic gap 0.5438, compared with 0.4936 for the scored table. Both within-topic and cross-topic means change, so lowering cross-topic similarity alone does not settle the comparison. The four-coordinate scored representation instead reaches 0.6646. Scoring and reducing width have different effects and should be compared through the stated task measure.",
             ),
             choice(
               "Reconstruction error against half-separation, read together across widths. What do the two columns say?",
@@ -1136,10 +856,10 @@ export default function PointwiseMutualInformationPage() {
                 "Both turn over at the width that works, which is how the width was chosen",
               ],
               0,
-              "At a width of two the fit misses the table by 0.6579 of its own size, at four by 0.5668, at eight by 0.4542, and only at the full 23 does it reproduce the table exactly, where the halves are barely apart at all. Reproducing the table is not the goal, since the table is mostly substituted zeros, and the narrow fits do better precisely because they cannot reproduce them. Nothing computed during the fit turns over at a good width.",
+              "The relative reconstruction errors decrease from 0.6579 at width two to 0.5668 at four and 0.4542 at eight, reaching zero at full width. The topic-separation measure does not follow that ordering. Reconstructing the supplied PPMI table and preserving useful topic distinctions are different objectives. Choose width using the intended comparisons and held-out evidence, rather than assume that lower matrix error guarantees a better representation.",
             ),
             several(
-              "An implementation meets a pair the corpus never saw together. Which of these are named as honest choices?",
+              "Which approaches does the lesson discuss for handling an unobserved pair in a finite table or observed-pair fitting objective?",
               [
                 "Substitute a PMI target of zero, which is the independence baseline rather than evidence supplied by an unobserved pair",
                 "Leave the cell out, which is what GloVe does",
@@ -1147,7 +867,7 @@ export default function PointwiseMutualInformationPage() {
                 "Take the lowest score in the table and use that"
               ],
               [0, 1, 2],
-              "A zero joint count makes the ordinary real-valued logarithm unavailable. A method must choose how to handle it. Substituting zero, omitting the pair from an observed-pair objective, and adding pseudocounts are different explicit modelling choices. Positive PMI also clips negative finite scores to zero; that clipping should not be confused with evidence that an unseen pair is independent.",
+              "A zero joint count makes the ordinary real-valued logarithm unavailable. The three approaches discussed here substitute a zero target, omit the pair from an observed-pair objective, or add pseudocounts before scoring. Choosing another finite floor would be an additional policy requiring justification, rather than a mathematical impossibility. Clipping negative finite PMI to zero is separate from assuming an unseen pair is independent.",
               {
                 "description": "We are discussing design choices for a finite table or an observed-pair fitting objective when a co-occurrence count is zero. No smoothing has yet been applied. “Leave out” means omit that pair from the fitting objective rather than provide it with a numerical target."
               },
@@ -1155,7 +875,7 @@ export default function PointwiseMutualInformationPage() {
             trueFalse(
               "Stir and whisk were counted together four times and score higher than eggs and oven, which were counted together six times.",
               true,
-              "1.5278 against 1.2603, and the arithmetic is correct. Both words’ rates sit in the denominator, so the score rewards rarity by design, and no amount of evidence about a common pair can match two words counted once each that happened to fall beside one another. Dropping words below a count threshold and flattening the context rates both hold the effect back and neither removes it.",
+              "The scores are 1.5278 for stir/whisk and 1.2603 for eggs/oven. PMI compares each joint rate with both marginal rates, so a larger pair count need not have the larger association ratio. Rare observed pairs can receive high scores despite little supporting evidence. Frequency thresholds and context smoothing change that behavior, but neither makes PMI itself a confidence measurement.",
             ),
         ],
         },
@@ -1283,7 +1003,7 @@ and beside bake, counted 1, kept 0.0000`,
               "Flatten the context rates and watch the direction",
               [
   "Fit the notes with context exponents one and 0.75. Print flour/whisk and sugar/the scores for both.",
-  "Then print and/crew and crew/and under both fits. Keep target/context order explicit: changing context frequencies can make the smoothed score directional even when raw neighbouring counts are symmetric."
+  "Then print and/crew and crew/and under both fits. Keep target/context order explicit: changing context frequencies can make the smoothed score directional even when raw neighboring counts are symmetric."
 ],
               `from oop_ml import PointwiseMutualInformationEmbeddings
 
@@ -1349,9 +1069,9 @@ flattened, crew beside and 0.4232
 unflattened, and beside crew 0.3646
 unflattened, crew beside and 0.3646`,
               { hints: [
-  "An exponent below one changes the normalised context baseline in the denominator.",
+  "An exponent below one changes the normalized context baseline in the denominator.",
   "Read both argument orders rather than assuming a matrix remains symmetric after smoothing."
-], check: numberCheck("What does flour beside whisk score at the published three quarters?", 0.5933, 5e-05, "The smoothed score is 0.5933. Flattening the context baseline changes the denominator, so a rare context can lower a pair’s score rather than automatically boost it."), question: "How does smoothing context frequencies change pair scores and direction?" },
+], check: numberCheck("What is the flour/whisk score with context_distribution_smoothing set to 0.75?", 0.5933, 5e-05, "The smoothed score is 0.5933. Flattening the context baseline changes the denominator, so a rare context can lower a pair’s score rather than automatically boost it."), question: "How does smoothing context frequencies change pair scores and direction?" },
             ),
             exercise(
               "Squeeze the table to four numbers a word",
@@ -1431,9 +1151,9 @@ flour and anchor 0.0081
 power 0.5: within 0.6732, across 0.0086, gap 0.6646
 power 1.0: within 0.8191, across 0.0428, gap 0.7762`,
               { hints: [
-  "The factorisation’s scaling power changes the representation, not the underlying pair counts.",
+  "The factorization’s scaling power changes the representation, not the underlying pair counts.",
   "Exclude shared words from the supplied topic groups when reproducing their pair means."
-], check: numberCheck("What is the gap between the two means at a power of one?", 0.7762, 0.0001, "The mean-similarity gap is 0.7762 at power one. The scaling of retained directions changes these vector comparisons even though the underlying context counts stay fixed."), question: "What relationship survives a four-dimensional factorisation of the scored table?" },
+], check: numberCheck("What is the gap between the two means at a power of one?", 0.7762, 0.0001, "The mean-similarity gap is 0.7762 at power one. The scaling of retained directions changes these vector comparisons even though the underlying context counts stay fixed."), question: "What relationship survives a four-dimensional factorization of the scored table?" },
             ),
           ],
         },

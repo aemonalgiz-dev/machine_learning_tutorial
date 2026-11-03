@@ -9,15 +9,15 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Evaluating Generative Models · oop_ml",
-  description: "A fluent answer or convincing picture is not enough to show that a model does its job well. We need evaluation examples and criteria that reflect the task, including failures an overall average might conceal.",
+  title: "Evaluating Generative Models · Perceptron Lab",
+  description: "Generated content needs to be judged against the task it is meant to perform. Relevant evaluation cases and explicit criteria help distinguish a plausible-looking result from one that meets the requirements.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="evaluating-generative-models"
     title="Evaluating Generative Models"
-    tagline={"A fluent answer or convincing picture is not enough to show that a model does its job well. We need evaluation examples and criteria that reflect the task, including failures an overall average might conceal."}
+    tagline={"Generated content needs to be judged against the task it is meant to perform. Relevant evaluation cases and explicit criteria help distinguish a plausible-looking result from one that meets the requirements."}
     openingTitle="A Response Looks Convincing. How Do We Know the Model Improved?"
     intuition={lessonIntuitions["evaluating-generative-models"]}
     technicalStart="Part 2. Calculate Loss and Perplexity"
@@ -31,19 +31,25 @@ export default function Page() {
 <p>{"A response can read well and still give the wrong answer. Before comparing model versions, let's decide what we want the response to accomplish. Correctness on a factual question, following a format, and assigning probability to held-out text require different checks. We will choose a measurement for the job and inspect what it leaves out."}</p>
 <p>{"A language model can be evaluated by how much probability it assigns to text that it did not train on. That asks whether its continuation distribution fits held-out language. It does not directly ask whether an answer follows instructions, cites evidence correctly, or solves the user’s problem."}</p>
 <p>{"For a factual question with a known answer, correctness may be checked against a reference. Exact string matching can be useful for rigid outputs but rejects valid paraphrases. For a longer response, write down what the reader needs to find: perhaps the correct opening time, an appropriate source, and no unsupported claim about holiday hours. These written scoring criteria form a rubric."}</p>
-<NumberTable headings={["The question", "A measurement that fits it", "What it leaves unanswered"]} rows={[["Does the model predict text it has not seen?", "The probability it gave the observed next tokens", "Whether any answer is correct or useful"], ["Is a factual answer right?", "Comparison with a reference answer", "Whether a valid paraphrase was rejected"], ["Is an open-ended response good?", "A rubric applied to the response", "Anything the rubric did not name"]]} caption="Three questions about one model. A good result on one row says nothing about the other two." />
+<NumberTable headings={["The question", "A measurement that fits it", "What it leaves unanswered"]} rows={[["Does the model predict text it has not seen?", "The probability it gave the observed next tokens", "Whether any answer is correct or useful"], ["Is a factual answer right?", "Comparison with a reference answer", "Whether a valid paraphrase was rejected"], ["Is an open-ended response good?", "A rubric applied to the response", "Anything the rubric did not name"]]} caption="These measurements answer different questions. Success on one does not establish success on another." />
 <p>{"The paraphrase problem is easy to meet. Take the previous lesson’s question about when the library opens on Saturday, with a reference answer of ten. A response of ten in the morning is right, and it does not match the reference character for character. Exact matching suits outputs that have one correct form, such as a date in a fixed format or a label from a short list."}</p>
 <p>{"The first row is the one this page calculates, and it is the one most easily mistaken for the others. A model can become better at predicting ordinary text without becoming more accurate, more obedient to instructions or more careful with sources. Part 2 measures predictive fit. Part 3 returns to the rest."}</p>
 
 </SubSection>
 <SubSection title="2. Keep the comparison fair">
-<p>{"A comparison is a claim that one thing changed. If the model changed and the prompt changed with it, the difference in score belongs to both, and there is no way to divide it between them afterward. That is the reason for recording every setting, including the ones that seem incidental."}</p>
+<p>
+                  {"Changing both the model and the prompt may improve the whole system, but two resulting scores alone do not tell us which change caused the difference. To investigate the model’s effect, compare both versions under the same prompt and scoring conditions. Record those settings so the comparison can be repeated."}
+                </p>
 <p>{"Use comparable test inputs and record the prompt, sampling settings, model version, and scoring procedure. A model that receives source passages is being tested under different conditions from one answering from its parameters alone."}</p>
 <p>{"Keep final test examples separate from training and model selection. Repeatedly tuning against the test set turns it into another selection set. Check for near duplicates and shared source material as well as exact overlap."}</p>
 <p>{"The usual arrangement gives each part of the data one job."}</p>
-<NumberTable headings={["Split", "What it is used for", "How often it is consulted"]} rows={[["Training", "Learning the parameters", "Throughout training"], ["Validation", "Choosing settings and comparing versions", "As often as needed"], ["Test", "Estimating final performance", "As rarely as possible"]]} caption="Three roles for three separate sets of examples." />
-<p>{"A test set loses its value gradually, not all at once. Each time a change is kept because it scored better on the test examples, the choice has been fitted a little to those particular examples. After enough rounds a high test score partly reports how well the choices suit that set, and the set can no longer say how the model will do on examples nobody has looked at."}</p>
-<p>{"Overlap does the same damage from the other side. A test question that also appears in the training data, or appears there with a word changed, or is drawn from the same source document, can be answered from memory. It then measures recall of the training data where it was meant to measure ability on new inputs."}</p>
+<NumberTable headings={["Split", "What it is used for", "How often it is consulted"]} rows={[["Training","Learning the parameters","Throughout training"],["Validation","Choosing settings and comparing versions","During development; repeated selection can overfit it"],["Test","Estimating final performance","After the model and procedure are fixed"]]} caption="Three roles for three separate sets of examples." />
+<p>
+                  {"Choosing changes because they improve test scores makes those examples part of development. The score then reflects selection as well as the fitted model. It is no longer an untouched assessment of the chosen procedure. Keep an independent final assessment when evaluating decisions made from those earlier results."}
+                </p>
+<p>
+                  {"Exact and near-duplicate training passages can reward remembered continuations in an intended test of new text. Shared source documents can also connect examples across a split. If the aim is performance on unseen source material, hold out whole documents as well as removing duplicates. Choose the boundary to match the generalization question."}
+                </p>
 
 </SubSection>
 
@@ -56,17 +62,24 @@ export default function Page() {
 <Equation>{"Mean negative log likelihood = −(1 / N) Σₜ ln pₜ(yₜ)\nPerplexity = exp(Mean negative log likelihood)\n\nFor three equally probable vocabulary tokens:\np(target) = 1 / 3\nMean loss = −ln(1 / 3) = ln(3)\nPerplexity = exp(ln(3)) = 3"}</Equation>
 <p>{"Lower values mean the model assigned more probability to the observed targets on this evaluation. Perplexity can be understood as an effective average uncertainty, not a literal count of choices considered at every position."}</p>
 <p>{"Raising the wrong token’s logit reduces the target probability and increases both metrics. A confidently wrong model can therefore score worse than a less certain one."}</p>
-<p>{"The live example makes these numbers by hand. It scores three positions over a vocabulary of three tokens, starts every logit at zero, and adds a boost to one logit in each row. With the boost on the target the model is confidently right. With the boost on another token it is confidently wrong. At a boost of 1 on the target, which is where the example starts, the calculation runs as follows."}</p>
+<p>
+                  {"The live example assigns scores to three positions over a vocabulary of three tokens. It starts every logit at zero and adds a boost to one entry in each row. Boosting the observed target raises its probability; boosting another token lowers the target’s probability. The default target boost is 1, giving the following calculation."}
+                </p>
 <Equation>{"p(target) = e¹ / (e¹ + 2) ≈ 0.576\nMean loss = −ln(0.576) ≈ 0.551\nPerplexity = exp(0.551) ≈ 1.736"}</Equation>
 <NumberTable headings={["Boost", "Placed on", "Target probability", "Mean loss", "Perplexity"]} rows={[["0", "no token", "0.333", "1.099", "3.000"], ["1", "the target", "0.576", "0.551", "1.736"], ["2", "the target", "0.787", "0.240", "1.271"], ["4", "the target", "0.965", "0.036", "1.037"], ["1", "a wrong token", "0.212", "1.551", "4.718"], ["2", "a wrong token", "0.107", "2.240", "9.389"], ["4", "a wrong token", "0.018", "4.036", "56.598"]]} caption="Seven settings of the live example. All three positions receive the same boost, so every position has the same target probability." />
 <p>{"Read the perplexity column against the vocabulary of three. A value of 3 is what spreading probability evenly over the three tokens earns. Confidence in the right token brings it down toward 1, which is the floor, reached only by giving the target all of the probability. Confidence in a wrong token sends it past 3, to 4.7, then 9.4, then 56.6."}</p>
-<p>{"That last figure is the reason for the warning about counts. There are three tokens, so no model is choosing among 56 of them. When every position has the same target probability, perplexity is one divided by that probability, and 56.6 is one divided by the 0.018 the target was left with. Perplexity reports how surprised the model was by what actually came next. A model can be more surprised than an even guess would have been, and the uniform row at 3 beats every row in which the confidence went to a wrong token."}</p>
+<p>
+                  {"There are still only three vocabulary entries. When every scored position has the same target probability, perplexity is its reciprocal. The last row uses the unrounded probability; 0.018 is only its displayed approximation. Perplexity can therefore exceed the vocabulary size without describing additional candidate tokens."}
+                </p>
+                <Equation>{"With the same target probability p at each scored position:\nperplexity = exp(−ln(p)) = 1 / p\n\nWrong-token boost = 4:\np = 1 / (exp(4) + 2)\nperplexity = exp(4) + 2 ≈ 56.598"}</Equation>
 </SubSection>
 <SubSection title="4. Preserve the units of comparison">
 <p>{"Perplexity is measured per token under a particular tokenizer and scoring protocol. Comparing values across different tokenizations or differently masked datasets can be misleading because the prediction units changed."}</p>
 <p>{"The dependence on units is arithmetic, and the three-token example shows it. Suppose a text is scored as three tokens at a probability of one third each. Suppose a second tokenizer cuts the same text into six pieces, and the text as a whole receives the same total probability. The total cost is unchanged. The cost per token is halved, because there are twice as many tokens to share it."}</p>
 <Equation>{"Total negative log likelihood = 3 × ln(3) ≈ 3.296\n\nScored as 3 tokens:  exp(3.296 / 3) = 3\nScored as 6 tokens:  exp(3.296 / 6) ≈ 1.732"}</Equation>
-<p>{"Nothing about the model’s grasp of the text differs between those two lines. Only the size of the pieces differs, so a comparison of 3 against 1.732 would be a comparison of tokenizers. The same thing happens when two evaluations score different positions, since a mean over the easy positions and a mean over all of them are different means."}</p>
+<p>
+                  {"The total assigned probability is held fixed in this illustration. Only the token count changes, so the lower per-token perplexity does not establish a better model of the text. Masking also changes which terms enter an average: scoring only easy positions answers a different question from scoring all positions."}
+                </p>
 <p>{"A lower perplexity on one corpus does not establish a better assistant or image generator. Report the data and protocol beside the score, and use task-specific tests for the behaviors that matter."}</p>
 <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm leading-relaxed text-slate-100"><code>{"import numpy as np\nfrom oop_ml.numpy.modern import TokenCrossEntropy\n\nresult = TokenCrossEntropy().measure(\n    np.zeros((3, 3)), np.array([0, 1, 2]),\n)\nprint(result.value)\nprint(result.perplexity)"}</code></pre>
 <p>{"The snippet scores the uniform case. It prints a mean loss of about 1.0986, which is ln 3, and a perplexity of 3."}</p>
@@ -79,7 +92,7 @@ choice(
   "With three equally probable vocabulary tokens, what is the perplexity at a scored position?",
   ["1 / 3", "ln(3)", "3", "1"],
   2,
-  "The probability of the observed target is 1 / 3, so the mean negative log likelihood is ln(3) and the perplexity is its exponential, which is 3. Perplexity is best read as an effective average uncertainty rather than as a literal count of the choices the model considered at that position.",
+  "The observed target has probability one third. Perplexity exponentiates its negative log probability.\n\n```math\nPPL = exp[−ln(1/3)] = 3\n```\n\nFor an exactly uniform three-token distribution this equals the vocabulary size. More generally, perplexity is an effective uncertainty measure, not a literal count of considered candidates.",
 ),
 trueFalse(
   "A confidently wrong model can score worse on these metrics than a less certain one.",
@@ -116,21 +129,32 @@ trueFalse(
 ] },
 { title: "Part 3. Evaluate the Generated Output as Well", content: <>
 <SubSection title="5. Check grounded answers and open-ended responses">
-<p>{"Everything in Part 2 scored text that someone else wrote. The model was asked how probable it found a continuation, and it never produced one. Once a model generates, there is a new thing to judge, which is the output itself, and the quality of an output is not a probability."}</p>
+<p>
+                  {"Part 2 evaluates assigned probabilities on reference text; it does not ask the model to generate a response. To test an actual answer, run generation and apply the task’s criteria to that output. This provides evidence that the next-token score alone does not supply."}
+                </p>
 <p>{"For RAG, ask whether the necessary evidence was retrieved, whether the answer is correct, and whether each cited source supports its claim. These checks distinguish a retrieval miss from an answer-generation error."}</p>
-<p>{"Take the previous lesson’s question again, when the library opens on Saturday, and suppose the answer comes with a citation. The three checks are separate, and an answer can pass one and fail another. If the Saturday passage was never retrieved, the first check fails and the model had nothing to work from. If it was retrieved and the answer says nine, the second check fails. If the answer says ten and cites the weekday passage, the answer is correct and the third check fails, because the cited source says nine."}</p>
+<p>
+                  {"For the library’s Saturday opening time, check the supplied evidence and the answer separately. If the Saturday passage was not retrieved, the retrieval check fails. If it was provided but the answer says nine, the factual answer is wrong. If the answer says ten and cites the weekday passage, the answer is correct but that citation does not support the Saturday claim."}
+                </p>
 <p>{"Human evaluators need concrete criteria and examples of how to apply them. Model-based judges also need validation: their preferences can depend on wording, answer order, and response length. Inspect disagreements and error categories instead of treating one judge’s score as ground truth."}</p>
-<p>{"A judge is a measuring instrument and can be tested like one. Show it the same two answers in both orders. If its preference follows the position and not the answer, then order is part of what it measures. Rewording the instructions, or padding one answer with empty sentences, tests the other two dependencies the same way. Where the judge and a careful human reader disagree, the disagreements show what the judge is really responding to."}</p>
+<p>{"A model judge's decision can depend on presentation as well as answer quality. Showing the same pair in both orders tests whether position changes its preference. Rewording the instructions or adding empty padding tests other possible influences. Disagreements with careful human review need investigation too, since either the judging criteria or their application may need clarification."}</p>
 <p>{"For random generation, evaluate multiple samples and report variation when it matters. A cherry-picked response shows that a behavior is possible, not how reliably it occurs."}</p>
 <p>{"The remedy is to count. Draw several samples from the same prompt with the same settings, record how many show the behavior, and report that count beside any example. One good sample among many failures and one good sample among many successes look the same when only the sample is shown."}</p>
 
 </SubSection>
 <SubSection title="6. Inspect image quality and distribution coverage">
 <p>{"For an image generator, individual realism and coverage of the data distribution are separate concerns. A generator that produces one convincing picture repeatedly has little diversity. Inspect random samples and look for memorization, missing categories, and repeated structures."}</p>
-<p>{"The lesson on adversarial networks met this as mode collapse. A generator that has learned to draw one convincing digit passes every inspection of a single picture and fails as a model of handwritten digits. Realism is a property of one picture. Coverage is a property of the whole set of pictures a generator produces, and it can only be judged on a set."}</p>
+<p>
+                  {"A generator can repeatedly produce a convincing example of one digit while omitting the rest. Reviewing one plausible image does not reveal that coverage gap. Assess a collection for missing categories and repetition as well as the quality of individual images."}
+                </p>
 <p>{"Fréchet Inception Distance, or FID, compares summary statistics of real and generated image features from a particular pretrained network. It is a distribution-level comparison, not a correctness score for one picture. Sample count, preprocessing, reference data, and feature extraction need to be consistent."}</p>
-<p>{"Unpacking that helps. A pretrained image network turns each picture into a list of numbers called features. Over many pictures those features have a mean and a spread. The distance compares the mean and spread of the real pictures’ features with the mean and spread of the generated pictures’ features, and a smaller distance says the two sets are distributed more alike. No single picture has a distance, so the measure cannot say which pictures are wrong."}</p>
-<p>{"It shares perplexity’s weakness about units. Change the number of samples, the resizing, the reference pictures or the network that extracts the features, and the value changes although the generator has not. Two distances can be compared only when all of those were held the same."}</p>
+<p>
+                  {"An Inception network pretrained to classify images turns each picture into feature coordinates. Across each collection, calculate the coordinates’ means and how they vary together, summarized by a covariance matrix. FID compares Gaussian approximations described by those means and covariances. A smaller value means these summaries are closer; it does not establish that every aspect of the image distributions matches or identify which individual pictures are wrong."}
+                </p>
+<p>
+                  {"Use a consistent feature extractor, preprocessing and reference collection when comparing FID values. Match or account for sample counts as well: sampling variation and finite-sample bias can change the estimate even when the generator is unchanged. Matching counts alone does not remove every estimator bias. Report the protocol and uncertainty with the comparison."}
+                </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://openaccess.thecvf.com/content_CVPR_2020/html/Chong_Effectively_Unbiased_FID_and_Inception_Score_and_Where_to_Find_CVPR_2020_paper.html">{"Chong and Forsyth: Effectively Unbiased FID and Inception Score (2020)"}</Link></p>
 <p>{"For a conditional generator, also evaluate whether the output matches the requested condition. Neither a low image-distribution distance nor attractive examples alone establishes that the model obeys a text prompt."}</p>
 <p>{"The page calculates language-model loss and perplexity only. It does not present FID results or benchmark claims for any trained generator."}</p>
 
@@ -147,7 +171,7 @@ choice(
     "How much probability the generator assigns to held-out images",
   ],
   1,
-  "It is a distribution-level comparison rather than a correctness score for one picture, and sample count, preprocessing, reference data and feature extraction all have to be held consistent. Whether a conditional generator obeyed the requested condition is a separate evaluation that a low distance does not settle.",
+  "Fréchet Inception Distance compares the means and covariances of real and generated image features extracted by an Inception network. It approximates those feature distributions as Gaussians. It is a comparison between sample sets, not a correctness score for one image. Sample count, preprocessing and the reference collection affect the result. A low FID also does not establish that a conditional generator followed its prompt.",
 ),
 choice(
   "An answer says the library opens at ten on Saturday, which is right, and cites the passage about weekday hours. Which check does it fail?",
@@ -169,7 +193,7 @@ several(
     "Taking a model judge’s score as ground truth",
   ],
   [0, 1],
-  "Those two checks are what separate a retrieval miss from an answer-generation error. A model-based judge needs validation of its own, since its preferences can depend on wording, answer order and response length, so the disagreements and the error categories are what to inspect rather than the score.",
+  "Check whether retrieval supplied relevant evidence and whether the generated answer is supported by that evidence. Those checks help distinguish a retrieval miss from a generation error. If a model judges the responses, validate its judgments against examples you have checked: wording, answer order and length can influence its preferences. Inspect disagreements as well as the aggregate score.",
 ),
 trueFalse(
   "For an image generator, individual realism and coverage of the data distribution are separate concerns.",
@@ -227,7 +251,7 @@ boost on a wrong token
             ),
             exercise(
               "Let one confident mistake into three predictions",
-              ["The page’s tagline says to inspect what averages conceal. Build a case the live example cannot show. Give the first two positions a boost of 4 on their targets, and give the third position a boost of 4 on a wrong token. Score all three.", "Print each position’s token loss, then the mean loss and the perplexity, to four places. Two of the three predictions are nearly certain and right. Compare the perplexity with the 3 that an even guess earns, and find the position responsible."],
+              ["Give the first two positions a logit boost of four on their targets, and give the third position the same boost on a wrong token. Score all three positions. This creates a mixture of well-predicted targets and one strongly disfavored target, rather than the identical rows in the earlier example.", "Print each position’s token loss, then the mean loss and the perplexity, to four places. Two of the three predictions are nearly certain and right. Compare the perplexity with the 3 that an even guess earns, and find the position responsible."],
               `import numpy as np
 from oop_ml.numpy.modern import TokenCrossEntropy
 
@@ -261,7 +285,7 @@ perplexity 3.9326`,
             ),
             exercise(
               "Score the same predictions under two masks",
-              ["Part 2 warned that perplexities from differently masked datasets are not comparable. Take one set of predictions in which the first position has a boost of 4 on its target and the other two positions are even guesses. Score every position, and then score only the last two.", "Print the mean loss and the perplexity for each to four places. The model and its predictions are identical in both measurements."],
+              ["Use one prediction table with a boost of four on the first target and equal logits at the other two positions. Score it once over all positions and once over only the last two. Keep the predictions fixed so any change in reported loss comes from the selection of scored targets.", "Print the mean loss and the perplexity for each to four places. The model and its predictions are identical in both measurements."],
               `import numpy as np
 from oop_ml.numpy.modern import TokenCrossEntropy
 

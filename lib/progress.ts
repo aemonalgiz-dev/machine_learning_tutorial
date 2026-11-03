@@ -30,6 +30,7 @@ const progressByAccount = new Map<string | null, Progress>();
 const listeners = new Set<() => void>();
 const changes = new Set<() => void>();
 const scopes = new Set<() => void>();
+const updates = new Set<(local: boolean) => void>();
 
 export function normalised(parsed: unknown): Progress {
   if (!parsed || typeof parsed !== "object") return EMPTY;
@@ -54,6 +55,7 @@ export function readProgress(): Progress {
 
 function write(next: Progress, local = true) {
   progressByAccount.set(accountId, next);
+  updates.forEach(listener => listener(local));
   listeners.forEach((listener) => listener());
   if (local) changes.forEach((listener) => listener());
 }
@@ -118,6 +120,7 @@ export const getProgressAccount = () => accountId;
 export function setProgressAccount(id: string | null) {
   if (id === accountId) return;
   accountId = id;
+  updates.forEach(listener => listener(false));
   scopes.forEach(listener => listener());
   listeners.forEach(listener => listener());
 }
@@ -132,6 +135,12 @@ export function useProgressAccount() {
 export function onProgressChange(listener: () => void) {
   changes.add(listener);
   return () => { changes.delete(listener); };
+}
+
+/** Includes hydration updates so reward feedback can distinguish restored work. */
+export function onProgressUpdate(listener: (local: boolean) => void) {
+  updates.add(listener);
+  return () => { updates.delete(listener); };
 }
 
 export function guestProgress(): Progress {

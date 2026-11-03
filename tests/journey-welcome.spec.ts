@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { SavedRecord } from "../lib/learner-state";
 import { mockAccountBackend, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 
-const intro = "Start by connecting something";
+const intro = "Botie's workshop tutorial";
 function deferred() {
   let resolve!: () => void;
   const promise = new Promise<void>(done => { resolve = done; });

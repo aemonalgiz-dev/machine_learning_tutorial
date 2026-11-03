@@ -326,7 +326,7 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
     const attemptId = crypto.randomUUID();
     saved.set({ ...initial(), graph: empty(compact), attemptId, carriedSupport: false });
     resetFields(); cancelWire(); setRun(null); setSelected(null); setSelectedWire(null); setPlacing(null);
-    setNotice("A fresh floor is ready. Your earlier successful attempts stay in your journey history. This attempt records its own hints.");
+    setNotice("The floor is empty. Your earlier successful attempts remain in the results history. Hints opened during this attempt are recorded separately.");
     onActivity?.(); onFreshAttempt?.(attemptId);
   }
   function cancelWire(){wiring.current=null;setSocket(null);setWireEnd(null);setHoveredInput(null);}

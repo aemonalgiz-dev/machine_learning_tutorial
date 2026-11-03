@@ -24,6 +24,9 @@ import { servingDepthTools } from './serving-depth-tools';
 import { stateEstimationTools } from './state-estimation-tools';
 import { numericalLearningTools } from './numerical-learning-tools';
 import { databricksTools } from './databricks-tools';
+import { databricksIntroPlatformTools } from './databricks-intro-platform-tools';
+import { databricksIntroStorageTools } from './databricks-intro-storage-tools';
+import { databricksIntroWorkflowTools } from './databricks-intro-workflow-tools';
 import { modelToolContractsTools } from './model-tool-contracts-tools';
 import { mlLifecycleSecurityTools } from './ml-lifecycle-security-tools';
 export function scalar(x: Data): number { if (typeof x !== "number") throw Error("This input needs one number. Inspect the connected machine to see what it produces."); return x; }
@@ -51,6 +54,9 @@ export const TOOLS: Record<string, Tool> = {
   ...stateEstimationTools,
   ...numericalLearningTools,
   ...databricksTools,
+  ...databricksIntroPlatformTools,
+  ...databricksIntroStorageTools,
+  ...databricksIntroWorkflowTools,
   ...modelToolContractsTools,
   ...mlLifecycleSecurityTools,
   ...practiceTools,
@@ -79,7 +85,7 @@ export const TOOLS: Record<string, Tool> = {
   subtract: define("Subtract", "Finds what remains after removing a reference value. The order of the inputs matters.", ["Starting value", "Value to remove"], ([a,b]) => zip(a,b,(x,y)=>x-y)),
   multiply: define("Multiply", "Scales a contribution, or combines matching entries in two lists.", ["Value", "Multiplier"], ([a,b]) => zip(a,b,(x,y)=>x*y)),
   divide: define("Divide", "Shares a total or changes its units. The second input must not be zero.", ["Amount", "Divisor"], ([a,b]) => zip(a,b,(x,y)=>x/y)),
-  square: define("Square", "Makes both positive and negative differences positive, with larger differences contributing more.", ["Value or list"], ([x]) => map(x,n=>n*n)),
+  square: define("Square", "Multiplies each value by itself. Equal positive and negative differences give the same square, while larger differences contribute more.", ["Value or list"], ([x]) => map(x,n=>n*n)),
   root: define("Square root", "Returns a squared measurement to its original units.", ["Squared value"], ([x]) => map(x,Math.sqrt)),
   absolute: define("Absolute value", "Keeps the size of a difference while discarding its direction.", ["Difference"], ([x]) => map(x,Math.abs)),
   total: define("Add a list", "Collects the contribution of every number in a list.", ["Numbers"], ([x]) => sum(vector(x))),
@@ -88,7 +94,7 @@ export const TOOLS: Record<string, Tool> = {
   dot: define("Dot product", "Multiplies corresponding entries and adds the products. It reuses the weighted sums built earlier.", ["First vector", "Second vector"], ([a,b]) => dot(vector(a),vector(b))),
   length: define("Vector length", "Finds a vector's Euclidean length by squaring its entries, adding, and taking a square root.", ["Vector"], ([x]) => Math.hypot(...vector(x))),
   exp: define("Exponentiate", "Turns each score into a positive contribution. Differences between scores become ratios between contributions.", ["Scores"], ([x]) => map(x,Math.exp)),
-  log: define("Natural logarithm", "Compresses positive quantities such as counts and turns multiplication into addition.", ["Positive values"], ([x]) => map(x,Math.log)),
+  log: define("Natural logarithm", "Returns the natural logarithm of a positive value. A common ratio becomes a common difference, which is useful when comparing counts on very different scales.", ["Positive values"], ([x]) => map(x,Math.log)),
   log2: define("Logarithm in bits", "Measures a positive ratio on a base-two scale. A doubling adds one bit.", ["Positive ratios"], ([x]) => map(x,Math.log2)),
   softmax: define("Softmax", "Turns scores into positive shares that sum to one. It reuses exponentiation, a total, and division.", ["Score vector"], ([x]) => softmax(vector(x))),
   sigmoid: define("Sigmoid", "Maps a score smoothly into the interval from zero to one. Zero maps to one half.", ["Score"], ([x]) => map(x,n=>1/(1+Math.exp(-n)))),
@@ -102,7 +108,7 @@ export const TOOLS: Record<string, Tool> = {
   matmul: define("Matrix multiplication", "Combines transformations. Every output entry is a dot product of a row and a column.", ["Left matrix", "Right matrix"], ([a,b]) => { const A=matrix(a),B=matrix(b); return A.map(r=>B[0].map((_,i)=>dot(r,B.map(t=>t[i])))); }),
   rowmean: define("Mean within each row", "Produces one mean for each example while keeping examples separate.", ["Rows of measurements"], ([m])=>matrix(m).map(mean)),
   columnmedian: define("Median within each column", "Sorts each coordinate's values and takes the middle one, or averages the two middle values for an even count. An extreme value therefore has less influence than it has on a mean.", ["Rows of proposed shifts"], ([m])=>{const rows=matrix(m);return rows[0].map((_,i)=>{const values=rows.map(r=>r[i]).sort((a,b)=>a-b),middle=Math.floor(values.length/2);return values.length%2?values[middle]:mean([values[middle-1],values[middle]]);});}),
-  rownorm: define("Normalise each row", "Subtracts each row's own mean and divides by its own population standard deviation. A constant row becomes zeros.", ["Rows of activations"], ([m])=>matrix(m).map(r=>{const c=mean(r),s=Math.sqrt(mean(r.map(x=>(x-c)**2)));return r.map(x=>s?(x-c)/s:0);})),
+  rownorm: define("Normalize each row", "Subtracts each row's own mean and divides by its own population standard deviation. A constant row becomes zeros.", ["Rows of activations"], ([m])=>matrix(m).map(r=>{const c=mean(r),s=Math.sqrt(mean(r.map(x=>(x-c)**2)));return r.map(x=>s?(x-c)/s:0);})),
   index: define("Choose an entry", "Reads the entry at a zero-based position. Use an ID as an address rather than multiplying by it.", ["Table or list", "Index"], ([a,b]) => { const i=scalar(b),xs=list(a); if(!Number.isInteger(i)||i<0||i>=xs.length)throw Error("That index is outside this list.");return xs[i]; }),
   lookup: define("Look up IDs", "Retrieves one table entry for each incoming ID, including repeated IDs.", ["Table", "IDs"], ([a,b]) => vector(b).map(i=>{const x=list(a)[i];if(x===undefined)throw Error("An ID is missing from this table.");return x;})),
   argmin: define("Find the smallest", "Returns the position of the smallest score, keeping the first in a tie.", ["Scores"], ([x])=>{const v=vector(x);return v.indexOf(Math.min(...v));}),

@@ -25,9 +25,9 @@ import { TurnedAgainstRelit } from "@/components/widgets/TurnedAgainstRelit";
 import { VoteSharingSlide } from "@/components/widgets/VoteSharingSlide";
 
 export const metadata: Metadata = {
-  title: "Histogram of Oriented Gradients · oop_ml",
+  title: "Histogram of Oriented Gradients · Perceptron Lab",
   description:
-    "An object's outline can remain recognisable when the lighting changes. Histograms of oriented gradients describe local edge directions, giving a detector information about shape without relying on exact pixel values.",
+    "Local edge directions describe image shape without requiring every pixel value to match. Histograms of oriented gradients collect those directions into regional summaries that can support object detection.",
 };
 
 export default function OrientedGradientsPage() {
@@ -38,9 +38,9 @@ export default function OrientedGradientsPage() {
       technicalStart="Part 2. Counting Directions Inside A Cell"
       openingTitle="Describe Which Way the Edges Point"
       playgroundTitle="Describe an image by the directions of its edges"
-      playgroundIntro="Follow an edge direction into its histogram bins. Compare the counts before and after block normalisation as the picture's contrast changes."
+      playgroundIntro="Follow an edge direction into its histogram bins. Compare the counts before and after block normalization as the picture's contrast changes."
       title="Histogram of Oriented Gradients"
-      tagline={"An object's outline can remain recognisable when the lighting changes. Histograms of oriented gradients describe local edge directions, giving a detector information about shape without relying on exact pixel values."}
+      tagline={"Local edge directions describe image shape without requiring every pixel value to match. Histograms of oriented gradients collect those directions into regional summaries that can support object detection."}
       prerequisites={
         <>
           Start with{" "}
@@ -58,32 +58,21 @@ export default function OrientedGradientsPage() {
       playground={<OrientedGradientPlayground />}
       sections={[
         {
-          title: "Part 1. Why A Description Made Of Brightnesses Will Not Do",
+          title: "Part 1. Image Descriptions Under Changing Brightness",
+          id: "part-1-why-a-description-made-of-brightnesses-will-not-do",
           defaultOpen: true,
           content: (<>
 <>
               <SubSection title="1. The scene we will describe">
                 <>
-<p>
-                  Everything on this page is worked on one small scene, 48 pixels on a side, drawn by arithmetic rather than photographed so that we can always say exactly what is in it. There is a square near the top left with four straight edges and four corners, a disc to the right of it whose edge points in every direction there is, a bar running diagonally across the bottom left, and three small crosses scattered about.
-                </p>
+<p>We will use a drawn scene forty-eight pixels on each side. Its square has straight edges and corners, its disc has an edge whose direction changes, and its diagonal bar supplies another orientation. Three small crosses complete the scene. Because we placed these shapes ourselves, we can check what each image measurement responds to.</p>
                 <p>
                   Laid over all of that is a ramp of brightness that makes the right-hand side of the scene lighter than the left, so the crosses on the right are brighter than the ones on the left although they are the same shape.
                 </p>
 </>
-                <p>
-                  The question the whole page turns on is what we should write
-                  down about a patch of that scene so that we could recognise
-                  the same thing again somewhere else. The obvious answer is to
-                  write down the brightnesses, and the reason that answer fails
-                  is worth measuring rather than asserting.
-                </p>
+                <p>We want a description that lets us compare a shape seen in different images. Keeping every brightness value preserves exact detail, but also makes the comparison sensitive to lighting and small position changes. The measurements below show what we might gain by keeping a different kind of information.</p>
                 <KeepInMind>
-                  The ramp is the most important thing in the scene and the
-                  least visible. It is what makes two copies of the same shape
-                  read at different brightnesses, so a description built out of
-                  brightness will call them different things.
-                </KeepInMind>
+                  The brightness ramp changes the values of otherwise matching crosses. A raw pixel comparison responds to that difference. Whether a later model should retain or remove it depends on the task and expected lighting variation.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. Turn the lamp up and every brightness moves">
@@ -101,29 +90,20 @@ export default function OrientedGradientsPage() {
                 <Equation>{`apart  = √( Σ over pixels of (relit − here)² )
 
 length = √( Σ over pixels of here² )`}</Equation>
-                <p>
-                  Measured, the two lists are 19.52 apart, where the first
-                  list&rsquo;s own length is 21.89. That is 89 per cent of the
-                  way to being an unrelated picture, for a change that a person
-                  looking at the two would describe as the same scene on a
-                  brighter day.
-                </p>
+                <p>The image vectors are 19.52 apart, while the original vector has length 21.89. Their distance is therefore about 89 percent of that reference length. This quantifies a large numerical change under the tested lighting transformation; it does not define a percentage of being an unrelated image.</p>
                 <Equation>{`19.52 / 21.89 ≈ 0.89`}</Equation>
                 <SceneUnderTwoLamps />
                 <KeepInMind>
-                  A description built out of brightnesses is partly a
-                  description of the lighting, and there is no threshold or
-                  tolerance that repairs that, because the change is as large
-                  as the thing being described.
-                </KeepInMind>
+                  Raw brightness comparisons can be sensitive to lighting. A threshold may still work in a controlled setting, while centering or normalization can remove some specific brightness changes. Here we investigate a different representation and the information it preserves.</KeepInMind>
               </SubSection>
 
               <SubSection title="3. The rate of change holds still">
                 <p>
+
                   Now read the same two pictures a different way, by asking at
                   each pixel how fast the brightness is changing and in which
                   direction. The added constant does not survive that question
-                  at all, since it is added to both of the neighbours whose
+                  at all, since it is added to both of the neighbors whose
                   difference is being taken and cancels out. The multiplier
                   does survive, but it multiplies every rate of change by the
                   same factor, which stretches all the arrows and turns none of
@@ -139,14 +119,7 @@ length = √( Σ over pixels of here² )`}</Equation>
                   and off by one overall factor on account of the multiplier.
                 </p>
                 <WhyThisWorks title="Why a constant brightness offset vanishes under these filters">
-                  <p>
-                    The estimate of the rate of change at a pixel is a weighted
-                    sum of the brightnesses around it, and every one of the
-                    grids used for it has weights adding to nought, with each
-                    positive weight matched by a negative one across the middle.
-                    Adding a constant to every brightness therefore contributes
-                    that constant times the sum of the weights, which is nought.
-                  </p>
+                  <p>The derivative filters used here have weights summing to zero. Adding a constant to every sampled value therefore adds zero to their response. The border rule must preserve the same constant offset for this argument to hold at the image frame.</p>
                   <Equation>{`sum of weights = 0    so    sweep(picture + c) = sweep(picture)`}</Equation>
                   <p>
                     Multiplying is different, because the sum is linear in the
@@ -167,21 +140,8 @@ length = √( Σ over pixels of here² )`}</Equation>
               </SubSection>
 
               <SubSection title="4. A field of arrows is still not a description">
-                <p>
-                  So far nothing has been described. The scene had one number
-                  per pixel and now it has two, a length and an angle, which is
-                  4608 numbers where there were 2304. Worse, those numbers are
-                  still tied to exact positions, so the same shape drawn one
-                  pixel to the left disagrees with the original at almost every
-                  position, in the same way the brightnesses did.
-                </p>
-                <p>
-                  What is wanted is a way of keeping the directions, which
-                  held still under the lamp, while giving up some of the
-                  precision about where each one was, which is what moved when
-                  the shape moved. That trade is the whole of the method, and it
-                  happens in three stages.
-                </p>
+                <p>The gradient field still stores two values at each exact pixel position, giving 4608 numbers instead of 2304 intensities. It describes local changes, but a direct position-by-position comparison remains sensitive to shifting the same shape. Grouping gradients within cells reduces some of that position sensitivity.</p>
+                <p>Gradient directions give us useful local structure. We can summarize their distribution within regions instead of retaining the exact position of every response. This reduces some sensitivity to small shifts while deliberately losing fine spatial information. The following stages build that regional description.</p>
                 <InAModel>
                   At the size the pedestrian work used, a window 64 pixels wide
                   and 128 tall holds 8192 brightnesses and so 16384 numbers of
@@ -198,33 +158,10 @@ length = √( Σ over pixels of here² )`}</Equation>
           content: (
             <>
               <SubSection title="5. A cell, and the one question it asks">
-                <p>
-                  Divide the patch into small squares of a fixed size, 8 pixels
-                  on a side by default, and treat each square on its own. Inside
-                  one square, throw away where each edge was and keep only which
-                  way it pointed, weighted by how sharply the brightness was
-                  changing at that pixel. What comes out is a handful of numbers
-                  saying that this square holds a great deal of nearly upright
-                  edge and a little diagonal, and nothing at all about
-                  whereabouts in the square any of it was.
-                </p>
-                <p>
-                  Those squares are called cells, and the handful of numbers is
-                  the histogram of that cell. Two pictures whose shapes are
-                  two pixels apart inside the same cell produce exactly the same
-                  handful of numbers, which is the tolerance we came for, and
-                  what it costs is that the description no longer knows where
-                  anything was.
-                </p>
+                <p>Divide the patch into cells, 8 pixels on a side by default. For each cell, accumulate gradient contributions into direction ranges, weighting each contribution by its strength. The resulting numbers describe which brightness-change directions occur in that region. They do not record each contributing pixel’s precise position.</p>
+                <p>Those direction totals form the cell’s histogram. If a shift preserves the same gradients inside the same cell, their totals remain unchanged. Crossing a cell boundary, changing the gradients or clipping part of the shape can change the description. The tolerance comes from grouping positions, rather than from guaranteeing identical outputs for every small movement.</p>
                 <KeepInMind>
-                  The cell size is the dial that trades those two against each
-                  other, and nothing in the method sets it. At 8 pixels the
-                  scene here divides into 6 cells by 6 and the square, which is
-                  11 pixels across, spreads over six of them. At 16 pixels there
-                  are 3 cells by 3, the square lies almost wholly inside one of
-                  them, and a movement of five pixels then changes the answer by
-                  nothing at all.
-                </KeepInMind>
+                  Cell size controls how much spatial detail is pooled together. Eight-pixel cells give a six-by-six grid here; sixteen-pixel cells give a three-by-three grid. A larger cell can tolerate some movements that keep the same gradient contributions inside it, while making more distinct arrangements share the same summary.</KeepInMind>
               </SubSection>
 
               <SubSection title="6. Nine buckets over half a circle">
@@ -239,14 +176,15 @@ length = √( Σ over pixels of here² )`}</Equation>
                     Each of the nine bins covers a twenty-degree interval.
                   </p>
                 </>
-                <Equation>{`bucket b covers  [ b × w , (b+1) × w )    and is centred at  (b + 0.5) × w
+                <Equation>{`bucket b covers  [ b × w , (b+1) × w )    and is centered at  (b + 0.5) × w
 
 with  w = 180 / 9 = 20 degrees`}</Equation>
                 <p>
+
                   So bucket 0 covers everything from 0 up to 20 degrees and is
-                  centred on 10, bucket 4 covers 80 up to 100 and is centred on
-                  90, and bucket 8 covers 160 up to 180 and is centred on 170.
-                  The centres matter as much as the edges, and Part 3 is about
+                  centered on 10, bucket 4 covers 80 up to 100 and is centered on
+                  90, and bucket 8 covers 160 up to 180 and is centered on 170.
+                  The centers matter as much as the edges, and Part 3 is about
                   why.
                 </p>
                 <p>
@@ -340,34 +278,15 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
                 </p>
                 <InsideOneCell />
                 <>
-<p>
-                  The move that stays inside the cell leaves the description at a distance of exactly 0, which is the same vector rather than a nearby one. The move that crosses the cell edge takes it 1.4142 away, out of an answer whose own length is 1, and 1.4142 is the furthest apart two answers of that length can be.
-                </p>
+<p>The within-cell move gives the same descriptor, at distance zero. Moving the square across the cell boundary gives distance 1.4142 between these nonnegative unit descriptors. That is their maximum possible distance because their nonzero entries occupy disjoint positions. General signed unit vectors can be farther apart, as discussed later.</p>
                 <p>
                   So the same change in the brightnesses produces no change at all in one case and the largest change available in the other, and which of the two happens is decided by where the cell edges were drawn.
                 </p>
 </>
                 <WhyThisWorks title="Why these nonnegative unit descriptors cannot be farther apart">
-                  <p>
-                    Why 1.4142 is the ceiling needs one fact about the
-                    description. Every entry in it is a sum of vote weights,
-                    and a weight is how sharply the brightness changes, which
-                    is never below nought. So no entry is ever negative, and
-                    two answers of length 1 are as far apart as they can be
-                    when they have no bucket in common at all, every entry
-                    that is above nought in one being nought in the other.
-                    The squared distance is then the sum of the two squared
-                    lengths.
-                  </p>
+                  <p>Every histogram entry is nonnegative because it sums nonnegative gradient weights. For two unit descriptors, disjoint nonzero entries give a zero dot product. Their squared distance then equals the sum of their squared lengths, as shown below. This establishes the bound for these histograms.</p>
                   <Equation>{`with no entry in common     apart² = 1² + 1² = 2     so     apart = √2 ≈ 1.4142`}</Equation>
-                  <p>
-                    The square that crossed into the next cell is exactly that
-                    case. Its votes left the cell that held them for one that
-                    held nothing, so the two unit blocks have no position
-                    above nought in common, and the distance between them is
-                    the largest the method can report for two answers of that
-                    length.
-                  </p>
+                  <p>In this example, crossing into the next cell moves all nonzero contributions to positions where the other descriptor is zero. That disjoint support gives the largest distance available for two nonnegative unit descriptors.</p>
                 </WhyThisWorks>
                 <KeepInMind>
                   This is where the method is worse than reading the
@@ -396,12 +315,12 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
                 "The directions hold, and the sizes are untouched by the multiplier",
               ],
               0,
-              "The added constant cancels because every sweep’s weights add to nought, so it contributes that constant times nought. The multiplier survives and stretches all the arrows while turning none of them, because a direction is the ratio of two rates of change and a common factor cancels out of a ratio. So the added constant is already free, and the multiplier is a real problem that is still there.",
+              "The zero-sum derivative filters cancel a common brightness offset under the stated boundary convention. A positive multiplier scales both gradient components equally, so their direction is unchanged while magnitude grows. Histogram counts still depend on that magnitude; block normalization addresses the remaining global scale dependence in this example.",
             ),
             trueFalse(
-              "Reading a rate of change at every pixel gives the scene two numbers per pixel, 4608 where there were 2304, and still describes nothing.",
+              "Keeping a gradient value at every exact pixel position still makes direct vector comparisons sensitive to small shifts of the same shape.",
               true,
-              "Each of those numbers is tied to an exact position, so the same shape drawn one pixel to the left disagrees with the original at almost every position, exactly as the brightnesses did. What is wanted is to keep the directions, which held still under the lamp, and give up some of the precision about where each one was, and that trade is what the three stages make.",
+              "A shifted edge changes which pixel positions contain its gradients. Comparing the gradient arrays position by position can therefore give a large difference for the same shifted shape. HOG groups gradient information within cells, deliberately giving up some precise location information to reduce that sensitivity.",
             ),
             trueFalse(
               "At a cell side of 16 pixels the scene divides into 3 cells by 3, the square lies almost wholly inside one of them, and a movement of five pixels can then change the answer by nothing at all.",
@@ -411,7 +330,7 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
             choice(
               "A bright square 3 pixels across is moved within its cell, and then moved into the next cell along. Both moves change the brightnesses by exactly 4.2426. What happens to the description?",
               [
-                "The move inside the cell leaves it at a distance of exactly 0 and the move across takes it 1.4142 away, the furthest two answers of length 1 can be",
+                "The move inside the cell gives distance 0, while crossing cells gives 1.4142, the maximum for nonnegative unit vectors",
                 "Both moves change it by the same amount, since both changed the brightnesses by the same amount",
                 "Both leave it unchanged, which is the tolerance the cells buy",
                 "The move inside the cell changes it slightly and the move across not at all",
@@ -424,11 +343,11 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
               [
                 "A direction and its reverse count as one, so the range is half a circle and each bucket covers twenty degrees",
                 "On the 6 by 6 patch with cells 3 pixels on a side, each cell collects 12 of weight and under whole votes all of it lands in bucket 0",
-                "Bucket 4 covers 80 up to 100 degrees and is centred on 100",
+                "Bucket 4 covers 80 up to 100 degrees and is centered on 100",
                 "A cell’s counts add to one, since a histogram is a distribution",
               ],
               [0, 1],
-              "A bucket is centred halfway along its span, so bucket 4, covering 80 up to 100, is centred on 90, and bucket 8 on 170. The sweep answers 4 at every pixel of the two columns beside the patch’s edge, so each cell holds 3 pixels of 4 and the four cells hold 48 between them. The counts are a sum of magnitudes rather than a probability, so they do not add to one and they grow with the contrast of the picture, which is what Part 4 removes.",
+              "A bucket is centered halfway along its span, so bucket 4, covering 80 up to 100, is centered on 90, and bucket 8 on 170. The sweep answers 4 at every pixel of the two columns beside the patch’s edge, so each cell holds 3 pixels of 4 and the four cells hold 48 between them. The counts are a sum of magnitudes rather than a probability, so they do not add to one and they grow with the contrast of the picture, which is what Part 4 removes.",
             ),
         ],
         },
@@ -437,13 +356,7 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
           content: (
             <>
               <SubSection title="10. A whole vote jumps at a boundary">
-                <p>
-                  Dropping a vote whole into the bucket its direction falls in
-                  is the obvious rule and it has a bad property at the edges
-                  of the buckets. Two patches whose edges differ by an
-                  arbitrarily small amount, one on each side of a boundary,
-                  produce cells with no weight in common at all.
-                </p>
+                <p>Assigning a whole vote to one direction bin creates an abrupt boundary. A tiny rotation across that boundary moves the entire contribution to a neighboring bin. Two very similar patches can then receive sharply different histograms.</p>
                 <p>
                   The cleanest way to see it is a picture whose brightness rises
                   along a straight ramp, since the direction is then the same at
@@ -457,14 +370,7 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
               </SubSection>
 
               <SubSection title="11. Sharing it in proportion slides instead">
-                <p>
-                  The repair is to look at the two bucket centres nearest the
-                  direction and give each of them a share in proportion to how
-                  near it is. A direction exactly on a centre gives that bucket
-                  everything; a direction a quarter of the way from one centre
-                  to the next gives three quarters to the first and a quarter to
-                  the second.
-                </p>
+                <p>Share each contribution between its two nearest bin centers. The nearer center receives more of the weight. At a center, that bin receives everything; between centers, the proportions change gradually. This is linear interpolation applied to the vote weights.</p>
                 <Equation>{`position = direction / w
 
 lower = floor(position − 0.5)      upper = lower + 1
@@ -480,19 +386,12 @@ share of upper = position − 0.5 − lower       share of lower = 1 − that`}<
                   ought to move.
                 </p>
                 <VoteSharingSlide />
-                <WhyThisWorks title="How interpolation shares a vote between neighbouring directions">
+                <WhyThisWorks title="How interpolation shares a vote between neighboring directions">
+                  <p>Interpolating between bin centers makes an individual vote continuous as its direction changes, with its magnitude and cell assignment fixed. This reduces sensitivity to an angular bin boundary. Rotating a whole image can also alter sampling and cell locations, so vote interpolation alone does not guarantee a small change in the complete descriptor.</p>
                   <p>
-                    The sharing is the linear interpolation you would use to
-                    read a value between two entries of a table, applied to
-                    which bucket a vote belongs to rather than to a value. It
-                    makes the histogram a continuous function of the direction,
-                    so a small turn of the picture produces a small change in
-                    the answer, which is what a description handed to a
-                    classifier needs if nearby inputs are to get nearby scores.
-                  </p>
-                  <p>
+
                     The wrapping matters as much as the interpolation. The
-                    buckets go round a circle, so the last one is a neighbour of
+                    buckets go round a circle, so the last one is a neighbor of
                     the first, and over half a circle that is a statement
                     about geometry rather than a convenience of the arithmetic,
                     since 180 degrees and 0 degrees are the same direction once
@@ -512,23 +411,26 @@ share of upper = position − 0.5 − lower       share of lower = 1 − that`}<
                 <EdgeToBucket initialSharing="shared" />
                 <>
                   <p>
-                    The first bin centre is ten degrees and the last is 170 degrees.
+
+                    The first bin center is ten degrees and the last is 170 degrees.
                     Unsigned orientations wrap around after 180 degrees, making zero
-                    equally close to those two centres.
+                    equally close to those two centers.
                   </p>
                   <Equation>{"wraparound distance = 180° − 170° = 10°\nordinary distance = 10° − 0° = 10°\nweight in each bin = 1/2"}</Equation>
                   <p>
+
                     The square’s upright edges split their contributions equally between
-                    these neighbouring bins. The initial playground cell shows that
+                    these neighboring bins. The initial playground cell shows that
                     split.
                   </p>
                 </>
                 <p>
+
                   Compare that with an edge running left to right, whose
-                  direction is 90 degrees. That is the centre of bucket 4, so
+                  direction is 90 degrees. That is the center of bucket 4, so
                   the sharing gives that bucket everything and the two rules
-                  agree exactly. What decides the behaviour is how far the
-                  direction falls from the nearest centre, and 0 degrees happens
+                  agree exactly. What decides the behavior is how far the
+                  direction falls from the nearest center, and 0 degrees happens
                   to be the furthest a direction can fall from one, which is 10
                   degrees under this arrangement of buckets.
                 </p>
@@ -541,28 +443,18 @@ share of upper = position − 0.5 − lower       share of lower = 1 − that`}<
               </SubSection>
 
               <SubSection title="13. What the sharing costs">
-                <p>
-                  Nothing has been gained for free. Under whole votes a pure
-                  direction lands in one bucket and the cell says with complete
-                  confidence which of the nine it was; under sharing the same
-                  pure direction is spread over two, and the fullest bucket
-                  holds between 0.5 and 1.0 of the cell depending on where the
-                  direction fell. So a reader of the description can no longer
-                  recover which single bucket a pure direction belonged to, and
-                  in return a turn of two degrees changes the answer by
-                  something proportional to two degrees.
-                </p>
+                <p>With shared votes, the largest bin receives between 0.5 and 1.0 of a pure direction’s contribution, depending on its position between centers. The neighboring weights together still encode that position. The useful change is continuity: a small rotation changes the shares gradually instead of moving the entire contribution at a bin boundary.</p>
                 <>
 <p>
-                  Drag the slider above to 30 degrees and both rules put everything in the second bucket, since 30 is that bucket&rsquo;s centre. Drag to 20, which is a boundary rather than a centre, and the shared rule reads a clean half and half while the whole-vote rule reads 0.4531 and 0.5469, because the ramp&rsquo;s direction is worked out pixel by pixel and lands on either side of the boundary by amounts far below anything the picture could distinguish.
+
+                  Drag the slider above to 30 degrees and both rules put everything in the second bucket, since 30 is that bucket&rsquo;s center. Drag to 20, which is a boundary rather than a center, and the shared rule reads a clean half and half while the whole-vote rule reads 0.4531 and 0.5469, because the ramp&rsquo;s direction is worked out pixel by pixel and lands on either side of the boundary by amounts far below anything the picture could distinguish.
                 </p>
-                <p>
-                  That is what a rule with a jump in it does when handed the jump, and it is why the shared rule is the one worth building on, at the price that no cell ever again reports a direction more precisely than the two buckets it falls between.
-                </p>
+                <p>Interpolation removes that abrupt jump in the direction vote. It does not remove changes caused by moving gradients between spatial cells, which is a separate part of the descriptor. We will keep those two sources of sensitivity distinct.</p>
 </>
                 <KeepInMind>
+
                   Only the direction is shared here. The original work also
-                  shares each vote between neighbouring cells, which removes the
+                  shares each vote between neighboring cells, which removes the
                   same kind of jump in space that this removes in angle. That is
                   absent from what this page measures rather than hidden, and it
                   is the obvious next thing to add.
@@ -576,29 +468,25 @@ share of upper = position − 0.5 − lower       share of lower = 1 − that`}<
           content: (
             <>
               <SubSection title="14. A block, and dividing it by its own length">
-                <p>
-                  The counts in a cell still grow with the contrast of the
-                  picture, so we are one factor away from a description that
-                  does not read the lamp at all. Removing a common factor from a
-                  vector is easy, and the only real decision is which vector to
-                  remove it from.
-                </p>
+                <p>Histogram magnitudes still increase with a common increase in contrast. Normalization removes that shared factor from a selected group of counts. We now need to decide which nearby cells to normalize together and how to handle groups with almost no gradient information.</p>
                 <p>
                   Group nearby cells into a block, two by two by default.
                   Each cell contributes its nine direction counts. Placing those
                   four lists end to end gives the block vector shown below.
                 </p>
                 <p>
+
                   Divide a nonzero block vector by its Euclidean length to remove
                   a common positive scale factor. In the ideal expression this
                   produces unit length. A zero block needs a separate policy,
-                  and implementations may add a small stabilising value to the
+                  and implementations may add a small stabilizing value to the
                   denominator rather than divide by zero.
                 </p>
                 <p>
-                  Normalise locally because illumination can vary across a
+
+                  Normalize locally because illumination can vary across a
                   photograph. A contrast change shared by a small patch may not
-                  be shared by the whole person. Block normalisation addresses
+                  be shared by the whole person. Block normalization addresses
                   that local scale change; it does not remove every lighting effect.
                 </p>
                 <Equation>{`block = ( cell₁ , cell₂ , cell₃ , cell₄ )        36 numbers
@@ -607,15 +495,7 @@ rescaled = block / ‖block‖`}</Equation>
               </SubSection>
 
               <SubSection title="15. Only half of a change of lighting needed rescaling">
-                <p>
-                  Here is the sharpest measurement on the page, and it
-                  contradicts the way the step is usually described. Rescaling
-                  the blocks is said to give the description its tolerance to
-                  lighting. Half of that is true. Split the change of lighting
-                  into its two parts, the constant added to every brightness and
-                  the factor every brightness is multiplied by, and measure each
-                  on its own with the rescaling switched off.
-                </p>
+                <p>An additive brightness offset and a multiplicative contrast change affect different stages. Difference filters already cancel a common offset; normalization addresses a common scale factor in the gradient counts. Switching normalization off lets us measure those effects separately instead of attributing both to the final rescaling.</p>
                 <p>
                   Adding 0.15 to every brightness moves the unrescaled
                   description by 8.4 times ten to the minus fourteenth, which is
@@ -627,15 +507,7 @@ rescaled = block / ‖block‖`}</Equation>
                   moves it by 2.3 times ten to the minus fifteenth.
                 </p>
                 <LightingLedger />
-                <p>
-                  Push the multiplier to 3.7 and the shift to 12, which is a far
-                  more violent relighting than any photograph would receive, and
-                  the unrescaled answer moves 598.02 while the rescaled one
-                  stays at about ten to the minus fifteenth. The rescaled
-                  distance does not grow with the multiplier at all, because the
-                  factor cancels exactly and what is left is the rounding of the
-                  arithmetic that cancelled it.
-                </p>
+                <p>With multiplier 3.7 and offset 12, the unnormalized descriptor changes by 598.02, while the normalized result differs by about 10⁻¹⁵ in this test. Positive common gain cancels in the ideal nonzero-block normalization. The experiment applies no clipping or camera nonlinearities, so it tests that model rather than every possible relighting.</p>
                 <KeepInMind>
                   Saying that rescaling the blocks buys tolerance to lighting
                   credits it with something it did not do. It buys tolerance to
@@ -674,14 +546,7 @@ rescaled = block / ‖block‖`}</Equation>
                   ]}
                   caption="Measured on the scene, at the usual settings. Every rescaling removes the multiplier completely, and what separates them is the shape they leave the block in."
                 />
-                <p>
-                  Dividing by the sum makes a block add to one, which is the
-                  shape of a distribution; taking the square root of that pulls
-                  the large entries down towards the small ones and happens to
-                  leave the block a unit vector as well. Dividing by the length
-                  makes it a unit vector directly. The last row is the default
-                  and is the subject of the next step.
-                </p>
+                <p>Dividing a nonzero nonnegative block by the sum of its entries makes those entries sum to one. Taking their square roots compresses ratios between large and small values; it does not make each entry numerically smaller. The resulting vector has unit Euclidean length because its squared entries sum to one. Dividing directly by Euclidean length also produces a unit vector, with different relative contributions. The final table row adds clipping before another normalization.</p>
               </SubSection>
 
               <SubSection title="17. Cutting the loudest direction back">
@@ -697,15 +562,7 @@ rescaled = block / ‖block‖`}</Equation>
 cut   =  min(unit, 0.2)
 
 answer = cut / ‖cut‖`}</Equation>
-                <p>
-                  On the scene, the largest entry of the description falls from
-                  0.9274 under plain division by the length to 0.5376 with the
-                  cut, so the loudest direction has lost a little over two
-                  fifths of its share and the rest of its block has gained it.
-                  What is bought is the ratio between the loudest direction in a
-                  block and the quietest, which is what lets a faint edge beside
-                  a strong one survive into the answer at all.
-                </p>
+                <p>In this scene, clipping and renormalizing changes the largest descriptor entry from 0.9274 to 0.5376. It reduces some dominant contributions relative to weaker ones within their blocks. The total sum of entries need not be preserved, and a nonzero faint response was already present before clipping. The operation changes relative weighting rather than making an otherwise absent edge appear.</p>
                 <KeepInMind>
                   The 0.2 is a limit on the way in and not a ceiling on the way
                   out, and the last Part measures how thoroughly it is not one.
@@ -723,9 +580,10 @@ answer = cut / ‖cut‖`}</Equation>
                 <BlockOverlapMap initialPreset={2} />
                 <>
                   <p>
+
                     Overlapping two-by-two blocks reuse cells. In a three-by-three cell
                     grid, each corner belongs to one block, each non-corner edge cell to
-                    two, and the centre to four.
+                    two, and the center to four.
                   </p>
                   <Equation>{"cell appearances = 4 × 1 + 4 × 2 + 1 × 4 = 16"}</Equation>
                   <p>
@@ -735,24 +593,8 @@ answer = cut / ‖cut‖`}</Equation>
                   </p>
                 </>
                 <WhyThisWorks title="Why overlapping blocks give a cell several local comparisons">
-                  <p>
-                    The repetition is the point rather than an accident of the
-                    arrangement. A cell that sits beside a very strong edge is
-                    dimmed by that neighbour in the block they share, and left
-                    alone in a block on its other side that does not contain the
-                    strong edge. Both readings survive into the description, so
-                    whichever of them turns out to be informative is available
-                    to whatever reads it, and the classifier is given the choice
-                    instead of having it made in advance by where the block
-                    boundaries happened to fall.
-                  </p>
-                  <p>
-                    Switching the blocks to tile instead, with the widget above,
-                    shows what is lost. Every cell is then described once, under
-                    exactly one denominator, and the answer is four times
-                    shorter and carries only the reading that its own block
-                    happened to give it.
-                  </p>
+                  <p>Overlapping blocks describe a cell under several local normalization contexts. A strong neighboring edge can reduce its relative contribution in one block but be absent from another. Keeping both versions gives a later classifier access to those different comparisons. The repeated values serve that purpose rather than adding new pixels.</p>
+                  <p>Switch the widget to tiled blocks. When the grid divides exactly, each cell then appears in one normalized block rather than several overlapping blocks. On the six-by-six cell grid, this gives nine blocks instead of twenty-five. The descriptor is shorter, but the exact length ratio depends on the grid and stride; it is not always four.</p>
                 </WhyThisWorks>
               </SubSection>
             </>
@@ -762,31 +604,31 @@ answer = cut / ‖cut‖`}</Equation>
           title: "Questions on Parts 3 and 4",
           quiz: [
             choice(
-              "Turning a ramp from 19 degrees to 21, across the boundary at 20, moves a cell’s histogram by 724.08 under whole votes. What does sharing between the two nearest centres give?",
+              "Turning a ramp from 19 degrees to 21, across the boundary at 20, moves a cell’s histogram by 724.08 under whole votes. What does sharing between the two nearest centers give?",
               [
                 "72.41, a tenth of the whole-vote move, because two degrees is a tenth of a twenty-degree bucket",
                 "724.08 still, since the direction crossed a boundary either way",
-                "Nothing at all, since the two centres are equally near",
+                "Nothing at all, since the two centers are equally near",
                 "1.4142, the furthest two answers of length 1 can be",
               ],
               0,
-              "At 19 degrees the cell reads 0.55 and 0.45 and at 21 it reads 0.45 and 0.55, and the ratio between the two moves is 10 to within 4.4 times ten to the minus fourteenth. Sharing makes the histogram a continuous function of the direction, so a small turn of the picture produces a small change in the answer, which is what a description handed to a classifier needs if nearby inputs are to get nearby scores.",
+              "At nineteen degrees the two bin shares are 0.55 and 0.45; at twenty-one they are 0.45 and 0.55. Sharing interpolates the vote between nearby bin centers, reducing the histogram jump in this comparison. It makes binning continuous in angle for fixed pixel magnitude and cell assignment; image resampling or crossing a cell boundary can still introduce other changes.",
             ),
             trueFalse(
               "A clean upright edge splitting its weight evenly between the first bucket and the last is a fault in the wrapping.",
               false,
-              "The first centre is 10 degrees and the last is 170, and once directions wrap at 180 the two are equally near to 0, which makes 0 degrees the furthest a direction can fall from any centre under this arrangement. An edge running left to right, at 90 degrees, sits exactly on the centre of bucket 4 and the two rules agree on it. Reading the split as a bug and moving the bucket edges would only put the halfway points somewhere else.",
+              "The first center is 10 degrees and the last is 170, and once directions wrap at 180 the two are equally near to 0, which makes 0 degrees the furthest a direction can fall from any center under this arrangement. An edge running left to right, at 90 degrees, sits exactly on the center of bucket 4 and the two rules agree on it. Reading the split as a bug and moving the bucket edges would only put the halfway points somewhere else.",
             ),
             choice(
               "What does sharing a vote cost?",
               [
-                "A reader can no longer recover which single bucket a pure direction belonged to, since the fullest bucket holds between 0.5 and 1.0 of the cell",
+                "One gradient can contribute to two bins instead of one, so its largest-bin share can range from 0.5 to 1.0",
                 "Nothing, since the two rules agree on every direction",
                 "The histogram stops being a continuous function of the direction",
                 "The wrapping between the last bucket and the first",
               ],
               0,
-              "Under whole votes a pure direction lands in one bucket and the cell says with complete confidence which of the nine it was. Handed a direction on a boundary, though, the whole-vote rule reads 0.4531 and 0.5469 where the shared rule reads a clean half and half, because the ramp’s direction is worked out pixel by pixel and falls on either side by amounts nothing in the picture could distinguish. The two rules agree only where a direction sits exactly on a centre, as at 30 degrees.",
+              "Sharing uses two weighted bin contributions rather than one hard assignment. It trades a little more work for smoother angular changes. A pure direction can still be inferred from its split weights under the known convention, but a cell mixes many gradients and does not retain every original direction separately. At a hard boundary, small numerical angle errors can instead split whole votes unpredictably across neighboring bins.",
             ),
             choice(
               "Rescaling the blocks is usually said to buy the tolerance to lighting. What did splitting the change in two show?",
@@ -797,7 +639,7 @@ answer = cut / ‖cut‖`}</Equation>
                 "Neither half is bought by the rescaling",
               ],
               0,
-              "Multiplying every brightness by 1.6 moves the unrescaled description by 132.89 against an answer whose own length is 221.49, and with the rescaling on the whole change moves it by 2.3 times ten to the minus fifteenth. Every one of the four ways of rescaling removes the multiplier completely, and what separates them is the shape they leave a block in. Keeping the two halves apart is what explains why the step is done over small groups of cells rather than once at the end.",
+              "The unnormalized descriptor is already nearly invariant to the added constant because it uses intensity differences. Multiplying intensities scales its gradient votes and changes that descriptor. The normalized blocks remove nearly all of this global positive multiplier in the supplied experiment. Local lighting changes, clipping or low-contrast numerical effects need not satisfy the same ideal transformation.",
             ),
             several(
               "Blocks step one cell at a time instead of tiling. Which of these does the page give as the reason or the consequence?",
@@ -805,10 +647,10 @@ answer = cut / ‖cut‖`}</Equation>
                 "A cell away from the border belongs to four blocks and reaches the answer four times, each under a different denominator",
                 "A cell beside a strong edge is dimmed in the block they share and left alone in a block that does not hold the strong edge",
                 "Both readings survive, so the classifier is given the choice rather than having it made by where the boundaries happened to fall",
-                "Tiling the blocks instead gives an answer four times shorter, in which every cell is described once under exactly one denominator",
+                "When tiling fits the grid exactly, each cell appears in one block, producing fewer entries than overlapping blocks",
               ],
               [0, 1, 2, 3],
-              "Every one of the four holds. The repetition is the point rather than an accident of the arrangement, and the claim about tiling is what the widget shows when the blocks are switched to tile, since what tiling gives up is the second, third and fourth readings of each middle cell. On a 3 by 3 grid the nine cells make sixteen appearances in the answer, and on the scene’s 6 by 6 grid thirty-six cells make a hundred.",
+              "With two-by-two blocks and stride one, an interior cell participates in four neighborhoods, each with its own normalization. Tiling gives a cell only one such neighborhood. For the six-by-six cell grid, overlapping blocks produce twenty-five block positions while exact tiling produces nine. The repeated contextual normalization is the purpose of the extra entries; the length ratio depends on the finite grid and stride.",
             ),
         ],
         },
@@ -826,44 +668,19 @@ answer = cut / ‖cut‖`}</Equation>
                   bar on a dark ground beside the same bar with its brightness
                   turned inside out.
                 </p>
-                <p>
-                  The bar has two edges, and they are one edge seen from either
-                  side, so their directions are exactly opposite. Over half a
-                  circle they fall in one bucket and the bar occupies a single
-                  bucket of the nine. Over the whole circle they fall in two,
-                  centred on 10 degrees and 190 degrees, half the weight in each.
-                </p>
+                <p>The bar’s two sides have opposite brightness-gradient directions. Unsigned orientations combine opposite directions; signed orientations keep them separate. The comparison below measures how those choices respond when the bright bar and dark background exchange contrast.</p>
                 <RangeChoiceCompare />
-                <p>
-                  The number that decides the choice is the distance between the
-                  bar and its inverted twin. Over half a circle it is exactly 0,
-                  the same vector to the last bit, so the description cannot see
-                  the inversion at all. Over the whole circle it is 1.41421,
-                  which is the furthest apart two answers of length 1 can be, so
-                  the description sees nothing else. On the whole scene the same
-                  comparison gives 4.2 times ten to the minus fifteenth against
-                  5.9899, out of a length of 5.
-                </p>
+                <p>For the isolated bar, unsigned orientations give distance 0 after contrast reversal. Signed orientations give 1.41421, the maximum for nonnegative unit vectors with disjoint support. General signed unit vectors could be distance 2, but these histogram entries are nonnegative. On the full scene, the two conventions give distances 4.2 × 10⁻¹⁵ and 5.9899 for descriptors of length 5.</p>
               </SubSection>
 
               <SubSection title="20. Why the pedestrian work folded the circle">
                 <>
-<p>
-                  A person in a dark coat against a bright wall and the same person in a light coat against a dark one produce gradients that point opposite ways along the same silhouette. A description over the whole circle calls those two people as different as two descriptions can be, when the thing a detector has to learn is that they are the same shape, and a description over half a circle hands it both of them as one case.
-                </p>
+<p>If a silhouette changes from brighter than its background to darker, its gradient directions can reverse while its outline stays similar. Unsigned orientations remove that polarity difference from the orientation measurement. Other textures and image changes can still alter the descriptor, so it need not become identical for every change of clothing or background.</p>
                 <p>
                   That is the argument Dalal and Triggs made, and the measurement above is that argument in two numbers.
                 </p>
 </>
-                <p>
-                  It is not always the right choice. Where the direction of the
-                  contrast is itself information, keeping the whole circle is
-                  worth twice as many numbers per cell. Printed text is the
-                  obvious case, since light letters on a dark page and dark
-                  letters on a light page really are different things and a
-                  reader wants to know which, and there the 1.41421 measured
-                  above is the useful answer and the 0 is the useless one.
-                </p>
+                <p>Keeping contrast direction can be useful when foreground polarity matters to the task. It may be unhelpful when light-on-dark and dark-on-light versions should receive the same interpretation, as in some text-recognition settings. Covering a full circle at the same angular resolution requires twice as many bins; keeping the bin count fixed instead makes each bin wider.</p>
                 <KeepInMind>
                   Combining opposite gradient directions makes the descriptor less sensitive to contrast reversal. That can help when the same outline appears lighter than its background in one image and darker in another. If the direction of contrast is useful evidence for our task, unsigned orientations discard it. We should compare that choice with the signed version.
                 </KeepInMind>
@@ -900,7 +717,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                 <BlockOverlapMap initialPreset={0} showStride={false} />
               </SubSection>
 
-              <SubSection title="22. The work of voting, grouping and normalising cells" id="22-what-it-costs">
+              <SubSection title="22. The work of voting, grouping and normalizing cells" id="22-what-it-costs">
                 <p>
                   The pedestrian window holds 8192 brightnesses and its
                   description holds 3780 numbers, which is 0.46 numbers per
@@ -941,13 +758,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
           content: (
             <>
               <SubSection title="23. A patch that has been turned">
-                <p>
-                  Every stage above measures a direction from a fixed axis and
-                  assigns a pixel to a cell by its fixed position, so turning
-                  the patch turns every direction with it and moves every pixel
-                  into a different cell. The description is not defined to
-                  survive that and it does not.
-                </p>
+                <p>The descriptor uses fixed image axes and a fixed spatial cell layout. Rotating a patch changes its gradient orientations and relocates its contributions among cells. Ordinary HOG therefore does not guarantee rotation invariance. The following rotation test checks both changes together.</p>
                 <p>
                   Turn the scene a quarter circle, which is exact because every
                   pixel lands on a pixel and nothing has to be guessed in
@@ -960,62 +771,21 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                 </p>
                 <TurnedAgainstRelit />
                 <>
-<p>
-                  It would be comfortable to blame the buckets. At 9 buckets a quarter turn is four and a half buckets, so the directions do not land cleanly on new buckets, and one might hope that a count dividing 90 exactly would fix it. It does not. At 6 buckets, where each covers 30 degrees and a quarter turn is exactly three of them, the answer still moves 0.95 of its own length, and no way of rescaling a block brings any of it below 0.98.
-                </p>
-                <p>
-                  The directions are only half of the problem, since the cells have moved as well, and no arithmetic over buckets can undo that.
-                </p>
+<p>With nine bins, a quarter turn shifts angles by four and a half bins, so bin alignment might appear to explain the change. Using six bins makes the angle shift exactly three bins, yet the measured descriptor still changes by 0.95 of its original length. Cell and block locations also rotate. Changing only the bin count therefore does not supply rotation invariance.</p>
+                <p>Changing the direction bins alone does not undo the spatial movement of cells and blocks. A rotation-handling procedure must account for both orientation and spatial coordinates.</p>
 </>
                 <KeepInMind>
-                  This is why the family of methods that followed begins by
-                  measuring a patch&rsquo;s own dominant direction and turning
-                  the patch to face it before counting anything. That step is
-                  outside this method and it is what a description meant to
-                  survive rotation has to add.
-                </KeepInMind>
+                  One approach is to estimate a dominant local orientation and describe the patch relative to it, as the keypoint lesson explains. Other rotation-handling designs are possible. Ordinary fixed-axis HOG does not include that alignment automatically.</KeepInMind>
               </SubSection>
 
               <SubSection title="24. A grid chosen in advance, and a thing at the wrong size">
-                <p>
-                  The cell side is a number a person picks, and once picked it
-                  fixes what counts as a small movement. Nothing in the method
-                  derives it from the picture, and there is no sense in which
-                  8 pixels is correct. That is a genuine gap rather than an
-                  omission, because the right cell size depends on how large the
-                  thing being described is in the picture, which is not known
-                  until it has been found.
-                </p>
-                <p>
-                  The same fact makes the description depend on scale. An object
-                  twice as far from the camera fills a quarter as many cells, so
-                  its edges fall across a different arrangement of cells and its
-                  description is a different length, which cannot even be
-                  compared with the first. Two descriptions of different lengths
-                  do not correspond position by position and the distance
-                  between them has no meaning, so the comparison is undefined
-                  rather than merely poor.
-                </p>
-                <p>
-                  The usual repair lives outside the method. Resize the picture
-                  several times over, run the whole thing at each size, and keep
-                  whichever answer scored best. That turns one description into
-                  a family of them and turns the cost measured in the last Part
-                  into that cost times the number of sizes tried.
-                </p>
+                <p>Cell size is selected for an expected object scale and the detail needed by the task. Eight pixels is a convention used in this arrangement, rather than a universal correct size. When an object can appear at several sizes, the detection procedure can compare multiple image scales or use another scale-handling representation.</p>
+                <p>A smaller object occupies a different pattern of cells when the image window and cell size stay fixed. The descriptor keeps its length in that case, but its entries change. Resizing the whole cropped window instead changes the cell grid and can change descriptor length. This API rejects a direct distance comparison between unequal-length descriptors.</p>
+                <p>A sliding-window detector can compute features across an image pyramid, evaluating candidate windows at several sizes. That adds work, but shared gradients and feature maps can avoid recomputing every window independently. The actual cost depends on the image sizes and implementation.</p>
               </SubSection>
 
               <SubSection title="25. Brightness that does not change has no direction">
-                <p>
-                  Where the brightness is flat in both directions the rate of
-                  change is nought in both directions, and the angle of a vector
-                  of length nought does not exist. Every implementation has to
-                  answer something, and the reasonable answers are to record
-                  nought degrees, to record nothing at all, or to refuse. Since
-                  the vote is weighted by the magnitude, a pixel like that votes
-                  with weight nought whichever answer is chosen, so the choice
-                  is invisible in the counts.
-                </p>
+                <p>A zero gradient has no defined direction, but it also contributes zero vote weight. An implementation still needs a stored angle or missing-value convention. That choice is invisible to these histogram counts as long as the zero magnitude is handled consistently.</p>
                 <p>A flat image region creates a zero gradient histogram. Normalizing that histogram requires care because its length is zero, and direct division by that length is undefined.</p>
 <p>We therefore need a stated policy. We can leave a zero block unchanged, stabilize the denominator with a small positive constant, or reject the block. The first two preserve a useful interpretation, which is that this region has no measured edge structure.</p>
 <p>The stabilizing constant also affects nearly flat regions, where dividing by a tiny length could amplify numerical noise. In the displayed uniform scene, the accumulated gradient weight is zero and the implementation returns a zero descriptor.</p>
@@ -1053,9 +823,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
 <p>
                   On the scene, where the entries are not all equal, the cut does change the answer and still does not enforce the limit. The largest entry falls from 0.9274 to 0.5376, which is nearly three times the limit it was cut to. And the number of entries in the whole description above 0.2 rises from 170 to 248, because making each block a unit vector again lifts everything that was not cut.
                 </p>
-                <p>
-                  What the step does is move weight from the loud entries of a block to the quiet ones, and the 0.2 governs how much moves rather than where any entry ends up.
-                </p>
+                <p>Clipping limits large entries before a second normalization. That second step can raise entries above 0.2 again. The parameter controls the redistribution of relative contributions, rather than imposing a final upper bound on every descriptor value.</p>
 </>
               </SubSection>
 
@@ -1067,22 +835,22 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                     {
                       expression: "brightness flat at a pixel",
                       reason:
-                        "The rate of change is nought in both directions and its angle does not exist. Any answer is a convention, and the weighting by magnitude makes the convention invisible in the counts.",
+                        "When both estimated gradient components are zero, orientation is undefined. Its stored value is a convention and contributes zero weight to the histogram.",
                     },
                     {
                       expression: "every cell of a block flat",
                       reason:
-                        "Dividing by the block’s own length is a division by nought. Answering with noughts, adding a constant to the denominator and refusing the patch are the three choices, and they differ in what a patch of blank sky is said to be.",
+                        "A zero block cannot be divided by its length. An implementation can retain zeros, stabilize the denominator or reject the block. State the policy and its treatment of nearly zero blocks.",
                     },
                     {
-                      expression: "a direction halfway between two centres",
+                      expression: "a direction halfway between two centers",
                       reason:
                         "Genuinely split in half by the sharing rule, and 0 degrees is such a direction over half a circle, so a clean upright edge reads as two half-full buckets. Moving the bucket edges only moves the halfway points.",
                     },
                     {
                       expression: "the patch does not divide into whole cells",
                       reason:
-                        "The leftover strip either votes in a cell of a different size, which changes what a number in the answer means, or does not vote at all, which loses an edge silently. Refusing is the only choice that does neither.",
+                        "Choose an explicit crop, padding, resizing or partial-cell policy, or reject the shape. The choice affects coordinates and contributions and must be consistent between training and prediction.",
                     },
                     {
                       expression: "blocks stepping further than their own width",
@@ -1092,7 +860,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                     {
                       expression: "two patches of different sizes",
                       reason:
-                        "Their descriptions have different lengths, so position 40 of one and position 40 of the other are counts of different things and the distance between them is a number with no meaning.",
+                        "Under the same fixed cell settings, different image grids can produce unequal descriptor lengths. Direct elementwise distance requires compatible layouts; a declared resizing or alignment can provide one.",
                     },
                     {
                       expression: "the patch has been turned",
@@ -1102,20 +870,12 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                     {
                       expression: "an entry above the cut limit",
                       reason:
-                        "Renormalising after the cut puts it back above the limit, so the limit constrains the ratios inside a block rather than any single entry. On the scene the largest entry ends at 0.5376 against a limit of 0.2.",
+                        "Renormalizing after the cut puts it back above the limit, so the limit constrains the ratios inside a block rather than any single entry. On the scene the largest entry ends at 0.5376 against a limit of 0.2.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Three of those eight are choices with a cost attached and the
-                  rest are places the arithmetic has no answer at all. The
-                  awkward ones are the two about a patch that does not divide
-                  and about two patches of different sizes, because rounding
-                  either of them away produces a description of the right shape
-                  and the right general appearance whose numbers count different
-                  things at different positions, and nothing downstream can
-                  detect that.
-                </KeepInMind>
+                  Several rows require a representation policy rather than a mathematical refusal. Keep the cell layout, image extent and normalization conventions with the descriptor. A consumer can then reject incompatible inputs or apply a declared alignment or resizing procedure, instead of comparing entries whose spatial meanings differ.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -1132,7 +892,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                 "0 over the whole circle and 1.41421 over half of it",
               ],
               0,
-              "The bar’s two edges are one edge seen from either side, so their directions are exactly opposite and fold into one bucket over half a circle, while over the whole circle they land in two buckets centred on 10 and 190 degrees with half the weight in each. That is Dalal and Triggs’ argument in two numbers, since a person in a dark coat against a bright wall is the same shape as one in a light coat against a dark wall, and for printed text the 1.41421 is the useful answer and the 0 the useless one.",
+              "Unsigned orientations identify a direction with its reverse, so this contrast reversal produces matching unsigned descriptors. Signed orientations preserve the polarity and differ in the example. Whether that polarity should be ignored depends on the task: reversing foreground and background may be irrelevant for one shape detector and meaningful for another. These examples do not establish one convention for every printed-text problem.",
             ),
             choice(
               "The pedestrian window is 64 wide and 128 tall with 8 pixel cells. How does its description reach 3780 numbers?",
@@ -1143,23 +903,23 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                 "7 by 15 block positions of 9 numbers each, one bucket per block",
               ],
               0,
-              "A 2 by 2 block stepping one cell at a time has one position fewer than there are cells along each side, and each block holds 4 cells of 9 buckets, which is 36 numbers. That is Dalal and Triggs’ own figure for their descriptor. The window holds 8192 brightnesses, so the description is smaller than the picture though not by much, and it is far larger than the 128 cells it is built from would suggest, because the overlap describes those 128 cells in 420 cells’ worth of numbers.",
+              "The cell and block counts are:\n\n```math\ncells: 64/8 = 8 across; 128/8 = 16 down\nblock positions: (8 − 1) × (16 − 1) = 105\nentries per block: 2 × 2 × 9 = 36\ntotal entries: 105 × 36 = 3,780\n```\n\nOverlap describes many cells in several normalized neighborhoods, so the final vector is longer than one nine-bin histogram per cell.",
             ),
             trueFalse(
               "A bucket count that divides 90 exactly would let the description survive a quarter turn.",
               false,
-              "A quarter turn moves the description 5.2331 where its own length is 5, and at 6 buckets, where a quarter turn is exactly three of them, it still moves 0.95 of its own length, with no way of rescaling a block bringing any of it below 0.98. The directions are only half the problem, since the cells have moved as well and no arithmetic over buckets can undo that.",
+              "A quarter turn changes where cells and blocks occur in the fixed image grid as well as rotating gradient directions. Matching the bin width to ninety degrees would address only bin alignment. The default descriptor changes substantially in the supplied scene, so rotation invariance would require an additional alignment or representation choice.",
             ),
             choice(
-              "What changes in the descriptor when the same object appears at half its previous image size?",
+              "A tightly cropped image window is resized to half its width and height while HOG cell size stays fixed. What changes when those window sizes produce different cell grids?",
               [
-                "It fills a quarter as many cells, so it is a different length, and two descriptions of different lengths do not correspond position by position",
+                "The smaller window has roughly one quarter as many cells and a different descriptor length, so entries no longer correspond position by position",
                 "Its rates of change are weaker, so every entry comes out smaller",
                 "Its directions have turned, so the buckets no longer line up",
                 "The cut at 0.2 bites differently at the smaller size",
               ],
               0,
-              "The distance between two descriptions of different lengths has no meaning, so the comparison is undefined rather than poor. The usual repair lives outside the method, resizing the picture several times over and keeping whichever answer scored best, which turns the cost of one description into that cost times the number of sizes tried.",
+              "With a fixed cell size, changing the image-window dimensions changes the cell grid and usually the descriptor length. This API rejects direct distance comparisons between unequal-length descriptors. If an object merely becomes smaller inside the same window, the length stays fixed but its cell pattern changes. Detection systems can instead compare appropriately resized windows or search an image pyramid with a fixed descriptor geometry.",
             ),
             several(
               "The cut at 0.2 is applied to a unit vector, which is then made a unit vector again. Which of these hold?",
@@ -1177,7 +937,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
         {
           title: "Practice. Describing The Scene With The Library",
           practice: [
-            exercise("Work the one-edge patch through with the library",["Part 2 takes a patch 6 pixels square, dark on the left and bright on the right, with cells 3 pixels on a side, and counts 12 of weight into each of its four cells, all of it in bucket 0 under whole votes. Part 3 switches the sharing on and the same 12 comes apart into 6 in bucket 0 and 6 in bucket 8. Build the patch, count its votes under both rules with HistogramOfOrientedGradients, and read the top-left cell.", "Then describe the patch under the default settings. The four cells make one block, so the description is a single unit vector of 36 numbers, and it is the block of eight sixes that Part 6 works on paper. Read how long it is, its largest entry, and how many of its entries sit above the 0.2 limit."],`import numpy as np
+            exercise("Work the one-edge patch through with the library",["Build the six-by-six vertical step below. With cell_side=3, calculate cell_histograms once using WHOLE_TO_NEAREST and once using the default shared votes. Print total_weight, the cell-grid shape and the top-left cell's nine bins for both rules.", "Call describe with the shared-vote settings. Print descriptor size, vector length, largest entry and the count of entries above 0.2. Compare that final maximum with the intermediate clipping threshold."],`import numpy as np
 from oop_ml.core.computer_vision.oriented_gradients import (
     HistogramOfOrientedGradients,
     VoteSharing,
@@ -1216,8 +976,8 @@ print(f"largest entry {entries.max():.4f} with {int((entries > 0.2).sum())} entr
 top-left cell under whole votes  [12.  0.  0.  0.  0.  0.  0.  0.  0.]
 top-left cell under shared votes [6. 0. 0. 0. 0. 0. 0. 0. 6.]
 description holds 36 numbers of length 1.0000
-largest entry 0.3536 with 8 entries above 0.2`,{...{ hints: ["cell_histograms takes a Picture and answers an object holding one histogram per cell. total_weight, n_cell_rows and n_cell_columns are properties of it, and histogram_at(row, column) is one cell’s nine buckets as an array.", "The shared rule is the default, so the second model needs only the cell side. The whole-vote rule is VoteSharing.WHOLE_TO_NEAREST.", "describe takes the same Picture and answers the finished description. n_values and length are properties of it, and np.asarray turns it into a plain array for max and for a comparison with 0.2."], check: numberCheck("What is the largest entry of the finished description?", 0.3536, 0.0005, "The nonzero entries are clipped together and then renormalised. That second normalisation can place them above the clipping value again, so the intermediate clipping level is not a final upper bound on descriptor entries.") },question:"How do edge votes become a normalised HOG descriptor?"}),
-            exercise("Turn a ramp across a bucket boundary",["Part 3 draws a picture whose brightness rises along a straight ramp, so that every interior pixel has the same direction, and turns the ramp from 19 degrees to 21, across the boundary between the first two buckets. Draw the two ramps, 24 pixels square, and read the middle cell at row 1 and column 1 under each voting rule.", "The lesson reports the cell moving 724.08 under whole votes and 72.41 under sharing. Print those, the shares in each bucket at both angles, and one number the lesson does not give, which is how much weight the cell holds."],`import numpy as np
+largest entry 0.3536 with 8 entries above 0.2`,{...{ hints: ["cell_histograms takes a Picture and answers an object holding one histogram per cell. total_weight, n_cell_rows and n_cell_columns are properties of it, and histogram_at(row, column) is one cell’s nine buckets as an array.", "The shared rule is the default, so the second model needs only the cell side. The whole-vote rule is VoteSharing.WHOLE_TO_NEAREST.", "describe takes the same Picture and answers the finished description. n_values and length are properties of it, and np.asarray turns it into a plain array for max and for a comparison with 0.2."], check: numberCheck("What is the largest entry of the finished description?", 0.3536, 0.0005, "The nonzero entries are clipped together and then renormalized. That second normalization can place them above the clipping value again, so the intermediate clipping level is not a final upper bound on descriptor entries.") },question:"How do edge votes become a normalized HOG descriptor?"}),
+            exercise("Turn a ramp across a bucket boundary",["Use the supplied 24-by-24 ramps at nineteen and twenty-one degrees. Read cell (1, 1) from each image under both vote-sharing settings. This cell is away from the image border, so its pixels have the ramp's common gradient direction.", "For each rule, print total cell weight and the fraction in each bin at both angles. Measure the Euclidean distance between the two raw histogram vectors. Compare how gradually the bins change when votes are shared."],`import numpy as np
 from oop_ml.core.computer_vision.oriented_gradients import (
     HistogramOfOrientedGradients,
     VoteSharing,
@@ -1261,7 +1021,7 @@ split_between_neighbours
   shares at 19 degrees [0.55 0.45 0.   0.   0.   0.   0.   0.   0.  ]
   shares at 21 degrees [0.45 0.55 0.   0.   0.   0.   0.   0.   0.  ]
   moved 72.41`,{...{ hints: ["The default cell side is 8, so a 24 pixel ramp is 3 cells by 3 and the cell at row 1, column 1 is the one that touches no border.", "histogram_at(1, 1) answers that cell’s nine buckets as a frozen array. Wrap it in np.asarray so the arithmetic that follows works on a plain array, and the weight is its sum.", "The move between the two angles is the length of the difference between the two histograms, which is np.linalg.norm of one minus the other, the same yardstick Part 1 uses on two lists of brightnesses."], check: numberCheck("How much weight does the middle cell hold, under either rule?", 512, 0.5, "Sharing changes the direction bins receiving each gradient vote, not the total gradient magnitude. The cell keeps its total weight while a small angle change redistributes that weight more gradually.") },question:"Does sharing an edge vote make a small direction change less abrupt?"}),
-            exercise("Relight the scene and turn it, and measure both at each stage",["Rebuild the 48 pixel scene from Part 1, a square, a disc, a diagonal bar, three crosses and a brightness ramp, and make the three relit copies Part 4 measures, the shift of 0.15 alone, the multiplier of 1.6 alone and the two together, along with the quarter turn of Part 6.", "Describe the scene with the blocks left alone and under the default rule. Part 4 reports the unrescaled description moving 8.4 times ten to the minus fourteenth for the shift and 132.89 for the multiplier against its own length of 221.49, and Part 6 reports the quarter turn moving the finished description 5.2331 against a length of 5. Print all of those to six significant figures, with the two figures Part 6 sets side by side, the turn and the whole relighting under the default rule, in the same block of output."],`import numpy as np
+            exercise("Relight the scene and turn it, and measure both at each stage",["Use the supplied scene and four changed versions: add 0.15, multiply by 1.6, combine both operations, and rotate by ninety degrees. Describe each version with block normalization disabled and with the default clipped L2 normalization.", "For each configuration, print the original descriptor length and its distance to each changed descriptor using six significant figures. Compare the effect of global intensity changes with rotation, which moves both cells and gradient directions."],`import numpy as np
 from oop_ml.core.computer_vision.oriented_gradients import (
     BlockNormalisation,
     HistogramOfOrientedGradients,
@@ -1319,8 +1079,8 @@ l2_clipped length 5
   shift moves it 1.9318e-15
   scale moves it 1.9759e-15
   both moves it 2.29922e-15
-  turn moves it 5.23308`,{...{ hints: ["A model is configured at construction and reads a picture with describe. The only setting that changes between the two runs is block_normalisation, which takes BlockNormalisation.NONE or BlockNormalisation.L2_CLIPPED, the default.", "Each changed copy of the canvas is a plain array until Picture wraps it, and describe wants the Picture. The original canvas stays as it was, since the arithmetic made new arrays rather than writing into it.", "distance_to is a method of one description taking another, and length is a property. A format of .6g shows the tiny moves as powers of ten rather than as 0.000000."], check: numberCheck("How far does the quarter turn move the finished description, under the default rule?", 5.23308, 0.0005, "Normalisation nearly removes this uniform relighting, but a quarter turn changes both cell locations and directions measured from fixed image axes. HOG is not generally rotation invariant.") },question:"Which changes survive HOG normalisation: relighting or rotating the scene?"}),
-            exercise("Ask for three things the method does not define",["Part 6 lists the cases the arithmetic has no answer for, and three of them the library refuses by name. Hand it a 20 by 20 picture at the default cell side of 8, which does not divide into whole cells. Ask for the distance between the descriptions of a 48 by 48 picture and a 24 by 24 one, which are different lengths. And construct a model whose 2 by 2 blocks step 3 cells at a time, which would leave cells no block covers.", "Catch each refusal and print the name of its class and its message. The first two derive from the library’s own base error. The third is refused at construction, before any picture exists, by the validation the model’s own constructor runs, so it arrives as a validation error rather than as one of the library’s."],`import numpy as np
+  turn moves it 5.23308`,{...{ hints: ["A model is configured at construction and reads a picture with describe. The only setting that changes between the two runs is block_normalisation, which takes BlockNormalisation.NONE or BlockNormalisation.L2_CLIPPED, the default.", "Each changed copy of the canvas is a plain array until Picture wraps it, and describe wants the Picture. The original canvas stays as it was, since the arithmetic made new arrays rather than writing into it.", "distance_to is a method of one description taking another, and length is a property. A format of .6g shows the tiny moves as powers of ten rather than as 0.000000."], check: numberCheck("How far does the quarter turn move the finished description, under the default rule?", 5.23308, 0.0005, "Normalization nearly removes this uniform relighting, but a quarter turn changes both cell locations and directions measured from fixed image axes. HOG is not generally rotation invariant.") },question:"Which changes survive HOG normalization: relighting or rotating the scene?"}),
+            exercise("Ask for three things the method does not define",["Test three invalid configurations: describe a 20-by-20 image with eight-pixel cells, compare descriptors from 48-by-48 and 24-by-24 images, and construct two-cell blocks with block_stride_in_cells=3.", "Catch each refusal and print the name of its class and its message. The first two derive from the library’s own base error. The third is refused at construction, before any picture exists, by the validation the model’s own constructor runs, so it arrives as a validation error rather than as one of the library’s."],`import numpy as np
 from oop_ml import MLLibError
 from oop_ml.core.computer_vision.oriented_gradients import HistogramOfOrientedGradients
 from oop_ml.core.computer_vision.picture import Picture
@@ -1361,7 +1121,7 @@ a 20 by 20 patch does not divide into whole 8 by 8 cells, and the leftover strip
 ShapeMismatchError
 two descriptions can only be compared position by position, and these are 900 and 144 long, so they were built under different settings
 ValidationError
-Value error, blocks 2 cells across stepping 3 cells at a time leave cells that no block covers, so those cells would not reach the answer at all; the stride is at most the block's own side`,{...{ hints: ["A blank picture describes without complaint, since a block with no weight comes back as noughts, so the second refusal is about the two lengths alone. The 48 by 48 picture describes in 900 numbers and the 24 by 24 one in 144.", "The model is a pydantic model, and a rule that spans two of its fields is checked when it is constructed. pydantic wraps that check in a ValidationError whose errors() lists each failure as a dictionary with the message under msg."] },question:"Which image and descriptor configurations does this implementation reject?"}),
+Value error, blocks 2 cells across stepping 3 cells at a time leave cells that no block covers, so those cells would not reach the answer at all; the stride is at most the block's own side`,{...{ hints: ["Blank images are accepted and produce zero descriptors. The distance check fails because the two descriptor arrays have different lengths: 900 and 144.", "The model is a pydantic model, and a rule that spans two of its fields is checked when it is constructed. pydantic wraps that check in a ValidationError whose errors() lists each failure as a dictionary with the message under msg."] },question:"Which image and descriptor configurations does this implementation reject?"}),
           ],
         },
       ]}

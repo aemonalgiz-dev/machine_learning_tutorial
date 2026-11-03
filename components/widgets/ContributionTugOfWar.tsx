@@ -226,7 +226,7 @@ export function ContributionTugOfWar() {
           </thead>
           <tbody className="font-mono text-slate-800 dark:text-slate-200">
             <tr>
-              <td className="py-1 pr-3 font-sans text-slate-500 dark:text-slate-400">metres at t = {time.toFixed(2)}</td>
+              <td className="py-1 pr-3 font-sans text-slate-500 dark:text-slate-400">meters at t = {time.toFixed(2)}</td>
               <td className="py-1 pr-3">{fit ? formatMetres(fit.intercept) : "…"}</td>
               {contributions.map((each) => (
                 <td key={each.name} className="py-1 pr-3">{formatMetres(each.value)}</td>

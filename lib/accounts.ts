@@ -41,6 +41,13 @@ export function useAccount() {
   }, () => state, () => initial);
 }
 
+/** The same identity snapshot used by the UI, without starting a request. */
+export function readAccount() { return state; }
+export function onAccountUpdate(listener: () => void) {
+  listeners.add(listener);
+  return () => { listeners.delete(listener); };
+}
+
 function request(path: string, init?: RequestInit) {
   return fetch(`/account-api/${path}`, {
     ...init, cache: "no-store", credentials: "same-origin", signal: AbortSignal.timeout(15000),

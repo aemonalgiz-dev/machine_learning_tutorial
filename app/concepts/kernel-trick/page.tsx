@@ -19,8 +19,8 @@ import { MarginView } from "@/components/widgets/MarginView";
 import { SupportVectorRefit } from "@/components/widgets/SupportVectorRefit";
 
 export const metadata: Metadata = {
-  title: "The Kernel Trick · oop_ml",
-  description: "A pattern may be difficult to separate with a straight boundary until we change how it is represented. A kernel lets us compare examples in a transformed space without explicitly building every new feature.",
+  title: "The Kernel Trick · Perceptron Lab",
+  description: "Changing the representation of data can make a complicated separation easier to describe. A kernel calculates inner-product comparisons in a transformed feature space without requiring every transformed coordinate to be constructed explicitly.",
 };
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 
@@ -34,7 +34,7 @@ export default function KernelTrickPage() {
     <ConceptPage
       lessonId="kernel-trick"
       title="The Kernel Trick"
-      tagline={"A pattern may be difficult to separate with a straight boundary until we change how it is represented. A kernel lets us compare examples in a transformed space without explicitly building every new feature."}
+      tagline={"Changing the representation of data can make a complicated separation easier to describe. A kernel calculates inner-product comparisons in a transformed feature space without requiring every transformed coordinate to be constructed explicitly."}
       openingTitle="What If the Middle Belongs to One Class?"
       technicalStart="Part 3. Calculate the Same Comparison Two Ways"
       history={<LessonMotivation lesson={lessonProgressions["kernel-trick"]} />}
@@ -48,7 +48,7 @@ export default function KernelTrickPage() {
           defaultOpen: true,
           content: <>
             <SubSection title="Start with the divider we want to use">
-              <p>Imagine trying to separate two colours of beads on a tabletop with one straight ruler. If the colours occupy opposite ends of the table, we can place the ruler between them. But if one colour surrounds the other, turning or sliding the ruler will leave some beads on the wrong side.</p>
+              <p>Imagine trying to separate two colors of beads on a tabletop with one straight ruler. If the colors occupy opposite ends of the table, we can place the ruler between them. But if one color surrounds the other, turning or sliding the ruler will leave some beads on the wrong side.</p>
               <p>This is the difficulty in our picture. A simple classifier uses a straight boundary to decide which group a point belongs to. It needs one group on one side and the other group on the other side. The original arrangement does not allow that.</p>
               <p>So, we need to give the classifier a more useful arrangement to work with. In a model, moving a point means changing the numbers used to represent it. Its label stays the same.</p>
             </SubSection>
@@ -58,17 +58,17 @@ export default function KernelTrickPage() {
               <p>There is a reason for this limit. If a straight divider worked after an ordinary stretch, compression, or rotation, undoing that transformation would turn it back into another straight divider. We could already have used that divider in the original picture.</p>
             </SubSection>
             <SubSection title="Add a direction in which the groups can separate">
-              <p>Now imagine keeping every bead over its original spot on the table, but giving it a height. A bead near the centre stays low. A bead far from the centre rises higher. The new height represents distance from the centre, with larger distances exaggerated by squaring them.</p>
-              <p>This changes the arrangement in a useful way. The two colours were mixed when viewed only across the tabletop. Once height is available, the blue group sits below the amber group. There is now a vertical gap between them.</p>
+              <p>Now imagine keeping every bead over its original spot on the table, but giving it a height. A bead near the center stays low. A bead far from the center rises higher. The new height represents distance from the center, with larger distances exaggerated by squaring them.</p>
+              <p>This changes the arrangement in a useful way. The two colors were mixed when viewed only across the tabletop. Once height is available, the blue group sits below the amber group. There is now a vertical gap between them.</p>
               <p>We applied the same rule to every point. We did not tell the rule to raise amber points and lower blue ones. It only used position. This matters because we will need to apply it to new observations whose labels we do not know.</p>
             </SubSection>
             <SubSection title="Place a flat sheet in the gap">
               <p>With three coordinates, the equivalent of our straight divider is a <strong>plane</strong>: a flat surface, like a sheet of glass extending in both directions. We can place that sheet above the blue points and below the amber points.</p>
               <p>Use Place a plane in the walkthrough. Move the sheet too low, and some blue points end up above it. Move it too high, and amber points end up below it. Between the groups, there is a range of positions that separate this example successfully.</p>
-              <p>In the transformed representation, we can place a simple boundary between the groups. Here we move that sheet by hand so we can see why it separates them. A trained classifier would use the labelled examples to choose its boundary. Its objective decides which separator to prefer, or how to handle mistakes when the groups cannot be separated perfectly.</p>
+              <p>In the transformed representation, we can place a simple boundary between the groups. Here we move that sheet by hand so we can see why it separates them. A trained classifier would use the labeled examples to choose its boundary. Its objective decides which separator to prefer, or how to handle mistakes when the groups cannot be separated perfectly.</p>
             </SubSection>
             <SubSection title="Read that decision in the original picture">
-              <p>Select Original view. A point near the centre would rise only a little, so it would remain below the sheet. A point far from the centre would rise above it. The points that would reach the sheet exactly form a circle in the original view.</p>
+              <p>Select Original view. A point near the center would rise only a little, so it would remain below the sheet. A point far from the center would rise above it. The points that would reach the sheet exactly form a circle in the original view.</p>
               <p>The circle and the plane describe the same decision using different coordinates. The boundary is flat in the representation with height, even though it is circular in the original two-coordinate picture.</p>
               <p>In another dataset, another transformation might help: it could change distances differently in different regions or introduce several additional coordinates. There is no promise that every transformation will produce a useful separation. The purpose is to make the relationships we care about easier for the model to use.</p>
             </SubSection>
@@ -86,13 +86,13 @@ export default function KernelTrickPage() {
             <PreviousSection id="part-1-give-the-model-a-useful-measurement" />
             <PreviousSection id="part-1-a-boundary-no-straight-line-can-draw" />
             <SubSection title="1. Why the original inputs can be awkward">
-              <p>The original picture gave each point two coordinates. Each coordinate is a <strong>feature</strong>, a number supplied to the model about an observation. The point&apos;s colour represents its <strong>label</strong>, the answer supplied during training.</p>
+              <p>The original picture gave each point two coordinates. Each coordinate is a <strong>feature</strong>, a number supplied to the model about an observation. The point&apos;s color represents its <strong>label</strong>, the answer supplied during training.</p>
               <p>In an application, two features could be temperature and heart rate, and the supplied labels could be healthy or unwell. The later clinic playground uses that made-up example. For the calculation here, we will keep simple coordinates so that we can follow the height of each point.</p>
               <p>Our original coordinates describe position along two directions. The pattern we want to express is distance from the middle, regardless of direction. That is the extra feature we are going to calculate.</p>
             </SubSection>
             <SubSection title="2. Ask for distance from the middle">
               <p>We can change what the model receives. Being far below the usual temperature and being far above it have opposite signs, but both are departures from the middle. Squaring a departure gives us a number that grows in either direction.</p>
-              <p>Let the two coordinates measure departures from the centre on comparable scales. We will call those coordinates x₁ and x₂. The square of their distance from the centre is called r². This is the height used in the opening picture.</p>
+              <p>Let the two coordinates measure departures from the center on comparable scales. We will call those coordinates x₁ and x₂. The square of their distance from the center is called r². This is the height used in the opening picture.</p>
               <Equation>{"r² = x₁² + x₂²"}</Equation>
               <NumberTable headings={["Observation", "Original coordinates", "Calculate the new feature"]} rows={[
                 ["Near the middle", "(0.5, 0.5)", "r² = 0.5² + 0.5² = 0.5"],
@@ -105,7 +105,7 @@ export default function KernelTrickPage() {
               <KeepInMind>Creating this feature is not yet the kernel trick. We have explicitly calculated a new input and can train an ordinary model on it.</KeepInMind>
             </SubSection>
             <SubSection title="3. Give the model several derived features">
-              <p>Our horizontal sheet gave us a circle around a chosen centre. We may need more choices, such as an oval that is wider in one direction, or one whose long direction lies diagonally across the plot.</p>
+              <p>Our horizontal sheet gave us a circle around a chosen center. We may need more choices, such as an oval that is wider in one direction, or one whose long direction lies diagonally across the plot.</p>
               <p>To allow that, we will now use a different transformation. Supply the two squared coordinates separately, together with a feature that multiplies the coordinates. The separate squares let the model treat the two directions differently. The product lets the rule also depend on how the coordinates vary together.</p>
               <p>A <strong>feature map</strong> is the rule that builds this new list of numbers. We write the rule as φ, pronounced phi. Here is the particular map we will use throughout the worked kernel calculation.</p>
               <Equation>{"φ(x₁, x₂) = (x₁², √2 × x₁ × x₂, x₂²)"}</Equation>
@@ -159,9 +159,9 @@ export default function KernelTrickPage() {
               "If a straight divider worked after one of those, undoing the transformation would turn it back into another straight divider, which we could already have used in the original picture. A wider ring, a flatter ring and a rotated ring all still surround the middle group. What helps is adding a direction the groups can separate along.",
             ),
             trueFalse(
-              "The height rule in the opening picture reads only a bead's position, never its colour, which is what lets it be applied to new observations whose labels are unknown.",
+              "The height rule in the opening picture reads only a bead's position, never its color, which is what lets it be applied to new observations whose labels are unknown.",
               true,
-              "The same rule was applied to every point. A bead near the centre stays low and a bead far from the centre rises higher, and nothing in that consults a label, so the rule did not raise the amber points and lower the blue ones. It is the arrangement that separated, and a rule that needed the labels could not be run on a new observation at all.",
+              "The same rule was applied to every point. A bead near the center stays low and a bead far from the center rises higher, and nothing in that consults a label, so the rule did not raise the amber points and lower the blue ones. It is the arrangement that separated, and a rule that needed the labels could not be run on a new observation at all.",
             ),
             choice(
               "Why does the middle entry of the feature map carry a factor of the square root of two?",
@@ -226,7 +226,7 @@ export default function KernelTrickPage() {
               <Equation>{"Kᵢⱼ = k(rᵢ, rⱼ)\n\nFor n training observations, K has n rows and n columns."}</Equation>
               <p>Labels remain separate from this table. Two observations can receive a large kernel comparison even if their labels disagree. The learning objective determines what to do with that disagreement.</p>
               <p>For a new input, compute a new set of comparisons against the stored training inputs, using the same preprocessing and kernel. Then apply the learned coefficients. An algorithm that requires explicit coordinates for other operations cannot automatically use this substitution.</p>
-              <p>We can now try a fitted classifier. Choose The clinic below, then compare Linear with Squared. Each dot&apos;s colour is its supplied label; the background colour is the model&apos;s prediction. Look for whether the predicted healthy region surrounds the middle group.</p>
+              <p>We can now try a fitted classifier. Choose The clinic below, then compare Linear with Squared. Each dot&apos;s color is its supplied label; the background color is the model&apos;s prediction. Look for whether the predicted healthy region surrounds the middle group.</p>
               <KernelPlayground />
               <p>Linear shows one fitted straight boundary. Its accuracy measures this fit, rather than establishing the best accuracy of every possible straight boundary. An Ideal Case loads a different arrangement where a straight boundary can separate the groups.</p>
             </SubSection>
@@ -305,7 +305,7 @@ export default function KernelTrickPage() {
               "Labels remain separate from the comparison table. Two observations can be compared highly and still carry different labels, and what to do about that disagreement is the learning objective's business rather than the kernel's.",
             ),
             choice(
-              "With the squared kernel, references at (1, 0) and (0, 1), both coefficients at negative one and the offset at one, what is the score?",
+              "With the pure squared kernel k(a,b)=(a·b)², references (1, 0) and (0, 1), both coefficients −1 and offset 1, what score does a new point receive?",
               [
                 "1 minus the two squared coordinates, which is the circular rule from the first part",
                 "The squared distance from the middle itself",
@@ -329,7 +329,7 @@ export default function KernelTrickPage() {
                 "Evaluating the radial kernel without truncating an endless feature expansion",
               ],
               0,
-              "That figure is a hundred million entries at eight bytes each, before the solver's other arrays. Predicting carries its own cost too, since it needs comparisons against the reference observations the fitted model retains, so a kernel model is not thereby a cheap one.",
+              "A dense Gram matrix has one entry per training pair. With ten thousand observations and eight-byte values:\n\n```math\n10,000 × 10,000 × 8 = 800,000,000 bytes ≈ 800 MB\n```\n\nThe solver needs additional memory. Predictions may also require comparisons with many retained reference observations. Avoiding explicit expanded features therefore does not remove every computation or storage cost.",
             ),
             trueFalse(
               "Once gamma has been chosen by the score on the second clinic, that score is still an untouched test of the whole procedure.",
@@ -434,7 +434,7 @@ export default function KernelTrickPage() {
                 "The sigmoid of it is a calibrated probability",
               ],
               [0, 1, 2],
-              "The sign, the functional margin and the normalised distance all hold, and the raw score on its own is neither a distance nor a probability, since the signed distance needs the score divided by the norm of a nonzero feature weight vector. The sigmoid places the value between zero and one without fitting a probability model, and if probabilities are needed the calibration has to be learned and evaluated separately.",
+              "The sign, the functional margin and the normalized distance all hold, and the raw score on its own is neither a distance nor a probability, since the signed distance needs the score divided by the norm of a nonzero feature weight vector. The sigmoid places the value between zero and one without fitting a probability model, and if probabilities are needed the calibration has to be learned and evaluated separately.",
             ),
             trueFalse(
               "A negative entry in the kernel matrix is allowed, since an ordinary dot product can be negative.",
@@ -451,7 +451,7 @@ export default function KernelTrickPage() {
         {
           title: "Practice. Calculate the Comparisons With the Library",
           practice: [
-            exercise("Take both routes to 121 with the library’s kernels",["Part 3 compares a = (1, 2) with b = (3, 4) two ways, by lifting both through the feature map and taking the dot product of the three-entry vectors, and by squaring the original dot product of 11. Ask the library’s kernels for all three numbers.", "A kernel here is an object that compares two blocks of rows and answers a matrix with one entry per pair, so a block of one row each gives a single entry. The linear kernel is the plain dot product, and the polynomial kernel of degree 2 with its constant at zero is the pure squared kernel. Finish by asking the playground’s Squared kernel, whose constant is one, for its value on the same pair, which the page does not quote."],`import numpy as np
+            exercise("Take both routes to 121 with the library’s kernels",["Compare a=(1, 2) and b=(3, 4) with LinearKernel. Then compare the supplied three-coordinate feature vectors with LinearKernel and the original two-coordinate vectors with PolynomialKernel(degree=2, constant=0). Print all three values to check the feature-map identity.", "Finally compare the original pair with PolynomialKernel(degree=2, constant=1). This is the playground's Squared setting. Print its value separately: adding the constant changes the kernel and the matching feature map. Each one-row RowBlock comparison produces a one-by-one kernel matrix."],`import numpy as np
 from oop_ml import LinearKernel, PolynomialKernel, RowBlock
 
 a = RowBlock(np.array([[1.0, 2.0]]), ["x1", "x2"])
@@ -483,7 +483,7 @@ print(f"the playground's Squared kernel, (a . b + 1) squared = {shifted:.0f}")`,
 route one, the lifted dot product = 121
 route two, the squared kernel = 121
 the playground's Squared kernel, (a . b + 1) squared = 144`,{...{ hints: ["between takes two row blocks and answers a kernel matrix. Its values are a two-dimensional array, so the one comparison of a one-row block against another sits at position [0, 0].", "The lifted vectors are the feature map worked by hand in section 3, (1, 2√2, 4) and (9, 12√2, 16), handed to the linear kernel under their own three names.", "The polynomial kernel raises the dot product plus its constant to its degree, so a constant of zero is the pure square and a constant of one is what the playground calls Squared."], check: numberCheck("What does the pure squared kernel return for a and b?", 121, 0.5, "The explicit feature-map dot product agrees with the zero-constant squared kernel. Adding a constant before the square defines a different kernel, so its value need not match that homogeneous feature map.") },question:"Do explicit feature vectors and the kernel give the same comparison?"}),
-            exercise("Read the radial kernel at two gammas",["Section 14 works the radial kernel on a pair whose squared distance is 4, finding 0.1353 at a gamma of 0.5 and 0.0003 at a gamma of 2. Put the origin and the point (2, 0) to the library’s radial kernel at both gammas, and at a gamma of 0.1, which the page does not work.", "Print each value to four places. The larger gamma gives the pair a far smaller comparison, and the smallest gamma a larger one, since gamma sets how fast the kernel falls with distance."],`import numpy as np
+            exercise("Read the radial kernel at two gammas",["Use RadialBasisKernel to compare the origin (0, 0) with (2, 0), first at gamma=0.5, then gamma=2 and gamma=0.1.", "Print each kernel value to four decimal places. Compare how quickly the similarity falls for this fixed pair as gamma increases."],`import numpy as np
 from oop_ml import RadialBasisKernel, RowBlock
 
 origin = RowBlock(np.array([[0.0, 0.0]]), ["x1", "x2"])
@@ -501,7 +501,7 @@ for gamma in (0.5, 2, 0.1):
     print(f"gamma {gamma}: k = {value:.4f}")`,`gamma 0.5: k = 0.1353
 gamma 2: k = 0.0003
 gamma 0.1: k = 0.6703`,{...{ hints: ["The radial kernel is constructed with its gamma and compared the same way as the others, through between on two row blocks.", "The squared distance between the two rows is 4, so each value is exp of minus gamma times 4, which is what the library computes."], check: numberCheck("What does the radial kernel return at a gamma of 0.5, to four places?", 0.1353, 5e-05, "A smaller gamma makes the radial comparison decay more slowly with distance. The pair is unchanged; only the range over which it remains similar has changed.") },question:"How does gamma change the comparison of the same two points?"}),
-            exercise("Fit the clinic under three kernels",["Part 4 fits the support vector classifier on the standardized clinic and compares Linear with Squared, and Part 6 adds the radial kernel. Fit all three yourself on the twenty-four patients, standardizing the two vitals first as every fit on the page does, and read each fit’s training accuracy, how many patients are support vectors, how many of those sit at the capacity, and how many ascent steps the solver took.", "The library’s default step of 0.001 and ceiling of 1000 epochs stop short on this clinic, so use a step of 0.02 and a ceiling of 50000, which is what the page’s widgets run. Finish by fitting the linear kernel at the library’s own defaults and reading its support vector count, which the page does not quote."],`from oop_ml import (
+            exercise("Fit the clinic under three kernels",["Standardize temperature and heart rate for the twenty-four patients below. Fit SupportVectorClassifier with linear, degree-two shifted polynomial and radial kernels using capacity=1. For each fit, print training accuracy, support-vector count, count at capacity and epochs_run.", "The library’s default step of 0.001 and ceiling of 1000 epochs stop short on this clinic, so use a step of 0.02 and a ceiling of 50000, which is what the page’s widgets run. Finish by fitting the linear kernel at the library’s own defaults and reading its support vector count, which the page does not quote."],`from oop_ml import (
     Feature, LinearKernel, PolynomialKernel, RadialBasisKernel, Standardizer, SupportVectorClassifier,
 )
 
@@ -539,8 +539,8 @@ default = SupportVectorClassifier(kernel=LinearKernel()).fit(inputs, healthy)
 print(f"linear at the defaults: support vectors {default.support_vectors.n_vectors} of 24, {default.epochs_run} epochs")`,`linear: accuracy 0.7083, support vectors 20 of 24, 19 at the capacity, 226 epochs
 squared: accuracy 1.0000, support vectors 6 of 24, 3 at the capacity, 812 epochs
 radial: accuracy 1.0000, support vectors 16 of 24, 4 at the capacity, 5768 epochs
-linear at the defaults: support vectors 24 of 24, 1000 epochs`,{...{ hints: ["A standardizer is fitted on the two vitals and its transform answers the scaled features, which are what the classifier is fitted on.", "The classifier is constructed with a kernel object, a capacity, a learning_rate and a max_epochs, and fitted on the features and the labels like every classifier here.", "support_vectors on the fitted model knows its count, n_vectors, and how many of them sit at the capacity, n_at_the_cap. epochs_run is the number of ascent steps the solver took, and a count equal to max_epochs means it stopped at the ceiling rather than by converging."], check: numberCheck("What training accuracy does the linear kernel reach on the clinic, to four places?", 0.7083, 5e-05, "The nonlinear kernels fit the surrounding class pattern that the linear boundary cannot separate on these vitals. Solver settings and stopping behaviour must be checked before treating returned support-vector counts as a finished optimum.") },question:"Which kernels separate the clinic's classes, and did their solvers finish?"}),
-            exercise("Build the Gram matrix under the sigmoid kernel and let the ridge check judge it",["Part 8 says a kernel must produce a positive-semidefinite Gram matrix, that the Sigmoid option on the clinic has negative eigenvalues, and that the ridge check rejects it while the classifier still returns a result. Build the clinic’s 24 by 24 table under the sigmoid kernel with a gamma of 1 and a constant of 0, read its eigenvalues, and then hand the same kernel to the library’s kernel ridge and to the classifier.", "Print the smallest and largest eigenvalue to four places and how many are negative, then the refusal the ridge fit raises, by its name and message, and the classifier’s accuracy and support vector count on the same kernel. The classifier answers, and the page says why that is the weaker guarantee."],`import numpy as np
+linear at the defaults: support vectors 24 of 24, 1000 epochs`,{...{ hints: ["A standardizer is fitted on the two vitals and its transform answers the scaled features, which are what the classifier is fitted on.", "The classifier is constructed with a kernel object, a capacity, a learning_rate and a max_epochs, and fitted on the features and the labels like every classifier here.", "Read support_vectors.n_vectors and call support_vectors.n_at_the_cap(1). epochs_run records solver updates. Reaching max_epochs warns that the budget may have limited the run; the returned support-vector count alone does not prove an optimum."], check: numberCheck("What training accuracy does the linear kernel reach on the clinic, to four places?", 0.7083, 5e-05, "The nonlinear kernels fit the surrounding class pattern that the linear boundary cannot separate on these vitals. Solver settings and stopping behavior must be checked before treating returned support-vector counts as a finished optimum.") },question:"Which kernels separate the clinic's classes, and did their solvers finish?"}),
+            exercise("Build the Gram matrix under the sigmoid kernel and let the ridge check judge it",["Compare the standardized clinic rows with themselves using SigmoidKernel(gamma=1, constant=0). This gives one entry per patient pair, a 24-by-24 Gram matrix. Use NumPy to inspect its eigenvalues, then use the same kernel in KernelRidgeRegression and SupportVectorClassifier.", "Print the smallest and largest eigenvalues and count values below −1e-9, separating substantial negative values from rounding noise. Catch and print the kernel-ridge error. Finally print the classifier's accuracy and support-vector count. Compare what returned predictions do and do not establish about the kernel."],`import numpy as np
 from oop_ml import (
     Feature, KernelRidgeRegression, MLLibError, RowBlock, SigmoidKernel, Standardizer, SupportVectorClassifier,
 )
@@ -586,7 +586,7 @@ print(f"classifier accuracy {model.score(inputs, healthy):.4f}, support vectors 
 negative eigenvalues 12 of 24
 InvalidValuesError
 the system K + penalty I is singular, which a valid kernel cannot produce -- a positive semi-definite Gram matrix plus a positive penalty is always invertible. This kernel (SigmoidKernel(tanh(1.0 a . b + 0.0))) failed Mercer's condition on this data; the sigmoid kernel with a negative constant is the usual way to get here
-classifier accuracy 0.7083, support vectors 19 of 24`,{...{ hints: ["A row block over the standardized columns, compared with itself through between, is the training Gram matrix, and its values are the square array whose eigenvalues numpy can read.", "Kernel ridge solves a system built from that matrix by a Cholesky route that fails exactly when the matrix is not positive definite, so its refusal is the library’s Mercer check. Catch MLLibError to inspect the failure on this Gram matrix.", "The classifier runs projected gradient ascent on the same table and never checks it, which is why it returns a result whose concavity guarantee is gone."] },question:"Does a returned model establish that the supplied sigmoid is a valid kernel?"}),
+classifier accuracy 0.7083, support vectors 19 of 24`,{...{ hints: ["A row block over the standardized columns, compared with itself through between, is the training Gram matrix, and its values are the square array whose eigenvalues numpy can read.", "Kernel ridge attempts a Cholesky solve of the Gram matrix plus penalty times the identity. This requires the shifted matrix to be numerically positive definite. Failure on this example is consistent with its substantial negative eigenvalues, but a successful solve at one penalty is not a general test that the kernel is valid. Catch MLLibError to inspect the failure.", "The classifier runs projected gradient ascent on the same table and never checks it, which is why it returns a result whose concavity guarantee is gone."] },question:"Does a returned model establish that the supplied sigmoid is a valid kernel?"}),
           ],
         },
       ]}

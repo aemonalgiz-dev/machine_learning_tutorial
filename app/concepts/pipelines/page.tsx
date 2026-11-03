@@ -24,9 +24,9 @@ import { StepOrderChart } from "@/components/widgets/StepOrderChart";
 import { TemplateLedger } from "@/components/widgets/TemplateLedger";
 
 export const metadata: Metadata = {
-  title: "Pipelines · oop_ml",
+  title: "Pipelines · Perceptron Lab",
   description:
-    "Preparing data is part of fitting a model. If a scaler learns from our test examples, the test has already influenced the result. A pipeline helps us keep those fitting steps together and inside the training procedure.",
+    "Data preparation can learn settings from the observations it receives. Keeping preparation and prediction in one fitting procedure helps prevent evaluation data from influencing those settings.",
 };
 
 const link =
@@ -42,7 +42,7 @@ export default function PipelinesPage() {
       playgroundTitle="Keep preprocessing and prediction on the same path"
       playgroundIntro="Follow the data through each transformation and into the model. Check which rows supply the fitted statistics and which rows only use them."
       title="Pipelines"
-      tagline={"Preparing data is part of fitting a model. If a scaler learns from our test examples, the test has already influenced the result. A pipeline helps us keep those fitting steps together and inside the training procedure."}
+      tagline={"Data preparation can learn settings from the observations it receives. Keeping preparation and prediction in one fitting procedure helps prevent evaluation data from influencing those settings."}
       prerequisites={
         <>
           The folds come from the{" "}
@@ -73,49 +73,32 @@ export default function PipelinesPage() {
 <>
               <SubSection title="1. A held-out person arrives alone">
                 <>
-<p>
-                  Take the grid search page&rsquo;s twelve people, measured by height in centimetres and weight in kilograms, and hold three of them out, the people at 153, 165 and 177 cm. A model that predicts weight from standardized height is fitted on the other nine, and now the first held-out person arrives to be scored. Their height has to be standardized before the model can read it, and the question is what centre and what spread to subtract and divide by.
-                </p>
-                <p>A single arriving height cannot provide the training reference. Its own standard deviation is zero, so standardising it against itself cannot reproduce the scale on which the predictor was fitted.</p>
-              <p>Instead, retain the centre and spread calculated from the training people. Every later person must pass through that same fitted transformation before the prediction rule uses the result. A pipeline keeps those dependent steps together.</p>
+<p>Return to the twelve height and weight pairs from grid search. We reserve the people at heights 153, 165 and 177 centimeters, then fit a predictor on the other nine. The predictor expects standardized height. When a reserved person arrives, which mean and standard deviation should we use?</p>
+                <p>Those reference values are part of what we learned from the training data. We need to keep them with the predictor so that a new height is expressed in the same units.</p>
+                <p>A single arriving height cannot provide the training reference. Its own standard deviation is zero, so standardizing it against itself cannot reproduce the scale on which the predictor was fitted.</p>
+              <p>Instead, retain the center and spread calculated from the training people. Every later person must pass through that same fitted transformation before the prediction rule uses the result. A pipeline keeps those dependent steps together.</p>
 </>
                 <ChainTrace />
                 <>
 <p>
-                  The numbers in the boxes come from the nine training people. Their heights centre at 167.11 cm with a spread of 10.38 cm, and the held-out person at 153 cm becomes −1.360 under those two numbers, at 165 cm −0.203, and at 177 cm 0.953. Press the second button and hold out the three tallest instead.
+
+                  The numbers in the boxes come from the nine training people. Their heights center at 167.11 cm with a spread of 10.38 cm, and the held-out person at 153 cm becomes −1.360 under those two numbers, at 165 cm −0.203, and at 177 cm 0.953. Press the second button and hold out the three tallest instead.
                 </p>
-                <p>
-                  The centre falls to 162.11 and the spread to 7.67, and the three held-out heights standardize to 1.942, 2.334 and 2.725, more than two spreads above anyone the fit saw, which is the truth about them and is what the scaled numbers should say.
-                </p>
+                <p>Holding out the three tallest people lowers the training center to 162.11 cm and spread to 7.67 cm. Their standardized heights become 1.942, 2.334 and 2.725. These values measure distance above the training mean, not above the tallest training person. All three heights are outside the training range.</p>
 </>
                 <KeepInMind>
-                  A held-out row is measured against the training rows, never
-                  against itself or against the other held-out rows. The
-                  feature scaling page showed what goes wrong when it is
-                  measured against itself; this page is about the object that
-                  stops the question ever arising.
-                </KeepInMind>
+                  For this evaluation, reuse the reference learned from the training rows. Do not refit it on a held-out person or the held-out group. A pipeline keeps that reference with the model, provided the training procedure gives its fit method the correct rows.</KeepInMind>
               </SubSection>
 
-              <SubSection title="2. The centre and spread belong to the fit">
-                <p>
-                  So the centre and spread are learned from the training
-                  people and reused on everyone who comes later, which makes
-                  them a fitted parameter of the model in every sense that
-                  matters. They were read off the training rows, they change
-                  when the training rows change, and a prediction cannot be
-                  made without them. The middle three and the tallest three
-                  give two different standardizers from the same twelve
-                  people, because the nine left to train on differ, and each
-                  standardizer is the right one for the model fitted beside
-                  it.
-                </p>
+              <SubSection title="2. The center and spread belong to the fit" id="2-the-centre-and-spread-belong-to-the-fit">
+                <p>The training center and spread belong to the fitted prediction procedure. They change when we change the training rows, and later predictions need those same values. Holding out the middle three people leaves a different training group from holding out the tallest three. Each fitted standardizer must stay paired with the predictor trained using it.</p>
                 <Equation>{"z = (height − 167.11) / 10.38        the middle three held out\nz = (height − 162.11) / 7.67         the three tallest held out"}</Equation>
                 <WorkedExample title="The held-out person at 153 cm, by hand">
                   <>
                     <p>
-                      The nine training heights add to 1504 centimetres. Their fitted
-                      standard deviation is about 10.38 centimetres. Use those training
+
+                      The nine training heights add to 1504 centimeters. Their fitted
+                      standard deviation is about 10.38 centimeters. Use those training
                       statistics for both held-out people.
                     </p>
                     <Equation>{"training mean = 1504 / 9 ≈ 167.11 cm\nscore at 153 cm ≈ (153 − 167.11) / 10.38 ≈ −1.360\nscore at 177 cm ≈ (177 − 167.11) / 10.38 ≈ 0.953"}</Equation>
@@ -127,17 +110,14 @@ export default function PipelinesPage() {
                 </WorkedExample>
                 <InAModel title="What the two fits predict">
                   <>
-<p>
-                    With the middle three held out the chain predicts 52.75, 63.66 and 74.98 kg for people who weigh 52, 63 and 76, a held-out R² of 0.9930 against a training R² of 0.9917. With the tallest three held out it predicts 74.71, 77.61 and 80.53 kg for people who weigh 76, 78 and 82, every one an underestimate, since the chain is reaching past its data, and the held-out R² falls to 0.7871 while the training R² stays at 0.9872.
-                  </p>
-                  <p>
-                    The standardizer did not cause that gap; the three tallest people are simply outside what nine shorter ones can teach.
-                  </p>
+<p>With the middle three held out, the chain predicts 52.75, 63.66 and 74.98 kg for observed weights 52, 63 and 76 kg. Held-out R² is 0.9930 and training R² is 0.9917. Holding out the tallest three gives predictions 74.71, 77.61 and 80.53 kg for weights 76, 78 and 82 kg. All are underestimates in this example, with held-out R² 0.7871 and training R² 0.9872. Extrapolation makes this a different test, but does not inherently force predictions downward.</p>
+                  <p>The standardizer still follows the correct procedure in both cases. What changed was the prediction problem: evaluating on the tallest people asks the fitted model to extend beyond the heights in its training group. Correct preprocessing does not guarantee accurate extrapolation.</p>
 </>
                 </InAModel>
                 <KeepInMind>
+
                   Anything learned from the rows is part of the fit. A
-                  standardizer&rsquo;s centre and spread are learned from the
+                  standardizer&rsquo;s center and spread are learned from the
                   rows, so they are part of the fit, and they must be learned
                   wherever the model is learned and reused wherever the model
                   is used.
@@ -146,28 +126,12 @@ export default function PipelinesPage() {
 
               <SubSection title="3. Two objects that must stay in step">
                 <>
-<p>
-                  Written by hand, that is two objects to keep in step, a standardizer and a model, with a rule that the standardizer is fitted exactly where the model is fitted and applied exactly where the model predicts. Every place the model is used is a place the rule can be broken. A fold loop written by hand has to refit the standardizer on each fold&rsquo;s training rows; a search over settings has to do it for every candidate at every fold; a serving endpoint has to apply the one standardizer that the deployed model was fitted with and never another.
-                </p>
-                <p>
-                  None of that is hard, and each is the kind of rule that is right when the loop is first written and wrong after the third change to it.
-                </p>
+<p>Keeping a standardizer and predictor separate means keeping their fitted states consistent. In cross-validation, refit both using the current fold’s training rows. In a search, repeat that for every candidate. When serving predictions, reuse the transformation fitted with the deployed model. A mistake in any of these places can change what the predictor’s inputs mean.</p>
+                <p>The rule is easy to explain but easy to lose when the surrounding code changes. A shared object can enforce the order at each place that uses the model.</p>
 </>
-                <p>
-                  The alternative is to make the two objects one. A chain
-                  holds its steps and its model together and exposes the same
-                  fit and predict as any single model on this site, so
-                  wherever a model is fitted the steps are fitted, and
-                  wherever a model predicts the fitted steps are applied,
-                  because there is nowhere else the fitting or the applying
-                  could happen.
-                </p>
+                <p>A pipeline holds the preparation steps and predictor together. Calling fit learns the steps from the training rows and fits the predictor on their output. Calling predict applies the already-fitted steps before using the predictor. The caller can work with one prediction procedure instead of coordinating several fitted objects.</p>
                 <KeepInMind>
-                  The rule that preprocessing is fitted on the training rows
-                  and reused elsewhere is easy to state and easy to break in
-                  one of several places. An object that fits its steps inside
-                  its own fit has no such places.
-                </KeepInMind>
+                  Fitting preparation inside the pipeline removes repeated coordination between call sites. It still relies on the caller to supply the intended training rows and on each step to implement fit and transform correctly.</KeepInMind>
               </SubSection>
             </>
 </>),
@@ -207,52 +171,32 @@ export default function PipelinesPage() {
               </SubSection>
 
               <SubSection title="5. Each step learns from what the step before produced">
+                <p>The expansion produces height and height-squared columns. The following standardizer learns separate reference values for both: height squared has center 28033.78 and spread 3467.39 on these nine people. Raw heights contain enough information to calculate their squares, but this standardizer learns statistics for the columns it actually receives, so the expansion must run first.</p>
+                <Equation>{"standardizer, fitted after the expansion, learned\n  height    center 167.11     spread 10.38\n  height²   center 28033.78   spread 3467.39"}</Equation>
                 <p>
-                  The standardizer in this chain does not learn the centre
-                  and spread of height. It learns the centre and spread of
-                  whatever the expansion handed it, which is two columns,
-                  height and height squared, and the boxes in section 1 show
-                  both. On the nine training people the square centres at
-                  28033.78 with a spread of 3467.39, numbers the standardizer
-                  could not have known from the raw height, because the
-                  column did not exist until the expansion made it.
-                </p>
-                <Equation>{"standardizer, fitted after the expansion, learned\n  height    centre 167.11     spread 10.38\n  height²   centre 28033.78   spread 3467.39"}</Equation>
-                <p>
-                  The standardizer will receive expanded features when we predict, so it must learn its reference values from expanded training features too. If we fitted it on raw height alone, it would have no learned centre or scale for the new height-squared column. The pipeline keeps this order consistent between fitting and prediction.
+
+                  The standardizer will receive expanded features when we predict, so it must learn its reference values from expanded training features too. If we fitted it on raw height alone, it would have no learned center or scale for the new height-squared column. The pipeline keeps this order consistent between fitting and prediction.
                 </p>
                 <KeepInMind>
-                  A step is fitted on the output of the step before it, never
-                  on the raw input, because the output of the step before it
-                  is what it will see when the chain predicts.
-                </KeepInMind>
+                  The first step receives the raw input. Each later step fits the output of its predecessor, matching the order used during prediction. That keeps its learned reference values consistent with the representation it will receive later.</KeepInMind>
               </SubSection>
 
               <SubSection title="6. Predict applies and learns nothing">
                 <p>
+
                   Predict is the shorter half. It hands the new rows to the
                   fitted expansion, hands what comes back to the fitted
                   standardizer, and hands what comes back from that to the
                   fitted model. Nothing is fitted anywhere along the way.
                   Measured on the chain in section 1, the standardizer&rsquo;s
-                  centre for height is 167.1111 before a predict on the three
+                  center for height is 167.1111 before a predict on the three
                   held-out people and 167.1111 after it, the same number to
                   the last digit, because predict has no code path that could
                   change it.
                 </p>
-                <p>
-                  That sentence is the whole of the leak protection at serving
-                  time. There is no second call site where a transformer could
-                  be fitted on the rows being scored, since the only place a
-                  transformer is ever fitted is inside fit, and fit is called
-                  on the training rows.
-                </p>
+                <p>Prediction does not refit the transformation, so a new query cannot change its own reference values through this call. The training procedure must still pass only the intended training rows to fit. A pipeline can reuse fitted state correctly while still being fitted on the wrong data.</p>
                 <KeepInMind>
-                  Fit is the only method that learns, and predict only applies
-                  what fit learned, so a chain cannot be asked to standardize
-                  the rows it is scoring against themselves; no method of it
-                  does that.
-                </KeepInMind>
+                  Prediction applies the stored transformations without refitting them. This prevents a prediction call from recalculating its own scaling reference. It does not prevent leakage if evaluation rows were included in an earlier fit call.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. Inside cross-validation nothing special happens">
@@ -291,44 +235,28 @@ export default function PipelinesPage() {
             <>
               <SubSection title="8. Where the leak comes from">
                 <p>
+
                   Now the mistake the object exists to prevent, written down
                   and then measured. Standardize the columns once over all
                   the people, and only then deal the folds. Every training
-                  fold has now been scaled by a centre that its held-out rows
+                  fold has now been scaled by a center that its held-out rows
                   helped to compute. With five folds each training fold holds
-                  four fifths of the rows, so the centre over everyone is a
-                  weighted average of the centre the fold should have used
-                  and the centre of the rows it is about to be judged on.
+                  four fifths of the rows, so the center over everyone is a
+                  weighted average of the center the fold should have used
+                  and the center of the rows it is about to be judged on.
                 </p>
-                <Equation>{"centre over all rows = (4/5) · centre of the training fold + (1/5) · centre of the held-out fold"}</Equation>
+                <Equation>{"center over all rows = (4/5) · center of the training fold + (1/5) · center of the held-out fold"}</Equation>
                 <>
-<p>
-                  Whether that matters, and how much, cannot be settled by looking at the formula, so the playground at the top of the page measures it. Twelve hand-typed people are too few to fold thirty times over, so the measurement draws people by seed, thirty, sixty or two hundred of them, measured by height in centimetres, age in years and how far they walk in a day in kilometres, with a weight that is a plain line through the three plus a little noise.
-                </p>
-                <p>
-                  The three columns are on three different scales, so a k-nearest neighbours regressor that skipped the standardizer would let age decide who is near, and the standardizer genuinely has work to do.
-                </p>
+<p>The playground repeats this comparison on seeded synthetic datasets of thirty, sixty or two hundred people. Each has height in centimeters, age in years, daily walking distance in kilometers and a weight generated from a linear combination of those measurements plus noise. Running several seeds shows how much the measured score difference varies with the sample.</p>
+                <p>The columns have different spreads in their original units. Age varies more widely than walking distance, so it can contribute more to unscaled Euclidean distances. Standardization changes that balance before the nearest-neighbor model selects its neighbors.</p>
 </>
                 <KeepInMind>
-                  The leak is the share of the held-out rows in whatever the
-                  transformer learned. For a standardizer that is a fifth of a
-                  centre and a fifth of a spread, and the question is how much
-                  of that reaches the score.
-                </KeepInMind>
+
+                  Fitting on all rows lets held-out observations influence the learned transformation. With five equal folds, they contribute one fifth of the rows used for the overall mean. The standard deviation also changes, but it is not a simple weighted average of the two groups&rsquo; standard deviations.</KeepInMind>
               </SubSection>
 
               <SubSection title="9. A standardizer leaks little, and in no particular direction">
-                <p>
-                  Press the button for the first thirty seeds and read the
-                  thirty-people column. Fitted on every person and then
-                  folded, the standardizer arrangement scores a mean held-out
-                  R² of 0.4813; refitted inside each fold it scores 0.4830.
-                  The shortcut did not flatter the score at all here, it cost
-                  0.0017, and fourteen of the thirty seeds went the other way.
-                  At sixty people the gap is +0.0004 with fifteen of thirty
-                  flattered, and at two hundred it is +0.0001 with eighteen of
-                  thirty, a coin toss that shrinks as the people multiply.
-                </p>
+                <p>For seeds 0 through 29 with thirty people, fitting the standardizer before the folds gives mean held-out R² 0.4813; fitting it inside each fold gives 0.4830. The shortcut lowers the average by 0.0017 here, although it raises the score in fourteen of thirty seeds. At sixty and two hundred people the mean differences are +0.0004 and +0.0001. The sign and size vary across these datasets.</p>
                 <NumberTable
                   headings={["people", "fitted before the folds", "fitted inside each fold", "gap", "seeds flattered", "largest single-seed gap"]}
                   rows={[
@@ -336,74 +264,35 @@ export default function PipelinesPage() {
                     ["60", "0.7668", "0.7664", "+0.0004", "15 of 30", "0.0256"],
                     ["200", "0.8635", "0.8634", "+0.0001", "18 of 30", "0.0037"],
                   ]}
-                  caption="Mean held-out R² of five-fold k-nearest neighbours at five neighbours, seeds 0 to 29. The gap is the first score less the second."
+                  caption="Mean held-out R² of five-fold k-nearest neighbors at five neighbors, seeds 0 to 29. The gap is the first score less the second."
                 />
                 <SeedGapStrip />
-                <p>
-                  The strip is the number that matters. A step that leaked
-                  something worth having would flatter most seeds, and this
-                  one flatters fourteen of thirty and costs the other sixteen,
-                  with the dots straddling zero and the largest single-seed
-                  gap at thirty people, 0.1019, larger than the mean gap by a
-                  factor of sixty. Press the button for seeds 30 to 59 and the
-                  mean is −0.0104 with fourteen of thirty flattered again. I
-                  have not found a family of seeds on which the standardizer
-                  flatters more than about half of them.
-                </p>
+                <p>Inspect the individual seed differences as well as their mean. At thirty people the largest gap is 0.1019, much larger than the average gap. Seeds 30 through 59 give a mean difference of −0.0104, again with fourteen of thirty shortcut scores higher. These runs show variability; they do not establish that every unsupervised preparation step has negligible leakage.</p>
                 <KeepInMind>
-                  For a transformer that never reads the target the leak is
-                  real, small, and as likely to hurt the score as to help it.
-                  Reporting it as a scare would be reporting something the
-                  measurement does not show.
-                </KeepInMind>
+                  For this standardizer and data generator, the average score difference is small and individual differences have either sign. That result does not measure every transformation that ignores target values. Keep preprocessing within the training split rather than relying on a universal small-effect assumption.</KeepInMind>
               </SubSection>
 
               <SubSection title="10. Why it is small, and why doubling the people shrinks it">
-                <p>
-                  Two reasons, and the model is the first. Nearest neighbours
-                  reads only distances, and a distance between two
-                  standardized people subtracts the same centre from both, so
-                  the centre cancels entirely and only the spread survives.
-                </p>
-                <Equation>{"d(a, b)² = Σⱼ ((aⱼ − bⱼ) / sⱼ)²        the centre mⱼ appears in neither term"}</Equation>
-                <p>
-                  What leaks, then, is the ratio of each column&rsquo;s spread
-                  over everyone to its spread over the training fold, a number
-                  close to one that reweights the three columns by a fraction
-                  shrinking like one over the number of people. That is the
-                  second reason. Nothing about that ratio knows the weight, so
-                  it cannot lean the fit toward the held-out answers any more
-                  than away from them, and a leak that is blind to the target
-                  can move the score in either direction, which is why
-                  fourteen of thirty seeds were flattered and sixteen were
-                  not.
-                </p>
-                <WhyThisWorks title="Why the held-out evaluation page's line felt even less">
+                <p>The nearest-neighbor model uses differences between standardized observations. Both observations have the same center subtracted, so that center cancels from their difference. The spread used to divide each column still affects distances and therefore which neighbors are selected.</p>
+                <Equation>{"d(a, b)² = Σⱼ ((aⱼ − bⱼ) / sⱼ)²        the center mⱼ appears in neither term"}</Equation>
+                <p>In this experiment, using all rows changes the spread estimates and therefore the relative influence of the columns. The score can move in either direction, as the repeated seeds show. A small average difference here does not make the shortcut valid or establish that preparation without target values is harmless in other problems.</p>
+                <WhyThisWorks title="Why unpenalized least squares is less sensitive to scaling">
                   <>
-<p>
-                    That page measured the same leak on a ridge fit at a small penalty and found gaps of a few ten-thousandths, and the reason is one step further along the same argument. A least-squares line is unchanged by any rescaling of its columns, since the slope simply rescales to match, so for it neither the centre nor the spread leaks anything at all; only the penalty, which charges for the size of a coefficient and so notices what scale the coefficient is in, lets any of the standardizer&rsquo;s numbers through.
-                  </p>
+<p>An unpenalized least-squares model with an intercept can compensate for an invertible shift and rescaling of its columns by changing its coefficients. Ridge adds a penalty on those coefficients, so changing the feature scales changes the fitting preference. That helps explain why the earlier low-penalty ridge experiment showed only small differences.</p>
                   <p>
                     Part 6 measures that same sensitivity from the other side.
                   </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  A centre cancels out of every distance and every
-                  least-squares line. A spread is a ratio near one that
-                  approaches one as the rows grow. Neither consults the target,
-                  which is why neither can bias the score.
-                </KeepInMind>
+
+                  A shared center cancels from Euclidean differences, while feature scales still change their relative contributions. In ordinary least squares with an intercept, invertible shifts and rescalings can be absorbed into the coefficients. These special invariances explain parts of this example; they do not imply that transformations ignoring the target cannot bias evaluation.</KeepInMind>
               </SubSection>
 
               <SubSection title="11. A step that reads the target leaks the target">
                 <>
-<p>
-                  The lower panel of the playground fits something deliberately not built here, a step that keeps whichever of twenty noise columns correlates best with a target that is itself noise. No column deserves any score above zero, and a neighbours fit on any one of them should do worse than answering the mean weight every time.
-                </p>
-                <p>
-                  Both arrangements do exactly that. Choosing the column inside each fold scores −0.8867 at thirty people, and choosing it on every person first scores −0.5979, which looks less bad by a margin that has survived every family of seeds I have run.
-                </p>
+<p>The lower panel uses twenty independently generated noise columns and an independent noise target. It selects the column with the strongest observed target correlation, then fits a nearest-neighbor predictor using that column. There is no population relationship to learn, although chance correlations appear in finite samples. Selecting with held-out targets can make those coincidences look useful during evaluation.</p>
+                <p>At thirty people, choosing the column inside each training fold gives mean R² −0.8867. Choosing it using all rows before forming the folds gives −0.5979. Both scores remain negative, but the latter evaluation is less negative because its feature selection used target values that were later treated as held out.</p>
 </>
                 <NumberTable
                   headings={["people", "chosen before the folds", "chosen inside each fold", "gap", "seeds flattered", "largest single-seed gap"]}
@@ -412,7 +301,7 @@ export default function PipelinesPage() {
                     ["60", "−0.2696", "−0.4252", "+0.1556", "27 of 30", "0.4518"],
                     ["200", "−0.1985", "−0.2392", "+0.0407", "18 of 30", "0.1972"],
                   ]}
-                  caption="The same folds and the same neighbours regressor as the standardizer's table, on twenty columns of noise beside a target of noise."
+                  caption="The same folds and the same neighbors regressor as the standardizer's table, on twenty columns of noise beside a target of noise."
                 />
                 <>
                   <p>
@@ -420,32 +309,17 @@ export default function PipelinesPage() {
                     presented as held out. Among twenty noise features, the strongest
                     chance correlation can look substantial on a small sample.
                   </p>
-                  <p>
-                    The resulting score inflation is positive in twenty-seven of thirty
-                    seeds in this experiment. It shrinks as the sample grows, but
-                    remains visible. A seemingly useful score can therefore arise from
-                    leaking answers into feature selection even when the input features
-                    contain no predictive information.
-                  </p>
+                  <p>In the thirty-person experiment, the shortcut raises the score in twenty-seven of thirty seeds. The mean gap becomes smaller at the larger sample sizes in the table. Even though these particular scores remain negative, the comparison shows how held-out answers can influence feature selection without any genuine predictive relationship.</p>
                 </>
                 <KeepInMind>
-                  A centre and a spread leak a fifth of two numbers that never
-                  consulted the weight, and the score moves either way by a
-                  few thousandths. A column chosen by its correlation with the
-                  target carries the held-out answers into the fit, and the gap
-                  kept its sign on twenty-seven seeds of thirty and on
-                  twenty-five of the next thirty.
-                </KeepInMind>
+
+                  The two experiments use held-out information in different ways. Standardizing first uses the held-out inputs; selecting by correlation also uses their target values. The measured effects differ in size, but both procedures cross the evaluation boundary.</KeepInMind>
               </SubSection>
 
               <SubSection title="12. The size of the leak is not the argument">
                 <>
-<p>
-                  It would be easy to read Part 3 as saying the chain matters only for a step that reads the target, and that reading is half right. No step on this page reads the target, and for the steps that are here the leak is within noise of zero. The argument for the object was never the size of the penalty for getting the fold wrong.
-                </p>
-                <p>
-                  It is that the question stops being the caller&rsquo;s to remember, at every fold, every candidate and every serving call, and that once the steps and the model are one object a setting inside a step becomes something a search can vary. Parts 4 and 5 are about those two things.
-                </p>
+<p>The standardization experiment produced small score differences, while selecting features using all target values produced a consistent advantage. These are results for the examples measured here. Preparation that does not read target values can still use information from held-out inputs, so we keep its fitting inside the training split rather than deciding by the size of a convenient result.</p>
+                <p>The pipeline gives the fitting boundary one place to be enforced. The same object can be refitted inside a fold or evaluated as a search candidate, with preparation included. It also lets us compare complete configurations, such as an expansion degree together with the predictor’s penalty.</p>
 </>
                 <KeepInMind>
                   The chain is worth having when the leak is small, because
@@ -460,16 +334,16 @@ export default function PipelinesPage() {
           title: "Questions on Parts 1 to 3",
           quiz: [
             trueFalse(
-              "A held-out person could be standardized against their own centre and spread rather than the training rows’.",
+              "A held-out person could be standardized against their own center and spread rather than the training rows’.",
               false,
-              "One height has no spread at all, so asking to standardize a single person is refused because the column is constant. The centre and spread are read off the training rows, 167.11 cm and 10.38 cm for the nine people here, and under those two numbers the held-out person at 153 cm becomes −1.360. They change when the training rows change and a prediction cannot be made without them, which makes them a fitted parameter of the model in every sense that matters.",
+              "One height has no spread at all, so asking to standardize a single person is refused because the column is constant. The center and spread are read off the training rows, 167.11 cm and 10.38 cm for the nine people here, and under those two numbers the held-out person at 153 cm becomes −1.360. They change when the training rows change and a prediction cannot be made without them, which makes them a fitted parameter of the model in every sense that matters.",
             ),
             choice(
-              "The chain expands height to height and its square, then standardizes. What does the standardizer learn the centre and spread of?",
+              "The chain expands height to height and its square, then standardizes. What does the standardizer learn the center and spread of?",
               [
-                "Both columns the expansion handed it, including the square at centre 28033.78 and spread 3467.39",
+                "Both columns the expansion handed it, including the square at center 28033.78 and spread 3467.39",
                 "The raw height only, since that is the column the caller supplied",
-                "The target weights, so that the ridge reads a centred target",
+                "The target weights, so that the ridge reads a centered target",
                 "Nothing, because a standardizer placed after an expansion has no columns to measure",
               ],
               0,
@@ -484,18 +358,18 @@ export default function PipelinesPage() {
                 "The shortcut flattered the score by more than a tenth of a unit of R²",
               ],
               0,
-              "The shortcut did not flatter the score at all there, and fourteen of the thirty seeds went the other way. At sixty people the gap is +0.0004 and at two hundred +0.0001, a coin toss that shrinks as the people multiply, and the largest single-seed gap at thirty people is 0.1019, which is sixty times the mean gap.",
+              "In the thirty-person comparison, fitting the scaler before splitting gives mean R² 0.4813 rather than 0.4830. Individual seeds produce differences in both directions. Their average size decreases in the larger samples measured here, but one thirty-person seed has a gap of 0.1019. A small average difference does not validate the procedure: preprocessing should be fitted using the rows available at the intended training stage.",
             ),
             choice(
               "Why can the standardizer’s leak move the held-out score in either direction?",
               [
-                "Because what leaks is a ratio of spreads that never consults the target",
+                "The leaked input spreads change distance weights, but do not guarantee whether this particular held-out score improves or worsens",
                 "Because the folds are dealt from a different seed each time",
                 "Because a standardizer is refitted on the held-out rows at predict time",
                 "Because R² is not a signed quantity",
               ],
               0,
-              "A distance between two standardized people subtracts the same centre from both, so the centre cancels and only the spread survives. What leaks is the ratio of each column’s spread over everyone to its spread over the training fold, a number close to one, and nothing about that ratio knows the weight, so it cannot lean the fit toward the held-out answers any more than away from them.",
+              "For a distance between two standardized rows, the common mean cancels while the fitted standard deviations set relative feature weights. Using all rows instead of training rows changes those weights and uses information about the held-out input distribution. It does not directly select a feature from the held-out labels, but that does not make the resulting evaluation valid or guarantee an unbiased score change. The observed score can move in either direction.",
             ),
             trueFalse(
               "The step that keeps whichever of twenty noise columns correlates best with a noise target leaks in one direction on most seeds, where the standardizer’s leak changes sign from one seed to the next.",
@@ -509,46 +383,15 @@ export default function PipelinesPage() {
           content: (
             <>
               <SubSection title="13. A template and its fitted copy">
-                <p>
-                  Section 7 handed one chain object to four folds in turn and
-                  claimed each fold got its own fit. For that to be true the
-                  steps and the model a caller builds the chain from must never
-                  themselves be fitted, or the second fold would start from
-                  whatever the first fold learned. So fit copies them. The
-                  copies are fitted and stored, and the originals, which are
-                  the configuration, stay exactly as they were built. The
-                  ledger reads that claim off a chain fitted on the nine
-                  training people.
-                </p>
+                <p>In this SDK, fitting copies the configured steps and model, fits those copies, and stores them only after the whole procedure succeeds. The supplied objects remain unchanged. This lets the same pipeline configuration be refitted on successive folds without replacing its configuration with the result of the preceding fit. Copying is the chosen implementation strategy; other APIs can provide fresh fits in other ways.</p>
                 <TemplateLedger />
-                <p>
-                  The configured model and both configured steps report
-                  themselves unfitted after the fit; the fitted copies report
-                  themselves fitted; and the copies are different objects from
-                  the configuration, so a change to one cannot reach the other.
-                  Refitting the same object on a different nine and comparing
-                  it with a chain built fresh for those nine gives predictions
-                  that agree to a largest difference of exactly zero, which is
-                  what starting from scratch means.
-                </p>
+                <p>In the ledger, the supplied model and steps start unfitted and remain so after pipeline fitting. The stored copies are fitted and are separate objects. Refitting the pipeline on a different group of nine produces exactly the same held-out predictions as a fresh pipeline fitted on that group. This checks refitting for the components used in the example.</p>
                 <KeepInMind>
-                  A chain holds a configuration and, after fit, a fitted copy
-                  of it. The configuration is a description and is never
-                  fitted; the copy is the result. Reading the fitted steps of
-                  an unfitted chain is refused, since there is no copy yet.
-                </KeepInMind>
+                  The pipeline retains its supplied configuration and, after a successful fit, separate fitted copies. It does not fit the supplied objects in place. If an object was already fitted when supplied, it keeps that state; the pipeline uses its own refitted copy. Reading fitted steps before the pipeline&rsquo;s first successful fit raises an error.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. Four folds, four independent fits">
-                <p>
-                  The same check, run inside the fold loop. At each of the
-                  four folds the shared object is refitted on that fold&rsquo;s
-                  nine and scored on its three, and a chain built fresh for
-                  the fold is fitted and scored beside it. If anything from an
-                  earlier fold survived on the shared object the two would
-                  differ somewhere; the figure over each bar is the largest
-                  difference between their predictions on that fold.
-                </p>
+                <p>Repeat the comparison inside cross-validation. At each fold, refit the shared pipeline on that fold&rsquo;s nine training rows and compare it with a fresh pipeline fitted on the same rows. The figure above each bar gives the largest prediction difference. Agreement checks for an observable effect of earlier fits on these predictions; it cannot prove that no unused internal state exists.</p>
                 <FoldIndependence />
                 <p>
                   Zero at every fold. Afterwards the shared object is fitted,
@@ -569,9 +412,7 @@ export default function PipelinesPage() {
 
               <SubSection title="15. Nothing is committed until everything succeeded">
                 <>
-<p>
-                  A fit can fail halfway. The expansion may succeed and the standardizer refuse, or both steps may succeed and the model refuse, and a chain that had already stored its new fitted steps by then would be left holding fitted steps from one fit beside a fitted model from another. So the chain computes every part into a result first and stores nothing until the model has fitted too.
-                </p>
+<p>A refit can fail after some steps have succeeded. Storing those new steps immediately could leave them paired with the old predictor. The chain instead prepares the complete new fit before replacing the stored state. If any stage fails, the previous fitted procedure remains intact.</p>
                 <p>
                   The ledger&rsquo;s seventh and eighth rows break a refit on purpose, handing the fitted chain a constant height column, which the standardizer refuses because a constant column has no spread.
                 </p>
@@ -585,11 +426,7 @@ export default function PipelinesPage() {
                   half replaced.
                 </p>
                 <KeepInMind>
-                  The chain computes every part of a fit before it stores
-                  any of it, so it either finishes a fit or keeps the one it
-                  had, and no caller ever meets a chain whose steps and model
-                  came from different fits.
-                </KeepInMind>
+                  The pipeline prepares new fitted state before replacing the old state. A failure during these fit calls therefore leaves the previous steps and predictor paired together. That is a guarantee of the refit procedure, rather than protection against every possible later manual change to an object.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -601,25 +438,16 @@ export default function PipelinesPage() {
               <SubSection title="16. Degree is not the model's to choose">
                 <>
 <p>
-                  The grid search page varied a neighbour count, which is a field of the neighbours model, and a ridge penalty, which is a field of the ridge model. The degree of the expansion in this chain is neither. It is a field of the expansion step, and a search over the ridge model alone has no way to reach it.
+
+                  The grid search page varied a neighbor count, which is a field of the neighbors model, and a ridge penalty, which is a field of the ridge model. The degree of the expansion in this chain is neither. It is a field of the expansion step, and a search over the ridge model alone has no way to reach it.
                 </p>
                 <p>
                   Asked to vary a degree on the ridge model, the search refuses at construction and names the two fields the model does have, its intercept switch and its penalty, and that refusal is quoted under the lattice below.
                 </p>
 </>
-                <p>
-                  Wrapped in a chain, the whole configuration is one model
-                  whose two fields are its steps and its model, and both can
-                  be varied. That is the capability the object buys, and it is
-                  stronger than the leak argument, since without it the
-                  question of which degree to use could not be put to a search
-                  at all.
-                </p>
+                <p>Wrapping the steps and predictor together gives the search a complete candidate to configure. It can vary the expansion as well as the ridge model and evaluate their combined effect. Without that wrapper, the same comparison would require a separate procedure that explicitly rebuilt both objects.</p>
                 <KeepInMind>
-                  A search can only vary a field of the model it is handed. A
-                  setting inside a preprocessing step is out of its reach
-                  until the step and the model are one object.
-                </KeepInMind>
+                  This search API varies fields of the object it receives. Wrapping preparation and prediction exposes both as parts of one candidate. A different API could also search preprocessing by explicitly rebuilding the full procedure.</KeepInMind>
               </SubSection>
 
               <SubSection title="17. A candidate is a whole object">
@@ -650,28 +478,13 @@ export default function PipelinesPage() {
 <p>
                   On the twelve people the search keeps degree 1 at a penalty of 0.1, with a mean held-out R² of 0.9796, and degree 1 at 0.01 finishes within a few millionths of it. Degree 2 at 0.1 scores 0.9790, degree 2 at 1 scores 0.9758, and every candidate at a penalty of 10 is far behind, degree 1 at 0.6157 and degree 4 at 0.9081.
                 </p>
-                <p>
-                  The spread across the sixteen is 0.3639, which says the settings mattered, though what mattered was the penalty; the degrees at any one small penalty finish within 0.015 of one another, and the expansion earns nothing on twelve people who lie very nearly on a line.
-                </p>
+                <p>The highest and lowest candidate means differ by 0.3639. The largest changes here come from the ridge penalty; the polynomial degrees at each small penalty finish within 0.015 of one another. On these nearly linear data and these folds, expansion adds little measured benefit. That conclusion is specific to the compared candidates.</p>
 </>
                 <InAModel title="The Ideal Case">
-                  <p>
-                    On fifteen people lying almost exactly on one line the
-                    winner is again degree 1 at 0.1, at 0.9976, and the spread
-                    of 0.2828 is once more the penalty of 10 ruining every
-                    degree. The search reports both numbers because a winner
-                    without its spread is a number that cannot be read, and
-                    here the spread says the search chose a penalty and had
-                    no opinion about the degree.
-                  </p>
+                  <p>On the separate fifteen-person example, degree 1 with penalty 0.1 again has the highest mean score, 0.9976. The candidate range is 0.2828, driven largely by the poorer scores at penalty 10. Compare the near-ties as well as the winner: this grid distinguishes penalty choices more strongly than polynomial degrees.</p>
                 </InAModel>
                 <KeepInMind>
-                  The winner is the candidate with the highest mean held-out
-                  score, and the spread beside it says how much the choice
-                  mattered. The grid search page&rsquo;s warning applies
-                  unchanged, since the winner&rsquo;s score is optimistic
-                  and a chain does nothing to change that.
-                </KeepInMind>
+                  The reported winner has the highest mean score among the tested candidates. The score range describes this grid, not uncertainty about the winner or performance on new data. Selecting and reporting the best cross-validation score can be optimistic; a separate evaluation is still needed.</KeepInMind>
               </SubSection>
 
               <SubSection title="19. A misspelt name is refused, never ignored">
@@ -690,11 +503,7 @@ export default function PipelinesPage() {
                 </>
                 <Equation>{"a range over the chain's field \"stepz\"     refused at construction, the chain has \"model\" and \"steps\"\na range over the ridge model's \"degree\"    refused at construction, the model has \"fit_intercept\" and \"penalty\""}</Equation>
                 <KeepInMind>
-                  A wrong name inside a candidate has to fail loudly, because
-                  the failure it would otherwise produce is a search that ran
-                  to completion and measured nothing. Both wrong names here
-                  are refused before a single fold is dealt.
-                </KeepInMind>
+                  Rejecting an unknown setting prevents the search from silently evaluating the wrong configurations. These two invalid names fail before any fold is fitted. A search can otherwise finish successfully while testing something different from what the caller intended.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -705,7 +514,8 @@ export default function PipelinesPage() {
             <>
               <SubSection title="20. Expand then standardize, or standardize then expand">
                 <p>
-                  Does preprocessing order change the model? Expand height first and standardize afterwards, and ridge receives two centred, unit-spread columns. Standardize height first and square it afterwards, and the square column has mean one under the population-variance convention used here, with a different spread. The chart compares both orders at six penalties on the same four folds.
+
+                  Does preprocessing order change the model? Expand height first and standardize afterwards, and ridge receives two centered, unit-spread columns. Standardize height first and square it afterwards, and the square column has mean one under the population-variance convention used here, with a different spread. The chart compares both orders at six penalties on the same four folds.
                 </p>
                 <StepOrderChart />
                 <p>
@@ -720,46 +530,21 @@ export default function PipelinesPage() {
                   ten.
                 </p>
                 <KeepInMind>
-                  The order of the steps is part of the model. Two chains with
-                  the same steps in different orders are different models, and
-                  on these twelve people they differ by as much as a quarter
-                  of a unit of R² at a penalty of ten.
-                </KeepInMind>
+                  The order of preparation steps can change the available representations and the fitting preference. In this comparison, both orders span the same quadratic curves, but ridge penalizes their coefficients differently. Their cross-validation R² values differ by about a quarter at penalty ten.</KeepInMind>
               </SubSection>
 
-              <SubSection title="21. Why a penalised model feels the order and least squares does not">
+              <SubSection title="21. Why a penalized model feels the order and least squares does not" id="21-why-a-penalised-model-feels-the-order-and-least-squares-does-not">
                 <>
 <p>
                   The two column sets span the same curves. Height and its square, or standardized height and its square, either pair together with an intercept can draw any parabola in height, so a fit that only asks which parabola is closest to the nine training people finds the same one either way. That is what the penalty of zero shows, and a plain least-squares model in place of the ridge gives the same 1.2e−13.
                 </p>
-                <p>
-                  A ridge penalty is a charge on the squared coefficients of whatever columns it was handed, and handing it different columns changes what it is charging for.
-                </p>
+                <p>Ridge penalizes the coefficients of the columns it receives. A change in representation can therefore change which prediction functions receive a large penalty, even when the available family of curves stays the same. The fitting objective depends on the representation as well as the predictions.</p>
 </>
-                <Equation>{"expand then standardize, penalty 1    height 4.821   height² 4.853        both columns centre 0, spread 1\nstandardize then expand, penalty 1    height 9.191   height² 0.241        the square has centre 1, spread 0.932"}</Equation>
-                <p>
-                  On heights between 150 and 183 cm the standardized height
-                  and the standardized square are very nearly the same column,
-                  and the ridge splits the slope between them, 4.821 and
-                  4.853, which is the grouping the{" "}
-                  <Link href="/concepts/ridge-lasso" className={link}>
-                    ridge and lasso page
-                  </Link>{" "}
-                  describes. Standardized first and then squared, the square is
-                  centred at one and carries little that the height does not,
-                  and the ridge puts 9.191 on the height and 0.241 on the
-                  square. Both orders fit the same nine people with the same
-                  family of curves, and the one that hands the penalty every
-                  column at the same spread scored higher at every penalty
-                  tried.
-                </p>
+                <Equation>{"expand then standardize, penalty 1    height 4.821   height² 4.853        both columns center 0, spread 1\nstandardize then expand, penalty 1    height 9.191   height² 0.241        the square has center 1, spread 0.932"}</Equation>
+                <p>Over heights from 150 to 183 cm, standardized height and standardized height squared are highly correlated. Ridge assigns them coefficients 4.821 and 4.853, illustrating the grouping discussed in the <Link href="/concepts/ridge-lasso" className={link}>ridge and lasso page</Link>. Standardizing before squaring creates a different basis: the squared standardized height represents curvature around the training mean, and the fitted coefficients are 9.191 and 0.241. Both orders can represent the same parabolas, but the same numeric penalty favors them differently. Standardizing last scores higher at each positive penalty tested here.</p>
                 <KeepInMind>
-                  A model with no penalty sees only the curves the columns can
-                  draw, and the order does not change those. A penalised model
-                  sees the columns themselves, and the order changes them. The
-                  chain&rsquo;s own order standardizes last, so the penalty
-                  meets every column at spread one.
-                </KeepInMind>
+
+                  For these two step orders, unpenalized least squares with an intercept can represent and fit the same quadratic functions. Ridge also depends on how those functions are expressed as coefficients. Standardizing the expanded columns gives both unit spread, while squaring an already standardized column gives a different coefficient basis.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -770,7 +555,7 @@ export default function PipelinesPage() {
             <>
               <SubSection title="22. What is fitted, what is copied and what prediction reuses" id="22-what-a-complete-implementation-specifies">
                 <p>The order of a pipeline is part of the model. Each named step fits the output of the preceding step. Prediction reuses that fitted sequence and fits nothing, so the later rows cannot change their own reference.</p>
-                <p>Here every fit works on copies of the configured steps and model. The original configuration remains unfitted, and no new fit is committed unless every stage succeeds. That prevents a failed fit from leaving half a new pipeline in use.</p>
+                <p>Here every fit works on copies of the configured steps and model, leaving the supplied objects unchanged. New fitted state is installed only if every stage succeeds. A supplied object can already have its own fit; the pipeline keeps its newly fitted copy separately.</p>
                 <p>Nested search settings must identify the correct step and parameter. Also check the treatment of a wrong name, an empty step list, an incompatible final model and incoming columns that are missing, extra or reordered.</p>
                 <KeepInMind>
                   Most of those are promises about what the chain does with
@@ -780,12 +565,7 @@ export default function PipelinesPage() {
               </SubSection>
 
               <SubSection title="23. What the chain refuses, accepts, and lets through">
-                <p>
-                  Every row below was put to the chain, on the twelve people
-                  where a row needs people, and the widget under the table
-                  asks the same list again on each load so the two cannot
-                  drift apart.
-                </p>
+                <p>The table records how the chain responds to these cases. The widget repeats the checks when it loads, using the twelve-person dataset where observations are needed.</p>
                 <DerivationTable
                   expressionHeading="Pipeline stage or input"
                   reasonHeading="Where fitting or prediction can fail"
@@ -795,7 +575,7 @@ export default function PipelinesPage() {
                     { expression: "one training person, or a constant height column", reason: "refused by the standardizer, because a column with no spread cannot be scaled." },
                     { expression: "a height that is not a number", reason: "refused at the boundary, by the same guard every column here passes through." },
                     { expression: "a target shorter than the features", reason: "refused by name, with both lengths in the message." },
-                    { expression: "a degree the training people cannot support", reason: "refused by the ridge, which needs at least as many rows as parameters; degree 9 on 8 people is ten parameters on eight rows." },
+                    { expression: "a degree the training people cannot support", reason: "refused by this SDK’s ridge implementation because it requires at least as many rows as parameters; degree 9 on 8 people creates ten parameters. Ridge regression can be defined for this case mathematically, but this implementation imposes the row-count check." },
                     { expression: "predict before fit, or read the fitted steps before fit", reason: "refused; there is no fitted copy to read." },
                     { expression: "predict with a feature missing", reason: "refused, though not by the first step; a standardizer transforms the subset it is given, and the model behind it refuses the exact set it was fitted on being incomplete." },
                     { expression: "predict with a feature the fit never saw", reason: "depends on which step meets it. A standardizer refuses a column it never learned a scaling for; an expansion computes the terms it needs and ignores the rest." },
@@ -821,24 +601,15 @@ export default function PipelinesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="24. Documented rather than defended">
+              <SubSection title="24. Validation Limits and Extra Columns" id="24-documented-rather-than-defended">
                 <>
-<p>
-                  Two rows in the table are honest gaps rather than contracts. A step is accepted by name and object at construction and nothing checks that the object can transform, so a ridge model handed in as a step is accepted and fails inside fit with a bare attribute error about a missing method, which is not one of the named refusals.
-                </p>
-                <p>
-                  And an expansion met by a column it never saw ignores the column rather than refusing it, so a chain whose first step is an expansion will quietly predict for a row carrying an extra measurement, where a chain whose first step is a standardizer will refuse the same row by name. Neither is defended here.
-                </p>
-                <p>
-                  The first would be a type check at construction; the second is a difference between two steps&rsquo; own rules that the chain inherits rather than makes.
-                </p>
+<p>Some failures occur later than a caller might expect. The constructor accepts a named object as a step without checking that it can transform data. A ridge model supplied there is accepted initially, then fails during fit because the required transformation method is missing. That is a limitation of this implementation’s validation.</p>
+                <p>An expansion ignores incoming columns it does not use, while a standardizer rejects a column for which it has no learned scaling. The same extra measurement can therefore be accepted or rejected depending on the first step. That behavior comes from each step&rsquo;s input contract.</p>
+                <p>Checking a step’s interface at construction could catch the first problem earlier. The extra-column behavior comes from the steps’ different input rules. Combining steps into a pipeline does not automatically make those rules identical.</p>
 </>
                 <KeepInMind>
-                  The chain keeps every promise in Parts 2 and 4 and inherits
-                  the edges of its steps, and where a step&rsquo;s edge is
-                  loose the table reports the measured behaviour rather than a
-                  tidier one.
-                </KeepInMind>
+
+                  The pipeline coordinates fitting order and state replacement, but it inherits its steps&rsquo; input rules and validation limits. Check the complete configured sequence rather than assuming the wrapper adds stricter checks everywhere.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -871,10 +642,10 @@ export default function PipelinesPage() {
                 "Because the search would have to refit the standardizer for every degree",
               ],
               0,
-              "Asked to vary a degree on the ridge model, the search refuses at construction and names the two fields the model does have, its intercept switch and its penalty. Wrapped in a chain the whole configuration is one model whose fields are its steps and its model, so both can be varied, and that is the capability the object buys beyond the leak argument.",
+              "In this SDK, SearchSpace.over varies declared fields of the supplied model class. RidgeRegression has no polynomial-degree field. RegressionPipeline exposes its steps and final model as configuration, allowing candidate step sequences and ridge models to be evaluated together. Each candidate is then a complete procedure, including the preprocessing that must be refitted.",
             ),
             choice(
-              "The search over four degrees and four penalties reports a winner of 0.9796 with a spread of 0.3639 across the sixteen candidates. What does the spread say?",
+              "The sixteen candidates span scores by 0.3639. Small penalties give similar scores across degrees, while penalty 10 gives much lower scores. What does that full comparison suggest?",
               [
                 "That the settings mattered, and that what mattered was the penalty rather than the degree",
                 "That the winner is within noise of every other candidate",
@@ -882,19 +653,19 @@ export default function PipelinesPage() {
                 "That the winning score is an honest estimate of future performance",
               ],
               0,
-              "Four degrees crossed with four penalties is sixteen candidates and sixty-four fits on the shared folds. Every candidate at a penalty of 10 is far behind, degree 1 at 0.6157 and degree 4 at 0.9081, while the degrees at any one small penalty finish within 0.015 of one another, so the expansion earns nothing on twelve people who lie very nearly on a line. The winner’s score is still optimistic, and a chain does nothing to change that.",
+              "The full candidate results show that the large penalty accounts for the largest differences in this search. The range alone says only that candidate scores differ. Small degree differences on twelve nearly linear observations do not establish that one degree will generalize better. Since these same folds selected the winner, use separate evaluation or nested validation for an independent performance estimate.",
             ),
             trueFalse(
               "At a penalty of zero, expanding then standardizing and standardizing then expanding give the same held-out predictions.",
               true,
-              "Both orders score 0.9579 and predict the three held-out weights to a largest difference of 1.2e−13, because either pair of columns together with an intercept can draw any parabola in height, and a fit with no penalty sees only the curves the columns can draw. At every positive penalty they part, because a penalty is a charge on the squared coefficients of whatever columns it was handed. At a penalty of one the chain’s own order puts 4.821 and 4.853 on height and its square, where standardizing first puts 9.191 and 0.241 on them, and the two score 0.9758 and 0.9523.",
+              "With a free intercept and no penalty, both feature orders span the same quadratic functions of height, giving equivalent least-squares predictions up to rounding. A coefficient penalty depends on the chosen coordinates, so the two orders need not select the same function once the penalty is positive. They differ in this dataset; that is not a guarantee of different predictions for every possible dataset or penalty.",
             ),
         ],
         },
         {
           title: "Practice. Fitting, Folding and Searching the Chain",
           practice: [
-            exercise("Fit the chain on nine people and score the three held out",["The starter builds Part 2’s chain, an expansion to degree 2, a standardizer and a ridge at a penalty of one, and holds out the people at 153, 165 and 177 cm. Fit the chain on the other nine. Print the centre and spread its standardizer learned for each column it was handed, the weight it predicts for each held-out person, and the held-out R squared and mean squared error.", "Part 1 gives the centre and spread of height as 167.11 and 10.38, the three predictions as 52.75, 63.66 and 74.98 kg, and the held-out R squared as 0.9930. The mean squared error is not on the page."],`from oop_ml import (
+            exercise("Fit the chain on nine people and score the three held out",["Use the supplied RegressionPipeline: degree-two PolynomialFeatures, then Standardizer, then RidgeRegression(penalty=1). Hold out heights 153, 165 and 177 cm and fit on the other nine people. Print each fitted scaling's name, mean and standard deviation.", "Predict the three held-out weights and print each beside its actual value. Print held-out R² and mean squared error. Inspect the squared-height scaling as well as height: the standardizer receives both expanded columns."],`from oop_ml import (
     Feature,
     PipelineSteps,
     PolynomialFeatures,
@@ -964,8 +735,8 @@ height^2: centre 28033.78, spread 3467.39
 165 cm weighs 63 kg, predicted 63.66 kg
 177 cm weighs 76 kg, predicted 74.98 kg
 held-out R squared 0.9930
-held-out mean squared error 0.6773`,{...{ hints: ["A chain is fitted and asked for predictions exactly like a single model. fit takes a list of features and a target feature, and predict takes a list of features.", "The fitted copies of the steps are on the chain as fitted_steps and are addressed by the names the steps were given, so the standardizer is fitted_steps[\"scaler\"].transformer. Its scalings can be looped over, and each has a name, a mean and a standard_deviation.", "evaluate answers an object that has already paired each prediction with its truth. r2_score and mean_squared_error are properties of it."], check: numberCheck("What mean squared error does the chain score on the three held-out people, to four places?", 0.6773, 0.0005, "The held-out errors come from predictions made with preprocessing learned on the nine training people. The held-out rows are transformed by that retained preparation without contributing to its fitted centre or spread.") },question:"Can a fitted pipeline predict held-out weights using training-only preprocessing?"}),
-            exercise("Read the configuration back, then break a refit",["Fit the same chain on the same nine people. Then ask the objects the chain was built from whether they are fitted, ask the fitted copy of the model the same question, and check whether the two models are the same object. After that, refit the chain on a height column that is constant, catch what the library raises, and see what the chain is left holding.", "Part 4 says the configuration is never fitted and that a refit which fails leaves the previous fit whole, with the predictions moved by exactly nothing."],`from oop_ml import (
+held-out mean squared error 0.6773`,{...{ hints: ["A chain is fitted and asked for predictions exactly like a single model. fit takes a list of features and a target feature, and predict takes a list of features.", "The fitted copies of the steps are on the chain as fitted_steps and are addressed by the names the steps were given, so the standardizer is fitted_steps[\"scaler\"].transformer. Its scalings can be looped over, and each has a name, a mean and a standard_deviation.", "evaluate answers an object that has already paired each prediction with its truth. r2_score and mean_squared_error are properties of it."], check: numberCheck("What mean squared error does the chain score on the three held-out people, to four places?", 0.6773, 0.0005, "The held-out errors come from predictions made with preprocessing learned on the nine training people. The held-out rows are transformed by that retained preparation without contributing to its fitted center or spread.") },question:"Can a fitted pipeline predict held-out weights using training-only preprocessing?"}),
+            exercise("Read the configuration back, then break a refit",["Fit the same chain on the same nine people. Then ask the objects the chain was built from whether they are fitted, ask the fitted copy of the model the same question, and check whether the two models are the same object. After that, refit the chain on a height column that is constant, catch what the library raises, and see what the chain is left holding.", "Print whether the configured model and transformers are fitted, whether fitted_model is fitted, and whether it is the same object as model. After the deliberate failed refit, compare the held-out predictions with those saved before the attempt."],`from oop_ml import (
     Feature,
     MLLibError,
     PipelineSteps,
@@ -1048,7 +819,7 @@ AllSameValuesError
 feature_values must not be constant (zero variance)
 still fitted: True
 predictions moved by 0.0`,{...{ hints: ["Every model and every transformer in the library answers is_fitted. The configuration is chain.model and chain.steps, and the results of the fit are chain.fitted_model and chain.fitted_steps.", "Looping over chain.steps gives each step in the order it runs, with a name and the transformer it wraps."] },question:"Does a failed refit preserve the previous fitted pipeline?"}),
-            exercise("Fold the chain, then let a search choose the degree",["Cross-validate Part 2’s chain over all twelve people, on four folds dealt with the page’s seed of 4, and print each fold’s held-out R squared and their mean. Then build a search space that varies the chain’s steps over degrees 1 to 4 and its model over penalties of 0.01, 0.1, 1 and 10, run the search on the same folds, and print every candidate’s score with the winner and the spread.", "Part 2 reports fold scores of 0.9986, 0.9916, 0.9234 and 0.9894, and Part 5 reports a winner of degree 1 at a penalty of 0.1, at 0.9796, with a spread of 0.3639. The lesson does not quote what degree 3 scores at a penalty of one."],`from oop_ml import (
+            exercise("Fold the chain, then let a search choose the degree",["Evaluate the complete pipeline with four-fold KFold under random_seed=4. Print each fold's held-out R² and their mean. Then search all combinations of polynomial degrees 1 through 4 and ridge penalties 0.01, 0.1, 1 and 10 using those same folds.", "Print every candidate's degree, penalty and mean score, then best_score and score_spread. Also print the degree-three, penalty-one result separately. Check that each candidate refits its preprocessing within the fold rather than reusing another candidate's fitted statistics."],`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1142,7 +913,7 @@ degree 4, penalty 1.0: 0.9717
 degree 4, penalty 10.0: 0.9081
 winner 0.9796, spread 0.3639
 degree 3 at a penalty of 1: 0.9751`,{...{ hints: ["CrossValidation is built with the folds and its evaluate takes the chain and the dataset. The result can be looped over, one evaluation per fold, and it carries mean_r2_score.", "SearchSpace.over takes the class being searched and then one list per field. The chain has two fields, steps and model, and each list holds whole objects that their own constructors have already checked.", "GridSearch is built with the folds, and its search takes a prototype, the space and the dataset. Looping over what it answers gives every scored candidate.", "A candidate hands back the object it carried for a field through value_for, so the degree is value_for(\"steps\")[\"terms\"].transformer.degree and the penalty is value_for(\"model\").penalty."], check: numberCheck("What mean held-out R squared does the degree 3 chain score at a penalty of one, to four places?", 0.9751, 0.0005, "This candidate is evaluated on the same folds as the other degree-and-penalty settings. Its score belongs to the complete refitted pipeline, including the transformations learned inside each training fold.") },question:"Can cross-validation and search refit every preprocessing stage within its fold?"}),
-            exercise("Run the two steps in the other order",["Part 6 says the order of the steps is part of the model. Build the chain both ways round, expanding and then standardizing, and standardizing and then expanding, and cross-validate each on the same four folds at penalties of 0, 1 and 100.", "The lesson gives 0.9579 for both orders at a penalty of zero and 0.9758 against 0.9523 at a penalty of one. It stops at a penalty of ten, so the last pair of numbers is yours to find. Before running, decide whether the gap between the orders should keep growing."],`from oop_ml import (
+            exercise("Run the two steps in the other order",["Part 6 says the order of the steps is part of the model. Build the chain both ways round, expanding and then standardizing, and standardizing and then expanding, and cross-validate each on the same four folds at penalties of 0, 1 and 100.", "Print both mean held-out R² values at each penalty, then the expand-first result at penalty 100 separately. Before running, consider why both orders can represent the same quadratic without a penalty but penalize its coefficient representations differently."],`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1195,7 +966,7 @@ for penalty in (0.0, 1.0, 100.0):
 print(f"expand first at a penalty of 100: {scores[0]:.4f}")`,`penalty 0.0: expand first 0.9579, standardize first 0.9579
 penalty 1.0: expand first 0.9758, standardize first 0.9523
 penalty 100.0: expand first 0.0257, standardize first -0.1614
-expand first at a penalty of 100: 0.0257`,{...{ hints: ["PipelineSteps.of runs its steps in the order the keywords are written, so swapping the two keywords is the whole of the change.", "Each cross-validation needs a chain of its own, built from one set of steps and a ridge at the penalty in hand. The folds are seeded, so both orders are judged on the same four deals."], check: numberCheck("What does the expand-first chain score at a penalty of 100, to four places?", 0.0257, 0.0005, "Changing step order changes the coordinates being penalised. At this large penalty both procedures lose much of their predictive fit; their score difference on these folds does not make either configuration useful.") },question:"Does the order of expansion and scaling change a regularised fit?"}),
+expand first at a penalty of 100: 0.0257`,{...{ hints: ["PipelineSteps.of runs its steps in the order the keywords are written, so swapping the two keywords is the whole of the change.", "Each cross-validation needs a chain of its own, built from one set of steps and a ridge at the penalty in hand. The folds are seeded, so both orders are judged on the same four deals."], check: numberCheck("What does the expand-first chain score at a penalty of 100, to four places?", 0.0257, 0.0005, "Changing step order changes the coordinates being penalized. At this large penalty both procedures lose much of their predictive fit; their score difference on these folds does not make either configuration useful.") },question:"Does the order of expansion and scaling change a regularized fit?"}),
           ],
         },
       ]}

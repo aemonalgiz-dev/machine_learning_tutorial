@@ -25,9 +25,9 @@ import { SweepCostTable } from "@/components/widgets/SweepCostTable";
 import { SweepGeometryTable } from "@/components/widgets/SweepGeometryTable";
 
 export const metadata: Metadata = {
-  title: "Convolution · oop_ml",
+  title: "Convolution · Perceptron Lab",
   description:
-    "A useful image pattern can appear anywhere in a picture. Convolution applies the same small set of weights at different positions, producing a map of where that pattern receives a response.",
+    "Convolution applies the same small set of weights across different positions. The resulting response map describes where a local pattern appears, using fewer independent weights than a separate rule for every position.",
 };
 
 const link =
@@ -38,35 +38,13 @@ export default function ConvolutionPage() {
     <ConceptPage
       lessonId="convolution"
       intuition={lessonIntuitions["convolution"]}
-      technicalStart="Part 2. One Kernel, Swept"
+      technicalStart="Part 2. Applying a Convolution Filter"
       openingTitle="Look for the Same Pattern in More Than One Place"
       playgroundTitle="Move one filter across the image"
       playgroundIntro="Inspect one input window and the output value it produces. Move to the next position and check that the same weights are reused."
       title="Convolution"
-      tagline={"A useful image pattern can appear anywhere in a picture. Convolution applies the same small set of weights at different positions, producing a map of where that pattern receives a response."}
-      prerequisites={
-        <>
-          A convolution is a layer, so the{" "}
-          <Link href="/concepts/dense-layers" className={link}>
-            dense layer page
-          </Link>{" "}
-          comes first, since that is where what a layer reads and answers with
-          was settled, and this page spends most of its length on the difference
-          between the two. The sum at the heart of it is the{" "}
-          <Link href="/primers/linear-algebra" className={link}>
-            linear algebra primer
-          </Link>
-          &rsquo;s dot product taken over a small patch rather than a row.{" "}
-          <Link href="/concepts/shapes-and-flattening" className={link}>
-            Shapes and flattening
-          </Link>{" "}
-          is where an arrangement of extents was introduced, and Part 6 leans on{" "}
-          <Link href="/concepts/backpropagation" className={link}>
-            backpropagation
-          </Link>{" "}
-          for what a slope arriving from the layer above is.
-        </>
-      }
+      tagline={"Convolution applies the same small set of weights across different positions. The resulting response map describes where a local pattern appears, using fewer independent weights than a separate rule for every position."}
+      prerequisites={<>The <Link href="/concepts/dense-layers" className={link}>dense layer page</Link> explains weighted sums and layer inputs and outputs. We compare that operation with a weighted sum over a small image patch. The <Link href="/primers/linear-algebra" className={link}>linear algebra primer</Link> introduces the dot product used in that sum. <Link href="/concepts/shapes-and-flattening" className={link}>Shapes and flattening</Link> explains array axes and extents. Part 6 uses <Link href="/concepts/backpropagation" className={link}>backpropagation</Link> to calculate how the loss changes with each input and parameter.</>}
 
       playground={<ConvolutionPlayground />}
       sections={[
@@ -82,15 +60,7 @@ export default function ConvolutionPage() {
                 <p>
                   The grid on the right is what comes back when those nine weights are swept across the picture, and it is six cells by six because a three by three window fits into an eight by eight picture in six places along each side.
                 </p>
-                <p>
-                  The square sits in rows 2 to 5 and columns 2 to 5, counting
-                  from zero, so its left edge is the boundary between column 1
-                  and column 2 and its right edge the boundary between column 5
-                  and column 6. Every worked number below comes from that
-                  arrangement, and the widgets on the page all start from it, so
-                  a reader can hold one picture in mind for the whole of the
-                  page rather than a fresh one per section.
-                </p>
+                <p>The square occupies rows 2 to 5 and columns 2 to 5, counting from zero. Its left edge lies between columns 1 and 2, and its right edge between columns 5 and 6. We reuse this picture in the calculations and widgets so we can compare changes to the filter while keeping the input familiar.</p>
                 <WorkedExample title="The picture, written out">
                   <p>
                     Rows 0, 1, 6 and 7 are dark all the way across. Rows 2, 3, 4
@@ -100,14 +70,10 @@ export default function ConvolutionPage() {
                   </p>
                 </WorkedExample>
                 <KeepInMind>
-                  Everything on this page is about one picture of sixty-four
-                  numbers and one small grid of nine weights. Nothing here needs
-                  a larger example to be true, and the counting section will show
-                  what happens to the numbers when the picture does get larger.
-                </KeepInMind>
+                  We start with sixty-four pixel values and nine filter weights. This is enough to calculate a complete convolution by hand. Later sections compare the same operation on larger images.</KeepInMind>
               </SubSection>
 
-              <SubSection title="2. A layer that reads a row is never told where the cells were">
+              <SubSection title="2. Flattening and spatial structure" id="2-a-layer-that-reads-a-row-is-never-told-where-the-cells-were">
                 <p>
                   A dense layer takes a list of numbers and answers with another
                   list, and each of its answers is a weighted sum of the whole
@@ -116,64 +82,23 @@ export default function ConvolutionPage() {
                   Cell row 0 column 0 becomes entry 0, cell row 0 column 1
                   becomes entry 1, and cell row 1 column 0 becomes entry 8.
                 </p>
-                <p>
-                  Once that has happened the layer has no way of knowing which entries were neighbours. Entry 0 and entry 1 were beside each other and entry 0 and entry 8 were one above the other, and entry 0 and entry 37 were nowhere near each other, but all three of those pairs look identical to a weighted sum.
-                </p>
-                <p>
-                  The layer is not forbidden from learning the geometry, and given enough examples it can work out that certain entries tend to agree; it simply has not been told, and everything it comes to know about the arrangement has to be paid for out of the data.
-                </p>
+                <p>Flattening preserves every value in a known order. Given the original dimensions and ordering, we can reconstruct the image. A standard dense layer, however, assigns an independent weight to each input position without treating nearby pixels as a special group. Horizontal and vertical neighbors receive no built-in relationship beyond their distinct positions in the list.</p>
+                <p>A dense layer can learn useful spatial relationships from examples. Convolution builds in a different assumption: nearby pixels should be processed together, and the same local rule should apply at different positions. That reduces the number of independently learned weights.</p>
                 <Equation>
                   {
                     "flattened[8 · row + column]  =  picture[row, column]\n\nanswer[j]  =  bias[j]  +  Σ over i of  weight[j, i] · flattened[i]"
                   }
                 </Equation>
-                <p>
-                  There is a sharper way of putting the same thing. Take any
-                  fixed shuffling of the sixty-four positions, apply it to every
-                  picture the layer will ever see, and apply it to the columns of
-                  the weight matrix as well. Nothing the layer answers changes,
-                  because the sum is over the same set of products in a different
-                  order. A reader who found that hard to believe should look at
-                  the next section, where it is measured rather than argued.
-                </p>
+                <p>Apply one fixed permutation to the sixty-four pixel positions and the same permutation to the columns of the dense weight matrix. Every pixel is still multiplied by its original weight, so the mathematical outputs stay the same. The next widget checks this comparison and shows the small floating-point differences caused by changing the summation order.</p>
                 <KeepInMind>
-                  The complaint against a dense layer here is not that it cannot
-                  read pictures. It is that the arrangement of the cells is a
-                  fact about the world which the layer has to rediscover from
-                  examples, and rediscovering it costs both weights and data.
-                </KeepInMind>
+                  Dense layers can process pictures. The distinction is that an ordinary dense weight matrix does not require local connections or share a detector across image positions. Those constraints are built into convolution.</KeepInMind>
               </SubSection>
 
-              <SubSection title="3. What is lost by flattening, measured on a shuffle">
-                <p>
-                  Rather than take that on trust, we can run it. A fixed shuffle
-                  moves the picture&rsquo;s sixty-four cells about, and the same
-                  shuffle is applied to every weight of a layer that reads a row.
-                  Then both readers are given both pictures, the original and the
-                  shuffle, and asked what they answer. The measurement is what
-                  the widget below prints on load.
-                </p>
-                <p>
-                  The rewired row reader answers what it answered before. Its
-                  largest disagreement across all thirty-six of its outputs is
-                  2.2 × 10<sup>&minus;16</sup>, which is one rounding step in
-                  double precision and not a difference of meaning; the answers
-                  are not bit for bit identical only because the products were
-                  added up in a different order. The same two pictures put
-                  through one convolution give answers 6 apart at the worst cell,
-                  with 27 of the 36 cells changed, on a map whose largest entry
-                  at rest is 4.
-                </p>
+              <SubSection title="3. Comparing responses to a pixel shuffle" id="3-what-is-lost-by-flattening-measured-on-a-shuffle">
+                <p>The widget applies a fixed shuffle to the image and a matching permutation to the dense layer’s input weights. It compares that rewired layer on the shuffled image with the original layer on the original image. It also applies the same convolution kernel to both pictures, keeping the kernel unchanged.</p>
+                <p>The rewired dense layer’s largest disagreement across thirty-six outputs is about 2.2 × 10<sup>−16</sup>. Reordering floating-point additions can produce a difference this small even though the mathematical sums are equal. The unchanged convolution kernel responds differently to the rearranged neighborhoods: its largest output difference is 6, and 27 of the 36 output cells change. The original response map has a largest magnitude of 4.</p>
                 <ShuffleComparison />
-                <p>
-                  The shuffle moved 18 of the 64 cells, so it was not a violent
-                  rearrangement, and it was still enough to destroy every edge in
-                  the picture. Look at the two swept maps side by side. The one
-                  on the original has a clean column of positive answers where
-                  the square begins, nothing across its interior, and a clean
-                  column of negative answers where it ends. The one on the
-                  shuffle has neither.
-                </p>
+                <p>Eighteen of the sixty-four pixel values change under this shuffle. That is enough to disrupt the square’s straight boundaries. Compare the response maps: the original has positive responses along the left edge, zeros across the interior and negative responses along the right edge. The shuffled image produces a different arrangement of local edge responses.</p>
                 <KeepInMind>
                   Both readers hold parameters, and they hold very different
                   numbers of them, 10 against 2,340 on this picture. What the
@@ -193,22 +118,13 @@ export default function ConvolutionPage() {
                   Carry on until the window reaches the right edge, drop down a
                   row, and start again from the left.
                 </p>
-                <p>
-                  Two things about that procedure are worth stating before any
-                  arithmetic. A weight only ever multiplies a cell inside its own
-                  window, so whatever the nine weights say, they say it about a
-                  neighbourhood; that is locality. And the same nine numbers
-                  answer at every position, so what they have learned to notice
-                  they notice everywhere rather than once per place; that is
-                  weight sharing. The rest of this page is those two facts
-                  followed through.
-                </p>
+                <p>The window restricts each output to nearby pixels. We call this locality. Reusing the same weights at every position is weight sharing. The distance the window moves between calculations is the stride; so far it is one pixel. These choices determine which pixels contribute, how many independent parameters we need and how the output responds when the picture moves.</p>
                 <DerivationTable
                   expressionHeading="what changes"
-                  reasonHeading="what it buys"
+                  reasonHeading="effect"
                   rows={[
                     {
-                      expression: "a window, not a row",
+                      expression: "a local window",
                       reason:
                         "each answer depends on nine cells rather than sixty-four, and on nine that were beside one another in the picture.",
                     },
@@ -220,7 +136,7 @@ export default function ConvolutionPage() {
                     {
                       expression: "answers laid out as a map",
                       reason:
-                        "the answer keeps the arrangement of the picture, so a second layer can read it as a picture in turn.",
+                        "outputs retain their spatial ordering, so a later layer can combine neighboring responses.",
                     },
                   ]}
                 />
@@ -234,18 +150,11 @@ export default function ConvolutionPage() {
 </>),
         },
         {
-          title: "Part 2. One Kernel, Swept",
+          title: "Part 2. Applying a Convolution Filter", id: "part-2-one-kernel-swept",
           content: (
             <>
               <SubSection title="5. Nine weights, one bias, and a window">
-                <p>
-                  The nine weights are called a kernel, and one kernel with one
-                  bias is a filter. The bias is added once to every answer, not
-                  once per window position, which is worth saying early because
-                  it is where the count of parameters gets its second term. Sweep
-                  the filter across the picture and what comes back is a map, one
-                  number for every place the window fitted.
-                </p>
+                <p>The grid of nine weights is called a kernel. Here we use filter to mean that kernel together with one bias. At every window position we sum the nine weighted pixel values and add the same bias once. The output map contains one number for each valid position. There is one bias parameter per filter, reused across positions.</p>
                 <p>
                   The kernel the page opens with has a negative left column, a
                   zero middle column and a positive right column. A window that
@@ -310,10 +219,7 @@ export default function ConvolutionPage() {
                   </p>
                 </WorkedExample>
                 <KeepInMind>
-                  A kernel entry that answers zero has not been switched off. It
-                  multiplied a cell that happened to be dark, and the same entry
-                  will dominate the sum at a position where that cell is lit.
-                </KeepInMind>
+                  A zero product does not imply a zero kernel weight. Here several nonzero weights multiply dark pixels whose values are zero. At another window position, the same weights can multiply lit pixels and contribute to the result.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. The rest of the answer, one row at a time">
@@ -346,18 +252,15 @@ export default function ConvolutionPage() {
                   all thirty-six of those numbers.
                 </p>
                 <KeepInMind>
-                  Two answers on the same row can be equal and mean different
-                  things, since a window straddling the edge at row 2 and one at
-                  row 3 both answer 4. The map says how strongly the filter fired
-                  and where, and nothing else.
-                </KeepInMind>
+                  Equal responses can occur at different positions or for different local patterns. The map records each filter’s response and its location; a single response value does not reconstruct the pixel window that produced it.</KeepInMind>
               </SubSection>
 
               <SubSection title="8. What a different kernel finds in the same picture">
                 <p>
+
                   Nothing about the sweep is particular to edge detection. The
                   same procedure with nine different numbers answers a different
-                  question about every neighbourhood, and the playground&rsquo;s
+                  question about every neighborhood, and the playground&rsquo;s
                   preset buttons are four more of them. Switching the kernel does
                   not change the picture, the window, the stride or the size of
                   the answer, only what the nine weights are asking.
@@ -365,62 +268,34 @@ export default function ConvolutionPage() {
                 <p>
                   Turn the kernel on its side and it finds the square&rsquo;s top and bottom edges instead, with the interior at zero and the vertical edges invisible. Set all nine weights to a ninth and it answers the mean of the window, so the interior comes back at 1, the corner where only one cell is lit comes back at a ninth, and the map is a blurred copy of the picture.
                 </p>
-                <p>
-                  Paint the diagonal instead of the square and both edge kernels find it, each at half the strength the square gave them, because a diagonal presents each of them with only part of an edge.
-                </p>
+                <p>The diagonal preset changes the local pattern rather than the filter. Both edge kernels respond, with smaller peak magnitudes in this fixture than on the solid square. The response follows from which weighted positions contain lit pixels; it is not a universal rule that diagonal edges have half the response.</p>
                 <InAModel>
                   <p>
+
                     None of the kernels on this page were learned. They are hand
                     written so that the arithmetic can be followed, and in a
                     trained network the nine weights are whatever
                     backpropagation left there. What is often found in the first
                     layer of a trained network does look a great deal like these,
-                    edges at various angles and small blobs of colour, which is
+                    edges at various angles and small blobs of color, which is
                     a result rather than something the architecture guarantees.
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  A kernel is a question asked of every neighbourhood at once.
-                  Changing the nine numbers changes the question and changes
-                  nothing else about the layer, which is why one implementation
-                  serves blurring, sharpening and edge finding without knowing
-                  which it is doing.
-                </KeepInMind>
+
+                  Changing kernel values changes the local weighted sum. The same operation can implement a blur, a sharpening filter or an edge detector, depending on the chosen weights.</KeepInMind>
               </SubSection>
 
               <SubSection title="9. The name says convolution and the arithmetic says correlation">
-                <p>
-                  There is a naming inaccuracy here that is universal and worth
-                  knowing about. In signal processing a convolution flips the
-                  kernel end over end, top to bottom and left to right, before
-                  sliding it, and the sum with the kernel unflipped is called a
-                  cross-correlation. What this layer computes, and what every
-                  machine learning framework computes under the name convolution,
-                  is the unflipped sum.
-                </p>
+                <p>There is a naming convention to distinguish. Signal-processing convolution reverses the kernel along both spatial axes before sliding it. The unflipped sum is cross-correlation. This SDK uses the unflipped form, as common neural-network convolution layers such as PyTorch Conv2d do.</p>
                 <Equation>
                   {
                     "cross-correlation   answer[i, j]  =  Σ  kernel[u, v] · picture[i + u,     j + v]\nconvolution         answer[i, j]  =  Σ  kernel[u, v] · picture[i − u + 2, j − v + 2]"
                   }
                 </Equation>
                 <WhyThisWorks title="Why the flip makes no difference to a learned kernel">
-                  <p>
-                    Suppose we had built the flipping version and trained it, and
-                    it settled on some kernel. The unflipped version, given the
-                    mirror image of that kernel, computes exactly the same sums
-                    at every position, so it can represent everything the
-                    flipping version can and nothing more. Since the nine numbers
-                    are learned rather than given, the two versions reach the
-                    same family of answers and differ only in which nine numbers
-                    they store to get there.
-                  </p>
-                  <p>
-                    The flip is not decoration in signal processing. It is what
-                    makes the operation commutative and makes the convolution
-                    theorem hold, so a signal processing text is right to insist
-                    on it. Neither of those properties is being used here, which
-                    is why the field kept the name and dropped the flip.
-                  </p>
+                  <p>Suppose a convolution using a reversed kernel has learned particular weights. An unflipped cross-correlation can produce the same sums by storing those weights reversed along both spatial axes. The two parameterizations therefore describe the same family of functions when all kernel entries are freely learned. They differ in the orientation of the stored weights.</p>
+                  <p>The distinction still matters when using known signal-processing filters. Reversal gives convolution its standard commutative form and its usual Fourier product identity. Cross-correlation has a related Fourier identity with a reversal or conjugation. Equivalent learned function families do not make the two operations interchangeable when the kernel is fixed.</p>
                 </WhyThisWorks>
                 <p>
                   The consequence for a reader is small but real. A kernel copied
@@ -430,11 +305,7 @@ export default function ConvolutionPage() {
                   vertical edge kernel is not, will behave the same either way.
                 </p>
                 <KeepInMind>
-                  The layer everyone calls a convolution computes a
-                  cross-correlation. Nothing about a trained network is harmed by
-                  that, and a reader lifting a kernel out of a signal processing
-                  reference still needs to know it.
-                </KeepInMind>
+                  Check whether a library reverses the kernel when reproducing a published filter. A freely learned kernel can represent either orientation, but a copied fixed kernel may produce a different result under the two conventions.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -445,7 +316,7 @@ export default function ConvolutionPage() {
             trueFalse(
               "Shuffling the sixty-four cells of every picture, and shuffling the columns of a row reader’s weights the same way, leaves what that reader answers unchanged.",
               true,
-              "The sum runs over the same set of products in a different order, so nothing it answers moves. Measured, the largest disagreement across all thirty-six outputs is 2.2 × 10⁻¹⁶, one rounding step in double precision. The same two pictures through one convolution give answers 6 apart at the worst cell, on a map whose largest entry at rest is 4.",
+              "For a dense row reader, applying the same permutation to the pixels and their matching weights preserves the sum in exact arithmetic. The tiny reported disagreement comes from floating-point summation order. A convolution instead uses spatial neighborhoods, which an arbitrary pixel shuffle changes. Its responses therefore need not be preserved by that shuffle.",
             ),
             choice(
               "The answer cell at row 2, column 0 comes out at 4. Where does the 4 come from?",
@@ -456,7 +327,7 @@ export default function ConvolutionPage() {
                 "The window lies inside the square, so the two outer columns cancel",
               ],
               1,
-              "Six of the nine products are zero because the cell beneath them is zero, and the three that survive are the right column against lit cells. Move the window two cells right so the left column sits on lit cells too and it brings −4, cancelling the right column and leaving 0.",
+              "Six of the nine products are zero because the cell beneath them is zero, and the three that survive are the right column against lit cells. Move the window two cells right so the left column sits on lit cells too and it brings −4, canceling the right column and leaving 0.",
             ),
             trueFalse(
               "A kernel entry that contributes zero at some position has effectively been switched off.",
@@ -466,7 +337,7 @@ export default function ConvolutionPage() {
             trueFalse(
               "The layer everyone calls a convolution computes the unflipped sum, so it can represent less than the flipping version can.",
               false,
-              "The first half is right and the second is not. Given the mirror image of any kernel, the unflipped sum computes exactly the same numbers at every position, so the two reach the same family of answers and differ only in which nine numbers they store. The flip earns its keep in signal processing, where it makes the operation commutative and makes the convolution theorem hold, and neither is used here. A kernel lifted from a signal processing reference still has to be flipped first.",
+              "Deep-learning layers commonly calculate cross-correlation, using the kernel without reversing its spatial axes. Reversing a learnable kernel gives the corresponding mathematical-convolution kernel, so either convention represents the same family of filters. The distinction matters when importing fixed kernels: check which operation the reference defines before copying its numbers.",
             ),
             trueFalse(
               "The blur kernel, all nine weights a ninth, answers the same numbers whether or not it is flipped end over end before the sweep.",
@@ -493,37 +364,14 @@ export default function ConvolutionPage() {
                     "window, nothing shared  =  36 positions × (9 weights + 1 bias)  =  360\ndense, equal width      =  36 outputs × (64 weights + 1 bias)  =  2,340"
                   }
                 </Equation>
-                <p>
-                  Locality alone takes 2,340 down to 360, which is a factor of
-                  six and a half, and the ratio is exactly the ratio of 65 to 10,
-                  what one output reads plus its bias in each case. That is
-                  worth having, and it is nothing like the whole of the saving
-                  the page is about.
-                </p>
+                <p>Restricting the connections to local windows reduces this example from 2,340 parameters to 360. Reusing one window’s parameters across positions will reduce the count further. These are separate constraints, so we can measure their contributions separately.</p>
                 <KeepInMind>
-                  Layers of exactly this kind exist and are called locally
-                  connected. They are used where the position genuinely matters,
-                  a face aligned so the eyes are always in the same place being
-                  the standard example, and they are not what this page is about.
-                </KeepInMind>
+                  A layer with local windows and independent weights at each position is called locally connected. It can be useful when positions have distinct roles, such as consistently aligned image regions. Convolution adds the further constraint of sharing weights across positions.</KeepInMind>
               </SubSection>
 
               <SubSection title="11. Sharing, which is one set of nine used thirty-six times">
-                <p>
-                  Now add the sharing back. The thirty-six sets of nine become
-                  one set of nine, and the thirty-six biases become one bias. The
-                  layer holds ten numbers and answers with the same thirty-six it
-                  answered with before.
-                </p>
-                <p>
-                  The thing to notice is what the ten does not depend on. It does
-                  not depend on the size of the picture, since the same nine
-                  weights sweep a picture of any size. It does not depend on
-                  where in the picture anything is. It depends on the window and
-                  on how many input channels there are, and on nothing else,
-                  which is why the count in the geometry table of Part 5 stays
-                  flat down a column where every other number moves.
-                </p>
+                <p>With weight sharing, the thirty-six independent sets become one set of nine weights and one bias. The convolution has ten parameters and still produces thirty-six output values. Those values need not match an arbitrary locally connected layer; the output shape is what stays the same.</p>
+                <p>For one filter, the parameter count depends on the window area and number of input channels. It does not depend on image height or width: the same weights can be reused at additional positions. A layer with more output filters has a proportionally larger count, as section 12 shows.</p>
                 <NumberTable
                   headings={["reader", "parameters", "answers", "reads"]}
                   rows={[
@@ -557,17 +405,7 @@ export default function ConvolutionPage() {
                     "convolution  =  n_filters × (channels × k × k)  +  n_filters\ndense        =  n_outputs × n_inputs  +  n_outputs"
                   }
                 </Equation>
-                <p>
-                  A colour picture makes the difference between the two terms
-                  visible. Three channels of an eight by eight picture through
-                  one filter of three by three costs 28 parameters, which is 27
-                  weights and a bias, because a filter reads every input channel
-                  at once rather than one per channel. The picture grew by a
-                  factor of three and the filter grew by a factor of three, so
-                  the layer got a little larger; a dense layer reading the same
-                  picture would have grown by a factor of three in its width as
-                  well.
-                </p>
+                <p>For a three-channel color image, one three-by-three filter has 27 weights and one bias, giving 28 parameters. The filter reads a patch from all three channels to produce one output value. Compared with a one-channel input, the weight count triples while the one shared bias remains. A dense layer with a fixed number of outputs also triples its input-weight count; its output width need not change.</p>
                 <DerivationTable
                   expressionHeading="term"
                   reasonHeading="what it counts"
@@ -595,22 +433,12 @@ export default function ConvolutionPage() {
                   ]}
                 />
                 <KeepInMind>
-                  A filter&rsquo;s kernel is three-dimensional whenever the input
-                  has more than one channel, and a bank of them is
-                  four-dimensional. Counting it as though each filter held a flat
-                  three by three grid undercounts a colour layer by a factor of
-                  three.
-                </KeepInMind>
+
+                  For multiple input channels, each filter stores a channel axis as well as its two spatial axes. A bank also has an output-filter axis. Counting only a three-by-three grid per filter omits the additional channel weights.</KeepInMind>
               </SubSection>
 
               <SubSection title="13. The ratio grows with the picture">
-                <p>
-                  The convolution&rsquo;s count is flat in the size of the
-                  picture and the dense layer&rsquo;s is quadratic in it, since
-                  the dense layer&rsquo;s count is how many numbers went in times
-                  how many come out and both of those grow with the picture. So
-                  the ratio between them grows without any change to the layer.
-                </p>
+                <p>Keep the kernel, channel count and filter count fixed while increasing image size. The convolution parameter count stays constant. A dense layer producing an equally sized output map has an input count and an output count that both grow with image area, so its parameter count grows roughly quadratically in that area. The output map and amount of convolution work still grow.</p>
                 <p>
                   The example carried through these pages is a twenty-eight by
                   twenty-eight picture, the size of a handwritten digit, read by
@@ -631,36 +459,14 @@ export default function ConvolutionPage() {
                   first invisible.
                 </p>
                 <InAModel>
-                  <p>
-                    Fewer parameters is not automatically better. What the
-                    sharing does is impose a constraint, that whatever is worth
-                    noticing here is worth noticing everywhere, and that
-                    constraint happens to be true of pictures and false of plenty
-                    of other things. A table of measurements where column 3 and
-                    column 4 mean unrelated quantities would be badly served by a
-                    layer that insisted on treating them alike.
-                  </p>
+                  <p>Sharing assumes that the same local feature can be useful at different positions. That is often appropriate for images, but it does not describe every image task or every kind of data. In a table, adjacent columns might be temperature and account balance. Sliding one shared filter across those unrelated measurements would impose a relationship that their ordering does not justify.</p>
                 </InAModel>
                 <KeepInMind>
-                  53,066 is a ratio at one particular size, and it moves as soon
-                  as the picture or the filter count moves. What survives every
-                  setting of the sliders is that one of the two counts grows with
-                  the picture and the other does not.
-                </KeepInMind>
+                  The ratio 53,066 belongs to this image and window geometry. It changes with settings such as image size, input channels, kernel size, stride and padding. When the comparison matches the number of output filters on both sides, changing that number scales both parameter counts equally and leaves their ratio unchanged.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. What the constraint costs">
-                <p>
-                  A kernel can only ever say something about a neighbourhood, so
-                  one layer of them cannot tell a face from a scrambled
-                  arrangement of the same eyes and mouth, since every window
-                  contains at most part of one feature and no window contains
-                  two of them at a distance. A wider kernel would answer that
-                  complaint and would hand back the parameter saving while doing
-                  so, since the count is the window area times the channels. The
-                  route taken instead is a second convolution laid on top of this
-                  one.
-                </p>
+                <p>A single output position sees only its local window. It cannot directly combine an eye on one side of a face with a mouth outside that window. The complete response map still preserves where local features occurred, so a later operation can combine them. We can enlarge the window, or stack layers so later local windows cover a larger part of the original image. Larger windows increase the weights per filter.</p>
                 <p>
                   A second three by three window placed over the first
                   layer&rsquo;s map covers a five by five patch of the original
@@ -676,11 +482,7 @@ export default function ConvolutionPage() {
                   }
                 </Equation>
                 <KeepInMind>
-                  Depth is how a network of small windows comes to read a large
-                  patch. The word deep in deep convolutional network is doing
-                  exactly that job, and it is why the receptive field is a
-                  property of a stack rather than of a layer.
-                </KeepInMind>
+                  Each layer has a receptive field in the original input. Stacking small-window layers enlarges the region that can affect a later output. Depth also adds learned transformations, so receptive-field growth is one consequence of depth rather than its complete definition.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -690,38 +492,12 @@ export default function ConvolutionPage() {
           content: (
             <>
               <SubSection title="15. The square, slid one column across">
-                <p>
-                  Take the picture, move every cell one column to the right, and
-                  sweep it again. The answer we get is the answer we had, moved
-                  one position to the right. Not approximately, and not usually;
-                  every cell of the map that has somewhere to move to agrees with
-                  the moved answer exactly, and the widget below reports the
-                  largest disagreement as 0.
-                </p>
-                <p>
-                  That is a statement about the arithmetic, not about the
-                  training, so it holds whatever nine numbers the kernel is
-                  carrying. Switch the kernel with the buttons and the maps
-                  change completely while the gap stays at 0. It is the property
-                  Fukushima was after in 1980, and it is what makes a filter that
-                  has learned an edge in one place a filter that has learned it
-                  everywhere.
-                </p>
+                <p>Move the square one column right and apply the same filter again. At stride one, the responses in the overlapping valid region equal the original responses shifted one output position. The widget reports a largest difference of zero there. We compare only positions for which both calculations use the corresponding original pixels.</p>
+                <p>This relationship follows from reusing the same weights, so it holds for every kernel setting in the widget. Changing the kernel changes the detected pattern while preserving the shift relationship on the comparable region. A filter therefore applies the same local rule wherever its window is placed.</p>
                 <ShiftLedger />
-                <p>
-                  The square really is moving under it. At a shift of one, 8 of
-                  the picture&rsquo;s cells change and 18 of the map&rsquo;s
-                  thirty-six do; at a shift of two, 16 cells change and all 36
-                  of the map&rsquo;s do. The map is not staying still, it is
-                  travelling with the square, which is a different and stronger
-                  claim.
-                </p>
+                <p>At shift one, eight pixel values and eighteen output cells change in this fixture. At shift two, sixteen pixels and all thirty-six output cells change. The map’s values at fixed positions can change even though the shifted responses agree on the overlapping region. We call that relationship translation equivariance.</p>
                 <KeepInMind>
-                  Read the column headed sweep in the table as the whole result.
-                  Every entry in it is 0, at every distance and under every
-                  kernel, and a single entry that was not would sink the argument
-                  of this part.
-                </KeepInMind>
+                  The sweep column reports the maximum difference after aligning the two output maps on their comparable region. Its zeros demonstrate this fixture’s shift relationship. Boundary handling, stride and the set of compared positions remain part of the claim.</KeepInMind>
               </SubSection>
 
               <SubSection title="16. A layer of the same width does not do that">
@@ -733,41 +509,13 @@ export default function ConvolutionPage() {
                   own nine weights written into one window position of the
                   picture and zeros in all the other fifty-five places.
                 </p>
-                <p>
-                  At rest that detector answers 4, since the square&rsquo;s edge
-                  is sitting exactly under it, and it is the same 4 the sweep
-                  answers at that position. Move the picture one column and it
-                  answers 0. Move it two and it answers 0. Move it three and it
-                  answers 0. It has learned the edge at one place and has learned
-                  nothing at all about the same edge one cell over.
-                </p>
-                <p>
-                  The second is an ordinary draw of thirty-six neurons over
-                  sixty-four cells, laid out as a six by six block purely so it
-                  can be printed beside the sweep&rsquo;s map, and compared
-                  against its own resting answer moved by the same amount. At a
-                  shift of one its answers move by 1.753 where the largest answer
-                  it gives anywhere on that picture is 0.896. The change is
-                  larger than the thing being changed, and all 36 of its outputs
-                  move at every distance.
-                </p>
-                <WorkedExample title="Why laying the dense answers out as a map is a courtesy">
-                  <p>
-                    Nothing in the dense layer&rsquo;s arithmetic makes output 7
-                    the neighbour of output 8 or of output 1. Arranging its
-                    thirty-six answers in a six by six block is a convenience for
-                    the comparison, and the layer would answer exactly the same
-                    numbers if we printed them in a line or in a circle. That is
-                    the same point section 2 made about its inputs, made again
-                    about its outputs.
-                  </p>
+                <p>The fixed detector responds 4 in the original position and 0 after each of the three listed shifts. Its nonzero weights were placed by hand at one location. They provide no matching detector at another location. A convolution reuses its detector at every valid window position.</p>
+                <p>The second dense layer has thirty-six randomly initialized outputs, displayed as a six-by-six grid for comparison. After a one-column input shift, its largest disagreement with a correspondingly shifted original output is 1.753. Its largest output magnitude on that shifted picture is 0.896, and all thirty-six coordinates change. This layer has no enforced translation relationship between output coordinates.</p>
+                <WorkedExample title="Displaying dense outputs as a grid">
+                  <p>{"A dense layer assigns separate weights to its output coordinates without defining a spatial relationship between them. Printing its thirty-six answers as a six by six grid makes comparison convenient, but does not make output 7 a learned neighbor of output 8 or output 1. The layer would calculate the same values if we displayed them in a line. This is the output-side version of the input-order distinction in section 2."}</p>
                 </WorkedExample>
                 <KeepInMind>
-                  A dense layer can of course be trained on shifted copies until
-                  it handles them, and that is the expensive route. The sweep
-                  does not need to be trained on them, because moving with the
-                  picture is a consequence of its arithmetic.
-                </KeepInMind>
+                  A dense layer can learn to handle shifted examples, or be explicitly constrained to share suitable weights. An ordinary dense layer does not enforce that relationship. Convolution enforces its translation relationship through the window and shared weights, subject to stride and boundary conditions.</KeepInMind>
               </SubSection>
 
               <SubSection title="17. Why it holds, in one substitution">
@@ -793,16 +541,7 @@ export default function ConvolutionPage() {
                   section 10 has no such property.
                 </p>
                 <WhyThisWorks title="Where the argument needs the stride to be one">
-                  <p>
-                    At a stride of s the answer at position j reads the picture
-                    starting at column j times s, so moving the picture by one
-                    column asks for an answer at position one over s, which is
-                    not a position unless s divides the move. The widget reports
-                    that honestly rather than rounding it away. A shift of one at
-                    a stride of two comes back with no answer position to move
-                    to; a shift of two at a stride of two moves the answer by
-                    exactly one position, with a gap of 0.
-                  </p>
+                  <p>At stride s, adjacent outputs read windows s pixels apart. A shift of the input corresponds to a whole output-position shift only when its size is divisible by s. The widget marks other shifts as having no integer output alignment. At stride two, an input shift of two aligns with a one-position output shift and gives a zero gap on the compared region.</p>
                 </WhyThisWorks>
                 <KeepInMind>
                   Equivariance at a stride greater than one holds only for shifts
@@ -821,35 +560,24 @@ export default function ConvolutionPage() {
                   verdict that does not change under a shift then something else
                   has to supply it.
                 </p>
-                <p>
-                  The two usual somethings are pooling, which summarises a small
-                  neighbourhood of the map and so absorbs a small movement inside
-                  it, and a summary taken over the whole map at the end, which
-                  throws the position away entirely. Both are separate layers
-                  with their own costs, and the{" "}
-                  <Link href="/concepts/pooling" className={link}>
-                    pooling page
-                  </Link>{" "}
-                  measures how much of a shift the first of them actually
-                  absorbs.
-                </p>
+                <p>Pooling summarizes neighborhoods and can reduce sensitivity to some small movements, but it does not guarantee that every movement within or across windows leaves the result unchanged. A whole-map summary discards the individual positions and can give shift-invariant values when a shift merely rearranges map entries without changing their values or losing entries at boundaries. The <Link href="/concepts/pooling" className={link}>pooling page</Link> measures these limits.</p>
                 <NumberTable
                   headings={["property", "what it says", "does this layer have it"]}
                   rows={[
                     [
                       "equivariance",
                       "move the picture and the answer moves the same way",
-                      "yes, exactly, at stride one",
+                      "at stride one on corresponding valid regions",
                     ],
                     [
                       "invariance",
                       "move the picture and the answer does not change",
-                      "no, and it is not trying to",
+                      "not generally",
                     ],
                     [
                       "rotation equivariance",
                       "turn the picture and the answer turns with it",
-                      "no, a kernel has a fixed orientation",
+                      "not generally; rotating the input need not rotate a fixed kernel’s response",
                     ],
                   ]}
                 />
@@ -882,7 +610,7 @@ export default function ConvolutionPage() {
                 "Reading one channel rather than three",
               ],
               0,
-              "A locally connected layer keeps the window and gives every answer cell its own nine weights and its own bias, which is a factor of six and a half, exactly the ratio of 65 to 10. Sharing turns the thirty-six sets into one, a further factor of thirty-six, and the two multiply to 234. Layers of the locally connected kind are real and are used where the position genuinely matters.",
+              "Local windows reduce each output’s connections from all 64 input pixels to nine nearby pixels. Without sharing, the 36 positions would still hold separate weights and biases, totaling 360 parameters. Convolution shares one nine-weight kernel and one bias across every position, leaving ten parameters. Locality and sharing provide separate reductions.",
             ),
             trueFalse(
               "A convolution’s parameter count depends on its window and on the channels beneath it, and not on the size of the picture it reads.",
@@ -893,7 +621,7 @@ export default function ConvolutionPage() {
               "A second three by three window is placed over the first layer’s map. How much of the original picture does one of its answers cover?",
               ["Five cells by five", "Three cells by three", "Six cells by six", "Nine cells by nine"],
               0,
-              "Each of the second window’s nine inputs was itself formed from a three by three patch, and neighbouring patches overlap, so the nine of them together span five cells a side. A third layer covers seven. That growing patch is the receptive field, and stacking layers is what widens it while each layer keeps its own small count of weights, where a wider kernel would widen it at the cost of the parameter saving.",
+              "Each of the second window’s nine inputs was itself formed from a three by three patch, and neighboring patches overlap, so the nine of them together span five cells a side. A third layer covers seven. That growing patch is the receptive field, and stacking layers is what widens it while each layer keeps its own small count of weights, where a wider kernel would widen it at the cost of the parameter saving.",
             ),
             several(
               "When a picture is shifted, which statements hold for the convolution’s output?",
@@ -904,7 +632,7 @@ export default function ConvolutionPage() {
                 "A layer above this one therefore sees the same map for a moved picture"
               ],
               [0, 1, 2],
-              "The answer moves rather than staying put, so a layer above does see a different map, and anything needing a verdict that survives a shift has to get it from pooling or from a summary taken over the whole map. Reading this property as invariance is the commonest way it gets overstated. The map really is travelling, since at a shift of two all thirty-six of its cells change.",
+              "Over a comparable valid region, shifting the input shifts the stride-one convolution response. That is equivariance, not an unchanged output. Pooling, spatial summaries and training choices can help a later predictor become less sensitive to position, but they do not automatically guarantee invariance to every shift. Boundary cropping and stride also matter.",
               {
                 "description": "Use a shared kernel and bias, with the same activation at each position. Compare positions whose complete input windows remain inside both pictures. At stride two, test shifts divisible by two."
               },
@@ -913,7 +641,7 @@ export default function ConvolutionPage() {
               "This fixed-position dense detector answers 4 before the picture moves. What does it answer after moving the picture one column to the right?",
               ["4, since the edge is still in the picture", "0", "1.753", "3, since the window now overlaps the edge by two rows"],
               1,
-              "It answers 0 at a shift of one, and again at two and at three. It learned the edge at one place and learned nothing at all about the same edge one cell over. The 1.753 belongs to the other comparison, an ordinary draw of thirty-six neurons whose answers move by more than the largest answer it gives anywhere on the picture.",
+              "This supplied detector uses fixed weights at one location. Moving the edge away from that location gives output zero in the tested shifts. Its construction has no weight-sharing rule that applies the same detector at the new position. A dense model could learn other position-sensitive responses, but this fixed detector has not been trained to do so.",
               {
                 "description": "Use zero-based indices. The dense output reads only rows 2–4, columns 0–2 with the nine weights below; every other weight and the bias are zero. Shift the picture right by one column, filling the vacated left column with zeros.",
                 "data": "picture =\n0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0\n0 0 1 1 1 1 0 0\n0 0 1 1 1 1 0 0\n0 0 1 1 1 1 0 0\n0 0 1 1 1 1 0 0\n0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0\n\nweights in the fixed window =\n−1 0 1\n−2 0 2\n−1 0 1"
@@ -927,7 +655,8 @@ export default function ConvolutionPage() {
             <>
               <SubSection title="19. One layer holds several filters">
                 <p>
-                  One filter answers one question about every neighbourhood, and
+
+                  One filter answers one question about every neighborhood, and
                   a picture has more than one question worth asking of it. So a
                   layer holds a bank of filters rather than one, each with its own
                   nine weights and its own bias, and each sweeping the same
@@ -960,8 +689,9 @@ export default function ConvolutionPage() {
 
               <SubSection title="20. Channels in, filters out">
                 <p>
+
                   That stack of maps is what the next convolution reads, and it
-                  reads it the way this one read a colour picture. A filter in the
+                  reads it the way this one read a color picture. A filter in the
                   second layer holds one three by three grid of weights for each
                   of the maps beneath it, and its answer at one position is the
                   sum over all of them at once. So the second layer&rsquo;s
@@ -996,11 +726,7 @@ export default function ConvolutionPage() {
                   </>
                 </WorkedExample>
                 <KeepInMind>
-                  A filter&rsquo;s cost is the window times the number of channels
-                  beneath it. Deepening a network by adding filters at each layer
-                  therefore raises the cost of the layer above as well as the cost
-                  of the layer being widened.
-                </KeepInMind>
+                  A filter’s weight count is its spatial window area times its input-channel count, plus one bias. Increasing the number of filters widens a layer’s output. If a later convolution reads all those outputs, its filters need more channel weights too.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. Count the positions where the window fits" id="21-the-output-extent-worked-in-integers">
@@ -1017,14 +743,7 @@ export default function ConvolutionPage() {
                     "out  =  ⌊(n − k + 2p) / s⌋  +  1\n\nn = 8, k = 3, p = 0, s = 1     ⌊5 / 1⌋ + 1  =  6\nn = 8, k = 3, p = 1, s = 1     ⌊7 / 1⌋ + 1  =  8\nn = 8, k = 3, p = 0, s = 2     ⌊5 / 2⌋ + 1  =  3\nn = 8, k = 3, p = 1, s = 2     ⌊7 / 2⌋ + 1  =  4\nn = 8, k = 5, p = 0, s = 1     ⌊3 / 1⌋ + 1  =  4"
                   }
                 </Equation>
-                <p>
-                  The floor is where a stride that does not divide evenly loses
-                  its last partial step, and it is the only place in the formula
-                  where information is thrown away. The table below builds a layer
-                  for every combination of window, stride and padding at whatever
-                  picture size is chosen, and reads the answer off the
-                  layer&rsquo;s own shape without sweeping a single cell.
-                </p>
+                <p>The floor symbol keeps only whole window positions. If the stride leaves a partial step at the far edge, no output is created for that incomplete position. This is a count of positions, not a measure of all information discarded by the layer. The table constructs each configuration and reads its output shape before running data through it.</p>
                 <SweepGeometryTable />
                 <p>
                   Look down the parameters column while the picture side slider
@@ -1041,23 +760,8 @@ export default function ConvolutionPage() {
               </SubSection>
 
               <SubSection title="22. Padding, and what the corner is read by">
-                <p>
-                  Without padding the border of the picture is under-read, and the
-                  amount is easy to count. On the page&rsquo;s eight by eight
-                  picture under a three by three window at stride one, the top
-                  left cell is inside exactly 1 window position and the middle
-                  cell is inside 9 of them. The corner contributes to a ninth as
-                  many answers as the middle does, so whatever is happening at the
-                  corner is nine times less able to influence what the layer says.
-                </p>
-                <p>
-                  Adding one row and column of zeros at each edge before the sweep
-                  fixes both problems at once. The answer comes back at eight by
-                  eight rather than six by six, so the picture stops shrinking, and
-                  the corner&rsquo;s coverage goes from 1 window position to 4. The
-                  geometry table above reports both counts, and the rows where the
-                  answer is the same size as the picture are shaded.
-                </p>
+                <p>Coverage differs between border and interior pixels. With this eight-by-eight image, a three-by-three window and stride one, the top-left pixel appears in one output window while a fully interior pixel appears in nine. That is a ninefold difference in the number of uses, not necessarily in influence on the output or loss. The weights and later gradients determine each contribution’s size and sign.</p>
+                <p>One row and column of zero padding on each side preserve the eight-by-eight output size for this three-by-three, stride-one setting. The corner then appears in four windows instead of one, while the middle still appears in nine. Padding improves border coverage here without making it uniform.</p>
                 <NumberTable
                   headings={["setting", "answer", "corner read by", "middle read by"]}
                   rows={[
@@ -1077,11 +781,7 @@ export default function ConvolutionPage() {
                   padded picture that was not there before the padding was added.
                 </p>
                 <KeepInMind>
-                  Without padding a picture loses two cells a side per layer, so a
-                  stack of fourteen three by three layers has nothing left of a
-                  twenty-eight by twenty-eight picture to read. Padding is what
-                  makes a deep stack of these possible at all.
-                </KeepInMind>
+                  At stride one, an unpadded three-by-three convolution reduces each spatial extent by two. A twenty-eight-by-twenty-eight input cannot pass through fourteen such layers because the final window no longer fits. Appropriate padding preserves the spatial extent in a deep stack of these particular layers.</KeepInMind>
               </SubSection>
 
               <SubSection title="23. Stride, and the cells no window reaches">
@@ -1092,21 +792,8 @@ export default function ConvolutionPage() {
                   comes back three by three rather than six by six, which is a
                   quarter as many numbers carried forward.
                 </p>
-                <p>
-                  It is not free, and the cost is countable. At a stride of two
-                  with a three by three window, 15 of the picture&rsquo;s 64 cells
-                  are inside no window position at all, so 15 cells of the picture
-                  contribute nothing to any answer the layer gives. Nothing refuses
-                  that, and nothing should, since it is a legitimate thing to want;
-                  it is simply worth knowing before choosing the setting.
-                </p>
-                <p>
-                  Push it further and the effect grows. A three by three window at
-                  a stride of four answers with a two by two map and leaves 28 of
-                  the 64 cells outside every window, which the failure contracts of
-                  Part 7 record as one of the three things that are accepted
-                  rather than refuses.
-                </p>
+                <p>At stride two with a three-by-three window, fifteen of the sixty-four pixels fall outside every sampled window. Those pixels contribute nothing to this layer’s output. The setting is valid, but its smaller map also reflects skipped image content. Check coverage as well as output size when choosing a stride.</p>
+                <p>At stride four, the same three-by-three window produces a two-by-two map and leaves twenty-eight of the sixty-four pixels outside every window. Part 7 includes this valid configuration so we can inspect its behavior alongside configurations that the SDK rejects.</p>
                 <KeepInMind>
                   Reading the two counts together is what the geometry table is
                   for. A setting that answers with a pleasingly small map may be
@@ -1129,15 +816,7 @@ export default function ConvolutionPage() {
                     "this convolution's answer would have height\n(4 − 7 + 2 · 0) // 1 + 1 = −2,\nso the window does not fit over what it reads"
                   }
                 </Equation>
-                <p>
-                  Try that setting in the geometry table by dragging the picture
-                  side down to 4, and the rows with a window of five and of seven
-                  come back carrying that refusal instead of numbers. The
-                  alternative, which is what happens when the extents are only
-                  worked out as the data flows, is discovering the mistake several
-                  layers downstream in the middle of a training run, with a message
-                  about a matrix that will not multiply.
-                </p>
+                <p>At image side four, configurations whose padded input is smaller than their window are rejected. Padding matters: some five-by-five windows still fit when a border is included. The message reports the dimensions used in the failed calculation, so we can correct the geometry before running a network.</p>
                 <KeepInMind>
                   Every term of the formula was chosen by the caller, so the
                   refusal can name all four of them. A message that says what was
@@ -1161,40 +840,18 @@ export default function ConvolutionPage() {
                   of its nine weights, a slope for its bias, and one number for
                   each cell of the picture to hand down in turn.
                 </p>
-                <p>
-                  The bias is the easy one. It was added once at every answer
-                  position, so its slope is the arriving numbers added up. The
-                  weights are the interesting one, and the reason is the sharing.
-                  A single weight multiplied a cell at every one of the thirty-six
-                  positions, so its slope is a sum over all of them, and that sum
-                  is the sharing seen from behind.
-                </p>
+                <p>{"The bias contributes at every output position, so its gradient adds the derivatives arriving from those positions. Each kernel weight is reused in the same way: it multiplies a pixel in every window where it is applied. Its gradient must therefore include the contribution from each of the thirty-six positions. Shared parameters collect evidence from every use of that parameter."}</p>
                 <Equation>
                   {
                     "∂loss / ∂kernel[u, v]  =  Σ over i, j of  arriving[i, j] · picture[i + u, j + v]\n∂loss / ∂bias        =  Σ over i, j of  arriving[i, j]\n∂loss / ∂picture[r, c] =  Σ over the windows covering (r, c) of\n                          arriving[i, j] · the kernel entry that read it"
                   }
                 </Equation>
                 <KeepInMind>
-                  A shared weight collects a slope from every position it was used
-                  at. That is why a convolution&rsquo;s weights typically see much
-                  larger gradients than a dense layer&rsquo;s of the same
-                  magnitude, and why the learning rate is not transferable between
-                  the two without thought.
-                </KeepInMind>
+                  A shared weight’s gradient sums contributions from all positions where it was used, as well as the batch observations. These terms may reinforce or cancel one another. The total also depends on the loss reduction and activation derivatives, so weight sharing alone does not guarantee larger gradients than a dense layer. Check the gradient scale when choosing a learning rate.</KeepInMind>
               </SubSection>
 
-              <SubSection title="26. The two places the backward pass is usually got wrong">
-                <p>
-                  Both mistakes have the same shape, which is that they run
-                  perfectly and train something slightly other than what was asked
-                  for. The first is writing the kernel slope with an assignment
-                  where a sum was wanted, which leaves the layer training on the
-                  last window it happened to visit. The second is walking the
-                  input cells and asking which window each belongs to, rather than
-                  walking the output positions and adding into the cells each one
-                  covered, which loses terms at the border and under a stride
-                  greater than one.
-                </p>
+              <SubSection title="26. Accumulating gradients across overlapping windows" id="26-the-two-places-the-backward-pass-is-usually-got-wrong">
+                <p>A kernel weight’s gradient must accumulate contributions rather than overwrite them at each position. Otherwise only the final visited window contributes. An input pixel can also belong to several windows. An implementation can iterate over outputs or over inputs, but it must enumerate every corresponding contribution, including overlap, padding and stride. Assuming that an input belongs to just one window loses terms.</p>
                 <p>
                   Both are visible on the page&rsquo;s own square if a slope of one
                   is sent to every answer cell, because then every number in the
@@ -1206,16 +863,7 @@ export default function ConvolutionPage() {
                   position it was added at.
                 </p>
                 <SweepBackwardBlame />
-                <p>
-                  The blame handed down to the picture is the other half. A cell
-                  read by every one of the nine kernel positions collects the sum
-                  of the nine weights, which for this kernel is 0, so the whole
-                  interior of the picture receives nothing. The very corner cell is
-                  read by one window position only, at the kernel entry holding
-                  &minus;1, so it collects exactly &minus;1. Thirty-two of the
-                  sixty-four cells receive nothing at all, and they are the ones
-                  where the kernel&rsquo;s columns cancel.
-                </p>
+                <p>{"An input pixel's derivative combines contributions from every output window that used it. A fully interior pixel appears under all nine kernel positions, whose weights sum to 0 for this kernel. A corner pixel appears under only the kernel entry holding −1, so its derivative is −1 in this example. Thirty-two of the sixty-four input cells receive zero because the corresponding weight contributions cancel."}</p>
                 <KeepInMind>
                   Both directions accumulate rather than assign, and for the same
                   reason. One weight was used many times going up, and one cell was
@@ -1224,44 +872,11 @@ export default function ConvolutionPage() {
               </SubSection>
 
               <SubSection title="27. Checked against a central difference">
-                <p>
-                  Hand-checking one fixture is not a test of the implementation, so
-                  the reported slopes are also compared against
-                  measured ones. Each parameter is moved a millionth up and a
-                  millionth down, the loss is remeasured both times, and the
-                  difference divided by the total movement is what the slope must
-                  be. That is done for every kernel weight, every bias and every
-                  input value, on three fixtures, and the second table in the
-                  widget above reports the worst disagreement in each block.
-                </p>
-                <p>
-                  The three fixtures are chosen for what each can catch. A plain
-                  sweep at stride one with no padding is the base case. Padding by
-                  one is where an implementation that forgets to strip the invented
-                  border off the blame shows up. Two channels at a stride of two is
-                  where an implementation walking the input rather than the output
-                  positions loses terms. On the run behind these figures the worst
-                  disagreement anywhere across the three fixtures was 7.8 × 10
-                  <sup>&minus;9</sup>, on the inputs of the padded fixture,
-                  against reported slopes as large as 13.9.
-                </p>
+                <p>The hand calculation checks one fixture. The widget also compares the analytic gradients with central finite differences: move a parameter slightly up and down, measure the corresponding scalar loss and divide its change by the total displacement. It checks every kernel weight, bias and input value on three fixtures. The second table reports the largest disagreement in each block.</p>
+                <p>The fixtures exercise different geometry. One uses stride one without padding. Another adds padding, checking that the returned input gradient excludes the padded border. A third uses two channels and stride two, checking their contributions together. In the recorded run, the largest disagreement was 7.8 × 10<sup>−9</sup> on the padded fixture’s inputs, with analytic gradient magnitudes as large as 13.9.</p>
                 <WhyThisWorks title="Why the difference is taken from both sides">
-                  <p>
-                    Measuring the loss at the parameter and at the parameter plus a
-                    step gives an error that falls in step with the step, so
-                    halving the step halves the error. Measuring at plus a step and
-                    minus a step and dividing by twice the step cancels the leading
-                    error term, and what is left falls as the square of the step.
-                    That is what makes an agreement of eight decimal places evidence
-                    about the implementation rather than evidence about how the
-                    difference was taken.
-                  </p>
-                  <p>
-                    The step cannot simply be made tiny. Subtracting two nearly
-                    equal losses in double precision loses digits, so too small a
-                    step measures rounding rather than slope. A millionth is the
-                    usual compromise and is what these figures use.
-                  </p>
+                  <p>For a sufficiently smooth function, a one-sided finite difference generally has leading truncation error proportional to the step size. The symmetric difference cancels that term, leaving error proportional to the square of the step before rounding dominates. This makes it useful for comparing analytic gradients, while still leaving a numerical approximation rather than a proof.</p>
+                  <p>Making the step extremely small also causes problems. The calculation subtracts nearly equal floating-point loss values, so rounding can dominate their difference. These checks use a step of one millionth. A suitable step depends on the parameter and loss scales and should be reconsidered when those scales change.</p>
                 </WhyThisWorks>
                 <KeepInMind>
                   A gradient check is a comparison against a definition, not a proof.
@@ -1285,44 +900,19 @@ export default function ConvolutionPage() {
                 <p>
                   None of those products depends on any other, so the order they are added in is ours to choose. Lay every window of the picture out as one row of a table, nine numbers long for a three by three kernel on one channel, and the thirty-six windows of our square become a table of thirty-six rows and nine columns.
                 </p>
-                <p>
-                  Write the kernel bank as a table of nine rows with one column per filter, and the whole sweep is the first table times the second, which is a matrix multiply, the operation numerical routines have been tuned hardest for. The windows do not even have to be copied to be laid out this way, since each one is the same stretch of the picture read from a different starting cell, so the table of windows is a way of reading the picture and costs no copy.
-                </p>
+                <p>Write the kernel bank as a table with one column per filter. Multiplying the window table by it produces all output values. The SDK expresses the same sum with NumPy einsum over a sliding-window view. That view shares the padded input’s memory, but forming a contiguous matrix representation or executing the optimized contraction can still require temporary storage. Zero padding itself also allocates a bordered array.</p>
                 <Equation>
                   {
                     "answer[f, i, j]  =  bias[f] + Σ over c, u, v of  kernel[f, c, u, v] · picture[c, i·s + u, j·s + v]\n\n(windows × c·k·k)  ·  (c·k·k × filters)  =  (windows × filters)"
                   }
                 </Equation>
-                <p>
-                  The widget runs both versions on the machine serving this page,
-                  at three sizes, beside a dense layer reading the same numbers and
-                  answering the same numbers, and it compares the two
-                  versions&rsquo; answers. They agree to 1.8 × 10
-                  <sup>&minus;15</sup> at the largest size, a few rounding steps,
-                  which is what adding the same products in a different order
-                  costs and nothing more. On the runs I made behind this page the
-                  loops took between about 115 and 330 times as long as the
-                  multiply at the largest size, and only one to two times as long
-                  on the page&rsquo;s own picture, where there are too few
-                  products for the multiply&rsquo;s fixed setup to be repaid.
-                </p>
+                <p>The benchmark compares the explicit loops with the matrix-based implementation at three sizes, and includes a dense-layer calculation for context. At the largest size, the two convolution results agree to 1.8 × 10⁻¹⁵. Reordering floating-point additions can produce differences of that size.</p>
+                <p>In the recorded runs, the loop implementation takes about 115 to 330 times as long as the matrix-based version at the largest size. On the small image used in the lesson, the ratio is only one to two. The setup work matters more when there are few products to calculate. Current timings depend on the runtime executing the benchmark.</p>
                 <SweepCostTable />
-                <p>
-                  The dense layer is kept beside them because it corrects an easy reading of the parameter count. On the page&rsquo;s picture the sweep holds 10 parameters against the dense layer&rsquo;s 2,340 and is still the slower of the two, between about six and sixteen times on my runs, since multiplying a row of sixty-four by a table of sixty-four by thirty-six is almost nothing and laying the windows out costs more than that.
-                </p>
-                <p>
-                  At twenty-eight on a side through eight filters the dense layer has 4,245,280 parameters to work through against the sweep&rsquo;s 48,672 products, and the order reverses, the sweep taking between about a tenth and two fifths of the dense layer&rsquo;s time. That is far less than the eighty-seven-fold gap in arithmetic would suggest, because at these sizes most of the sweep&rsquo;s time is fixed overhead and the widget shows it barely moving from the smallest picture to the largest.
-                </p>
+                <p>The dense benchmark shows why parameter count and runtime must be measured separately. On the eight-by-eight example the convolution has ten parameters and the dense layer has 2,340, yet the recorded convolution takes about six to sixteen times as long. At this size, preparing and processing the windows can cost more than the small dense matrix multiplication.</p>
+                <p>At side twenty-eight with eight filters, the dense layer has 4,245,280 parameters while the convolution evaluates 48,672 weighted products. In the recorded runs, convolution takes between about one tenth and two fifths of the dense layer’s time. The runtime difference is smaller than the arithmetic-count difference. Setup, array layout and the optimized numerical operations also affect elapsed time.</p>
                 <InAModel>
-                  <p>
-                    Holding fewer parameters buys a model that can be estimated
-                    from less data, fits in less memory, and carries a constraint
-                    that matches how pictures work. What it costs to run is a
-                    separate question, decided by how the sum is arranged and how
-                    large the picture is, and on this page the same layer is the
-                    slower of the two on an eight by eight picture and the quicker
-                    at twenty-eight by twenty-eight.
-                  </p>
+                  <p>Fewer independent parameters reduce parameter storage and impose a shared local rule. When that rule fits the task, it can also reduce the data needed to learn useful features; fewer parameters alone do not guarantee better learning. Execution cost is separate. In these benchmarks the convolution is slower on the small image and faster on the larger image.</p>
                 </InAModel>
                 <KeepInMind>
                   The seven loops and the single multiply add up the same products
@@ -1356,7 +946,7 @@ export default function ConvolutionPage() {
                     {
                       expression: "flipped or not",
                       reason:
-                        "not flipped, so this computes a cross-correlation under the name convolution, as every framework does.",
+                        "not flipped: this SDK computes cross-correlation under the convolution name, following the convention used by common neural-network libraries.",
                     },
                     {
                       expression: "window, stride, padding",
@@ -1381,59 +971,43 @@ export default function ConvolutionPage() {
                     {
                       expression: "where the weights start",
                       reason:
-                        "normal draws scaled by the square root of two over the fan-in, the fan-in being channels times the window area. The seed is a construction argument, so two layers built alike are the same layer.",
+                        "normal draws scaled by the square root of two over the fan-in, where fan-in is channels times window area. Matching configuration and seed reproduce the initial parameter values.",
                     },
                     {
                       expression: "the activation",
                       reason:
-                        "one activation function for the whole layer, since a filter answers at many positions and there is no per-position identity for an activation function to belong to.",
+                        "one configured activation function applied across the layer. Per-position activation choices are not part of this interface.",
                     },
                     {
                       expression: "the gradient block",
                       reason:
-                        "kernels flattened to two dimensions on the way out and reshaped back on the way in, by this layer and nothing else, since only the layer that made a gradient can say what its axes mean.",
+                        "kernel gradients returned as a two-dimensional block and reshaped to the configured kernel-bank dimensions when updating the layer.",
                     },
                     {
                       expression: "a training step",
                       reason:
-                        "a new layer of the same geometry carrying moved parameters. Nothing is mutated, so a fitted layer stays reproducible.",
+                        "a new layer of the same geometry with updated parameters. The original layer and its parameters remain unchanged.",
                     },
                     {
                       expression: "a step with no gradient",
                       reason:
-                        "refused. A convolution has parameters and has nothing to answer with when asked to step by nothing.",
+                        "refused: an update requires a parameter-gradient block. A zero-valued gradient block is valid and is different from no gradient block.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Padding value, the flip, and dilation are the three that most
-                  often differ between two implementations of what is called the
-                  same layer. They are the first three to check when two libraries
-                  disagree about a number.
-                </KeepInMind>
+                  When two libraries disagree, compare kernel orientation, axis order, padding, stride, dilation, bias and activation settings. Each changes the operation or representation and may explain the difference.</KeepInMind>
               </SubSection>
 
               <SubSection title="30. Windows that do not fit and shapes that do not join" id="30-the-edges-probed">
-                <p>
-                  Below is every edge asked of a convolution as this page loads,
-                  with what came back rather than what ought to. Nineteen are
-                  attempted, sixteen are refused, and every one of the sixteen
-                  names itself in words that say what was wrong rather than in a
-                  message from the interpreter.
-                </p>
+                <p>The widget tries nineteen configurations and reports the actual results. Sixteen are rejected with messages about the invalid shape, setting or value. The remaining three are accepted; inspecting their outputs helps distinguish a valid configuration from one that is useful for the intended task.</p>
                 <ConvolutionEdgeCases />
                 <p>
                   Two of those refusals are there because the natural mistake would otherwise escape as a bare failure. Giving a whole number where three extents are wanted is exactly what a dense layer&rsquo;s width looks like, and without a guard it would come back saying that an integer is not iterable; here it says that a convolution reads channels, height and width, and got 8, which is not a sequence of extents.
                 </p>
-                <p>
-                  Giving a flag where a count is wanted is the other, since a flag indexes as one and would otherwise slip through as a layer with a single filter.
-                </p>
-                <p>
-                  Three are accepted, and each of the three is a decision rather than an oversight. A window the size of the whole picture answers with a single number from one position and holds 65 parameters reading 64, which is a dense layer wearing this layer&rsquo;s interface and is not wrong, only pointless. A stride of four with a window of three answers two by two and leaves 28 of the 64 cells outside every window.
-                </p>
-                <p>
-                  A padding of four with a window of three answers fourteen by fourteen, of which 96 of the 196 positions read nothing but invented border and so answer with the bias and no evidence at all.
-                </p>
+                <p>Python booleans can behave as integers in some operations. The SDK checks for this and rejects a boolean filter count, so True is not silently treated as a request for one filter.</p>
+                <p>The three accepted configurations are valid special cases. A window covering the complete eight-by-eight image produces one output and has sixty-four weights plus one bias, the same weighted-sum structure as one dense neuron. That can be intentional. A stride of four with a three-by-three window produces a two-by-two map while omitting twenty-eight input pixels from every window.</p>
+                <p>With padding four and a three-by-three window, the output is fourteen-by-fourteen. Ninety-six of its 196 window positions contain only padding zeros. Their weighted pixel contribution is zero, so their pre-activation score is the filter bias. With the Identity activation used here, the output is also that bias.</p>
                 <p>
                   Two things a reader might look for are absent from the table, and
                   both for the same reason. There is no unfitted state to guard and
@@ -1444,12 +1018,7 @@ export default function ConvolutionPage() {
                   cannot be a window.
                 </p>
                 <KeepInMind>
-                  A refusal that names the arrangement is worth more than one that
-                  names a Python type, because the arrangement is what the caller
-                  got wrong. The three accepted rows are worth as much again, since
-                  each is a setting that will quietly do something other than what
-                  was probably intended.
-                </KeepInMind>
+                  Validation distinguishes unsupported or inconsistent settings from valid settings with potentially surprising behavior. Read the accepted rows as carefully as the rejected ones, and choose geometry according to which pixels the task needs.</KeepInMind>
               </SubSection>
 
               <SubSection title="31. The join that names both arrangements">
@@ -1466,16 +1035,7 @@ export default function ConvolutionPage() {
                     "layer 0 answers with (1, 6, 6) and layer 1 reads (36,);\nboth hold 36 numbers, so it is the arrangement that disagrees\nand not the width"
                   }
                 </Equation>
-                <p>
-                  The second half of that message is the part worth having. A check
-                  that compared counts alone would have let this join through, and
-                  a message that said only that a shape did not match would send a
-                  reader looking for a bug in the code rather than for the
-                  missing layer. The third chain is the twenty-eight by twenty-eight example
-                  joined the same wrong way, where the two sides are (8, 26, 26)
-                  and (5408,) and the message says the same thing about 5,408
-                  numbers.
-                </p>
+                <p>The message distinguishes shape agreement from equal element counts. In the larger example, the convolution returns shape (8, 26, 26), while the dense layer expects (5408,). Both contain 5,408 values, but the explicit flattening operation is missing between them.</p>
                 <p>
                   The repair is a flattening layer between them, which changes no
                   number and only restates the arrangement, and the middle chain is
@@ -1485,12 +1045,7 @@ export default function ConvolutionPage() {
                   picture has been read.
                 </p>
                 <KeepInMind>
-                  Two arrangements holding the same count of numbers are not
-                  interchangeable, and the failure when they are treated as though
-                  they were is a network that trains happily while reading the
-                  picture sideways. That is the case this whole family of checks
-                  exists to catch.
-                </KeepInMind>
+                  Equal element counts do not make two array shapes interchangeable. This stack rejects the missing-flattening join before a forward pass. If we explicitly reshape data, we must still preserve the intended axis order; shape validation alone cannot detect every semantic rearrangement.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -1518,7 +1073,7 @@ export default function ConvolutionPage() {
                 "The border cells are read four times each",
               ],
               1,
-              "Raising the stride shrinks the answer to a quarter as many numbers without adding a layer, and the cost is countable. Pushing to a stride of four answers two by two and leaves 28 of the 64 cells outside every window, which the failure contracts record as accepted rather than refused. A setting that answers with a pleasingly small map may be ignoring a quarter of the picture to do it.",
+              "At stride two, this valid sweep produces nine outputs instead of thirty-six. A larger stride can also leave input pixels outside every window. In the displayed stride-four case, 28 of the 64 pixels are never read by a window. A smaller output map therefore needs to be considered alongside coverage, not just its value count.",
             ),
             choice(
               "Each of this convolution’s 36 output cells receives an arriving gradient of 1. What gradient does each of the nine shared kernel entries receive?",
@@ -1648,7 +1203,7 @@ shift 3: 20 picture cells changed, 30 map cells changed, largest gap 0.0`,
               "Send a slope of one back down",
               [
   "Run the supplied square through its fixed convolution. Send an upstream derivative of one to every output-map position and obtain correction_for from that forward response.",
-  "Print kernel gradients, bias gradient, input-gradient map, the specified corner/centre gradients and number of zero input gradients. These are derivatives of the summed outputs, not a separate fitted loss."
+  "Print kernel gradients, bias gradient, input-gradient map, the specified corner/center gradients and number of zero input gradients. These are derivatives of the summed outputs, not a separate fitted loss."
 ],
               `import numpy as np
 from oop_ml import Conv2d, Identity

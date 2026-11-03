@@ -29,9 +29,9 @@ import {
 } from "@/components/widgets/distanceMetricsFixtures";
 
 export const metadata: Metadata = {
-  title: "What Near Means · oop_ml",
+  title: "What Near Means · Perceptron Lab",
   description:
-    "Which of two examples is nearer depends on how we measure distance. We will compare those choices before using nearness to find neighbours or form groups.",
+    "Distance depends on which differences we choose to count and how we combine them. Different measures can change which observations are nearest, affecting comparisons and the groups formed from them.",
 };
 
 const linkClass =
@@ -44,10 +44,10 @@ export default function DistanceMetricsPage() {
       intuition={lessonIntuitions["distance-metrics"]}
       technicalStart="Part 2. One Formula, One Dial"
       openingTitle="Near According to Which Rule?"
-      playgroundTitle="Does changing the distance rule change the neighbour?"
-      playgroundIntro="Keep the points fixed and change the distance rule. Watch how the shape of an equal-distance boundary and the nearest neighbours change."
+      playgroundTitle="Does changing the distance rule change the neighbor?"
+      playgroundIntro="Keep the points fixed and change the distance rule. Watch how the shape of an equal-distance boundary and the nearest neighbors change."
       title="What Near Means"
-      tagline={"Which of two examples is nearer depends on how we measure distance. We will compare those choices before using nearness to find neighbours or form groups."}
+      tagline={"Distance depends on which differences we choose to count and how we combine them. Different measures can change which observations are nearest, affecting comparisons and the groups formed from them."}
       prerequisites={
         <>
           The vector, its length and the dot product come from the{" "}
@@ -57,7 +57,8 @@ export default function DistanceMetricsPage() {
           , and the model being refitted all through this page is the one from
           the{" "}
           <Link href="/concepts/k-nearest-neighbours" className={linkClass}>
-            k-nearest neighbours
+
+            k-nearest neighbors
           </Link>{" "}
           page, which took its distance for granted. The{" "}
           <Link href="/concepts/feature-scaling" className={linkClass}>
@@ -78,14 +79,14 @@ export default function DistanceMetricsPage() {
               <SubSection title="1. Two people, one number">
                 <>
 <p>
-                  The plot uses the nearest-neighbours example: five children and six adults, measured by height and weight. We want to classify the ringed person at 150 centimetres and 45 kilograms by asking the three nearest people to vote. But how should we measure &apos;nearest&apos;? So far we have used straight-line distance. Let&apos;s see what changes when we choose another rule.
+
+                  The plot uses the nearest-neighbors example: five children and six adults, measured by height and weight. We want to classify the ringed person at 150 centimeters and 45 kilograms by asking the three nearest people to vote. But how should we measure &apos;nearest&apos;? So far we have used straight-line distance. Let&apos;s see what changes when we choose another rule.
                 </p>
-                <p>
-                  Switch the metric in the box and two things move at once, which people the ringed person actually consults and the shaded map of what the model would answer everywhere else. Under four of the six metrics the three consulted are the same three and the answer is child; under cosine the third voter is a different adult and the answer is adult; under Hamming every person in the crowd is at exactly the same distance and the vote is decided by whoever happens to come first.
-                </p>
+                <p>Change the distance rule and inspect the dashed connections first. They show which three people vote. The shaded regions then show the resulting class predictions across the plot.</p>
+                <p>Four of the six rules select the same neighbors and predict child. Cosine selects a different adult as the third neighbor, changing the prediction to adult. Under Hamming distance, everyone is equally far from this query, so the implementation breaks the tie using the stored order. Each result follows from a different definition of similarity.</p>
 </>
                 <p>A distance takes two representations and produces one comparison value. A nearest-neighbor model then uses those values to decide which stored examples contribute to its answer. The distance therefore defines what the model treats as relevant similarity.</p>
-<p>For the marked example and the nearby observation at height 147 and weight 41, the coordinate differences are three centimetres and four kilograms. The rules produce different kinds of comparison:</p>
+<p>For the marked example and the nearby observation at height 147 and weight 41, the coordinate differences are three centimeters and four kilograms. The rules produce different kinds of comparison:</p>
 <Equation>{`Euclidean distance: √(3² + 4²) = 5
 Manhattan distance: |3| + |4| = 7
 Maximum-coordinate distance: max(3, 4) = 4
@@ -93,21 +94,13 @@ Hamming distance: both coordinates differ, so the differing share is 1
 Cosine distance: approximately 0.000189`}</Equation>
 <p>The small cosine distance reflects similar directions from the origin, not small coordinate differences in the same units as the other scores. We will define each rule separately before using it to rank neighbors.</p>
                 <KeepInMind>
-                  A metric is a statement about which differences between two
-                  people count as real, and by how much. It is chosen before
-                  the model sees any data and nothing in the fit can correct
-                  it, so it deserves to be chosen rather than defaulted into.
-                </KeepInMind>
+                  A distance rule defines which differences contribute to a comparison and by how much. The neighbor fit here stores the examples rather than learning a better distance. We need to choose or evaluate that comparison separately; other methods can learn feature weights or a distance from data.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. The three rules a distance keeps">
                 <>
-<p>
-                  Not every rule that turns two rows into a number deserves the name. A distance has to put a person at zero from themselves and at more than zero from anyone else, it has to answer the same whichever person is named first, and going by way of a third person can never be shorter than going direct.
-                </p>
-                <p>
-                  The third rule is the one that does work, since it is what lets a search prune, if the way station is far from the query then everything near the way station is far too, and it is what makes a distance behave like the word suggests.
-                </p>
+<p>A metric is a distance rule with specific guarantees. It is non-negative, gives zero exactly when the two represented points agree, and gives the same result in either order. It must also satisfy the triangle inequality: going through a third point cannot make the total route shorter than the direct distance. Some useful dissimilarity scores do not satisfy all these conditions.</p>
+                <p>The triangle inequality gives search algorithms bounds. If the distance from a query to a reference point is large, the distances of candidates near that reference cannot be arbitrarily small. A search can sometimes exclude a whole region using that bound. Applying the shortcut to a score that lacks the inequality can exclude the true nearest candidate.</p>
 </>
                 <Equation>{"d(a, a) = 0,  and  d(a, b) > 0  whenever a ≠ b\nd(a, b) = d(b, a)\nd(a, b) ≤ d(a, c) + d(c, b)"}</Equation>
                 <>
@@ -126,17 +119,14 @@ Cosine distance: approximately 0.000189`}</Equation>
                 </>
                 <DistanceAxioms />
                 <>
-<p>
-                  The reason cosine fails is that it is an angle wearing the vocabulary of a distance. One minus the cosine of an angle is not additive along a path the way the angle itself is, and for a small angle it grows with the square of the angle, so halving the angle quarters the number and two halves sum to less than the whole.
-                </p>
-                <p>
-                  It also fails the first rule at one point. A row of all zeros has no direction, and the last column of the table shows the origin at distance 1 from itself under cosine and at 0 under every other metric.
-                </p>
+<p>Cosine distance transforms an angle rather than measuring route length. For small angles, one minus the cosine grows approximately with the angle squared. Two half-angle comparisons can therefore sum to less than the full-angle comparison. That is why this useful directional score is not a metric under the triangle-inequality definition.</p>
+                <p>Cosine distance also gives zero for distinct nonzero vectors pointing in the same direction, so it fails the requirement that only identical points have zero distance. At the origin the formula is undefined. This SDK assigns distance one whenever a zero vector participates, including its comparison with itself.</p>
 </>
                 <KeepInMind>
+
                   Five of the six here are distances in the mathematical
                   sense. Cosine is not, and nothing in a brute-force
-                  neighbour search depends on the missing rule, since every
+                  neighbor search depends on the missing rule, since every
                   pair is measured directly. A spatial index that prunes by
                   the triangle inequality would depend on it, which is one
                   reason such an index is not offered here.
@@ -144,12 +134,7 @@ Cosine distance: approximately 0.000189`}</Equation>
               </SubSection>
 
               <SubSection title="3. One pair under six">
-                <p>
-                  Now the pair the page works by hand, the ringed person at
-                  (150, 45) against their nearest at (147, 41). The gaps are
-                  3 and 4, which is the triangle every schoolchild meets, so
-                  the first three answers can be read straight off.
-                </p>
+                <p>Return to the marked person at (150, 45) and the neighbor at (147, 41). The numerical coordinate gaps are 3 and 4. Compare how the following rules combine those same gaps.</p>
                 <Equation>{"gaps  3 and 4\n\nmanhattan   3 + 4                  = 7\neuclidean   √(3² + 4²) = √25       = 5\nchebyshev   max(3, 4)              = 4"}</Equation>
                 <WorkedExample title="The other three by hand">
                 <>
@@ -194,20 +179,14 @@ Cosine distance: approximately 0.000189`}</Equation>
                 <InAModel title="Where cosine parts company">
                   <>
 <p>
-                    Cosine keeps the first two, at 0.000189 and 0.000650, and for its third voter passes over the child at (145, 57) in favour of the adult at (159, 57), at 0.001392. Two adults out of three, and the answer flips to adult. Raise k to five and cosine admits the child at (122, 28) from the far clump, at 0.002168, a person the straight line does not reach at five, where it consults the middle five and answers adult, because that child is small in both measurements and therefore points almost exactly where the query points.
+
+                    Cosine keeps the first two, at 0.000189 and 0.000650, and for its third voter passes over the child at (145, 57) in favor of the adult at (159, 57), at 0.001392. Two adults out of three, and the answer flips to adult. Raise k to five and cosine admits the child at (122, 28) from the far clump, at 0.002168, a person the straight line does not reach at five, where it consults the middle five and answers adult, because that child is small in both measurements and therefore points almost exactly where the query points.
                   </p>
-                  <p>
-                    Under Hamming every person in the crowd is at exactly 1, the model has nothing to rank by, and the shaded map is one colour everywhere.
-                  </p>
+                  <p>Every Hamming comparison in this crowd is 1 because both recorded coordinates differ. The score cannot rank these candidates by closeness. The implementation’s tie rule determines the selected neighbors, producing the single-color map rather than a meaningful local distinction.</p>
 </>
                 </InAModel>
                 <KeepInMind>
-                  The p-norms disagree about how far and, when the gaps all
-                  point one way, agree about who is nearest, which is why
-                  switching among them in the box above changes the numbers
-                  in the table and seldom the vote. Cosine and
-                  Hamming ask different questions and can change the vote.
-                </KeepInMind>
+                  If one candidate has no larger absolute gap in any coordinate than another, each p-norm ranks it at least as near. When candidates trade a smaller height gap for a larger weight gap, changing the order can change their ranking. The agreement for this query is a property of these observations.</KeepInMind>
               </SubSection>
             </>
 </>),
@@ -217,19 +196,9 @@ Cosine distance: approximately 0.000189`}</Equation>
           content: (
             <>
               <SubSection title="5. The Minkowski family">
-                <p>
-                  Manhattan, Euclidean and Chebyshev are one formula. Take
-                  the gaps along each feature, raise each to a power, add
-                  them up, and take that root back off again. The power is
-                  the dial, and the three names are three settings of it.
-                </p>
+                <p>Manhattan and Euclidean distances belong to the same family of p-norms. Take the absolute coordinate differences, raise them to p, sum them, then take the p-th root. Increasing p gives large individual differences more influence. Chebyshev distance is the limiting case, where only the largest coordinate difference remains.</p>
                 <Equation>{"minkowski, order p    ( Σ |gap|^p ) ^ (1/p)\n\n    p = 1    the gaps added up          Manhattan\n    p = 2    the straight line           Euclidean\n    p → ∞    the largest single gap      Chebyshev"}</Equation>
-                <p>
-                  Raising the order shifts weight onto whichever single gap
-                  is largest. On the worked gap of 3 and 4 the sweep from
-                  one to infinity is a falling sequence, and every value in
-                  it was computed rather than interpolated.
-                </p>
+                <p>Increasing the order gives the largest absolute gap more influence relative to the smaller ones. For gaps of 3 and 4, the numerical distance decreases from the Manhattan value toward the largest gap, as the table shows.</p>
                 <NumberTable
                   headings={["order p", "distance"]}
                   rows={[
@@ -244,65 +213,57 @@ Cosine distance: approximately 0.000189`}</Equation>
                   caption="The p-norm of the gap (3, 4) at seven orders. It falls from the gaps added up to the larger gap alone, and it never rises."
                 />
                 <KeepInMind>
-                  Only three orders have names, and the neighbour models
-                  here accept any order at all, so an order of
-                  three is a legitimate choice that no name covers. An order
-                  below one is accepted too, and Part 8 records that it is
-                  not a distance.
-                </KeepInMind>
+
+                  The three familiar cases here are orders one, two and infinity. The SDK also accepts other positive orders, including three and fractional values. Values below one produce a dissimilarity score without all the metric guarantees; Part 8 demonstrates the missing triangle inequality.</KeepInMind>
               </SubSection>
 
               <SubSection title="6. The shape of one unit away">
                 <>
-<p>
-                  The quickest way to feel what a metric does is to ask it which points are exactly one away from a fixed centre. Under Euclidean distance the answer is a circle, which is what the word means. Under Manhattan it is a diamond, because to stay at a total of one you must trade horizontal movement for vertical one for one.
-                </p>
+<p>To picture the geometry, find every point exactly one unit from a fixed center. Euclidean distance gives a circle in two dimensions. Manhattan distance gives a diamond: a larger horizontal gap must be offset by a smaller vertical gap to keep their sum at one.</p>
                 <p>
-                  Under Chebyshev it is a square, because only the larger gap counts, so you can move freely in the other direction until it overtakes. Each panel below is a lattice of 41 by 41 cells a tenth apart, every cell asked how far it is from the centre.
+
+                  Under Chebyshev it is a square, because only the larger gap counts, so you can move freely in the other direction until it overtakes. Each panel below is a lattice of 41 by 41 cells a tenth apart, every cell asked how far it is from the center.
                 </p>
 </>
                 <UnitShapesGallery />
                 <p>
+
                   Hamming&rsquo;s panel looks broken and is not. It can only
                   ever answer zero, a half or one, so of the 1681 cells
                   exactly 1600 sit at its maximum of one and the remaining 81
-                  form a cross through the centre, the cells that happen to
+                  form a cross through the center, the cells that happen to
                   share a horizontal or a vertical value with it. There is no
                   curve to draw because there is no gradual falling away.
                 </p>
                 <>
 <p>
-                  Now click a panel to move the centre, because that is the control that separates the six into two kinds. The circle, the diamond, the square and the cross are the same shapes wherever you put them, and their counts change only where the shape runs off the edge of the lattice. Cosine and Canberra are not.
+
+                  Now click a panel to move the center, because that is the control that separates the six into two kinds. The circle, the diamond, the square and the cross are the same shapes wherever you put them, and their counts change only where the shape runs off the edge of the lattice. Cosine and Canberra are not.
                 </p>
                 <p>
-                  Move the centre to (1, 1) and cosine&rsquo;s region becomes a half-plane of 861 cells with 41 on its boundary, and Canberra&rsquo;s becomes 413 with 46, and both change again at the next centre you pick. Their notion of one unit depends on where they are standing, which for Canberra is the entire point of it.
+
+                  Move the center to (1, 1) and cosine&rsquo;s region becomes a half-plane of 861 cells with 41 on its boundary, and Canberra&rsquo;s becomes 413 with 46, and both change again at the next center you pick. Their notion of one unit depends on where they are standing, which for Canberra is the entire point of it.
                 </p>
 </>
                 <>
 <p>
                   The origin, which is where the gallery starts, is the worst place to stand for both of them. Cosine shades every one of the 1681 cells at exactly one, because the origin has no direction for anything to point away from. Canberra shades only the two axes, 81 cells within one and 80 at exactly one, because dividing a gap by the sum of the pair it separates gives exactly one whenever the other number is zero.
                 </p>
-                <p>
-                  Two metrics that work well elsewhere have nothing to say at the one point a reader is most likely to try first, and a model that hands them data centred on zero inherits that silence.
-                </p>
+                <p>The zero vector reveals a limitation of both comparisons in this gallery. Centering data can create zero rows, but it does not make every row zero. Check which actual inputs receive the special behavior before interpreting a flat panel as a useful neighborhood.</p>
 </>
                 <KeepInMind>
-                  The p-norms are translation invariant, which is the formal
-                  name for the shapes not moving. Cosine and Canberra read
-                  the coordinates themselves rather than only the gaps
-                  between them, so where the data sits matters to them, and
-                  centring the data, which is harmless to the p-norms, is
-                  the one thing that breaks both.
-                </KeepInMind>
+
+                  For a p-norm, shifting both observations by the same vector leaves their distance unchanged. This property is translation invariance. Cosine and Canberra depend on the coordinates relative to zero, so centering can change their comparisons. Whether that new reference is useful depends on what zero represents.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. Diamond inside circle inside square">
                 <p>
+
                   Measured on the lattice, the diamond holds 221 cells within
                   one unit, the circle 317 and the square 441, and the
                   boundaries run 40, 12 and 80 cells. That ordering is not an
                   accident of the drawing. The diamond sits inside the
-                  circle, which sits inside the square, for every centre and
+                  circle, which sits inside the square, for every center and
                   every radius, and the argument is short.
                 </p>
                 <WhyThisWorks title="Deriving the bounds between Manhattan, Euclidean and maximum distance">
@@ -330,13 +291,7 @@ Cosine distance: approximately 0.000189`}</Equation>
               </SubSection>
 
               <SubSection title="8. Why the limit is the largest gap">
-                <p>
-                  The one derivation worth doing is the limit that produces
-                  Chebyshev, because it explains why the largest gap is the
-                  sensible reading of an infinite order rather than a
-                  convention. Call the largest gap M and pull it out of the
-                  sum.
-                </p>
+                <p>Chebyshev distance follows from the limit as the p-norm order increases. Let M be the largest absolute coordinate difference. If M is zero, all the distances are zero. Otherwise factor M out as below, leaving ratios between zero and one.</p>
                 <WhyThisWorks title="The derivation">
                   <Equation>{"( Σ |gap|^p ) ^ (1/p)  =  M · ( Σ (|gap| / M)^p ) ^ (1/p)"}</Equation>
                   <p>
@@ -362,11 +317,7 @@ Cosine distance: approximately 0.000189`}</Equation>
                   larger one.
                 </p>
                 <KeepInMind>
-                  Chebyshev is the metric to reach for when a person is
-                  unacceptable if they are far off on any one feature,
-                  whatever the others say, since it reads the worst feature
-                  and nothing else.
-                </KeepInMind>
+                  Maximum-coordinate distance is useful when one sufficiently large deviation should make a pair dissimilar regardless of the remaining coordinates. Choose meaningful scales or tolerances first, since the largest raw numerical gap may simply reflect its unit.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -377,18 +328,18 @@ Cosine distance: approximately 0.000189`}</Equation>
             trueFalse(
               "All six of the rules on this page are distances in the mathematical sense.",
               false,
-              "Five of them are and cosine is not. It is an angle wearing the vocabulary of a distance, so on three people of one height weighing 45, 52 and 60 kilograms the route through the middle costs 0.001987 against a direct 0.003962. It also puts the origin at distance 1 from itself, where every other metric answers 0.",
+              "The library's one-minus-cosine rule is a dissimilarity, but it does not satisfy all metric requirements. For the three same-height people, the indirect dissimilarity is 0.001987, smaller than the direct 0.003962, violating the triangle inequality. Its zero-vector convention also gives the origin distance one from itself; mathematical cosine is undefined for a zero vector.",
             ),
             choice(
               "What does the triangle inequality buy a search?",
               [
                 "It makes distances comparable across metrics",
-                "It lets a search prune, since everything near a far way station is far too",
+                "It can rule out a whole region when the query-to-region distance is bounded using a reference point",
                 "It guarantees the answer is the same whichever row is named first",
                 "It keeps a distance bounded",
               ],
               1,
-              "If the way station is far from the query then everything near the way station is far too, which is what lets a search skip whole regions without measuring them. Nothing in a brute-force neighbour search depends on it, because every pair is measured directly, and a spatial index that prunes by it would, which is one reason such an index is not offered here and why cosine, which fails the rule on three people of one height, is safe only under brute force.",
+              "If every point in a region lies within a known radius of a reference point, the triangle inequality gives a lower bound on its distance from the query. When that bound already exceeds the best candidate distance, a search can skip the region. Brute-force search measures every pair and needs no such bound. A particular index must support its chosen dissimilarity; one-minus-cosine cannot simply use metric triangle bounds.",
             ),
             choice(
               "Under Hamming, what happens to the ringed person's vote?",
@@ -399,23 +350,23 @@ Cosine distance: approximately 0.000189`}</Equation>
                 "The distance is undefined, so the model refuses",
               ],
               1,
-              "Hamming reports the share of coordinates that differ, and on measurements that vary continuously it answers 1 for almost every pair. The model has nothing to rank by and the shaded map is one colour everywhere. On categorical codes it is the only honest answer of the six, which is the case it exists for.",
+              "Hamming counts the fraction of coordinates whose stored values differ. Both measurements differ for every query-reference pair here, so all distances are one and the implementation resolves ties by row order. Hamming can be useful for categorical attributes where exact matches matter, but those matches and their weights must fit the application.",
             ),
             trueFalse(
               "Raising the order of the p-norm can never push a person further away.",
               true,
-              "Scale a gap vector so its Manhattan length is one and every absolute gap is at most one, and a number at most one raised to a higher power only shrinks, so the distance under a higher order is at most the distance under a lower. That is the sweep from 7 down to 4 on the worked gaps of 3 and 4, and it is the diamond at 221 cells sitting inside the circle at 317 and the square at 441.",
+              "For a fixed finite gap vector and orders at least one, its unnormalized p-norm cannot increase as the order increases. Larger orders emphasize the largest absolute gap relative to the combined smaller gaps. For gaps 3 and 4, the distance decreases from Manhattan distance 7 toward the Chebyshev limit 4. This compares the same coordinates without changing their units.",
             ),
             several(
               "Which of these hold of the unit shapes drawn on the lattice?",
               [
-                "The circle, the diamond, the square and the cross keep their form wherever the centre is placed",
+                "The circle, the diamond, the square and the cross keep their form wherever the center is placed",
                 "Moved to (1, 1), cosine's region becomes a half-plane of 861 cells",
                 "At the origin cosine shades all 1681 cells at exactly one",
                 "Canberra keeps its form for the same reason the p-norms do",
               ],
               [0, 1, 2],
-              "The p-norms read only the gaps, where cosine and Canberra read the coordinates themselves, so where the data sits matters to those two and centring the data breaks both. At the origin Canberra shades only the two axes, because dividing a gap by the sum of the pair it separates gives exactly one whenever the other number is zero.",
+              "The p-norms and Hamming depend on differences or equality, so a shared translation preserves their regions. Cosine depends on direction from zero, and Canberra uses the magnitudes of the original coordinates in its denominators. Translating or centering therefore changes those two comparisons. That is a change in the defined geometry, not a failure of the transformation.",
             ),
         ],
         },
@@ -424,16 +375,7 @@ Cosine distance: approximately 0.000189`}</Equation>
           content: (
             <>
               <SubSection title="9. A distance adds unlike things">
-                <p>
-                  Every one of the p-norms adds a gap in centimetres to a gap
-                  in kilograms as if they were the same kind of number, and
-                  they are only comparable because the crowd happens to span
-                  about sixty of each. Nothing in the formula knows that. On
-                  the worked pair the height column is doing 0.512 of the
-                  squared-gap arithmetic across the crowd, which is roughly
-                  half, and it is half by luck of the units rather than by
-                  any decision.
-                </p>
+                <p>The raw p-norms combine numerical height and weight gaps despite their different units. Across the crowd, height contributes about 0.512 of the aggregate squared-gap total, roughly half under these recorded units. That is a dataset-wide share, not the worked pair’s height share. Changing units changes this relative weighting without changing the observations.</p>
                 <p>
                   Put the weights into grams, which changes no person, and
                   the same pair is 4000.001 apart by the straight line where
@@ -444,48 +386,20 @@ Cosine distance: approximately 0.000189`}</Equation>
                 </p>
                 <PairMeasurer panel="column" />
                 <KeepInMind>
-                  A distance over several features is a sum over those
-                  features, and a sum hands the answer to whichever term is
-                  largest. The units decide which term that is, and units
-                  are a choice the data collector made for reasons of their
-                  own.
-                </KeepInMind>
+                  Combining raw numerical gaps gives their units a role in the comparison. A feature recorded with larger numbers can dominate even when the underlying observation has not changed. Decide what relative contribution each feature should have.</KeepInMind>
               </SubSection>
 
               <SubSection title="10. Weight in grams, weight in tonnes">
-                <p>
-                  Refit the whole crowd with its weights multiplied by a
-                  thousand and the height column&rsquo;s share of the
-                  arithmetic falls from 0.512 to about one millionth. On this
-                  particular crowd the three people the query consults come
-                  back the same three, at 4000.001, 8000.002 and 12000.001,
-                  because the ranking by weight alone happens to agree with
-                  the ranking by both, and the vote is still child. That is
-                  the quiet version of the failure, a model that has stopped
-                  reading one of its columns and gives no sign of it.
-                </p>
+                <p>Multiplying only weight by a thousand reduces height’s aggregate share from 0.512 to about one millionth. For this query the same three neighbors remain selected, at distances 4000.001, 8000.002 and 12000.001, so the class stays child. Weight now dominates those raw distances; an unchanged prediction does not establish that the feature weighting is appropriate.</p>
                 <InAModel title="Weight in tonnes">
-                  <p>
-                    Divide the weights by a thousand instead and height does
-                    0.999999 of the arithmetic. Now the order changes. The
-                    person at (145, 57), who was third at 13, comes second at
-                    5.000014, and the person at (156, 53), who was second at
-                    10, drops to third at 6.000005, because the model is now
-                    ranking by height with weight as a tie-break too small
-                    to see. The vote happens to survive here, two children
-                    of three either way, and on a crowd where the reordered
-                    person carried the other label it would not.
-                  </p>
+                  <p>Dividing the weights by a thousand makes height account for 0.999999 of the aggregate squared-gap total. The person at (145, 57) moves from third to second, at distance 5.000014, and the person at (156, 53) moves from second to third, at 6.000005. The same three people still vote, so reordering them cannot change an unweighted three-neighbor vote. A change at the selection boundary could change that vote.</p>
                 </InAModel>
                 <UnitsRefit />
                 <KeepInMind>
-                  Grams silence the height column and tonnes silence the
-                  weight column, and in either case the model has become a
-                  one-feature model with nothing in its output to say so.
-                </KeepInMind>
+                  These conversions make one feature dominate the raw distances. The other feature still contributes, even when that contribution is very small. An unchanged class prediction does not establish that this relative weighting is appropriate.</KeepInMind>
               </SubSection>
 
-              <SubSection title="11. Standardise first">
+              <SubSection title="11. Standardize first" id="11-standardise-first">
                 <p>
                   The repair is to put every column on a scale of its own
                   spread before measuring anything, which is the whole
@@ -493,7 +407,8 @@ Cosine distance: approximately 0.000189`}</Equation>
                   <Link href="/concepts/feature-scaling" className={linkClass}>
                     feature scaling
                   </Link>{" "}
-                  page and is not repeated here. Standardised, the query is
+
+                  page and is not repeated here. Standardized, the query is
                   at (−0.080, −0.403) in units of standard deviations, its
                   three nearest are the same three as the raw fit at 0.233,
                   0.466 and 0.618, and the height column does 0.464 of the
@@ -501,7 +416,8 @@ Cosine distance: approximately 0.000189`}</Equation>
                   and now holds whatever units the data arrived in.
                 </p>
                 <p>
-                  The standardised panel of the widget above fits the scaler
+
+                  The standardized panel of the widget above fits the scaler
                   on the crowd and passes the query through the same
                   scalings, in that order. Fitting it on the crowd and the
                   query together would let the query move the mean it is
@@ -511,35 +427,16 @@ Cosine distance: approximately 0.000189`}</Equation>
                   </Link>{" "}
                   page measures as a leak.
                 </p>
-                <KeepInMind>
-                  Everywhere else on this site standardising is a
-                  convenience that makes a fit better conditioned. For a
-                  distance it is part of being correct, because an
-                  unstandardised distance is reading whichever column has
-                  the biggest numbers and calling it nearness.
-                </KeepInMind>
+                <KeepInMind>Feature scales define relative contributions to distance. Standardization is one possible convention, useful when a one-standard-deviation change in each input should have comparable weight. Physical units, task-specific costs or learned weights may justify another distance. Raw units are not automatically correct or automatically wrong.</KeepInMind>
               </SubSection>
 
               <SubSection title="12. Which metrics are exempt, measured">
-                <p>
-                  It would be convenient if some of the six were immune to
-                  units, and one of them is. Canberra divides each gap by the
-                  size of the values it sits between, so multiplying a column
-                  by a thousand multiplies the gap and its denominator alike,
-                  and the pair reads 0.0566 in kilograms and 0.0566 in
-                  grams, identical to the last bit. Hamming is exempt too,
-                  trivially, since it asks only whether two values are equal
-                  and a thousand times equal values are still equal.
-                </p>
-                <p>I expected cosine to ignore this scaling, but the measurement clarified the distinction. Multiplying every coordinate of one vector by the same positive factor preserves its direction. Rescaling only one feature changes directions and can change cosine comparisons.</p>
+                <p>Canberra is invariant to multiplying a feature by a nonzero unit-conversion factor: its numerator and denominator change by the same magnitude. The displayed pair gives 0.0566 in kilograms and grams. Hamming also preserves equality under an exact nonzero unit conversion, so that comparison is unchanged.</p>
+                <p>Multiplying every coordinate of a vector by the same positive factor preserves its direction. Rescaling one feature column changes directions instead. Cosine is insensitive to the former operation, but its comparisons can change under the latter. The measurement below distinguishes those two uses of scaling.</p>
 <p>Converting the weight column from kilograms to grams changes the selected pair&apos;s cosine distance from approximately 0.000189 to 0.0000000318. The vectors now point much more strongly along the weight axis. Although the first three neighbors happen to remain the same, later rankings differ.</p>
 <p>Standardizing the features changes the geometry again. In this example, the standardized cosine neighbors produce a child prediction where the raw-feature version predicted adult. The relevant question is therefore how features are scaled, not simply whether a comparison divides by vector length.</p>
                 <KeepInMind>
-                  Canberra and Hamming do not need scaling. Cosine needs it
-                  as much as the p-norms do, and the belief that it does not
-                  comes from confusing the row it ignores the length of
-                  with the column whose units changed.
-                </KeepInMind>
+                  Canberra and Hamming do not change under an exact nonzero rescaling of a feature. Centering is a different transformation and can change Canberra. Cosine preserves a nonzero row direction under positive row scaling, but rescaling individual feature columns can change it. Choose the preprocessing for the intended comparison.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -561,22 +458,9 @@ Cosine distance: approximately 0.000189`}</Equation>
                   still reads 0.000189.
                 </p>
                 <PairMeasurer panel="row" />
-                <p>
-                  The extreme case is (1, 1) against (100, 100), which cosine
-                  puts at 0.0000000000000002, an epsilon from zero, and the
-                  straight line at 140.007. If magnitude carries meaning, and
-                  for a person&rsquo;s height and weight it plainly does,
-                  that is the wrong answer. If the rows are word counts and
-                  a long document should resemble a short one on the same
-                  subject, it is exactly the right one, and it is why text is
-                  usually handled with angles.
-                </p>
+                <p>For (1, 1) and (100, 100), cosine distance is about 0.0000000000000002, close to the exact value zero, while Euclidean distance is 140.007. Cosine ignores their large magnitude difference because their directions agree. This can suit document comparisons when relative word use matters more than document length. It is unsuitable when that magnitude difference is information we need.</p>
                 <KeepInMind>
-                  Cosine is invariant to scaling a row and not to scaling a
-                  column, which is the distinction Part 3 turned on. It is
-                  the metric for data where a row&rsquo;s size is an accident
-                  of how much of it was collected.
-                </KeepInMind>
+                  Cosine distance is unchanged by positive scaling of a nonzero row. It is useful when relative composition or direction matters more than total magnitude. Feature-column scaling can still change those directions.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. Where cosine has no answer">
@@ -584,38 +468,25 @@ Cosine distance: approximately 0.000189`}</Equation>
 <p>
                   Three things follow from cosine being an angle. The range runs from zero to two, since one minus a cosine can reach two only for rows pointing exactly opposite, and (3, 4) against (−3, −4) does reach 2.0. On data that cannot go below zero, counts and shares and measurements of people, two rows are at most a right angle apart and the distance never exceeds one.
                 </p>
-                <p>
-                  A row of all zeros has no direction at all, and it is reported at distance 1 from everything, itself included, which is the convention the wider ecosystem follows and the reason the gallery&rsquo;s cosine panel is one flat colour at the origin.
-                </p>
+                <p>The zero vector has no direction, so the usual cosine formula is undefined there. This SDK returns distance 1 whenever a zero vector participates, including a comparison with itself. That is an explicit convention, rather than a universal mathematical value or behavior shared by every library. It produces the flat cosine panel at the origin.</p>
 </>
                 <>
 <p>
-                  A query at the origin under cosine is therefore at exactly 1 from every one of the eleven people, and the neighbour model consults the first three by index because it has nothing else to go on. The third consequence is the one Part 1 measured, that the triangle inequality fails, so a search that prunes by it would prune wrongly.
+
+                  A query at the origin under cosine is therefore at exactly 1 from every one of the eleven people, and the neighbor model consults the first three by index because it has nothing else to go on. The third consequence is the one Part 1 measured, that the triangle inequality fails, so a search that prunes by it would prune wrongly.
                 </p>
                 <p>
                   Rounding adds a small fourth. A row against its own direction lands an epsilon or two from zero rather than on it, and the implementation clamps a distance of minus two times ten to the sixteenth back to zero so that it cannot sort ahead of a genuine zero.
                 </p>
 </>
                 <KeepInMind>
-                  Cosine has a blind spot at the origin and no triangle
-                  inequality anywhere. Neither matters to a brute-force
-                  neighbour search on data that never reaches the origin,
-                  and both matter the moment the data is centred.
-                </KeepInMind>
+
+                  A zero row needs an explicit cosine convention. The triangle-inequality issue is separate: it matters to algorithms that rely on that inequality, regardless of whether the data is centered. A brute-force neighbor search compares every candidate directly and does not require it.</KeepInMind>
               </SubSection>
 
               <SubSection title="15. Hamming reads labels">
-                <p>
-                  Suppose the first column is a colour encoded as 0, 1 or 2
-                  and the second is a size. There is no sense in which colour
-                  2 is further from colour 0 than colour 1 is, and every
-                  metric on this page except Hamming would insist otherwise.
-                  Two people whose colours are two apart are 2.0 apart by
-                  the straight line and 1.0 by Canberra, two people whose
-                  colours are one apart are 1.0 and 1.0, and Hamming puts
-                  both pairs at 0.5, one feature of two disagreeing, which is
-                  the only honest answer.
-                </p>
+                <p>Suppose the first column identifies an unordered color category using 0, 1 or 2, and the second records size. The gap between two color IDs has no defined physical meaning. Hamming distance can record whether those categories match; a rule that uses the size of the numerical gap imposes an ordering we did not intend.</p>
+                <p>In the displayed pairs, Hamming gives 0.5 whenever the color differs and the size matches: one of two entries differs. The other rules react differently to gaps of one and two. That makes the encoding part of the distance choice, rather than harmless labeling.</p>
                 <PairComparisonTable pairs={CODE_PAIRS} />
                 <p>
                   Hamming is reported as a share rather than a count, so
@@ -623,13 +494,7 @@ Cosine distance: approximately 0.000189`}</Equation>
                   features or four hundred, and so that it sits on the same
                   scale whatever the width of the table.
                 </p>
-                <KeepInMind>
-                  Hamming is the one metric here that treats values as labels
-                  rather than quantities, and therefore the only one that
-                  means anything on categorical codes. On measurements that
-                  vary continuously it answers 1 for almost every pair,
-                  which is what happened to the crowd.
-                </KeepInMind>
+                <KeepInMind>Hamming checks exact matches without assigning meaning to the size of a category ID difference. It can suit categorical codes under that interpretation. Other encodings or category-specific distances can also be meaningful. For continuously varying measurements, almost every coordinate may differ, leaving little ability to rank closeness.</KeepInMind>
               </SubSection>
 
               <SubSection title="16. Exact equality, and the trap in it">
@@ -646,12 +511,7 @@ Cosine distance: approximately 0.000189`}</Equation>
                     different arithmetic paths may not.
                   </p>
                 </>
-                <KeepInMind>
-                  Hand Hamming values that were assigned, never values that
-                  were calculated. A standardised column is calculated, so
-                  standardising before a Hamming distance turns every
-                  feature into a disagreement.
-                </KeepInMind>
+                <KeepInMind>Use Hamming when exact stored equality is the intended comparison. The same standardization applied to equal stored values does not inherently make them unequal. Different numerical computation paths can leave tiny differences, so continuous measurements may need an explicit tolerance or a different distance rule.</KeepInMind>
               </SubSection>
 
               <SubSection title="17. Canberra reads a gap against its size">
@@ -679,11 +539,8 @@ Cosine distance: approximately 0.000189`}</Equation>
                   </p>
                 </>
                 <KeepInMind>
-                  Every Canberra term lies between zero and one whatever the
-                  units, which is what makes it the one option that tolerates
-                  unstandardised input, and it pays for that by being most
-                  sensitive exactly where the values are smallest.
-                </KeepInMind>
+
+                  Each Canberra contribution lies between zero and one, with a zero contribution defined for two zero entries. Nonzero unit conversions leave it unchanged. Differences near zero can have a large relative contribution, so check whether that sensitivity matches the question.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -700,13 +557,13 @@ Cosine distance: approximately 0.000189`}</Equation>
                 "Doubles it, since one column was multiplied",
               ],
               1,
-              "A distance over several features is a sum, and a sum hands the answer to whichever term is largest. The height column's share of the squared-gap arithmetic falls from 0.512 to about one millionth. On this crowd the three consulted come back the same three and the vote is still child, which is the quiet version of the failure, a model that has stopped reading one of its columns with nothing in its output to say so.",
-              {"description":"Use these values and conventions.","data":"Height gap: 3 cm\nWeight gap: 4 kg\nOne kilogram is 1000 grams. Heights remain in centimetres.\nEuclidean distance: square each coordinate gap, add the squares, then take the square root."},
+              "Changing weight from kilograms to grams makes its gap 4,000 while the height gap remains 3. The raw numerical Euclidean distance becomes:\n\n```math\ndistance = √(3² + 4,000²) ≈ 4,000.001\nheight share before = 3² / (3² + 4²) = 0.36\nheight share after = 3² / (3² + 4,000²) ≈ 0.0000005625\n```\n\nHeight has much less influence on this distance, even though this particular query keeps the same three neighbors and class prediction.",
+              {"description":"Use these values and conventions.","data":"Height gap: 3 cm\nWeight gap: 4 kg\nOne kilogram is 1000 grams. Heights remain in centimeters.\nEuclidean distance: square each coordinate gap, add the squares, then take the square root."},
             ),
             trueFalse(
               "Cosine needs no scaling, since it divides out the length of each row.",
               false,
-              "Multiplying every coordinate of one row by the same positive factor does preserve its direction, and rescaling a single feature changes directions and can change comparisons. Converting the weight column to grams moves the pair's cosine distance from about 0.000189 to 0.0000000318, and standardising changes the geometry again, where the standardised cosine neighbours give child and the raw features gave adult.",
+              "Multiplying every coordinate of one row by the same positive factor does preserve its direction, and rescaling a single feature changes directions and can change comparisons. Converting the weight column to grams moves the pair's cosine distance from about 0.000189 to 0.0000000318, and standardizing changes the geometry again, where the standardized cosine neighbors give child and the raw features gave adult.",
             ),
             choice(
               "Which of the six are exempt from the choice of units?",
@@ -719,16 +576,16 @@ Cosine distance: approximately 0.000189`}</Equation>
               [
                 "Never, since the two rows are plainly different",
                 "When the rows are word counts and a long document should resemble a short one on the same subject",
-                "Once the data has been standardised",
+                "Once the data has been standardized",
                 "When the rows hold categorical codes",
               ],
               1,
-              "Cosine is invariant to scaling a row and not to scaling a column, so it is the metric for data where a row's size is an accident of how much of it was collected. For a person's height and weight the magnitude plainly carries meaning, and there it is the wrong answer.",
+              "Multiplying an entire nonzero row by a positive constant preserves its direction, so cosine can compare document word proportions without treating length alone as a difference in subject. Rescaling just one column changes directions. Whether magnitude should matter depends on the application; height-weight records do not automatically justify ignoring it.",
             ),
             trueFalse(
-              "Standardising a column before measuring Hamming distance turns every feature into a disagreement.",
+              "Hamming can count two theoretically equal computed floating-point values as different if rounding leaves different stored numbers.",
               true,
-              "Hamming compares floating-point values exactly, and arithmetic can leave slightly different stored numbers for what the decimal expressions call one value, so 0.1 + 0.2 reads as a full disagreement against 0.3. A standardised column is calculated, so standardising first turns every feature into a disagreement. Hand Hamming values that were assigned, never values that were computed.",
+              "Hamming compares stored values exactly. For example, floating-point evaluation can produce:\n\n```math\n0.1 + 0.2 = 0.30000000000000004\n```\n\nThat stored result differs from the stored value of 0.3, so an exact equality test counts a mismatch. Applying the same standardization to equal stored inputs does not inherently make them different. Use Hamming where exact categorical equality is the intended comparison, and define how computed numerical values should be matched.",
             ),
         ],
         },
@@ -736,36 +593,18 @@ Cosine distance: approximately 0.000189`}</Equation>
           title: "Part 5. Which Models Can Choose",
           content: (
             <>
-              <SubSection title="18. The neighbour models take any distance">
+              <SubSection title="18. The neighbor models take any distance" id="18-the-neighbour-models-take-any-distance">
                 <>
-<p>
-                  The nearest neighbours regressor and classifier take the metric as a setting, since a neighbour model learns nothing and the metric is the whole of its opinion. The six named metrics are a closed set, so a misspelling is refused rather than silently defaulted, and beyond the six the model accepts any object that can measure every query against every stored row.
-                </p>
-                <p>
-                  An order-three p-norm, which no name covers, ranks the worked crowd&rsquo;s nearest three at 4.498, 8.996 and 12.28, between the Euclidean 5, 10, 13 and the Chebyshev 4, 8, 12 as Part 2 says it must.
-                </p>
+<p>The neighbor regressor and classifier use distances to select stored examples before combining their answers. Changing the distance can therefore change the evidence behind a prediction. The SDK accepts six named rules and rejects misspellings. A caller can also supply a comparison object that measures queries against the stored rows.</p>
+                <p>An order-three p-norm ranks this query’s nearest three at 4.498, 8.996 and 12.28. Those values lie between the Euclidean distances of 5, 10 and 13 and the Chebyshev distances of 4, 8 and 12, as the bounds in Part 2 predict.</p>
 </>
                 <KeepInMind>
-                  A metric nobody has named yet is a subclass with one
-                  method, and the neighbour models will use it without
-                  knowing it is new. The six names cover the six worth
-                  spelling, and anything else that can measure a query
-                  against a stored row is accepted beside them.
-                </KeepInMind>
+
+                  The comparison object provides a method that measures query rows against stored rows. A custom implementation can use the same interface as the six named options. Its meaning and mathematical guarantees still need to match the search that consumes it.</KeepInMind>
               </SubSection>
 
               <SubSection title="19. Density and linkage take one too">
-                <p>
-                  Two of the clusterers take the same setting, and each for
-                  the same reason, that all the model ever asks of a distance
-                  is a comparison. The density clusterer asks whether one
-                  person is within a radius of another and groups whoever is
-                  connected by such steps; single, complete and average
-                  linkage ask which two groups are nearest and merge them.
-                  Any of the six answers either question. What changes is
-                  that the radius is in the metric&rsquo;s own units, and
-                  twenty means something different under each.
-                </p>
+                <p>The density clusterer uses a radius to find nearby observations and a minimum-neighbor count to identify dense regions. Connected dense neighborhoods form groups; isolated observations can remain unassigned. Single, complete and average linkage instead summarize distances between groups and merge the nearest pair. Each can use the supplied pairwise comparison rules. A radius or merge value must be interpreted on that rule’s numerical scale.</p>
                 <DensityUnderMetrics />
                 <InAModel title="The crowd at a radius of twenty">
                   <>
@@ -781,61 +620,43 @@ Cosine distance: approximately 0.000189`}</Equation>
 <p>
                   Single linkage cut at two groups gives a cleaner reading of what each metric thinks the crowd is. Four of the six cut the three far children off from the other eight, Euclidean making its first merge at 2.236 and its last at 23.35 and Manhattan at 3 and 33. Cosine cuts by direction instead, and puts the person at (147, 41) with the three far children, because all four are small in both measurements and point the same way.
                 </p>
-                <p>
-                  Hamming, with every pair at 1, has nothing to merge by, and its cut leaves one person alone and says nothing about the crowd.
-                </p>
+                <p>With every pair tied at Hamming distance 1, linkage has no measured preference among possible merges. Its tie policy leaves one person alone at this cut. That result reflects the ordering convention as much as the data and needs to be interpreted accordingly.</p>
 </>
                 <KeepInMind>
+
                   A radius or a merge height is a distance, so it belongs to
                   the metric it was measured under and does not transfer.
-                  Twenty is a fact about Euclidean centimetres and kilograms
+                  Twenty is a fact about Euclidean centimeters and kilograms
                   and means nothing under cosine.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="20. Why k-means cannot">
                 <>
-<p>
-                  It would be reasonable to expect every method that measures distance to offer the same dial, and the k-means page does not. The reason is a fact about the algorithm rather than a simplification of it. k-means alternates two steps, put every person with the nearest centre and then move each centre to the mean of the people it now holds, and the argument that it must settle rests on both steps lowering one total.
-                </p>
+<p>K-means couples two operations: assign observations to their nearest center, then replace each center with its group mean. Both are chosen to reduce total squared Euclidean distance. A distance setting is therefore not an independent choice unless the representative update is changed to minimize the matching objective too.</p>
                 <p>
-                  The second step lowers it because the mean is the point that minimises the sum of squared distances to a group, and that is a fact about squared Euclidean distance specifically.
+
+                  The second step lowers it because the mean is the point that minimizes the sum of squared distances to a group, and that is a fact about squared Euclidean distance specifically.
                 </p>
 </>
                 <>
 <p>
                   Measured on the crowd&rsquo;s weight column, whose mean is 53.36 and whose median is 57, the total squared gap from the mean is 4742.5 and from the median 4888.0, so the mean wins on squares. The total absolute gap from the mean is 191.6 and from the median 188.0, so the median wins on absolute gaps, which are Manhattan&rsquo;s currency.
                 </p>
-                <p>
-                  Hand k-means Manhattan and its update step moves the centre to the wrong place for the total it is supposed to be lowering, the convergence argument collapses, and what is left is a loop with no guarantee.
-                </p>
+                <p>The mean does not generally minimize total Manhattan distance. Using it after Manhattan assignments would therefore remove the argument that both steps lower the same objective. A coordinate-median update gives a related algorithm, rather than ordinary k-means with an interchangeable ruler.</p>
 </>
                 <NumberTable
-                  headings={["centre", "total squared gap", "total absolute gap"]}
+                  headings={["center", "total squared gap", "total absolute gap"]}
                   rows={[
                     ["mean, 53.36", "4742.5", "191.6"],
                     ["median, 57", "4888.0", "188.0"],
                   ]}
-                  caption="The crowd’s eleven weights against two candidate centres. Each centre wins the column whose total it minimises, and the update step of k-means computes the mean."
+                  caption="The crowd’s eleven weights against two candidate centers. Each center wins the column whose total it minimizes, and the update step of k-means computes the mean."
                 />
-                <p>
-                  So the metric is a setting on the neighbour models and on
-                  the density and linkage clusterers, where it is a genuine
-                  choice, and is absent from{" "}
-                  <Link href="/concepts/k-means" className={linkClass}>
-                    k-means
-                  </Link>
-                  , where offering it would be offering something that does
-                  not work. The method that does what the expectation wants
-                  is k-medoids, which replaces the mean with an actual member
-                  of the group, and it is not built here.
-                </p>
+                <p>The SDK lets neighbor models and the listed density and linkage methods use these comparison rules. Ordinary <Link href="/concepts/k-means" className={linkClass}>k-means</Link>{" "}uses a squared-Euclidean objective with a mean update. Other clustering methods pair different representatives with other objectives. For example, k-medoids chooses an observed group member to minimize its within-group dissimilarity; it is not implemented here.</p>
                 <KeepInMind>
-                  A model can take a metric only if every step it makes is
-                  defined by comparisons alone. The moment a step computes a
-                  centre, the centre&rsquo;s arithmetic has chosen the metric
-                  already.
-                </KeepInMind>
+
+                  A distance and its representative update must optimize compatible quantities. Replacing the distance while keeping an unrelated center update can remove the guarantee that an iteration improves the intended objective.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. Ward and the map are Euclidean for the same reason">
@@ -848,7 +669,8 @@ Cosine distance: approximately 0.000189`}</Equation>
                   rather than producing a number the rule does not describe.
                   The{" "}
                   <Link href="/concepts/self-organising-map" className={linkClass}>
-                    self-organising map
+
+                    self-organizing map
                   </Link>{" "}
                   moves a winning unit a step along the negative gradient of
                   half the squared Euclidean distance, which is a different
@@ -858,12 +680,8 @@ Cosine distance: approximately 0.000189`}</Equation>
                 </p>
                 <Equation>{"ward with manhattan  →  refused at construction\n\n\"ward linkage merges whichever pair adds least to the spread about a group mean, and a mean minimises squared Euclidean distance and no other\""}</Equation>
                 <KeepInMind>
-                  Single, complete and average linkage summarise a block of
-                  pairwise distances and take any metric. Ward reads the
-                  group means and takes Euclidean alone, and the
-                  implementation branches on exactly that property rather than on the
-                  linkage&rsquo;s name.
-                </KeepInMind>
+
+                  Single, complete and average linkage summarize pairwise distances directly. Ward linkage minimizes the increase in within-group squared Euclidean spread. Its Euclidean restriction in this implementation follows from that specific objective.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -874,24 +692,15 @@ Cosine distance: approximately 0.000189`}</Equation>
             <>
               <SubSection title="22. Every query against every stored row">
                 <>
-<p>
-                  A neighbour model at prediction time measures every query against every remembered row, so the answer is a table with one row per query and one column per stored person. The general way to build it is to line every query up against every stored row, subtract, and reduce over the features, which produces a three-dimensional array of queries by rows by features before the reduction collapses it.
-                </p>
+<p>This implementation evaluates query rows against stored rows and returns a table with queries along one axis and stored observations along the other. A direct broadcast first forms their coordinate differences. That intermediate has an additional feature axis, which can consume much more memory than the final distance table.</p>
                 <p>
                   Five hundred queries against twenty thousand stored rows over twenty features is two hundred million numbers at eight bytes each, 1.6 gigabytes for an answer that occupies 80 megabytes.
                 </p>
 </>
-                <p>
-                  Four of the six metrics have no way round that array, so the
-                  queries are taken a block at a time, with the block sized
-                  so the pairing array stays under 64 megabytes, and
-                  the loop changes only the peak memory and never the
-                  arithmetic, so the blocked and unblocked answers agree bit
-                  for bit. The other two reduce to a matrix multiply and
-                  never build the array at all.
-                </p>
+                <p>For four rules, this implementation limits the broadcast intermediate by processing query blocks. The block size keeps that array under 64 megabytes. Blocking preserves the individual distance calculations while reducing peak memory. The other two implementations use matrix products to avoid that intermediate.</p>
                 <KeepInMind>
-                  The cost of a neighbour model is paid at prediction rather
+
+                  The cost of a neighbor model is paid at prediction rather
                   than at fit, and it is proportional to queries times stored
                   rows times features. Nothing about the metric changes that
                   product; what changes is whether the intermediate has to
@@ -910,9 +719,10 @@ Cosine distance: approximately 0.000189`}</Equation>
                 </p>
                 <Equation>{"||a − b||²  =  ||a||²  −  2 a · b  +  ||b||²"}</Equation>
                 <p>
+
                   On the worked pair the three routes agree. The definition
                   gives 5, the expansion on the raw coordinates gives
-                  4.999999999999273, and the centred expansion gives 5. The expansion
+                  4.999999999999273, and the centered expansion gives 5. The expansion
                   is off in the thirteenth decimal on numbers around a
                   hundred and fifty, which is the first sign of what the next
                   step shows. Cosine takes the same route, since after each
@@ -920,12 +730,7 @@ Cosine distance: approximately 0.000189`}</Equation>
                   product of unit rows.
                 </p>
                 <KeepInMind>
-                  The matrix product is the same arithmetic rearranged so
-                  that a linear algebra routine can do the cross term in
-                  blocked, threaded code, and the only thing it changes is
-                  where the rounding happens, which is why it is exact
-                  wherever that rounding is harmless.
-                </KeepInMind>
+                  The matrix-product expression is algebraically equivalent to direct coordinate subtraction. It can use optimized linear algebra routines and avoids the three-dimensional difference array. Floating-point rounding occurs in a different order, so the numerical results need not be identical.</KeepInMind>
               </SubSection>
 
               <SubSection title="24. Why it shifts to the mean first">
@@ -939,20 +744,15 @@ Cosine distance: approximately 0.000189`}</Equation>
 </>
                 <FarFromOrigin />
                 <>
-<p>
-                  Both symptoms come from the coordinates being far from the origin rather than from the people being close together, so the implementation subtracts the stored rows&rsquo; mean from both inputs before expanding. Shifting every point equally leaves every distance unchanged while making each squared length a number the size of the spread rather than of the offset, and on the pathological pair the shifted expansion returns the definition&rsquo;s answer exactly.
-                </p>
+<p>The cancellation becomes severe when the squared coordinate magnitudes are large compared with the small distance being recovered. Subtracting the stored rows’ mean from both inputs can reduce those magnitudes without changing the mathematical distances. For this pathological pair, the shifted expansion agrees with direct subtraction. It reduces this source of error rather than guaranteeing exact agreement for every dataset.</p>
                 <p>
-                  The shift is also why the crowd with a constant height column, in Part 8, reports its second neighbour at 7.999999999999999 rather than 8, since the arithmetic is now done on deviations and rounds where the definition would not. A clamp at zero stays regardless, because the square root of a tiny negative is not a number and would propagate silently through a mean.
+
+                  The shift is also why the crowd with a constant height column, in Part 8, reports its second neighbor at 7.999999999999999 rather than 8, since the arithmetic is now done on deviations and rounds where the definition would not. A clamp at zero stays regardless, because the square root of a tiny negative is not a number and would propagate silently through a mean.
                 </p>
 </>
                 <KeepInMind>
-                  The expansion is safe only once the numbers it subtracts are
-                  the size of the spread rather than of the offset. Centring
-                  costs one subtraction per value and turns a formula that
-                  fails on real coordinates into one that agrees with the
-                  definition to the last bit.
-                </KeepInMind>
+
+                  Centering both inputs at a shared reference can reduce cancellation in the expanded formula. Direct subtraction provides another route for checking difficult cases. Both operate on the already rounded stored inputs, and neither can recover precision those inputs have lost.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -963,37 +763,19 @@ Cosine distance: approximately 0.000189`}</Equation>
             <>
               <SubSection title="25. Nearest against farthest">
                 <>
-<p>
-                  Every distance on this page was measured in two features, and two is where distance works best. Add columns and something happens to the word nearest that no choice of metric undoes. Draw two hundred rows at random in one feature, measure every row against every other, and ask for each row how much further its farthest neighbour is than its nearest, as a ratio to the nearest.
-                </p>
+<p>In many dimensions, distances can become less distinct. The following experiment draws two hundred random rows with independent features. For each row, compare its nearest and farthest neighbors and express their distance difference relative to the nearest distance. Then repeat while increasing the feature count. This tests a specific data-generating setup, rather than every high-dimensional dataset.</p>
                 <p>
-                  The median of that ratio is 369.8, so a typical row has a neighbour hundreds of times nearer than the rest. Keep the same rows and add features, each drawn the same way, and the median falls to 28.3 in two, 4.50 in five, 1.98 in ten, 0.544 in fifty and 0.235 in two hundred.
+
+                  The median of that ratio is 369.8, so a typical row has a neighbor hundreds of times nearer than the rest. Keep the same rows and add features, each drawn the same way, and the median falls to 28.3 in two, 4.50 in five, 1.98 in ten, 0.544 in fifty and 0.235 in two hundred.
                 </p>
-                <p>
-                  At two hundred features the nearest row is only about a quarter nearer than the farthest, so the k nearest is very nearly a random subset wearing a disguise.
-                </p>
+                <p>At two hundred features, the farthest distance is only about a quarter larger than the nearest in this experiment. A small distance difference gives weaker evidence that one observation is substantially more similar than another. Whether that harms a prediction still depends on which information the features contain and what the target requires.</p>
 </>
                 <Equation>{"relative contrast  =  (farthest − nearest) / nearest,   one ratio per row, the median over rows"}</Equation>
                 <DimensionCurse />
-                <p>
-                  Richard Bellman named the curse of dimensionality in 1957,
-                  for the way the volume of a box grows with its dimension,
-                  and Beyer, Goldstein, Ramakrishnan and Shaft asked the
-                  question this widget answers in &ldquo;When is nearest
-                  neighbor meaningful?&rdquo; in 1999. Their result is that
-                  when the spread of distances from a query grows more slowly
-                  than their average, which it does for independent
-                  features, every point ends up about equally far away and
-                  nearest stops being a property of the data.
-                </p>
+                <p>Bellman introduced the curse-of-dimensionality terminology in 1957. Beyer, Goldstein, Ramakrishnan and Shaft examined distance concentration in “When is nearest neighbor meaningful?” in 1999. Under their stated conditions, the range of distances becomes small relative to their overall size. The experiment here illustrates that behavior with independent random features; independence alone is not a claim about every possible distribution or task.</p>
                 <KeepInMind>
-                  This is a property of distance itself rather than of any
-                  implementation of it, and the mean of the same ratio,
-                  which is the measure I first recorded, tells the same
-                  story at 3248 in one feature and 0.238 in two
-                  hundred. Nothing in the fit can see that its neighbours
-                  have become arbitrary.
-                </KeepInMind>
+
+                  The mean relative contrast in the same experiment is 3248 with one feature and 0.238 with two hundred. The difference between mean and median also shows how a few near-zero nearest distances affect this ratio. These results describe the sampled distribution; they do not make neighbors arbitrary in every high-dimensional problem.</KeepInMind>
               </SubSection>
 
               <SubSection title="26. Which metric keeps the most contrast">
@@ -1018,12 +800,10 @@ Cosine distance: approximately 0.000189`}</Equation>
                     ["Chebyshev", "0.193"],
                     ["Hamming", "0"],
                   ]}
-                  caption="Two hundred uniform rows at seed zero. Lower exponents keep more contrast, and the angle keeps the most."
+                  caption="For these two hundred uniform rows at seed zero, lower p-norm orders retain more contrast and cosine retains the most."
                 />
                 <>
-<p>
-                  That the lower exponents hold up better is the result of Aggarwal, Hinneburg and Keim in 2001, who found that Manhattan beats Euclidean in high dimensions and that fractional orders below one beat both, and it is why Manhattan is the steadier choice on data with many columns. Cosine keeps the most here, which is part of why text, with its thousands of columns, is handled with angles.
-                </p>
+<p>Aggarwal, Hinneburg and Keim compared distance measures in high dimensions in 2001, including lower and fractional orders. Their analysis motivates checking how much contrast a distance retains, rather than assuming Euclidean distance is always suitable. The observed ordering is not a universal predictive ranking. Fractional orders also lack some metric guarantees, and cosine’s retained contrast here still needs to be connected to the intended task.</p>
                 <p>
                   In two features cosine is the outlier the other way, with a median of 128,032 and a mean of 2,694,429, because a few rows have another row almost exactly on their line from the origin and the ratio divides by a nearest distance near zero.
                 </p>
@@ -1052,7 +832,8 @@ Cosine distance: approximately 0.000189`}</Equation>
                   direction can still contain the distinction we need.
                 </p>
                 <p>
-                  Standardising does not resolve this particular synthetic
+
+                  Standardizing does not resolve this particular synthetic
                   example because the drawn features already share a scale.
                   Compare any feature selection or transformation inside
                   the training and validation procedure rather than treating
@@ -1063,7 +844,8 @@ Cosine distance: approximately 0.000189`}</Equation>
                   satisfy the triangle inequality required of a metric.
                 </p>
                 <KeepInMind>
-                  When a neighbour model on many columns scores badly, ask
+
+                  When a neighbor model on many columns scores badly, ask
                   which measurements contain useful evidence, how their
                   scales affect the comparison, and whether the available
                   training examples cover the query. Reducing dimensions
@@ -1079,19 +861,19 @@ Cosine distance: approximately 0.000189`}</Equation>
           content: (
             <>
               <SubSection title="28. What an implementation must specify and refuse">
-                <p>Two functions called Euclidean distance can disagree numerically if one subtracts coordinates directly and the other expands the squares. Record which route is used and, for an expanded calculation, where the coordinates are centred.</p>
+                <p>Two functions called Euclidean distance can disagree numerically if one subtracts coordinates directly and the other expands the squares. Record which route is used and, for an expanded calculation, where the coordinates are centered.</p>
                 <p>Other distances need their own decisions. Which orders does the p-norm accept? Does Hamming compare floating-point entries exactly? What does Canberra do with zero over zero, and what does cosine do with a zero vector or rounding beyond its usual range?</p>
-                <p>For a search, also check the permitted pair indices, the rule for tied neighbours and which models accept the chosen metric. The table records these behaviours, including whether a caller can supply a distance beyond the named options.</p>
+                <p>For a search, also check the permitted pair indices, the rule for tied neighbors and which models accept the chosen metric. The table records these behaviors, including whether a caller can supply a distance beyond the named options.</p>
                 <DerivationTable
-                  expressionHeading="Neighbour-search input"
+                  expressionHeading="Neighbor-search input"
                   reasonHeading="How the search responds"
                   rows={[
                     { expression: "no people at all", reason: "refused at the site's boundary before any distance is measured; a request must carry at least one person." },
                     { expression: "one person", reason: "refused by the classifier as a single class, since there is nothing to discriminate between; a lone row is a valid stored set for the distance itself." },
-                    { expression: "more neighbours asked for than people", reason: "refused, in the implementation's own words, 12 neighbours were asked for and only 11 rows were supplied." },
-                    { expression: "a constant column", reason: "accepted by every metric; the crowd with every height at 150 ranks its three nearest at 4, 7.999999999999999 and 11.999999999999998, the odd digits being the centred expansion's rounding. The standardizer refuses the same column, because its spread is zero." },
+                    { expression: "more neighbors asked for than people", reason: "refused, in the implementation's own words, 12 neighbors were asked for and only 11 rows were supplied." },
+                    { expression: "a constant column", reason: "accepted by every metric; the crowd with every height at 150 ranks its three nearest at 4, 7.999999999999999 and 11.999999999999998, the odd digits being the centered expansion's rounding. The standardizer refuses the same column, because its spread is zero." },
                     { expression: "a value that is not finite", reason: "refused at the implementation's boundary, feature_values must contain only finite values, and the request layer cannot carry one in the first place, since JSON has no spelling for it." },
-                    { expression: "a query on a stored person", reason: "accepted; that person is at exactly 0.0 and votes first." },
+                    { expression: "a query on a stored person", reason: "accepted; under the displayed Euclidean case, the stored person has distance 0.0 and votes first. Cosine uses its separate zero-vector convention." },
                     { expression: "the same person stored twice", reason: "accepted; both copies sit at 5.0, both are consulted, and ties are broken by index, so the earlier copy comes first." },
                     { expression: "a query at the origin under cosine", reason: "accepted; every person is at exactly 1.0 and the first three by index vote, which is the documented blind spot rather than a refusal." },
                     { expression: "a query at the origin under Canberra", reason: "accepted; every person is at exactly 2.0, since both terms divide a value by itself." },
@@ -1106,21 +888,9 @@ Cosine distance: approximately 0.000189`}</Equation>
                     { expression: "a coordinate beyond a million", reason: "refused at the site's own boundary as a bound on hand-entered data; the implementation itself has no such limit." },
                   ]}
                 />
-                <p>
-                  The two rows that deserve a second look are the ones that
-                  are accepted. An order below one and a Hamming comparison
-                  of computed floats both give a number that a caller can
-                  use, and both give one that is not what the caller probably
-                  meant. Each is documented rather than refused,
-                  because the first is a legitimate request in a
-                  high-dimensional setting and the second is correct on the
-                  data Hamming exists for.
-                </p>
+                <p>Accepted input can still have unexpected meaning. An order below one produces a comparison without the usual p-norm metric guarantees. Hamming on computed floating-point values counts exact disagreements, including tiny numerical differences. Both outputs can be useful, but the caller must choose them for those actual behaviors.</p>
                 <KeepInMind>
-                  What is refused here is refused by name, and what is
-                  accepted and strange is written down, so that no number
-                  comes back with its meaning left to be guessed at.
-                </KeepInMind>
+                  Read the accepted-input rules along with the comparison formula. A successful computation tells us what the implementation returned, while its conventions determine how that value should be interpreted.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -1132,12 +902,12 @@ Cosine distance: approximately 0.000189`}</Equation>
               "Why is the metric a setting on the density clusterer and absent from k-means?",
               [
                 "k-means is older, so the setting was never added",
-                "Its update step moves each centre to a mean, and the mean minimises squared Euclidean distance specifically",
+                "Its update step moves each center to a mean, and the mean minimizes squared Euclidean distance specifically",
                 "k-means asks only for comparisons, so every metric would give the same answer",
                 "A mean cannot be computed under Manhattan",
               ],
               1,
-              "The argument that k-means settles rests on both of its steps lowering one total, and handing it Manhattan moves the centre to the wrong place for the total it is meant to be lowering. Measured on the crowd's weight column the mean wins on squared gaps, 4742.5 against the median's 4888.0, and the median wins on absolute gaps, 188.0 against 191.6. A model can take a metric only when every step it makes is settled by comparisons alone.",
+              "Ordinary k-means minimizes squared Euclidean distances. Assigning each observation to its nearest center and then replacing each center with the assigned observations' mean both lower that same objective. For absolute differences in one dimension, the median minimizes the total instead. The supplied weight comparison confirms this: the mean gives the smaller squared-error total, while the median gives the smaller absolute-error total. Supporting another distance may require a different center update or a different clustering algorithm.",
             ),
             trueFalse(
               "Given a radius of twenty, the density clusterer finds three clumps under Euclidean and Manhattan, two under Chebyshev, and one under cosine, Hamming and Canberra.",
@@ -1161,15 +931,15 @@ Cosine distance: approximately 0.000189`}</Equation>
                 "Cosine keeps the most at 0.540 and Chebyshev the least at 0.193",
                 "Manhattan keeps less contrast than Euclidean, since it adds every gap at full size",
                 "Choosing cosine over Euclidean roughly doubles the contrast, which is still far below what one feature offered",
-                "Standardising the columns recovers most of the loss",
+                "Standardizing the columns recovers most of the loss",
               ],
               [0, 2],
-              "The median ratio falls from 369.8 in one feature to 0.235 in two hundred, so the nearest row ends up about a quarter nearer than the farthest. The p-norms sit in order of their exponent, Manhattan at 0.297 above Euclidean at 0.235 above Chebyshev at 0.193, which is Aggarwal, Hinneburg and Keim’s result that the lower exponents hold up better and why Manhattan is the steadier choice on wide data; Hamming on continuous rows is at zero throughout. Standardising does not help, since the drawn features already share a scale, and the remedies are all about having fewer columns or better ones.",
+              "In this simulated dataset, distance contrast falls sharply as the number of features rises. At two hundred features, Manhattan has contrast 0.297, Euclidean 0.235 and Chebyshev 0.193; cosine reaches 0.540. This experiment agrees with the cited analysis that lower norm orders can retain more contrast under its assumptions. It does not establish one universally best metric. Scaling cannot recover contrast lost to many similarly scaled uninformative dimensions; reducing irrelevant inputs is another option to evaluate.",
             ),
             trueFalse(
               "An order below one is refused, since below one the triangle inequality fails.",
               false,
-              "It is accepted and documented rather than refused, because a fractional order is a legitimate request on wide data, where Aggarwal, Hinneburg and Keim found orders below one beating both Manhattan and Euclidean. A Hamming comparison of computed floats is the other accepted-and-strange case. What is refused here is refused by name, so that no number comes back with its meaning left to be guessed at.",
+              "This library accepts positive orders below one as fractional dissimilarities. They fail the triangle inequality and are not norms, but can still be evaluated by methods that do not require metric bounds. The cited experiments found them useful for some high-dimensional datasets; their usefulness here must also be checked against the task. Acceptance by an API does not establish that a distance rule is appropriate.",
             ),
         ],
         },
@@ -1210,7 +980,7 @@ order 2: 5.0000
 order 3: 4.4979
 order 4: 4.2846
 order 10: 4.0220`,{...{ hints: ["A RowBlock is a block of rows with named columns, built from a two-dimensional array, so one person is an array with one row.", "between answers a table with one row per query and one column per remembered row, so a single pair's distance is the entry at [0, 0].", "DistanceMetric is a closed enum of six names, and iterating it visits all six. MinkowskiDistance takes the order at construction and is what the enum holds for Manhattan and Chebyshev."], check: numberCheck("What is the worked pair's distance at order 1.5?", 5.5843, 0.0005, "For this fixed pair, increasing the Minkowski order moves the result toward the largest coordinate gap. Compare the same two measurements under each rule before attaching meaning to the distance value.") },question:"How do the distance rules compare the same two people?"}),
-            exercise("Let the crowd vote under each rule",["Part 1 says that under four of the six metrics the ringed person's three nearest are the same three and the answer is child, that under cosine the third voter is a different adult and the answer flips to adult, and that under Hamming every person is at exactly 1 and the first three by index vote. Fit KNearestNeighboursClassifier with three neighbours under each metric and watch it happen.", "The observed route, neighbour_search, keeps every distance, so print who voted and how far away they were. Part 1 has the straight line at 5, 10 and 13, the taxi grid at 7, 14 and 17, the largest gap at 4, 8 and 12, cosine at 0.000189, 0.000650 and 0.001392, and Canberra at 0.0566, 0.1012 and 0.1346."],`from oop_ml import DistanceMetric, Feature, KNearestNeighboursClassifier
+            exercise("Let the crowd vote under each rule",["Classify the query of 150 cm and 45 kg using three neighbors under each of the six DistanceMetric settings. Fit KNearestNeighboursClassifier to the same eleven labeled people each time. Print the metric name and predicted class.", "Use neighbour_search to print each selected neighbor's row index and distance. Compare the selected rows with the class vote. In particular, inspect how cosine and Hamming handle these continuous measurements."],`from oop_ml import DistanceMetric, Feature, KNearestNeighboursClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1240,8 +1010,8 @@ manhattan: child, consulted [(0, 7.0), (1, 14.0), (2, 17.0)]
 chebyshev: child, consulted [(0, 4.0), (1, 8.0), (2, 12.0)]
 cosine: adult, consulted [(0, 0.000189), (1, 0.00065), (3, 0.001392)]
 hamming: child, consulted [(0, 1.0), (1, 1.0), (2, 1.0)]
-canberra: child, consulted [(0, 0.056613), (1, 0.10124), (2, 0.134596)]`,{...{ hints: ["metric is a field of the classifier, set at construction, and takes a member of DistanceMetric.", "neighbour_search answers one record per query row, and each record carries chosen_indices and chosen_distances, the people who voted and how far away they were.", "Index 0 is the person at (147, 41), index 2 the child at (145, 57) and index 3 the adult at (159, 57), which is the swap cosine makes."], check: numberCheck("Under cosine, how far is the third voter, the adult at (159, 57)?", 0.001392, 1e-06, "Cosine distance compares directions from the origin, so its third neighbour differs from the one selected by the raw coordinate norms. That changes the class vote for this query.") },question:"Can changing the distance rule change the neighbour vote?"}),
-            exercise("Put three people of one height through the three rules",["Part 1 takes three people of one height weighing 45, 52 and 60 kilograms and compares the direct distance from the lightest to the heaviest with the route through the middle person. Under every p-norm the two legs add to the direct 15 exactly; under cosine they add to 0.001987 against a direct 0.003962, which breaks the triangle inequality.", "Measure the direct route and both legs under all six metrics and print whether the route by way of the middle person is at least as long as the direct one. Canberra's numbers on this triple are ones the lesson never prints."],`import numpy as np
+canberra: child, consulted [(0, 0.056613), (1, 0.10124), (2, 0.134596)]`,{...{ hints: ["metric is a field of the classifier, set at construction, and takes a member of DistanceMetric.", "neighbour_search answers one record per query row, and each record carries chosen_indices and chosen_distances, the people who voted and how far away they were.", "Index 0 is the person at (147, 41), index 2 the child at (145, 57) and index 3 the adult at (159, 57), which is the swap cosine makes."], check: numberCheck("Under cosine, how far is the third voter, the adult at (159, 57)?", 0.001392, 1e-06, "Cosine distance compares directions from the origin, so its third neighbor differs from the one selected by the raw coordinate norms. That changes the class vote for this query.") },question:"Can changing the distance rule change the neighbor vote?"}),
+            exercise("Put three people of one height through the three rules",["Use three people with height 150 cm and weights 45, 52 and 60 kg. For each distance rule, measure the direct distance from the lightest to the heaviest and compare it with the sum of the two distances through the middle person.", "Print the direct distance, the summed indirect distance and whether the indirect distance is at least as large. This is the triangle-inequality check for this one triple; passing it does not prove that a rule passes for every triple."],`import numpy as np
 from oop_ml import DistanceMetric, RowBlock
 
 names = ("height", "weight")
@@ -1267,8 +1037,8 @@ manhattan: direct 15.000000, via the middle 15.000000, holds True
 chebyshev: direct 15.000000, via the middle 15.000000, holds True
 cosine: direct 0.003962, via the middle 0.001987, holds False
 hamming: direct 0.500000, via the middle 1.000000, holds True
-canberra: direct 0.142857, via the middle 0.143594, holds True`,{...{ hints: ["The direct route is one call of between and each leg is another, so three calls per metric.", "A sum of two floats can land an ulp under the third, and the page allows for that in its own check. On this triple every p-norm lands on 15 exactly, so the plain comparison is enough here."], check: numberCheck("Under cosine, what do the two legs by way of the middle person add to?", 0.001987, 1e-06, "The indirect route is shorter than the direct route under one-minus-cosine on this triple. That is a concrete failure of the triangle inequality; the function can still be used as a dissimilarity when the method permits it.") },question:"Does travelling through the middle person obey the triangle inequality?"}),
-            exercise("Give the density clusterer one radius under six rules",["Part 5 hands the density clusterer a radius of twenty under every metric and finds the three clumps under Euclidean and Manhattan, two under Chebyshev, and one under cosine, Hamming and Canberra, since twenty is larger than any distance in the crowd under those three. Fit DBSCAN at that radius with a minimum neighbourhood of two under each metric and print how many groups it found and how many people it left in none.", "Then cut single linkage at two groups under Euclidean and Manhattan with AgglomerativeClustering and print the first and last merge heights, which Part 5 gives as 2.236 and 23.35 for the straight line and 3 and 33 for the taxi grid."],`from oop_ml import DBSCAN, AgglomerativeClustering, DistanceMetric, Feature, Linkage
+canberra: direct 0.142857, via the middle 0.143594, holds True`,{...{ hints: ["The direct route is one call of between and each leg is another, so three calls per metric.", "Compare the two totals with via >= direct, as the supplied solution does. These particular norm distances are exact integers. In general, allow for floating-point rounding when judging a very small difference."], check: numberCheck("Under cosine, what do the two legs by way of the middle person add to?", 0.001987, 1e-06, "The indirect route is shorter than the direct route under one-minus-cosine on this triple. That is a concrete failure of the triangle inequality; the function can still be used as a dissimilarity when the method permits it.") },question:"Does traveling through the middle person obey the triangle inequality?"}),
+            exercise("Give the density clusterer one radius under six rules",["Fit DBSCAN to the same eleven people under each metric, using radius=20 and min_neighbourhood_size=2. Print the number of clusters and noise observations. Check whether the same numeric radius groups the data in the same way under different rules.", "Next fit AgglomerativeClustering with n_clusters=2 and linkage=Linkage.SINGLE under Euclidean and Manhattan distance. Print the first and last recorded merge distances. Compare the distance scale used by each rule."],`from oop_ml import DBSCAN, AgglomerativeClustering, DistanceMetric, Feature, Linkage
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1302,7 +1072,7 @@ cosine: 1 groups, 0 in none
 hamming: 1 groups, 0 in none
 canberra: 1 groups, 0 in none
 single linkage, euclidean: first merge 2.236, last merge 23.35
-single linkage, manhattan: first merge 3.000, last merge 33.00`,{...{ hints: ["A clusterer takes no target, so fit receives the list of Features alone. Both models carry metric as a field set at construction.", "n_clusters and n_noise are properties of the fitted DBSCAN, and a person in no group carries the label −1 in labels.", "merge_distances on the fitted linkage model can be iterated and lists every merge made in order, nearest pair first, so its first and last entries are the two heights the lesson quotes."], check: numberCheck("At what height does single linkage under Euclidean make its last merge?", 23.35, 0.01, "A merge height has the units and scale of the chosen distance rule. The same numeric radius or linkage cutoff does not describe the same neighbourhood under different rules.") },question:"What does a radius of twenty mean under different distance rules?"}),
+single linkage, manhattan: first merge 3.000, last merge 33.00`,{...{ hints: ["A clusterer takes no target, so fit receives the list of Features alone. Both models carry metric as a field set at construction.", "n_clusters and n_noise are properties of the fitted DBSCAN, and a person in no group carries the label −1 in labels.", "merge_distances on the fitted linkage model can be iterated and lists every merge made in order, nearest pair first, so its first and last entries are the two heights the lesson quotes."], check: numberCheck("At what height does single linkage under Euclidean make its last merge?", 23.35, 0.01, "A merge height has the units and scale of the chosen distance rule. The same numeric radius or linkage cutoff does not describe the same neighborhood under different rules.") },question:"What does a radius of twenty mean under different distance rules?"}),
           ],
         },
       ]}

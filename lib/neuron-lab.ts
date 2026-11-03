@@ -11,10 +11,10 @@ export const STAGES = [
   {
     label: "Weights", title: "Can two measurements tell us where a part belongs?",
     paragraphs: [
-      "Our workshop receives a mixed delivery of parts. Some belong on the workbench; others should go into storage. A person has labelled this first batch, but the sorting machine only knows each part’s height and mass.",
+      "Our workshop receives a mixed delivery of parts. Some belong on the workbench; others should go into storage. A person has labeled this first batch, but the sorting machine only knows each part’s height and mass.",
       "A weight controls how much one measurement contributes to the decision. Like a volume knob, it can make that input matter more or less. A negative weight makes a larger measurement reduce the score. Adjust the two weights, then send the batch through.",
     ],
-    goal: "Route all eight parts to their labelled bins.",
+    goal: "Route all eight parts to their labeled bins.",
     hint: "Look at the workshop parts: height is larger than mass. Try giving height a positive weight and mass a negative weight.",
     takeaway: "Both measurements now have a role. Height adds to the score and mass subtracts from it. The gate sends a part to the workshop when the result reaches zero.",
     settings: { height: 1, mass: 1, bias: 0, activation: "step" as Activation }, batch: FIRST_BATCH,

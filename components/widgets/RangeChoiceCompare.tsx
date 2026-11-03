@@ -125,7 +125,7 @@ export function RangeChoiceCompare() {
       </div>
 
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The bars are labelled by the direction each bucket is centred on, in
+        The bars are labeled by the direction each bucket is centered on, in
         degrees. Turning a picture&rsquo;s brightness inside out reverses every
         edge without moving any of them, and the two settings disagree about
         whether that is a change at all.

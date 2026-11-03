@@ -18,6 +18,7 @@ const cache = new Map<string, Entry>();
 const hydratedAccounts = new Set<string>();
 const listeners = new Set<() => void>();
 const changes = new Set<() => void>();
+const updates = new Set<(local: boolean) => void>();
 let version = 0;
 let storageFailed = false;
 const address = (key: string, account: string | null) => `${PREFIX}${account ?? "guest"}:${key}`;
@@ -59,6 +60,7 @@ function read(key: string, account: string | null): Entry | undefined {
 
 function announce(local = false) {
   version++;
+  updates.forEach(listener => listener(local));
   listeners.forEach(listener => listener());
   if (local) changes.forEach(listener => listener());
 }
@@ -295,6 +297,20 @@ export function hasPendingLearnerState(account: string) {
 export function useLearnerHydrated() {
   const account = useProgressAccount();
   return useSyncExternalStore(subscribe, () => !account || hydratedAccounts.has(account), () => false);
+}
+
+export function learnerHydrated(account = getProgressAccount()) {
+  return !account || hydratedAccounts.has(account);
+}
+
+/** Read existing work without creating records or importing browser caches. */
+export function readLearnerRecords(prefix: string): readonly SavedRecord[] {
+  return entries(getProgressAccount()).filter(entry => entry.key.startsWith(prefix));
+}
+
+export function onLearnerUpdate(listener: (local: boolean) => void) {
+  updates.add(listener);
+  return () => { updates.delete(listener); };
 }
 
 export function useLearnerStorageStatus() {

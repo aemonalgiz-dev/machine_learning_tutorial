@@ -21,9 +21,9 @@ import { TreebankCostPanel } from "@/components/widgets/TreebankCostPanel";
 import { TreebankPlayground } from "@/components/widgets/TreebankPlayground";
 
 export const metadata: Metadata = {
-  title: "Penn Treebank Rules · oop_ml",
+  title: "Penn Treebank Rules · Perceptron Lab",
   description:
-    "Should can't remain one piece, or should the negation be separated? Penn Treebank tokenization gives English contractions and punctuation consistent treatment so annotated text can be processed using the same conventions.",
+    "Penn Treebank tokenization applies consistent rules to English contractions and punctuation. Those conventions let text be divided into pieces that match the assumptions used in annotated datasets.",
 };
 
 const link =
@@ -37,9 +37,9 @@ export default function PennTreebankRulesPage() {
       technicalStart="Part 2. The Contraction, Cut Where the Grammar Wants It"
       openingTitle="A Written Word Can Contain More Than One Grammatical Piece"
       playgroundTitle="Separate contractions and punctuation with explicit rules"
-      playgroundIntro="Compare contractions and punctuation before and after tokenisation. Check both the output spelling and the span pointing back into the source."
+      playgroundIntro="Compare contractions and punctuation before and after tokenization. Check both the output spelling and the span pointing back into the source."
       title="Penn Treebank Rules"
-      tagline={"Should can't remain one piece, or should the negation be separated? Penn Treebank tokenization gives English contractions and punctuation consistent treatment so annotated text can be processed using the same conventions."}
+      tagline={"Penn Treebank tokenization applies consistent rules to English contractions and punctuation. Those conventions let text be divided into pieces that match the assumptions used in annotated datasets."}
       prerequisites={
         <>
           The{" "}
@@ -80,11 +80,11 @@ export default function PennTreebankRulesPage() {
                 </Equation>
                 <p>
                   Read it as an annotator. The stop after{" "}
-                  <span className="font-mono">Dr</span> belongs to the
-                  abbreviation and is part of the word being labelled, while the
+                  <span className="font-mono">Dr</span>  belongs to the
+                  abbreviation and is part of the word being labeled, while the
                   stop at the end belongs to the sentence and is a separate thing
                   that has its own tag. And{" "}
-                  <span className="font-mono">didn&rsquo;t</span> has to be two
+                  <span className="font-mono">didn&apos;t</span> has to be two
                   rows under these conventions. That gives the verb and the
                   negation separate part-of-speech tags, meaning grammatical
                   labels for the roles those units play. It lets an annotator
@@ -129,18 +129,9 @@ export default function PennTreebankRulesPage() {
                     were left exactly as they were written.
                   </p>
                 </WorkedExample>
-                <p>
-                  Every one of those spans is honest, in the sense that reading
-                  the sentence between the two numbers gives back the piece
-                  printed beside them, character for character. That is worth
-                  saying out loud now because it stops being true in Part 4, and
-                  the sentence that breaks it is this same sentence inside a pair
-                  of quotation marks.
-                </p>
+                <p>For each span, slicing the original sentence between its recorded positions returns the displayed piece exactly. Part 4 introduces quote normalization, where a returned piece can differ from the source characters at its span. Positions can still locate the source, but reconstructing the original text then requires retaining the normalization information.</p>
                 <KeepInMind>
-                  Nine pieces from a sentence of 51 characters, and 45 of those
-                  characters ended up inside a piece. The other six are the six
-                  spaces, which means nothing in the writing was thrown away.
+                  {"The result contains nine pieces whose source spans cover 45 of 51 characters. The excluded six characters are spaces. This retains every non-whitespace source character in the running example, but the piece strings alone do not preserve its layout."}
                 </KeepInMind>
               </SubSection>
 
@@ -172,16 +163,7 @@ export default function PennTreebankRulesPage() {
                   caption="Three answers to one sentence. The middle and the last agree on the count and share only three of the nine pieces, which are Alvarez, expect and the."
                 />
                 <p>
-                  The disagreements run in both directions, which is what makes
-                  them informative. The boundary rules split{" "}
-                  <span className="font-mono">low-cost</span> into two and these
-                  rules do not, since a hyphenated compound is one thing to a
-                  grammar and gets one tag. These rules split{" "}
-                  <span className="font-mono">didn&rsquo;t</span> into two and
-                  the boundary rules do not, since an apostrophe between two
-                  letters is glue in the standard&rsquo;s table and a
-                  morpheme boundary to a linguist. Neither rule is reading the
-                  other&rsquo;s question wrongly.
+                  These conventions differ in both directions. Unicode word-only boundaries split <span className="font-mono">low-cost</span>, while this Treebank convention keeps it whole. The Treebank rule splits <span className="font-mono">didn&apos;t</span> before the negative ending; the Unicode rule keeps the apostrophe context joined. These choices match different definitions of the units the next stage expects.
                 </p>
                 <KeepInMind>
                   Both a hyphen and an apostrophe stand between two letters, and
@@ -219,17 +201,11 @@ export default function PennTreebankRulesPage() {
                   ]}
                 />
                 <p>
-                  There is no dictionary of English, no list of abbreviations, no
-                  frequency count and nothing that was learned from a corpus. The
-                  cost is one pass over the text and a fixed amount of work per
-                  run of characters, which is what the rest of this page is
-                  spending. Where each of the two earlier rules is a single
-                  clause, this is a dozen or so, and every one of them is a
-                  repair to a particular way splitting on spaces went wrong on
-                  English newspaper prose.
+                  {"The rule uses fixed lists and nearby character tests rather than fitted parameters or word frequencies. This scanner walks the text, then checks suffixes and fixed-form patterns. The work also depends on the lengths of the runs it scans; it is not one fixed-cost action for an arbitrarily long run."}
                 </p>
                 <KeepInMind>
-                  This implementation combines two small word lists with rules that inspect nearby characters. One list contains eight endings and the other ten whole forms. There are no fitted parameters to load. Its behaviour comes from those written rules, which also means that an unhandled form needs a new rule or a different method.
+
+                  This implementation combines two small word lists with rules that inspect nearby characters. One list contains eight endings and the other ten whole forms. There are no fitted parameters to load. Its behavior comes from those written rules, which also means that an unhandled form needs a new rule or a different method.
                 </KeepInMind>
               </SubSection>
             </>
@@ -244,18 +220,19 @@ export default function PennTreebankRulesPage() {
                   This is the clause that has no equivalent in either earlier
                   rule, and it is the one that most clearly comes from the
                   annotation rather than from the writing. There is no space
-                  inside <span className="font-mono">didn&rsquo;t</span> and no
+                  inside <span className="font-mono">didn&apos;t</span> and no
                   mark that either earlier rule treats as a separator, and the
                   rules cut it anyway, into{" "}
                   <span className="font-mono">did</span> and{" "}
-                  <span className="font-mono">n&rsquo;t</span>.
+                  <span className="font-mono">n&apos;t</span>.
                 </p>
                 <p>
-                  The reason is that an annotator labelling that sentence has to
+
+                  The reason is that an annotator labeling that sentence has to
                   write down two facts, that there is a past tense auxiliary verb
                   and that it is negated. Those are two tags, so they need two
                   rows. The negation is written{" "}
-                  <span className="font-mono">n&rsquo;t</span> and it is one
+                  <span className="font-mono">n&apos;t</span> and it is one
                   morpheme, so the cut goes in front of the n rather than in
                   front of the apostrophe, and the same treatment covers eight
                   endings in all.
@@ -277,7 +254,7 @@ export default function PennTreebankRulesPage() {
                     marker is its own thing to a grammar whether or not an s
                     follows it. What all eight share is that the ending is taken
                     only when something is left in front of it, so a text that is
-                    nothing but <span className="font-mono">&rsquo;s</span> comes
+                    nothing but <span className="font-mono">&apos;s</span> comes
                     back as one piece.
                   </p>
                 </WorkedExample>
@@ -299,13 +276,7 @@ export default function PennTreebankRulesPage() {
               </SubSection>
 
               <SubSection title="6. The hosts English spells irregularly">
-                <p>
-                  If the negation is always{" "}
-                  <span className="font-mono">n&rsquo;t</span>, then whatever is
-                  left in front of it is whatever is left. For most verbs that is
-                  a word. For three of them it is not, and the rules produce a
-                  piece that no dictionary of English holds.
-                </p>
+                <p>Keeping <span className="font-mono">n&apos;t</span> as the negation piece leaves the ordinary verb spelling in many contractions. In <span className="font-mono">can&apos;t</span>, <span className="font-mono">won&apos;t</span> and <span className="font-mono">shan&apos;t</span>, it instead leaves <span className="font-mono">ca</span>, <span className="font-mono">wo</span> and <span className="font-mono">sha</span>. Those are literal remaining spans rather than normalized full verb forms.</p>
                 <Equation>
                   {"did  n't        the host is a word\n" +
                     "is   n't        the host is a word\n" +
@@ -313,50 +284,19 @@ export default function PennTreebankRulesPage() {
                     "wo   n't        the host is what remains of will\n" +
                     "sha  n't        the host is what remains of shall"}
                 </Equation>
-                <p>
-                  English spelt those three contractions by changing the verb as
-                  well as adding the negation, so there is no division of the
-                  characters that gives both morphemes their own letters. The
-                  rules take the position that the negation is the fixed part and
-                  the host absorbs the irregularity, which is why{" "}
-                  <span className="font-mono">can&rsquo;t</span> comes back as{" "}
-                  <span className="font-mono">ca</span> and{" "}
-                  <span className="font-mono">n&rsquo;t</span>, and the
-                  cut was placed there deliberately rather than falling out of
-                  the pattern by accident.
-                </p>
+                <p>These contractions do not divide into literal, nonoverlapping pieces spelling both full verb and negation. The Treebank convention keeps <span className="font-mono">n&apos;t</span> fixed and assigns the remaining letters to the host. That is why <span className="font-mono">can&apos;t</span> becomes <span className="font-mono">ca</span> and <span className="font-mono">n&apos;t</span>.</p>
                 <WhyThisWorks title="Why the alternative is worse than it sounds">
-                  <p>
-                    The obvious repair is to have the rules answer{" "}
-                    <span className="font-mono">can</span> instead of{" "}
-                    <span className="font-mono">ca</span>, which reads better and
-                    costs two things. A piece would no longer stand for a span of
-                    the source, so the sentence could not be reassembled from the
-                    pieces and their positions, and every use that highlights or
-                    aligns text against the original would break. And the repair
-                    would need a list, since knowing that{" "}
-                    <span className="font-mono">ca</span> is short for{" "}
-                    <span className="font-mono">can</span> is a fact about English
-                    that no reading of the characters supplies. A one-entry list
-                    grows, and the moment the rules carry a vocabulary they carry
-                    the whole question of what is in it.
-                  </p>
+                  <p>Returning <span className="font-mono">can</span> instead of <span className="font-mono">ca</span> would normalize the host spelling rather than simply cut it. A token could still carry an offset to the original span, as the quote-rewriting example already does.</p>
+<p>Exact recovery would then need enough information to reverse that normalization. A lookup table could record word-specific choices; a rule or model could also supply them. The important distinction is between locating the source and claiming the token text is an unchanged source slice.</p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  Three pieces in the whole of English are not words, and they
-                  are the price of a rule that always cuts the negation off in
-                  the same place and never rewrites what it cuts.
+                  {"In these three contractions, the remaining hosts are ca, wo and sha. This convention preserves their literal spans while keeping the negative ending spelled the same way. It is not a claim that these are the only nonword forms English can produce."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="7. The fixed list, and the forms that are not on it">
                 <p>
-                  Some contractions leave no mark at all.{" "}
-                  <span className="font-mono">cannot</span> is two words to a
-                  grammar and six letters with nothing between them, so no rule
-                  reading the characters can find the join. The treebank rules
-                  handle those by naming them, ten forms in all, each with the
-                  place inside it where the cut goes.
+                  The form <span className="font-mono">cannot</span> has no punctuation cue at its internal token boundary. This implementation names ten fixed forms and records their cuts. Other character-based rules or learned models could recognize such patterns too; whitespace alone does not find this one.
                 </p>
                 <ContractionTable />
                 <p>
@@ -364,24 +304,14 @@ export default function PennTreebankRulesPage() {
                   ones to read carefully, because in every one of them the answer
                   is a single piece and nothing anywhere reports that a list was
                   consulted and came up empty. The same apostrophe that gets{" "}
-                  <span className="font-mono">didn&rsquo;t</span> cut in two
-                  leaves <span className="font-mono">y&rsquo;all</span> whole,
+                  <span className="font-mono">didn&apos;t</span> cut in two
+                  leaves <span className="font-mono">y&apos;all</span> whole,
                   and the curved apostrophe that a word processor inserts by
                   default leaves the very same contraction whole as well.
                 </p>
                 <InAModel>
                   <p>
-                    The two foreign rows are the ones that would bite hardest in
-                    practice. French writes{" "}
-                    <span className="font-mono">l&rsquo;analyse</span> where these
-                    rules would want two units, an article and a noun, and the
-                    apostrophe is doing exactly the job it does in{" "}
-                    <span className="font-mono">it&rsquo;s</span>. The rules leave
-                    it whole because the clause that would cut it lists endings
-                    rather than beginnings, and English clitics attach at the end
-                    while French ones attach at the front. Nothing in the rules
-                    knows which language it is reading, so a French document put
-                    through them comes back looking successfully processed.
+                    The displayed French article example, <span className="font-mono">l&apos;analyse</span>, needs a different clitic convention from the English ending in <span className="font-mono">it&apos;s</span>. The listed suffix rule does not separate the prefixed article. French and Italian also have other clitic patterns; this English-oriented list is not a general account of either language. A returned piece list does not identify the language or certify that its linguistic units are suitable.
                   </p>
                 </InAModel>
                 <KeepInMind>
@@ -418,15 +348,7 @@ export default function PennTreebankRulesPage() {
                     ".                      a piece on its own, only at the end"}
                 </Equation>
                 <p>
-                  The first two lines are worth noticing for what they do not
-                  say. There is no condition on them at all, so a mark from that
-                  set is separated whatever surrounds it, and{" "}
-                  <span className="font-mono">a@b.com</span> comes back as three
-                  pieces while <span className="font-mono">AT&amp;T</span> comes
-                  back as three as well. On newspaper prose that is right almost
-                  every time, since those characters really are punctuation
-                  there. On an address it is a piece of writing pulled apart into
-                  its punctuation and its letters.
+                  Characters in the first two listed sets are separated regardless of their surroundings. Thus <span className="font-mono">a@b.com</span> and <span className="font-mono">AT&amp;T</span> each become three pieces. The split follows the convention; whether an application wants the address or company name preserved is a separate requirement.
                 </p>
                 <KeepInMind>
                   Separating a mark from the word beside it is the whole of the
@@ -459,38 +381,27 @@ export default function PennTreebankRulesPage() {
                   with no space around the comma.
                 </p>
                 <p>
+
                   The same shape of condition, one character of context, is what
                   the boundary rules use for their own version of this case,
                   though they reach it from the other side by putting the comma
                   in a class that joins two digits. Two different methods arrive
-                  at the same behaviour on{" "}
+                  at the same behavior on{" "}
                   <span className="font-mono">1,000</span>, and they disagree on{" "}
                   <span className="font-mono">3:30</span>, which these rules keep
                   whole and the standard cuts into two.
                 </p>
                 <KeepInMind>
-                  A mark inside a number is kept by testing the character after
-                  it, which is an approximation to the thing meant and is exact on
-                  the writing the rules were built for.
+                  {"The rule uses the following digit as a short test for retaining a comma or colon. It agrees with the shown numeric examples. That agreement does not guarantee that it identifies every number or punctuation role correctly."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="10. The full stop, and the sentence the rules assume they were handed">
                 <p>
-                  The full stop is the hard one, and it is hard for a reason that
-                  no amount of care about characters removes. In{" "}
-                  <span className="font-mono">Dr.</span> the stop is part of the
-                  word and should stay; at the end of the sentence it is a mark
-                  of its own and should come off; and the two are the same
-                  character.
+                  In <span className="font-mono">Dr.</span>, this annotation convention retains the period with the abbreviation. A sentence-ending period is a separate token in the running example. The character alone does not state its role, so the rule needs context or a convention for making that distinction.
                 </p>
                 <p>
-                  The rules settle it without a list of abbreviations, by using a
-                  fact about where the text came from. The script ran on one
-                  sentence at a time, after somebody or something else had
-                  already decided where the sentences were, so a stop that is not
-                  the last thing in the text cannot be ending a sentence and must
-                  therefore be an abbreviation&rsquo;s.
+                  {"The final-period rule is designed for sentence-separated input. It separates the last eligible period and leaves other periods attached. An internal period might belong to an abbreviation, decimal, identifier or an earlier sentence; the rule does not determine which role it has."}
                 </p>
                 <Equation>
                   {"the last character of the text,\n" +
@@ -500,17 +411,10 @@ export default function PennTreebankRulesPage() {
                     "every other stop  stays where it is"}
                 </Equation>
                 <p>
-                  Read that as an assumption rather than as a rule, because it is
-                  one. It says the text is exactly one sentence. Where that holds
-                  the answer is right on both stops of the sentence about Dr. Alvarez at
-                  once, which no rule reading only the characters around each
-                  stop could manage. Where it does not hold, nothing raises an
-                  objection.
+                  {"The assumption works for both periods in the Dr. Alvarez example. It does not prove that every one-sentence input will be handled as desired. The following probes show what happens when an earlier sentence end or a sentence-final abbreviation needs different treatment."}
                 </p>
                 <KeepInMind>
-                  A rule about position, standing in for a fact about vocabulary.
-                  It is exact when the text handed over is one sentence, and the
-                  next two sections are the two ways that can fail.
+                  {"The rule uses position as a cue. Sentence-separated input fits its intended use, while abbreviation endings and multiple sentences expose choices it cannot resolve on that cue alone."}
                 </KeepInMind>
               </SubSection>
 
@@ -544,20 +448,13 @@ export default function PennTreebankRulesPage() {
                   piece.
                 </p>
                 <KeepInMind>
-                  72 pieces against 67 on the same writing, decided entirely by
-                  whether the sentence boundaries were found before the rules ran.
-                  Anything using these rules has to do that first, and the rules
-                  neither do it nor ask whether it was done.
+                  {"Separate sentence inputs give 72 pieces; their joined text gives 67. Five sentence-ending periods stay attached in the joined case. If those boundaries matter to the application, preserve or determine them before applying this sentence-oriented rule."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="12. The abbreviation that ends a sentence">
                 <p>
-                  The second failure runs the other way and is the one the rules
-                  cannot repair even in principle. A sentence that ends in an
-                  abbreviation is written with one stop doing both jobs, so the
-                  final-stop rule fires, and the abbreviation loses the stop that
-                  belongs to it.
+                  {"At a sentence-final abbreviation, the last period has two roles. This rule separates it as a punctuation token, so the abbreviation token no longer contains it. That is the chosen token convention; separate annotations can retain both roles."}
                 </p>
                 <WorkedExample title="One character, two jobs, and no division that gives it to both">
                   <Equation>
@@ -576,21 +473,10 @@ export default function PennTreebankRulesPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  A list of abbreviations would fix the first failure and not
-                  this one. Knowing that{" "}
-                  <span className="font-mono">al.</span> is an abbreviation tells
-                  us the stop belongs to it; it does not tell us where the
-                  sentence&rsquo;s own stop went, because there is not a second
-                  one. The two marks were written as one, and no division of the
-                  characters into pieces can assign that character to two pieces
-                  at once.
+                  {"An abbreviation list can help recognize the form, but token attachment and sentence annotation remain separate choices. One period can be a separate token, belong to an abbreviation token, and still carry a sentence-end annotation in another layer. The output format determines how those facts are represented."}
                 </p>
                 <KeepInMind>
-                  One of the two full stop failures is a missing list and the
-                  other is a case with no correct answer available. The boundary
-                  rules meet the same wall from the other direction, which is the
-                  clearest sign that it is a property of English writing rather
-                  than of either method.
+                  {"The final-period heuristic has limitations on both joined sentences and sentence-final abbreviations. A tailored boundary procedure and explicit annotation policy can address them. The source character itself need not be lost."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -600,20 +486,20 @@ export default function PennTreebankRulesPage() {
           title: "Questions on Parts 1 to 3",
           quiz: [
             choice(
-              "The rules cut didn’t in front of the n rather than at the apostrophe. Why there?",
+              "These rules split didn't before the n rather than at its straight apostrophe. Why there?",
               [
-                "Because the negation is written n’t and is one morpheme, so that is where the row begins",
+                "Under this annotation convention, n't is a separate negation unit, so its piece starts before n.",
                 "Because an apostrophe is punctuation and always comes off as a piece of its own",
                 "Because the apostrophe stands between two letters and is therefore glue",
                 "Because the verb did happens to be three characters long",
               ],
               0,
-              "An annotator has to write down two facts, a past tense auxiliary verb and a negation, so two tags need two rows. The negation is spelled n’t, so the cut goes in front of the n, and the same treatment covers eight endings in all. The apostrophe is not being treated as punctuation here at all. The boundary rules read the same apostrophe as glue and keep didn’t whole, while cutting both compounds these rules keep, which is why the two rules’ nine pieces on the sentence about Dr. Alvarez share only three, Alvarez, expect and the.",
+              "The Treebank convention gives the auxiliary and negation separate annotation units. It treats n't as the negation piece, leaving did as the host. A Unicode word-boundary rule instead keeps this contraction together. These are different segmentation conventions for different tasks, not competing claims that the apostrophe has one universal boundary.",
             ),
             trueFalse(
-              "The rules cut can’t into ca and n’t, and the piece ca was placed there deliberately rather than falling out of the pattern by accident.",
+              "The rules cut can't into ca and n't. The host ca is the literal source span left by keeping n't as the negation piece, rather than a replacement spelling read from a dictionary.",
               true,
-              "English spelled that contraction by changing the verb as well as adding the negation, so no division of the characters gives both morphemes their own letters, and the rules take the position that the negation is the fixed part and the host absorbs the irregularity. Answering can instead would cost two things. A piece would no longer stand for a span of the source, and the repair would need a list, since knowing that ca is short for can is a fact about English that no reading of the characters supplies. Three pieces in the whole of English are not words, and they are the price of a rule that never rewrites what it cuts.",
+              "The contraction cannot be divided into literal, nonoverlapping source slices spelling both can and n't. This rule keeps n't fixed and returns ca for the remaining span. Returning can would be a normalization rather than a literal cut. An offset could still point to its source, as rewritten quotation marks do elsewhere, but recovering the original would require enough information to reverse that rewrite.",
             ),
             choice(
               "The six sentences are handed to the rules joined into one string rather than one at a time. What happens?",
@@ -624,7 +510,7 @@ export default function PennTreebankRulesPage() {
                 "The rules refuse the input, because they state that the text must be one sentence",
               ],
               0,
-              "The full stop is settled by position rather than by a list of abbreviations, so a stop that is not the last thing in the text is read as an abbreviation’s and stays put. Six stops came back on their own when the sentences arrived separately and one did when they arrived joined, and nothing raises an objection, which is why sentence boundaries have to be found before these rules run.",
+              "This rule detaches a period at the end of its sentence-sized input. Earlier periods in a joined paragraph can remain attached; the tokenizer has not inferred that they are abbreviations. Splitting the notebook sentence by sentence yields six detached periods, while the joined input yields one. Sentence-boundary detection is a separate preceding step.",
             ),
             several(
               "Which of these follow from the table naming the characters that are a piece on their own?",
@@ -635,12 +521,12 @@ export default function PennTreebankRulesPage() {
                 "The comma in 1,000 is separated, since a comma is one of the marks the table names",
               ],
               [0, 1],
-              "The first two lines of the table carry no condition at all, so a mark from that set is separated whatever surrounds it, which is right on newspaper prose and pulls an address and a company name apart. The comma and the colon sit on a different line with a condition one character wide, separated unless the very next character is a digit, so 1,000 stays whole and so does 3:30, which the standard cuts into two. The test reads the character after the mark rather than asking whether the mark is inside a number, which is an approximation that happens to be exact on the writing the rules were built for.",
+              "Some punctuation is separated unconditionally; comma and colon use a local next-character condition. That preserves the displayed numeric groups but can also keep punctuation in contexts that are not numbers. The rule is an operational approximation tailored to a corpus convention, not a guarantee of correct linguistic analysis on every newspaper sentence.",
             ),
             trueFalse(
               "A list of abbreviations would repair both of the full stop failures.",
               false,
-              "It repairs the first and cannot touch the second. A sentence ending in an abbreviation is written with one stop doing both jobs, so knowing that al. is an abbreviation tells us the stop belongs to it and says nothing about where the sentence’s own stop went, because there is not a second one. No division of the characters can assign one character to two pieces at once.",
+              "An abbreviation list can help identify a familiar abbreviation, but it does not by itself resolve every sentence boundary. At a sentence-final abbreviation, one period can have both roles. A tokenizer returning nonoverlapping literal pieces cannot give that one source character to two different pieces without changing its output policy.",
             ),
         ],
         },
@@ -670,13 +556,7 @@ export default function PennTreebankRulesPage() {
                   into the piece.
                 </p>
                 <p>
-                  The spelling chosen was the one a typist of the period used for
-                  directional quotes on a machine that had no directional quotes,
-                  which is why an opening quotation mark in treebank text is two
-                  backquotes and a closing one is two apostrophes. That is a
-                  convention of a particular decade&rsquo;s typing, and it is the
-                  reason a modern reader meeting treebank output for the first
-                  time usually thinks something has gone wrong.
+                  {"Treebank-style output uses two backquotes for an opening quote and two apostrophes for a closing quote. These ASCII spellings make direction explicit in the token strings. A consumer expecting the original quotation character must account for that rewriting."}
                 </p>
                 <KeepInMind>
                   A decision the writing left implicit is made explicit and
@@ -707,21 +587,13 @@ export default function PennTreebankRulesPage() {
                     ["}", "-RCB-", "one character"],
                     ["< and >", "unchanged", "one character"],
                   ]}
-                  caption="Six of the eight brackets get a name. The angle brackets do not, because the file format never used them, which is the whole of the reason."
+                  caption="The optional mapping names six round, square and curly bracket characters. The two angle brackets stay unchanged."
                 />
                 <p>
-                  The last row is the tell. If this were a rule about brackets it
-                  would cover all of them. It covers exactly the six that the
-                  storage format needed escaping, and leaves the two it did not.
-                  A choice about how the annotation was written down reached back
-                  and changed what a word is, and every parser trained on that
-                  corpus has been expecting the escaped spelling ever since.
+                  {"The optional mapping names round, square and curly brackets. Angle brackets remain unchanged in this implementation. These are representation conventions for the corpus format, rather than a claim that six kinds are grammatical words or that every bracket must be rewritten."}
                 </p>
                 <KeepInMind>
-                  The bracket rewriting came out of how the annotation was
-                  stored rather than out of anything about English, and the two
-                  brackets the format never needed are left alone, which is the
-                  clearest sign on this page that these rules describe one corpus.
+                  {"The bracket names separate corpus representation from source spelling. Turning the option on changes token strings and keeps the source spans. Turning it off leaves the separated bracket characters unchanged."}
                 </KeepInMind>
               </SubSection>
 
@@ -735,39 +607,33 @@ export default function PennTreebankRulesPage() {
                 </p>
                 <RewritingCensus />
                 <p>
+
                   Read the third line of the two amber boxes. Each of them holds
                   two characters and points at a stretch of the sentence that is
                   one character wide, so the length of a piece and the length of
                   what it stands for have come apart. The span says where the
                   piece came from, and the text says what it became, and a rule
-                  that normalises anything at all has to be allowed to say two
+                  that normalizes anything at all has to be allowed to say two
                   different things there.
                 </p>
                 <WhyThisWorks title="Why the published form cannot say this at all">
                   <>
 <p>
-                    The rules as published are a sequence of substitutions that insert spaces around the things to be separated, and then a split on white space. That form cannot report a span, because once an opening quotation mark has been replaced by two backquotes nothing records where in the original it stood, and every position after it has moved.
-                  </p>
+                  {"A substitution pipeline that only returns its final strings does not automatically retain source offsets. Replacing one quote with two characters also shifts later positions in the rewritten string. An implementation can track those transformations or scan the source while emitting pieces, as this SDK does."}
+                </p>
                   <p>
-                    Anything that wants to highlight a piece in the source, align two readings of one sentence, or check that no writing was lost has to recover that separately, and the usual recovery is to search the source for each piece in turn, which fails on precisely the pieces that were rewritten.
-                  </p>
+                  {"Source highlighting and alignment need that provenance. Searching for each output string can fail when it was rewritten or appears more than once. Tracking the source span during tokenization avoids relying on that search."}
+                </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  A piece is a text and a place, and these rules are the first on
-                  this site where those two are allowed to disagree. Everything in
-                  Part 6 about not being able to paste the pieces back together
-                  comes from this one clause.
+                  {"A piece can contain an analysis spelling alongside its original source span. Reconstruction must then account for both omitted whitespace and rewritten characters. Their causes and remedies are different."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. Counting the rewriting over a corpus">
                 <p>
-                  How much of a corpus is affected is a fair question and the
-                  answer is small, which is what makes the case interesting rather
-                  than alarming. Over the 22 sentences in the panel above, chosen
-                  so that every clause on this page is exercised at least once, 14
-                  of 266 pieces are not the source their span covers.
+                  In the selected 22-sentence panel, 14 of the 266 pieces differ from the source text covered by their spans. The sentences were chosen to exercise the rules, so this is an inspectable example count rather than an estimate of how often ordinary English text is rewritten. Each difference matters if another stage assumes that a token is an unchanged slice of its source.
                 </p>
                 <NumberTable
                   headings={["over 22 sentences", "count", "share of 266 pieces"]}
@@ -779,20 +645,10 @@ export default function PennTreebankRulesPage() {
                   caption="Every one of the 14 is a quotation mark, seven opening and seven closing, and the corpus closes every quotation it opens."
                 />
                 <p>
-                  Five per cent sounds like a small enough share to ignore and
-                  it is not, because what the rewriting costs does not shrink
-                  with it. A corpus where one piece in twenty is not a copy of
-                  the writing is a corpus that cannot be reassembled from its
-                  pieces, and it is a corpus in which searching the pieces for a
-                  quotation mark returns nothing at all, since none of them holds
-                  that character any more.
+                  {"Fourteen rewritten pieces are about five percent of this selected panel. A downstream stage that assumes unchanged source slices will mishandle those cases. The normalized pieces can still be searched by their output spellings, while a query for the original straight quotation character needs the mapping or source."}
                 </p>
                 <KeepInMind>
-                  14 pieces of 266, all of them quotation marks, and 22 once the
-                  brackets are named as well. A caller who wants to reassemble a
-                  text has to handle those 14, so the small share tells us how
-                  much work the repair is and nothing at all about whether it can
-                  be skipped.
+                  {"The panel has 14 rewritten pieces out of 266, or 22 with bracket naming enabled. The count tells us how many instances need that mapping here; it is not a benchmark of reconstruction cost or a reason to ignore the changed spelling."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -804,40 +660,19 @@ export default function PennTreebankRulesPage() {
             <>
               <SubSection title="17. More pieces than either rule it is measured against">
                 <p>
-                  The bill everything downstream pays is length, and these rules
-                  are the longest of the three on both corpora. Anything reading
-                  the text afterwards pays per piece, and a model that compares
-                  every position with every other position pays roughly with the
-                  square of the count.
+                  {"These rules return more pieces than either comparison rule on both supplied corpora. A consumer processing one position per piece receives a longer sequence. Dense attention compares position pairs within a sequence, but its cost is only one part of a model’s runtime."}
                 </p>
                 <TreebankCostPanel />
                 <p>
-                  On the six sentences the three rules give 72, 63 and 69 pieces,
-                  and the gap is modest because that notebook has one contraction
-                  and few marks in it. On the wider corpus, which is newspaper
-                  prose with quotations, money, percentages and brackets in it,
-                  the same three rules give 266, 155 and 159. That is 72 per cent
-                  more pieces than splitting on spaces produces from identical
-                  writing, and every one of them is paid for on every pass over
-                  the corpus.
+                  {"The six-sentence notebook gives 72 Treebank pieces, 63 whitespace pieces and 69 word-only Unicode pieces. The wider panel gives 266, 155 and 159. It contains 22 selected sentences exercising quotations, money, percentages, brackets and other rules. Its roughly 72 percent length increase is a property of that test panel, not an estimate for ordinary newspaper prose."}
                 </p>
                 <InAModel>
                   <p>
-                    The number that grew is the sequence length, which is the one
-                    quantity every method later in this section is reported
-                    against. It is also why the count above is worth carrying
-                    forward rather than filing away. A method that cuts words into
-                    smaller pieces so that a vocabulary of forty thousand can
-                    spell anything starts from whatever these rules handed it, so
-                    a corpus that is already 72 per cent longer than it needed to
-                    be stays that way.
-                  </p>
+                  The observed sequence is 72 per cent longer for this corpus under these rules. That changes how many units a later stage initially receives. A subsequent subword procedure may split those units further, depending on its vocabulary and allowed boundaries; we cannot assume that the same percentage describes its final sequence or the model&apos;s performance.
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  266 pieces against 155 on the same 22 sentences. Separating
-                  every mark is what most of that difference is, and it buys a
-                  table where a word appears once rather than once per mark that
-                  happened to follow it.
+                  {"The selected 22 sentences yield 266 pieces rather than 155. Separate punctuation accounts for many of the returned pieces. It can let a lexical form use the same entry across punctuation contexts, though other distinctions such as capitalization can still create separate entries."}
                 </KeepInMind>
               </SubSection>
 
@@ -853,20 +688,10 @@ export default function PennTreebankRulesPage() {
                   Whether separate punctuation tokens help depends on the task. Treebank annotation needs a place to attach punctuation&apos;s grammatical label. A fixed-width word-context window then includes those punctuation positions too, reducing how many surrounding words it reaches. Punctuation can still carry useful information; we should test the convention against the intended task.
                 </p>
                 <p>
-                  The other component is smaller than it looks. At most 26 of the
-                  266 pieces come from the contraction and clitic clauses, and
-                  four of the spellings counted there are ordinary words that also
-                  appear on their own, so the true figure is lower. Splitting
-                  contractions is the clause that carries the most linguistics,
-                  and it accounts for at most 26 of the 111 pieces by which these
-                  rules exceed splitting on spaces, against 86 from separating
-                  the marks.
+                  {"At most 26 of the 266 returned pieces have spellings associated with the contraction and clitic clauses. Some spellings also occur independently, so this is an upper-bound census rather than an exact count of rule applications. The total output exceeds whitespace splitting by 111 pieces. Neither the 26-form count nor the 86 punctuation count directly measures how many extra pieces each rule added; some corresponding text was already a whitespace piece."}
                 </p>
                 <KeepInMind>
-                  86 pieces of punctuation against at most 26 from a
-                  contraction, with the rest ordinary words. Most of the extra
-                  length comes from the clause that separates the marks, which is
-                  also the clause that looks least like a claim about language.
+                  {"There are 86 punctuation-only pieces and at most 26 pieces matching the selected contraction or clitic spellings in this panel. Those describe the output composition. To attribute the extra sequence length to individual rules, compare their actual before-and-after splits."}
                 </KeepInMind>
               </SubSection>
 
@@ -893,20 +718,10 @@ export default function PennTreebankRulesPage() {
                   caption="The first and third rows agree for two of the three rules, which is the whole claim. What is missing from all three is the spacing."
                 />
                 <p>
-                  318 is exactly the number of characters in those six sentences
-                  that are not spaces, so the treebank rules kept every single one
-                  of them. That is a real difference from the boundary rules,
-                  which found the marks correctly and then discarded them as not
-                  being words, and it is what makes these rules usable where the
-                  original text has to be handed back. A hyphen, a comma and a
-                  full stop all survive as pieces here and none of them survives
-                  there.
+                  {"The spans cover all 318 non-whitespace characters in the six-sentence notebook. The word-only Unicode filter covers 303 because it omits some punctuation segments. This is a difference in source coverage, not a guarantee of exact detokenization: whitespace and any rewriting still need their own records."}
                 </p>
                 <KeepInMind>
-                  Nothing but the spacing is thrown away, so what a caller has is
-                  a division of the writing rather than a selection from it. The
-                  two quotation marks of the previous part are the only characters
-                  anywhere that come back as something else.
+                  {"In this notebook, the Treebank spans cover everything except whitespace. Other examples rewrite quotes, and the bracket option can rewrite bracket tokens. Keep source coverage and output spelling as separate checks."}
                 </KeepInMind>
               </SubSection>
 
@@ -921,29 +736,13 @@ export default function PennTreebankRulesPage() {
                   ampersand becomes three. A percentage becomes two.
                 </p>
                 <p>
-                  What those share is that the separated character really is
-                  punctuation in prose and really is not punctuation there. The
-                  rules were written for a corpus of newspaper articles and they
-                  read every text as though it were one, which on an address is
-                  the same failure the earlier pages describe from the other
-                  direction, an assumption about the writing that the rule never
-                  states.
+                  {"The same punctuation characters can participate in an address, company name or numeric expression inside prose. A rule can correctly apply its listed split while giving an application units it does not want. The application must decide whether these spans should stay whole."}
                 </p>
                 <p>
-                  There is a case running the other way that is worth reporting
-                  beside it. A file name such as{" "}
-                  <span className="font-mono">re-analysis_2019.csv</span> comes
-                  back whole from these rules and in three pieces from the
-                  boundary rules, because a hyphen is nothing to these rules and a
-                  separator to the standard. Neither rule is better at
-                  non-prose in general; each is accidentally right about a
-                  different kind of it.
+                  The file name <span className="font-mono">re-analysis_2019.csv</span> remains whole here and becomes three pieces under the word-only Unicode rule. The difference follows from the hyphen and period handling. Which result fits depends on whether the application wants the full identifier or searchable components.
                 </p>
                 <KeepInMind>
-                  On an address the cruder rule wins, on a file name this one
-                  does, and neither wins for a reason connected to what the text
-                  actually is. Anything reading text with identifiers in it should
-                  protect those spans before any of these rules see them.
+                  {"The examples compare different requirements: preserving an address, a file name or separate annotation tokens. Protecting selected spans or using a tailored tokenizer are possible responses. No single output convention is best for every identifier task."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -955,31 +754,13 @@ export default function PennTreebankRulesPage() {
             <>
               <SubSection title="21. A definition of a word in one corpus">
                 <p>
-                  Everything on this page has been a decision, and every one of
-                  those decisions was answerable only because the person making it
-                  knew which corpus was being annotated, in which language, under
-                  which house style. Take that away and most of the clauses have
-                  no content.
+                  {"The convention was chosen for a particular annotated corpus and language. Its clauses still produce defined outputs on other text. The separate question is whether those outputs supply the units another application needs."}
                 </p>
                 <p>
-                  The hyphen is the cleanest case. These rules leave{" "}
-                  <span className="font-mono">low-cost</span> whole and the
-                  standard cuts it in two, and nothing in the writing decides
-                  between them. What decided it here is that the annotation gave
-                  one tag to a compound modifier, which is a claim about the
-                  grammar being used to describe English, and a different
-                  descriptive framework would have wanted two rows and got a
-                  different rule. The rules are the shadow of a particular
-                  linguistic analysis, and they are exact only relative to it.
+                  This Treebank convention retains <span className="font-mono">low-cost</span> as one token, while the Unicode word-only result splits it. The annotation scheme determines which units receive tags. Another task can adopt different units and test its tokenizer against that stated convention.
                 </p>
                 <p>
-                  That is not the criticism it sounds like, because it is the same
-                  thing that makes them useful. Everything trained on the treebank
-                  agrees about what a unit is, and agreement is what a person
-                  actually needs from the part of a pipeline that decides where
-                  the words are, since the decision is made identically millions
-                  of times and two parts of one system disagreeing about it costs
-                  far more than either being slightly odd.
+                  {"Compatible tokenization helps a model receive the kinds of units its training pipeline used. Record the rule and options alongside that model. Agreement is useful, but it does not remove the need to check that the chosen convention suits the application."}
                 </p>
                 <KeepInMind>
                   There is no fact of the matter about{" "}
@@ -989,78 +770,42 @@ export default function PennTreebankRulesPage() {
 
               <SubSection title="22. The list is finite, and the silence is the failure">
                 <p>
-                  Two of the clauses are lists, ten whole forms and eight endings,
-                  and a list is finite in a way a rule about characters is not.
-                  The eight endings cover the English clitics as they were spelled
-                  in the corpus. The ten forms cover the spoken contractions
-                  somebody thought of.
+                  {"The scanner includes ten fixed forms and eight endings. These handle the named cases, not every contraction or clitic in English. Their spellings are part of the contract, including the distinction between a straight and a curved apostrophe."}
                 </p>
                 <p>
-                  What matters is the shape of the failure rather than its size. A
-                  form that is on the list is cut; a form that is not is returned
-                  whole; and those two answers are the same answer. A caller
-                  receives one piece and has no way to ask whether that is because
-                  the text was examined and found not to need cutting or because
-                  no clause covers it at all. Six of the fifteen probes in section
-                  7 fall into the second case and are indistinguishable from the
-                  first.
+                  {"A matched form is split according to the list; an unhandled form may remain whole. The returned list does not include a diagnostic explaining which tests were tried. In the probe panel, six of fifteen forms remain outside the intended cuts. Inspecting those outputs or adding validation can expose the coverage gap."}
                 </p>
                 <p>
-                  Adding entries does not change this and cannot. Whatever is on
-                  the list, there is a next form, and the writing gives no signal
-                  that would let a rule notice it has met one. Any method that
-                  decides a boundary by consulting a finite list of forms inherits
-                  the same silence, and the only escape is a method that infers
-                  the boundary from a corpus rather than from a list, which is
-                  what the rest of this section of the site is about.
+                  {"Adding an entry repairs that entry’s case, but does not establish coverage of all future text. A learned model can infer other boundaries, while also making mistakes of its own. Tests, explicit domain limits and diagnostics are other ways to manage the list’s coverage."}
                 </p>
                 <KeepInMind>
-                  Whatever is on the list there is a next form, and the answer
-                  never says whether one was met. That holds of every rule that
-                  decides a boundary by consulting named forms, and it is not a
-                  complaint about these ten entries.
+                  {"The finite list handles its named forms. An unchanged output is not proof that a form was linguistically checked and approved. Make that coverage limit clear to callers."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="23. One era's typing, and one language's apostrophe">
                 <p>
-                  Several clauses depend on how the text was typed rather than on
-                  what it says, and both of the assumptions they make were true of
-                  a corpus keyed in the late nineteen eighties and are false of a
-                  good deal of writing now.
+                  {"Several clauses depend on the input punctuation spelling. Straight apostrophes, curly apostrophes and directional quotation marks can all occur in text, so compatibility needs to be tested on the actual input rather than inferred from its date."}
                 </p>
                 <>
 <p>
-                  The apostrophe is one character to these rules and there are two in common use, since the curved one is what a word processor inserts by default. The same contraction typed the modern way is returned whole. Quotation marks have the same problem twice over, since the rules read the straight typewriter mark and rewrite it into a typewriter convention, and curved quotation marks are neither read nor produced.
+                  {"This rule recognizes the straight apostrophe in its listed clitics. Typing the same contraction with a curved apostrophe can leave it whole. Its quote rewriting likewise handles specified characters, rather than every directional quotation mark. Test the actual code points when preparing compatible input."}
                 </p>
                 <p>
-                  And the final-stop clause assumes a step before it that finds the sentences, which was true in a pipeline built around this script and is not true of a string arriving from anywhere else.
+                  {"The final-period rule also expects sentence-oriented input. A pipeline can supply that deliberately; an arbitrary input string may contain several sentences. The tokenizer does not detect or validate that distinction for the caller."}
                 </p>
 </>
                 <p>
-                  There is a subtler one worth naming. The rules as published are
-                  a pipeline of substitutions rather than a specification, so on
-                  writing they did not anticipate, a doubled comma or a run of
-                  three backquotes, the answer falls out of how one
-                  substitution&rsquo;s replacement lands in the next
-                  one&rsquo;s search. Nobody decided those cases, and two careful
-                  readings of the same rules can therefore differ on them without
-                  either being unfaithful.
+                  {"The reference substitution pipeline and this source-preserving scanner express the rules differently. Unusual runs such as doubled commas or backquotes need explicit comparison tests if exact compatibility matters. A deterministic pipeline has a definite result under its engine and order; a reimplementation should not assume every edge case matches automatically."}
                 </p>
                 <KeepInMind>
-                  A rule that reads a character is a rule about a keyboard, and
-                  keyboards changed. Anything putting modern text through these
-                  rules should normalise the apostrophes and the quotation marks
-                  first, which is a decision the rules do not contain.
+                  {"If incoming text uses punctuation these rules do not handle, choose a policy: normalize with a retained source mapping, add handling, or use another tokenizer. Normalization is a preprocessing choice with its own reconstruction consequences."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. The pieces alone cannot be pasted back into the source">
                 <p>
-                  The rewriting has a consequence that outlived every other
-                  choice on this page, and it is the reason later methods gave it
-                  up. Once a piece can be something other than the writing it came
-                  from, a list of pieces is no longer a division of a text.
+                  Rewriting a quotation mark changes the relationship between a piece and the original text. A token can now be an analysis form rather than an unchanged source substring. That is useful for a consistent annotation convention, but an application returning the original writing must keep enough additional information to recover the transformation.
                 </p>
                 <Equation>
                   {"the pieces joined with one space each\n" +
@@ -1069,30 +814,13 @@ export default function PennTreebankRulesPage() {
                     "        \"Dr. Alvarez didn't expect the low-cost re-analysis,\" she wrote."}
                 </Equation>
                 <p>
-                  Two separate things went wrong there. The spacing is gone, which
-                  is true of every rule on these three pages and is recoverable if
-                  one knows the language&rsquo;s conventions, and the quotation
-                  marks are gone, which is not recoverable at all from the pieces,
-                  since two apostrophes might have been a closing quotation mark
-                  or might have been two apostrophes. The pieces plus the spans
-                  plus the original text do recover everything; the pieces alone
-                  recover nothing exactly.
+                  Spacing and rewritten quotation marks create different reconstruction questions. Detokenization rules can propose conventional spacing, but that does not establish the original layout. Normalized quotation pieces can also correspond to different source characters. Keeping the original text with the spans preserves both distinctions; the token strings alone do not guarantee an exact round trip.
                 </p>
                 <p>
-                  Every method that came afterwards had to give this up in order
-                  to be usable for anything that hands the reader back their own
-                  text. That is why the methods later in this section are
-                  described as reversible or not reversible, and why the ones that
-                  keep the space attached to the word after it are keeping it for
-                  this reason rather than out of tidiness.
+                  Later schemes make different choices about this trade-off. Some retain separators in the piece sequence; others rely on the original text or a record of transformations. Calling a scheme reversible requires stating which input distinctions it preserves, rather than assuming that a plausible reconstructed sentence is the exact original.
                 </p>
                 <KeepInMind>
-                  The pieces are an annotation of the text rather than a
-                  partition of it, and nothing about them shows the difference
-                  until somebody tries to put the text back. Anything that will
-                  have to hand the reader their own writing should check whether
-                  the method it is using can, since these rules cannot and say
-                  nothing about it.
+                  {"Compare each piece’s text with the source slice named by its span to detect rewriting. If the application must reproduce the original, retain the source or enough separators and transformation records. A plausible detokenized sentence is not proof of an exact round trip."}
                 </KeepInMind>
               </SubSection>
 
@@ -1105,12 +833,12 @@ export default function PennTreebankRulesPage() {
                     {
                       expression: "a full stop ending an abbreviation",
                       reason:
-                        "undecidable at the end of a sentence, with or without a list, because one character is closing both the abbreviation and the sentence and no division of the characters gives it to two pieces. In the middle of a text it is decidable with a list of abbreviations, and these rules carry none, standing a rule about position in its place.",
+                        "The final-period rule separates a sentence-final abbreviation’s period. An abbreviation list could support another convention, while a separate sentence annotation can retain its second role. This implementation uses position rather than such an annotation.",
                     },
                     {
                       expression: "where the sentences are",
                       reason:
-                        "assumed, never determined. The final-stop rule is exact only when the text handed over is one sentence, and the six sentences here give 72 pieces separately and 67 joined, with five stops staying attached to the words in front of them. Whoever runs the rules decides this, and the rules do not report which was done.",
+                        "Sentence boundaries are not found by this tokenizer. The six sentences yield 72 pieces separately and 67 joined, with five earlier periods remaining attached. Sentence-separated input suits the heuristic, but does not guarantee every final abbreviation is treated as desired.",
                     },
                     {
                       expression: "a hyphen joining two words",
@@ -1120,7 +848,7 @@ export default function PennTreebankRulesPage() {
                     {
                       expression: "a contraction nobody listed",
                       reason:
-                        "returned whole, and indistinguishable from a text the rules examined and left alone. Ten whole forms and eight endings are named; six of the fifteen probes here fall outside them, including the same contraction typed with a curved apostrophe. A list can be extended and cannot be completed.",
+                        "An unhandled form may remain whole, with no rule-coverage diagnostic in the returned pieces. Ten fixed forms and eight endings are listed, and six of fifteen probes fall outside the intended cuts. Extending the list fixes particular cases without proving coverage of every future input.",
                     },
                     {
                       expression: "a language other than English",
@@ -1130,12 +858,12 @@ export default function PennTreebankRulesPage() {
                     {
                       expression: "which apostrophe and which quotation mark",
                       reason:
-                        "fixed to the characters a keyboard produced in the late nineteen eighties. Any normalising of the modern curved marks happens before the rules and is not part of them, and two callers who normalise differently get different pieces from the same writing.",
+                        "fixed to the characters a keyboard produced in the late nineteen eighties. Any normalizing of the modern curved marks happens before the rules and is not part of them, and two callers who normalize differently get different pieces from the same writing.",
                     },
                     {
                       expression: "a piece that is not its source",
                       reason:
-                        "allowed, which is what separates this method from the two before it. 14 of 266 pieces over 22 sentences hold a text their span does not cover, 22 once the bracket spellings are switched on, and every one of them is a quotation mark standing for one character.",
+                        "A piece may use a normalized spelling while its span still locates the source. Of 266 pieces in the selected 22 sentences, 14 are rewritten quotes. Enabling bracket naming raises the total to 22, including bracket rewrites.",
                     },
                     {
                       expression: "putting the text back together",
@@ -1150,17 +878,12 @@ export default function PennTreebankRulesPage() {
                     {
                       expression: "a case the published rules never anticipated",
                       reason:
-                        "produced rather than decided. The rules were published as a pipeline of substitutions, so on a doubled comma or a run of three backquotes the answer falls out of how one substitution's replacement meets the next one's search, and two faithful readings can differ there.",
+                        "The substitution pipeline has an output determined by its order, patterns and engine. A source-preserving reimplementation may differ on unusual runs, so compare those cases when exact compatibility is required.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Two of these are worth carrying past this page. The rules never
-                  refuse, so a text they were not written for comes back looking
-                  exactly like a text they were, and only the pieces themselves
-                  say which happened. And a piece here is an assertion about the
-                  writing rather than a copy of it, which is the property every
-                  method after this one had to weigh up and mostly chose to keep.
+                  {"Check the convention against the text being processed and the units the next stage expects. Returned pieces may be normalized analysis forms, so keep their source relationship explicit when display or reconstruction matters."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1178,12 +901,12 @@ export default function PennTreebankRulesPage() {
                 "To keep every piece exactly one character wide",
               ],
               0,
-              "A reader can see which mark opens and which closes; the plain typewriter quotation mark is the same character both times, so the rules work it out once, from whether the mark begins the text or follows a space or an opening bracket, and write the answer into the piece. The two-character spelling was what a typist of the period used for directional quotes on a machine that had none.",
+              "The Treebank convention writes opening and closing quotes differently even when the source used the same straight quotation-mark character. These rules infer a role from local context and emit the corresponding two-character spelling. That records a formatting decision in the token text, so spelling and original source slice need not match.",
             ),
             trueFalse(
               "The bracket rewriting gives a name to all eight brackets.",
               false,
-              "It names six and leaves the angle brackets alone, because the file format never used them. A parsed sentence is written as a tree with round brackets around each group, so a round bracket belonging to the sentence had to be spelled differently, and the rule covers exactly what the storage needed escaping. That is the clearest sign on the page that these rules describe one corpus.",
+              "This implementation offers named replacements for round, square and curly brackets, leaving angle brackets unchanged. Parenthesis-based tree storage gives a reason to distinguish text brackets from structural notation. The exact replacement set is still a corpus/API convention; it is not a claim that other bracket characters never occur in source text.",
             ),
             several(
               "These rules give 266 pieces on the 22 sentences where splitting on spaces gives 155. Which of these does the page measure over those 266 pieces?",
@@ -1211,7 +934,7 @@ export default function PennTreebankRulesPage() {
                 "The original text can be pasted back together from the pieces alone, since every piece carries its span",
               ],
               [0, 1],
-              "What chose between keeping low-cost whole and cutting it was how many tags the annotation gave a compound modifier, which is a fact about the treebank rather than about the writing, and agreement about it is what makes the rules useful. A caller handed one piece cannot ask whether a clause looked at it, and six of the fifteen probes fall into that silence, including the curved spelling, which is one era’s typing rather than a contraction the rules know. And the pieces alone recover nothing exactly, since two apostrophes might have been a closing quotation mark or might have been two apostrophes. The pieces, their spans and the original text together recover everything.",
+              "These rules implement a particular annotation convention. A probe left whole may match a keep rule or may simply have no splitting rule, as with several supplied contractions and the curved apostrophe. Token spellings alone also omit source spacing and can be ambiguous after quote rewriting. Spans identify locations; retaining the original source supplies the omitted and rewritten characters for exact reconstruction.",
             ),
         ],
         },
@@ -1278,8 +1001,8 @@ question: "Does a token’s spelling always equal the source slice its span iden
               "Hand the six sentences over one at a time, then joined",
               [
   "Split each of the six supplied sentences separately, then split one string formed by joining them with a single space.",
-  "For each approach print the total piece count, the number of pieces that are exactly a full stop and the list of pieces ending in a full stop while containing other characters.",
-  "This Treebank rule expects a sentence-sized input. Joining inputs changes which full stop it treats as sentence-final, even though the words have not changed."
+  "For each approach, print the total piece count, the number of pieces equal to a period, and the list of longer pieces ending in a period.",
+  "This Treebank rule expects a sentence-sized input. Joining sentences changes which period it treats as final, even though their words remain unchanged."
 ],
               `from oop_ml import PennTreebankPreTokenizer
 
@@ -1326,7 +1049,7 @@ question: "What happens when a sentence-oriented rule receives several sentences
  hints: [
   "Collect all split(text).texts for the separate-sentence report.",
   "For the joined report, call split on \" \".join(sentences) once.",
-  "A detached full stop equals \".\". An attached one ends with \".\" but is not itself \".\"."
+  "A detached period equals \".\". An attached period ends a longer piece, so test that the spelling ends with \".\" and is not just \".\"."
 ], check: numberCheck("How many pieces do the six sentences give when they arrive joined into one string?", 67, 0.0, "The joined input gives 67 pieces. Several stops remain attached to preceding words because the rule sees one input whose final stop is at the very end.") },
             ),
             exercise(
@@ -1383,11 +1106,11 @@ print(f"{cut} cut, {len(probes) - cut} returned whole")`,
 "o'clock"            -> ["o'clock"]
 9 cut, 6 returned whole`,
               {
-question: "Which typed contractions do these English rules recognise?",
+question: "Which typed contractions do these English rules recognize?",
  hints: [
   "Compare split(probe).n_words with len(probe.split()). Multiword probes need this baseline.",
   "ascii(probe) escapes non-ASCII characters, making the curved apostrophe visible.",
-  "Keep the literal spelling of every supplied probe. Normalising the apostrophe would change the experiment."
+  "Keep the literal spelling of every supplied probe. Normalizing the apostrophe would change the experiment."
 ], check: numberCheck("How many of the fifteen probes come back whole?", 6, 0.0, "Six probes return whole. These rules have specific spellings and suffixes, so a familiar contraction typed with a different apostrophe can miss those branches.") },
             ),
             exercise(

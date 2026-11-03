@@ -1,3 +1,4 @@
+import { americanEnglish } from "@/lib/american-english";
 // The content treatments a page uses instead of labelling its readers.
 //
 // A page could sort its material by audience, "for beginners" here and "for the
@@ -42,7 +43,7 @@ export function SubSection({
   return (
     <section id={id ?? sectionId(title)} tabIndex={-1} className="mt-8 scroll-mt-6 first:mt-0">
       <h3 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">
-        {title}
+        {americanEnglish(title)}
       </h3>
       <div className="space-y-4 text-slate-700 dark:text-slate-300">
         {children}
@@ -62,7 +63,7 @@ export function WorkedExample({
 }) {
   return (
     <div className="my-5 rounded-lg border border-slate-200 bg-slate-50/70 px-5 py-4 dark:border-slate-800 dark:bg-slate-900/40">
-      {title && <Label>{title}</Label>}
+      {title && <Label>{americanEnglish(title)}</Label>}
       <div className="space-y-3 text-slate-700 dark:text-slate-300">
         {children}
       </div>
@@ -85,7 +86,7 @@ export function WhyThisWorks({
         <span className="mr-2 inline-block transition-transform group-open:rotate-90">
           &rsaquo;
         </span>
-        {title}
+        {americanEnglish(title)}
       </summary>
       <div className="mt-3 space-y-3 border-t border-slate-100 pt-3 text-slate-700 dark:border-slate-800 dark:text-slate-300">
         {children}
@@ -106,7 +107,7 @@ export function KeepInMind({
   if (!title) return <div className="my-4 space-y-3 text-slate-700 dark:text-slate-300">{children}</div>;
   return (
     <div className="my-5 rounded-lg border-l-4 border-amber-400 bg-amber-50/60 px-5 py-4 dark:border-amber-500/70 dark:bg-amber-950/20">
-      <Label>{title}</Label>
+      <Label>{americanEnglish(title)}</Label>
       <div className="space-y-3 text-slate-700 dark:text-slate-300">
         {children}
       </div>
@@ -126,7 +127,7 @@ export function InAModel({
   if (!title) return <div className="my-4 space-y-3 text-slate-700 dark:text-slate-300">{children}</div>;
   return (
     <div className="my-5 rounded-lg border-l-4 border-sky-400 bg-sky-50/60 px-5 py-4 dark:border-sky-500/70 dark:bg-sky-950/20">
-      <Label>{title}</Label>
+      <Label>{americanEnglish(title)}</Label>
       <div className="space-y-3 text-slate-700 dark:text-slate-300">
         {children}
       </div>

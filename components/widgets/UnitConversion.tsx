@@ -45,7 +45,7 @@ export function UnitConversion() {
       <div className="flex gap-1 pb-3">
         {(["cm", "m"] as const).map((choice) => (
           <button key={choice} onClick={() => setUnit(choice)} className={`rounded-md border px-3 py-1 text-sm font-medium transition ${unit === choice ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-400 dark:bg-indigo-950/40 dark:text-indigo-200" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"}`}>
-            heights in {choice === "cm" ? "centimetres" : "metres"}
+            heights in {choice === "cm" ? "centimeters" : "meters"}
           </button>
         ))}
       </div>

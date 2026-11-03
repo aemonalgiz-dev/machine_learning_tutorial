@@ -190,8 +190,8 @@ export function LossBowlPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Drag to turn the room. The green dot marks the floor, the least squares
-        fit.
+        Drag to rotate the loss surface. The green dot marks the minimum,
+        where the least-squares fit has its coefficients.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">

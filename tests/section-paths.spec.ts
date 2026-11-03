@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { openFullWorkshop } from "./helpers/open-workshop";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { CURRICULUM } from "../lib/curriculum";
+import { CURRICULUM, displaySectionTitle } from "../lib/curriculum";
 import { lessonOrder, courseSectionHref, lessonCount, lessonLocations } from "../lib/course-navigation";
 import { expandedLessons } from "../lib/lessons";
 import { TOOLS } from "../lib/builds/tools";
@@ -17,14 +17,15 @@ const sections: Record<string, number> = {
   "Deploying and Maintaining Models": 5, "Complete Projects": 3,
 };
 const lessons = expandedLessons.filter(lesson => Object.hasOwn(sections, lesson.section));
+const displayedSections = new Set(Object.keys(sections).map(displaySectionTitle));
 const run = (name: string, ...inputs: Data[]) => TOOLS[name].run(inputs, {});
 
 test("ten new sections contain complete lessons and preserve the reinforcement introduction", () => {
-  expect(CURRICULUM).toHaveLength(45);
-  expect(lessonOrder).toHaveLength(377);
+  expect(CURRICULUM).toHaveLength(46);
+  expect(lessonOrder).toHaveLength(384);
   expect(lessons).toHaveLength(47);
   for (const [title, count] of Object.entries(sections)) {
-    const section = CURRICULUM.find(part => part.title === title)!;
+    const section = CURRICULUM.find(part => part.title === displaySectionTitle(title))!;
     expect(lessonCount(section)).toBe(count);
     expect(section.intro.length).toBeGreaterThan(120);
     for (const topic of section.topics) expect(topic.blurb.length).toBeGreaterThan(50);
@@ -85,7 +86,7 @@ test("solves, graph scaling and region counts agree with independently known cas
 });
 
 test("all section overviews link to actual lessons and the landing page remains an overview", async ({ page, request }) => {
-  for (const section of CURRICULUM.filter(part => Object.hasOwn(sections, part.title))) {
+  for (const section of CURRICULUM.filter(part => displayedSections.has(part.title))) {
     const response = await request.get(courseSectionHref(section));
     expect(response.status(), section.title).toBe(200);
     const html = await response.text();

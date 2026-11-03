@@ -66,8 +66,8 @@ export function UpdateThenReforward() {
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         {step.loss_after < step.loss_before
-          ? `At η = ${rate.toFixed(2)} the loss falls from ${show(step.loss_before)} to ${show(step.loss_after)}. The gradients in the amber column describe the network as it was; after the move they describe nothing, and the next step needs a fresh forward pass through the green network.`
-          : `At η = ${rate.toFixed(2)} the step overshoots and the loss rises from ${show(step.loss_before)} to ${show(step.loss_after)}. The gradients were right; the stride was too long for them.`}
+          ? `At η = ${rate.toFixed(2)} the loss falls from ${show(step.loss_before)} to ${show(step.loss_after)}. The amber gradients were calculated at the old parameters. To calculate the next update at the new parameters, run another forward pass and backpropagate from its result.`
+          : `At η = ${rate.toFixed(2)} the loss rises from ${show(step.loss_before)} to ${show(step.loss_after)}. A gradient describes a local rate of change, so a large step can increase the loss. Try a smaller learning rate and compare the result.`}
       </p>
     </div>
   );

@@ -48,12 +48,12 @@ export class ApiError extends Error {
 // What a reader sees when no refusal of the calculation's own came back. These
 // are page text like any other, so they name what happened rather than the
 // machinery behind the page. A first visit after a restart can meet the second
-// one while a large fit is still being worked out, which is why it suggests a
-// reload rather than blaming the input.
+// one while a large fit is still being worked out. Neither message assumes
+// that reloading will fix it or asks the reader to discard unsaved work.
 const UNREACHABLE =
-  "The calculation behind this could not be reached. Reloading the page usually brings it back.";
+  "The calculation service could not be reached. Please try again later.";
 const NOT_WORKED_OUT =
-  "This could not be worked out just now. Reloading the page usually fixes it.";
+  "The service could not finish this calculation. Please try again later.";
 
 // One POST, one place to turn a non-2xx into a readable ApiError. Every call
 // below is a thin wrapper over this.

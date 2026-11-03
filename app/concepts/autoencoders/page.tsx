@@ -9,15 +9,15 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Autoencoders · oop_ml",
-  description: "If we ask a model to compress an input and then reconstruct it, the reconstruction tells us what the compressed representation kept. An autoencoder learns that representation by trying to reduce what is lost.",
+  title: "Autoencoders · Perceptron Lab",
+  description: "An autoencoder learns to reconstruct an input through an intermediate representation. Restricting that representation forces choices about which details to preserve, measured by the error in the reconstruction.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="autoencoders"
     title="Autoencoders"
-    tagline={"If we ask a model to compress an input and then reconstruct it, the reconstruction tells us what the compressed representation kept. An autoencoder learns that representation by trying to reduce what is lost."}
+    tagline={"An autoencoder learns to reconstruct an input through an intermediate representation. Restricting that representation forces choices about which details to preserve, measured by the error in the reconstruction."}
     openingTitle="What Can We Keep When We Cannot Keep Everything?"
     intuition={lessonIntuitions["autoencoders"]}
     technicalStart="Part 2. Calculate a Bottleneck We Can See"
@@ -32,17 +32,25 @@ export default function Page() {
 <p>{"The encoder maps an observation to a representation called a latent code. The code is the information passed through the middle of the system. The decoder maps that code back into the input's original arrangement."}</p>
 <p>{"Take the two sensors from the opening and one observation in which they read 3 and −1. The encoder on this page keeps their average, so the code is the single number 1, and the decoder copies that number into both outputs."}</p>
 <Equation>{"Observation:     [3, −1]    two numbers\nCode:            [1]        one number\nReconstruction:  [1, 1]     two numbers"}</Equation>
-<p>{"Each component has one job, and none of them can do another’s. The encoder decides what to keep. The code is all that crosses the middle, so anything not in it is gone. The decoder has to rebuild every output entry from the code alone, and it never sees the observation."}</p>
+<p>
+                  {"Only the code reaches the decoder in this example. Once the encoder maps different observations to the same code, the decoder must give them the same reconstruction. It cannot recover their difference from information it never receives."}
+                </p>
 <p>{"For an image, the input and reconstructed output may have the same height, width, and channels. Their shapes matching does not mean their pixel values match. Reconstruction error measures the difference."}</p>
 <p>{"The sensor trace shows the same thing in two numbers. The reconstruction [1, 1] has the same arrangement as the observation [3, −1] and a different value in both places. The reconstruction error is the size of that difference, and Part 2 calculates it."}</p>
 
 </SubSection>
 <SubSection title="2. Make preserving everything difficult">
 <p>{"An unrestricted network can learn to copy inputs without discovering a useful representation. A bottleneck limits the code width, forcing the model to choose what information it can preserve. Other autoencoders use constraints such as sparsity or corruption of the input."}</p>
-<p>{"Copying is easy to exhibit. Let the code be as wide as the observation, let the encoder pass both readings through unchanged, and let the decoder do the same. The observation [3, −1] becomes the code [3, −1] and comes back as [3, −1], with a reconstruction error of zero. So does every other observation. A perfect score has been reached and nothing has been learned about how the two sensors relate, because the code is the data under another name."}</p>
-<p>{"That is why a low error is not the goal by itself. The error is useful as a measure of what a constrained code managed to keep. Narrow the code to one number and a real question appears, which is what that one number should be."}</p>
+<p>
+                  {"If the code is as wide as the observation, the encoder can pass both readings through unchanged and the decoder can copy them back. The observation [3, −1] then reconstructs as [3, −1] with zero error, just as any other observation would. This identity solution does not require learning how the two sensors relate."}
+                </p>
+<p>
+                  {"The reconstruction error is useful alongside the restriction on the code. With only one code coordinate, we need to decide which aspect of the two readings to retain."}
+                </p>
 <p>{"Compression is useful when the data has structure that a compact code can capture. A smaller code does not guarantee that the preserved information will help a later classifier or search task. That must be checked separately."}</p>
-<p>{"For two sensors that usually agree, one shared level is such a structure. When the readings are 1 and 1, the average is 1, and copying it back loses nothing. When they are 3 and −1, the average is also 1, and the disagreement is what gets lost. The same one-number code suits the first observation and fails on the second. What a narrow code gives up is decided by the encoder, and a good encoder gives up what the data rarely does."}</p>
+<p>
+                  {"Our fixed encoder maps both [1, 1] and [3, −1] to code 1. Copying that code back reconstructs the agreeing readings but loses the sensors’ difference in the second observation. A trained encoder’s choices depend on the data and loss: even an infrequent difference can matter if discarding it produces large errors."}
+                </p>
 
 </SubSection>
 
@@ -53,17 +61,28 @@ export default function Page() {
 <Equation>{"Input x = [3, −1]\n\nCode z = (3 + (−1)) / 2 = 1\nReconstruction = [z, z] = [1, 1]\n\nSquared errors = [(3 − 1)², (−1 − 1)²]\n               = [4, 4]\nMean squared error = (4 + 4) / 2 = 4"}</Equation>
 <p>{"The reconstructed pair retains the average but loses the difference. Moving the live slider changes that difference while holding the average constant."}</p>
 <NumberTable headings={["offset on the live slider", "input", "code", "reconstruction", "mean squared error"]} rows={[["0", "[1, 1]", "1", "[1, 1]", "0"], ["0.5", "[1.5, 0.5]", "1", "[1, 1]", "0.25"], ["1", "[2, 0]", "1", "[1, 1]", "1"], ["2", "[3, −1]", "1", "[1, 1]", "4"], ["−2", "[−1, 3]", "1", "[1, 1]", "4"]]} caption="Five settings of the live slider. The last row swaps which sensor reads high." />
-<p>{"Every row has the same code and the same reconstruction. The decoder is handed a 1 each time and has no way to know which of these observations produced it. The error column is the only place where the five differ. It grows with the square of the offset, so a disagreement twice as large costs four times as much."}</p>
-<p>{"A second code entry repairs it. Let a wider encoder keep the average and also half the difference between the readings, and let the decoder add that second entry to one output and subtract it from the other. For [3, −1] the code becomes [1, 2] and the reconstruction is [3, −1], with an error of zero. The 2 in that code is exactly what the one-number bottleneck threw away."}</p>
+<p>
+                  {"Every row has the same code and reconstruction despite the different inputs. The decoder receives 1 each time and cannot distinguish which observation produced it. Mean squared error varies with the square of the slider offset, as the table shows."}
+                </p>
+<p>
+                  {"With two code coordinates, we can store both the shared level and how the sensors differ. Let the encoder keep their average and half their difference. The decoder adds that second coordinate to one output and subtracts it from the other."}
+                </p>
+                <Equation>{"input = [3, −1]\naverage = 1\nhalf the difference = 2\ncode = [1, 2]\nreconstruction = [1 + 2, 1 − 2] = [3, −1]\nmean squared error = 0"}</Equation>
 </SubSection>
 <SubSection title="4. Replace fixed rules with trainable transformations">
-<p>{"Let the encoder have parameters θ and the decoder have parameters φ. Training passes an observation through both, compares the reconstruction with the original, and differentiates through the entire path."}</p>
+<p>{"The encoder's parameters θ determine the code, and the decoder's parameters φ determine what is reconstructed from it. The reconstruction loss therefore depends on both sets. Backpropagation follows that whole route so the encoder can learn which information the decoder needs, rather than treating the code as a fixed input."}</p>
 <Equation>{"z = encoder_θ(x)\nx̂ = decoder_φ(z)\n\nL_reconstruction = mean over examples and coordinates of (x − x̂)²"}</Equation>
 <WorkedExample title="Three fixed choices scored on five readings">
-<p>{"A loss over examples needs more than one observation, so take five. Four are the readings from the opening picture in which the sensors agree, [0, 0], [1, 1], [2, 2] and [3, 3]. The fifth is the one in which they disagree, [2, 0]. The loss averages the squared error over all ten numbers. Here it is for three one-number codes, each a fixed choice of encoder and decoder."}</p>
+<p>
+                  {"Now evaluate fixed encoder and decoder rules on five observations. Four are the agreeing pairs from the opening picture: [0, 0], [1, 1], [2, 2] and [3, 3]. The fifth is [2, 0]. The loss averages squared error over all ten coordinates. The table compares three choices of a one-number code and reconstruction rule."}
+                </p>
 <NumberTable headings={["the encoder keeps", "the decoder writes", "codes for the five readings", "mean squared error"]} rows={[["the average of A and B", "the code into both outputs", "0, 1, 2, 3, 1", "0.2"], ["sensor A alone", "the code into both outputs", "0, 1, 2, 3, 2", "0.4"], ["sensor A alone", "the code into A and zero into B", "0, 1, 2, 3, 2", "1.4"]]} />
-<p>{"The loss ranks the three without anybody inspecting them. Averaging is the best of these because its only error is on the fifth reading, where it is off by one in each output. Keeping sensor A and copying it is off by two in one output of that reading. Writing zero for sensor B is wrong on every reading in which B is not zero."}</p>
-<p>{"Training does not pick from a list of three. It adjusts the numbers inside the encoder and the decoder, a little at a time, in whichever direction lowers this loss. Searching over every one-number linear code for these five readings ends at an error of about 0.1858, a little under the 0.2 that averaging scores. The best code leans slightly toward sensor A, because the one reading that disagrees has A above B. It describes the line through the origin that the five readings lie closest to, and that is the connection to principal components made at the end of this step."}</p>
+<p>
+                  {"Averaging has the smallest mean squared error of these three fixed choices. Its only error is on the fifth reading, where it differs by one in each output. Keeping sensor A and copying it differs by two in one output of that reading. Writing zero for sensor B is wrong whenever its observed reading is nonzero."}
+                </p>
+<p>
+                  {"Training uses loss gradients to adjust the encoder and decoder parameters. It need not improve the loss on every finite update. For these five readings, the best rank-one linear reconstruction through the origin has mean squared error about 0.1858, below the average rule’s 0.2. Its line leans slightly toward sensor A because the differing observation has A above B. This is an uncentered subspace fit; ordinary centered PCA first subtracts the data mean."}
+                </p>
 </WorkedExample>
 <p>{"Mean squared error is one possible reconstruction objective for real-valued inputs. A binary or probabilistic observation model can call for a different loss. The loss defines which reconstruction mistakes the model is encouraged to avoid."}</p>
 <p>{"A linear bottleneck trained with squared error is closely related to finding a low-dimensional subspace, as in PCA. Nonlinear encoders and decoders can represent more complex relationships, but they also make training and interpretation less direct."}</p>
@@ -112,7 +131,7 @@ several(
                   "Mean squared error is the only loss a reconstruction can be scored with",
                 ],
               [0, 1],
-              "Averaging is wrong only on the fifth reading, by one in each output, which comes to 0.2, and keeping sensor A alone scores 0.4. The best one-number linear code reaches about 0.1858 and not zero, because five readings that do not lie on one line cannot all be rebuilt from one number. That best code is the line the readings lie closest to, which is the link to principal components. Squared error is one possible objective for real-valued inputs, and a binary or probabilistic observation model can call for another.",
+              "The averaging design reconstructs the first four observations exactly and misses the fifth by one in each coordinate, giving mean squared error 0.2. Copying sensor A gives 0.4. The best one-coordinate linear reconstruction through the origin reaches about 0.1858. These observations do not all lie on one line, so that linear code cannot reconstruct them all exactly. This connects to a principal-component approximation, with the additional choice here that the reconstruction line must pass through the origin.",
               {
                 "description": "Sensor A is the first entry and sensor B the second. Compare a code that keeps their average with one that keeps A. Each decoder copies its one stored number into both reconstructed entries. Average squared error over all ten scalar entries, not just the five rows. The best linear code is restricted to one stored number per row."
               },
@@ -120,21 +139,27 @@ several(
 ] },
 { title: "Part 3. Reconstruction Is Not Yet a Sampling Rule", content: <>
 <SubSection title="5. Reproduce the chosen transformation">
-<p>{"The SDK class takes explicit encoder and decoder matrices. It calculates codes, reconstructed rows, and mean squared error. It deliberately does not fit them in this example."}</p>
+<p>
+                  {"Each input row contains two sensor readings. The encoder matrix has two rows and one column, producing one code value per observation. The decoder has one row and two columns, rebuilding two readings from each code. The SDK class calculates these codes, reconstructed rows and mean squared error from the supplied matrices; it does not fit them."}
+                </p>
 <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm leading-relaxed text-slate-100"><code>{"import numpy as np\nfrom oop_ml.numpy.modern import LinearAutoencoder\n\nmodel = LinearAutoencoder(\n    encoder=np.array([[0.5], [0.5]]),\n    decoder=np.array([[1.0, 1.0]]),\n)\nresult = model.respond_to(np.array([[3.0, -1.0]]))\nprint(result.code)\nprint(result.reconstructed)\nprint(result.mean_squared_error)"}</code></pre>
 <p>{"Run as written, it reports a code of 1, a reconstruction of [1, 1] and a mean squared error of 4, the figures from step 3. Given the five readings from step 4 in one call, it returns five codes and a single error averaged over all of them, 0.2. Everything the lesson has calculated so far is a reconstruction, which means it started from an observation."}</p>
 
 </SubSection>
 <SubSection title="6. Ask where a new code would come from">
-<p>{"Generating means producing an example that was not in the data, and there is no observation to start from. The only way in is through the decoder, and the decoder needs a code."}</p>
+<p>
+                  {"For generation, we ask the decoder for a sample without first encoding an observed input. That requires a rule for choosing a code. The resulting sample might resemble or even reproduce a training observation; this route does not guarantee novelty."}
+                </p>
 <p>{"Once we have a decoder, it is tempting to feed it a random code and call the output a generated example. But a plain autoencoder has not necessarily organized its code space so arbitrary random codes produce useful outputs."}</p>
 <WorkedExample title="A thousand codes nobody encoded">
 <p>{"The five readings from step 4 produce codes of 0, 1, 2, 3 and 1. Those are the only codes this decoder has ever been checked on. Now pick codes by a rule that ignores the data. A common first guess is a standard normal distribution, the bell curve centered on zero with a spread of one. In one seeded run of 1,000 draws from it, 534 codes were negative."}</p>
 <p>{"The copying decoder accepts every one of them. A code of −1.5 comes back as the readings [−1.5, −1.5]. Nothing fails, and nothing says whether a pair of negative readings is something these sensors ever report. None of the five observations looked like that."}</p>
-<p>{"The reconstruction error could not have warned us. It is measured only at codes that came from real inputs, so it is the same 0.2 whatever the decoder does with codes that no input produced. A sampling rule has to say which codes to draw and how often, and reconstruction training never states one. Reusing the five observed codes would be a rule, and all it could do is replay the data."}</p>
+<p>{"The reconstruction loss checks codes produced from the observed inputs. Here it stays at 0.2 even if the decoder behaves badly at other codes, because those locations never enter that calculation. Generation needs an additional rule for which codes to draw and how often. Drawing only the five observed codes would supply such a rule, but could only replay the recorded examples."}</p>
 </WorkedExample>
 <p>{"A variational autoencoder introduces an explicit prior distribution and a training objective connecting inferred codes to that prior. That gives the next lesson a specific problem to solve: choosing codes for generation."}</p>
-<p>{"Put against the example above, the prior is the rule for drawing codes, stated before training. The added objective pushes the codes the encoder produces toward that rule, so the decoder is trained on the region it will later be sampled from."}</p>
+<p>
+                  {"In the next model, the encoder describes a distribution of possible codes for each input. We choose a prior distribution for generation before training. The objective balances reconstruction against a penalty for differing from that prior. This encourages the decoder to handle codes from the region used in generation, without guaranteeing a useful result for every draw."}
+                </p>
 
 </SubSection>
 <p>{"Hinton and Salakhutdinov describe learning low-dimensional codes by reconstructing high-dimensional inputs."}{" "}<a href="https://pubmed.ncbi.nlm.nih.gov/16873662/">Reducing the Dimensionality of Data with Neural Networks</a>.</p>
@@ -149,7 +174,7 @@ trueFalse(
 trueFalse(
   "Once an autoencoder is trained, handing its decoder a random code produces a useful example.",
   false,
-  "That is the tempting step and the lesson refuses it. A plain autoencoder has not necessarily organized its code space so that arbitrary random codes produce useful outputs, because nothing in reconstruction asked it to. In the seeded run on the page, 534 of 1,000 codes drawn from a standard normal were negative, and the decoder turned each into a pair of negative readings that none of the five observations resembled.",
+  "Reconstruction training evaluates codes produced by the encoder. It does not by itself specify a distribution for drawing useful new codes. In the supplied experiment, 534 of 1,000 standard-normal draws are negative, and the fixed copying decoder maps them to pairs of negative readings. Those outputs are unlike the five observed inputs. This illustrates a mismatch between the chosen sampling distribution and the code values used in reconstruction.",
 ),
 choice(
   "The five readings produce codes of 0, 1, 2, 3 and 1. What does the reconstruction error of 0.2 say about decoding a code of −1.5?",
@@ -160,7 +185,7 @@ choice(
     "That it decodes to the average of the five readings",
   ],
   0,
-  "The error stays at 0.2 whatever the decoder does with a code no input produced, so it carries no information about such a code. The copying decoder accepts −1.5 without complaint and returns [−1.5, −1.5]. A sampling rule has to say which codes to draw and how often, and reconstruction training never states one.",
+  "The reconstruction error of 0.2 summarizes the five observed inputs; it does not evaluate a new code of −1.5. The fixed linear decoder maps that code to [−1.5, −1.5], but the reported training error does not establish whether that output is useful. A generative setup also needs a rule for selecting codes, including how often different regions should be sampled.",
 ),
 choice(
   "What does a variational autoencoder add to address that?",
@@ -171,7 +196,7 @@ choice(
     "A reconstruction loss suited to binary observations",
   ],
   1,
-  "The problem is where a new code would come from, so the fix is a statement about the code space rather than about the reconstruction. Widening the code or changing the loss both leave the code space unorganized in the same way.",
+  "A variational autoencoder defines a prior distribution for drawing codes and trains an input-dependent distribution of codes. Its objective combines a reconstruction term with a penalty for divergence from that prior. This changes the training loss as well as the code-space model. It encourages a more usable sampling arrangement, but it does not guarantee good generated outputs.",
 ),
 ] }
 ,

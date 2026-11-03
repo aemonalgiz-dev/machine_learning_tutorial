@@ -5,9 +5,9 @@
 // The curve is the weight a count earns, rising with the count until the cap
 // and flat at one after it. The ticks along it are the corpus's own counts, so
 // the reader can see where the cap falls relative to the pairs that actually
-// occurred, and the readouts say how much of the whole objective the single
-// commonest pair and the ten commonest pairs carry once the cap has taken their
-// share back. The API weighs and totals; the browser draws.
+// occurred. The readouts show shares of total pair weight, which differ from
+// loss shares because each loss also depends on its prediction error.
+// The API weighs and totals; the browser draws.
 
 import { useEffect, useState } from "react";
 import { ApiError, WeightingReport, fetchWeighting } from "@/lib/concepts/glove";
@@ -166,11 +166,11 @@ export function GloveWeightingCurve() {
         <Stat label="pairs at or beyond the cap" value={`${report.n_at_the_cap} of ${report.n_pairs}`} />
         <Stat label="largest count in the corpus" value={report.largest_count.toFixed(1)} />
         <Stat
-          label="the commonest pair's share"
+          label="commonest pair's share of total weight"
           value={`${(report.top_pair_share * 100).toFixed(2)}%`}
         />
         <Stat
-          label="the ten commonest pairs' share"
+          label="ten commonest pairs' share of total weight"
           value={`${(report.top_ten_share * 100).toFixed(2)}%`}
         />
       </div>
@@ -195,9 +195,10 @@ export function GloveWeightingCurve() {
       <Legend>
         The ticks along the bottom are the corpus&rsquo;s own counts. Move the cap
         down and the tallest of them fall under the flat part of the curve, where
-        seeing a pair more often buys it nothing further. For
+        their weights stop increasing. Each pair&rsquo;s loss still depends on its prediction
+        error. For
         comparison, weighting every pair alike would give the ten commonest{" "}
-        {(report.alike_top_ten_share * 100).toFixed(2)}% of the objective and
+        {(report.alike_top_ten_share * 100).toFixed(2)}% of the total weight and
         weighting them in proportion to their counts would give them{" "}
         {(report.proportional_top_ten_share * 100).toFixed(2)}%.
       </Legend>

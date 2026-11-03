@@ -82,7 +82,7 @@ export function CompressionControl() {
         <Stat label="of the total spread" value={`${((body.reconstruction_errors[kept - 1] / worst) * 100).toFixed(1)}%`} />
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        {body.rows.length} people, {count} standardised measurements, so the total squared spread is {worst} and keeping every component rebuilds it exactly. The first component alone leaves {body.reconstruction_errors[0].toFixed(1)} of that behind{total > 0 ? "" : ""}.
+        {body.rows.length} people, {count} standardized measurements, so the total squared spread is {worst} and keeping every component rebuilds it exactly. The first component alone leaves {body.reconstruction_errors[0].toFixed(1)} of that behind{total > 0 ? "" : ""}.
       </p>
     </div>
   );

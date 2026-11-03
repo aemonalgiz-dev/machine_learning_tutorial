@@ -349,7 +349,7 @@ export function KernelPcaPlayground() {
 
       {answer && answer.n_rows <= 8 && (
         <div className="mt-3 rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800">
-          <div className="text-xs text-slate-500 dark:text-slate-400">Centred kernel row of person 1, one value per person</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">Centered kernel row of person 1, one value per person</div>
           <div className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">{answer.first_row_kernel_values.map((value) => tidy(value, 4)).join("   ")}</div>
         </div>
       )}

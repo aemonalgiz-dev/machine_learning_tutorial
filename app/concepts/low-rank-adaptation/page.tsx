@@ -9,15 +9,15 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Low-Rank Adaptation · oop_ml",
-  description: "Adapting every weight in a large model can be expensive. LoRA keeps the original weights fixed and learns a smaller correction through two narrow matrices, reducing the number of parameters that need updating.",
+  title: "Low-Rank Adaptation · Perceptron Lab",
+  description: "LoRA adapts a model by learning a smaller matrix-based correction while leaving the original weights fixed. This reduces the number of parameters updated and stored for a particular adaptation.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="low-rank-adaptation"
     title="Low-Rank Adaptation"
-    tagline={"Adapting every weight in a large model can be expensive. LoRA keeps the original weights fixed and learns a smaller correction through two narrow matrices, reducing the number of parameters that need updating."}
+    tagline={"LoRA adapts a model by learning a smaller matrix-based correction while leaving the original weights fixed. This reduces the number of parameters updated and stored for a particular adaptation."}
     openingTitle="Do We Need to Change Every Weight to Teach a New Task?"
     intuition={lessonIntuitions["low-rank-adaptation"]}
     technicalStart="Part 2. Calculate the Factored Update"
@@ -41,9 +41,13 @@ export default function Page() {
 <p>{"The adapter maps an input through a narrow intermediate space and then back to the output width. If that intermediate space has one coordinate, all output corrections are scaled versions of one learned direction. More coordinates allow combinations of more directions."}</p>
 <p>{"Follow that with numbers. Take an adapter whose intermediate space has one coordinate. Its first factor reads only the first input coordinate. Its second factor writes one half of whatever it is handed into the second output coordinate. The base is the identity, which returns its input unchanged, so anything different in the output is the adapter’s doing."}</p>
 <NumberTable headings={["Input", "The one intermediate number", "Correction added to the output"]} rows={[["[1, 0, 0, 0]", "1", "[0, 0.5, 0, 0]"], ["[0, 1, 0, 0]", "0", "[0, 0, 0, 0]"], ["[3, 1, 0, 0]", "3", "[0, 1.5, 0, 0]"], ["[−2, 0, 1, 4]", "−2", "[0, −1, 0, 0]"]]} caption="Four inputs through one rank-one adapter. These are the factors used in the code of Part 3." />
-<p>{"Every correction in the last column is a multiple of [0, 0.5, 0, 0]. The input decides the multiple and nothing else. Four numbers went in, one number came through the middle, and one number cannot carry more than a single direction of change out the other side. That is what a rank of one means. With two intermediate coordinates the adapter could add any combination of two directions, and with r of them, r directions."}</p>
+<p>
+                  {"Every correction shown is a multiple of [0, 0.5, 0, 0]. With one intermediate coordinate, the corrections lie along at most one output direction. For these nonzero factors the update has rank one. With r intermediate coordinates it can use at most r independent output directions; zero or dependent factors can reduce the actual rank."}
+                </p>
 <p>{"Rank constrains the update, not the rank of the frozen base matrix. A small-rank correction can be added to a full-rank base. Whether that restriction is sufficient depends on the task and the projections being adapted."}</p>
-<p>{"The example shows this as well. Its correction has a rank of one, and the identity it is added to has the full rank of four. Their sum still has a rank of four. A low-rank update adjusts a matrix. It does not flatten it."}</p>
+<p>
+                  {"The selected correction has rank one, while the four-coordinate identity base has rank four. Their adapted matrix also has rank four in this example. The bottleneck limits the update’s independent directions, not necessarily those of the complete projection."}
+                </p>
 
 </SubSection>
 
@@ -58,10 +62,12 @@ export default function Page() {
 <Equation>{"Base route:     x W = [1, 0, 0, 0]\n\nAdapter route:  x A = (1 × 1) + (0 × 0) + (0 × 0) + (0 × 0) = 1\n                (x A) B = 1 × [0, 0.5, 0, 0] = [0, 0.5, 0, 0]\n                α / r = 1 / 1 = 1\n\nSum:            y = [1, 0, 0, 0] + (1 × [0, 0.5, 0, 0])\n                  = [1, 0.5, 0, 0]"}</Equation>
 <p>{"The merged form reaches the same output by doing the work in another order. Multiply the factors first, and ΔW is a four-by-four matrix whose only nonzero entry is 0.5, in the first row and second column. Add it to the identity, and that single matrix sends [1, 0, 0, 0] to [1, 0.5, 0, 0] in one multiplication."}</p>
 </WorkedExample>
-<p>{"The two forms suit different moments. During training the routes are kept apart, because A and B are the things being updated. Afterward a merged copy costs nothing extra to run, while a separate adapter lets one stored base serve several tasks by swapping a small pair of factors."}</p>
+<p>
+                  {"During training, we keep the routes separate because A and B are the parameters being updated. For this linear operation, merging lets inference use one matrix multiplication with the adapted weights. Keeping the factors separate uses an additional adapter calculation, but lets one stored base serve several tasks by swapping the factors."}
+                </p>
 <p>{"A common initialization makes one factor zero so the initial correction is zero while the other factor is nonzero. Setting both factors to zero would give both a zero first derivative through their product. The live example instead uses nonzero chosen factors so the correction is visible immediately."}</p>
 <WhyThisWorks title="Why both factors cannot start at zero">
-<p>{"The correction is a product, and the slope of a product with respect to one factor is the other factor. The gradient that reaches A is the loss’s gradient multiplied by B, and the gradient that reaches B is multiplied by x A. If both factors are zero, both gradients are zero, and neither factor ever leaves zero."}</p>
+<p>{"Each adapter factor affects the loss through the other factor in their product. The gradient reaching A includes B; the gradient reaching B includes x A. Initializing both factors to zero would therefore give both zero gradients, leaving the correction unable to begin learning. One factor can start at zero while the other supplies a nonzero route for the first update."}</p>
 <p>{"If only B starts at zero, the initial correction is zero and the adapted model begins as the pretrained one. A nonzero A leaves a route through which B can receive a gradient on the first step. Once B has moved, A can receive one too. A particular input or upstream derivative can still make a gradient zero; the initialization makes learning possible rather than guaranteeing a change on every example."}</p>
 </WhyThisWorks>
 </SubSection>
@@ -119,17 +125,21 @@ export default function Page() {
 <p>{"The SDK takes a base matrix, both factors, and alpha. It returns the adapted output and exposes the assembled update and parameter count. The chosen factors in this snippet are for arithmetic, not a trained task."}</p>
 <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm leading-relaxed text-slate-100"><code>{"import numpy as np\nfrom oop_ml.numpy.modern import LowRankAdapter\n\nadapter = LowRankAdapter(\n    base=np.eye(4),\n    down=np.array([[1.0], [0.0], [0.0], [0.0]]),\n    up=np.array([[0.0, 0.5, 0.0, 0.0]]),\n    alpha=1.0,\n)\nprint(adapter.respond_to(np.array([[1.0, 0.0, 0.0, 0.0]])))\nprint(adapter.trainable_parameters)"}</code></pre>
 <p>{"The snippet builds the adapter traced in Part 2 and prints two things. The first is the adapted output [1, 0.5, 0, 0]. The second is the trainable count of 8, which is four numbers in each factor."}</p>
-<p>{"Change alpha to 2.0 and run it again. The output becomes [1, 1, 0, 0]. The correction has doubled from 0.5 to 1, it still lands on the second coordinate alone, and the count is still 8. Alpha sets how large the correction is along a direction the factors have already chosen. It adds nothing to what the adapter can express."}</p>
+<p>
+                  {"Change alpha to 2.0 and run it again. The output becomes [1, 1, 0, 0]. The correction has doubled from 0.5 to 1, still on the second coordinate, and the trainable count remains 8. With these fixed factors, alpha rescales the same correction; it does not introduce an independent output direction."}
+                </p>
 <p>{"The live example runs the same operation on different chosen factors. They are drawn at random from a fixed seed, so the update has no convenient zeros, and the input is [1, 0, 0.5, −0.5]. The base is again the identity, so the change in each coordinate is the adapter’s contribution."}</p>
 <NumberTable headings={["Coordinate", "Input", "Output at rank one", "Change"]} rows={[["1", "1", "1.0007", "0.0007"], ["2", "0", "−0.0355", "−0.0355"], ["3", "0.5", "0.4884", "−0.0116"], ["4", "−0.5", "−0.5039", "−0.0039"]]} caption="The live example at rank one and an alpha of 1." />
-<p>{"All four coordinates moved this time, and it is still one direction. The table of the assembled update in the live example shows why. Its second, third and fourth rows are the first row multiplied by −0.817, −0.536 and 1.074. Sixteen entries are on display, and eight numbers produced them. Raise the rank to two and the rows stop being multiples of one another, while the count reaches the 16 of a full update. At rank three it passes that with 24."}</p>
+<p>
+                  {"All four coordinates moved this time, and it is still one direction. The table of the assembled update in the live example shows why. Its second, third and fourth rows are approximately the first row multiplied by −0.817, −0.536 and 1.074. Sixteen entries are on display, and eight numbers produced them. Raise the rank to two and the rows stop being multiples of one another, while the count reaches the 16 of a full update. At rank three it passes that with 24."}
+                </p>
 
 </SubSection>
 <SubSection title="6. Choose and evaluate the adaptation">
 <p>{"So far we have calculated an adapter output without training it. During training, that output contributes to the response loss, and backpropagation computes the required derivatives. The optimizer leaves the base matrix W fixed and updates the adapter factors A and B. Gradients may still need to pass through the frozen base operation to reach earlier trainable parts of the model."}</p>
 <p>{"A real setup chooses which projections receive adapters, a rank and scaling policy, the training examples, and the optimizer. The response loss can be the same supervised objective used for full fine-tuning. The difference is which parameters are allowed to change."}</p>
 <p>{"Each of those choices has a cost that the tiny example makes visible. Every projection given an adapter adds another pair of factors to train and store. A higher rank allows more directions and costs more parameters, and past the break-even point it costs more than the full update it was meant to replace. The scaling sets how large the correction is beside the frozen base."}</p>
-<p>{"LoRA is not quantization. Quantization changes how numerical values are represented or computed. The two techniques can be combined, but parameter rank and numeric precision solve different storage and computation problems."}</p>
+<p>{"LoRA restricts an update to a product of smaller matrices. Quantization changes the numerical representation or computation of the stored values. They can be combined, but reducing the number of trainable directions and reducing numerical precision are separate choices with different effects to evaluate."}</p>
 <p>{"Evaluate the adapted task and the behavior worth retaining. A smaller checkpoint is a resource property; it does not by itself prove that an adapter learned the intended behavior."}</p>
 
 </SubSection>
@@ -299,11 +309,11 @@ rank  8  adapter 1024  full 4096  share 25.0%
 rank 16  adapter 2048  full 4096  share 50.0%
 rank 32  adapter 4096  full 4096  share 100.0%
 rank 48  adapter 6144  full 4096  share 150.0%`,
-              { hints: ["The base of a projection 64 wide is np.eye(width), and its number of entries is adapter.base.size.", "trainable_parameters is an integer, the entries of down plus the entries of up.", "Multiply the ratio by 100 before formatting it with .1f."], check: numberCheck("How many trainable parameters does the rank-8 adapter have at a width of 64?", 1024, 0.5, "Both factor arrays contain trainable entries, so increasing the internal rank increases the total even though the base stays frozen. Compare that count with the full projection’s entries. A low-rank factorisation saves trainable parameters only below its break-even rank; the name alone does not guarantee a saving.") , question: "At which ranks does a width-64 adapter save fewer parameters than a full update?" },
+              { hints: ["The base of a projection 64 wide is np.eye(width), and its number of entries is adapter.base.size.", "trainable_parameters is an integer, the entries of down plus the entries of up.", "Multiply the ratio by 100 before formatting it with .1f."], check: numberCheck("How many trainable parameters does the rank-8 adapter have at a width of 64?", 1024, 0.5, "Both factor arrays contain trainable entries, so increasing the internal rank increases the total even though the base stays frozen. Compare that count with the full projection’s entries. A low-rank factorization saves trainable parameters only below its break-even rank; the name alone does not guarantee a saving.") , question: "At which ranks does a width-64 adapter use fewer trainable parameters than a full matrix update?" },
             ),
             exercise(
               "Hand the adapter factors that do not join",
-              ["Part 2 fixed the shapes before multiplying. The first factor maps the input width into the rank, and the second maps the rank back out. Give the library a first factor of rank two and a second factor of rank one, and see what it does.", "It should not guess which rank was meant. Catch what the library raises and print the name of its class and its message."],
+              ["The down factor has shape (4, 2), so its internal width is two. The supplied up factor has shape (1, 4), so it expects an internal width of one. Try constructing an adapter from these incompatible factors on a four-by-four identity base.", "It should not guess which rank was meant. Catch what the library raises and print the name of its class and its message."],
               `import numpy as np
 from oop_ml import MLLibError
 from oop_ml.numpy.modern import LowRankAdapter

@@ -151,7 +151,7 @@ export function PassInspector() {
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-slate-200 text-left dark:border-slate-800">
-              <th className="py-1.5 pr-3 font-semibold text-slate-600 dark:text-slate-400">centred height x′</th>
+              <th className="py-1.5 pr-3 font-semibold text-slate-600 dark:text-slate-400">centered height x′</th>
               <th className="py-1.5 pr-3 font-semibold text-slate-600 dark:text-slate-400">weight y</th>
               {reached("predict") && <th className="py-1.5 pr-3 font-semibold text-slate-600 dark:text-slate-400">prediction ŷ</th>}
               {reached("residuals") && <th className="py-1.5 pr-3 font-semibold text-rose-600 dark:text-rose-400">residual e</th>}

@@ -1,3 +1,4 @@
+import { americanEnglish } from "@/lib/american-english";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -41,10 +42,10 @@ export default async function LearningAreaPage({ params }: Props) {
             <ul className="space-y-5">
               {group.sections.map(title => {
                 const section = sections.find(section => section.title === title)!;
-                return <li key={title} className="journal-panel overflow-hidden"><Link href={courseSectionHref(section)} aria-label={title} className="group flex items-start gap-4 px-5 py-5 hover:bg-raised">
+                return <li key={title} className="journal-panel overflow-hidden"><Link href={courseSectionHref(section)} aria-label={americanEnglish(title)} className="group flex items-start gap-4 px-5 py-5 hover:bg-raised">
                   <span className="area-emblem" aria-hidden="true">{String(sections.indexOf(section) + 1).padStart(2, "0")}</span>
                   <div className="min-w-0 flex-1">
-                    <Heading className="text-lg font-semibold group-hover:text-accent">{title}</Heading>
+                    <Heading className="text-lg font-semibold group-hover:text-accent">{americanEnglish(title)}</Heading>
                     <span className="mt-2 block text-sm leading-6 text-muted">{section.intro}</span>
                     <span className="mt-3 block font-mono text-xs text-muted">{lessonCount(section)} lessons</span>
                   </div>

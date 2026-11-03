@@ -150,7 +150,7 @@ export function StepOrderChart() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-left dark:border-slate-800">
-                  {["column", "centre", "spread", "coefficient"].map((heading) => (
+                  {["column", "center", "spread", "coefficient"].map((heading) => (
                     <th key={heading} className="py-1 pr-4 font-semibold text-slate-600 last:pr-0 dark:text-slate-400">{heading}</th>
                   ))}
                 </tr>
@@ -165,7 +165,7 @@ export function StepOrderChart() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-left dark:border-slate-800">
-                  {["column", "centre", "spread", "coefficient"].map((heading) => (
+                  {["column", "center", "spread", "coefficient"].map((heading) => (
                     <th key={heading} className="py-1 pr-4 font-semibold text-slate-600 last:pr-0 dark:text-slate-400">{heading}</th>
                   ))}
                 </tr>

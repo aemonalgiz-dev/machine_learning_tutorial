@@ -23,9 +23,9 @@ import { UnigramPlayground } from "@/components/widgets/UnigramPlayground";
 import { WordLattice } from "@/components/widgets/WordLattice";
 
 export const metadata: Metadata = {
-  title: "The Unigram Language Model · oop_ml",
+  title: "The Unigram Language Model · Perceptron Lab",
   description:
-    "A word can have several valid divisions into smaller pieces. A unigram tokenizer assigns probabilities to those pieces so it can compare complete segmentations while learning which vocabulary entries to keep.",
+    "A unigram tokenizer assigns probabilities to candidate pieces and compares complete segmentations. Vocabulary selection balances the available pieces against how well their combinations describe the observed text.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -40,7 +40,7 @@ export default function UnigramLanguageModelPage() {
       playgroundTitle="Which complete segmentation has the higher probability?"
       playgroundIntro="Compare alternative segmentations of the same word. Distinguish the best segmentation's probability from the total over all possible segmentations."
       title="The Unigram Language Model"
-      tagline={"A word can have several valid divisions into smaller pieces. A unigram tokenizer assigns probabilities to those pieces so it can compare complete segmentations while learning which vocabulary entries to keep."}
+      tagline={"A unigram tokenizer assigns probabilities to candidate pieces and compares complete segmentations. Vocabulary selection balances the available pieces against how well their combinations describe the observed text."}
       prerequisites={
         <>
           Two things from earlier in this section. Something has already decided
@@ -76,59 +76,25 @@ export default function UnigramLanguageModelPage() {
 </>
                 <Equation>{SENTENCE}</Equation>
                 <p>
-                  What is being chosen, in both cases, is a set of pieces. Any
-                  set that contains every symbol the corpus uses can spell any
-                  text written in those symbols, so the question is never
-                  whether a vocabulary works but which of the enormous number of
-                  workable ones to take. Written out in characters the large
-                  corpus is 648 pieces long and the sentence is 45; the smallest
-                  vocabulary that can exist on it is 52 rows, one per symbol
-                  plus one for anything unspellable.
+                  Both approaches choose an inventory of pieces, but its starting symbols still determine what can be covered. In this representation, symbols include the relevant boundary forms as well as visible letters. The large corpus initially has 648 pieces and the sentence 45; the stated starting table needs 52 rows including the stand-in. Once coverage is defined, the remaining choices concern which additional pieces improve the objective.
                 </p>
                 <KeepInMind>
-                  A tokenizer is judged on text it has not seen. Every number on
-                  this page is either about a corpus a vocabulary was learned
-                  from or about a sentence that was deliberately kept out of it,
-                  and the two often point in opposite directions.
+                  {"Training-corpus measurements show what the vocabulary fits; held-out examples show how it represents other text. Keep those two uses separate. A tokenizer can compress its own corpus well while offering poor pieces for a new word."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. A piece is in the vocabulary because of the moment it was added">
                 <p>
-                  Byte pair encoding grows the vocabulary. It starts at single
-                  characters and repeatedly joins the commonest adjacent pair,
-                  so a piece exists because at some step it was the best
-                  available join. Nothing later revisits that decision. Once a
-                  piece has been added, every later count is taken on a corpus
-                  already respelled to use it, which means the whole rest of the
-                  run is conditioned on a choice made when very little was known.
+                  The BPE trainer starts from small symbols and repeatedly commits to a selected adjacent merge. Later rounds count pairs in the representation produced by earlier choices; this trainer does not return to reconsider a merge. The unigram approach will instead keep several candidate pieces available while estimating their usefulness, which creates a different way to compare alternative segmentations.
                 </p>
                 <p>
-                  Look at what that does on the four words. Merging them to a
-                  vocabulary of 22 rows makes newest and low into single pieces,
-                  but lower occurs only twice and never gets one; it comes out
-                  as lo, then w, then e, then r with its end-of-word mark, four
-                  pieces for a word the corpus definitely contains. The pieces are all
-                  frequent and the cut is defensible at every step, and yet the
-                  resulting encoding needs four positions for a word it holds and
-                  cannot say that spelling it whole would have been better.
+                  {"After ten BPE merges on the four-word corpus, lower remains lo, w, e and marked r. Its two occurrences contribute eight pieces. A whole lower entry would shorten those occurrences, but the earlier merge choices have already spent the fixed budget elsewhere. That is a limitation of this greedy training procedure."}
                 </p>
                 <p>
-                  The deeper trouble is that the merge list gives one answer and
-                  offers no way to ask how good it is. Replay the merges on a
-                  word and you get a cut; there is no second cut to compare it
-                  with and no number attached to either. That is fine when the
-                  cut is the only thing wanted, and it is exactly what fails when
-                  a model would learn more from meeting several cuts of the same
-                  word.
+                  {"Ordinary deterministic BPE returns one segmentation from its ranked merges. It does not attach a probability distribution to alternative segmentations. We can still compare token counts or add a separate scoring model; the unigram approach builds probability-based comparison into the tokenizer itself."}
                 </p>
                 <KeepInMind>
-                  A merge list holds no number that could be used to compare one
-                  cut of a word with another, so it cannot notice that spelling
-                  lower whole would have cost three pieces fewer than the four it
-                  hands back. Giving every piece a probability is what supplies
-                  that number, and everything else on this page follows from
-                  having it.
+                  {"A merge list specifies how to encode, while a piece-probability table lets us score multiple complete encodings. Those are different kinds of information. The probability score is not the same as the number of pieces, which we can count for either tokenizer."}
                 </KeepInMind>
               </SubSection>
 
@@ -144,12 +110,7 @@ export default function UnigramLanguageModelPage() {
                   build.
                 </p>
                 <KeepInMind>
-                  Growing and shrinking optimise different quantities, so they
-                  arrive at different vocabularies given the same corpus and the
-                  same budget. Part 5 measures how different, and at 100 rows on
-                  the eighteen sentences one of them spends all 48 of its
-                  learned rows on whole words of the corpus while the other
-                  spends 8 of its 48 that way.
+                  {"The procedures use different construction criteria and produce different entries on this corpus. At 100 rows, the shrinking method uses all 48 learned entries for complete corpus words; BPE uses eight of its 48 that way. Equal size does not imply equal structure."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -161,12 +122,7 @@ export default function UnigramLanguageModelPage() {
             <>
               <SubSection title="4. Every piece gets a number, and the numbers add to one">
                 <p>
-                  The model is a table. On the left, every piece; on the right, a
-                  probability, and the probabilities over the whole table add to
-                  one. Nothing else. To start it off, take every substring the
-                  corpus contains, count how often each occurs, and give each one
-                  its share of the total count, so a substring seen twice as
-                  often begins twice as likely.
+                  {"Start with candidate pieces and give each a positive probability. In this teaching implementation, substring frequencies initialize those probabilities. A separate frequency-times-length ranking selects candidates when the seed budget is limited. The normalized table supplies the model used in the next calculations."}
                 </p>
                 <p>
                   On the four words that gives 49 candidates, since those four
@@ -191,11 +147,7 @@ export default function UnigramLanguageModelPage() {
                   </>
                 </WorkedExample>
                 <KeepInMind>
-                  The starting table is deliberately far too large, and it is
-                  not a guess about what the pieces ought to be. On the eighteen
-                  sentences it holds 866 candidates against a finished
-                  vocabulary of 137, and choosing which 137 is the whole of the
-                  method.
+                  {"The eighteen sentences supply 866 candidates before pruning, compared with a final request of 137 entries. A large seed leaves alternatives available for the probability model to compare. Its memory and fitting cost still matter."}
                 </KeepInMind>
               </SubSection>
 
@@ -239,67 +191,36 @@ export default function UnigramLanguageModelPage() {
                 </p>
                 <SpellingLadder />
                 <p>
-                  The row worth looking at is the fourth. Merging the same four
-                  words to a vocabulary of 22 rows cuts lowest as lo, then w,
-                  then est with its mark, and that cut is here, ranked fourth,
-                  holding 3.10% of the word. It is not wrong; it is one of the
-                  28 and it is a perfectly ordinary member of the list. What
-                  merging cannot do is see the other 27, so it cannot notice that
-                  three of them are more probable and that one of them is fifteen
-                  times as probable.
+                  {"The BPE segmentation of lowest is fourth in this unigram model’s list, with a conditional share of 3.10%. Three alternatives receive higher scores under this table. That ranking evaluates BPE’s returned pieces using a different model; it does not prove a BPE scoring error."}
                 </p>
                 <p>
-                  Switch the widget to lower and the gap is wider. The starting
-                  table gives lower spelled whole 92.90% of the word, and the
-                  merged vocabulary&rsquo;s four-piece cut ranks twelfth of
-                  sixteen. Switch to newest, which merging does learn whole, and
-                  the two agree at 85.45%, which is worth seeing as well, since
-                  the point is not that merging is usually wrong.
+                  {"For lower, the initial unigram table gives the whole-word segmentation a conditional share of 92.90%; BPE’s four-piece split ranks twelfth of sixteen. For newest, both choose the whole word, whose share is 85.45%. The comparison shows agreement as well as disagreement between the two procedures."}
                 </p>
                 <KeepInMind>
-                  A probability turns one cut into a ranked list of cuts, and
-                  the ranking is what merging never had. On lowest the cut
-                  merging produces sits fourth of 28 at 3.10%, which is a fact
-                  neither method could state before there was a number on each
-                  spelling.
+                  {"Adding a probability table lets us rank alternative segmentations. Under this table, BPE’s lowest segmentation ranks fourth of 28. BPE itself did not claim to maximize that probability."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="7. The probability of the word itself">
                 <p>
-                  There are now two different questions about a word and they
-                  have two different answers. The first is which spelling is
-                  likeliest, which is a maximum over the list. The second is how
-                  probable the word is at all, which is the total over the list,
-                  since the model could have produced the word by any of those
-                  routes and they are alternatives rather than requirements.
+                  {"The best segmentation is the path with the largest product of piece probabilities. To account for all valid segmentations of a fixed word, add those products. This marginal quantity includes every path that spells that word, rather than selecting just one."}
                 </p>
                 <Equation>{"P(word)  =  Σ over spellings s of the word   P(s)"}</Equation>
                 <p>
-                  The total is never below the maximum, and the two are equal
-                  exactly when the word has one spelling only. Dividing one
-                  spelling&rsquo;s probability by the word&rsquo;s total gives
-                  that spelling&rsquo;s share, which is what the widget above
-                  prints, and the shares over a word&rsquo;s spellings add to
-                  one. Those shares are the thing Kudo wanted in the first place,
-                  since drawing a spelling in proportion to its share is exactly
-                  how a model gets to see several cuts of one word.
+                  {"The path sum is at least as large as its largest term. With positive path probabilities, equality holds only when one path is available. Divide a path’s value by the sum to obtain its conditional probability given this word. Those conditional probabilities support sampling several segmentations of the same input."}
                 </p>
                 <WhyThisWorks title="Why the total is the more natural quantity, and the maximum is what gets used">
                   <>
 <p>
-                    The total is what the model actually says about the word, and it is the quantity the estimation in Part 4 improves. The maximum is a convenience. A tokenizer has to hand a model one sequence of ids, so it hands over the likeliest spelling, and the pruning step in section 14 uses the maximum too, because computing the exact drop in the total for every candidate piece would mean running the sum for every word against every piece.
-                  </p>
+                  {"Fitting uses the total over segmentations, while ordinary encoding returns a highest-scoring path. The SDK also supports sampling a path. For pruning, this teaching implementation measures the change in the best path at fixed surviving scores, which is a cheaper proxy than recomputing and refitting the full marginal model."}
+                </p>
                   <p>
-                    That substitution is Kudo&rsquo;s, it is an approximation rather than a definition, and it is what makes the whole procedure affordable.
-                  </p>
+                  {"Keep that proxy separate from the exact marginal objective and from production implementations. It makes the smaller teaching model inspectable, but does not provide the exact cost of removing and re-estimating a candidate."}
+                </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  Which spelling is likeliest is a maximum over the list, and
-                  how probable the word is at all is a total over it. Both read
-                  the same table and the next Part computes them the same way,
-                  so nothing is being paid twice for having two questions.
+                  {"The maximum and the sum use the same piece lattice. Each can be computed without listing every complete path. They require their own calculations, so sharing the graph does not make the second result computationally free."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -311,32 +232,14 @@ export default function UnigramLanguageModelPage() {
             <>
               <SubSection title="8. Positions rather than letters">
                 <p>
-                  Twenty-eight spellings for a six-symbol word is already too
-                  many to list at any real scale, and the count grows roughly
-                  like two to the power of the word length. Nothing is enumerated
-                  in practice, and the reason nothing has to be is a change of
-                  view. Stop thinking about which pieces a word is made of and
-                  think instead about the positions <em>between</em> its symbols.
-                  A word of six symbols has seven positions, numbered 0 to 6, and
-                  a piece is a step from one position to a later one.
+                  {"A six-symbol word has seven boundary positions, numbered zero through six. A candidate piece connects its starting position to its ending position. There can be exponentially many complete segmentations, but many share the same prefix or suffix calculation. That makes a table over positions useful."}
                 </p>
                 <WordLattice />
                 <p>
-                  A spelling of the word is then a walk from position 0 to
-                  position 6 taking any steps available, and the count of walks
-                  is the count of spellings. Seventeen pieces of the starting
-                  table span a pair of these positions, and those seventeen steps
-                  admit exactly 28 walks. The picture is worth the paragraph
-                  because it converts a question about sets of pieces into a
-                  question about paths through a small graph, and paths through a
-                  graph are something we know how to search without listing them.
+                  {"For lowest, seventeen available piece spans form 28 complete paths through the positions. Each path spells the same word. We can reuse the best score or total at an intermediate position instead of recomputing it for every path."}
                 </p>
                 <KeepInMind>
-                  Once a piece is an arc between two positions, a spelling is a
-                  walk, and the search for the best walk never has to build a
-                  walk. Seventeen arcs stand for 28 spellings on a word of six
-                  symbols, and the gap between those two numbers is what the
-                  rest of this Part exploits.
+                  {"The lattice stores available spans rather than an explicit list of segmentations. A best-path calculation can then reconstruct its chosen path from saved decisions. It avoids enumerating every path, rather than never constructing one at all."}
                 </KeepInMind>
               </SubSection>
 
@@ -372,29 +275,17 @@ export default function UnigramLanguageModelPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  Replacing the maximum with a sum answers the other question at
-                  the same cost. Where the first recurrence keeps the best route
-                  into each position, the second keeps the total over all routes
-                  into it, and its last entry is the probability of the word.
-                  Both are one pass over the same arcs.
+                  {"For the marginal total, sum the contributions entering each position instead of retaining only the best. Initialize position zero with total one, then process positions forward. This has similar span-processing complexity to the best-path pass, while using log-sum-exp in the actual implementation for numerical stability."}
                 </p>
                 <Equation>{"total(j)  =  Σ over pieces p ending at j   total(start of p) × P(p)"}</Equation>
                 <KeepInMind>
-                  Two recurrences, identical except that one takes a maximum
-                  where the other takes a sum. That is the entire difference
-                  between the likeliest spelling and the probability of the word.
+                  {"Maximizing selects one path; summing retains the contribution of every path. The graph and reusable position states are shared, but the arithmetic and numerical treatment differ."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="10. Two rules settle every tie">
                 <p>
-                  Two spellings can reach exactly the same score, as low with est
-                  and lowe with st do above, and then the recurrence has to be
-                  told what to prefer. The first rule is fewer pieces, which is
-                  the one worth having, since a model reading the answer pays per
-                  piece. The second, for a tie that survives the first, is the
-                  longer piece at the earliest position where two spellings
-                  differ.
+                  {"Equal path scores need a reproducible choice. This decoder first prefers fewer pieces, then the longer piece at the earliest differing position. Those preferences resolve ties in this scoring objective; they do not establish which segmentation will help every downstream task most."}
                 </p>
                 <p>
                   A third rule sounds necessary and is not, and the argument is
@@ -407,11 +298,7 @@ export default function UnigramLanguageModelPage() {
                   the start is that this reading falls directly out of it.
                 </p>
                 <KeepInMind>
-                  A tie means the model is genuinely indifferent, so no rule for
-                  breaking it is more correct than another. What a rule does buy
-                  is that two runs on the same corpus give the same answer,
-                  rather than an answer that depends on the order the words
-                  arrived in.
+                  {"A tie gives equal probability scores to the candidate paths. The tie rule makes their selection reproducible. A downstream model or another evaluation criterion can still prefer one of them."}
                 </KeepInMind>
               </SubSection>
 
@@ -425,21 +312,12 @@ export default function UnigramLanguageModelPage() {
                   direct way, that is proportional to n cubed for one word.
                 </p>
                 <p>
-                  Words are short, so this is not the reason anything on this
-                  page is slow. The usual repair, where it matters, is to hold
-                  the pieces in a structure that lets the spans starting at a
-                  position be enumerated in one walk, which takes the cost to n
-                  times the length of the longest piece. That is an optimisation
-                  of this search rather than a different search.
+                  {"A trie can enumerate vocabulary matches from each position without repeatedly constructing every possible substring. With maximum piece length L, that gives a bound proportional to n times L for a word of length n. The best-path recurrence remains the same."}
                 </p>
                 <InAModel>
                   <p>
-                    At the scale a real tokenizer runs at the vocabulary is tens
-                    of thousands of pieces and the encoding is done on billions
-                    of words, so the difference between those two costs is the
-                    difference between a usable tokenizer and an unusable one.
-                    The arithmetic is unchanged.
-                  </p>
+                  {"At high text volumes, repeated substring work can become significant even if individual words are short. Measure the implementation on its intended input lengths and throughput requirements before deciding which optimization is needed."}
+                </p>
                 </InAModel>
                 <KeepInMind>
                   The search is one pass over the arcs of one word, whichever
@@ -463,7 +341,7 @@ export default function UnigramLanguageModelPage() {
                 "A way to replay its merges on a word",
               ],
               0,
-              "Replaying the merges does give a cut, and that is the trouble. There is no second cut to compare it with and no number attached to either, so the finished vocabulary spends four rows on a word it holds and cannot say that spelling it whole would have been better. Giving every piece a probability is what supplies the missing number.",
+              "The merge list specifies which joins to replay. It does not assign probabilities to alternative complete segmentations, so it cannot compare them by likelihood. A unigram model supplies a probability for each piece and uses those probabilities to score complete paths. This adds a comparison criterion; it does not guarantee that the best-scoring path is the shortest.",
             ),
             trueFalse(
               "A spelling in fewer pieces is always the more probable one.",
@@ -491,7 +369,7 @@ export default function UnigramLanguageModelPage() {
                 "A guarantee that the likeliest spelling is also the shortest",
               ],
               [0, 1, 2],
-              "The total is never below the maximum, and the two are equal exactly when the word has one spelling only. Dividing one spelling’s probability by the word’s total gives its share, and those shares are the thing Kudo wanted in the first place.",
+              "Piece probabilities let us score alternative segmentations. Summing their probabilities gives the word's probability under this model; taking the maximum identifies its most probable segmentation. The sum is at least as large as the maximum. Dividing a path's probability by the sum gives that path's share, which the expectation step uses when estimating piece counts.",
             ),
             trueFalse(
               "Finding the likeliest spelling of a word and finding the probability of the word are the same pass over the same arcs, with a maximum in one where the other has a sum.",
@@ -506,32 +384,17 @@ export default function UnigramLanguageModelPage() {
             <>
               <SubSection title="12. The probabilities are not known">
                 <p>
-                  Everything so far assumed the table. The frequencies it was
-                  seeded from are a reasonable start and they are not the answer,
-                  because they count every occurrence of every substring
-                  including the ones that overlap, and a word was in truth
-                  produced by one spelling rather than by all of them at once.
-                  What we would like is the probability of each piece given how
-                  the corpus was actually spelled, and how the corpus was
-                  actually spelled is precisely what nobody observed.
+                  {"Substring counts include overlapping possibilities, whereas a complete segmentation chooses a compatible set of pieces. The observed word does not tell us which segmentation to treat as its hidden explanation. Fitting estimates piece probabilities while accounting for those alternative paths; it need not claim that an actual author generated the word by drawing these pieces."}
                 </p>
                 <p>
-                  That shape of problem has a standard treatment. Guess the
-                  probabilities, work out what the hidden thing probably was
-                  given the guess, then re-estimate the probabilities as though
-                  that were what happened, and repeat. Each round raises the
-                  corpus&rsquo;s likelihood or leaves it alone, so the walk
-                  climbs and settles, though it settles at a local maximum rather
-                  than the best one that exists.
+                  {"Expectation-maximization alternates two calculations. First estimate each piece’s expected use under the current conditional path probabilities. Then update the piece probabilities from those counts. Exact EM does not reduce its marginal objective, but convergence need not find a global optimum. Finite iterations and numerical safeguards require their own checks."}
                 </p>
                 <KeepInMind>
-                  The hidden quantity is which spelling produced each word. Once
-                  that is named, the estimation is the ordinary one, and the two
-                  recurrences of Part 3 are exactly the machinery it needs.
+                  {"The unobserved quantity in this model is the segmentation. Forward and backward path totals let us compute its expected piece counts without committing to one guessed path."}
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="13. Expectation, then maximisation">
+              <SubSection title="13. Expectation, then maximization" id="13-expectation-then-maximisation">
                 <>
 <p>
                   The first step asks how often each piece was probably used. For a piece spanning two positions of a word, the chance that the word&rsquo;s spelling went through that arc is the total over routes reaching its start, times the piece&rsquo;s own probability, times the total over routes finishing from its end, divided by the total over all routes through the word.
@@ -550,10 +413,10 @@ export default function UnigramLanguageModelPage() {
                 <EstimationRounds />
                 <>
 <p>
-                  The panel above works the smallest corpus that has a choice in it. One word ab, seen once, with the three pieces a, b and ab all at a third. The word can be spelled whole at a third or in two pieces at a ninth, so the word&rsquo;s own probability is four ninths and the one-piece spelling holds three quarters of it.
+                  {"The smallest example has one observed word, ab, and candidate pieces a, b and ab initialized equally. There are two complete paths: the whole-word entry or the two single characters. The display gives the whole-word path a conditional share of three quarters."}
                 </p>
                 <p>
-                  The expected counts are therefore 0.75 for ab and 0.25 each for a and b, adding to 1.25, and the division gives 0.6, 0.2 and 0.2. A second round takes the whole spelling to 0.882.
+                  {"The expected counts are 0.75 for ab and 0.25 each for a and b. Normalizing them gives new piece probabilities 0.6, 0.2 and 0.2. After the next round, the probability assigned to the whole-word piece is about 0.882. Piece probability and conditional path share are different quantities here."}
                 </p>
 </>
                 <>
@@ -561,11 +424,12 @@ export default function UnigramLanguageModelPage() {
                   The second panel shows a more concentrated fit on the four repeated words. The probability of the whole-word piece low rises from 0.020 to 0.265 to 0.312, approaching its corpus share of five sixteenths. We need to distinguish that piece probability from the probability of a particular segmentation conditioned on the word.
                 </p>
                 <p>
-                  Meanwhile lo, which no occurrence needs, goes from 0.028 to 0.011 to 0.000134 and keeps falling. The likeliest spelling of lowest never changes, and its score falls from &minus;7.30 to &minus;9.45 to &minus;18.39 to &minus;36.75 to &minus;73.50, roughly doubling every round.
+                  The piece lo loses probability through the displayed iterations, from 0.028 to 0.011 to 0.000134. The preferred segmentation of lowest stays the same while its log score falls from minus 7.30 through minus 9.45, minus 18.39 and minus 36.75 to minus 73.50. A fixed best path does not imply a fixed probability: the probabilities assigned to its pieces can keep changing as the corpus fit shifts mass elsewhere.
                 </p>
 </>
                 <KeepInMind>
-                  This small corpus rewards whole-word entries very strongly. Alternative spellings can become extremely unlikely even while remaining representable. A new word assembled from those low-probability pieces may therefore receive a tiny score. The behaviour follows the training objective on these repeated forms; it is a reason to test held-out words too.
+
+                  This small corpus rewards whole-word entries very strongly. Alternative spellings can become extremely unlikely even while remaining representable. A new word assembled from those low-probability pieces may therefore receive a tiny score. The behavior follows the training objective on these repeated forms; it is a reason to test held-out words too.
                 </KeepInMind>
               </SubSection>
 
@@ -589,58 +453,25 @@ export default function UnigramLanguageModelPage() {
                 </p>
                 <PieceLosses />
                 <p>
-                  On the four words the answer is stark. Four pieces carry the
-                  entire corpus. Dropping newest costs 91.26 nats of likelihood,
-                  low costs 85.04, widest 45.63 and lower 34.02, and those four
-                  are the four words themselves. On the eighteen sentences the
-                  ranking is the frequency ranking of the corpus&rsquo;s own
-                  words, with the at 339.32, capitalised The at 229.02, was at
-                  187.94, expected at 88.02 and analysis at 85.65.
+                  {"With the fitted four-word table, the best-path removal proxy gives newest a loss of 91.26 nats, low 85.04, widest 45.63 and lower 34.02. These are the four complete corpus words. The larger corpus’s leading entries also include common words such as the and The. The numbers describe the fixed-table proxy, not an exactly refitted marginal likelihood loss."}
                 </p>
                 <KeepInMind>
-                  A piece is priced by what its absence would cost, measured on
-                  the likeliest spelling rather than on the full total. That
-                  substitution is an approximation and it is deliberate, since
-                  the exact quantity would need a fresh pass over every word for
-                  every candidate.
+                  {"The removal score compares best-path log scores before and after deleting a piece while retaining the other scores. It is a useful approximation for ranking candidates. Its numerical value is not generally equal to, or a bound on, the full marginal loss after removal and re-estimation."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. Most pieces are worth nothing at all">
                 <p>
-                  The measurement that surprised me is in the readouts above
-                  rather than in the bars. On the four words, 34 of the 38 pieces
-                  the pruning is allowed to touch cost exactly zero. On the
-                  eighteen sentences it is 745 of 815, which is 91% of them.
-                  These are not small numbers rounded down; they are zero to the
-                  last bit, which means the objective has no preference at all
-                  about whether those pieces stay.
+                  {"The best-path removal proxy is zero for 34 of the 38 removable candidates in the four-word example and 745 of 815 in the sentence corpus. Removing those entries leaves the chosen best-path scores unchanged at this step. Their other paths may still contribute to the full marginal likelihood."}
                 </p>
                 <p>
-                  There are two ways a piece gets there and both are ordinary. It
-                  may lie on no word&rsquo;s likeliest spelling, in which case
-                  removing it changes nothing by construction. Or it may lie on
-                  one, and the spelling that replaces it may be exactly as
-                  probable, which happens whenever two arcs cover the same
-                  symbols at the same total score. Either way the objective is
-                  indifferent about whether that piece stays.
+                  {"An entry can have zero best-path loss because no selected path uses it, or because an equally scored alternative remains after removal. That says the proxy is indifferent. It does not say that all path probabilities or later pruning rounds are unchanged."}
                 </p>
                 <p>
-                  So the ranking that decides which pieces survive separates a
-                  handful of pieces from each other and leaves the great majority
-                  tied at the bottom, and among those the order has to come from
-                  somewhere else. Here it comes from alphabetical order, which
-                  is arbitrary and at least repeatable. Ask the four words for 22
-                  tokens and the six pieces
-                  kept above the four words themselves are de, des, dest, er, es
-                  and est, which are the first six in alphabetical order among 34
-                  candidates the objective could not tell apart.
+                  {"The SDK breaks equal removal losses lexically. With 22 tokens requested on the four-word corpus, the extra retained pieces include de, des, dest, er, es and est. Those choices reflect ties in the current proxy, not evidence that these fragments are the most useful linguistic units."}
                 </p>
                 <KeepInMind>
-                  Between two sizes, the pieces a vocabulary gains are often
-                  pieces the objective had no opinion about. Anything read into
-                  which of them appeared is being read into a tie-break rather
-                  than into the corpus.
+                  {"Some retained entries are selected among tied removal costs. Read those entries as consequences of the tie rule and current vocabulary, rather than attaching meaning to the exact list without additional evidence."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -660,13 +491,7 @@ export default function UnigramLanguageModelPage() {
                   and the alphabet alone is 51.
                 </p>
                 <p>
-                  A large seed is not a cost to be minimised. Everything the
-                  method can ever choose has to be in it, so a seed that is too
-                  small removes options before any evidence has been consulted,
-                  which is the very failure the whole design was arranged to
-                  avoid. At a real scale the seed is capped, typically at a few
-                  times the target size, and that cap is the one place where a
-                  piece is discarded on frequency alone.
+                  {"The seed limits what can survive later pruning. Too small a seed can exclude useful candidates, while a large one increases storage and fitting work. This implementation protects the alphabet and ranks the remaining substrings using frequency and length before applying the seed cap."}
                 </p>
                 <KeepInMind>
                   Of the 866 candidates the eighteen sentences supply, 729 are
@@ -679,14 +504,7 @@ export default function UnigramLanguageModelPage() {
 
               <SubSection title="17. Three quarters at a time">
                 <p>
-                  The pieces are not removed one at a time, and the reason is
-                  that the losses were all measured against the same table.
-                  Remove one piece and every other piece&rsquo;s loss is in
-                  principle different, since a word that had been leaning on the
-                  removed piece now leans somewhere else. Recomputing after every
-                  removal would be correct and would cost a full pass per piece,
-                  so instead a fixed share is dropped at once and everything is
-                  re-estimated before the next round.
+                  {"This implementation removes a group of candidates in each pruning round. Their losses were measured with the other candidates still present, so simultaneous removals can interact. Recomputing after each removal would account for those interactions more often, at a higher cost, but would still be a greedy procedure."}
                 </p>
                 <ShrinkingTrace />
                 <p>
@@ -700,14 +518,7 @@ export default function UnigramLanguageModelPage() {
                   the end.
                 </p>
                 <p>
-                  Two things stop the shrinking. The obvious one is reaching the
-                  size asked for. The other is that a single symbol is never a
-                  candidate for removal, whatever it costs, because a vocabulary
-                  that cannot spell every symbol the corpus uses assigns some
-                  word a probability of zero and the whole corpus a likelihood of
-                  zero, at which point nothing can be compared with anything.
-                  Asking for fewer rows than the alphabet has is therefore
-                  refused rather than approximated.
+                  {"Single-symbol entries are protected so the training corpus remains spellable. The tokenizer rejects a requested size below its required alphabet and unknown entry. Removing needed symbol coverage would require a different fallback policy or yield unusable scores for some training words."}
                 </p>
                 <KeepInMind>
                   The share dropped per round is a trade between how often the
@@ -720,7 +531,7 @@ export default function UnigramLanguageModelPage() {
               <SubSection title="18. What the vocabulary turned out to be made of">
                 <>
 <p>
-                  Here is the result I did not predict, and it is the most informative thing on the page. Take the eighteen sentences, ask for 100 tokens, and look at what the 48 pieces above the alphabet actually are. Every single one of them is a whole word of the corpus with its end-of-word mark, and there is not a stem or a suffix or a frequent letter pair among them.
+                  {"At a requested size of 100 on the sentence corpus, all 48 entries above the required symbols are complete corpus words with end markers. This small fit uses its budget very differently from BPE, rather than necessarily discovering stems or suffixes."}
                 </p>
                 <p>
                   At 80 the same thing holds for all 28, and only at 137, once the corpus has run short of words to buy, do 15 pieces appear that are something else, among them Augus and the apostrophe followed by t.
@@ -749,58 +560,28 @@ export default function UnigramLanguageModelPage() {
                 </p>
                 <WhyThisWorks title="Why likelihood buys whole words first">
                   <p>
-                    A word that occurs three times contributes its likelihood
-                    three times, and spelling it as one piece rather than eight
-                    replaces eight small probabilities with one larger one. The
-                    saving is largest exactly where the corpus repeats itself
-                    most, which for any corpus is at whole frequent words. A
-                    fragment, by contrast, only pays where it is shared between
-                    words, and on a corpus of 72 distinct words there is not much
-                    sharing to be had.
-                  </p>
+                  {"A complete entry for a frequent word can contribute strongly to this model’s training likelihood, especially when the vocabulary budget can hold much of a tiny corpus. Fragments can contribute through shared use across words. Which candidates rank highest depends on their probabilities, the alternatives and the corpus; complete words are not guaranteed to win on every dataset."}
+                </p>
                 </WhyThisWorks>
                 <InAModel>
                   <p>
-                    This corpus is 133 word occurrences, so 100 rows really can
-                    hold most of it and the method is behaving reasonably by
-                    doing so. On billions of words no vocabulary holds the words,
-                    the repetition that pays is in endings and stems and common
-                    prefixes, and the pieces come out looking much more like
-                    pieces. The direction of the effect survives the change of
-                    scale even though this extreme form of it does not, which is
-                    what Bostrom and Durrett measured when they found these
-                    vocabularies sitting closer to morphological boundaries.
-                  </p>
+                  {"The corpus has only 72 distinct words, so a 100-row vocabulary can devote much of its learned budget to whole forms. On larger and more varied text, recurring subword units can become useful alternatives. Results about alignment with morphological boundaries require their own empirical comparison; they do not follow merely from increasing corpus size."}
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  What a vocabulary is made of is decided by what is being
-                  maximised, not by the size it was given. Two methods at 100
-                  rows on one corpus produced 48 whole words and 8.
+                  {"The training criterion affects which entries fit into a fixed budget. On these same inputs at 100 rows, the methods select 48 whole-word entries and eight respectively. Vocabulary size also matters, as the other rows show."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. Against a vocabulary of the same size grown by merging">
-                <p>
-                  The honest comparison is at matched sizes, since the two
-                  methods reach different vocabularies at the same budget and
-                  neither can be given the other&rsquo;s. Fit both on the
-                  eighteen sentences at fourteen sizes and count two things at
-                  each, what the corpus costs in pieces and what the one held-out
-                  sentence costs.
-                </p>
+                <p>Compare the two methods at matched vocabulary sizes. We fit both to the eighteen sentences at fourteen sizes and measure the number of pieces used for the training corpus and the held-out sentence. Their vocabulary-construction procedures can reach different final sizes from the same requested budget, so matching the actual sizes matters.</p>
                 <AgainstMerging />
                 <p>
-                  On the corpus the shrunk vocabulary wins everywhere and wins by
-                  a lot. At 80 tokens it reads the corpus in 324 pieces against
-                  merging&rsquo;s 414; at 137 it reads it in 133 against 263,
-                  which is a little over half. And 133 is the floor, since
-                  the corpus holds 133 word occurrences and one piece per word is
-                  the fewest pieces any vocabulary can achieve. It reaches that
-                  floor at 130 tokens and merging never comes near it.
+                  {"On training text, the shrinking method is shorter at the nontrivial listed budgets. At 80 entries it uses 324 pieces versus 414; at 137 it reaches one piece per word occurrence, or 133 versus 263. That is the minimum under this within-word representation, which does not permit one piece to cover several words."}
                 </p>
                 <>
 <p>
-                  On the held-out sentence it loses everywhere, and this is the place on the page where the method is worse than the thing it is usually offered against. At 80 tokens the shrunk vocabulary reads the sentence in 40 pieces where merging reads it in 28. At 137 the gap narrows to 28 against 25 and it never closes.
+                  {"On the held-out sentence, the methods tie at the alphabet-only setting, then the shrinking method uses more pieces at every larger listed size. The gap is 40 versus 28 pieces at 80 entries and 28 versus 25 at 137. These are tokenizer-length results for this probe."}
                 </p>
                 <p>
                   The same property is behind both columns. A vocabulary of whole words is unbeatable on the words it holds and has almost nothing to offer a word it does not, so the sentence&rsquo;s expect, which the corpus never wrote without its ending, comes back at 137 as six single letters.
@@ -825,9 +606,7 @@ export default function UnigramLanguageModelPage() {
                   caption="At 52 both vocabularies are the alphabet and agree exactly. Merging runs out of pairs worth joining at 137 and answers 137 above it; the shrinking has candidates to spare and keeps going."
                 />
                 <KeepInMind>
-                  The training corpus and a held-out sentence disagree about
-                  which method is better, at every size, on this corpus. Reading
-                  either column alone would settle the question the wrong way.
+                  {"The corpus-length result and held-out length result favor different methods after the shared starting point. Neither column alone measures every aspect of tokenizer quality, especially because the probe also contains an unavailable symbol."}
                 </KeepInMind>
               </SubSection>
 
@@ -865,13 +644,7 @@ export default function UnigramLanguageModelPage() {
 
               <SubSection title="21. The round trip">
                 <p>
-                  Gluing pieces back is mechanical. Concatenate them, then turn
-                  every end-of-word mark into a space. The marks are inside the
-                  pieces, so no separate record of where the spaces were is
-                  needed, and the round trip is exact on any text spelled
-                  entirely in symbols the corpus taught. The control sentence,
-                  which is written in exactly those symbols, reads as 9 pieces at
-                  a vocabulary of 137 and comes back exactly.
+                  Decoding concatenates the pieces and interprets their end-of-word marks using this scheme&apos;s spacing rule. The control sentence has the required symbols, uses 9 pieces with the 137-entry vocabulary, and reconstructs exactly in this test. That result establishes the round trip for the retained representation; arbitrary spacing changes or unavailable boundary symbols need their own coverage checks.
                 </p>
                 <p>
                   The sentence about Dr. Alvarez does not come back, at any size, and the
@@ -885,10 +658,7 @@ export default function UnigramLanguageModelPage() {
                 </p>
                 <Equation>{"Alvarez didn't   →   Alvare[UNK]didn't"}</Equation>
                 <KeepInMind>
-                  This is a fact about spelling words with a mark on the last
-                  character, and it is shared with every method in this section
-                  that spells them that way. Nothing about probabilities makes it
-                  better or worse.
+                  {"This failure follows from the corpus-derived final-symbol alphabet and the SDK’s unknown-token policy. An augmented alphabet or byte fallback could change coverage. Probabilistic segmentation alone does not supply those missing entries."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -906,12 +676,12 @@ export default function UnigramLanguageModelPage() {
                 "0.882, since the two-piece spelling is dropped at once",
               ],
               0,
-              "The word can be spelled whole at a third or in two pieces at a ninth, so its own probability is four ninths and the one-piece spelling holds three quarters of it. That 0.75 is an expected count and not yet a probability, because a and b have expected counts too, and the division by 1.25 gives 0.6, 0.2 and 0.2. The 0.882 is where a second round takes ab. On the four words the same two steps make the model certain, with low spelled whole stopping at exactly five sixteenths.",
+              "The whole-word path receives 75 percent of the posterior segmentation probability. That contributes an expected count of 0.75 for ab. The separate path also contributes expected counts for a and b, so the re-estimation step must normalize all expected counts together. The updated probabilities are 0.6 for ab and 0.2 for each single character. A second round raises ab to about 0.882. A posterior path share and a re-estimated piece probability are different quantities.",
             ),
             trueFalse(
               "On the eighteen sentences, 745 of the 815 pieces the pruning may touch price at exactly zero.",
               true,
-              "A piece is priced by the fall in score of the words whose likeliest spelling uses it, respelled without it, so a piece on no word’s likeliest spelling costs nothing by construction, and so does one whose replacement is exactly as probable. That is 91 per cent of them here, zero to the last bit and not small numbers rounded down. On the four words only the four words themselves cost anything, newest at 91.26 nats and low at 85.04, and among the tied pieces the order comes from alphabetical order, which is arbitrary and at least repeatable.",
+              "The pruning score measures the drop in a training word's best segmentation score when a piece is removed. A piece absent from every best path therefore has zero score under this criterion. A replacement path with exactly the same score also gives zero loss. Here 745 of 815 removable pieces have exactly zero loss, rather than small values rounded away. Alphabetical ordering resolves those ties. In the four-word case, only the whole-word pieces have positive removal costs, including 91.26 nats for newest and 85.04 for low.",
             ),
             choice(
               "Why is a fixed share of the table dropped each round rather than one piece at a time?",
@@ -933,7 +703,7 @@ export default function UnigramLanguageModelPage() {
                 "Fifteen are whole words and the rest are letter pairs",
               ],
               0,
-              "A word occurring three times contributes its likelihood three times, so spelling it as one piece replaces several small probabilities with one larger one, and on a corpus of 72 distinct words there is little sharing for a fragment to pay from. The eight whole words is the merge-grown vocabulary at the same size, and the fifteen other pieces appear only at 137, once the corpus has run short of words to buy.",
+              "All 48 learned pieces are complete words from this corpus. Repeated words receive repeated weight in the fitting objective, and the small collection gives whole-word entries a substantial benefit. The BPE comparison has eight whole words among its 48 learned pieces. At 137 unigram rows, fifteen learned pieces are fragments instead. These counts describe the fitted inventories, not a requirement that unigram vocabularies always contain mostly whole words.",
             ),
             trueFalse(
               "The shrunk vocabulary reads both the corpus and the held-out sentence in fewer pieces than merging does.",
@@ -948,34 +718,21 @@ export default function UnigramLanguageModelPage() {
             <>
               <SubSection title="22. Pieces drawn independently, which language is not">
                 <p>
-                  The name says the assumption out loud, which is unusual and is
-                  worth crediting. A unigram model over pieces is a model in
-                  which each piece is drawn without reference to the pieces
-                  around it, so the probability of a spelling is a product with
-                  no conditioning in it anywhere. That is false about language in
-                  the most obvious way available. The probability that the next
-                  piece is ing depends enormously on whether the piece before it
-                  was play or the.
+                  {"A unigram piece model multiplies piece probabilities without conditioning each one on its neighbors. Real text has such dependencies: an ing piece can be more plausible after play than after the. The independence assumption makes this a simplified model for scoring and choosing segmentations."}
                 </p>
                 <>
 <p>
-                  Two consequences follow and they are different in kind. The first is that the model&rsquo;s probability for a word is not a serious estimate of anything, and nothing on this page or in the method treats it as one; it is a score used to compare spellings of the same word and to compare vocabularies, both of which are relative judgements the independence assumption affects far less.
+                  {"The resulting values are probabilities within the model’s assumed piece process. They need not be calibrated probabilities for natural-language words. Relative segmentation and vocabulary comparisons still depend on that assumption, so their downstream usefulness requires evaluation."}
                 </p>
                 <p>
-                  The second is that the assumption is what makes the arithmetic a dynamic programme at all. A model in which a piece depends on the one before it would need a state per piece at every position and the lattice would grow by that factor.
+                  {"Independence lets a position summarize all earlier paths without retaining the preceding piece identity. A model conditioned on the previous piece could still use dynamic programming, but would require additional states and transitions."}
                 </p>
 </>
                 <p>
-                  So the assumption is not a shortcut that could be dropped for
-                  more accuracy at more cost. It is what buys the search, and any
-                  richer model is a different method rather than this one tuned
-                  up.
+                  {"A richer dependency model changes both the scoring assumption and computational cost. It need not require enumerating every path. The unigram design chooses a particularly small state representation."}
                 </p>
                 <KeepInMind>
-                  The independence is load-bearing. It is the reason the likeliest
-                  spelling can be found without enumerating spellings, and it is
-                  the reason the number attached to a spelling should be read as
-                  a comparison and not as a belief about language.
+                  {"Independent piece scores permit a simple position-based dynamic program. Read its probability comparisons under that modeling assumption, and evaluate the segmentations separately for the intended application."}
                 </KeepInMind>
               </SubSection>
 
@@ -992,18 +749,10 @@ export default function UnigramLanguageModelPage() {
                 </p>
 </>
                 <p>
-                  The measured shadow of this is section 15. When 91% of the
-                  removable pieces on a corpus price at exactly zero, a great
-                  many of them are zero <em>because something else is there</em>,
-                  and the ranking cannot distinguish those from the ones that are
-                  zero outright. Making the rounds smaller reduces the exposure
-                  and makes the fit proportionately slower, and there is no
-                  setting at which the effect is absent.
+                  {"The many zero proxy losses show that the ranking leaves many candidates tied; they do not reveal exactly how many are redundant substitutes. Smaller removal batches allow more frequent re-estimation, while retaining greedy and proxy approximations. Removing one at a time avoids the particular interaction of simultaneous deletion, though it still need not find the global best vocabulary."}
                 </p>
                 <KeepInMind>
-                  Both methods are greedy and neither finds the best vocabulary
-                  of a given size. What shrinking buys is that its greed operates
-                  with more information, not that it has stopped being greedy.
+                  {"Pruning remains greedy and approximate. It compares existing alternative segmentations before committing to removals, but does not guarantee a globally optimal vocabulary. A given run may still happen to find an optimum; the procedure does not certify that fact."}
                 </KeepInMind>
               </SubSection>
 
@@ -1021,44 +770,22 @@ export default function UnigramLanguageModelPage() {
                   A sharper version of the same gap is available inside one vocabulary, and the lattice of Part 3 is what makes it easy to ask about. Leave the arcs exactly where they are and give every one of them a cost of one instead of a log probability, and the same recurrence answers a different question, which is the fewest pieces this vocabulary can spell the word in.
                 </p>
                 <p>
-                  Sequence length is what everything downstream pays in, so that is a reasonable thing to want, and there is no reason the two answers have to agree, since two common pieces can outscore one rare one.
+                  {"Minimum token count is another reasonable objective because sequence length affects later computation. It can disagree with maximum path probability: common separate pieces can outscore a rare combined entry. Neither criterion alone measures downstream learning quality."}
                 </p>
 </>
                 <p>
-                  I expected them to disagree often and measured it rather than
-                  asserting it. Over 88 words at a vocabulary of 200, comprising
-                  every word of the corpus and sixteen held-out ones, exactly one
-                  comes out longer than it needed to be.
+                  {"The finite check compares best-probability and minimum-piece segmentations for 88 words at vocabulary size 200: all corpus words plus sixteen held-out words. Exactly one word receives more pieces under the probability objective."}
                 </p>
                 <WorkedExample title="The one word where they part">
                   <p>
-                    That word is didn&rsquo;t. The vocabulary holds the two-symbol
-                    piece &rsquo;t with its end-of-word mark, so five pieces are
-                    available. The model takes six, splitting the apostrophe from
-                    the t, because the apostrophe and the marked t are common
-                    enough separately to beat the joined piece. Scored whole, the
-                    six-piece spelling comes to &minus;2122.86 and the five-piece
-                    one to &minus;2246.46. Fewer pieces, less probable, and the
-                    model is choosing correctly by its own objective while giving
-                    the longer answer.
-                  </p>
+                  {"The word is didn't, using the straight apostrophe in the actual probe. Its vocabulary includes the joined final piece 't with the end marker, allowing a five-piece path. The model instead chooses six pieces because the separate apostrophe and marked t have a higher probability product. The complete log scores are −2122.86 for six pieces and −2246.46 for five. The longer path is better under this fitted probability score."}
+                </p>
                 </WorkedExample>
                 <p>
-                  One word in 88 is not a crisis, and the small number is the
-                  honest finding here rather than a disappointing one. What it
-                  shows is that on this corpus likelihood and length agree almost
-                  always without being the same thing. Making the count the
-                  objective on both sides, so that the vocabulary is chosen to
-                  keep the corpus short and the cut is the shortest one that
-                  vocabulary allows, is a separate method with its own answers,
-                  and the arithmetic it needs is the arithmetic already on this
-                  page with the arc costs changed.
+                  {"Best-probability decoding and minimum-piece decoding differ on one of these 88 words. They often agree on this sample while remaining different objectives. Optimizing token count in vocabulary selection would be another design choice, with its own evaluation requirements."}
                 </p>
                 <p>
-                  The other half of the gap has no measurement here and I will
-                  not pretend otherwise. Whether these pieces make a better input
-                  for a model to learn from is a question about the model, not
-                  about the tokenizer, and nothing on this page trains one.
+                  These measurements describe the tokenizer&apos;s vocabulary and segmentation costs. They do not measure how well a downstream model learns from those pieces, because no such model is trained here. Comparing that outcome requires keeping the model experiment separate from the evidence about the tokenizer itself.
                 </p>
                 <KeepInMind>
                   The likeliest cut is the answer to the question the method
@@ -1091,7 +818,7 @@ export default function UnigramLanguageModelPage() {
                     {
                       expression: "the exact cost of removing a piece",
                       reason:
-                        "not what is measured. The definition is the fall in the corpus’s total probability, summed over every spelling of every word; what is computed is the fall in the likeliest spelling’s probability, over the words that were using the piece. The substitution is what keeps a round affordable, and it means the reported price is a lower bound on the true one rather than the true one.",
+                        "The SDK computes a fixed-table best-path log-score loss. A full marginal calculation would sum every path and specify whether probabilities are renormalized or re-estimated after removal. The proxy is not generally a lower bound on that different quantity.",
                     },
                     {
                       expression: "the best vocabulary of a given size",
@@ -1101,7 +828,7 @@ export default function UnigramLanguageModelPage() {
                     {
                       expression: "the best estimate of the probabilities",
                       reason:
-                        "also not what is found. Alternating expectation and re-estimation climbs to a local maximum of the corpus likelihood, and which one it climbs to is decided by where it started, which here is the seed frequencies. Nothing checks whether a better maximum exists elsewhere and nothing could, short of starting again from somewhere else.",
+                        "Exact EM improves or preserves its objective but need not reach a global optimum. A finite run can stop before convergence, and this implementation also uses a numerical floor for zero expected counts. Initialization and iteration count therefore belong in the experiment description.",
                     },
                     {
                       expression: "how many rounds of re-estimation to run",
@@ -1111,7 +838,7 @@ export default function UnigramLanguageModelPage() {
                     {
                       expression: "a symbol the corpus never used",
                       reason:
-                        "unspellable, and the model must still answer something. Scoring it a fixed amount below the rarest piece in the table keeps the arithmetic finite and makes any spelling that avoids it win, which is the right ordering; what it cannot do is say which symbol was there. A byte alphabet removes the case entirely and pays in pieces, and there is no third option that keeps the symbol without enlarging the alphabet.",
+                        "The SDK gives an absent single symbol a penalized finite score, then encoding maps an unavailable entry to the unknown token. That retains a finite path score but not the missing character. An augmented character alphabet, byte fallback or explicit refusal would be alternative coverage policies.",
                     },
                     {
                       expression:
@@ -1122,23 +849,17 @@ export default function UnigramLanguageModelPage() {
                     {
                       expression: "a word’s morphological joints",
                       reason:
-                        "outside the method entirely. Nothing in a probability over pieces knows that a prefix is a prefix, so a piece spanning a prefix and a root is exactly as admissible as any other. What this method has instead is a tendency, measured rather than designed, which is that maximising likelihood on a corpus with repetition in it prefers pieces that recur, and pieces that recur in a real language are often the ones a linguist would name.",
+                        "outside the method entirely. Nothing in a probability over pieces knows that a prefix is a prefix, so a piece spanning a prefix and a root is exactly as admissible as any other. What this method has instead is a tendency, measured rather than designed, which is that maximizing likelihood on a corpus with repetition in it prefers pieces that recur, and pieces that recur in a real language are often the ones a linguist would name.",
                     },
                     {
                       expression: "a corpus with no repetition in it",
                       reason:
-                        "defined, and it answers the question asked rather than the one intended. Every substring occurs once, so every candidate has the same frequency and the seed is ordered by length alone; there is no evidence about what a piece is worth because nothing is ever spelled twice. The four-word corpus is the opposite extreme and shows the same shape from the other side, where four pieces carry the entire corpus and 34 of 38 others are worth exactly nothing.",
+                        "If every candidate substring truly occurs once, their frequency ranking ties and the seed’s length preference becomes important. Distinct whole words alone do not ensure that condition: they can share substrings. The four-word corpus instead contains many repeated forms and has 34 of 38 candidates tied at zero best-path removal loss.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Four of these are decisions rather than limits, namely how the
-                  ties among worthless pieces are ordered, how large a fraction
-                  each round drops, how many rounds of re-estimation to run, and
-                  what an unspellable symbol scores. Each has defensible answers
-                  on both sides and each changes the finished vocabulary, so each
-                  belongs in whatever describes a tokenizer rather than being
-                  left to whoever writes it.
+                  {"Document how removal ties are ordered, how much each pruning round removes, how many fitting iterations run and how missing symbols are handled. These settings can alter the returned vocabulary even when the high-level probability model is unchanged."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1150,7 +871,7 @@ export default function UnigramLanguageModelPage() {
             trueFalse(
               "The independence assumption is a shortcut that could be dropped for more accuracy at more cost.",
               false,
-              "It is what buys the search. A model in which a piece depended on the one before it would need a state per piece at every position and the lattice would grow by that factor, so a richer model is a different method rather than this one tuned up. The assumption is also why a spelling’s number should be read as a comparison rather than as a belief about language.",
+              "Independence is what lets a path score use the same probability for a piece regardless of the preceding piece. If probabilities depend on the previous piece, the search must also track that piece as state at each position. Such a model is possible, but it changes both the probability model and the recurrence. More dependence would also need evidence that the resulting predictions improve; extra computation alone does not establish that.",
             ),
             choice(
               "What does shrinking fix about merging’s greed, and what does it leave?",
@@ -1161,13 +882,13 @@ export default function UnigramLanguageModelPage() {
                 "It brings a dropped piece back when the corpus turns out to need it",
               ],
               0,
-              "Both methods are greedy and neither finds the best vocabulary of a given size. The case that shows the gap is a pair of pieces standing in for each other, where each is nearly free while the other is present, and a round dropping a quarter of the table may take both. When 91 per cent of the removable pieces price at zero, many are zero only because something else is there.",
+              "Neither greedy procedure guarantees the global best vocabulary. In simultaneous pruning, two alternatives can each appear cheap to remove while the other remains, yet be costly to remove together. The reported 91 percent zero best-path losses show many ties under the proxy; they do not establish how many are such substitutable pairs.",
             ),
             choice(
               "Give every arc a cost of one instead of a log probability and the same recurrence answers the fewest pieces a vocabulary can spell a word in. Over 88 words at a vocabulary of 200, how many come out longer than they needed to be?",
               ["Exactly one", "None", "Eight", "Sixteen"],
               0,
-              "That word is didn’t. The vocabulary holds the two-symbol marked ending, so five pieces are available, and the model takes six because the apostrophe and the marked t are common enough separately to beat the joined piece. One word in 88 is the honest finding here, and it says that likelihood and length agree almost always on this corpus without being the same thing.",
+              "Only didn't has a longer probability-optimal segmentation in this comparison. The vocabulary allows a five-piece path, but the six-piece path has the larger probability product. The apostrophe and marked t are more probable separately than as the joined piece. On these 88 probes, the two objectives usually agree while remaining mathematically different.",
             ),
             trueFalse(
               "The six-piece spelling of didn’t scores higher than the five-piece one the same vocabulary allows, so the model is choosing correctly by its own objective while giving the longer answer.",
@@ -1183,7 +904,7 @@ export default function UnigramLanguageModelPage() {
                 "What a symbol the corpus never used scores",
               ],
               [0, 1, 2, 3],
-              "Each of the four has defensible answers on both sides and each changes the finished vocabulary. Ordering the ties alphabetically is repeatable and arbitrary, a smaller fraction refreshes the prices more often and slows the fit, and the walk of re-estimation converges without ever terminating. What is not a decision is whether a single symbol may be removed. A vocabulary that cannot spell every symbol the corpus uses gives some word a probability of zero and the whole corpus a likelihood of zero, so asking for fewer rows than the alphabet has is refused and not approximated.",
+              "Tie order, pruning fraction and the re-estimation stopping rule are implementation choices. Each can affect the fitted vocabulary or fitting work. Alphabetical tie order is repeatable, while pruning fewer entries refreshes removal scores more often. The trainer also protects the single-symbol entries needed to represent its training alphabet, so it rejects a requested size below that protected inventory. That restriction belongs to this trainer's coverage contract.",
             ),
         ],
         },
@@ -1239,8 +960,8 @@ question: "Does the most probable segmentation have the same pieces as BPE?",
  hints: [
   "best_segmentation(word) exposes pieces, n_tokens and log_probability.",
   "The </w> suffix is part of the learned spelling of a word-ending piece.",
-  "BPE.encode(word).texts shows the separate comparison. The two learning objectives need not favour the same inventory or cut."
-], check: numberCheck("What log probability does the fitted model give the likeliest spelling of lowest, to two places?", -25.7, 0.005, "The fitted unigram model scores lowest at about -25.70. Its very low-probability remaining components can spell the word, while the familiar lower has a complete learned row.") },
+  "BPE.encode(word).texts shows the separate comparison. The two learning objectives need not favor the same inventory or cut."
+], check: numberCheck("What log probability does the fitted model assign to the most probable segmentation of lowest, to two places?", -25.7, 0.005, "The fitted unigram model scores lowest at about -25.70. Its very low-probability remaining components can spell the word, while the familiar lower has a complete learned row.") },
             ),
             exercise(
               "Take two vocabularies of the same size apart",
@@ -1329,7 +1050,7 @@ question: "How do equally large vocabularies divide their rows between whole wor
   "Slice list(model.vocabulary) after its first 52 entries for this fixture.",
   "Build a set of corpus words with </w> attached before testing learned-row membership.",
   "Measure corpus length and held-out length independently. A row devoted to one familiar whole word may offer little to another word."
-], check: numberCheck("How many pieces does the corpus cost under the shrunk vocabulary at 90 rows?", 274, 0, "At ninety rows the unigram vocabulary gives 274 corpus tokens. It spends its learned rows on complete familiar words here, which shortens training text without giving the same benefit on the held-out sentence.") },
+], check: numberCheck("How many tokens represent the training corpus under the unigram vocabulary at 90 rows?", 274, 0, "At ninety rows the unigram vocabulary gives 274 corpus tokens. It spends its learned rows on complete familiar words here, which shortens training text without giving the same benefit on the held-out sentence.") },
             ),
             exercise(
               "Find the word whose likeliest cut is not its shortest",
@@ -1410,12 +1131,12 @@ shorter: d i d n 't</w> (5) at -2246.46
 joined -726.53, apart -602.93
 corpus: 133 pieces`,
               {
-question: "Can a more probable spelling use more pieces?",
+question: "Can the more probable segmentation contain more pieces?",
  hints: [
   "best_segmentation returns the chosen cut and its complete log_probability.",
   "log_probability_of expects the exact vocabulary spelling, including </w> where present.",
   "Compare the scores of the two alternatives. A less negative log score means higher probability, regardless of how many pieces it uses."
-], check: numberCheck("What log probability does the joined piece, the apostrophe and the marked t together, hold on its own, to two places?", -726.53, 0.005, "The joined piece scores about -726.53. Keeping its characters separate is more probable under this fitted inventory, so the best probability path uses an extra piece.") },
+], check: numberCheck("What log probability does the vocabulary assign to the single joined piece 't</w>, to two places?", -726.53, 0.005, "The joined piece scores about -726.53. Keeping its characters separate is more probable under this fitted inventory, so the best probability path uses an extra piece.") },
             ),
           ],
         },

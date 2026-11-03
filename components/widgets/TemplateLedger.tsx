@@ -73,7 +73,7 @@ export function TemplateLedger() {
       good: anatomy.fitted_parts_are_separate,
     },
     {
-      question: "the standardizer's centre for height before and after a predict",
+      question: "the standardizer's center for height before and after a predict",
       answer: `${anatomy.mean_before_predict.toFixed(4)}, ${anatomy.mean_after_predict.toFixed(4)}`,
       good: anatomy.mean_before_predict === anatomy.mean_after_predict,
     },

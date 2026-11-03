@@ -20,9 +20,9 @@ import { QuantiserPlayground } from "@/components/widgets/QuantiserPlayground";
 import { RungLadder } from "@/components/widgets/RungLadder";
 
 export const metadata: Metadata = {
-  title: "Finite Scalar Quantisation · oop_ml",
+  title: "Finite Scalar Quantization · Perceptron Lab",
   description:
-    "Instead of choosing a whole vector from a learned codebook, we can give each coordinate a few allowed levels. Combining those choices produces a discrete code with a different way of controlling the available representations.",
+    "Finite scalar quantization restricts each coordinate to a small set of levels. Combining the coordinate choices produces a discrete code without selecting a whole vector from a learned codebook.",
 };
 
 const link =
@@ -37,32 +37,25 @@ export default function FiniteScalarQuantisationPage() {
       openingTitle="Round Each Coordinate Instead of Learning a Table"
       playgroundTitle="Round a vector onto a finite grid"
       playgroundIntro="Follow a vector through bounding, rounding, and code construction. Compare the selected coordinate levels with the original values."
-      title="Finite Scalar Quantisation"
-      tagline={"Instead of choosing a whole vector from a learned codebook, we can give each coordinate a few allowed levels. Combining those choices produces a discrete code with a different way of controlling the available representations."}
+      title="Finite Scalar Quantization"
+      tagline={"Finite scalar quantization restricts each coordinate to a small set of levels. Combining the coordinate choices produces a discrete code without selecting a whole vector from a learned codebook."}
       prerequisites={
         <>
-          Two pages sit under this one. The page on{" "}
+          {"The "}{" "}
           <Link href="/concepts/a-vector-for-a-word" className={link}>
             giving a word a vector
           </Link>{" "}
-          is where the four numbers this page rounds come from, since a word has
-          to become a handful of coordinates before anybody can round them, and
-          the seventy-two word vectors used throughout here are read off the same
-          eighteen English sentences that page and the others in this section
-          work on. The page on{" "}
+          {" lesson constructs the four-coordinate word representations used here. The "}{" "}
           <Link href="/concepts/k-means" className={link}>
-            grouping rows around centres
+
+            grouping rows around centers
           </Link>{" "}
-          is the fitted table this one is measured against, since a set of
-          representative vectors found by grouping is exactly the thing finite
-          scalar quantisation does without. If you want the wider question of
-          what it means for a model to read whole numbers rather than text, the
-          page on{" "}
+
+          {" lesson explains how to fit representatives for comparison. For the relationship between pieces and IDs, read "}{" "}
           <Link href="/concepts/what-a-token-is" className={link}>
             what a token is
           </Link>{" "}
-          asks it.
-        </>
+          {"."}</>
       }
 
       playground={<QuantiserPlayground />}
@@ -84,12 +77,8 @@ export default function FiniteScalarQuantisationPage() {
                   and &minus;0.3151.
                 </p>
                 <>
-<p>
-                  Four real numbers are exactly what a model that reads continuous vectors wants and exactly what a model that reads whole numbers cannot use. If we want the second kind of model, which is the kind that predicts the next unit of a sequence the way a language model predicts the next word, then cost has to become one number out of a fixed and finite set.
-                </p>
-                <p>
-                  That is the question this page answers, and it is the same question a tokenizer answers for a piece of text, asked of something that was never text in the first place.
-                </p>
+<p>Some sequence-model interfaces require an ID from a finite set rather than a continuous input vector. To use our four-coordinate representation with such an interface, we need a rule for assigning it a discrete code. This is an interface choice, not a claim that models in general cannot use real-valued inputs.</p>
+                <p>Quantization is the replacement of a continuous value or vector by one of a limited set of representatives. The code identifies the representative. The difference between the original and reconstructed vector lets us measure the information lost through that choice.</p>
 </>
                 <KeepInMind>
                   Everything on this page rounds vectors rather than strings. The
@@ -102,36 +91,10 @@ export default function FiniteScalarQuantisationPage() {
 
               <SubSection title="2. What a table of representative vectors costs">
                 <p>
-                  The established answer, and a very good one, is to keep a table
-                  of representative vectors and to answer with whichever of them
-                  is nearest. Six hundred four-coordinate vectors drawn about the
-                  origin, rounded to a table of sixty-four representatives found
-                  by grouping those same vectors around centres, sit an average
-                  squared distance of 0.1368 from the representative they were
-                  given. That is a good answer and it is what this page is
-                  measured against throughout.
+                  {"A learned codebook assigns each input to its nearest representative. As a comparison, we fit 64 representatives to 600 four-coordinate vectors and measure the mean squared assignment distance. The reported error is 0.1368. We will compare this with a grid that does not fit representatives."}
                 </p>
-                <p>
-                  It costs three things. It costs a fit, which is an iterative
-                  search that has to be run before a single vector can be
-                  rounded. It costs a collection to fit on, which has to look
-                  like the vectors that will arrive later. And when the table is
-                  learned by gradient inside a model rather than by grouping, it
-                  can end up with rows that nothing is ever assigned to, because
-                  a row only moves when something is assigned to it, so a row
-                  that begins far from the data stays there and takes no part.
-                </p>
-                <p>
-                  The third of those is worth stating carefully, because it is
-                  the complaint the method on this page is usually introduced
-                  against and it is the one that is easiest to overstate. Fitted
-                  by grouping, on the six hundred vectors here, a table of any
-                  size from sixteen up to a hundred and sixty uses every single
-                  one of its rows. The unused rows are a fact about a particular
-                  training loop rather than about tables as such, and Part 5
-                  measures which of the two arrangements actually leaves codes
-                  empty.
-                </p>
+                <p>A learned codebook requires representative vectors to be fitted on suitable data before we can use them for rounding. That adds a training step and ties the representatives to the collection we fitted them on. Some entries may also receive few or no assignments. With assignment-based updates, those unused entries receive little direct learning signal, so implementations may need an explicit policy for them.</p>
+                <p>Unused codebook entries are a possible training problem, rather than an inevitable property of codebooks. Grouping the six hundred vectors here into tables from sixteen to a hundred and sixty entries uses every row in each table. Part 5 compares the code usage of the two arrangements, so we can distinguish a training-loop problem from the choice of a learned table itself.</p>
                 <KeepInMind>
                   The fit and the collection to fit on are unconditional costs. A
                   table with rows nothing lands on is a cost of one way of
@@ -142,27 +105,12 @@ export default function FiniteScalarQuantisationPage() {
 
               <SubSection title="3. What we would like instead">
                 <p>
-                  Suppose the set of codes were decided in advance, by a rule
-                  written down before any data arrived, and suppose the rule were
-                  cheap enough that finding a vector&rsquo;s code took no search
-                  at all. Then there would be no fit, no collection to fit on and
-                  nothing about the codes for a training loop to get wrong. The
-                  price would be that the codes sit where the rule put them
-                  rather than where the vectors are, and the rest of this page is
-                  about how large that price turns out to be.
+                  {"A fixed grid places its allowed representative values before seeing the observations. Encoding can then work coordinate by coordinate, without searching a learned table of complete vectors. The representatives follow the rule rather than adapting to the input distribution. In 2023, Mentzer and colleagues proposed finite scalar quantization as a simpler discrete bottleneck for learned image representations, reducing the codebook-management work of vector quantization."}
                 </p>
-                <p>
-                  Finite scalar quantisation is one such rule, and it is about as
-                  simple as a rule can be. Push each coordinate into a bounded
-                  interval, round it to one of a few evenly spaced levels, and
-                  let the code be the combination of what each coordinate chose.
-                  None of those three steps consults a collection of vectors.
-                </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://arxiv.org/abs/2309.15505">{"Mentzer et al.: Finite Scalar Quantization: VQ-VAE Made Simple (2023)"}</Link></p>
+                <p>Finite scalar quantization makes that choice separately for each coordinate. It maps the coordinate into a bounded range, rounds to an allowed level and combines the resulting level indices into one code. The rule itself uses no fitted codebook, although a surrounding model can still learn representations that work well with it.</p>
                 <KeepInMind>
-                  The whole method is a fixed rule applied to each coordinate
-                  separately. Every consequence on this page follows from the
-                  rule being fixed in advance and from it being applied to one
-                  coordinate at a time.
+                  {"This lesson uses a symmetric grid in the tanh-bounded interval to make the rounding visible. The paper’s implementation uses a shifted bounding function and a different normalization for even level counts, so these numerical examples are not a reproduction of its code. In a trained model, a straight-through gradient estimate lets the encoder learn despite rounding having zero derivative almost everywhere. The SDK demonstration here rounds supplied vectors; it does not train that encoder."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -178,20 +126,10 @@ export default function FiniteScalarQuantisationPage() {
                 </p>
                 <Equation>{"bounded  =  tanh(z)     in  (−1, 1)"}</Equation>
                 <p>
-                  The word strictly matters in the mathematics and not in the
-                  arithmetic a computer actually does. In exact terms the
-                  hyperbolic tangent never reaches 1, so the ends of the interval
-                  are approached and never attained. In the arithmetic these
-                  measurements are made in, the value reaches exactly 1 at an
-                  input of 18.99034, and every input larger than that gives the
-                  same answer. The first coordinate of the word cost, 0.5904,
-                  comes back as 0.5302; an input of 3 comes back as 0.99505.
+                  {"In finite precision, tanh can round to an endpoint. In the calculation used here, it returns exactly 1 near an input of 18.99034. That threshold depends on precision and implementation. For comparison, cost’s first coordinate maps to about 0.5302, while an input of 3 maps to about 0.99505."}
                 </p>
                 <KeepInMind>
-                  The squashing is the same function for every coordinate and
-                  every collection. It looks at nothing, which is what makes the
-                  method free of a fit and is also the first of the three limits
-                  in Part 6.
+                  {"The bounding function uses the same formula for every coordinate. It needs no fitted parameters, but the scale of its input determines how much variation survives near the interval’s ends."}
                 </KeepInMind>
               </SubSection>
 
@@ -218,10 +156,7 @@ export default function FiniteScalarQuantisationPage() {
                   reason a whole rounding rule has to be corrected.
                 </p>
                 <p>
-                  Each coordinate gets its own level count, so a configuration is
-                  a list of them. The one reported most often in the original
-                  work is eight levels for the first coordinate and five for each
-                  of the other three.
+                  {"We will use eight levels for the first coordinate and five for each of the other three. The FSQ paper includes this as one of several configurations."}
                 </p>
                 <KeepInMind>
                   The levels are evenly spaced in the bounded interval, not in
@@ -234,7 +169,8 @@ export default function FiniteScalarQuantisationPage() {
               <SubSection title="6. Rounding to the nearest level">
                 <>
                   <p>
-                    Scale the bounded coordinate so that neighbouring levels are one
+
+                    Scale the bounded coordinate so that neighboring levels are one
                     unit apart. The rounding step can then operate on a unit-spaced
                     grid.
                   </p>
@@ -249,19 +185,10 @@ export default function FiniteScalarQuantisationPage() {
                   {"h  =  (L − 1) / 2\n\nposition  =  round( tanh(z) × h )"}
                 </Equation>
                 <p>
-                  At five levels the half width is 2, the positions are
-                  &minus;2, &minus;1, 0, 1 and 2, and reading a position back as
-                  a level is a division by 2. At eight levels the half width is
-                  3.5, and that half is exactly where the trouble in Part 4 comes
-                  from. For now take the rule as written and note that it is one
-                  multiplication and one rounding per coordinate, with no search
-                  and no comparison against anything.
+                  {"For five levels, the half width is 2, so integer positions map back to levels by division by 2. For eight levels, the half width is 3.5. Simply rounding to integers does not produce the intended symmetric eight-level grid. Part 4 adds the required offset; the worked vector below uses that corrected rule."}
                 </p>
                 <KeepInMind>
-                  Finding a vector&rsquo;s code costs one multiplication and one
-                  rounding per coordinate. A table of representatives costs a
-                  distance to every row, which is why the arrangement here needs
-                  no clever lookup however many codes there are.
+                  {"The calculation grows with the number of coordinates, rather than requiring a distance to every complete grid point. It includes bounding, scaling and rounding each coordinate, followed by composing the digits into an ID."}
                 </KeepInMind>
               </SubSection>
 
@@ -339,11 +266,8 @@ export default function FiniteScalarQuantisationPage() {
                 </>
                 <WorkedExample title="The same arithmetic on four chosen numbers">
                   <p>
-                    Take 1.0, &minus;0.5, 0.2 and 3.0, which are picked so that
-                    each case turns up once, one coordinate landing well inside,
-                    one landing exactly on a level, one sitting near the middle
-                    and one nearly reaching the end.
-                  </p>
+                  {"Take the input vector [1.0, −0.5, 0.2, 3.0]. After tanh, these coordinates fall in different parts of the bounded interval. Apply the same level counts and offset rule as before."}
+                </p>
                   <Equation>
                     {"squashed    0.7616   −0.4621    0.1974    0.9951\n" +
                       "digits           6         1         2         4\n" +
@@ -374,25 +298,11 @@ export default function FiniteScalarQuantisationPage() {
                 </p>
                 <Equation>{"8 × 5 × 5 × 5  =  1000"}</Equation>
                 <p>
-                  This is where the method differs from a learned table in the
-                  way that matters most for anybody planning a system. A table of
-                  a thousand vectors has to be found, stored and kept from
-                  degenerating; a grid of a thousand codes is four small numbers
-                  written in a configuration file. Doubling the first
-                  coordinate&rsquo;s levels from eight to sixteen doubles the
-                  code count without adding a single fitted parameter, and a
-                  thousand codes is 9.9658 bits, which is what each position of
-                  the sequence costs a model downstream.
+                  {"A thousand grid points can be specified by four level counts, without storing a thousand fitted vectors. Doubling one coordinate’s level count doubles the number of combinations. Storage still depends on how the resulting IDs are encoded, and a downstream model may need parameters for the codes it reads or predicts."}
                 </p>
+                <Equation>{"Code count = 8 × 5 × 5 × 5 = 1000\nlog₂(1000) ≈ 9.966\nFixed-length ID width = ⌈log₂(1000)⌉ = 10 bits"}</Equation>
                 <InAModel>
-                  Nothing about the grid grows with the number of codes except
-                  the model&rsquo;s own output layer, which has to score one of
-                  them. A learned table of a hundred thousand rows is a hundred
-                  thousand vectors to hold and to move during training, where the
-                  grid of a hundred thousand codes that five coordinates at ten
-                  levels each would give is five small numbers written into a
-                  configuration, and reaching a million codes from there is
-                  adding a sixth coordinate.
+                  {"Increasing the number of levels does not add fitted parameters to this quantizer. It can still increase ID width and the storage or computation of downstream code embeddings and output layers. Account for those costs separately from the grid specification."}
                 </InAModel>
                 <KeepInMind>
                   The number of codes is a product of the per-coordinate level
@@ -434,12 +344,7 @@ export default function FiniteScalarQuantisationPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  Two corners are worth knowing. Code 0 is the vector with every
-                  coordinate at &minus;1, and code 999 in the published
-                  configuration is the vector with every coordinate at 1, which
-                  is what any sufficiently large input lands on. A vector every
-                  one of whose coordinates saturates is reproduced exactly, and
-                  its rounding error is zero.
+                  {"Code 0 represents the all-minus-one grid corner; code 999 represents the all-plus-one corner. A sufficiently large positive input can map to the latter. If tanh has rounded every coordinate to 1, its bounded-space rounding error is zero. That does not reconstruct the original large input values."}
                 </p>
                 <KeepInMind>
                   A code stands for a point of the grid and not for the vector
@@ -458,7 +363,7 @@ export default function FiniteScalarQuantisationPage() {
                   coordinate separately does not obviously answer with the
                   nearest point of the grid, and yet it does.
                 </p>
-                <WhyThisWorks title="Why choosing the nearest level separately minimises the total squared distance">
+                <WhyThisWorks title="Why choosing the nearest level separately minimizes the total squared distance">
                   <p>
                     The squared distance from a bounded vector to a grid point is
                     a sum over coordinates of the squared gap in that coordinate,
@@ -473,13 +378,8 @@ export default function FiniteScalarQuantisationPage() {
                     {"‖b − g‖²  =  Σ (bᵢ − gᵢ)²,   and each gᵢ is free"}
                   </Equation>
                   <p>
-                    That is not true when the set of codes is a list rather than
-                    a product, which is exactly why a table has to be searched.
-                    Materialising the thousand grid points and asking which is
-                    nearest gives the same code and the same error as rounding
-                    the four coordinates one at a time, and the point of the
-                    method is that the second route never needs the table.
-                  </p>
+                  {"For this product grid, the nearest level can be chosen independently in each coordinate. An arbitrary list of representative vectors does not generally have that separable structure. Explicitly searching all thousand grid points gives the same minimum squared error here, provided ties follow the same convention."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
                   The grid is a genuine set of a thousand representative vectors
@@ -494,42 +394,42 @@ export default function FiniteScalarQuantisationPage() {
           title: "Questions on Parts 1 to 3",
           quiz: [
             several(
-              "What does a learned table of representative vectors cost that the fixed rule does not?",
+              "Which costs of this SDK’s k-means-codebook workflow are absent from its fixed-grid quantization route?",
               [
-                "A fit, which is an iterative search that has to be run before a single vector can be rounded",
-                "A collection to fit on, which has to look like the vectors that will arrive later",
+                "An iterative run estimating the codebook centers from training vectors",
+                "Training vectors whose distribution influences the chosen representatives",
                 "Rows that nothing is ever assigned to, however the table was learned",
-                "A distance to every row at the moment a vector is rounded",
+                "An exhaustive lookup comparing the input with every stored representative",
               ],
               [0, 1, 3],
-              "The fit and the collection to fit on are unconditional costs. Rows nothing lands on are a cost of one way of learning the table, since fitted by grouping on these six hundred vectors a table of any size from sixteen up to a hundred and sixty used every one of its rows. The grid instead costs one multiplication and one rounding per coordinate, with no search at all.",
+              "A learned codebook requires a procedure and data for selecting its representative vectors. This quantizer instead fixes a product of per-coordinate levels. Each input still needs bounding, level selection and code packing, but does not search a learned list of whole-vector representatives. Whether either representation uses its available codes well is a separate measurement.",
             ),
             choice(
               "At five levels the levels are −1, −0.5, 0, 0.5 and 1. Why is zero not a level at eight?",
               [
                 "Because the squashing never returns exactly zero",
-                "Because the levels are symmetric about zero, and an even number of symmetric levels cannot include the centre",
+                "Because the levels are symmetric about zero, and an even number of symmetric levels cannot include the center",
                 "Because the first level is placed at zero and the rest are counted upward from it",
                 "Because the offset of a half is applied before rounding and not undone",
               ],
               1,
-              "A coordinate of exactly zero therefore comes back as 1/7 at eight levels, carrying a squared error of 1/49, where at five levels it comes back as zero and costs nothing. Both are correct, and if the middle matters for a particular coordinate the argument is for giving it an odd level count rather than for changing the rounding.",
+              "Five evenly spaced symmetric levels include a middle level at zero. Eight such levels have no single middle entry, so zero lies between two levels. The SDK's tie convention chooses a reconstruction of about 0.1429 and a squared error of about 0.020408. An odd level count can preserve zero exactly in this layout; the choice depends on what that coordinate needs to represent.",
             ),
             choice(
               "The four coordinates have eight, five, five and five levels, and the word cost chose digits 5, 3, 2 and 1. What code does it get?",
               ["11", "309", "875", "1000"],
               1,
-              "The place-value multipliers are the level counts themselves, so they are one, eight, forty and two hundred, and the code is 5 plus 24 plus 80 plus 200. The composition is arbitrary in the same way that writing the units digit on the right is arbitrary, and what matters is only that it is one to one.",
+              "The SDK packs the first coordinate as the least significant digit. Later coordinates use the products of the earlier level counts as place values.\n\n```math\ncode = 5 × 1 + 3 × 8 + 2 × 40 + 1 × 200\n     = 5 + 24 + 80 + 200\n     = 309\n```\n\nThis convention gives each valid digit tuple one unique code. Another ordering can also work if encoding and decoding use the same convention.",
             ),
             trueFalse(
               "Rounding each coordinate on its own gives the nearest point of the grid.",
               true,
-              "The squared distance to a grid point is a sum of squared gaps, one per coordinate, and each coordinate of a grid point is free to be chosen, so making every term smallest on its own makes the sum smallest. That fails when the set of codes is a list rather than a product, which is exactly why a table has to be searched, and materialising the thousand grid points gives the same code and the same error as the four roundings.",
+              "For this Cartesian grid, each coordinate can choose its level independently. Squared Euclidean distance adds the coordinate costs, so minimizing each one also minimizes their sum. An arbitrary learned codebook need not contain every combination of coordinate levels; there the independent choices may not identify an available vector. The materialized grid comparison confirms the same choice and distortion for this fixture.",
             ),
             trueFalse(
               "Doubling the first coordinate’s levels from eight to sixteen doubles the number of codes without adding a single fitted parameter.",
               true,
-              "The number of codes is the product of the per-coordinate level counts, which is what makes the published eight, five, five, five a thousand codes, or 9.9658 bits at each position of the sequence. A table of a hundred thousand rows is a hundred thousand vectors to hold and to move during training, where the grid of the same size is five small numbers in a configuration file.",
+              "The number of possible codes is the product of the level counts, so doubling one count doubles capacity. The (8, 5, 5, 5) configuration has 1,000 codes. Its information-capacity logarithm is about 9.9658 bits, while a separate fixed-width binary ID needs ten bits. The grid parameters are configuration values rather than 1,000 learned representative vectors; a surrounding encoder and decoder can still have learned parameters.",
             ),
         ],
         },
@@ -539,11 +439,7 @@ export default function FiniteScalarQuantisationPage() {
             <>
               <SubSection title="12. The rule anybody writes first">
                 <p>
-                  Section 6 gave the rule as multiply by the half width and
-                  round, and that is what anybody writes the first time. It is
-                  right for an odd level count and wrong for an even one, and the
-                  way it is wrong is quiet enough that a system built on it will
-                  train, produce codes and report plausible numbers.
+                  {"The unshifted rule in section 6 works for odd level counts but does not form the intended even-level grid. Inspect the positions it can return before using it to create IDs. A plausible error value alone will not reveal a wrong output alphabet."}
                 </p>
                 <Equation>
                   {"h  =  (L − 1) / 2\n\nposition  =  round( tanh(z) × h )"}
@@ -557,20 +453,13 @@ export default function FiniteScalarQuantisationPage() {
                   3. There are seven of them.
                 </p>
                 <KeepInMind>
-                  An interval of width 2h contains 2h + 1 whole numbers when h is
-                  a whole number and 2h when it is not, and the half width is a
-                  whole number exactly when the level count is odd.
+                  {"When h is an integer, the closed interval from −h to h contains 2h+1 integer positions. When h is a half-integer, it contains 2h integer positions. The latter gives one fewer position than the even level count asks for, before considering floating-point saturation at the boundaries."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="13. Swept from two levels to twelve">
                 <p>
-                  One example is not evidence, so here is the whole sweep. For
-                  every level count from two to twelve, two hundred thousand
-                  inputs spread across the range were rounded under both rules
-                  and the distinct results counted. The widget draws each level
-                  count as a line from &minus;1 to 1, the obvious rule&rsquo;s
-                  levels above the line and the corrected rule&rsquo;s below.
+                  {"Compare both rules over 200,001 inputs from −10 to 10, for each level count from two through twelve. Count the distinct rounded positions. The widget places the unshifted rule’s levels above the line and the corrected levels below it."}
                 </p>
                 <RungLadder />
                 <p>
@@ -602,11 +491,7 @@ export default function FiniteScalarQuantisationPage() {
                   caption="Seven of the eleven level counts swept. Every even one is short by exactly one."
                 />
                 <KeepInMind>
-                  The fault is not a rounding inaccuracy that could be tightened
-                  away. The obvious rule delivers L &minus; 1 levels whenever L
-                  is even, for every even L, and the two extreme levels it does
-                  reach are the ones nearest the ends rather than the ends
-                  themselves.
+                  {"In this nonsaturating sweep, the unshifted rule produces one fewer level for every even count tested. The saturation experiment below shows why that count is not a universal statement about all floating-point inputs."}
                 </KeepInMind>
               </SubSection>
 
@@ -645,16 +530,11 @@ export default function FiniteScalarQuantisationPage() {
                   caption="The extra pair at the ends appears at four, eight and twelve and not at two, six and ten."
                 />
                 <p>
-                  Even where they appear the extra levels are no use, since they
-                  are reached only by inputs beyond the point at which the
-                  squashing has flattened completely. Under the obvious rule at
-                  eight levels a system would have seven levels in ordinary use,
-                  two more that fire only on saturating inputs, and a total of
-                  nine where eight were configured, which is a worse state of
-                  affairs than being one short.
+                  {"At eight configured levels, saturation adds two outer positions under the unshifted rule. It then produces nine positions overall, outside the intended eight-level alphabet. Reaching additional values at the ends therefore does not fix the mismatch."}
                 </p>
                 <KeepInMind>
-                  The behaviour at saturation depends on the tie rule and on
+
+                  The behavior at saturation depends on the tie rule and on
                   whether the half width rounds outward, which is why it turns up
                   at some even level counts and not others. It is not a repair
                   under any of them.
@@ -684,10 +564,7 @@ export default function FiniteScalarQuantisationPage() {
                   pattern rather than a noisy one.
                 </p>
                 <KeepInMind>
-                  The offset is applied before rounding and undone after it. Half
-                  of a fix is worse than none here, since applying it only on the
-                  way in would shift every level off the interval it was supposed
-                  to be symmetric in.
+                  {"Apply the offset before rounding, then add it back when reconstructing the level. Omitting the second step shifts the reconstruction values away from the symmetric grid."}
                 </KeepInMind>
               </SubSection>
 
@@ -717,17 +594,14 @@ export default function FiniteScalarQuantisationPage() {
                 />
                 <>
 <p>
-                  All-even configurations are where it bites. At four levels across four coordinates the obvious rule reaches eighty-one of the two hundred and fifty-six codes configured and the error is 79 per cent higher; at two levels it reaches one code out of sixteen and the whole arrangement answers the same number for every vector. The published configuration is the interesting case, because three of its four level counts are odd, so only the first coordinate is affected, the reachable codes fall from a thousand to eight hundred and seventy-five, and the error rises by four per cent.
+                  {"The all-even configurations show a larger difference in this test. With four levels per coordinate, the unshifted rule can reach 81 combinations rather than 256, and its measured error is about 79% higher. With [8,5,5,5], only one coordinate is affected: its reachable count is 875 rather than 1000, with about 4% higher error. These reachability counts describe the rule, not the number of codes actually observed in 600 samples."}
                 </p>
                 <p>
                   A system built on the obvious rule and tested at eight, five, five and five would look almost right.
                 </p>
 </>
                 <KeepInMind>
-                  Test a rounding rule at an all-even configuration, and at two
-                  levels in particular. A configuration with one even count out
-                  of four hides the fault behind a four per cent difference that
-                  reads as noise.
+                  {"Include all-even settings and the two-level case when checking a rounding implementation. Testing only [8,5,5,5] leaves most coordinates unaffected and may conceal the incorrect grid."}
                 </KeepInMind>
               </SubSection>
 
@@ -745,13 +619,9 @@ export default function FiniteScalarQuantisationPage() {
                   {"tanh(0) × 3.5 − 0.5  =  −0.5   →   position 0   →   level 1/7"}
                 </Equation>
                 <p>
-                  So a coordinate of exactly zero comes back as 1/7 and carries a
-                  squared error of 1/49, which is 0.020408, while at five levels
-                  zero is a level, comes back as zero and costs nothing. Both are
-                  correct. The levels are symmetric about zero either way, and an
-                  even number of symmetric levels cannot include the
-                  centre.
+                  {"At eight levels, a bounded coordinate of zero ties between the two middle levels. This implementation chooses the positive one under its round-to-even convention. At five levels, zero itself is available and reconstructs exactly."}
                 </p>
+                <Equation>{"Eight-level reconstruction of zero = 1/7\nSquared error = (1/7 − 0)² = 1/49 ≈ 0.020408\nFive-level reconstruction of zero = 0; squared error = 0"}</Equation>
                 <KeepInMind>
                   A method whose levels are symmetric and even in number has no
                   level at the middle. If the middle matters for a particular
@@ -783,23 +653,13 @@ export default function FiniteScalarQuantisationPage() {
                   20.
                 </p>
                 <KeepInMind>
-                  The error is measured against the squashed vector rather than
-                  the original one, because the grid lives in the bounded
-                  interval. Measured against the original, a vector that arrived
-                  far outside the interval would dominate the number and say
-                  nothing about the grid.
+                  {"Here we measure the gap from tanh’s output to its chosen grid point. This isolates the rounding step. It does not measure how well the original unsquashed vector can be recovered; assessing the whole representation requires checking that loss too."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. Against a table fitted to the same vectors">
                 <p>
-                  A number like 0.2312 means nothing on its own, so the widget
-                  above draws a second line. At every code count the same six
-                  hundred vectors were also rounded to a table of exactly that
-                  many representatives, found by grouping those same six hundred
-                  vectors around centres. That is the arrangement finite scalar
-                  quantisation is doing without, given every advantage, since it
-                  is fitted on precisely the vectors it is then judged on.
+                  {"Compare the grid with a codebook fitted to the same 600 bounded vectors. At each listed code count, both methods encode the same inputs and use the same squared-error measure. The fitted table is evaluated on its own training sample, so this comparison measures in-sample reconstruction rather than transfer to new inputs."}
                 </p>
                 <NumberTable
                   headings={[
@@ -824,17 +684,15 @@ export default function FiniteScalarQuantisationPage() {
                   On the comparisons shown, the fitted codebook&apos;s reconstruction error is lower by factors from 2.04 to 4.96. The fixed grid avoids fitting a codebook, but pays for that simplicity in reconstruction error here. In an end-to-end learned system, we would also need to examine how the encoder adapts to the quantizer before extending this result.
                 </p>
                 <KeepInMind>
-                  On this collection the fixed grid is between two and five times
-                  worse than a table fitted to the very vectors it is judged on.
-                  Anybody choosing between the two is trading that factor against
-                  a fit they no longer have to run or debug.
+                  {"The fitted table has lower in-sample error in these comparisons. The fixed grid avoids that fitting step. This is evidence about the supplied vectors; a learned encoder may adapt its outputs to the grid and change the comparison."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="20. How the codes are spent matters as much as how many there are">
                 <p>
+
                   The line in section 18 is not monotone, and the reason is a
-                  real property of the method rather than an artefact of the
+                  real property of the method rather than an artifact of the
                   collection. Sixty-four codes spent as four, four, two, two cost
                   0.4828, while fifty-four codes spent as three, three, three,
                   two cost 0.3918. Fewer codes, better spent, is the lower error.
@@ -850,20 +708,10 @@ export default function FiniteScalarQuantisationPage() {
                   caption="Four ways to spend a budget, on the same six hundred vectors."
                 />
                 <p>
-                  Three configurations of exactly sixty-four codes differ by 29
-                  per cent in error depending only on how the levels are
-                  distributed, and giving eight levels to one coordinate while
-                  leaving the other three at two is the worst of them by a clear
-                  margin. On a collection where every coordinate matters equally,
-                  spreading the levels evenly is what pays, and the level counts
-                  are therefore a real design choice rather than a formality.
+                  {"The equal-size configurations have different errors because they allocate resolution to different coordinates. The more balanced setting performs best among these examples. The appropriate allocation also depends on each coordinate’s scale and how its error affects the task."}
                 </p>
                 <KeepInMind>
-                  Which coordinates get the levels is a choice, and it is not a
-                  choice the method makes for you. The published eight, five,
-                  five, five is uneven on purpose, and on a collection whose
-                  first coordinate carries more than the others that is the right
-                  shape.
+                  {"Choose level counts using the representation and the task. The published [8,5,5,5] is one tested setting, not proof that the first coordinate inherently contains more useful information."}
                 </KeepInMind>
               </SubSection>
 
@@ -879,7 +727,7 @@ export default function FiniteScalarQuantisationPage() {
                 <GridUsage />
                 <>
 <p>
-                  Of the 420 that were reached, 293 hold exactly one vector, 88 hold two, 28 hold three, 9 hold four and two codes hold five and six. That is about as even a spread as six hundred vectors over a thousand codes can be, and the emptiness is a consequence of having more codes than vectors rather than of anything going wrong.
+                  {"Among the 420 used codes, 293 receive one vector, 88 receive two, 28 receive three, nine receive four, and the last two receive five and six. Having more codes than vectors guarantees some unused codes. It does not make this the most even possible occupancy: 600 distinct assignments would be more even."}
                 </p>
                 <p>
                   The fitted table of the same size is not available for comparison at a thousand codes, but at every size where it is, from sixteen up to a hundred and sixty, it uses every single one of its codes while the grid uses 152 of 160 and 80 of 81.
@@ -895,11 +743,7 @@ export default function FiniteScalarQuantisationPage() {
                   vectors, come back identical.
                 </p>
                 <KeepInMind>
-                  A fixed grid has unused codes for a different reason than a
-                  learned table does, and on these collections it has more of
-                  them. The grid&rsquo;s codes sit where the rule put them, so
-                  every code covering a region the vectors avoid is empty by
-                  construction and no amount of training will move it.
+                  {"The fixed grid’s points do not move toward the observed vectors. A surrounding encoder can still learn to send inputs to different points. Unused codes in this sample therefore do not imply that no training could change their usage."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -913,16 +757,16 @@ export default function FiniteScalarQuantisationPage() {
               [
                 "It delivers one level fewer than was asked for, at every even level count",
                 "It delivers one level more than was asked for",
-                "It delivers the right number of levels but shifts them all off centre",
+                "It delivers the right number of levels but shifts them all off center",
                 "It raises a complaint, because the half width is not a whole number",
               ],
               0,
-              "An interval of width 2h holds 2h + 1 whole numbers when h is a whole number and 2h when it is not, and the half width is a whole number exactly when the level count is odd. Across two hundred thousand inputs at every count from two to twelve the pattern is exact, and the worst case is the smallest, since asked for two levels the rule produces one and the coordinate carries no information at all.",
+              "For these strictly nonsaturated inputs, the naive scale-and-round rule reaches every odd-count level but one fewer position at each even count. In the two-level case it returns only zero. Exact floating-point saturation can change endpoint behavior, which the next question tests; it is not a reliable repair.",
             ),
             trueFalse(
               "Letting the squashing reach exactly 1 brings the missing outer levels back.",
               false,
-              "At eight levels it reaches nine distinct levels rather than seven, one more at each end, and at two, six and ten it reaches one, five and nine, which is no more than before, because a value landing exactly half way is rounded to the even whole number. Even where the extra levels appear they fire only on inputs past the point where the squashing has flattened, so eight configured levels become seven in ordinary use and nine in total, which is worse than being one short.",
+              "Finite-precision tanh can round extreme inputs to exactly an endpoint. For the naive rule, that makes eight configured levels produce nine distinct values instead of seven. At two, six and ten levels, ties-to-even rounding still leaves only one, five and nine values in this experiment. Neither outcome gives the intended level set reliably. Saturation is therefore not a repair for the even-level formula.",
             ),
             choice(
               "At which configuration would a system built on the obvious rounding rule look almost right?",
@@ -933,10 +777,10 @@ export default function FiniteScalarQuantisationPage() {
                 "Any of them, since the error rises by the same amount everywhere",
               ],
               2,
-              "Three of those four counts are odd, so only the first coordinate is affected, the reachable codes fall from a thousand to eight hundred and seventy-five and the error rises by four per cent, which reads as noise. All-even configurations are where it bites, since four levels across four coordinates reaches eighty-one of two hundred and fifty-six codes at 79 per cent higher error, and two levels reaches one code out of sixteen and answers the same number for every vector.",
+              "Only the first coordinate in (8, 5, 5, 5) has an even count. The naive rule reaches 875 rather than 1,000 codes and gives about four percent higher error in this comparison. That small change does not make the implementation correct. With four levels on every coordinate, it reaches 81 of 256 codes and gives 79 percent higher error. With two per coordinate, all inputs receive the same code.",
             ),
             several(
-              "Which statements agree with these measured quantisation comparisons?",
+              "Which statements agree with these measured quantization comparisons?",
               [
                               "The fitted table is better everywhere, by between 2.04 and 4.96 times",
                               "Giving eight levels to one coordinate and two to each of the other three is the worst of the three ways of spending sixty-four codes, at 0.6228",
@@ -944,7 +788,7 @@ export default function FiniteScalarQuantisationPage() {
                               "From sixteen codes up to a hundred and sixty the fitted table uses every one of its codes, while the grid uses 152 of 160 and 80 of 81",
                             ],
               [0, 1, 2, 3],
-              "The table was fitted on precisely the vectors it was then judged on, which is the honest price of doing without a fit. The grid’s curve is not monotone, since sixteen codes cost 0.8200, eighty-one cost 0.2312 and a hundred and sixty cost 0.2828, and three configurations of exactly sixty-four codes differ by 29 per cent in error on nothing but how the levels are spread, so the level counts are a real design choice rather than a formality.",
+              "The learned codebooks were fitted and evaluated on the same supplied vectors, so their errors are in-sample measurements. The fixed grids also differ in how they allocate levels across coordinates. Increasing total capacity need not create a nested set of grid points: the reported errors at 16,81 and 160 codes are 0.8200,0.2312 and 0.2828. Three different 64-code configurations differ by 29 percent in error. Capacity alone does not specify the geometry.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "codes | configuration | grid | fitted table | times worse\n16 | 2, 2, 2, 2 | 0.8200 | 0.3719 | 2.21\n24 | 3, 2, 2, 2 | 0.6782 | 0.2864 | 2.37\n36 | 3, 3, 2, 2 | 0.5509 | 0.2173 | 2.53\n54 | 3, 3, 3, 2 | 0.3918 | 0.1610 | 2.43\n64 | 4, 4, 2, 2 | 0.4828 | 0.1368 | 3.53\n81 | 3, 3, 3, 3 | 0.2312 | 0.1136 | 2.04\n160 | 5, 4, 4, 2 | 0.2828 | 0.0570 | 4.96\n\nconfiguration | codes | rounding error\n8, 2, 2, 2 | 64 | 0.6228\n2, 2, 2, 8 | 64 | 0.6145\n4, 4, 2, 2 | 64 | 0.4828\n3, 3, 3, 2 | 54 | 0.3918\n\nFor each fitted table from 16 through 160 codes, every code is used.\nGrid usage: 80 of 81 codes; 152 of 160 codes.\nThe fitted tables were trained and scored on these same 600 vectors."
@@ -953,7 +797,7 @@ export default function FiniteScalarQuantisationPage() {
             trueFalse(
               "Of the 981 codes the seventy-two word vectors leave empty, only sixteen are the rounding’s doing.",
               true,
-              "The seventy-two words hold only thirty-five distinct vectors between them, so at most thirty-five codes could have been reached before anything was rounded, and 965 of the thousand were empty by counting alone. Rounding then takes the thirty-five down to nineteen, which is where lower and estimate, arriving as different vectors, come back identical. The grid has empty codes for a different reason than a learned table does, and on these collections it has more of them.",
+              "There are only 35 distinct input vectors, so even a perfect identity-preserving assignment could use at most 35 of the 1,000 codes.\n\n```math\nminimum empty codes from the input count = 1,000 − 35 = 965\nadditional merges during quantization    = 35 − 19 = 16\n```\n\nThe observed 19 used codes reflect both the limited input variety and the further merging caused by quantization. Lower and estimate illustrate distinct vectors receiving one code.",
             ),
         ],
         },
@@ -998,18 +842,14 @@ export default function FiniteScalarQuantisationPage() {
                 />
                 <>
 <p>
-                  Read the first and fourth rows together. At a tenth of the scale the error is 0.0564 and at full scale it is 0.0565, which is the same number to three places, and yet the first reaches thirty codes and the second reaches four hundred and twenty. At eight times the scale the error is six times lower and only a hundred and seventeen codes are reached, because 81 per cent of all coordinates have been pushed past 0.99 and are landing on the ends, where they are reproduced almost exactly and describe almost nothing.
+                  {"At one-tenth scale and full scale, the bounded-space errors are both near 0.056, but the inputs reach 30 and 420 codes respectively. At eight-times scale, about 81% of coordinates lie beyond magnitude 0.99 after tanh. The rounding error is smaller partly because many values sit near the end levels, while differences in their original magnitudes have been compressed."}
                 </p>
                 <p>
                   A low rounding error is therefore not by itself evidence that the arrangement is working, and the number of codes reached has to be read beside it.
                 </p>
 </>
                 <KeepInMind>
-                  Where the data sits relative to the squashing is the single
-                  most important thing about a system built this way, and the
-                  method decides none of it. In a trained model the encoder ends
-                  up deciding it, which moves the question rather than answering
-                  it.
+                  {"Input scaling changes both grid usage and the information lost during bounding. A learned encoder can adjust that scale, but the adjustment must be evaluated against reconstruction or the downstream task rather than bounded-space error alone."}
                 </KeepInMind>
               </SubSection>
 
@@ -1024,28 +864,21 @@ export default function FiniteScalarQuantisationPage() {
                   simple counting.
                 </p>
                 <p>
-                  We have fixed the number of levels rather than learned representatives from the data. That still leaves a modelling choice: how many levels should each coordinate receive? We can compare candidate settings on suitable development data. Avoiding codebook fitting does not remove the need to select and evaluate that choice.
+
+                  We have fixed the number of levels rather than learned representatives from the data. That still leaves a modeling choice: how many levels should each coordinate receive? We can compare candidate settings on suitable development data. Avoiding codebook fitting does not remove the need to select and evaluate that choice.
                 </p>
                 <KeepInMind>
-                  Removing the fit does not remove the need to know something
-                  about the data. It moves that knowledge from a fitted table
-                  into a configuration, where it is written down by hand and is
-                  not checked by anything.
+                  {"A fixed grid still needs configuration and evaluation. Choose the levels on suitable development data, then check the resulting representation on inputs that were not used to choose them."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. The coordinates are treated one at a time">
                 <p>
-                  The last limit is the deepest, and it is a consequence of the
-                  set of codes being a product. Every combination of
-                  per-coordinate choices exists, whether or not any vector ever
-                  wants it, and no combination can be added, removed or moved.
-                  Structure between two coordinates is therefore unrepresentable,
-                  not badly represented.
+                  {"The grid contains every combination of its per-coordinate levels. It cannot move those points to follow a diagonal concentration in the supplied coordinates. It can still encode vectors in that region; the cost is that many other combinations may go unused."}
                 </p>
                 <>
 <p>
-                  Take six hundred vectors whose first two coordinates rise together, at a correlation of 0.9486, and the same draw with that lean taken out. At sixty-four codes the grid&rsquo;s error is 0.4583 on the leaning collection and 0.4574 on the straight one, which is the same number, so the grid does not notice the lean at all.
+                  {"Compare the sample whose first two coordinates have correlation 0.9486 with the version without that dependence. At 64 codes, their grid errors are 0.4583 and 0.4574. The small difference here does not mean a scalar quantizer is incapable of retaining dependence."}
                 </p>
                 <p>
                   What changes is how much of the grid is reachable, since the vectors now occupy a diagonal band and the corners off that band are visited by nothing. Forty-six of the sixty-four codes are used against all sixty-four before.
@@ -1062,22 +895,13 @@ export default function FiniteScalarQuantisationPage() {
                     ["first two coordinates leaning together", "0.4583", "46 of 64", "0.0834"],
                     ["the same draw without the lean", "0.4574", "64 of 64", "0.1327"],
                   ]}
-                  caption="A lean between two coordinates is something a fitted table can spend on and a product grid cannot."
+                  caption="The fitted table can place representatives in the diagonal region. The fixed grid keeps its locations, although the used IDs can still reveal the dependence."
                 />
                 <p>
-                  The fitted table goes the other way. Its error falls from 0.1327
-                  to 0.0834 when the lean is introduced, because a collection
-                  concentrated in a band is easier to cover with representatives
-                  placed where the vectors are. So a dependence between
-                  coordinates is information, one arrangement uses it and the
-                  other cannot, and the gap between them widens from 3.45 times
-                  to 5.50 times on exactly that account.
+                  {"The fitted table’s error is lower on the correlated sample, where the vectors concentrate in a narrower region. Its improvement over the grid is larger in that comparison. These results show the benefit of adapting representative locations to these inputs; they do not establish that the fixed-grid representation contains no information about their dependence."}
                 </p>
                 <KeepInMind>
-                  A product of per-coordinate choices can only describe a box.
-                  Any shape the vectors actually occupy inside that box costs
-                  codes that are spent on regions nothing visits, and the method
-                  has no mechanism for noticing.
+                  {"A product grid includes combinations absent from the data. It does not relocate points to avoid those regions. An upstream transformation or learned encoder can change the coordinates before quantization."}
                 </KeepInMind>
               </SubSection>
 
@@ -1091,71 +915,11 @@ export default function FiniteScalarQuantisationPage() {
                 </p>
                 <DerivationTable
                   expressionHeading="Coordinate or level choice"
-                  reasonHeading="What the quantiser can represent"
-                  rows={[
-                    {
-                      expression: "one level for a coordinate",
-                      reason:
-                        "the half width is zero, so reading a position back as a level is a division by zero and the arithmetic has nothing to say. Behind that is the reason it does not matter, since a coordinate with one level takes one value whatever arrives and contributes nothing to the code.",
-                    },
-                    {
-                      expression: "no coordinates at all",
-                      reason:
-                        "the number of codes is an empty product, which is one, so there is exactly one code and it stands for the empty vector. Defined, and useless, in the way an empty sum is zero.",
-                    },
-                    {
-                      expression: "a coordinate that never varies",
-                      reason:
-                        "defined, and wasteful in a way nothing reports. The levels are placed by the rule and not by the data, so every vector takes the same level there and that coordinate's whole level count is spent on a distinction that never arises. A learned table would never place two representatives apart along such a coordinate.",
-                    },
-                    {
-                      expression: "a coordinate that is not a finite number",
-                      reason:
-                        "the squashing of an undefined quantity is undefined, so there is no position to round to and no digit to compose. This is the one case that has to be refused rather than answered.",
-                    },
-                    {
-                      expression: "an input past the point where the squashing flattens",
-                      reason:
-                        "defined and irreversible. Beyond about 19 in ordinary computer arithmetic the squashed value is exactly 1, so 19 and a million give the same code, and the method cannot distinguish inputs that a model may well be distinguishing.",
-                    },
-                    {
-                      expression: "a value exactly half way between two levels",
-                      reason:
-                        "genuinely undecided, and any rule is arbitrary. Rounding half to the nearer even whole number is the usual choice; it costs nothing on ordinary data, since a tie needs an exact half, and it is why zero is not the middle level at an even level count. What turns on it is repeatability, so the rule has to be stated rather than left to whichever function was reached for.",
-                    },
-                    {
-                      expression: "an even level count",
-                      reason:
-                        "defined, and only if the half offset is applied. Without it the interval of width L − 1 holds L − 1 whole numbers rather than L, so the count delivered is not the count configured, and at two levels it collapses to one. This is a decision an implementation faces and gets wrong quietly.",
-                    },
-                    {
-                      expression: "more codes than vectors",
-                      reason:
-                        "defined, and guaranteed to leave codes empty by counting alone. Six hundred vectors cannot reach more than six hundred of a thousand codes, and reached 420. Nothing is wrong; the number of codes is not a claim about how many are used.",
-                    },
-                    {
-                      expression: "two vectors that round to the same code",
-                      reason:
-                        "defined, and the entire point. The code names a point of the grid, not the vector that produced it, so composing and decomposing a code is one to one while quantising is not. What is lost is exactly the rounding error the cost is measured by.",
-                    },
-                    {
-                      expression: "a dependence between two coordinates",
-                      reason:
-                        "defined, and unrepresentable. The set of codes is a product, so it is a box, and a collection lying along a diagonal inside that box leaves the corners empty while the error stays where it was. Measured at a correlation of 0.9486, the grid's error moved by 0.0009 and eighteen of its sixty-four codes stopped being used.",
-                    },
-                    {
-                      expression: "the scale of the incoming coordinates",
-                      reason:
-                        "defined at every scale and different at each of them, with nothing in the method choosing. Multiplying a collection by eight lowered the rounding error sixfold and cut the codes reached from 420 to 117, so the two readings that matter move in opposite directions and neither one alone says whether the arrangement is working.",
-                    },
-                  ]}
+                  reasonHeading="What the quantizer can represent"
+                  rows={[{"expression":"one level for a coordinate","reason":"The reconstruction formula used here divides by a zero half width, so this implementation requires at least two levels. Another quantizer could define a constant one-level representative explicitly."},{"expression":"no coordinates at all","reason":"Mathematically, an empty product gives one code for the empty vector. This SDK requires a nonempty configuration and rejects that case."},{"expression":"a coordinate that never varies","reason":"defined, and wasteful in a way nothing reports. The levels are placed by the rule and not by the data, so every vector takes the same level there and that coordinate's whole level count is spent on a distinction that never arises. A learned table would never place two representatives apart along such a coordinate."},{"expression":"a coordinate that is not a finite number","reason":"This interface rejects nonfinite inputs. NaN does not define a real-valued position to round. Infinite values have tanh limits at the endpoints, but they are still outside this input contract."},{"expression":"an input past the point where the squashing flattens","reason":"defined and irreversible. Beyond about 19 in ordinary computer arithmetic the squashed value is exactly 1, so 19 and a million give the same code, and the method cannot distinguish inputs that a model may well be distinguishing."},{"expression":"a value exactly half way between two levels","reason":"Two nearest levels have equal squared error. This implementation rounds halfway integer positions to even. State the convention for reproducibility; exact ties such as zero can occur frequently in structured inputs."},{"expression":"an even level count","reason":"The symmetric grid here requires the offset for even counts. Other valid scalar-quantizer conventions are possible, including the different bounding and normalization used in the original FSQ implementation."},{"expression":"more codes than vectors","reason":"defined, and guaranteed to leave codes empty by counting alone. Six hundred vectors cannot reach more than six hundred of a thousand codes, and reached 420. Nothing is wrong; the number of codes is not a claim about how many are used."},{"expression":"two vectors that round to the same code","reason":"defined, and the entire point. The code names a point of the grid, not the vector that produced it, so composing and decomposing a code is one to one while quantizing is not. What is lost is exactly the rounding error the cost is measured by."},{"expression":"a dependence between two coordinates","reason":"The grid does not adapt its locations to a diagonal concentration, so some combinations may remain unused. The observed ID frequencies and reconstructed vectors can nevertheless retain dependence between coordinates."},{"expression":"the scale of the incoming coordinates","reason":"defined at every scale and different at each of them, with nothing in the method choosing. Multiplying a collection by eight lowered the rounding error sixfold and cut the codes reached from 420 to 117, so the two readings that matter move in opposite directions and neither one alone says whether the arrangement is working."}]}
                 />
                 <KeepInMind>
-                  Only two lines above are genuine refusals, the level count of
-                  one and the coordinate that is not a number. Everything else is
-                  defined, which is the difficulty, since a configuration that
-                  wastes most of its codes or that cannot see the shape of its own
-                  data still answers every question it is asked.
+                  {"Validate the input contract before quantizing, then evaluate how much information the chosen grid preserves. A request can be accepted and still give an unsuitable representation for the task."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1173,26 +937,26 @@ export default function FiniteScalarQuantisationPage() {
                 "That both scales are too small for the squashing to matter",
               ],
               1,
-              "At eight times the scale the error is six times lower and only a hundred and seventeen codes are reached, because 81 per cent of all coordinates have been pushed past 0.99 and land on the ends, where they are reproduced almost exactly and describe almost nothing. The number of codes reached has to be read beside the error.",
+              "These errors are measured after tanh, so they compare reconstructed and bounded coordinates rather than the original magnitudes. At scale eight, about 81 percent of coordinates exceed absolute value 0.99 and 117 codes are used. Many different magnitudes are compressed near the same endpoints. A small bounded-space error can therefore accompany lost magnitude distinctions; read saturation and code use beside distortion.",
             ),
             trueFalse(
               "Removing the fit removes the need to know something about the data.",
               false,
-              "The level counts have to be chosen by somebody who has looked at the vectors, which is a fit performed by a person rather than by an algorithm. What removing the fit does is move that knowledge out of a fitted table and into a configuration, where it is written down by hand and nothing checks it.",
+              "The quantizer can have fixed levels without fitting individual representatives. Its usefulness still depends on the input distribution, coordinate scaling and chosen capacity. Those settings can be selected from a budget or compared on development data. Removing learned codebook entries does not remove the need to evaluate the resulting representation.",
             ),
             choice(
               "Six hundred vectors whose first two coordinates rise together at a correlation of 0.9486 are set beside the same draw with the lean taken out. What did the grid do?",
               [
                 "Its error fell on the leaning collection, since a concentrated collection is easier to cover",
-                "It answered 0.4583 against 0.4574, which is the same number, so it did not notice the lean at all",
+                "Its errors are nearly equal, 0.4583 and 0.4574, while the correlated inputs use fewer grid codes",
                 "It reached more of its codes on the leaning collection",
                 "It refused the leaning collection, since a product of per-coordinate choices cannot describe a band",
               ],
               1,
-              "What changed is how much of the grid is reachable, with forty-six of the sixty-four codes used where all sixty-four had been. The fitted table went the other way, its error falling from 0.1327 to 0.0834, so a dependence between coordinates is information that one arrangement uses and the other cannot, and the gap widened from 3.45 times to 5.50 times on that account.",
+              "With the correlated inputs, the grid uses 46 of 64 codes instead of all 64. Its fixed coordinate levels do not adapt to the narrower occupied region. The fitted codebook does adapt to these training vectors, and its recorded error falls from 0.1327 to 0.0834. An upstream transformation could change the grid's input geometry, but that is outside this unchanged-grid comparison.",
             ),
             choice(
-              "How many of the method’s edge cases are genuine refusals?",
+              "Which two of the listed configurations are rejected, rather than merely returning a poor representation?",
               [
                 "Two, a level count of one and a coordinate that is not a number",
                 "None, because a product grid always has an answer",
@@ -1210,7 +974,7 @@ export default function FiniteScalarQuantisationPage() {
             exercise(
               "Take the word cost through the grid",
               [
-  "Build the supplied four-dimensional word vectors from the term-document table and apply the starter’s scaling. Quantise cost with level counts (8,5,5,5).",
+  "Build the supplied four-dimensional word vectors from the term-document table and apply the starter’s scaling. Quantize cost with level counts (8,5,5,5).",
   "Print its original and tanh-squashed coordinates, digits, packed code, reconstructed grid point and squared distance from the squashed input. The reconstruction is in squashed coordinates, not the original embedding scale."
 ],
               `import numpy as np
@@ -1290,13 +1054,13 @@ squared distance moved 0.065215`,
               { hints: [
   "Quantize accepts an observation-by-coordinate block even for one word.",
   "Use ids and digits_of for code structure; compare reconstruction with tanh(input) when measuring the stated distortion."
-], check: numberCheck("What code does the word cost receive on the published grid?", 309, 0.5, "The packed code is 309. Its digits identify one grid coordinate per dimension; the single integer is an address for their combination."), question: "How does a four-coordinate word vector become one grid code?" },
+], check: numberCheck("Which packed code does cost receive with level counts (8, 5, 5, 5)?", 309, 0.5, "The packed code is 309. Its digits identify one grid coordinate per dimension; the single integer is an address for their combination."), question: "How does a four-coordinate word vector become one grid code?" },
             ),
             exercise(
               "Count what each rounding rule reaches",
               [
   "Sweep the supplied two hundred thousand inputs for each level count from two through twelve. Compare distinct library codes with distinct positions from the starter’s naive squash/scale/round rule.",
-  "Print both reachable counts for every setting. Then quantise exactly zero at eight and five levels, reporting reconstruction and squared distortion."
+  "Print both reachable counts for every setting. Then quantize exactly zero at eight and five levels, reporting reconstruction and squared distortion."
 ],
               `import numpy as np
 from oop_ml import FiniteScalarQuantizer
@@ -1323,7 +1087,7 @@ for n_levels in range(2, 13):
     reached = len(set(quantizer.quantize(inputs.reshape(-1, 1)).ids))
     half_width = (n_levels - 1) / 2
     obvious = len(np.unique(np.rint(squashed * half_width)))
-    print(f"{n_levels:2d} levels: library reaches {n_levels:2d}, obvious rule reaches {obvious:2d}")
+    print(f"{n_levels:2d} levels: library reaches {reached:2d}, obvious rule reaches {obvious:2d}")
 
 for n_levels in (8, 5):
     zero = FiniteScalarQuantizer(levels=(n_levels,)).quantize([[0.0]])
@@ -1344,7 +1108,7 @@ zero at 5 levels comes back as 0.0000, squared distance 0.000000`,
               { hints: [
   "A one-coordinate quantizer needs a one-element levels tuple and a two-dimensional input column.",
   "Count distinct IDs separately from distinct naive rounded values; inspect the even-level half-way case."
-], check: numberCheck("How many distinct positions does the obvious rule reach at twelve levels?", 11, 0.5, "The naive rule reaches eleven positions at twelve requested levels. Its even-level rounding convention fails to use the complete intended grid."), question: "Can a naive rounding rule reach every promised level?" },
+], check: numberCheck("How many distinct positions does the starter's naive rule reach when twelve levels are requested?", 11, 0.5, "The naive rule reaches eleven positions at twelve requested levels. Its even-level rounding convention fails to use the complete intended grid."), question: "Can a naive rounding rule reach every promised level?" },
             ),
             exercise(
               "The same six hundred vectors at three scales",
@@ -1387,7 +1151,7 @@ multiplied by 8.0: error 0.0095, codes reached 117 of 1000, past 0.99 0.8121`,
             exercise(
               "The seventy-two words on the thousand-code grid",
               [
-  "Quantise all seventy-two supplied word vectors on the same thousand-code grid. Print word count, distinct vector count, codes reached, empty codes and largest number of words sharing one code.",
+  "Quantize all seventy-two supplied word vectors on the same thousand-code grid. Print word count, distinct vector count, codes reached, empty codes and largest number of words sharing one code.",
   "Finish with the codes assigned to lower and the punctuated estimate entry from the vocabulary. Preserve the exact spelling estimate. when looking it up."
 ],
               `from collections import Counter

@@ -156,16 +156,16 @@ export function ComponentSpectrum() {
           ) : null,
         )}
         <text x={PADDING} y={12} fontSize={10} fill={SHARED}>
-          bars are what one direction accounts for, the line is the running
-          total
+          bars: squared-magnitude share · line: cumulative share
         </text>
       </svg>
 
       <Legend>
-        The bars fall away sharply after the first two and then flatten, and
-        past the fourteenth they are exactly nothing, since twenty-three words
-        over twenty-four documents built in this pattern leave only fourteen
-        directions with any spread in them at all.
+        Each bar shows a component&apos;s share of the sum of squared values in
+        this count table. The first two capture most of that total. After the
+        fourteenth, no further contribution is visible at the displayed precision.
+        The dependencies between these particular word counts limit how many
+        independent directions the table contains.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">

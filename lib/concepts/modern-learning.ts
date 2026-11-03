@@ -43,7 +43,7 @@ export const modernControls = {
   ],
   "diffusion-models": [
     { key: "step", label: "Forward noise step", kind: "range", initial: 5, min: 0, max: 20, step: 1 },
-    { key: "estimate_fraction", label: "Fraction of true noise supplied by the oracle", kind: "range", initial: 0, min: 0, max: 1, step: 0.1 },
+    { key: "estimate_fraction", label: "Fraction of actual noise used in the estimate", kind: "range", initial: 0, min: 0, max: 1, step: 0.1 },
   ],
   "supervised-fine-tuning": [
     { key: "confidence", label: "Assigned target logit", kind: "range", initial: 1, min: 0, max: 4, step: 0.1 },

@@ -279,7 +279,7 @@
       ]
     },
     "why": "The shape comes from the requested report. The filled sheet supplies references, while subtraction compares them with actual observations.",
-    "limitation": "The workshop uses small positive dimensions. It does not expose uninitialised storage.",
+    "limitation": "The workshop uses small positive dimensions. It does not expose uninitialized storage.",
     "extras": [
       "constant",
       "add",
@@ -393,7 +393,7 @@
       ]
     },
     "why": "Gather chooses the days; transpose changes which meaning occupies a row. Neither step averages or sorts the selected temperatures.",
-    "limitation": "These workshop wires carry values rather than shared NumPy storage. Copy and view behaviour is demonstrated and checked in Python.",
+    "limitation": "These workshop wires carry values rather than shared NumPy storage. Copy and view behavior is demonstrated and checked in Python.",
     "extras": [
       "constant",
       "add",
@@ -787,7 +787,7 @@
   },
   {
     "id": "numpy-vectorisation",
-    "title": "Inspect every error before summarising the report",
+    "title": "Inspect every error before summarizing the report",
     "problem": "Botie wants one average squared deviation from a supplied target. Opposite temperature deviations must not cancel.",
     "challenge": "Subtract the target from each reading, square the individual differences, then average their contributions.",
     "sources": {
@@ -1520,7 +1520,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-select",
@@ -1653,7 +1653,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-where",
@@ -1807,7 +1807,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-order-limit",
@@ -1954,7 +1954,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-null",
@@ -2072,7 +2072,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-case",
@@ -2195,7 +2195,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-aggregates",
@@ -2312,7 +2312,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-group-by",
@@ -2438,7 +2438,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-having",
@@ -2592,7 +2592,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-inner-joins",
@@ -2793,7 +2793,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-left-joins",
@@ -2978,7 +2978,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-join-grain",
@@ -3163,7 +3163,7 @@
     ],
     "extras": [],
     "draftVersion": 1,
-    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behaviour, including types and NULL."
+    "limitation": "The workshop calculates over small record lists to make the relational operations visible. It is not a SQL parser or query planner. The worksheet runs SQLite and is the authority for SQL behavior, including types and NULL."
   },
   {
     "id": "sql-subqueries",
@@ -3624,7 +3624,7 @@
       }
     },
     "why": "Complete projected rows determine membership, while set difference removes duplicates and completed work.",
-    "limitation": "The records use consistent text keys. More general SQL type affinity and collation behaviour is outside this graph.",
+    "limitation": "The records use consistent text keys. More general SQL type affinity and collation behavior is outside this graph.",
     "hints": [
       "Project compatible columns before appending.",
       "Set difference needs candidates first and completed rows second."
@@ -3944,7 +3944,7 @@
       }
     },
     "why": "The path guard controls revisits while the final group changes path records into one row per reached node.",
-    "limitation": "This bounded traversal is a record demonstration, not a database optimiser or a complete reachability claim beyond max_depth.",
+    "limitation": "This bounded traversal is a record demonstration, not a database optimizer or a complete reachability claim beyond max_depth.",
     "hints": [
       "Begin with the root record before expanding edges.",
       "Keep the smallest depth per reached node after walking."
@@ -4110,7 +4110,7 @@
       }
     },
     "why": "The sort gives each partition a deterministic order, then the window annotation preserves complete rows.",
-    "limitation": "The timestamp strings are normalised UTC values; mixed timezone strings require normalisation before lexicographic ordering.",
+    "limitation": "The timestamp strings are normalized UTC values; mixed timezone strings require normalization before lexicographic ordering.",
     "hints": [
       "Sort complete records before numbering them.",
       "Use asset_id as the partition and retain row number one."
@@ -4499,7 +4499,7 @@
     "id": "sql-text",
     "title": "Search the prefix that the technician actually typed",
     "problem": "A wildcard-shaped character in an equipment identifier is still part of that identifier.",
-    "challenge": "Trim ordinary edge spaces and lowercase ASCII letters into normalised. Keep the supplied literal prefix, then return record_id and normalised ordered by record_id.",
+    "challenge": "Trim ordinary edge spaces and lowercase ASCII letters into normalized. Keep the supplied literal prefix, then return record_id and normalized ordered by record_id.",
     "sources": {
       "codes": "Imported code records",
       "prefix": "Literal prefix to select"
@@ -4636,10 +4636,10 @@
       }
     },
     "why": "The cleanup component and literal-prefix component expose two separate decisions.",
-    "limitation": "The workshop uses literal starts-with semantics, not a LIKE parser. It deliberately does not perform general Unicode normalisation.",
+    "limitation": "The workshop uses literal starts-with semantics, not a LIKE parser. It deliberately does not perform general Unicode normalization.",
     "hints": [
-      "Keep the raw code and append a normalised field.",
-      "Apply the prefix to normalised rather than raw code."
+      "Keep the raw code and append a normalized field.",
+      "Apply the prefix to normalized rather than raw code."
     ],
     "extras": [],
     "draftVersion": 1
@@ -5371,7 +5371,7 @@
   },
   {
     "id": "sql-insert-update-delete",
-    "title": "Close one job without changing its neighbours",
+    "title": "Close one job without changing its neighbors",
     "problem": "A status update belongs to one selected job.",
     "challenge": "The selector gives field values that must all match a job. Find those records, replace only the fields named in patch, and return the whole queue in its original order. Keep IDs and every unmatched record unchanged.",
     "sources": {
@@ -5897,7 +5897,7 @@
       ]
     },
     "why": "A leading equality prefix identifies a candidate region in the chosen lexicographic ordering.",
-    "limitation": "This record ordering illustrates index geometry. It does not model B-tree cost, optimiser choices or real I/O.",
+    "limitation": "This record ordering illustrates index geometry. It does not model B-tree cost, optimizer choices or real I/O.",
     "hints": [
       "Keep the index-key list connected to both ordering and prefix selection."
     ],
@@ -8397,7 +8397,7 @@
     "id": "nosql-recovery",
     "title": "Restore stock to a supported point before the bad import",
     "problem": "A snapshot and retained full replacements describe an earlier stock history.",
-    "challenge": "The snapshot is the starting state. Require every consecutive source position after its seq through target, then apply that interval's full replacements to a copy. Return the recovered state labelled with target. Do not skip the faulty import if the selected target includes it.",
+    "challenge": "The snapshot is the starting state. Require every consecutive source position after its seq through target, then apply that interval's full replacements to a copy. Return the recovered state labeled with target. Do not skip the faulty import if the selected target includes it.",
     "sources": {
       "snapshot": "Backup snapshot",
       "events": "Retained recovery log",
@@ -13183,7 +13183,7 @@
     "id": "distribution-shift",
     "title": "Compare the greenhouse population mix",
     "problem": "Botie needs to compare roof-category shares in a reference report and a new report. Both use the same category order.",
-    "challenge": "Normalise each count vector by its own total, take absolute differences, add them, and divide by two.",
+    "challenge": "Normalize each count vector by its own total, take absolute differences, add them, and divide by two.",
     "sources": {
       "reference": "Reference category counts",
       "current": "Current category counts"
@@ -13297,7 +13297,7 @@
         }
       ]
     },
-    "why": "Normalisation removes volume differences. The remaining distance measures how the supplied category shares differ.",
+    "why": "Normalization removes volume differences. The remaining distance measures how the supplied category shares differ.",
     "limitation": "Both reports must have positive totals and aligned, nonnegative counts. This is a distribution audit, not a performance estimate or an automatic retraining rule.",
     "extras": [
       "constant",
@@ -13880,7 +13880,7 @@
       ]
     },
     "why": "Pairing removes a difference in case difficulty from the direct comparison. It does not remove sampling or selection uncertainty.",
-    "limitation": "This workshop summarises supplied losses. Use the Python exercise and an appropriate sampling design to investigate uncertainty.",
+    "limitation": "This workshop summarizes supplied losses. Use the Python exercise and an appropriate sampling design to investigate uncertainty.",
     "extras": [],
     "draftVersion": 1
   },
@@ -14693,7 +14693,7 @@
     "id": "naive-bayes",
     "title": "Combine the sensor's clues",
     "problem": "Botie has several observed signs. Each table row gives their probabilities under one cause: faulty first, working second.",
-    "challenge": "Multiply probabilities within each row, weight the resulting likelihoods by their priors, and normalise the two contributions.",
+    "challenge": "Multiply probabilities within each row, weight the resulting likelihoods by their priors, and normalize the two contributions.",
     "sources": {
       "rates": "Probabilities of observed signs by cause",
       "prior": "Faulty and working priors"
@@ -14829,7 +14829,7 @@
   {
     "id": "support-vector-machines",
     "title": "Measure the boundary's margin violations",
-    "problem": "Botie's labelled parts have supplied measurements and a proposed linear boundary. Correct labels alone do not tell him which parts sit inside its margin.",
+    "problem": "Botie's labeled parts have supplied measurements and a proposed linear boundary. Correct labels alone do not tell him which parts sit inside its margin.",
     "challenge": "Form the scores, multiply by the labels, calculate the shortfall from one, keep positive shortfalls, and return their mean.",
     "sources": {
       "measurements": "Part measurements by row",
@@ -14962,8 +14962,8 @@
         }
       ]
     },
-    "why": "The label turns either correct side into a positive signed score. The remaining shortfall measures margin violation, and the mean summarises the proposed boundary's examples.",
-    "limitation": "The weights are supplied, not fitted. A full SVM objective also penalises their norm, and its score is not a calibrated probability.",
+    "why": "The label turns either correct side into a positive signed score. The remaining shortfall measures margin violation, and the mean summarizes the proposed boundary's examples.",
+    "limitation": "The weights are supplied, not fitted. A full SVM objective also penalizes their norm, and its score is not a calibrated probability.",
     "extras": [
       "constant",
       "add",
@@ -15069,8 +15069,8 @@
   {
     "id": "density-based-clustering",
     "title": "Find the points that can grow a group",
-    "problem": "Botie's sensor locations need a local density test before he can connect dense regions. A point counts itself among its neighbours.",
-    "challenge": "Which sensor locations have enough neighbours to support a dense region? Compare every pair's Euclidean distance with the inclusive radius. Count each point itself, then return 1 where its neighbour count reaches the minimum and 0 elsewhere. These are core-point flags, not cluster labels.",
+    "problem": "Botie's sensor locations need a local density test before he can connect dense regions. A point counts itself among its neighbors.",
+    "challenge": "Which sensor locations have enough neighbors to support a dense region? Compare every pair's Euclidean distance with the inclusive radius. Count each point itself, then return 1 where its neighbor count reaches the minimum and 0 elsewhere. These are core-point flags, not cluster labels.",
     "sources": {
       "locations": "Sensor locations by row",
       "radius": "Neighbourhood radius",
@@ -15182,7 +15182,7 @@
         }
       ]
     },
-    "why": "The distance table becomes a neighbourhood table. Row totals count support, and the final comparison identifies cores under the chosen convention.",
+    "why": "The distance table becomes a neighborhood table. Row totals count support, and the final comparison identifies cores under the chosen convention.",
     "limitation": "Core detection is one part of DBSCAN. This result does not assign cluster IDs or attach border points, and density settings need validation against the intended task.",
     "extras": [
       "constant",
@@ -15727,8 +15727,8 @@
   {
     "id": "connected-components",
     "title": "Count connected seed regions",
-    "problem": "Botie has a foreground mask. Group reachable foreground pixels under the supplied neighbour rule, then count the resulting regions.",
-    "challenge": "Which foreground pixels belong to one reachable region? Label them using the supplied 4-neighbour or 8-neighbour rule, then return the number of regions. This labeller reserves zero for background and assigns consecutive positive IDs, so the largest ID gives the count.",
+    "problem": "Botie has a foreground mask. Group reachable foreground pixels under the supplied neighbor rule, then count the resulting regions.",
+    "challenge": "Which foreground pixels belong to one reachable region? Label them using the supplied 4-neighbor or 8-neighbor rule, then return the number of regions. This labeller reserves zero for background and assigns consecutive positive IDs, so the largest ID gives the count.",
     "sources": {
       "mask": "Seed foreground mask",
       "connectivity": "Neighbour rule: 4 or 8"
@@ -15821,7 +15821,7 @@
         }
       ]
     },
-    "why": "Labelling counts groups connected by the chosen neighbour rule. Consecutive positive IDs make the maximum equal the group count, including zero for an empty mask.",
+    "why": "Labeling counts groups connected by the chosen neighbor rule. Consecutive positive IDs make the maximum equal the group count, including zero for an empty mask.",
     "limitation": "Connected regions are not necessarily physical objects. Touching seeds can merge, and a fragmented seed can split.",
     "extras": [
       "constant",
@@ -15843,7 +15843,7 @@
   },
   {
     "id": "image-augmentation",
-    "title": "Reflect a labelled seed image",
+    "title": "Reflect a labeled seed image",
     "problem": "Botie is creating a reflected training view. The segmentation mask must continue to identify the same seed pixels.",
     "challenge": "Reverse columns in both the image and the mask. Pack the transformed image first and the transformed mask second.",
     "sources": {
@@ -16168,8 +16168,8 @@
   {
     "id": "bounding-boxes",
     "title": "Measure the overlap of two seed rectangles",
-    "problem": "Botie has a predicted rectangle and a labelled rectangle. Calculate their intersection over union using continuous boundary coordinates.",
-    "challenge": "How much of the covered area do the predicted and labelled rectangles share? Coordinates are [left, top, right, bottom], treated as continuous boundaries. Find each area and the intersection, form the union without counting the intersection twice, then return intersection divided by union.",
+    "problem": "Botie has a predicted rectangle and a labeled rectangle. Calculate their intersection over union using continuous boundary coordinates.",
+    "challenge": "How much of the covered area do the predicted and labeled rectangles share? Coordinates are [left, top, right, bottom], treated as continuous boundaries. Find each area and the intersection, form the union without counting the intersection twice, then return intersection divided by union.",
     "sources": {
       "a": "Predicted rectangle",
       "b": "Labelled rectangle"
@@ -16302,7 +16302,7 @@
       ]
     },
     "why": "Subtracting the intersection prevents the union from counting shared area twice. The ratio compares shared coverage with all covered area.",
-    "limitation": "All rectangles must have positive width and height. This calculation is one pairwise localisation measure, not a complete detection evaluation.",
+    "limitation": "All rectangles must have positive width and height. This calculation is one pairwise localization measure, not a complete detection evaluation.",
     "extras": [
       "constant",
       "add",
@@ -16516,7 +16516,7 @@
       ]
     },
     "why": "Ranking determines which candidate gets the first decision. Each kept candidate removes only still-available boxes with overlap strictly above the threshold.",
-    "limitation": "All candidates here belong to one class. Ties use the original index; real library tie behaviour can differ. Suppression can mistakenly remove nearby real objects.",
+    "limitation": "All candidates here belong to one class. Ties use the original index; real library tie behavior can differ. Suppression can mistakenly remove nearby real objects.",
     "extras": [
       "constant",
       "add",
@@ -16606,7 +16606,7 @@
         }
       ]
     },
-    "why": "Absolute values stop positive and negative errors from cancelling. Each pair must describe the same target date.",
+    "why": "Absolute values stop positive and negative errors from canceling. Each pair must describe the same target date.",
     "limitation": "These are supplied historical forecasts. This calculation does not fit a model or estimate uncertainty.",
     "extras": [
       "constant",
@@ -16696,7 +16696,7 @@
         }
       ]
     },
-    "why": "Each row ends before its target. Averaging keeps target dates separate while summarising their available history.",
+    "why": "Each row ends before its target. Averaging keeps target dates separate while summarizing their available history.",
     "limitation": "Inputs must be evenly spaced and already audited for availability. This tool does not fill missing dates.",
     "extras": [
       "constant",
@@ -17365,7 +17365,7 @@
       ]
     },
     "why": "Each extra delay introduces another factor of gamma. The dot product combines the weighted contributions.",
-    "limitation": "Rewards and episode termination are supplied. A return from one realised episode is not a policy's expected value.",
+    "limitation": "Rewards and episode termination are supplied. A return from one realized episode is not a policy's expected value.",
     "extras": [
       "constant",
       "add",
@@ -17821,7 +17821,7 @@
         }
       ]
     },
-    "why": "Each outcome contributes to its own parameter before normalisation.",
+    "why": "Each outcome contributes to its own parameter before normalization.",
     "limitation": "Use positive prior parameters and non-negative integer counts. Trials assume one stable rate.",
     "extras": [
       "constant",
@@ -18533,7 +18533,7 @@
       ]
     },
     "why": "Magnitude scales each direction separately.",
-    "limitation": "This final stage assumes valid corrected moments. The full optimiser also maintains state and counts updates.",
+    "limitation": "This final stage assumes valid corrected moments. The full optimizer also maintains state and counts updates.",
     "extras": [
       "constant",
       "add",
@@ -18617,7 +18617,7 @@
         }
       ]
     },
-    "why": "Symmetric perturbations estimate the local slope while cancelling some approximation error.",
+    "why": "Symmetric perturbations estimate the local slope while canceling some approximation error.",
     "limitation": "Use deterministic evaluations at a smooth point. Finite differences are approximate.",
     "extras": [
       "constant",
@@ -18731,7 +18731,7 @@
         ]
       },
       {
-        "name": "Different favourite",
+        "name": "Different favorite",
         "data": {
           "opened": [
             [
@@ -18782,7 +18782,7 @@
       ]
     },
     "why": "The reduction preserves a separate popularity count for each guide.",
-    "limitation": "Zero is unobserved interaction, not proof of dislike. Ties use catalogue order.",
+    "limitation": "Zero is unobserved interaction, not proof of dislike. Ties use catalog order.",
     "extras": [
       "constant",
       "add",
@@ -18886,7 +18886,7 @@
         }
       ]
     },
-    "why": "Normalising removes length so direction drives this comparison.",
+    "why": "Normalizing removes length so direction drives this comparison.",
     "limitation": "Requires nonzero vectors with matching feature meanings. A score is not a calibrated probability.",
     "extras": [
       "constant",
@@ -18904,8 +18904,8 @@
   {
     "id": "collaborative-filtering",
     "title": "Predict a reader’s rating",
-    "problem": "Botie has positive neighbour similarities and their observed ratings for the candidate.",
-    "challenge": "Subtract neighbour means, compute a weighted average of deviations, then add the target reader’s mean.",
+    "problem": "Botie has positive neighbor similarities and their observed ratings for the candidate.",
+    "challenge": "Subtract neighbor means, compute a weighted average of deviations, then add the target reader’s mean.",
     "sources": {
       "ratings": "Neighbour ratings",
       "means": "Neighbour means",
@@ -18952,7 +18952,7 @@
         "expected": 2
       },
       {
-        "name": "One neighbour",
+        "name": "One neighbor",
         "data": {
           "ratings": [
             4
@@ -19008,8 +19008,8 @@
         }
       ]
     },
-    "why": "Centred deviations preserve preference relative to each neighbour’s rating scale.",
-    "limitation": "Weights must be non-negative with positive total. Missing neighbours are excluded before this calculation.",
+    "why": "Centered deviations preserve preference relative to each neighbor’s rating scale.",
+    "limitation": "Weights must be non-negative with positive total. Missing neighbors are excluded before this calculation.",
     "extras": [
       "constant",
       "add",
@@ -19340,8 +19340,8 @@
   {
     "id": "local-density-anomalies",
     "title": "Compare a point with its local surroundings",
-    "problem": "Botie has reachability distances and the neighbours’ own densities.",
-    "challenge": "Is this point in a sparser neighbourhood than its neighbours? The positive reachability distances are already supplied. Their reciprocal mean gives the point's local reachability density. Divide each supplied neighbour density by that density, then return the mean ratio, the local outlier factor.",
+    "problem": "Botie has reachability distances and the neighbors’ own densities.",
+    "challenge": "Is this point in a sparser neighborhood than its neighbors? The positive reachability distances are already supplied. Their reciprocal mean gives the point's local reachability density. Divide each supplied neighbor density by that density, then return the mean ratio, the local outlier factor.",
     "sources": {
       "reach": "Positive reachability distances",
       "neighbours": "Neighbour local densities"
@@ -19422,7 +19422,7 @@
       ]
     },
     "why": "The score compares density at the point with density nearby.",
-    "limitation": "Inputs must come from the same neighbourhood rule. This stage does not construct neighbour sets.",
+    "limitation": "Inputs must come from the same neighborhood rule. This stage does not construct neighbor sets.",
     "extras": [
       "constant",
       "add",
@@ -19439,7 +19439,7 @@
   {
     "id": "isolation-forests",
     "title": "Score isolation paths",
-    "problem": "Botie has this reading’s path length in each tree and the positive sample-size normaliser.",
+    "problem": "Botie has this reading’s path length in each tree and the positive sample-size normalizer.",
     "challenge": "How quickly did the fitted trees isolate this reading? Average its supplied path lengths, divide by the positive sample-size reference c(n), negate the result and raise two to that power. Return the anomaly score; shorter average paths should give larger scores.",
     "sources": {
       "paths": "Paths across trees",
@@ -19669,7 +19669,7 @@
     "id": "graph-representations",
     "title": "Count the network’s connections",
     "problem": "Botie wants the degree of every pump in an undirected binary network.",
-    "challenge": "An adjacency row belongs to one pump, and a 1 in a column marks a connection to that pump. Sum each row and return one neighbour count per pump in the same order.",
+    "challenge": "An adjacency row belongs to one pump, and a 1 in a column marks a connection to that pump. Sum each row and return one neighbor count per pump in the same order.",
     "sources": {
       "A": "Undirected binary adjacency matrix"
     },
@@ -19757,7 +19757,7 @@
       ]
     },
     "why": "Each row retains its node identity while its edge entries are counted.",
-    "limitation": "The supplied graphs are undirected, binary and have no self-loops, so row sums count neighbours. Weighted row sums instead measure total weight; a directed graph needs an explicit incoming or outgoing convention.",
+    "limitation": "The supplied graphs are undirected, binary and have no self-loops, so row sums count neighbors. Weighted row sums instead measure total weight; a directed graph needs an explicit incoming or outgoing convention.",
     "extras": [
       "constant",
       "add",
@@ -19894,9 +19894,9 @@
   },
   {
     "id": "neighbour-aggregation",
-    "title": "Read neighbouring pumps",
+    "title": "Read neighboring pumps",
     "problem": "Botie has an undirected adjacency matrix and aligned scalar readings.",
-    "challenge": "What do the connected pumps report on average? Matrix-vector multiplication sums neighbouring readings for each adjacency row. Divide each sum by that row's neighbour count, returning zero for an isolated pump. Keep one output per original pump.",
+    "challenge": "What do the connected pumps report on average? Matrix-vector multiplication sums neighboring readings for each adjacency row. Divide each sum by that row's neighbor count, returning zero for an isolated pump. Keep one output per original pump.",
     "sources": {
       "A": "Binary adjacency matrix",
       "x": "Node readings"
@@ -20014,7 +20014,7 @@
         }
       ]
     },
-    "why": "Each output remains attached to a node while summarising its neighbourhood.",
+    "why": "Each output remains attached to a node while summarizing its neighborhood.",
     "limitation": "The zero fallback is explicit. For directed graphs, choose message orientation before multiplying.",
     "extras": [
       "constant",
@@ -20033,7 +20033,7 @@
     "id": "graph-convolution",
     "title": "Pass measurements through one graph layer",
     "problem": "Botie has an undirected adjacency matrix, node features, and supplied feature weights.",
-    "challenge": "Each node should retain its own reading while also receiving information from neighbours. Add the identity matrix to create self-connections. Scale each connection by the reciprocal square roots of its endpoints' resulting neighbour counts. Use that matrix to mix node-feature rows, apply the shared feature weights, then replace negative outputs with zero. Return one feature row per node.",
+    "challenge": "Each node should retain its own reading while also receiving information from neighbors. Add the identity matrix to create self-connections. Scale each connection by the reciprocal square roots of its endpoints' resulting neighbor counts. Use that matrix to mix node-feature rows, apply the shared feature weights, then replace negative outputs with zero. Return one feature row per node.",
     "sources": {
       "A": "Undirected adjacency, zero diagonal",
       "X": "Node feature rows",
@@ -20515,7 +20515,7 @@
   },
   {
     "id": "causal-adjustment",
-    "title": "Standardise the schedule comparison",
+    "title": "Standardize the schedule comparison",
     "problem": "Botie has both outcome means for each starting condition and one target population.",
     "challenge": "What comparison would use the same mix of dry and moist beds for both schedules? Subtract control mean from treatment mean within each starting-condition group, then average those differences using the target population's supplied proportions. Return that adjusted difference.",
     "sources": {
@@ -20773,7 +20773,7 @@
       ]
     },
     "why": "Weighting changes how observed outcomes represent the target population under the identification assumptions.",
-    "limitation": "This uses the unnormalised all-unit mean. Positivity and no unmeasured confounding cannot be established by the arithmetic.",
+    "limitation": "This uses the unnormalized all-unit mean. Positivity and no unmeasured confounding cannot be established by the arithmetic.",
     "extras": [
       "constant",
       "add",
@@ -20911,7 +20911,7 @@
       ]
     },
     "why": "The same retained transformation and model state produce the same numerical procedure.",
-    "limitation": "Feature order and units must match the saved contract. This example is a linear predictor, not arbitrary model serialisation.",
+    "limitation": "Feature order and units must match the saved contract. This example is a linear predictor, not arbitrary model serialization.",
     "extras": [
       "constant",
       "add",
@@ -21012,7 +21012,7 @@
       ]
     },
     "why": "Validation checks the data boundary before downstream operations run.",
-    "limitation": "All listed examples are valid inputs; the validator tool rejects wrong widths and non-finite values, but these cases alone do not demonstrate rejection behaviour. Numeric shape checks cannot infer feature names or units, which need their own request contract.",
+    "limitation": "All listed examples are valid inputs; the validator tool rejects wrong widths and non-finite values, but these cases alone do not demonstrate rejection behavior. Numeric shape checks cannot infer feature names or units, which need their own request contract.",
     "extras": [
       "constant",
       "add",
@@ -21218,7 +21218,7 @@
         }
       ]
     },
-    "why": "A shared fixture set makes behavioural changes measurable.",
+    "why": "A shared fixture set makes behavioral changes measurable.",
     "limitation": "This is prediction change, not prediction error. It cannot choose the better model without a task criterion.",
     "extras": [
       "constant",
@@ -21558,7 +21558,7 @@
     "id": "project-seed-counting",
     "title": "Count candidate seeds in a tray",
     "problem": "Botie has a grayscale tray image and a fixed intensity and minimum-area rule.",
-    "challenge": "Threshold the image, label four-neighbour regions, calculate each region’s size, and count those at least as large as the minimum.",
+    "challenge": "Threshold the image, label four-neighbor regions, calculate each region’s size, and count those at least as large as the minimum.",
     "sources": {
       "image": "Grayscale tray image",
       "threshold": "Strict intensity threshold",
@@ -22343,7 +22343,7 @@
       ]
     },
     "why": "Each multiplication converts a count into bytes. Adding compatible allocations gives a total we can compare with the limit.",
-    "limitation": "The model assumes linear activation scaling and fixed runtime overhead. Actual peak memory and quantised-model quality need measurement.",
+    "limitation": "The model assumes linear activation scaling and fixed runtime overhead. Actual peak memory and quantized-model quality need measurement.",
     "extras": [
       "constant",
       "add",
@@ -22573,7 +22573,7 @@
         }
       ]
     },
-    "why": "Multiplying binary checks requires both conditions for the same candidate. No favourable metric can cancel a failed hard requirement.",
+    "why": "Multiplying binary checks requires both conditions for the same candidate. No favorable metric can cancel a failed hard requirement.",
     "limitation": "These sample measurements do not establish future guarantees. Compare uncertainty, operating conditions, and any omitted requirements.",
     "extras": [
       "constant",
@@ -23186,7 +23186,7 @@
       ]
     },
     "why": "Separate branches preserve the meaning of each requirement. The final AND passes only after both measured quantities meet their limits.",
-    "limitation": "This verifies two toy requirements. Field usefulness, inspection capacity, label coverage, memory, response deadlines, and fallback behaviour still need their own evidence.",
+    "limitation": "This verifies two toy requirements. Field usefulness, inspection capacity, label coverage, memory, response deadlines, and fallback behavior still need their own evidence.",
     "extras": [
       "constant",
       "add",
@@ -24113,7 +24113,7 @@
     "id": "agent-or-workflow",
     "title": "Choose how much control Botie needs",
     "problem": "The maintenance desk has several controllers tested on the same requests. It needs one that meets its declared requirements.",
-    "challenge": "Summarise the aligned trial records, filter by the requirements, and choose the least autonomy among the candidates that passed. Preserve review requirements when none pass.",
+    "challenge": "Summarize the aligned trial records, filter by the requirements, and choose the least autonomy among the candidates that passed. Preserve review requirements when none pass.",
     "sources": {
       "trials": "Controllers tested on the same requests",
       "policy": "Task, time and cost requirements"
@@ -24655,7 +24655,7 @@
     "id": "agent-human-approval",
     "title": "Keep approval attached to the reviewed inspection",
     "problem": "Botie has a proposed job and an earlier review decision. Check whether the decision still applies before the write boundary.",
-    "challenge": "Match the proposal fields against the approval, compare current time with the supplied expiry, and require current reviewer permission. Combine all three boolean checks to return the authorisation route.",
+    "challenge": "Match the proposal fields against the approval, compare current time with the supplied expiry, and require current reviewer permission. Combine all three boolean checks to return the authorization route.",
     "sources": {
       "proposal": "Current proposal fields",
       "approval": "Authoritative approval fixture",
@@ -24954,7 +24954,7 @@
       ]
     },
     "why": "A permission comparison and a content screen answer different questions. This construction keeps them separate.",
-    "limitation": "These fixtures do not detect injection, run an agent or execute tools. Continuing still requires argument validation and service-side resource authorisation.",
+    "limitation": "These fixtures do not detect injection, run an agent or execute tools. Continuing still requires argument validation and service-side resource authorization.",
     "hints": [
       "Follow the proposal into its tool-name reader. Its reason is not a permission field.",
       "The server-grant branch and screen-status branch meet at the final route."
@@ -25228,7 +25228,7 @@
     "limitation": "The fixture assumes trusted classifications and controlled field values. It does not detect hidden personal data, enforce a network sandbox or make a request.",
     "hints": [
       "Inspect the projected record before wiring a release decision.",
-      "Use the projected payload on both the release-label branch and the final output. Reconnecting the original record would defeat minimisation."
+      "Use the projected payload on both the release-label branch and the final output. Reconnecting the original record would defeat minimization."
     ],
     "extras": [],
     "draftVersion": 1
@@ -26327,7 +26327,7 @@
   {
     "id": "agent-langfuse",
     "title": "Keep the missing evaluations visible",
-    "problem": "Botie wants to compare prompt revisions, but scoring finishes out of order and some runs have no judgement.",
+    "problem": "Botie wants to compare prompt revisions, but scoring finishes out of order and some runs have no judgment.",
     "challenge": "Select the requested rubric, attach its scores by trace ID, and keep the requested prompt version. Return [mean of available scores, scored fraction]. A zero counts as scored; missing remains null. Each case includes at least one selected run.",
     "sources": {
       "runs": "Recorded runs and prompt revisions",
@@ -26379,7 +26379,7 @@
         ]
       },
       {
-        "name": "A run never received its judgement",
+        "name": "A run never received its judgment",
         "data": {
           "runs": [
             {
@@ -26894,7 +26894,7 @@
   {
     "id": "agent-model-judges",
     "title": "Give disputed answers a place to go",
-    "problem": "Botie needs a review queue for recorded answer judgements, including disagreements hidden by a favourable average.",
+    "problem": "Botie needs a review queue for recorded answer judgments, including disagreements hidden by a favorable average.",
     "challenge": "Read case IDs from the records. Flag human-versus-judge disagreement and judge-versus-reordered-evidence disagreement. Either flag, or an uncertain label on either comparison, should keep the ID in the review queue. Preserve the input order.",
     "sources": {
       "rows": "Answer judgement records: human, judge, reversed"
@@ -26923,7 +26923,7 @@
         ]
       },
       {
-        "name": "The first judgement agrees; the repeated one changes",
+        "name": "The first judgment agrees; the repeated one changes",
         "data": {
           "rows": [
             {
@@ -27031,8 +27031,8 @@
         }
       ]
     },
-    "why": "The queue preserves individual cases for inspection instead of cancelling opposing disagreements in an average.",
-    "limitation": "These recorded labels are fixtures. Agreement is not proof of correctness, and a changed judgement does not by itself prove a specific source of bias.",
+    "why": "The queue preserves individual cases for inspection instead of canceling opposing disagreements in an average.",
+    "limitation": "These recorded labels are fixtures. Agreement is not proof of correctness, and a changed judgment does not by itself prove a specific source of bias.",
     "extras": [
       "constant",
       "add",
@@ -27435,7 +27435,7 @@
         "expected": 0
       },
       {
-        "name": "Correct behaviour arrives too late",
+        "name": "Correct behavior arrives too late",
         "data": {
           "baseline": [
             {
@@ -28190,7 +28190,7 @@
       ]
     },
     "why": "The release must pass every continuation requirement. The action inventory follows release identity and remains separate from that decision, because stopping new work does not settle existing effects.",
-    "limitation": "This fixture returns a proposed control state and investigation IDs. Real enforcement needs an authenticated operator control, worker acknowledgement, authoritative action reconciliation and an audited recovery process.",
+    "limitation": "This fixture returns a proposed control state and investigation IDs. Real enforcement needs an authenticated operator control, worker acknowledgment, authoritative action reconciliation and an audited recovery process.",
     "extras": [],
     "draftVersion": 1,
     "hints": [
@@ -28488,7 +28488,7 @@
       "Start with the effect-to-control lookup.",
       "Compare required controls with installed names before choosing routes."
     ],
-    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.",
     "extras": [],
     "draftVersion": 1
   },
@@ -28580,12 +28580,12 @@
         }
       ]
     },
-    "why": "Scope and test behaviour remain separate requirements. Neither can compensate for the other.",
+    "why": "Scope and test behavior remain separate requirements. Neither can compensate for the other.",
     "hints": [
       "Extract the complete path set first.",
       "Pass the outside-scope list and the independent test Boolean to the review decision."
     ],
-    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.",
     "extras": [],
     "draftVersion": 1
   },
@@ -28716,7 +28716,7 @@
       "Give the mount checker the approved writable list.",
       "Join findings before asking whether the profile is ready for isolation testing."
     ],
-    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.",
     "extras": [],
     "draftVersion": 1
   },
@@ -28833,7 +28833,7 @@
       "Keep the candidate-to-evidence comparison separate from the check list.",
       "A missing or skipped required check belongs in the unsatisfied list."
     ],
-    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.",
     "extras": [],
     "draftVersion": 1
   },
@@ -28938,7 +28938,7 @@
       "Compare the host-configured identity independently.",
       "A changed description must fail the manifest branch even when the tool name matches."
     ],
-    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.",
     "extras": [],
     "draftVersion": 1
   },
@@ -29081,7 +29081,7 @@
       "The token branch checks recipient and lifetime.",
       "Scope does not replace the token check or the later object check."
     ],
-    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.",
     "extras": [],
     "draftVersion": 1
   },
@@ -29251,7 +29251,7 @@
       "Compare proposal fields with the review record before choosing the effect route.",
       "A matching receipt explains a completed action even when the object version advanced."
     ],
-    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.",
     "extras": [],
     "draftVersion": 1
   },
@@ -29404,7 +29404,7 @@
       "Keep data eligibility separate from capability eligibility.",
       "The final bundle should contain two named lists, not a merged instruction string."
     ],
-    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.",
     "extras": [],
     "draftVersion": 1
   },
@@ -29561,7 +29561,7 @@
       "Compare effects with each case’s own allowlist.",
       "Unknown traces must remain visible in the report used by the release decision."
     ],
-    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behavior.",
     "extras": [],
     "draftVersion": 1
   },
@@ -29690,8 +29690,8 @@
   },
   {
     "id": "software-fitted-state",
-    "title": "Keep the centre on the training branch",
-    "problem": "A new neighbour should not change a pump’s representation.",
+    "title": "Keep the center on the training branch",
+    "problem": "A new neighbor should not change a pump’s representation.",
     "challenge": "Calculate the mean from training readings and subtract it from each request value.",
     "sources": {
       "training": "Fitting readings",
@@ -29715,7 +29715,7 @@
         ]
       },
       {
-        "name": "An extreme neighbour",
+        "name": "An extreme neighbor",
         "data": {
           "training": [
             2,
@@ -30229,7 +30229,7 @@
       ]
     },
     "why": "Only the public edge depends on the old names.",
-    "limitation": "The adapters recognise only these two specified request versions. Supporting another client requires checking its actual message and behaviour, then adding the relevant adapter and fixtures.",
+    "limitation": "The adapters recognize only these two specified request versions. Supporting another client requires checking its actual message and behavior, then adding the relevant adapter and fixtures.",
     "extras": [
       "constant",
       "add",
@@ -30247,7 +30247,7 @@
     "id": "software-semantic-contracts",
     "title": "Convert the request before using fitted state",
     "problem": "Botie’s fitted Celsius model receives temperatures from a device that may report Fahrenheit.",
-    "challenge": "Use the declared unit to obtain a scale and offset. Convert the readings, subtract the saved Celsius centre, and apply the saved coefficient. Return one illustrative score per reading, in order.",
+    "challenge": "Use the declared unit to obtain a scale and offset. Convert the readings, subtract the saved Celsius center, and apply the saved coefficient. Return one illustrative score per reading, in order.",
     "sources": {
       "values": "Incoming temperatures",
       "unit": "Declared temperature unit",
@@ -30349,7 +30349,7 @@
         }
       ]
     },
-    "why": "After conversion, the saved centre and coefficient receive temperatures in their original Celsius unit. Equivalent physical readings therefore receive the same illustrative score.",
+    "why": "After conversion, the saved center and coefficient receive temperatures in their original Celsius unit. Equivalent physical readings therefore receive the same illustrative score.",
     "limitation": "The scores come from a supplied linear rule and have no calibrated probability meaning. This exercise checks conversion and calculation order; sensor calibration and predictive quality require other evidence.",
     "extras": [
       "constant",
@@ -30474,7 +30474,7 @@
     "id": "software-contract-tests",
     "title": "Keep one pump’s transformed value stable across batches",
     "problem": "Botie’s first test accidentally made request-local fitting look correct.",
-    "challenge": "Use the saved centre to transform the current readings. Return that whole list beside a Boolean saying whether its first entry matches the independently supplied expectation within tolerance. Both outputs should describe the same calculation.",
+    "challenge": "Use the saved center to transform the current readings. Return that whole list beside a Boolean saying whether its first entry matches the independently supplied expectation within tolerance. Both outputs should describe the same calculation.",
     "sources": {
       "values": "Current request batch",
       "centre": "Stored training centre",
@@ -31194,6 +31194,1281 @@
     "draftVersion": 1
   },
   {
+    "id": "what-is-databricks",
+    "title": "Connect the Requested Data to the Processing Description",
+    "problem": "The maintenance directory contains both inspection reports and pump readings. A program request must retain the identity of its own input.",
+    "challenge": "Find requestedInput in registeredDatasets. Return a record containing program, input with its name and location, and output with its requested name. Use the current request rather than directory order. Our policy requires a separate output name. These are local instructions, not a cloud execution.",
+    "sources": {
+      "requestedInput": "Requested input dataset name",
+      "registeredDatasets": "Named dataset directory",
+      "program": "Requested program name",
+      "outputName": "Separate output dataset name"
+    },
+    "cases": [
+      {
+        "name": "Readings follow a report entry",
+        "data": {
+          "requestedInput": "lab.raw.readings",
+          "registeredDatasets": [
+            {
+              "name": "lab.raw.inspections",
+              "location": "reports/"
+            },
+            {
+              "name": "lab.raw.readings",
+              "location": "readings/"
+            }
+          ],
+          "program": "clean_v1",
+          "outputName": "lab.prepared.readings"
+        },
+        "expected": {
+          "program": "clean_v1",
+          "input": {
+            "name": "lab.raw.readings",
+            "location": "readings/"
+          },
+          "output": {
+            "name": "lab.prepared.readings"
+          }
+        }
+      },
+      {
+        "name": "The requested input changes",
+        "data": {
+          "requestedInput": "lab.raw.inspections",
+          "registeredDatasets": [
+            {
+              "name": "lab.raw.readings",
+              "location": "readings/"
+            },
+            {
+              "name": "lab.raw.inspections",
+              "location": "reports/"
+            }
+          ],
+          "program": "extract_dates_v1",
+          "outputName": "lab.prepared.inspection_dates"
+        },
+        "expected": {
+          "program": "extract_dates_v1",
+          "input": {
+            "name": "lab.raw.inspections",
+            "location": "reports/"
+          },
+          "output": {
+            "name": "lab.prepared.inspection_dates"
+          }
+        }
+      },
+      {
+        "name": "A configured location changes",
+        "data": {
+          "requestedInput": "lab.raw.readings",
+          "registeredDatasets": [
+            {
+              "name": "lab.raw.readings",
+              "location": "retained/2026/readings/"
+            }
+          ],
+          "program": "clean_v2",
+          "outputName": "lab.prepared.readings_v2"
+        },
+        "expected": {
+          "program": "clean_v2",
+          "input": {
+            "name": "lab.raw.readings",
+            "location": "retained/2026/readings/"
+          },
+          "output": {
+            "name": "lab.prepared.readings_v2"
+          }
+        }
+      }
+    ],
+    "recipe": {
+      "op": "dbxIntroManifest",
+      "inputs": [
+        {
+          "source": "program"
+        },
+        {
+          "op": "dbxIntroResolveDataset",
+          "inputs": [
+            {
+              "source": "requestedInput"
+            },
+            {
+              "source": "registeredDatasets"
+            }
+          ]
+        },
+        {
+          "source": "outputName"
+        }
+      ]
+    },
+    "why": "The processing description follows the request and current directory while preserving the selected input’s identity.",
+    "limitation": "The directory and manifest are declared local teaching formats. They do not call a Databricks API, prove permissions, read a bucket or run the program.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "databricks-data-lakes",
+    "title": "Read the files belonging to this table version",
+    "problem": "Botie can read the first batch. A second file now exists, but the producer has not committed it to the requested table version.",
+    "challenge": "Choose the requested version’s reconstructed manifest, then read only the listed object keys from storage. Return their complete records in manifest order. A file that merely exists must not be added to the result.",
+    "sources": {
+      "manifests": "Retained committed file lists",
+      "version": "Requested version number",
+      "files": "Stored files with decoded records"
+    },
+    "cases": [
+      {
+        "name": "Only the first batch exists",
+        "data": {
+          "manifests": [
+            {
+              "version": 0,
+              "files": [
+                "readings/batch-0.parquet"
+              ]
+            }
+          ],
+          "version": 0,
+          "files": [
+            {
+              "key": "readings/batch-0.parquet",
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 12
+                },
+                {
+                  "pump": "P2",
+                  "temperature_c": 18
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "pump": "P7",
+            "temperature_c": 12
+          },
+          {
+            "pump": "P2",
+            "temperature_c": 18
+          }
+        ]
+      },
+      {
+        "name": "A pending file now exists too",
+        "data": {
+          "manifests": [
+            {
+              "version": 0,
+              "files": [
+                "readings/batch-0.parquet"
+              ]
+            }
+          ],
+          "version": 0,
+          "files": [
+            {
+              "key": "readings/batch-0.parquet",
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 12
+                },
+                {
+                  "pump": "P2",
+                  "temperature_c": 18
+                }
+              ]
+            },
+            {
+              "key": "readings/batch-1.parquet",
+              "rows": [
+                {
+                  "pump": "P9",
+                  "temperature_c": 27
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "pump": "P7",
+            "temperature_c": 12
+          },
+          {
+            "pump": "P2",
+            "temperature_c": 18
+          }
+        ]
+      },
+      {
+        "name": "The second file is committed in a new version",
+        "data": {
+          "manifests": [
+            {
+              "version": 0,
+              "files": [
+                "readings/batch-0.parquet"
+              ]
+            },
+            {
+              "version": 1,
+              "files": [
+                "readings/batch-0.parquet",
+                "readings/batch-1.parquet"
+              ]
+            }
+          ],
+          "version": 1,
+          "files": [
+            {
+              "key": "readings/batch-0.parquet",
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 12
+                },
+                {
+                  "pump": "P2",
+                  "temperature_c": 18
+                }
+              ]
+            },
+            {
+              "key": "readings/batch-1.parquet",
+              "rows": [
+                {
+                  "pump": "P9",
+                  "temperature_c": 27
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "pump": "P7",
+            "temperature_c": 12
+          },
+          {
+            "pump": "P2",
+            "temperature_c": 18
+          },
+          {
+            "pump": "P9",
+            "temperature_c": 27
+          }
+        ]
+      },
+      {
+        "name": "A correction replaces a file without erasing old bytes",
+        "data": {
+          "manifests": [
+            {
+              "version": 0,
+              "files": [
+                "readings/batch-0.parquet"
+              ]
+            },
+            {
+              "version": 2,
+              "files": [
+                "readings/corrected-0.parquet",
+                "readings/batch-1.parquet"
+              ]
+            }
+          ],
+          "version": 2,
+          "files": [
+            {
+              "key": "readings/batch-0.parquet",
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 12
+                },
+                {
+                  "pump": "P2",
+                  "temperature_c": 18
+                }
+              ]
+            },
+            {
+              "key": "readings/batch-1.parquet",
+              "rows": [
+                {
+                  "pump": "P9",
+                  "temperature_c": 27
+                }
+              ]
+            },
+            {
+              "key": "readings/corrected-0.parquet",
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 14
+                },
+                {
+                  "pump": "P2",
+                  "temperature_c": 18
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "pump": "P7",
+            "temperature_c": 14
+          },
+          {
+            "pump": "P2",
+            "temperature_c": 18
+          },
+          {
+            "pump": "P9",
+            "temperature_c": 27
+          }
+        ]
+      },
+      {
+        "name": "An intentionally empty committed table",
+        "data": {
+          "manifests": [
+            {
+              "version": 4,
+              "files": []
+            }
+          ],
+          "version": 4,
+          "files": [
+            {
+              "key": "readings/batch-0.parquet",
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 12
+                },
+                {
+                  "pump": "P2",
+                  "temperature_c": 18
+                }
+              ]
+            }
+          ]
+        },
+        "expected": []
+      }
+    ],
+    "recipe": {
+      "op": "dbxReadNamedFiles",
+      "inputs": [
+        {
+          "op": "dbxCommittedFileKeys",
+          "inputs": [
+            {
+              "source": "manifests"
+            },
+            {
+              "source": "version"
+            }
+          ]
+        },
+        {
+          "source": "files"
+        }
+      ]
+    },
+    "why": "The active file list is chosen before the records are read. Adding an unrelated stored file cannot change an earlier committed result.",
+    "limitation": "This local model receives decoded Python-like records and already reconstructed manifests. It does not access storage, replay a Delta transaction log or implement the real table format’s transaction and failure guarantees.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "databricks-workspaces-compute",
+    "title": "Save the Intended Result Before Restarting",
+    "problem": "Botie can see the cleaned pump rows in a preview. The next process must read those rows from the saved table after the preview’s process has restarted.",
+    "challenge": "Start from savedRows, attach calculatedRows as the live preview, deliberately save that preview, and restart the teaching process. Return the final state with exactly two fields: saved contains calculatedRows, while preview is null. An empty calculated result is valid and must also be saved. The source supplies the program result so this workshop can focus on its lifetime.",
+    "sources": {
+      "savedRows": "Previously saved pump records",
+      "calculatedRows": "Rows calculated by the cleaning program"
+    },
+    "cases": [
+      {
+        "name": "Two saved rows become one accepted row",
+        "data": {
+          "savedRows": [
+            {
+              "id": "a",
+              "temperature": 12
+            },
+            {
+              "id": "b",
+              "temperature": -3
+            }
+          ],
+          "calculatedRows": [
+            {
+              "id": "a",
+              "temperature": 12
+            }
+          ]
+        },
+        "expected": {
+          "saved": [
+            {
+              "id": "a",
+              "temperature": 12
+            }
+          ],
+          "preview": null
+        }
+      },
+      {
+        "name": "The new calculation legitimately accepts no rows",
+        "data": {
+          "savedRows": [
+            {
+              "id": "c",
+              "temperature": -5
+            }
+          ],
+          "calculatedRows": []
+        },
+        "expected": {
+          "saved": [],
+          "preview": null
+        }
+      },
+      {
+        "name": "A later batch has different accepted records",
+        "data": {
+          "savedRows": [
+            {
+              "id": "d",
+              "temperature": 6
+            }
+          ],
+          "calculatedRows": [
+            {
+              "id": "e",
+              "temperature": 14
+            },
+            {
+              "id": "f",
+              "temperature": 9
+            }
+          ]
+        },
+        "expected": {
+          "saved": [
+            {
+              "id": "e",
+              "temperature": 14
+            },
+            {
+              "id": "f",
+              "temperature": 9
+            }
+          ],
+          "preview": null
+        }
+      }
+    ],
+    "recipe": {
+      "op": "dbxWorkspaceRestart",
+      "inputs": [
+        {
+          "op": "dbxWorkspaceSavePreview",
+          "inputs": [
+            {
+              "op": "dbxWorkspacePreview",
+              "inputs": [
+                {
+                  "op": "dbxWorkspaceOpen",
+                  "inputs": [
+                    {
+                      "source": "savedRows"
+                    }
+                  ]
+                },
+                {
+                  "source": "calculatedRows"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Saving happens while the preview exists. The restart then clears temporary state while leaving the deliberately saved result available.",
+    "limitation": "The saved field is an in-memory representation of persistent storage for this model. These tools neither run a notebook nor establish real write durability, permissions, transactions or cloud behavior.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "databricks-table-names",
+    "title": "Find the intended registered table",
+    "problem": "Two departments use readings as a table name. Botie needs to see which full table the supplied reference actually requests before using its records.",
+    "challenge": "Resolve the supplied one-, two- or three-part name using only the missing session defaults. Find that exact table in the registry, check its effective reader list for the supplied principal, and return its full name beside copied rows. A changed current schema must affect a short name, while a fully qualified reference stays explicit.",
+    "sources": {
+      "parts": "Requested table-name parts",
+      "currentCatalog": "Current catalog",
+      "currentSchema": "Current schema",
+      "registry": "Registered tables and effective readers",
+      "principal": "Verified principal identity"
+    },
+    "cases": [
+      {
+        "name": "The short name begins in maintenance",
+        "data": {
+          "parts": [
+            "readings"
+          ],
+          "currentCatalog": "operations",
+          "currentSchema": "maintenance",
+          "registry": [
+            {
+              "name": "operations.maintenance.readings",
+              "readers": [
+                "botie"
+              ],
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 12
+                }
+              ]
+            },
+            {
+              "name": "operations.commissioning.readings",
+              "readers": [
+                "botie"
+              ],
+              "rows": [
+                {
+                  "pump": "TEST_P7",
+                  "temperature_c": 80
+                }
+              ]
+            }
+          ],
+          "principal": "botie"
+        },
+        "expected": {
+          "name": "operations.maintenance.readings",
+          "rows": [
+            {
+              "pump": "P7",
+              "temperature_c": 12
+            }
+          ]
+        }
+      },
+      {
+        "name": "The current schema changes to commissioning",
+        "data": {
+          "parts": [
+            "readings"
+          ],
+          "currentCatalog": "operations",
+          "currentSchema": "commissioning",
+          "registry": [
+            {
+              "name": "operations.maintenance.readings",
+              "readers": [
+                "botie"
+              ],
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 12
+                }
+              ]
+            },
+            {
+              "name": "operations.commissioning.readings",
+              "readers": [
+                "botie"
+              ],
+              "rows": [
+                {
+                  "pump": "TEST_P7",
+                  "temperature_c": 80
+                }
+              ]
+            }
+          ],
+          "principal": "botie"
+        },
+        "expected": {
+          "name": "operations.commissioning.readings",
+          "rows": [
+            {
+              "pump": "TEST_P7",
+              "temperature_c": 80
+            }
+          ]
+        }
+      },
+      {
+        "name": "The maintenance name is fully qualified",
+        "data": {
+          "parts": [
+            "operations",
+            "maintenance",
+            "readings"
+          ],
+          "currentCatalog": "operations",
+          "currentSchema": "commissioning",
+          "registry": [
+            {
+              "name": "operations.maintenance.readings",
+              "readers": [
+                "botie"
+              ],
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 12
+                }
+              ]
+            },
+            {
+              "name": "operations.commissioning.readings",
+              "readers": [
+                "botie"
+              ],
+              "rows": [
+                {
+                  "pump": "TEST_P7",
+                  "temperature_c": 80
+                }
+              ]
+            }
+          ],
+          "principal": "botie"
+        },
+        "expected": {
+          "name": "operations.maintenance.readings",
+          "rows": [
+            {
+              "pump": "P7",
+              "temperature_c": 12
+            }
+          ]
+        }
+      },
+      {
+        "name": "Two name parts override only the schema",
+        "data": {
+          "parts": [
+            "maintenance",
+            "readings"
+          ],
+          "currentCatalog": "operations",
+          "currentSchema": "commissioning",
+          "registry": [
+            {
+              "name": "operations.maintenance.readings",
+              "readers": [
+                "botie"
+              ],
+              "rows": [
+                {
+                  "pump": "P7",
+                  "temperature_c": 12
+                }
+              ]
+            },
+            {
+              "name": "operations.commissioning.readings",
+              "readers": [
+                "botie"
+              ],
+              "rows": [
+                {
+                  "pump": "TEST_P7",
+                  "temperature_c": 80
+                }
+              ]
+            }
+          ],
+          "principal": "botie"
+        },
+        "expected": {
+          "name": "operations.maintenance.readings",
+          "rows": [
+            {
+              "pump": "P7",
+              "temperature_c": 12
+            }
+          ]
+        }
+      },
+      {
+        "name": "A registered table can be empty",
+        "data": {
+          "parts": [
+            "empty"
+          ],
+          "currentCatalog": "operations",
+          "currentSchema": "maintenance",
+          "registry": [
+            {
+              "name": "operations.maintenance.empty",
+              "readers": [
+                "botie"
+              ],
+              "rows": []
+            }
+          ],
+          "principal": "botie"
+        },
+        "expected": {
+          "name": "operations.maintenance.empty",
+          "rows": []
+        }
+      }
+    ],
+    "recipe": {
+      "op": "dbxReadRegisteredTable",
+      "inputs": [
+        {
+          "op": "dbxFindTable",
+          "inputs": [
+            {
+              "source": "registry"
+            },
+            {
+              "op": "dbxResolveTableName",
+              "inputs": [
+                {
+                  "source": "parts"
+                },
+                {
+                  "source": "currentCatalog"
+                },
+                {
+                  "source": "currentSchema"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source": "principal"
+        }
+      ]
+    },
+    "why": "The resolved full identity remains visible. Identical short names cannot silently stand in for each other across departments.",
+    "limitation": "This local model uses simple lowercase registered names and explicit effective reader lists. It does not parse SQL, authenticate identities or implement Unity Catalog inheritance, ownership, namespace privileges, workspace restrictions or cloud storage permissions.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "databricks-basics",
+    "title": "Count Readings Across Partitions",
+    "problem": "Botie has the pump readings divided into portions. The number of portions alone does not tell him how many readings arrived.",
+    "challenge": "The input is a list of partitions, each containing reading records. Return two results together: first a list of record counts in partition order, then the total number of records. Keep zero for an empty partition. Count all supplied records, including repeated values. Your construction must work when the same records are arranged into a different number of partitions.",
+    "sources": {
+      "partitions": "Pump readings divided into partitions"
+    },
+    "cases": [
+      {
+        "name": "Two equally sized partitions",
+        "data": {
+          "partitions": [
+            [
+              {
+                "id": "r0",
+                "pump": "P7",
+                "temperature": 12
+              },
+              {
+                "id": "r1",
+                "pump": "P7",
+                "temperature": 9
+              }
+            ],
+            [
+              {
+                "id": "r2",
+                "pump": "P7",
+                "temperature": -3
+              },
+              {
+                "id": "r3",
+                "pump": "P7",
+                "temperature": 14
+              }
+            ]
+          ]
+        },
+        "expected": [
+          [
+            2,
+            2
+          ],
+          4
+        ]
+      },
+      {
+        "name": "The same records occupy uneven partitions",
+        "data": {
+          "partitions": [
+            [
+              {
+                "id": "r0",
+                "pump": "P7",
+                "temperature": 12
+              }
+            ],
+            [],
+            [
+              {
+                "id": "r1",
+                "pump": "P7",
+                "temperature": 9
+              },
+              {
+                "id": "r2",
+                "pump": "P7",
+                "temperature": -3
+              },
+              {
+                "id": "r3",
+                "pump": "P7",
+                "temperature": 14
+              }
+            ]
+          ]
+        },
+        "expected": [
+          [
+            1,
+            0,
+            3
+          ],
+          4
+        ]
+      },
+      {
+        "name": "No readings arrived",
+        "data": {
+          "partitions": [
+            [],
+            []
+          ]
+        },
+        "expected": [
+          [
+            0,
+            0
+          ],
+          0
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "pack",
+      "inputs": [
+        {
+          "op": "dbxPartitionSizes",
+          "inputs": [
+            {
+              "source": "partitions"
+            }
+          ]
+        },
+        {
+          "op": "total",
+          "inputs": [
+            {
+              "op": "dbxPartitionSizes",
+              "inputs": [
+                {
+                  "source": "partitions"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each partition contributes its own count. Adding those partial counts preserves the total even when the partition boundaries move.",
+    "limitation": "These are local lists representing partition contents. No actual Spark tasks or cloud computers run here, and the workshop does not measure parallel speed or recovery behavior.",
+    "extras": [
+      "count"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "Count records in each partition keeps one result per inner list. Count items applied to the outer list would count partitions instead.",
+      "Use Add a list on the partial counts, then Collect two results to keep the count list beside its total."
+    ]
+  },
+  {
+    "id": "databricks-notebooks-jobs",
+    "title": "Choose the Next Pump-Processing Tasks",
+    "problem": "Botie’s notebook procedure now needs to run without someone choosing the next cell from memory.",
+    "challenge": "Connect the task plan and successfully completed IDs to a prerequisite check. From that inspection, return only ready, unfinished task IDs in plan order. A task with no prerequisites may start initially; a completed task must not be returned again. The next example changes which work has succeeded.",
+    "sources": {
+      "tasks": "Pump update task plan",
+      "completed": "Successfully completed tasks"
+    },
+    "cases": [
+      {
+        "name": "The input has been read",
+        "data": {
+          "tasks": [
+            {
+              "id": "read",
+              "dependsOn": []
+            },
+            {
+              "id": "clean",
+              "dependsOn": [
+                "read"
+              ]
+            },
+            {
+              "id": "check",
+              "dependsOn": [
+                "clean"
+              ]
+            },
+            {
+              "id": "publish",
+              "dependsOn": [
+                "check"
+              ]
+            }
+          ],
+          "completed": [
+            "read"
+          ]
+        },
+        "expected": [
+          "clean"
+        ]
+      },
+      {
+        "name": "The quality check has also succeeded",
+        "data": {
+          "tasks": [
+            {
+              "id": "read",
+              "dependsOn": []
+            },
+            {
+              "id": "clean",
+              "dependsOn": [
+                "read"
+              ]
+            },
+            {
+              "id": "check",
+              "dependsOn": [
+                "clean"
+              ]
+            },
+            {
+              "id": "publish",
+              "dependsOn": [
+                "check"
+              ]
+            }
+          ],
+          "completed": [
+            "read",
+            "clean",
+            "check"
+          ]
+        },
+        "expected": [
+          "publish"
+        ]
+      },
+      {
+        "name": "Two inspections can follow cleaning",
+        "data": {
+          "tasks": [
+            {
+              "id": "read",
+              "dependsOn": []
+            },
+            {
+              "id": "clean",
+              "dependsOn": [
+                "read"
+              ]
+            },
+            {
+              "id": "check-values",
+              "dependsOn": [
+                "clean"
+              ]
+            },
+            {
+              "id": "check-count",
+              "dependsOn": [
+                "clean"
+              ]
+            },
+            {
+              "id": "publish",
+              "dependsOn": [
+                "check-values",
+                "check-count"
+              ]
+            }
+          ],
+          "completed": [
+            "read",
+            "clean"
+          ]
+        },
+        "expected": [
+          "check-values",
+          "check-count"
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "dbxReadyTaskIds",
+      "inputs": [
+        {
+          "op": "dbxTaskReadiness",
+          "inputs": [
+            {
+              "source": "tasks"
+            },
+            {
+              "source": "completed"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "A task’s missing prerequisites determine whether it can start. Its position on a drawing does not satisfy those prerequisites.",
+    "limitation": "This local graph model checks an all-prerequisites-successful rule. It does not run notebooks, reserve compute, implement retries or reproduce every Lakeflow Jobs run condition.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "databricks-mlflow-basics",
+    "title": "Keep Each Model Output with Its Attempt",
+    "problem": "Botie’s scheduled workflow saved two model files with the same name. Their measurements belong to different attempts.",
+    "challenge": "Find the requested run by its exact ID. Keep that run’s parameters, metrics and input table identity together, then attach only the artifact paths owned by the same run. Return the complete manifest in the stated field order. A repeated filename under another owner is not a match.",
+    "sources": {
+      "runs": "Recorded model attempts",
+      "requestedRunId": "Attempt to inspect",
+      "artifacts": "Saved outputs and their owners"
+    },
+    "cases": [
+      {
+        "name": "The first attempt has one saved model",
+        "data": {
+          "runs": [
+            {
+              "runId": "A",
+              "parameters": {
+                "limit": 10
+              },
+              "metrics": {
+                "mae": 2.5
+              },
+              "dataset": {
+                "table": "maintenance.prepared.readings",
+                "version": 4
+              }
+            },
+            {
+              "runId": "B",
+              "parameters": {
+                "limit": 20
+              },
+              "metrics": {
+                "mae": 1.8
+              },
+              "dataset": {
+                "table": "maintenance.prepared.readings",
+                "version": 5
+              }
+            }
+          ],
+          "requestedRunId": "A",
+          "artifacts": [
+            {
+              "runId": "A",
+              "path": "model.json"
+            },
+            {
+              "runId": "B",
+              "path": "model.json"
+            }
+          ]
+        },
+        "expected": {
+          "runId": "A",
+          "parameters": {
+            "limit": 10
+          },
+          "metrics": {
+            "mae": 2.5
+          },
+          "dataset": {
+            "table": "maintenance.prepared.readings",
+            "version": 4
+          },
+          "artifacts": [
+            "model.json"
+          ]
+        }
+      },
+      {
+        "name": "The requested attempt changes",
+        "data": {
+          "runs": [
+            {
+              "runId": "A",
+              "parameters": {
+                "limit": 10
+              },
+              "metrics": {
+                "mae": 2.5
+              },
+              "dataset": {
+                "table": "maintenance.prepared.readings",
+                "version": 4
+              }
+            },
+            {
+              "runId": "B",
+              "parameters": {
+                "limit": 20
+              },
+              "metrics": {
+                "mae": 1.8
+              },
+              "dataset": {
+                "table": "maintenance.prepared.readings",
+                "version": 5
+              }
+            }
+          ],
+          "requestedRunId": "B",
+          "artifacts": [
+            {
+              "runId": "A",
+              "path": "model.json"
+            },
+            {
+              "runId": "B",
+              "path": "assessment.json"
+            },
+            {
+              "runId": "B",
+              "path": "model.json"
+            }
+          ]
+        },
+        "expected": {
+          "runId": "B",
+          "parameters": {
+            "limit": 20
+          },
+          "metrics": {
+            "mae": 1.8
+          },
+          "dataset": {
+            "table": "maintenance.prepared.readings",
+            "version": 5
+          },
+          "artifacts": [
+            "assessment.json",
+            "model.json"
+          ]
+        }
+      },
+      {
+        "name": "No output was supplied for this attempt",
+        "data": {
+          "runs": [
+            {
+              "runId": "C",
+              "parameters": {
+                "limit": 5
+              },
+              "metrics": {
+                "mae": 0
+              },
+              "dataset": {
+                "table": "maintenance.prepared.readings",
+                "version": 4
+              }
+            }
+          ],
+          "requestedRunId": "C",
+          "artifacts": [
+            {
+              "runId": "B",
+              "path": "model.json"
+            }
+          ]
+        },
+        "expected": {
+          "runId": "C",
+          "parameters": {
+            "limit": 5
+          },
+          "metrics": {
+            "mae": 0
+          },
+          "dataset": {
+            "table": "maintenance.prepared.readings",
+            "version": 4
+          },
+          "artifacts": []
+        }
+      }
+    ],
+    "recipe": {
+      "op": "dbxAttachIntroArtifacts",
+      "inputs": [
+        {
+          "op": "dbxPickIntroRun",
+          "inputs": [
+            {
+              "source": "runs"
+            },
+            {
+              "source": "requestedRunId"
+            }
+          ]
+        },
+        {
+          "source": "artifacts"
+        }
+      ]
+    },
+    "why": "An attempt identity connects the requested metadata and output ownership. Neither filename order nor the lowest score can replace that identity.",
+    "limitation": "The manifest is a small local teaching schema. It does not call MLflow, upload artifacts, train a model or establish that a recorded score is a fair comparison.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
     "id": "databricks-lazy-dataframes",
     "title": "Build a plan, then give it the current batch",
     "problem": "The original table still contains rejected readings. Botie needs the result of the cleaning procedure.",
@@ -31329,7 +32604,7 @@
       ]
     },
     "why": "The instructions and their execution have separate components, so a plan cannot be mistaken for the output table.",
-    "limitation": "The floor interprets a filter and a column selection on local records. Spark’s optimiser and distributed execution belong to the optional workspace example.",
+    "limitation": "The floor interprets a filter and a column selection on local records. Spark’s optimizer and distributed execution belong to the optional workspace example.",
     "extras": [],
     "draftVersion": 1
   },
@@ -31633,7 +32908,7 @@
   {
     "id": "databricks-replay-safe-ingest",
     "title": "Make a completed file stay completed",
-    "problem": "A scheduler retries after losing the acknowledgement. Botie must not learn from a second copy of the same file.",
+    "problem": "A scheduler retries after losing the acknowledgment. Botie must not learn from a second copy of the same file.",
     "challenge": "Filter discoveries against the committed checkpoint, then return one next state containing accepted rows and completed file identities.",
     "sources": {
       "files": "Current discovered immutable files",
@@ -32949,7 +34224,7 @@
     "id": "serving-prefill-decode",
     "title": "Separate the first wait from later pauses",
     "problem": "The technician sees a late start in one answer and a long pause in another. A single response duration does not show which wait changed.",
-    "challenge": "Return a pair: first-token wait in ms, then the list of neighbouring emission gaps. Arrival and token timestamps share one clock.",
+    "challenge": "Return a pair: first-token wait in ms, then the list of neighboring emission gaps. Arrival and token timestamps share one clock.",
     "sources": {
       "arrival": "Request arrival in ms",
       "times": "Token emission timestamps in ms"
@@ -33462,7 +34737,7 @@
     "id": "serving-cancellation-pressure",
     "title": "Keep ownership and queue overflow visible",
     "problem": "The technician has closed an answer, but its worker has not confirmed that the memory is free. More questions are arriving while that reservation remains held.",
-    "challenge": "Apply the worker’s release acknowledgements before counting held slots and blocks. Keep unacknowledged cancellations counted. Use the separate waiting-queue limit to divide new arrivals into accepted and rejected lists, retaining their order.",
+    "challenge": "Apply the worker’s release acknowledgments before counting held slots and blocks. Keep unacknowledged cancellations counted. Use the separate waiting-queue limit to divide new arrivals into accepted and rejected lists, retaining their order.",
     "sources": {
       "running": "Worker rows: id, state, blocks",
       "acks": "Confirmed cancellation-release IDs",
@@ -33643,7 +34918,7 @@
         }
       ]
     },
-    "why": "The acknowledgement changes execution ownership; queue overflow remains a separate admission outcome.",
+    "why": "The acknowledgment changes execution ownership; queue overflow remains a separate admission outcome.",
     "limitation": "A finite ownership model, not a cancellation protocol, live scheduler or reversal of agent side effects.",
     "extras": [
       "constant",
@@ -33672,7 +34947,7 @@
     },
     "cases": [
       {
-        "name": "Two authorised live runs",
+        "name": "Two authorized live runs",
         "data": {
           "ids": [
             "A",
@@ -33740,7 +35015,7 @@
         ]
       },
       {
-        "name": "Stable does not mean authorised",
+        "name": "Stable does not mean authorized",
         "data": {
           "ids": [
             "B"
@@ -34902,7 +36177,7 @@
     "id": "state-model-uncertainty",
     "title": "Test the precision claim on an independent simulated reference",
     "problem": "The simulated part moves farther than Botie expected, yet the filter reports a narrow uncertainty. Compare the completed estimate with a separate reference to see that mismatch.",
-    "challenge": "Complete the position and variance update without using the reference. Then report its mean, variance, signed reference error, normalised squared error and whether the reference lies within two standard deviations.",
+    "challenge": "Complete the position and variance update without using the reference. Then report its mean, variance, signed reference error, normalized squared error and whether the reference lies within two standard deviations.",
     "sources": {
       "initial": "Earlier mean/variance record",
       "move": "Expected displacement in m",
@@ -35735,7 +37010,7 @@
       ]
     },
     "why": "The clean metric cannot conceal the separate population and outcome of the targeted experiment.",
-    "limitation": "The paired predictions and label-preservation reviews are supplied data. The workshop measures this specified condition; it neither determines how the behaviour was learned nor checks untested trigger conditions.",
+    "limitation": "The paired predictions and label-preservation reviews are supplied data. The workshop measures this specified condition; it neither determines how the behavior was learned nor checks untested trigger conditions.",
     "extras": [
       "constant",
       "add",
@@ -36503,7 +37778,7 @@
   {
     "id": "numerical-stable-normalisation",
     "title": "Keep the direction when the encoder changes scale",
-    "problem": "Botie’s retrieval pipeline turns a valid large embedding into zeros while trying to normalise it.",
+    "problem": "Botie’s retrieval pipeline turns a valid large embedding into zeros while trying to normalize it.",
     "challenge": "Build a common scale from the largest absolute component. Divide first, calculate the scaled length, and divide again. Keep an all-zero vector at zero. Return the direction vector.",
     "sources": {
       "vector": "Encoder coordinates for one document"
@@ -36821,7 +38096,7 @@
     "id": "numerical-gradient-checks",
     "title": "Find the corner that a central difference concealed",
     "problem": "Botie’s gradient checker reports zero after averaging two incompatible sides of a loss.",
-    "challenge": "Evaluate the declared loss at the centre and at weight-minus-step and weight-plus-step. Calculate left and right slopes separately, then their central average. Use Label the slope comparisons to return all of them.",
+    "challenge": "Evaluate the declared loss at the center and at weight-minus-step and weight-plus-step. Calculate left and right slopes separately, then their central average. Use Label the slope comparisons to return all of them.",
     "sources": {
       "weight": "Weight being checked",
       "target": "Target weight for this test loss",

@@ -84,7 +84,7 @@ export function WidthAgainstTheTable() {
           value={narrow.gap_mean.toFixed(4)}
         />
         <Stat
-          label="width recovering the whole neighbour list"
+          label="width recovering the whole neighbor list"
           value={first ? String(first.dimension) : "not reached"}
         />
         <Stat

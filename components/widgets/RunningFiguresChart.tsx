@@ -162,8 +162,8 @@ export function RunningFiguresChart() {
         <Stat label="batch layer, while training" value={pair(lone.training_answer)} />
         <Stat label="batch layer, predicting, fresh figures" value={pair(lone.predicting_answer_fresh)} />
         <Stat label={`batch layer, predicting, after ${STEPS} steps`} value={pair(lone.predicting_answer_final)} />
-        <Stat label="layer normalisation" value={pair(lone.layer_answer)} />
-        <Stat label="RMS normalisation" value={pair(lone.rms_answer)} />
+        <Stat label="layer normalization" value={pair(lone.layer_answer)} />
+        <Stat label="RMS normalization" value={pair(lone.rms_answer)} />
       </div>
       {message && (
         <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">{message}</p>

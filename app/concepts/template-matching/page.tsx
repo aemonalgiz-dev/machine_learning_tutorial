@@ -21,9 +21,9 @@ import { TemplateSearchPlayground } from "@/components/widgets/TemplateSearchPla
 import { WhereEachRuleLands } from "@/components/widgets/WhereEachRuleLands";
 
 export const metadata: Metadata = {
-  title: "Template Matching · oop_ml",
+  title: "Template Matching · Perceptron Lab",
   description:
-    "If we already know what a pattern looks like, we can search for it in a larger picture. Template matching compares that known pattern with each possible location in the image.",
+    "A known image pattern can be compared with regions of a larger image to locate possible matches. The comparison rule determines how changes in brightness affect the match score.",
 };
 
 const link =
@@ -39,11 +39,12 @@ export default function TemplateMatchingPage() {
       playgroundTitle="Search an image for a familiar patch"
       playgroundIntro="Inspect the best position and its score, then compare it with competing positions. Try changes in lighting or appearance and check whether the reported match remains convincing."
       title="Template Matching"
-      tagline={"If we already know what a pattern looks like, we can search for it in a larger picture. Template matching compares that known pattern with each possible location in the image."}
+      tagline={"A known image pattern can be compared with regions of a larger image to locate possible matches. The comparison rule determines how changes in brightness affect the match score."}
       prerequisites={
         <>
+
           Nothing is fitted on this page and nothing is learned, so none of the
-          modelling ideas elsewhere on the site are needed. A picture here is a
+          modeling ideas elsewhere on the site are needed. A picture here is a
           grid of numbers, one brightness per position, and the only piece of
           mathematics that does real work is the angle between two lists of
           numbers, which the{" "}
@@ -68,12 +69,8 @@ export default function TemplateMatchingPage() {
                   Suppose we have a small picture of a cross and want to find it in a larger scene. We already know the appearance we are looking for. The question is where a similar arrangement of brightness occurs. We can slide the small picture over the scene and compare the values at each position.
                 </p>
                 <>
-<p>
-                  The scene this page works on is forty-eight pixels on each side and holds a square, a disc, a diagonal bar, and three copies of a small cross, which is the thing we will look for. The whole scene is also lit unevenly, brighter towards the right, and that piece of it is doing more work than anything else on the page.
-                </p>
-                <p>
-                  The three copies of the cross are the same seven-by-seven drawing repeated, sitting at row 26 column 26, row 38 column 12, and row 39 column 36, and because the light falls across the scene they are not equally bright. The one on the left is dimmer than the one on the right by an amount that turns out to decide which of them a scoring rule prefers.
-                </p>
+<p>The scene is forty-eight pixels on each side. It contains a square, a disc, a diagonal bar and three copies of our cross template. A gradual brightness increase makes the right side lighter than the left. That uneven lighting will help us compare which matching rules respond to shape and which also respond to brightness.</p>
+                <p>The crosses use the same seven-by-seven drawing, placed at row 26, column 26; row 38, column 12; and row 39, column 36. Their shapes match exactly, but the brightness ramp makes their values differ. A useful comparison here should explain why it prefers one location over another.</p>
 </>
                 <WhereEachRuleLands />
                 <p>
@@ -99,37 +96,16 @@ export default function TemplateMatchingPage() {
                   and keep going until every position has been tried. The answer
                   is whichever position scored best.
                 </p>
-                <p>
-                  Nothing is estimated, nothing is optimised, and there are no
-                  parameters to choose apart from the scoring rule itself. The
-                  answer is exact in the only sense available here, which is
-                  that it really is the best-scoring position, because every
-                  position was scored. That is why this is where the subject
-                  starts and why it predates everything else by decades.
-                </p>
+                <p>This scan evaluates every valid placement and returns the best one under the chosen scoring rule. There is no training procedure learning a new appearance from examples. The template, candidate placements and score define the comparison; deciding whether the best result is a real detection requires additional criteria.</p>
                 <p>
                   We call the small picture the template. Comparing it at each position in the larger scene gives us a grid of scores, or score surface. Keep that surface in view. It shows whether the best match stands out from the alternatives, or whether many positions look almost equally plausible. A best score alone cannot establish that the object is present.
                 </p>
               </SubSection>
 
               <SubSection title="3. Only the positions where the whole template fits">
-                <p>
-                  A template that hangs half off the edge of the picture cannot
-                  be scored honestly. Some of the pixels it would be compared
-                  against do not exist, so they would have to be invented, and
-                  the position would then win or lose on what was invented
-                  rather than on what is there. So a search answers only at the
-                  positions where the template fits entirely, and the score
-                  surface is correspondingly smaller than the picture.
-                </p>
+                <p>The search here evaluates only placements where the template fits entirely inside the image. Partial placements would require a separate policy for missing pixels and score normalization. Restricting to complete windows keeps each candidate comparison the same size, so the score surface is smaller than the search image.</p>
                 <Equation>{`positions = (picture height − template height + 1) × (picture width − template width + 1)`}</Equation>
-                <p>
-                  The scene is forty-eight by forty-eight and the cross is seven
-                  by seven, so the surface is forty-two by forty-two and holds
-                  1,764 positions. That is the number every later claim about
-                  cost is built on, and it is also why a search cannot find
-                  something sitting against the frame.
-                </p>
+                <p>A forty-eight-by-forty-eight image and seven-by-seven template give a forty-two-by-forty-two score surface with 1,764 placements. A complete template can touch the frame and still be scored. Only placements extending partly beyond the frame are excluded.</p>
                 <KeepInMind>
                   A thing lying partly outside the frame is not found by this
                   method, and it is not found quietly rather than loudly. The
@@ -190,14 +166,7 @@ export default function TemplateMatchingPage() {
               </SubSection>
 
               <SubSection title="6. Multiply the two together and add up the products">
-                <p>
-                  The second thing anybody tries is to multiply rather than
-                  subtract. Where the template is bright and the patch is bright,
-                  the product is large; where the template is bright and the
-                  patch is dark, the product is small. Adding those products up
-                  gives a number that is large when the two agree, and here a
-                  higher score is a better one.
-                </p>
+                <p>Another score multiplies corresponding template and patch pixels and adds the products. For these nonnegative images, bright patch values under bright template values contribute large products. This raw correlation uses a larger score as the preferred comparison, but brightness alone can also raise it.</p>
                 <Equation>{`score = sum over every pixel of ( patch × template )`}</Equation>
                 <p>
                   This is the sweep of the previous section with the template
@@ -209,11 +178,7 @@ export default function TemplateMatchingPage() {
                   this page is 20.3076. There is nothing to compare that against
                   without already knowing the template.
                 </p>
-                <p>
-                  A rule with no fixed perfect score is a warning rather than an
-                  inconvenience, and the next two sections are what it is warning
-                  about.
-                </p>
+                <p>The dot-product score has no universal value identifying a perfect match. Brightness and template size can both affect its magnitude. We need to examine those dependencies before interpreting a large score as evidence of matching shape.</p>
               </SubSection>
 
               <SubSection title="7. The whole search on six pixels by six">
@@ -269,21 +234,11 @@ export default function TemplateMatchingPage() {
                   A large sum of products can come from matching the template&apos;s bright regions, but a uniformly bright patch can also produce a large total. The raw score has no separate way to account for the patch&apos;s mean brightness. We need to decide whether that brightness is useful evidence or something the comparison should remove.
                 </p>
                 <KeepInMind>
-                  This is not a corner case arranged to embarrass the rule. Any
-                  picture with a highlight in it, or a white wall, or a patch of
-                  sky, contains regions that are bright and featureless, and the
-                  multiplication prefers them to the thing being looked for.
-                </KeepInMind>
+                  A bright, featureless patch can compete with a patterned template under the raw dot product. Whether it wins depends on the values and template; the six-pixel example demonstrates the possibility rather than a rule that every bright wall must win.</KeepInMind>
               </SubSection>
 
               <SubSection title="9. Take each patch&rsquo;s own mean away, then divide by what is left">
-                <p>
-                  Brightness can do two things to a patch. It can add the same
-                  amount to every pixel, which is what a second lamp in the room
-                  does, and it can multiply every pixel by the same amount, which
-                  is what opening the aperture does. The repair removes both, in
-                  that order.
-                </p>
+                <p>For this comparison, model a lighting change as a common additive offset and positive multiplicative gain. Centering removes the offset; dividing by the deviation length removes the gain. Real camera changes can also alter blur, clipping and noise, which these two operations do not remove.</p>
                 <p>First subtract each patch&apos;s own mean. A common additive brightness shift affects that mean by the same amount, so it disappears from the deviations. The patch&apos;s arrangement of brighter and darker positions remains.</p>
               <p>Now divide those deviations by their vector length, provided it is nonzero. A common positive brightness multiplier scales both the deviations and their length, so it cancels too. Apply the same preparation to the template. Their dot product is then the cosine similarity of the two deviation patterns. A constant patch has no deviation direction and needs the explicit policy described here.</p>
                 <Equation>{`deviation(patch) = patch − mean(patch)
@@ -292,14 +247,15 @@ export default function TemplateMatchingPage() {
 score = ─────────────────────────────────────────────────
         |deviation(patch)| × |deviation(template)|`}</Equation>
                 <p>
+
                   The answer lies between −1 and 1, and it reaches exactly 1
                   when the patch is the template multiplied by any positive
                   amount and shifted by any amount at all. That is the property
                   the rule exists for, and it is a statement about a whole family
-                  of patches rather than about one. This is normalised
+                  of patches rather than about one. This is normalized
                   cross-correlation.
                 </p>
-                <WhyThisWorks title="Why centring and normalising remove offset and positive gain">
+                <WhyThisWorks title="Why centering and normalizing remove offset and positive gain">
                   <>
 <p>
                     Write the patch as g × template + s, for a positive gain g and an offset s. Its mean is g × mean(template) + s, so subtracting it leaves g × deviation(template), with the offset gone entirely. The numerator is then g times the template&rsquo;s deviation dotted with itself, which is g times the squared length.
@@ -316,16 +272,7 @@ score = ────────────────────────
                     the other way.
                   </p>
                 </WhyThisWorks>
-                <p>
-                  One caution about the name. &ldquo;Normalised
-                  cross-correlation&rdquo; is used in the literature for this and
-                  also for a weaker version that divides by the lengths without
-                  subtracting the means first. That weaker version survives a
-                  change of gain and not a change of offset, so a scene
-                  photographed against a lighter background defeats it. The
-                  centring is the half that matters most here, and everything
-                  measured on this page uses it.
-                </p>
+                <p>The name normalized cross-correlation is also used for a version that divides by vector lengths without first removing the means. That version is invariant to positive gain but can change under an additive offset. This page uses the centered version, so record both operations when comparing implementations.</p>
                 <DerivationTable
                   expressionHeading="Rule"
                   reasonHeading="What an exact copy scores, and which way it runs"
@@ -341,7 +288,7 @@ score = ────────────────────────
                         "The template’s own sum of squares, 20.3076 for the cross on this page. Higher is better, and a brighter patch can exceed it.",
                     },
                     {
-                      expression: "Normalised cross-correlation",
+                      expression: "Normalized cross-correlation",
                       reason:
                         "Exactly 1, and so does every brightened or dimmed copy. Higher is better, and the score is bounded by 1.",
                     },
@@ -358,12 +305,12 @@ score = ────────────────────────
               "The scene is forty-eight pixels on each side and the cross is seven by seven. How many positions does a search score?",
               ["1,764", "1,681", "2,116", "2,304"],
               0,
-              "A template hanging half off the edge would be compared against pixels that do not exist, so a search answers only where the template fits entirely. That makes the score surface forty-two by forty-two, and every later claim about cost on the page is built on that count.",
+              "The top-left template position can range from zero through forty-one in each coordinate:\n\n```math\npositions per side = 48 − 7 + 1 = 42\ntotal positions = 42 × 42 = 1,764\n```\n\nThese are full-overlap positions only. A method intended to compare partial templates at the border would need a different scoring convention.",
             ),
             trueFalse(
               "A copy of the cross lying partly outside the frame would be reported with a low score rather than missed.",
               false,
-              "It is not found at all, and it is not found quietly rather than loudly. The positions it would have occupied were never scored, so nothing in the output marks the omission.",
+              "The true top-left position of that partial copy lies outside the full-overlap search surface, so the search never evaluates it as a complete template. It may still report some other matching fragment or background patch. The output alone does not identify the excluded partial occurrence.",
             ),
             choice(
               "Under the multiplication rule, what does a perfect fit score?",
@@ -390,7 +337,7 @@ score = ────────────────────────
                 "The weaker version that divides by the lengths without subtracting the means survives a change of offset",
               ],
               [0, 1, 2],
-              "Adding light to a room adds the same amount to every pixel and opening the aperture multiplies every pixel, and the two halves of the repair remove them in that order. The weaker version survives a change of gain and not a change of offset, so a scene photographed against a lighter background defeats it, which is why the centring is the half that matters most here.",
+              "Mean subtraction cancels a common additive offset in a window. Dividing by the deviation-vector lengths removes a positive multiplicative scale when both patterns have nonzero variation. These are mathematical affine-intensity invariances; clipping, shadows or spatially varying illumination need not follow that model. Normalizing raw lengths without centering removes positive gain but generally remains sensitive to offsets.",
             ),
         ],
         },
@@ -415,19 +362,15 @@ score = ────────────────────────
                   on the right. Nothing about the crosses themselves has changed
                   and the differences are entirely the lamp.
                 </p>
-                <p>
-                  The playground at the top of the page has a control for taking
-                  the ramp away, which is the honest way to attribute an effect
-                  to it. Anything that changes when the ramp is removed was
-                  caused by the ramp.
-                </p>
+                <p>Remove the brightness ramp using the control above, leaving the shapes and matching settings fixed. Comparing the two runs isolates the ramp’s effect in this constructed scene. Check both the score values and which locations rank first.</p>
               </SubSection>
 
               <SubSection title="11. Where each rule lands on the workbench">
                 <p>
+
                   One scene, one template, three rules, three different answers.
                   The squared differences report row 38, column 12. The
-                  multiplication reports row 9, column 33. The normalised rule
+                  multiplication reports row 9, column 33. The normalized rule
                   reports row 26, column 26.
                 </p>
                 <NumberTable
@@ -457,7 +400,7 @@ score = ────────────────────────
                       "27.1932",
                     ],
                     [
-                      "Normalised",
+                      "Normalized",
                       "row 26, column 26",
                       "0.9992",
                       "0.9992",
@@ -482,7 +425,8 @@ score = ────────────────────────
                   three genuine copies by 27.9307 against 27.1932.
                 </p>
                 <p>
-                  The normalised rule lands on a copy, and its three scores are
+
+                  The normalized rule lands on a copy, and its three scores are
                   the same number three times.
                 </p>
                 <TemplateSearchPlayground showScenes={false} initialRule={1} />
@@ -508,7 +452,7 @@ score = ────────────────────────
                 </p>
                 <Equation>{`a flat patch of brightness b scores b × 27.66
 
-1.0098 × 27.66 = 27.9307`}</Equation>
+1.0098 × 27.66 ≈ 27.9307`}</Equation>
                 <>
                   <p>
                     The raw dot product responds to brightness as well as shape. At the
@@ -523,7 +467,8 @@ score = ────────────────────────
                   </p>
                 </>
                 <p>
-                  Under the normalised rule the same position scores essentially
+
+                  Under the normalized rule the same position scores essentially
                   zero, and the reason is more than that the patch is flattish.
                   A ramp running left to right is antisymmetric about the middle
                   once its mean is removed, meaning it is its own negative when
@@ -545,30 +490,34 @@ score = ────────────────────────
 
               <SubSection title="13. All three copies score exactly alike, and why not quite one">
                 <p>
-                  The normalised rule gives all three copies the same score,
+
+                  The normalized rule gives all three copies the same score,
                   0.9991504412, agreeing in every digit that is carried. Two
                   things about that number are worth a moment.
                 </p>
                 <p>
+
                   It is the same at all three because the ramp inside a
                   seven-pixel patch is the same slope wherever that patch is cut
                   from. The copies differ in how much brightness was added, and
-                  that is an offset, which the centring removes completely. What
-                  the centring does not remove is the slope, and the slope is
+                  that is an offset, which the centering removes completely. What
+                  the centering does not remove is the slope, and the slope is
                   identical at all three positions.
                 </p>
                 <p>
+
                   It falls short of 1 because that slope is a pattern the
                   template does not have. Since the slope is perpendicular to the
-                  centred cross, by the symmetry argument above, it adds nothing
+                  centered cross, by the symmetry argument above, it adds nothing
                   to the agreement in the numerator and adds length to the patch
                   in the denominator. A cosine whose numerator is unchanged and
                   whose denominator has grown is smaller.
                 </p>
                 <WhyThisWorks title="How a perpendicular brightness ramp changes the correlation">
                   <p>
+
                     Write the patch as template plus ramp, where ramp is
-                    perpendicular to the centred template. The numerator is
+                    perpendicular to the centered template. The numerator is
                     unchanged at the template&rsquo;s squared length. The
                     patch&rsquo;s length, by the right-angle rule, is the square
                     root of the sum of the two squared lengths. So the cosine is
@@ -579,14 +528,8 @@ score = ────────────────────────
                   <Equation>{`|deviation(ramp)| = 0.0894
 |deviation(template)| = 2.1665
 
-score = 1 / sqrt( 1 + (0.0894 / 2.1665)² ) = 0.9991504412`}</Equation>
-                  <p>
-                    Which is the number the search reports, to every digit
-                    carried. The shortfall is small because the ramp inside a
-                    seven-pixel window is a small pattern beside the cross, and
-                    a steeper ramp would push it lower without ever changing
-                    which position wins.
-                  </p>
+score = 1 / sqrt( 1 + (0.0894 / 2.1665)² ) ≈ 0.9991504412`}</Equation>
+                  <p>The displayed intermediate lengths are rounded. Using the full values gives the reported correlation. A steeper within-patch ramp reduces the true copies’ scores because it adds a pattern absent from the template. Which candidate wins still depends on all the competing positions.</p>
                 </WhyThisWorks>
                 <p>
                   So the winner is row 26, column 26 only because the three tie
@@ -600,28 +543,22 @@ score = 1 / sqrt( 1 + (0.0894 / 2.1665)² ) = 0.9991504412`}</Equation>
 
               <SubSection title="14. Turn the lamp up and two of the three answers move">
                 <p>
-                  The sharpest way to see what the normalising bought is to
+
+                  The sharpest way to see what the normalizing bought is to
                   relight the whole scene and search it again with the same
                   template. Every pixel multiplied by 1.6 and then shifted by
                   0.15, which is roughly what turning a lamp up and adding a
                   second one does to a photograph, and nothing else altered.
                 </p>
-                <p>
-                  The squared differences now report row 0, column 19, which is a
-                  patch of empty ground near the top of the scene, scoring
-                  4.7145. The three genuine copies score between 21.8990 and
-                  40.2612, so they are not close seconds, they are four to nine
-                  times worse than a piece of background. The rule has not
-                  degraded; it has been broken by a change nobody would call a
-                  change to the scene.
-                </p>
+                <p>After the affine brightness change, squared differences select background at row zero, column nineteen, with score 4.7145. The genuine copies score from 21.8990 to 40.2612. The unchanged numerical template now favors a different patch, showing that this score is not invariant to the tested lighting transformation.</p>
                 <p>
                   The multiplication still reports the inside of the disc, which
                   is not a recovery so much as the same failure surviving a
                   change that made it no worse.
                 </p>
                 <p>
-                  The normalised rule reports the same position with the same
+
+                  The normalized rule reports the same position with the same
                   scores. Across all 1,764 positions the largest change to any
                   score is 1.7 × 10<sup>&minus;15</sup>, which is the arithmetic
                   rounding differently rather than the answer moving.
@@ -632,13 +569,7 @@ score = 1 / sqrt( 1 + (0.0894 / 2.1665)² ) = 0.9991504412`}</Equation>
                   showSurface={false}
                 />
                 <InAModel>
-                  Lighting is the variation you get for free and never asked for.
-                  A camera moved slightly, a cloud, a different time of day, and
-                  the raw brightness of every pixel has changed while the scene
-                  has not. A description that moves when the light moves is
-                  describing the light, and this is the first place on the site
-                  where that costs an answer rather than an accuracy point.
-                </InAModel>
+                  Lighting changes can alter pixel values while leaving object geometry unchanged. The centered normalized score handles the particular common gain-and-offset model used here. Other changes, such as shadows, blur and clipping, require additional checks rather than the same invariance claim.</InAModel>
               </SubSection>
             </>
           ),
@@ -648,50 +579,16 @@ score = 1 / sqrt( 1 + (0.0894 / 2.1665)² ) = 0.9991504412`}</Equation>
           content: (
             <>
               <SubSection title="15. There is no position at which it answers that nothing is here">
-                <p>
-                  Every search returns a best position. That is not a
-                  shortcoming of any particular scoring rule, it is what taking
-                  the maximum of a list means. Hand this method a picture of a
-                  brick wall and ask it to find a face, and it will report a
-                  position, with a score, and nothing about the answer will look
-                  any different from an answer that is right.
-                </p>
-                <p>
-                  Measured over six pictures of random texture containing no
-                  copy of the shape at all, the best score reaches between 0.3876
-                  and 0.5341 under the normalised rule. Half of the maximum is a
-                  number that looks like something to anyone who was hoping, and
-                  there is no threshold on that number that separates these six
-                  from a genuine match without also throwing away genuine matches
-                  in harder pictures.
-                </p>
+                <p>A nonempty search has a best-scoring position even when the object is absent. Searching a brick wall for a face still returns coordinates. The search result therefore identifies the strongest candidate under its score, rather than confirming that the intended object exists there.</p>
+                <p>Across the six random textures without the inserted shape, the best normalized score ranges from 0.3876 to 0.5341. A nonzero or moderately large score therefore does not prove presence. In this exact-paste experiment, the inserted template can score one, so an absolute threshold can separate these easy examples. That does not establish a threshold for noisier or changed appearances.</p>
               </SubSection>
 
               <SubSection title="16. The winner against the best position that does not overlap it">
-                <p>
-                  Asking how good the winner is has just failed, so ask instead
-                  how far clear of everything else it stands. A real match is a
-                  sharp peak with mediocrity all around it, and the best of a bad
-                  set is one of many mediocre positions whose nearest rivals are
-                  almost as good as it is.
-                </p>
-                <p>
-                  There is one trap in putting that into practice. The
-                  second-best position of any genuine match is its own
-                  neighbour, since a template shifted by one pixel still overlaps
-                  itself almost entirely and scores almost as well. A ratio
-                  against that would be near one for every match ever made. So
-                  the comparison has to be against the best position that does
-                  not overlap the winner at all, which means at least the
-                  template&rsquo;s own width away in rows or in columns.
-                </p>
+                <p>The height of the best score is one piece of evidence. Its separation from competing peaks is another. An isolated strong peak suggests a more distinctive candidate than several similarly strong peaks, but repeated real objects can also produce several peaks. The comparison needs to match the detection problem.</p>
+                <p>Nearby placements overlap much of the same image patch and can receive similarly high scores. Comparing only with the immediate runner-up can therefore measure a small shift of the same candidate. Here the comparison excludes placements overlapping the winner and uses the best remaining position. That defines a particular distinctiveness check, rather than a universal confidence measure.</p>
                 <Equation>{`where a higher score is better    ratio = winner / runner-up
 where a lower score is better     ratio = runner-up / winner`}</Equation>
-                <p>
-                  Written that way the ratio is at least one whichever direction
-                  the rule runs in, and larger always means the winner stands
-                  further clear.
-                </p>
+                <p>For positive scores with a nonzero denominator, these ratios are at least one and a larger value indicates greater relative separation. Zero or negative correlation scores need an explicit convention. The SDK reports a ratio of one when the best higher-is-better score is nonpositive, and handles a positive best score with a nonpositive runner-up as infinite separation. These are scoring policies, not calibrated probabilities.</p>
               </SubSection>
 
               <SubSection title="17. Present and absent, over twelve searches">
@@ -701,14 +598,7 @@ where a lower score is better     ratio = runner-up / winner`}</Equation>
                   searches, twelve ratios.
                 </p>
                 <BelievabilityStrip showSizes={false} />
-                <p>
-                  With the shape absent the ratio runs from 1.0179 to 1.3654.
-                  With it present the same six pictures give 1.8722 to 2.5797.
-                  The two ranges do not touch, and there is a wide gap between
-                  them where a threshold can sit. A ratio of 1.5 separates all
-                  twelve correctly, where no threshold on the score separates
-                  even most of them.
-                </p>
+                <p>The absent-image ratios range from 1.0179 to 1.3654; the exact-paste present-image ratios range from 1.8722 to 2.5797. A ratio threshold of 1.5 separates all twelve. The absolute normalized scores can also separate these exact copies from these random textures. The next examples show why neither result supplies a universal detection rule.</p>
                 <p>
                   That threshold is fitted to one family of pictures and is worth
                   no more than that. Nothing in the method fixes it at 1.5, it is
@@ -726,80 +616,32 @@ where a lower score is better     ratio = runner-up / winner`}</Equation>
                   1.5, so a test that was reliable a moment ago now misses most
                   of what it is looking for.
                 </p>
-                <p>
-                  The cause is not the ratio and no better threshold repairs it.
-                  It is the template. A three-by-three template holds nine
-                  numbers, and the best agreement it finds in a fifteen-by-fifteen
-                  picture that contains nothing of the sort averages 0.7752 and
-                  reaches 0.8844. Something that good turns up by chance, so the
-                  genuine match at 1.0 has stiff competition from noise and
-                  cannot stand clear of it.
-                </p>
+                <p>For the three-by-three template, the best chance agreement in twenty fifteen-by-fifteen textures averages 0.7752 and reaches 0.8844. Those competitors make the winner-to-runner-up ratio less decisive, and the displayed present and absent ratio ranges overlap. An exact inserted copy still scores one. This experiment limits the ratio test; it does not prove that no scoring or threshold rule can use a small template.</p>
                 <BelievabilityStrip />
-                <p>
-                  Adding pixels fixes it, and quickly. Twenty-five pixels drop
-                  the chance agreement to 0.5047 and forty-nine to 0.3326, and at
-                  five-by-five all six genuine matches clear the threshold. A
-                  template&rsquo;s distinctiveness is a fact about how many
-                  pixels it has, settled before any scoring rule is chosen, and
-                  no scoring rule repairs having too few.
-                </p>
+                <p>For the larger random templates tested here, average chance agreement falls to 0.5047 with twenty-five pixels and 0.3326 with forty-nine. All six five-by-five present cases clear the ratio threshold. Distinctiveness also depends on the template’s pattern, background, search size and allowed appearance changes, rather than pixel count alone.</p>
                 <KeepInMind>
-                  The seven-by-seven row of that table has no ratio at all. In a
-                  fifteen-by-fifteen picture the score surface is nine by nine,
-                  the winner lies at most four rows or columns from any other
-                  position, and two patches must be seven apart before they stop
-                  overlapping. Every candidate is the winner shifted, so there is
-                  no second candidate and the question cannot be asked.
-                </KeepInMind>
+                  For the inserted seven-by-seven template, the winning placement is at row four, column four of the nine-by-nine score surface. Every other placement is within four rows and columns of that winner, so all patches overlap it. This case has no eligible non-overlapping runner-up. A winner closer to an edge of the same surface could have a non-overlapping rival.</KeepInMind>
               </SubSection>
 
               <SubSection title="19. A ratio says how distinctive, never how good">
-                <p>
-                  The ratio and the score answer different questions and neither
-                  substitutes for the other. A template that matches nothing at
-                  all, in a picture where everything else matches it even less,
-                  gets an excellent ratio out of two poor scores. Both numbers
-                  have to be read, the score to know that anything was found and
-                  the ratio to know that it was found in one place rather than
-                  everywhere.
-                </p>
-                <p>
-                  The workbench scene shows the other side of that. The
-                  normalised rule scores all three copies at 0.9991504412, so its
-                  winner and its best non-overlapping rival are equal and the
-                  ratio is exactly 1.0. The test therefore reports that this
-                  match is not to be believed, on a picture containing three
-                  perfect copies of the thing being looked for.
-                </p>
-                <p>
-                  That is the honest answer to the question actually asked. The
-                  ratio asks whether the winning position is the only good one,
-                  and with three copies the answer is genuinely no. It is a
-                  different question from whether the thing is present, and a
-                  caller who wants every occurrence has to read the whole surface
-                  rather than its winner.
-                </p>
+                <p>The score measures agreement with the template. The ratio measures separation from another candidate. A distinctive winner can still have poor agreement, and several good copies can have a weak separation ratio. Read the quantities together and choose acceptance criteria using relevant examples of matches and nonmatches.</p>
+                <p>In the workbench image, the normalized score is 0.9991504412 at all three copies. The best non-overlapping rival therefore ties the winner and the ratio is 1.0. The SDK’s ratio-based acceptance test rejects that candidate as insufficiently distinct, even though several true copies are present.</p>
+                <p>With three copies, a weak separation ratio correctly indicates that the winning location is not unique. That does not indicate that the object is absent. Finding every occurrence requires examining multiple peaks in the score surface rather than returning only one winner.</p>
               </SubSection>
 
               <SubSection title="20. Where the better rule gives the worse answer about itself">
                 <p>
+
                   Put those two facts side by side on the same scene and the
                   recommended rule comes off worse than the one it replaced. The
                   squared differences chose the leftmost copy, and because the
                   ramp gave the other two worse scores, that winner stands 3.6900
                   clear of its nearest non-overlapping rival and is reported as
-                  believable. The normalised rule chose a copy too, and because
+                  believable. The normalized rule chose a copy too, and because
                   it scored all three alike, its ratio is 1.0 and it is reported
                   as not believable.
                 </p>
-                <p>
-                  So on this picture the rule that was fooled by the lighting
-                  hands back the more usable confidence figure, and it does so
-                  precisely because it was fooled. Its three scores differ only
-                  because the lamp made them differ, and the ratio is reading
-                  that difference as evidence of distinctiveness.
-                </p>
+                <p>The squared-difference ratio is higher because lighting makes one genuine copy numerically closer to the template than the others. Treating that higher ratio as more reliable object evidence would confuse appearance differences with uniqueness. The normalized tie correctly preserves the ambiguity among the three matching locations.</p>
                 <p>
                   A high match score and a distinctive match answer different questions. Several repeated objects can all match well, leaving the best and second-best scores tied and their ratio at 1.0. Inspect the score surface alongside the ratio before interpreting that tie as a poor match.
                 </p>
@@ -822,9 +664,9 @@ where a lower score is better     ratio = runner-up / winner`}</Equation>
               "That patch holds no cross at all. It sits on the bright side of the ramp and beats the brightest of the three genuine copies by 27.9307 against 27.1932. The arithmetic can be pinned down completely, since the template sums to 27.66, the patch averages 1.0098, and the product is the score the search reports with no discrepancy.",
             ),
             trueFalse(
-              "The normalised rule gives all three copies the same score because the centring removes the ramp.",
+              "The normalized rule gives all three copies the same score because the centering removes the ramp.",
               false,
-              "The centring removes the offset, and the three copies differ only by an offset, which is why they tie at 0.9991504412. What the centring does not remove is the slope, and the ramp inside a seven-pixel patch is the same slope wherever that patch is cut from. That leftover slope is also why the common score falls short of 1. Relighting the whole scene, every pixel multiplied by 1.6 and shifted by 0.15, moves no normalised score by more than 1.7 times ten to the minus fifteen, while the squared differences are sent to a patch of empty ground at row 0, column 19.",
+              "The centering removes the offset, and the three copies differ only by an offset, which is why they tie at 0.9991504412. What the centering does not remove is the slope, and the ramp inside a seven-pixel patch is the same slope wherever that patch is cut from. That leftover slope is also why the common score falls short of 1. Relighting the whole scene, every pixel multiplied by 1.6 and shifted by 0.15, moves no normalized score by more than 1.7 times ten to the minus fifteen, while the squared differences are sent to a patch of empty ground at row 0, column 19.",
             ),
             several(
               "Six pictures of random texture were each searched twice, with a five by five shape drawn in and without, and the experiment was repeated at three template sizes. Which of these did it find?",
@@ -835,23 +677,23 @@ where a lower score is better     ratio = runner-up / winner`}</Equation>
                 "The seven by seven template gives the best ratio of the three sizes",
               ],
               [0, 1],
-              "A ratio of 1.5 separates all twelve of the five by five searches, where no threshold on the score separates even most of them, since the best score with the shape absent reaches between 0.3876 and 0.5341. Nine pixels are matched by chance almost anywhere, the best agreement in a picture that holds nothing of the sort averaging 0.7752 and reaching 0.8844, so the genuine match at 1.0 cannot stand clear and no threshold repairs that; twenty-five pixels drop the chance agreement to 0.5047 and forty-nine to 0.3326. The seven by seven row has no ratio at all, because in a nine by nine surface every candidate is the winner shifted and there is no second candidate to ask about.",
+              "The supplied five-by-five ratio results separate the tested present and absent cases at 1.5. With three-by-three templates, chance matches are much stronger and several genuine occurrences fail that same ratio threshold. That small experiment does not establish a universally valid threshold. The seven-by-seven examples have no ratio because all valid positions overlap their particular central winner, not because a nine-by-nine score surface can never contain two separated corners.",
             ),
             choice(
               "Why is the confidence ratio taken against the best position that does not overlap the winner?",
               [
-                "The second-best position of a genuine match is its own neighbour, which overlaps it almost entirely and scores almost as well",
+                "The second-best position of a genuine match is its own neighbor, which overlaps it almost entirely and scores almost as well",
                 "Overlapping positions are never scored by the search",
                 "An overlapping rival always scores higher than the winner",
                 "An overlapping position would be counted twice in the surface",
               ],
               0,
-              "A ratio against a neighbour would be near one for every match ever made, which would tell a caller nothing. So the rival has to be at least the template’s own width away in rows or in columns. That is also why the seven-by-seven row of the template-size table has no ratio at all, since in a nine-by-nine surface no two positions are seven apart.",
+              "Nearby shifted windows often contain much of the same object and can score almost as highly, so comparing only adjacent positions can measure localization rather than distinctiveness. This heuristic excludes overlapping windows before finding its rival. In the seven-by-seven example the winner is central, leaving no non-overlapping candidate; a different winner position in a nine-by-nine surface could have a valid rival.",
             ),
             trueFalse(
-              "On the workbench scene the normalised rule’s ratio is exactly 1.0, so the test reports that the match is not to be believed on a picture holding three perfect copies.",
+              "On the workbench scene the normalized rule’s ratio is exactly 1.0, so the test reports that the match is not to be believed on a picture holding three perfect copies.",
               true,
-              "Its winner and its best non-overlapping rival are equal, since all three copies score 0.9991504412. That is the honest answer to the question actually asked, because the ratio asks whether the winning position is the only good one and with three copies the answer is genuinely no. A caller who wants every occurrence has to read the whole surface rather than its winner.",
+              "All three copies have equal normalized scores, so the winning location is not distinctive from its best non-overlapping rival. A ratio of one is the expected outcome for that question. It does not mean the copies are absent or invalid. To find every occurrence, inspect multiple peaks in the score surface and apply an appropriate overlap policy.",
             ),
         ],
         },
@@ -860,35 +702,11 @@ where a lower score is better     ratio = runner-up / winner`}</Equation>
           content: (
             <>
               <SubSection title="21. A quarter turn, and what is reported instead">
-                <p>
-                  The method compares pixels at fixed offsets from the corner of
-                  the patch. Every claim it makes therefore assumes the thing
-                  appears at the same angle as the template, and the assumption
-                  fails immediately. Saying it fails is worth much less than
-                  saying by how much.
-                </p>
-                <p>
-                  The cross on the workbench is unchanged by a quarter turn, so
-                  it cannot show this, and the measurements below use a capital F
-                  instead, which is unchanged by no rotation and no reflection.
-                  An unturned copy scores 1.0 at its own corner, which is the
-                  control.
-                </p>
+                <p>Fixed pixel offsets encode the template’s size and orientation. A rotated or resized object may no longer align with those offsets. The following examples measure that change rather than assuming that the same template search recognizes every appearance of the object.</p>
+                <p>The cross is unchanged by a quarter turn, so it cannot demonstrate this orientation change. The next experiment uses a capital F, whose tested rotated and reflected forms differ. The unrotated inserted copy scores 1.0 at its own top-left position.</p>
                 <ChangedThingSearch includeCorner={false} />
-                <p>
-                  Turned by one right angle, the position the F actually occupies
-                  scores 0.0385, and the position reported instead is four pixels
-                  away scoring 0.5204. Turned by two, the true position scores
-                  −0.1218, which is worse than nothing, since an upside-down F is
-                  partly the negative of an F, and the winner is 3.1623 pixels
-                  away at 0.6591.
-                </p>
-                <p>
-                  Notice what does not happen. The score at the true position
-                  does not fall gently, and the reported position does not drift
-                  a little way off. The right answer is discarded and a confident
-                  wrong one is put in its place.
-                </p>
+                <p>After a quarter turn, the F’s actual top-left position scores 0.0385, while the reported position is four pixels away with score 0.5204. After a half turn, the actual position has negative centered correlation, −0.1218; another position wins at 0.6591, 3.1623 pixels away. These values compare the original template pattern, not the identity of the rotated object.</p>
+                <p>The scan still returns its best position, but that position need not be the rotated object’s origin. The score and separation checks must be interpreted for the appearances represented by the template.</p>
               </SubSection>
 
               <SubSection title="22. Twice the size">
@@ -911,13 +729,7 @@ where a lower score is better     ratio = runner-up / winner`}</Equation>
               </SubSection>
 
               <SubSection title="23. A doubled L holds an unscaled L, at a place the object does not begin">
-                <p>
-                  This one was a surprise, and it is the most useful thing in
-                  Part 5. Take an L, three pixels square, and double it the same
-                  way. The doubled L contains an exact copy of the original L,
-                  unscaled, pixel for pixel, at rows 2 to 4 and columns 1 to 3 of
-                  itself, which is the join where its two arms meet.
-                </p>
+                <p>A doubled three-by-three L contains an exact unscaled copy of the original pattern at its inner corner, rows two to four and columns one to three. This lets us test a different failure: a locally exact pattern can appear inside a larger object without marking that object’s top-left position.</p>
                 <p>
                   So a search for the original L in a picture containing only the
                   doubled one reports a flawless 1.0. The object begins at row 3,
@@ -925,14 +737,7 @@ where a lower score is better     ratio = runner-up / winner`}</Equation>
                   column 4.
                 </p>
                 <ChangedThingSearch />
-                <p>
-                  And the confidence check endorses it. That winner stands 2.0917
-                  clear of anything that does not overlap it, well past the
-                  threshold, so the ratio agrees that the match is to be
-                  believed. A caller reading the score, the position and the
-                  ratio has three numbers that all look right and an answer that
-                  is in the wrong place.
-                </p>
+                <p>The inner-corner match also has separation ratio 2.0917, above the default acceptance threshold. Both score and ratio describe a strong local template match. They do not establish that the returned position marks the larger object’s origin.</p>
                 <KeepInMind>
                   A method that failed loudly on a change of size would be much
                   easier to live with than one that sometimes succeeds perfectly
@@ -951,17 +756,7 @@ where a lower score is better     ratio = runner-up / winner`}</Equation>
                   change, although a person looking at the two pictures would say
                   the object had not.
                 </p>
-                <p>
-                  The repairs that followed all give up raw brightness in favour
-                  of something that survives more. Rates of change rather than
-                  levels, since a gradient is unmoved by adding light to
-                  everything. Counts of which directions the edges point rather
-                  than where they are, since a count survives a small shift.
-                  Places found at their own size rather than at a size chosen in
-                  advance. Each of those is a separate topic, and each of them is
-                  paying for exactly what this page has just measured the cost
-                  of.
-                </p>
+                <p>Other representations retain different information. Gradients reduce sensitivity to a common additive brightness shift. Regional direction histograms discard some exact position detail. Scale-selected keypoints address changes in image size. Each approach needs its own explanation of which changes it tolerates and which information it loses.</p>
               </SubSection>
             </>
           ),
@@ -988,12 +783,7 @@ pixels read = positions × h × w`}</Equation>
               </SubSection>
 
               <SubSection title="26. At a size a camera actually produces">
-                <p>
-                  The counts grow faster than they read. Both are quadratic in
-                  the picture&rsquo;s side and quadratic in the
-                  template&rsquo;s, so a search that felt free on a
-                  forty-eight-pixel scene does not stay free.
-                </p>
+                <p>For a direct scan, the number of placements grows approximately with image area when the template is small relative to the image. Work per placement also grows with template area. Increasing the template size reduces the valid placement count, so the exact total follows the formula above rather than a separate quadratic increase in both counts.</p>
                 <NumberTable
                   headings={[
                     "Picture",
@@ -1009,39 +799,14 @@ pixels read = positions × h × w`}</Equation>
                   ]}
                   caption="Looking for one object, at one angle, at one size."
                 />
-                <p>
-                  Eight hundred and twenty-five million pixel reads for one
-                  object in one modest photograph is the number a reader
-                  underestimates, and it is the honest floor rather than a
-                  pessimistic estimate, since every one of those reads is
-                  required by the definition of the method.
-                </p>
+                <p>The 512-by-512 example requires 825,757,696 pixel-pair contributions in this direct calculation. That is not an unavoidable number of physical memory reads or arithmetic operations: fast correlation, shared patch statistics and other optimized methods can reuse work. The table models the straightforward scan.</p>
               </SubSection>
 
               <SubSection title="27. Multiplied by every angle and every size worth trying">
-                <p>
-                  Part 5 established that a turned or resized copy is not found,
-                  so a search that has to cope with either must try several
-                  templates rather than one. Twelve angles, which is one every
-                  thirty degrees and is coarse, and five sizes, which is a little
-                  under a factor of two in each direction and is also coarse,
-                  come to sixty passes.
-                </p>
-                <p>
-                  Sixty passes over the five-hundred-and-twelve-pixel picture is
-                  49,545,461,760 pixel reads for one object, and the sampling is
-                  still coarse enough that a copy turned fifteen degrees falls
-                  between two of the angles tried.
-                </p>
+                <p>One way to search for changed sizes and orientations is to compare several transformed templates. Twelve angles at thirty-degree intervals and five sizes give sixty template variants. This samples those changes rather than covering every possible appearance, and each variant can have a different valid-search cost.</p>
+                <p>If every pass had the table’s 64-by-64 template cost, sixty passes would total 49,545,461,760 direct pixel-pair contributions. Actual resized templates change that count. An object at fifteen degrees would also fall between the tested thirty-degree angles, so the score must tolerate or further sample that mismatch.</p>
                 <InAModel>
-                  This is the practical reason the method was abandoned for
-                  anything but the case it is still exactly right for, which is a
-                  rigid, unrotated, unscaled thing at a known size. A button on a
-                  screen, a fiducial mark on a circuit board, a character in a
-                  font drawn to be matched. In those cases there is one angle and
-                  one size, the sixty collapses to one, and nothing else is
-                  needed.
-                </InAModel>
+                  Template matching is useful when the expected appearance is controlled, such as a known screen element or a registration mark. Multiple scales, rotations and optimized searches can extend it, with additional cost and ambiguity. Whether it is sufficient depends on the permitted variations and detection criteria.</InAModel>
               </SubSection>
             </>
           ),
@@ -1052,7 +817,8 @@ pixels read = positions × h × w`}</Equation>
             <>
               <SubSection title="28. A template with one brightness has no direction to compare">
                 <p>
-                  The normalised rule is a cosine between two deviation patterns,
+
+                  The normalized rule is a cosine between two deviation patterns,
                   and a cosine is an angle between two directions. A template
                   whose pixels are all the same number has a deviation pattern
                   that is the zero vector once its mean is taken away, and the
@@ -1060,14 +826,7 @@ pixels read = positions × h × w`}</Equation>
                   which means the score is undefined at every position at once
                   rather than badly behaved at some of them.
                 </p>
-                <p>
-                  This is a genuine dead end and not a choice about how to handle
-                  a hard case. The quantity being asked for does not exist. The
-                  other two rules are unaffected, since neither divides by
-                  anything, and a search for a flat grey square by squared
-                  differences is a perfectly sensible request with a perfectly
-                  sensible answer.
-                </p>
+                <p>A centered constant template has zero deviation length, so this normalized score is undefined. Squared differences and raw products do not divide by that length and remain computable. A flat template can therefore be a valid input for one comparison rule and invalid for another.</p>
                 <DerivationTable
                   expressionHeading="Degenerate input"
                   reasonHeading="What is undefined, and why"
@@ -1080,12 +839,12 @@ pixels read = positions × h × w`}</Equation>
                     {
                       expression: "template larger than the picture",
                       reason:
-                        "There is no position at which it fits, so the set being maximised over is empty and there is no best position to name.",
+                        "There is no position at which it fits, so the set being maximized over is empty and there is no best position to name.",
                     },
                     {
                       expression: "picture with no room for a second candidate",
                       reason:
-                        "Every position overlaps the winner, so there is no runner-up and how far the winner stands clear cannot be asked. A 7 by 7 template in a 15 by 15 picture leaves a 9 by 9 surface whose furthest position is 4 away, where 7 is needed before two patches come apart.",
+                        "no eligible non-overlapping rival exists for this winner. With the 7-by-7 inserted template at position (4, 4), all placements in the 9-by-9 score surface are at most four rows and columns away, so they still overlap it. This depends on the winning position.",
                     },
                   ]}
                 />
@@ -1095,24 +854,11 @@ pixels read = positions × h × w`}</Equation>
                 <p>
                   A flat candidate patch inside a varied image is a local problem: the template can still be valid, while this one position has no defined normalized comparison. We need a policy for skipping or marking that candidate without confusing it with a well-defined low score.
                 </p>
-                <p>
-                  The options are to refuse the whole search, which throws away
-                  every other position over one; to answer the position with
-                  something meaning &ldquo;not applicable&rdquo;, which then has
-                  to survive being compared against numbers; or to state a
-                  convention and use it. Zero is the usual convention, chosen
-                  because a flat patch really does have no agreement with any
-                  pattern, and because it is a value the comparison already knows
-                  what to do with.
-                </p>
-                <p>
-                  Whichever is chosen, the number that comes out is a convention
-                  rather than a measurement, and a reader who does not know that
-                  will read a column of zeros as a column of findings.
-                </p>
+                <p>An implementation can skip an undefined flat-patch comparison, mark it separately or use a declared fallback value. This SDK uses zero in the relevant case so the score surface remains numeric. That value is a convention, not the result of measuring an angle between a nonzero template and a directionless patch.</p>
+                <p>A fallback value communicates the implementation’s policy for an undefined comparison. It should not be interpreted as an observed match score. Without that distinction, a surface of fallback zeros can look like a measured rejection of every candidate.</p>
               </SubSection>
 
-              <SubSection title="30. And a patch that varies by nothing at all is scored in full confidence">
+              <SubSection title="30. Very Low Contrast and Numerical Noise" id="30-and-a-patch-that-varies-by-nothing-at-all-is-scored-in-full-confidence">
                 <p>
                   Between those two lies the case with no protection. A patch
                   that is flat exactly has deviations that are exactly zero. A
@@ -1120,59 +866,19 @@ pixels read = positions × h × w`}</Equation>
                   10<sup>&minus;17</sup>, and dividing those by their own length
                   is dividing rounding by rounding.
                 </p>
-                <p>
-                  It happens to stay harmless, and the reason is worth knowing.
-                  What is left over when a constant patch fails to average
-                  exactly is itself very nearly constant, and a constant is
-                  perpendicular to any centred template, so the quotient stays
-                  tiny. Measured on twenty-five pixels of one repeated value the
-                  answer is exactly 0.0, and on nine pixels of the same value it
-                  is 5 × 10<sup>&minus;17</sup>, which is zero for every purpose.
-                </p>
-                <p>
-                  A patch that genuinely varies by that much has no such
-                  protection. Its deviation pattern points somewhere real, so the
-                  cosine is a real cosine, and it is reported without hesitation.
-                  A patch whose brightest and darkest pixels differ by 1.4 ×
-                  10<sup>&minus;17</sup>, a difference no instrument records and
-                  no scene contains, is scored at 0.7454. The rule divides out the
-                  patch&rsquo;s own contrast, and dividing out something that was
-                  never there magnifies it to full size.
-                </p>
+                <p>In the repeated-value examples, rounding in mean subtraction leaves a nearly constant residual. Its dot product with the centered template largely cancels. The reported values are 0.0 for twenty-five pixels and 5 × 10<sup>−17</sup> for nine. These measurements are small for this use; they are not a guarantee for every nearly flat patch or floating-point path.</p>
+                <p>A patch with a very small but nonconstant stored variation can point in a definite numerical direction after normalization. In the displayed example, a brightness range of 1.4 × 10<sup>−17</sup> gives score 0.7454. The normalized score alone cannot establish that this contrast is meaningful relative to measurement precision or noise.</p>
                 <KeepInMind>
-                  Dividing by the patch&rsquo;s own spread is the same operation
-                  in both places, the one that carried the relit scene through
-                  unchanged in step 14 and the one that answers 0.7454 here.
-                  There is no version of the rule that keeps the first behaviour
-                  and drops the second, which is why an implementation usually
-                  refuses a patch whose spread falls below some floor the caller
-                  has to choose.
-                </KeepInMind>
+
+                  Normalizing contrast makes the score invariant to positive gain, including very small gains. A minimum-contrast check or a regularized denominator can reject or suppress unreliable low-contrast patches, while changing that invariance near the chosen floor. Choose the policy using the image scale and expected noise.</KeepInMind>
               </SubSection>
 
               <SubSection title="31. What it never knew in the first place">
-                <p>
-                  The failures above are all about the arithmetic running out.
-                  The limit that matters most is not one of them, and it is not a
-                  degenerate input at all.
-                </p>
-                <p>
-                  This method has no notion of what the thing it is looking for
-                  is. It has one arrangement of brightness that the thing
-                  produced once, from one place, at one size, at one angle, under
-                  one lamp. It cannot tell a cross from anything else that
-                  happens to have those numbers in those positions, and it cannot
-                  recognise a cross that produced different numbers. Everything
-                  measured on this page follows from that, and none of it is a
-                  defect in the search, which does exactly what it says.
-                </p>
+
+                <p>The template records one appearance of an object. The scan compares that appearance with candidate patches; it does not reason about the object’s identity. Another shape can produce matching local pixels, and the same object can produce different pixels under changed viewing conditions. The result must be interpreted at that level of comparison.</p>
                 <>
-<p>
-                  So three things are true at once. It finds only what it was given, exactly, so any change of size, angle or lighting defeats it, in the specific sense that it stops reporting the right position rather than reporting a lower score at the right position. It always returns a best position, whether or not the thing is anywhere in the picture, and the ratio of the winner to its rivals is what turns that answer into a question rather than an assertion.
-                </p>
-                <p>
-                  And what it matched was a photograph, not an object, which is why a doubled L can be found perfectly at a place no L begins.
-                </p>
+<p>The tested size and angle changes show how a fixed template can select the wrong position. Brightness changes depend on the score: the centered normalized rule handles a common positive gain and offset, while the other scores behave differently. Even a robust score still returns a best candidate in an image without the object. A detection decision therefore needs evidence beyond the existence of a winner.</p>
+
 </>
               </SubSection>
             </>
@@ -1184,13 +890,13 @@ pixels read = positions × h × w`}</Equation>
             choice(
               "A capital F turned by two right angles. What does the position the F actually occupies score?",
               [
-                "Minus 0.1218, which is worse than nothing",
+                "Minus 0.1218, indicating negative centered-pattern correlation at that location",
                 "0.0385",
                 "0.1650",
                 "0.6591",
               ],
               0,
-              "An upside-down F is partly the negative of an F, so the agreement comes out below zero, and the winner is reported 3.1623 pixels away at 0.6591. The other figures belong to the neighbouring experiments, 0.0385 to the single right angle and 0.1650 to the doubled F at the corner where it begins.",
+              "An upside-down F is partly the negative of an F, so the agreement comes out below zero, and the winner is reported 3.1623 pixels away at 0.6591. The other figures belong to the neighboring experiments, 0.0385 to the single right angle and 0.1650 to the doubled F at the corner where it begins.",
             ),
             trueFalse(
               "A search for a three-pixel L in a picture holding only a doubled copy of it reports a flawless 1.0, and the confidence ratio endorses that answer.",
@@ -1198,7 +904,7 @@ pixels read = positions × h × w`}</Equation>
               "The doubled L contains an exact copy of the original, pixel for pixel, at the join where its two arms meet, so the perfect score is real. The object itself begins at row 3, column 3 and scores 0.3162 there, while the answer given is row 5, column 4, standing 2.0917 clear of anything that does not overlap it. A perfect score is evidence that some patch of the picture is the template, not that the patch is the object.",
             ),
             choice(
-              "Twelve angles and five sizes over the five-hundred-and-twelve-pixel picture come to how many pixel reads for one object?",
+              "For the lesson's simple cost estimate, repeat a search costing 825,757,696 pixel comparisons for each of twelve angles and five sizes. What is the total estimated comparison count?",
               [
                 "49,545,461,760",
                 "About 825 million",
@@ -1206,30 +912,30 @@ pixels read = positions × h × w`}</Equation>
                 "1,764",
               ],
               0,
-              "Sixty passes are needed because a turned or resized copy is not found at all, and one pass over that picture is already the eight hundred and twenty-five million the previous step gave. The sampling is still coarse enough that a copy turned fifteen degrees falls between two of the angles tried.",
+              "The fixed-cost estimate repeats the baseline search sixty times:\n\n```math\n12 × 5 = 60 searches\n60 × 825,757,696 = 49,545,461,760 pixel comparisons\n```\n\nActual rotated and resized templates can have different dimensions and per-search costs. The finite angle and scale grid is also only a sampled search; intermediate transformations can still give poor matches.",
             ),
             trueFalse(
-              "A template whose pixels are all the same number defeats the squared differences, which cannot divide by a spread of zero, while the normalised rule scores it like any other.",
+              "A template whose pixels are all the same number defeats the squared differences, which cannot divide by a spread of zero, while the normalized rule scores it like any other.",
               false,
-              "It is the other way round. The normalised rule is a cosine between two deviation patterns, and a flat template’s deviation pattern is the zero vector once the mean is taken away, which has no direction, so there is no angle to measure and the score is undefined at every position at once. The squared differences and the multiplication divide by nothing and are unaffected, so a search for a flat grey square by squared differences is a perfectly sensible request with a perfectly sensible answer.",
+              "It is the other way round. The normalized rule is a cosine between two deviation patterns, and a flat template’s deviation pattern is the zero vector once the mean is taken away, which has no direction, so there is no angle to measure and the score is undefined at every position at once. The squared differences and the multiplication divide by nothing and are unaffected, so a search for a flat gray square by squared differences is a perfectly sensible request with a perfectly sensible answer.",
             ),
             choice(
-              "A patch whose brightest and darkest pixels differ by 1.4 times ten to the minus seventeen, a difference no instrument records and no scene contains. What does the normalised rule report?",
+              "The supplied patch has a stored brightness range of about 1.4e−17. What does this implementation's normalized matching report?",
               [
                 "0.7454, because the rule divides out the patch’s own contrast and dividing out something that was never there magnifies it to full size",
                 "Exactly 0.0, because a difference that small is flat for every purpose",
                 "Nothing, because the search refuses a patch whose spread falls below a floor",
-                "A value near zero, because whatever is left over is itself nearly constant and a constant is perpendicular to any centred template",
+                "A value near zero, because whatever is left over is itself nearly constant and a constant is perpendicular to any centered template",
               ],
               0,
-              "A patch that genuinely varies by that much has a deviation pattern pointing somewhere real, so the cosine is a real cosine and is reported without hesitation. The option promising a value near zero describes the neighbouring case, a patch of one repeated value, where the leftover really is nearly constant and the answer stays tiny. Dividing by the patch’s own spread is the same operation that carried the relit scene through unchanged, and there is no version of the rule that keeps one behaviour and drops the other.",
+              "The implementation normalizes the small nonzero deviation pattern and reports correlation 0.7454. A large normalized correlation does not encode how much measured contrast supported it. Near-constant inputs can amplify rounding effects, so an application can add a contrast threshold or another tolerance policy. That is an explicit robustness choice rather than a mathematical impossibility.",
             ),
         ],
         },
         {
           title: "Practice. Searching The Scene With The Library",
           practice: [
-            exercise("Score the six by six search under all three rules",["Part 2 cut a three by three template out of the six by six picture at row 0, column 1 and scored its sixteen positions by hand, finding 3, 0, 3 and 6 across the four columns under the squared differences and 0, 3, 3 and 3 under the multiplication, which cannot tell the exact copy from a patch of flat white. Run the same search with the library under all three rules.", "The normalised rule’s four scores are ones the page does not print. The exact copy at column 1 should score 1, the flat white at column 3 has no deviation pattern and is scored by the convention Part 7 describes, and the patch holding only part of the edge at column 2 lands somewhere between."],`import numpy as np
+            exercise("Score the six by six search under all three rules",["Cut a three-by-three template from the six-by-six image at row 0, column 1. Use every MatchRule to score all positions where the template fits. Print the first score-surface row and each rule's best column and score.", "Print the template values and the search's position and pixel-read counts. Compare the exact copy, partial edge and flat bright window. Their different scores show what each matching rule rewards."],`import numpy as np
 from oop_ml.core.computer_vision.matching import MatchRule, MatchScores, score_surface
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1254,8 +960,8 @@ print(f"{scores.n_positions} positions, {scores.n_pixels_read} pixels read")`,`t
 sum_of_squared_differences: row 0 of the surface [3.0, 0.0, 3.0, 6.0], best at column 1 scoring 0.0000
 correlation: row 0 of the surface [0.0, 3.0, 3.0, 3.0], best at column 1 scoring 3.0000
 normalised_cross_correlation: row 0 of the surface [0.0, 1.0, 0.5, 0.0], best at column 1 scoring 1.0000
-16 positions, 144 pixels read`,{...{ hints: ["patch_at(row, column, height, width) on a Picture answers the rectangle whose top-left pixel is at that position, and it is how the page cuts the template from the picture.", "score_surface takes the picture, the template and a MatchRule and answers a Picture of scores, smaller than the picture by two in each direction, so np.asarray and row 0 read the four scores of the top row. MatchRule is an enum, so a for loop visits all three.", "MatchScores.of takes the same three arguments and carries the winner as best, with row, column and score, plus n_positions and n_pixels_read."], check: numberCheck("What does the normalised rule score at column 2, the patch holding only part of the edge?", 0.5, 0.001, "The centred patch and reference have partial agreement, below the exact match. Raw multiplication can reward bright flat regions, while normalisation compares their contrast patterns under this implementation's constant-patch convention.") },question:"Do the three matching rules select and score the same image windows?"}),
-            exercise("Search the workbench three ways and read each winner’s ratio",["Part 3 found that one scene, one template and three rules give three different answers, the squared differences landing on the leftmost copy at row 38, column 12, the multiplication on the flat inside of the disc at row 9, column 33, and the normalised rule on row 26, column 26 with all three copies tied at 0.9991504412. Part 4 then found the squared differences standing 3.6900 clear of their rival and the normalised rule’s ratio sitting at exactly 1.0. The scene is rebuilt here from the numbers behind the page, with the three copies at the positions the page names.", "What the multiplication’s winner scores against its own best non-overlapping rival is a number the page does not print, and it says whether the decoy is reported as believable."],`import numpy as np
+16 positions, 144 pixels read`,{...{ hints: ["patch_at(row, column, height, width) on a Picture answers the rectangle whose top-left pixel is at that position, and it is how the page cuts the template from the picture.", "score_surface takes the picture, the template and a MatchRule and answers a Picture of scores, smaller than the picture by two in each direction, so np.asarray and row 0 read the four scores of the top row. MatchRule is an enum, so a for loop visits all three.", "MatchScores.of takes the same three arguments and carries the winner as best, with row, column and score, plus n_positions and n_pixels_read."], check: numberCheck("What does the normalized rule score at column 2, the patch holding only part of the edge?", 0.5, 0.001, "The centered patch and reference have partial agreement, below the exact match. Raw multiplication can reward bright flat regions, while normalization compares their contrast patterns under this implementation's constant-patch convention.") },question:"Do the three matching rules select and score the same image windows?"}),
+            exercise("Search the workbench three ways and read each winner’s ratio",["Use the supplied 48-by-48 scene and seven-by-seven cross template. For each matching rule, print the exact-copy reference score, winning row and column, winning score and score at each of the three known copies.", "Calculate believability() for each score surface. Print its ratio and is_believable() result. This library compares the winner with the best non-overlapping alternative using a default threshold of 1.5; inspect whether the declared winner is also distinctive."],`import numpy as np
 from oop_ml.core.computer_vision.matching import MatchRule, TemplateMatcher
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1311,8 +1017,8 @@ correlation: an exact copy scores 20.3076
   ratio against the best non-overlapping rival 1.0271, believable False
 normalised_cross_correlation: an exact copy scores 1.0000
   best at row 26, column 26 scoring 0.9992; the copies score [0.9992, 0.9992, 0.9992]
-  ratio against the best non-overlapping rival 1.0000, believable False`,{...{ hints: ["TemplateMatcher takes the template and a rule, and score_of_an_exact_copy is a property of it, 0 for the squared differences, the template’s sum of squares for the multiplication and 1 for the normalised rule.", "scores_on answers a MatchScores whose best is the winner and whose at(row, column) is the score of the patch whose top-left pixel sits there, so the three copies are read at the positions the page names.", "believability() sets the winner against the best position at least the template’s own width away in rows or columns, and answers an object with a ratio and an is_believable() test against the threshold of 1.5."], check: numberCheck("What ratio does the multiplication’s winner stand clear of its best non-overlapping rival by?", 1.0271, 0.0005, "The brightest decoy wins raw multiplication, but its best non-overlapping alternative is close in score. The ratio therefore fails the declared believability threshold. A winning score and a distinctive match are separate checks.") },question:"Can a high matching score distinguish the intended pattern from a decoy?"}),
-            exercise("Turn the F, then double the L",["Part 5 drew a capital F into plain ground and searched for it after turning it, finding that a quarter turn leaves the true position scoring 0.0385 with a confident wrong answer four pixels away at 0.5204, and a half turn scores −0.1218 at the truth with the winner 3.1623 pixels away at 0.6591. It then doubled a three pixel L and found the search reporting a flawless 1.0 at row 5, column 4, where no L begins, endorsed by a ratio of 2.0917. Reproduce all of it.", "The F and the L are the page’s own, five by five and three by three, on ground of 0.1. The unturned F is the control and should score 1.0 at its own corner."],`import numpy as np
+  ratio against the best non-overlapping rival 1.0000, believable False`,{...{ hints: ["TemplateMatcher takes the template and a rule, and score_of_an_exact_copy is a property of it, 0 for the squared differences, the template’s sum of squares for the multiplication and 1 for the normalized rule.", "scores_on answers a MatchScores whose best is the winner and whose at(row, column) is the score of the patch whose top-left pixel sits there, so the three copies are read at the positions the page names.", "believability() sets the winner against the best position at least the template’s own width away in rows or columns, and answers an object with a ratio and an is_believable() test against the threshold of 1.5."], check: numberCheck("What ratio does the multiplication’s winner stand clear of its best non-overlapping rival by?", 1.0271, 0.0005, "The brightest decoy wins raw multiplication, but its best non-overlapping alternative is close in score. The ratio therefore fails the declared believability threshold. A winning score and a distinctive match are separate checks.") },question:"Can a high matching score distinguish the intended pattern from a decoy?"}),
+            exercise("Turn the F, then double the L",["Place the supplied F at row 4, column 4 of the background, first unchanged, then rotated by one and two right angles. Search every image with the original F using normalized cross-correlation. Print the score at the known position, best position and score, and distance between those positions.", "Double the supplied three-by-three L by repeating each pixel twice in both directions. Place it at row 3, column 3 and search with the original L. Print the known-position score, winning position and score, and the believability ratio. Compare finding a matching subwindow with locating the whole resized object."],`import numpy as np
 from oop_ml.core.computer_vision.matching import MatchRule, MatchScores, placed, scaled_up, turned_by_a_right_angle
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1349,8 +1055,8 @@ print(f"doubled L: the object begins at row 3, column 3 scoring {scores.at(3, 3)
       f"column {scores.best.column} scoring {scores.best.score:.4f}, ratio {scores.believability().ratio:.4f}")`,`unturned: the true position scores 1.0000; reported row 4, column 4 scoring 1.0000, 0.0000 pixels away
 quarter turn: the true position scores 0.0385; reported row 8, column 4 scoring 0.5204, 4.0000 pixels away
 half turn: the true position scores -0.1218; reported row 1, column 3 scoring 0.6591, 3.1623 pixels away
-doubled L: the object begins at row 3, column 3 scoring 0.3162; reported row 5, column 4 scoring 1.0000, ratio 2.0917`,{...{ hints: ["placed(background, thing, row, column) writes a Picture into another at that top-left position, turned_by_a_right_angle(picture, quarter_turns) rotates one, and scaled_up(picture, 2) repeats every pixel twice each way.", "MatchScores.of(picture, template, rule) scores every position, at(row, column) reads one, best is the winner, and a ScoredPosition answers pixels_away_from another.", "believability() on the doubled L’s scores answers an object whose ratio is the winner over the best position that does not overlap it."], check: numberCheck("How many pixels from the true position is the winner reported after the half turn?", 3.1623, 0.0005, "Rotation changes the reference's pixel arrangement, and a fixed template can prefer the wrong location. A high score and a favourable ratio do not establish robustness to rotations or scale changes outside the search model.") },question:"Does a fixed template still locate an object after rotation or resizing?"}),
-            exercise("Find where the normalised rule stops being defined",["Part 7 names three places the arithmetic runs out. A template of one brightness has no deviation pattern, so the normalised rule is undefined at every position while the squared differences are unaffected; a patch whose pixels differ by 1.4 times ten to the minus seventeen is scored at 0.7454 in full confidence; and a seven by seven template in a fifteen by fifteen picture leaves no position that fails to overlap the winner, so its believability cannot be asked. Make all three happen.", "The refusals are the library’s own, so each is caught as an MLLibError and printed by its class name. The barely varying patch is built the way the page builds it, a small cross scaled down to the seventeenth decimal place on flat ground."],`import numpy as np
+doubled L: the object begins at row 3, column 3 scoring 0.3162; reported row 5, column 4 scoring 1.0000, ratio 2.0917`,{...{ hints: ["placed(background, thing, row, column) writes a Picture into another at that top-left position, turned_by_a_right_angle(picture, quarter_turns) rotates one, and scaled_up(picture, 2) repeats every pixel twice each way.", "MatchScores.of(picture, template, rule) scores every position, at(row, column) reads one, best is the winner, and a ScoredPosition answers pixels_away_from another.", "believability() on the doubled L’s scores answers an object whose ratio is the winner over the best position that does not overlap it."], check: numberCheck("How many pixels from the true position is the winner reported after the half turn?", 3.1623, 0.0005, "Rotation changes the reference's pixel arrangement, and a fixed template can prefer the wrong location. A high score and a favorable ratio do not establish robustness to rotations or scale changes outside the search model.") },question:"Does a fixed template still locate an object after rotation or resizing?"}),
+            exercise("Find where the normalised rule stops being defined",["Try a constant template under normalized cross-correlation and squared differences. Print any constructor error; otherwise print its exact-copy score. Then inspect the supplied almost-constant patch: print its brightness range and normalized score.", "Finally place the seven-by-seven template in the fifteen-by-fifteen image at row 4, column 4. Search it and request believability(), printing any MLLibError class and message. Check whether a non-overlapping rival exists for that winning location."],`import numpy as np
 from oop_ml.core.computer_vision.matching import MatchRule, MatchScores, TemplateMatcher, placed, score_surface
 from oop_ml.core.computer_vision.picture import Picture
 from oop_ml.core.exceptions import MLLibError
@@ -1398,7 +1104,7 @@ except MLLibError as refusal:
     print(f"{type(refusal).__name__}: {refusal}")`,`normalised_cross_correlation: AllSameValuesError
 sum_of_squared_differences: accepted, an exact copy scores 0.0
 a patch whose spread is 1.4e-17 scores 0.7454
-UndefinedMetricError: every position within a 9 by 9 search overlaps the winner at row 4, column 4, so there is no second candidate and believability is undefined`,{...{ hints: ["The flat template is refused when the matcher is built rather than when a picture is searched, since the template and the rule are fixed at construction, so the try has to wrap TemplateMatcher itself.", "patch_at(3, 3, 3, 3) cuts the patch, and a Picture carries its brightest and darkest, whose difference is the spread. score_surface indexed at [3, 3] is the score at that position.", "believability() raises when no position is at least the template’s own side away from the winner, which in a nine by nine surface is every position, and the message says so."], check: numberCheck("What does the normalised rule score the barely varying patch at?", 0.7454, 0.0005, "Normalisation divides out the patch's contrast magnitude, so a minute numerical pattern can receive a substantial correlation score. The score does not encode how much contrast supported it; near-constant data need an explicit tolerance policy.") },question:"Where does normalised matching become undefined or unreliable?"}),
+UndefinedMetricError: every position within a 9 by 9 search overlaps the winner at row 4, column 4, so there is no second candidate and believability is undefined`,{...{ hints: ["The flat template is refused when the matcher is built rather than when a picture is searched, since the template and the rule are fixed at construction, so the try has to wrap TemplateMatcher itself.", "patch_at(3, 3, 3, 3) cuts the patch, and a Picture carries its brightest and darkest, whose difference is the spread. score_surface indexed at [3, 3] is the score at that position.", "The winning top-left coordinate is (4, 4) within a nine-by-nine score surface. Every other valid top-left position is less than seven pixels away in both coordinates, so each candidate overlaps that winner and believability() has no valid rival."], check: numberCheck("What does the normalized rule score the barely varying patch at?", 0.7454, 0.0005, "Normalization divides out the patch's contrast magnitude, so a minute numerical pattern can receive a substantial correlation score. The score does not encode how much contrast supported it; near-constant data need an explicit tolerance policy.") },question:"Where does normalized matching become undefined or unreliable?"}),
           ],
         },
       ]}

@@ -180,7 +180,7 @@ export function MeanBalancePlayground() {
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         Drag a person and watch the mean chase them while the deviations go on
-        cancelling to zero.
+        canceling to zero.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">

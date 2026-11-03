@@ -101,7 +101,7 @@ export function LiftedCentring() {
         </div>
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Uncentred, the bars all point the same way, because the direction is the one every person shares, from the origin to the mean. Centred, the first direction sets some people against others, which is a spread.
+        Uncentered, the bars all point the same way, because the direction is the one every person shares, from the origin to the mean. Centered, the first direction sets some people against others, which is a spread.
       </p>
     </div>
   );

@@ -154,13 +154,13 @@ export function PerpendicularityCurve() {
       </svg>
 
       <Legend>
-        The grey stubs under the axis are the share of pairs that came out at
+        The gray stubs under the axis are the share of pairs that came out at
         exactly a right angle, which at four non-zero entries in a thousand
         positions is{" "}
         {`${(measured.widths[measured.widths.length - 1].exactly_perpendicular * 100).toFixed(1)}%`}{" "}
         of them. Switch to the second view and the rule stops predicting
         anything at all, since a direction with every position filled is supposed to
-        line up perfectly with its neighbour and comes out at{" "}
+        line up perfectly with its neighbor and comes out at{" "}
         {measured.fullness[measured.fullness.length - 1].measured.toFixed(4)}.
       </Legend>
       {message && (

@@ -2,6 +2,8 @@
 
 import { useCallback } from "react";
 import { useLearnerRecord } from "./learner-state";
+import { getProgressAccount, useProgressAccount } from "./progress";
+import { reportLearningActivity } from "./learning-activity";
 
 export interface JourneyEvidence { at: number; supported: boolean; attemptId?: string }
 export interface JourneyAttemptEvidence extends JourneyEvidence { kind: "built" | "transferred"; attemptId: string }
@@ -12,12 +14,14 @@ export interface JourneyProgress {
   exploredAt: number | null;
   built: JourneyEvidence | null;
   transferred: JourneyEvidence | null;
+  /** Optional for pre-awards records; the controls tutorial records this once. */
+  connected?: JourneyEvidence | null;
   lastVisitedAt: number | null;
   stage: string;
   /** Optional so records written before per-attempt evidence still restore. */
   attempts?: JourneyAttemptEvidence[];
 }
-type JourneyEvent = { type: "touch"; stage?: string } | { type: "explored" } |
+type JourneyEvent = { type: "touch"; stage?: string } | { type: "explored" } | { type: "connected" } |
   { type: "built" | "transferred"; supported: boolean; attemptId?: string };
 interface RecentJourney { id: string; title: string; href: string; stage: string; lastVisitedAt: number | null }
 
@@ -38,6 +42,7 @@ export function validJourneyProgress(value: unknown): value is JourneyProgress {
   const row = value as JourneyProgress;
   return identity(row.id) && typeof row.title === "string" && row.title.length > 0 && row.title.length <= 300 &&
     route(row.href) && (row.exploredAt === null || timestamp(row.exploredAt)) && evidence(row.built) && evidence(row.transferred) &&
+    (row.connected === undefined || evidence(row.connected)) &&
     (row.lastVisitedAt === null || timestamp(row.lastVisitedAt)) && typeof row.stage === "string" && row.stage.length <= 160 &&
     (row.attempts === undefined || Array.isArray(row.attempts) && row.attempts.every(attempt => attempt && evidence(attempt) &&
       attemptIdentity(attempt.attemptId) && (attempt.kind === "built" || attempt.kind === "transferred")));
@@ -62,6 +67,7 @@ export function updateJourneyProgress(current: JourneyProgress, event: JourneyEv
   const next = { ...current, lastVisitedAt: now };
   if (event.type === "touch") return { ...next, stage: event.stage?.slice(0, 160) ?? next.stage };
   if (event.type === "explored") return { ...next, exploredAt: next.exploredAt ?? now };
+  if (event.type === "connected") return { ...next, connected: current.connected ?? { at: now, supported: true } };
   const field: JourneyAttemptEvidence["kind"] = event.type === "built" ? "built" : "transferred";
   const attempts = journeyAttemptHistory(current);
   // Callers without an attempt identity keep their legacy attempt. Merely
@@ -118,19 +124,25 @@ function useRecentRecord() {
 }
 
 export function useJourneyProgress(id: string, title: string, href: string) {
+  const account = useProgressAccount();
   const { value: record, set } = useJourneyRecord(id, title, href);
   const { set: setRecent } = useRecentRecord();
   const save = useCallback((event: JourneyEvent) => {
+    if (getProgressAccount() !== account) return;
     const now = Date.now();
     set(previous => updateJourneyProgress({ ...previous, title, href }, event, now));
     setRecent(previous => ({ id, title, href, lastVisitedAt: now,
       stage: event.type === "touch" && event.stage !== undefined ? event.stage.slice(0, 160) : previous.id === id ? previous.stage : "" }));
-  }, [id, title, href, set, setRecent]);
+    if (event.type === "connected" || event.type === "built" || event.type === "transferred") {
+      reportLearningActivity("workshop", `workshop:${id}:${event.type}`, account);
+    }
+  }, [id, title, href, set, setRecent, account]);
   const touch = useCallback((stage?: string) => save({ type: "touch", stage }), [save]);
   const markExplored = useCallback(() => save({ type: "explored" }), [save]);
+  const markConnected = useCallback(() => save({ type: "connected" }), [save]);
   const markBuilt = useCallback((supported: boolean, attemptId?: string) => save({ type: "built", supported, attemptId }), [save]);
   const markTransferred = useCallback((supported: boolean, attemptId?: string) => save({ type: "transferred", supported, attemptId }), [save]);
-  return { record, touch, markExplored, markBuilt, markTransferred };
+  return { record, touch, markExplored, markConnected, markBuilt, markTransferred };
 }
 
 export function useRecentJourney() {

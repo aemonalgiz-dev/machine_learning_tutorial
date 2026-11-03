@@ -26,9 +26,9 @@ import { SoftmaxAssembly } from "@/components/widgets/SoftmaxAssembly";
 import { TwoClassCollapse } from "@/components/widgets/TwoClassCollapse";
 
 export const metadata: Metadata = {
-  title: "More Than Two Classes · oop_ml",
+  title: "More Than Two Classes · Perceptron Lab",
   description:
-    "Some problems have more than two possible answers. We need a way to compare the evidence for each category and decide how the resulting scores become a prediction.",
+    "Some predictions have several possible categories. Comparing a score for each category requires a consistent decision rule and a clear distinction between scores and probabilities.",
 };
 
 const linkClass =
@@ -44,7 +44,7 @@ export default function MulticlassClassificationPage() {
       playgroundTitle="Make the class scores compete for probability"
       playgroundIntro="Choose a point and compare the scores for every class. Check which class wins and whether the displayed probabilities are constrained to add to one."
       title="More Than Two Classes"
-      tagline={"Some problems have more than two possible answers. We need a way to compare the evidence for each category and decide how the resulting scores become a prediction."}
+      tagline={"Some predictions have several possible categories. Comparing a score for each category requires a consistent decision rule and a clear distinction between scores and probabilities."}
       prerequisites={
         <>
           Both routes are built out of the{" "}
@@ -73,7 +73,8 @@ export default function MulticlassClassificationPage() {
                 </p>
                 <Equation>{"P(class 0 | x) + P(class 1 | x) = 1"}</Equation>
                 <p>
-                  The crowd in the box above has three colours, children,
+
+                  The crowd in the box above has three colors, children,
                   teenagers and adults. Every person is exactly one of the
                   three, nobody is two at once, and the three cover everyone in
                   the dataset. For one person the model should now say
@@ -88,12 +89,7 @@ export default function MulticlassClassificationPage() {
                     ["total", "1.00"],
                   ]}
                 />
-                <p>
-                  One unit of probability, divided among mutually exclusive
-                  classes. That is what a multiclass probability model
-                  produces, and increasing one class&rsquo;s share has to come
-                  out of the others.
-                </p>
+                <p>For mutually exclusive and exhaustive classes, the probabilities share a total of one. Giving more probability to one class leaves less for the others. That shared constraint is useful when the required answer is exactly one category.</p>
               </SubSection>
 
               <SubSection title="2. Multiclass versus multilabel classification">
@@ -105,16 +101,7 @@ export default function MulticlassClassificationPage() {
                   each answers a separate question.
                 </p>
                 <MulticlassVersusMultilabel />
-                <p>
-                  Multiclass classification chooses among alternatives, and
-                  its output is one distribution. Multilabel classification
-                  answers several independent yes-or-no questions, and its
-                  output is several separate probabilities with their own
-                  thresholds. The rest of this page is about the first
-                  problem. The second appears again in section 24, because one
-                  of the two routes to the first problem is built from the
-                  tools of the second, and that is where the two get confused.
-                </p>
+                <p>A multiclass prediction chooses one category from a set of alternatives. A multilabel prediction can assign several labels to the same observation. Separate binary outputs can answer those label questions without requiring their probabilities to sum to one. The labels themselves may still be related. Section 24 returns to that distinction after we compare approaches to the single-category problem.</p>
               </SubSection>
             </>
 </>),
@@ -130,15 +117,8 @@ export default function MulticlassClassificationPage() {
                   inputs.
                 </p>
                 <Equation>{"z_k = w_k · x + b_k\n\nz_child = w_child · x + b_child\nz_teen  = w_teen · x + b_teen\nz_adult = w_adult · x + b_adult"}</Equation>
-                <p>
-                  Each class has its own weights and its own intercept. All
-                  three scores are computed from the same height and weight.
-                  They are unrestricted numbers, and they are not yet
-                  probabilities. What a multiclass linear model does is give
-                  every class its own opinion of the same observation, and the
-                  rest is deciding what to do with three opinions.
-                </p>
-                <WorkedExample title="Fitted softmax scores for three standardised input profiles">
+                <p>Each class has its own weights and intercept, applied to the same height and weight. These produce three scores indicating how the linear model ranks the possible classes for this observation. A score can have any real value. We need another operation before treating those values as probabilities.</p>
+                <WorkedExample title="Fitted softmax scores for three standardized input profiles">
                   <NumberTable
                     headings={["class", "intercept", "weight on height", "weight on weight"]}
                     rows={[
@@ -146,7 +126,7 @@ export default function MulticlassClassificationPage() {
                       ["teenager", "3.960", "3.403", "3.403"],
                       ["adult", "−0.792", "7.296", "7.296"],
                     ]}
-                    caption="The child row is all zeros because softmax holds one class as a reference, which section 26 explains. Both weights match because the three people lie on a line."
+                    caption="This implementation fixes the child class as its reference. The two standardized inputs are identical on these three profiles; the symmetric fitting procedure gives matching weights, rather than identifying separate height and weight effects."
                   />
                 </WorkedExample>
               </SubSection>
@@ -163,13 +143,7 @@ export default function MulticlassClassificationPage() {
                   cross along a straight line.
                 </p>
                 <Equation>{"z_j = z_k\n(w_j − w_k) · x + (b_j − b_k) = 0"}</Equation>
-                <p>
-                  So the boundary between any two classes is linear, and the
-                  map on the right is feature space divided by which class has
-                  the largest score. Everything in the next two Parts is about
-                  what to do with the three heights of the planes at a point,
-                  and none of it moves the boundaries the argmax already drew.
-                </p>
+                <p>For a fixed set of linear class scores, a nondegenerate pairwise tie lies on a straight line. Only portions where those classes also beat the others form actual decision boundaries. Softmax preserves the score ordering. Fitting separate one-vs-rest classifiers can produce different scores and therefore different boundaries.</p>
               </SubSection>
             </>
           ),
@@ -179,15 +153,7 @@ export default function MulticlassClassificationPage() {
           content: (
             <>
               <SubSection title="5. What softmax must produce">
-                <p>
-                  Three unrestricted scores need to become probabilities that
-                  stay between zero and one, sum to one, keep whichever score
-                  was largest as the largest probability, rise when their own
-                  score rises, and fall when another class&rsquo;s score
-                  rises. Those are the requirements. Softmax is the function
-                  that meets them, and it is easier to trust once the
-                  requirements are on the table first.
-                </p>
+                <p>We want the outputs to be positive, sum to one and preserve the ordering of the class scores. Increasing one score while holding the others fixed should increase its share. Softmax provides one way to obtain these properties. They motivate the construction, but do not uniquely determine it.</p>
               </SubSection>
 
               <SubSection title="6. Building softmax">
@@ -198,11 +164,7 @@ export default function MulticlassClassificationPage() {
                 </p>
                 <Equation>{"P(y = k | x) = e^(z_k) / Σⱼ e^(z_j)"}</Equation>
                 <SoftmaxAssembly />
-                <p>
-                  Every probability is one class&rsquo;s exponentiated score as
-                  a share of the total across all of them. That shared
-                  denominator is the whole design.
-                </p>
+                <p>Dividing by the shared total makes each output a proportion of the same quantity. This is why the probabilities sum to one and why increasing one score affects the other probabilities too.</p>
               </SubSection>
 
               <SubSection title="7. A complete softmax calculation">
@@ -282,7 +244,7 @@ export default function MulticlassClassificationPage() {
             trueFalse(
               "Asking whether each person enjoys sports, whether they enjoy music and whether they enjoy reading is a multiclass problem, because there are three answers.",
               false,
-              "Those are three independent yes-or-no questions, and a person may enjoy none, one, several or all three. There is no one unit of probability for them to be shares of, so the three outputs need not total anything. Multiclass classification chooses among mutually exclusive alternatives and produces one distribution.",
+              "These are separate binary labels: one person can enjoy several activities at once. Their probabilities do not have to sum to one, and the activities may be statistically related. A multiclass task instead assigns one mutually exclusive class per observation. Softmax is one way to represent a distribution over those classes.",
             ),
             choice(
               "With two input features, each class score is a flat plane over the feature plane. What is the boundary between two of the classes?",
@@ -309,7 +271,7 @@ export default function MulticlassClassificationPage() {
                 "A class’s probability depends only on its own score",
               ],
               [0, 1, 2],
-              "A probability that depended only on its own score is exactly what softmax refuses. Every class is divided by the same total, so raising one score lowers the others without anything being done to their scores. That shared denominator is the whole design, and it is what competition means here.",
+              "Each exponentiated score is divided by the sum across all classes. Raising another class's score increases that common denominator, reducing this class's probability when its own score is fixed. The probabilities are therefore coupled rather than calculated from each score in isolation.",
             ),
             choice(
               "Scores of (1, 2, 0) give softmax probabilities of 0.245, 0.665 and 0.090. What does the stable calculation return for scores of (1000, 1001, 999)?",
@@ -320,7 +282,7 @@ export default function MulticlassClassificationPage() {
                 "One third each, because scores that close together are indistinguishable at that size",
               ],
               0,
-              "Subtracting the largest score, 1001, leaves −1, 0 and −2, whose exponentials are 0.368, 1.000 and 0.135, and those divide out to the same three probabilities. Only the direct route overflows. The size of the scores is invisible to softmax, so a gap of one counts for the same at a thousand as it does at one.",
+              "Subtract the largest score before exponentiating:\n\n```math\n(1000, 1001, 999) − 1001 = (−1, 0, −2)\nexp(scores) ≈ (0.368, 1.000, 0.135)\n```\n\nNormalizing those exponentials gives the same probabilities as for scores (1, 2, 0). The shared shift cancels in the ratio and avoids the large positive exponentials that would overflow.",
             ),
         ],
         },
@@ -357,13 +319,7 @@ export default function MulticlassClassificationPage() {
                   its own.
                 </p>
                 <Equation>{"q_k = σ(w_k · x + b_k)"}</Equation>
-                <p>
-                  Fitted separately. Each compares one class with a different
-                  combined rest. No shared denominator connects the three
-                  outputs, and no classifier knows what the other two assigned.
-                  That independence is the whole of the route, and it is what
-                  the next section&rsquo;s totals reveal.
-                </p>
+                <p>Each binary model is fitted separately against its own combined rest category. No shared normalization forces their outputs to add to one. The totals in the next display show the practical consequence of that separate fitting.</p>
               </SubSection>
 
               <SubSection title="13. Why their outputs need not sum to one">
@@ -374,7 +330,7 @@ export default function MulticlassClassificationPage() {
                     ["(0.2, 0.2, 0.1)", "0.5"],
                     ["(0.7, 0.2, 0.1)", "1.0"],
                   ]}
-                  caption="Each number answers a different binary question. No equation forces their sum to one, and a total of one can happen by accident without meaning anything."
+                  caption="Each number answers a different binary question. A total of one is possible, but that alone does not establish coherent or calibrated multiclass probabilities."
                 />
                 <p>
                   The chart below is every person&rsquo;s row total under both
@@ -382,13 +338,7 @@ export default function MulticlassClassificationPage() {
                   One-vs-rest is not a line at all.
                 </p>
                 <RowSumChart />
-                <p>
-                  Independent class-versus-rest estimates do not form one
-                  multiclass distribution, and dividing them by their total to
-                  make them sum to one does not make them one either. It
-                  rescales three answers to three different questions, and
-                  the result is calibrated to nothing.
-                </p>
+                <p>Dividing the binary estimates by their total does produce non-negative values that sum to one, provided that total is positive. It does not establish that the values are calibrated multiclass probabilities. The binary models were fitted to separate objectives; a final rescaling cannot by itself verify their agreement with observed class frequencies.</p>
               </SubSection>
 
               <SubSection title="14. Producing a multiclass decision">
@@ -417,15 +367,16 @@ export default function MulticlassClassificationPage() {
           title: "Part 5. Work the Three-Person Example",
           content: (
             <>
-              <SubSection title="15. Standardising the three-person example">
+              <SubSection title="15. Standardizing the three-person example" id="15-standardising-the-three-person-example">
                 <p>
+
                   The three worked people are the child at 120 cm and 25 kg,
                   the teenager at 150 and 50, and the adult at 180 and 75. The
-                  features are standardised before either route fits, and the
-                  standardised values are worth seeing.
+                  features are standardized before either route fits, and the
+                  standardized values are worth seeing.
                 </p>
                 <NumberTable
-                  headings={["person", "height", "weight", "standardised height", "standardised weight"]}
+                  headings={["person", "height", "weight", "standardized height", "standardized weight"]}
                   rows={[
                     ["child", "120", "25", "−1.2247", "−1.2247"],
                     ["teenager", "150", "50", "0", "0"],
@@ -433,12 +384,13 @@ export default function MulticlassClassificationPage() {
                   ]}
                 />
                 <p>
+
                   The middle person becomes zero in both features, so their
                   score under every class is that class&rsquo;s intercept and
-                  nothing else. Standardisation changed the numbers, not who
+                  nothing else. Standardization changed the numbers, not who
                   anybody is, and it is the reason the arithmetic in the next
                   two sections is clean enough to do by hand. The widget in
-                  section 14 shows the raw and standardised coordinates side
+                  section 14 shows the raw and standardized coordinates side
                   by side for whichever person is picked.
                 </p>
               </SubSection>
@@ -526,18 +478,7 @@ export default function MulticlassClassificationPage() {
                   />
                 </WhyThisWorks>
                 <KeepInMind>
-                  <p>
-                    This is a fact about these three people, not about
-                    one-vs-rest. The zero slope comes from the exact symmetry
-                    of the three positions, which leaves no direction in which
-                    the feature helps at all. A different sample, even a
-                    slightly asymmetric one, gives the fit a nonzero slope
-                    however weak the relationship, and one-vs-rest does not in
-                    general switch off features it cannot use well. A score of
-                    exactly one third among three classes is worth recognising
-                    as a base rate. It is not a general property of an
-                    imperfect classifier.
-                  </p>
+                  <p>The constant prediction follows from the symmetry of these three labeled positions. Here a linear score cannot improve the likelihood by favoring either end. Changing the arrangement or labels can produce a nonzero slope, but asymmetry alone does not guarantee one. The one-third value is the positive-class base rate in this example, rather than a general output of one-vs-rest.</p>
                 </KeepInMind>
               </SubSection>
             </>
@@ -552,9 +493,9 @@ export default function MulticlassClassificationPage() {
               "The child classifier sees one child and two others, the teenager classifier one teenager and two others, and so on. Each fit therefore compares one class with a different combined rest, which is the first reason the three outputs have no shared total to add up to.",
             ),
             trueFalse(
-              "Dividing the three one-vs-rest outputs by their total turns them into a multiclass distribution.",
+              "Dividing these positive one-vs-rest outputs by their total guarantees calibrated probabilities for the mutually exclusive classes.",
               false,
-              "It rescales three answers to three different questions, each fitted against a different combined rest, and the result is calibrated to nothing. Forcing numbers to sum to one is not the same as their being one distribution.",
+              "Normalization makes nonnegative outputs sum to one when their total is positive, so it does form a numerical distribution. It does not make the separately fitted binary models a jointly trained softmax model or guarantee calibration. Some implementations use this normalization; evaluate the resulting probabilities with an appropriate common scoring rule and held-out data.",
             ),
             choice(
               "The middle person’s one-vs-rest outputs total 0.3535, and each person at the ends totals 1.3293. What does that show?",
@@ -565,10 +506,10 @@ export default function MulticlassClassificationPage() {
                 "The teenager classifier is miscalibrated and the other two are fine",
               ],
               0,
-              "No shared denominator connects the three fits, and no classifier knows what the other two assigned. From the same three fits one person’s answers add to about a third and another’s to about four thirds. Nothing failed and nothing needs reweighting, since there is one person of each class. Softmax on the same people is a flat line at one by construction.",
+              "Each binary classifier has its own objective, so the wrapper does not impose a shared row total. The three outputs for the middle person sum to 0.3535, while the endpoint totals are 1.3293. Those totals alone do not diagnose a failed fit or a need for reweighting. The softmax outputs sum to one by their shared formula, which is a separate property from calibration or convergence.",
             ),
             choice(
-              "Why does the teenager-versus-rest classifier answer exactly one third for everybody?",
+              "For the symmetric three-person example, why does the teenager-versus-rest classifier give everyone approximately one third?",
               [
                 "The three people lie on one line, so no straight boundary isolates the middle one, and the optimum ignores the feature and predicts the base rate",
                 "A sigmoid cannot return more than a third when two of the three labels are negative",
@@ -576,7 +517,7 @@ export default function MulticlassClassificationPage() {
                 "The fit was stopped after 49 passes, before it could do better",
               ],
               0,
-              "A linear boundary splits the line into a left and a right, so the middle person always shares a side with one of the ends. With the feature of no help the best constant is the share of yes answers, one in three, whose intercept is about −0.6931. The 49 passes are how long it took to reach that optimum, not a cap it ran into.",
+              "The teenager lies at the centered midpoint, with the two negative examples placed symmetrically on either side. A nonzero linear slope raises the score at one negative endpoint while lowering it at the other, so the logistic-loss optimum has zero slope and predicts the positive base rate. Moving the teenager away from the midpoint changes that symmetry and can produce nonconstant scores, as the later exercise shows, but a straight boundary still cannot isolate the middle point.",
             ),
             several(
               "The middle person gets 0.9731 from softmax and 0.3333 from the teenager-versus-rest classifier. Which of these hold?",
@@ -601,13 +542,14 @@ export default function MulticlassClassificationPage() {
             <>
               <SubSection title="19. Same accuracy, different models">
                 <p>
+
                   On the crowd both routes score an accuracy of 1.000. What
                   that establishes is that both chose the correct largest class
                   for every training person. What it does not establish is
                   that their probabilities are equally good, that their
                   decision regions are the same, that their calibration is
                   equal, that they would agree on new people, or that either
-                  optimisation converged.
+                  optimization converged.
                 </p>
                 <RegionsSideBySide />
                 <p>
@@ -621,11 +563,7 @@ export default function MulticlassClassificationPage() {
               </SubSection>
 
               <SubSection title="20. Multiclass log loss">
-                <p>
-                  For softmax the loss for one observation is minus the log of
-                  the probability given to the correct class, and the whole
-                  loss is the mean of that.
-                </p>
+                <p>A softmax model is trained to assign high probability to the supplied correct class. Its loss for one observation is the negative logarithm of that probability. Confidently assigning little probability to the correct class is heavily penalized. Average the observation losses to obtain the training objective.</p>
                 <Equation>{"lossᵢ = −ln P(yᵢ | xᵢ)          loss = −(1/n) Σᵢ ln P(yᵢ | xᵢ)"}</Equation>
                 <WorkedExample title="Compare cross-entropy for the same three people">
                   <NumberTable
@@ -663,37 +601,11 @@ export default function MulticlassClassificationPage() {
                   other two fits are charged 0.0047 each, because each of them
                   can separate its one person from the other two and does.
                 </p>
-                <p>
-                  The two losses are different objectives and the numbers
-                  should not be compared as if one probability model were
-                  being scored twice. Softmax is fitted to the multiclass loss.
-                  One-vs-rest is fitted to three binary losses independently,
-                  and its figure is the average of those. What both show is
-                  that accuracy checks only the winning class, while log loss
-                  looks at how the probability was distributed, and on the
-                  middle person the third the teenager classifier answered is
-                  a poor probability for a right answer.
-                </p>
+                <p>These are different loss functions: softmax contributes one correct-class term per observation, while the one-vs-rest figure averages three binary objectives. Do not compare their numerical sizes as though the same objective were evaluated twice. Both depend on more than the winning label. The teenager’s low binary probability incurs a substantial loss even though it is the largest output for that person.</p>
               </SubSection>
 
               <SubSection title="21. Normalization versus calibration">
-                <p>
-                  Softmax outputs are a distribution. They can still be
-                  overconfident or underconfident, and summing to one says
-                  nothing about whether a 0.97 turns out to be right 97
-                  percent of the time. One-vs-rest outputs may each be
-                  reasonably calibrated as binary probabilities and remain
-                  incoherent as a multiclass distribution, since three
-                  classifiers can all be right that their class is unlikely.
-                  Summing to one is necessary for a multiclass probability
-                  distribution and is not sufficient for a trustworthy one.
-                  Judging calibration takes data the model never saw, and
-                  belongs to the{" "}
-                  <Link href="/concepts/judging-a-classifier" className={linkClass}>
-                    judging page
-                  </Link>
-                  .
-                </p>
+                <p>Softmax outputs sum to one, but that does not establish calibration: observations assigned probability 0.97 need not be correct 97 percent of the time. Separately fitted binary estimates do not enforce a shared row total. Even acceptable calibration summaries for the individual binary models do not impose that pointwise constraint. Check calibration on excluded observations, as the <Link href="/concepts/judging-a-classifier" className={linkClass}>classifier evaluation page</Link>{" "}explains.</p>
               </SubSection>
             </>
           ),
@@ -714,17 +626,7 @@ export default function MulticlassClassificationPage() {
               </SubSection>
 
               <SubSection title="23. When one-vs-rest is useful">
-                <p>
-                  One-vs-rest is useful when a strong binary classifier is
-                  already to hand, when classes can be trained separately or
-                  in parallel, when new classes may need adding without
-                  refitting the rest, or when only a ranking or a final call
-                  is needed and jointly normalised probabilities are not. Its
-                  cost depends on the solver and the base model and is not
-                  automatically lower than one softmax fit. Its scores may need
-                  calibrating before they can be compared. And its performance
-                  has to be measured rather than assumed, which is section 19.
-                </p>
+                <p>One-vs-rest can reuse a suitable binary classifier and fit the class problems separately or in parallel. It can be useful when the final decision or ranking matters more than a jointly normalized distribution. Adding classes changes what belongs to each existing classifier’s rest category, so those models may need refitting too. Compare accuracy, calibration and computational cost for the actual task.</p>
               </SubSection>
 
               <SubSection title="24. Multilabel classification as a separate problem">
@@ -765,41 +667,22 @@ export default function MulticlassClassificationPage() {
                 />
                 <TwoClassCollapse />
                 <p>
+
                   Only the difference between the two scores matters, so
                   binary logistic regression needs one score and not two, and
                   multiclass softmax is the same competition extended to more
                   classes. Two-class softmax and binary logistic regression are
-                  one relationship in two parameterisations.
+                  one relationship in two parameterizations.
                 </p>
               </SubSection>
 
               <SubSection title="26. Softmax identifiability">
-                <p>
-                  Section 9 showed that adding a constant to every score
-                  changes nothing. Turned around, that means many different
-                  parameter sets produce the same probabilities, and a fit
-                  looking for the best parameters has infinitely many equally
-                  good answers. The probabilities are identified. The raw
-                  parameters are not.
-                </p>
-                <p>
-                  The usual repairs are to pick one reference class and fix its
-                  coefficients at zero, to constrain the class parameters to
-                  sum to zero, or to add a penalty that prefers one finite
-                  parameterisation among the equals. The fit on this page takes
-                  the first. That is why the child row of section 3&rsquo;s table is
-                  all zeros, and why pinning it there loses nothing. It is a
-                  choice about naming, not about the model.
-                </p>
+                <p>Adding the same value to every class score leaves the probabilities unchanged. Different coefficient sets can therefore represent the same predictions. We need a convention that removes this redundancy if we want a unique parameter description.</p>
+                <p>One option is to select a reference class and fix its coefficients to zero. Another constrains the class parameters to sum to zero. This implementation uses the reference-class option, explaining the all-zero child row. It removes the shared-score redundancy without changing the probability distributions the unpenalized model can represent. A coefficient penalty can also select among some equivalent parameterizations, depending on which parameters it penalizes.</p>
               </SubSection>
 
               <SubSection title="27. The softmax gradient">
-                <p>
-                  For a one-hot target y with a one in the observed class and a
-                  predicted probability vector p, the derivative of one
-                  observation&rsquo;s loss with respect to each class&rsquo;s
-                  score is the gap.
-                </p>
+                <p>A one-hot target places one in the observed class position and zero in the other positions. For one observation, differentiating the negative log probability gives predicted probability minus that indicator. The second line below sums those contributions over observations. For the mean loss defined earlier, divide that summed gradient by the observation count.</p>
                 <Equation>{"∂lossᵢ/∂zᵢₖ = pᵢₖ − yᵢₖ\n∂loss/∂w_k = Σᵢ (pᵢₖ − yᵢₖ) xᵢ"}</Equation>
                 <WorkedExample title="The middle person at the fitted softmax">
                   <NumberTable
@@ -812,14 +695,7 @@ export default function MulticlassClassificationPage() {
                     caption="The three gaps sum to zero, as they must for a distribution against a one-hot target. Each is that class's share of this person's push on the fit."
                   />
                 </WorkedExample>
-                <p>
-                  This is the logistic page&rsquo;s gradient with one more
-                  index. An observed indicator, minus the predicted
-                  probability, weighted by the inputs. Softmax fitting adjusts
-                  every class&rsquo;s score by the gap between what it
-                  predicted for that class and whether the class was the
-                  observed one.
-                </p>
+                <p>The negative-log-loss gradient uses predicted probability minus the observed indicator, multiplied by the input. Subtracting that gradient increases the observed class score relative to the others. Maximizing log likelihood uses the opposite sign, observed indicator minus predicted probability.</p>
               </SubSection>
             </>
           ),
@@ -836,17 +712,7 @@ export default function MulticlassClassificationPage() {
                   pass.
                 </p>
                 <SeparationSweep />
-                <p>
-                  Accuracy is perfect from pass 2. The size of the coefficients
-                  is 2.3 at pass 10, 7.1 at pass 100 and 11.4 at pass 500, and
-                  it is still growing. The loss is 0.43, then 0.08, then 0.016,
-                  still falling. The probability each person&rsquo;s own class
-                  receives climbs toward one and never arrives, and the run
-                  is reported as not converged, because no finite set of
-                  coefficients reaches the maximum. Perfect multiclass
-                  classification and an unbounded likelihood problem sit
-                  together comfortably.
-                </p>
+                <p>Training accuracy is perfect from pass two. Coefficient magnitude grows from 2.3 at pass ten to 7.1 at pass one hundred and 11.4 at pass five hundred. Loss falls from 0.43 to 0.08 to 0.016. On these separated observations, the likelihood approaches its upper bound as some parameters grow without bound; no finite parameter vector attains that bound. The run is reported as not converged.</p>
                 <p>
                   One-vs-rest on the same people is a mixture. The teenager
                   classifier converged in 49 passes, at the third from section
@@ -860,25 +726,9 @@ export default function MulticlassClassificationPage() {
               </SubSection>
 
               <SubSection title="29. Regularizing the fit">
-                <p>
-                  The repair is the{" "}
-                  <Link href="/concepts/ridge-lasso" className={linkClass}>
-                    ridge page
-                  </Link>
-                  &rsquo;s, for both routes. Penalise the size of the
-                  coefficients and extreme scores carry a cost, so the ascent
-                  settles at a finite point with probabilities short of zero
-                  and one. Regularised softmax has a finite maximum on
-                  separated data, and so does each regularised binary fit.
-                </p>
+                <p>A positive squared-coefficient penalty can give separated-data fits a finite optimum when all classes are represented and the necessary parameters are penalized or identified. It adds a cost to increasing score magnitudes indefinitely. The <Link href="/concepts/ridge-lasso" className={linkClass}>ridge page</Link>{" "}explains the penalty. Reaching that optimum still depends on the solver and stopping criteria.</p>
                 <InAModel>
-                  <p>
-                    Neither multiclass model here carries a penalty yet, so
-                    the four-way comparison of regularised and
-                    unregularised fits under both routes is not built here.
-                    What is built is the pass cap and the honest verdict per
-                    fit, which is the minimum a separated fit should report.
-                  </p>
+                  <p>The two multiclass implementations here do not include a regularization penalty. Their diagnostics report the iteration cap and stopping reason. As in binary logistic regression, a stopped run on separable data should not be reported as a finite optimum without supporting convergence evidence.</p>
                 </InAModel>
               </SubSection>
             </>
@@ -915,7 +765,7 @@ export default function MulticlassClassificationPage() {
                               "The teenager-versus-rest fit converged while the child and adult fits ran out of passes",
                             ],
               [0, 1, 2, 3],
-              "All four hold. The coefficient size is 2.3 at pass 10, 7.1 at pass 100 and 11.4 at pass 500, and on perfectly separated data no finite set of coefficients reaches the maximum, so the softmax run is honestly reported as not converged while classifying every person correctly. One-vs-rest is a mixture. The teenager classifier settled in 49 passes because it could separate nothing, and the other two each see one person separable from two.",
+              "Training accuracy can reach one before the probability objective stops improving. On these separable observations, growing softmax coefficients keep increasing the correct-class probabilities without reaching a finite unregularized likelihood maximum. The budget ends with converged=False. The symmetric teenager-versus-rest fit has a finite constant-probability optimum and meets its stopping criterion in 49 passes; the separable endpoint classifiers exhaust their budgets.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "Three separable training people:\nSoftmax training accuracy becomes 1.000 at pass 2.\nSoftmax coefficient length: pass 10 = 2.3; pass 100 = 7.1; pass 500 = 11.4.\nSoftmax result after pass 500: converged = false.\n\nOne-vs-rest result:\nteenager fit converges at pass 49; child and adult fits exhaust the pass budget."
@@ -924,13 +774,13 @@ export default function MulticlassClassificationPage() {
             choice(
               "Why is the child row of the fitted coefficient table all zeros?",
               [
-                "Adding a constant to every score changes nothing, so one class is pinned to pick a single parameterisation",
+                "Adding a constant to every score changes nothing, so one class is pinned to pick a single parameterization",
                 "The child class carries no information, and its weights fitted to zero on their own",
                 "Softmax pins whichever class is smallest",
                 "The child class was dropped before fitting and is recovered from the other two",
               ],
               0,
-              "Because a shared shift leaves the probabilities alone, many different parameter sets produce the same answers and the fit has infinitely many equally good ones. The probabilities are identified and the raw parameters are not. Fixing one reference class at zero is one of the usual repairs, and it is a choice about naming rather than about the model.",
+              "Adding the same affine score function to every class leaves every softmax probability unchanged, since its exponential factor cancels. Coefficients therefore have a shared redundancy. This implementation fixes the child reference class's coefficients and intercept to zero, selecting one parameterization without changing the possible class probabilities.",
             ),
             trueFalse(
               "Softmax outputs can sum to one and still be overconfident, so a 0.97 from the model need not turn out to be right 97 percent of the time.",
@@ -943,37 +793,16 @@ export default function MulticlassClassificationPage() {
           title: "Part 11. Type and Interface Design",
           content: (
             <SubSection title="30. Encoding output guarantees in types">
-              <p>
-                Everything above comes down to two guarantees a model can
-                make about a table of class scores, and the two are kept
-                apart by the kind of answer a fit returns rather than by
-                prose.
-              </p>
+              <p>A score table can support ranking without supporting probability calculations. The returned type distinguishes those guarantees so a caller can tell which operations the output permits.</p>
               <NumberTable
                 headings={["guarantee", "what a caller may assume", "returned by"]}
                 rows={[
-                  ["normalised distribution", "every value in [0, 1], every row sums to one, one joint distribution over exclusive classes", "softmax"],
+                  ["normalized distribution", "every value in [0, 1], every row sums to one, one joint distribution over exclusive classes", "softmax"],
                   ["independent class scores", "every value in [0, 1], rows need not sum to one, no joint distribution", "one-vs-rest"],
                 ]}
               />
-              <p>
-                The stronger guarantee is what expected-cost calculations over
-                the classes need, and sampling one class, and multiclass log
-                loss, and reporting a probability breakdown, and entropy. The
-                weaker one is enough for ranking the classes, taking the top
-                one, or retrieving the top few. Thresholding depends on what
-                the threshold is meant to mean, and does not automatically need
-                a normalised distribution.
-              </p>
-              <p>
-                That distinction found a real bug. The one-vs-rest
-                specification said in prose that its rows deliberately do not
-                sum to one, and went on returning the type that promises they
-                do. The prose was right and unenforced, which is the state a
-                type exists to replace. Now a caller who needs a distribution
-                and is handed independent scores finds out when the types
-                disagree, and not when a downstream sum comes out at 1.33.
-              </p>
+              <p>Expected costs, entropy and sampling a class require a probability distribution over the alternatives. Selecting the highest-scoring class only requires comparable scores. A threshold needs interpretation too: a probability threshold makes a stronger claim than an arbitrary score cutoff.</p>
+              <p>The return contract should reflect the actual guarantee. Giving one-vs-rest outputs a normalized-distribution type would promise a property those rows need not satisfy. Distinct score and distribution types let callers check that requirement before using operations such as entropy or sampling a class.</p>
             </SubSection>
           ),
         },
@@ -983,7 +812,7 @@ export default function MulticlassClassificationPage() {
             exercise(
               "Share one unit of probability among the three people",
               [
-  "Standardise the supplied three people’s height/weight features, then fit the stated softmax model for at most five hundred passes.",
+  "Standardize the supplied three people’s height/weight features, then fit the stated softmax model for at most five hundred passes.",
   "Print result type, every class-probability row and row total, the teenager intercept and its probability for the middle person. Preserve class order child, teenager, adult."
 ],
               `from oop_ml import Feature, MultinomialLogisticRegression, Standardizer
@@ -1026,14 +855,14 @@ teenager class intercept 3.9602
 middle person, teenager probability 0.9731`,
               { hints: [
   "Inspect the result’s probability matrix rather than independent binary outputs.",
-  "The middle person has centred feature values, so intercepts explain its relative class scores."
-], check: numberCheck("What probability does the fit give the middle person for the teenager class, to four places?", 0.9731, 0.0005, "The middle person’s teenager probability is 0.9731. Softmax normalises all class scores together, making this entry part of a row summing to one."), question: "How does softmax divide one unit of probability among three classes?" },
+  "The middle person has centered feature values, so intercepts explain its relative class scores."
+], check: numberCheck("What probability does the fit give the middle person for the teenager class, to four places?", 0.9731, 0.0005, "The middle person’s teenager probability is 0.9731. Softmax normalizes all class scores together, making this entry part of a row summing to one."), question: "How does softmax divide one unit of probability among three classes?" },
             ),
             exercise(
               "Three separate fits, and what their answers add up to",
               [
-  "Fit the supplied one-vs-rest model to the same standardised three people using five-hundred-pass binary LogisticRegression settings.",
-  "Print result type, each person’s three scores and their total, plus passes and convergence status for each binary fit. Keep the independent outputs without renormalising them."
+  "Fit the supplied one-vs-rest model to the same standardized three people using five-hundred-pass binary LogisticRegression settings.",
+  "Print result type, each person’s three scores and their total, plus passes and convergence status for each binary fit. Keep the independent outputs without renormalizing them."
 ],
               `from oop_ml import Feature, LogisticRegression, OneVsRestClassifier, Standardizer
 
@@ -1086,7 +915,7 @@ middle person total 0.3535`,
             exercise(
               "Give the separated fit ten times the passes",
               [
-  "Fit the same unregularised softmax model with maximum passes five hundred and five thousand.",
+  "Fit the same unregularized softmax model with maximum passes five hundred and five thousand.",
   "For each print convergence status, the norm of feature coefficients excluding intercepts, and the middle person’s teenager probability. A larger iteration limit is an observation to compare, not proof of convergence."
 ],
               `from oop_ml import Feature, MultinomialLogisticRegression, Standardizer
@@ -1131,7 +960,7 @@ size after 5000 passes 17.4473`,
               { hints: [
   "Keep the data and all other settings fixed.",
   "Compare probability improvement with continued coefficient growth. Perfect separation can make a finite maximum-likelihood optimum unavailable."
-], check: numberCheck("What is the size of the coefficients after 5000 passes, to four places?", 17.4473, 0.0005, "The feature-coefficient norm reaches 17.4473 without convergence. On separated data, further unregularised likelihood improvement can accompany growing coefficients."), question: "Will more iterations produce a finite optimum on perfectly separated classes?" },
+], check: numberCheck("What is the size of the coefficients after 5000 passes, to four places?", 17.4473, 0.0005, "The feature-coefficient norm reaches 17.4473 without convergence. On separated data, further unregularized likelihood improvement can accompany growing coefficients."), question: "Will more iterations produce a finite optimum on perfectly separated classes?" },
             ),
             exercise(
               "Move the middle person off centre",

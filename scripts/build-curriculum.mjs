@@ -45,6 +45,7 @@ import { deepenProbability } from "./curriculum/depth-probability.mjs";
 import { deepenTraining } from "./curriculum/depth-training.mjs";
 import { deepenProjects } from "./curriculum/depth-projects.mjs";
 import { applyDepthSupplements, depthSupplements } from "./curriculum/depth/index.mjs";
+import { applyAmericanBookmarks } from './curriculum/american-bookmarks.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const paths = [...forecasting, ...reinforcement, ...probabilistic, ...optimisation, ...recommendations, ...anomalies, ...graphs, ...causal, ...deployment, ...projects];
@@ -147,6 +148,7 @@ for (const [id, supplement] of Object.entries(depthSupplements)) {
   }
   if (supplement.checkpoint && (!titles.has(supplement.checkpoint.after) || !supplement.checkpoint.questions.every(question => question.given?.data))) throw Error(`${id}: checkpoint needs an existing explanation and self-contained questions.`);
 }
+applyAmericanBookmarks(lessons, depthSupplements);
 const dataOrder = ["record-quality", "missing-measurements", "categorical-encoding", "cyclical-features", "data-leakage", "class-imbalance"];
 const navigation = [...numpy, ...databaseLessons, ...[...data].sort((a,b) => dataOrder.indexOf(a.id) - dataOrder.indexOf(b.id)), ...evaluation, ...modelEvaluation, ...gaps];
 const ids = new Set();
@@ -195,7 +197,7 @@ const outputs = new Map([
 for (const [name, content] of outputs) {
   const filename = path.join(root, "lib", "lessons", name);
   if (process.argv.includes("--check")) {
-    const actual = await readFile(filename, "utf8");
+    const actual = (await readFile(filename, "utf8")).replace(/\r\n/g, "\n");
     if (actual !== content) throw Error(`${name} is stale. Run npm run curriculum:generate.`);
   } else await writeFile(filename, content);
 }

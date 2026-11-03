@@ -117,7 +117,7 @@ export function PracticeLibrary() {
         return <p role="status">Loading your practice library…</p>;
     const families = data.families.filter(f => (group === "All topics" || f.group === group) && [f.id, f.title, f.intro, f.group, f.language, f.lesson].join(" ").toLowerCase().includes(search.toLowerCase().trim()));
     return <div className="space-y-5">
-    <p className="text-muted">{data.total.toLocaleString("en-US")} activities covering {data.families.length} problems. Each problem has {data.variants} sets of inputs. Every set is available as a quiz, programming problem and workshop, so you can keep practising the topic after its lesson.</p>
+    <p className="text-muted">{data.total.toLocaleString("en-US")} activities covering {data.families.length} problems. Each problem has {data.variants} sets of inputs. Every set is available as a quiz, programming problem and workshop, so you can keep practicing the topic after its lesson.</p>
     <PracticeMemory />
     <div className="flex flex-wrap gap-4 rounded-xl border border-line bg-surface p-4">
       <label className="flex min-w-0 flex-1 basis-56 flex-col gap-2 text-sm">Find a problem<input className={control + " w-full"} type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Try precision, SQL, or attention"/></label>

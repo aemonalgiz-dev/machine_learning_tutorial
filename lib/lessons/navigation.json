@@ -4,1882 +4,1931 @@
     "title": "Giving Measurements a Place",
     "section": "Python and NumPy",
     "topic": "From a measurement to a calculation",
-    "blurb": "Three thermometers give us three readings. Before we can calculate with them, we need to decide how those readings are stored, which position belongs to which thermometer, and what an operation should do to the collection."
+    "blurb": "Python can keep values in an ordered list or find them by name in a dictionary. NumPy arrays give numerical data a consistent layout for calculation, so we need to understand what each position represents."
   },
   {
     "id": "numpy-axes",
     "title": "Which Direction Are We Adding?",
     "section": "Python and NumPy",
     "topic": "From a measurement to a calculation",
-    "blurb": "A table can hold several greenhouses across several days. Adding across a row answers a different question from adding down a column. We need to keep that distinction when we ask an array to calculate."
+    "blurb": "Rows and columns give a table different directions. Averaging down a column answers a different question from averaging across a row. NumPy calls these directions axes, and choosing one determines which observations we combine."
   },
   {
     "id": "numpy-creation",
     "title": "Preparing the Arrays We Need",
     "section": "Python and NumPy",
     "topic": "From a measurement to a calculation",
-    "blurb": "Botie needs a place for tomorrow's readings and a set of times at which to collect them. We can describe those arrangements directly instead of typing every repeated value ourselves."
+    "blurb": "We often know the size of an array or the spacing of a sequence before collecting its values. NumPy can create those layouts directly. The initial values need a clear meaning, especially when zero could be mistaken for a measurement."
   },
   {
     "id": "numpy-indexing",
     "title": "Choose the Readings Without Losing Their Place",
     "section": "Python and NumPy",
     "topic": "Working with whole arrays",
-    "blurb": "Botie may need one morning, a run of mornings, or selected greenhouses. We need to express each request precisely and know whether editing the selection will change the original report."
+    "blurb": "Selecting data means identifying the entries we actually want. Slices select ranges, while explicit indices select particular positions. Some selections share storage with the original array, which matters if we intend to change the result."
   },
   {
     "id": "numpy-reshaping",
     "title": "Put the Same Readings Into the Right Arrangement",
     "section": "Python and NumPy",
     "topic": "Working with whole arrays",
-    "blurb": "A sensor may send one long sequence while a calculation expects rows. We need to change the arrangement without changing which measurements belong to each day and greenhouse."
+    "blurb": "An array's arrangement determines which values a calculation treats together. Reshaping changes that arrangement, while a transpose exchanges its axes. The resulting dimensions need to preserve the meaning of the observations, even when the numbers themselves are unchanged."
   },
   {
     "id": "numpy-broadcasting",
     "title": "One Reference for Many Rows",
     "section": "Python and NumPy",
     "topic": "Working with whole arrays",
-    "blurb": "Each greenhouse has its own target temperature. We want to compare every day's readings with those three targets without copying the targets into a new table by hand."
+    "blurb": "One reference value, or one row of reference values, often needs to apply across a larger array. NumPy can match those values using the arrays' shapes. We need to check that the matching agrees with what the data represents."
   },
   {
     "id": "numpy-masks",
     "title": "Ask Each Row a Question",
     "section": "Python and NumPy",
     "topic": "Working with whole arrays",
-    "blurb": "Botie needs the greenhouse readings that reached a temperature limit. A yes-or-no decision for each reading lets us select the relevant observations without losing their order."
+    "blurb": "A condition can give us a yes-or-no answer for every entry in an array. Those answers form a mask that selects the values we need, while preserving their order and keeping the original data available."
   },
   {
     "id": "numpy-reductions",
-    "title": "Summarise a Report Without Losing the Question",
+    "title": "Summarize a Report Without Losing the Question",
     "section": "Python and NumPy",
     "topic": "Calculations We Will Reuse",
-    "blurb": "Botie needs totals, typical readings, and the greenhouse that needs attention first. A value, a position, and an ordered report answer different questions, even when they come from the same array."
+    "blurb": "A summary combines many observations into fewer answers. The largest value and the position where it occurred tell us different things. Choosing the right NumPy operation means keeping that distinction, along with the direction of the calculation."
   },
   {
     "id": "numpy-vectorisation",
     "title": "One Calculation for a Whole Report",
     "section": "Python and NumPy",
     "topic": "Calculations We Will Reuse",
-    "blurb": "Botie applies the same rule to many readings. We will first write the repeated steps, then express them with array operations while keeping the intermediate values and memory costs understandable."
+    "blurb": "Array operations let NumPy perform repeated calculations inside its compiled routines. We can understand them by first following the equivalent steps one value at a time. A shorter expression still needs checking for the temporary arrays and memory it requires."
   },
   {
     "id": "numpy-linear-algebra",
     "title": "Turn Several Measurements Into Several Predictions",
     "section": "Python and NumPy",
     "topic": "Calculations We Will Reuse",
-    "blurb": "A prediction can combine temperature and humidity with separate coefficients. Matrix operations let us apply that same rule to every greenhouse, then check how a fitted rule relates to its observations."
+    "blurb": "A prediction can combine several measurements using a coefficient for each one. Matrix multiplication applies that calculation across a table. Understanding how the rows and columns match also helps us solve equations and fit approximate relationships to observations."
   },
   {
     "id": "numpy-numerical-checks",
     "title": "When Two Calculations Almost Agree",
     "section": "Python and NumPy",
     "topic": "Keep the Calculation Trustworthy",
-    "blurb": "A tiny rounding difference, a missing observation, and a wrongly shaped result are different problems. We need checks that distinguish them before trusting a numerical answer."
+    "blurb": "Computer arithmetic can introduce small rounding differences. We need a reason for the error we allow, and separate checks for a result with the wrong dimensions or missing values. A close-looking answer alone does not establish that the calculation is correct."
   },
   {
     "id": "reproducible-sampling",
     "title": "Can We Repeat the Same Experiment?",
     "section": "Python and NumPy",
     "topic": "Keep the Calculation Trustworthy",
-    "blurb": "Changing both a model and its sampled observations makes it difficult to explain a changed result. We need to keep track of the random choices so we can repeat a comparison."
+    "blurb": "Random selections can change the result of an experiment. Recording how we made those choices lets us repeat a comparison and investigate a change. Repeatability still leaves us with the question of how well that sample represents other observations."
   },
   {
     "id": "numpy-functions",
     "title": "Give a Reusable Calculation a Clear Contract",
     "section": "Python and NumPy",
     "topic": "Keep the Calculation Trustworthy",
-    "blurb": "Copying a calculation into every exercise makes mistakes hard to repair. We will put the rule in a function, state what its inputs mean, and check it on more than one report."
+    "blurb": "A function gives a calculation one place to live and makes it reusable with new data. Its inputs need an agreed meaning, and its result needs a clear format. Tests help us check that agreement beyond the first example."
   },
   {
     "id": "numpy-saving-data",
     "title": "Keep Enough of a Calculation to Run It Again",
     "section": "Python and NumPy",
     "topic": "Keep the Calculation Trustworthy",
-    "blurb": "A printed table is not a complete experiment record. We will save arrays with their shapes and types, keep related arrays together, and check what survives when a report moves through a text file."
+    "blurb": "Saving numerical work means preserving enough information to repeat it. NumPy's array files retain shapes and data types, while text files need more explicit interpretation. Related arrays also need names and an agreed order when we load them again."
   },
   {
     "id": "sql-tables",
     "title": "What Does One Row Actually Describe?",
     "section": "SQL",
     "topic": "Reading the Records",
-    "blurb": "Botie has an asset list and a stack of inspection notes. Decide what belongs on each row before asking the database a question."
+    "blurb": "A table organizes records into rows with named fields. Before querying it, we need to understand what one row describes and which identifier distinguishes it from another. That choice determines how the stored facts can be combined later."
   },
   {
     "id": "sql-select",
     "title": "Which Columns Answer the Question?",
     "section": "SQL",
     "topic": "Reading the Records",
-    "blurb": "A report needs the kinds of equipment at each site. Choose the relevant fields and decide exactly which repeated rows should disappear."
+    "blurb": "A query can return only the fields needed for a report, including calculated values with useful names. Removing repeated results requires another decision: which selected fields together define a duplicate? SELECT and DISTINCT make those choices explicit."
   },
   {
     "id": "sql-where",
     "title": "Which Inspection Records Need Our Attention?",
     "section": "SQL",
     "topic": "Reading the Records",
-    "blurb": "Translate a maintenance question into conditions on individual rows, and make the grouping of those conditions explicit."
+    "blurb": "A database question becomes a condition that each row must satisfy. SQL combines those conditions with AND and OR. Their grouping matters because a small change in the condition can select a different population of records."
   },
   {
     "id": "sql-order-limit",
     "title": "Which Two Visits Took the Longest?",
     "section": "SQL",
     "topic": "Reading the Records",
-    "blurb": "Build a reproducible top list, including what happens when two records have the same value."
+    "blurb": "A table has no guaranteed reading order. A ranked report needs an explicit sorting rule before selecting its first results, including a decision about tied values. That makes the shortlist reproducible when the database reads the same records differently."
   },
   {
     "id": "sql-null",
     "title": "Was the Visit Instant, or Is Its Duration Missing?",
     "section": "SQL",
     "topic": "Missing Values and Decisions",
-    "blurb": "Keep an unknown measurement distinct from zero, and follow SQL’s true, false and unknown conditions."
+    "blurb": "A missing measurement tells us something different from a recorded zero. SQL represents missing values with NULL, which can make a comparison unknown. That affects which rows a filter keeps and how we interpret the resulting report."
   },
   {
     "id": "sql-case",
     "title": "What Should Botie Label Each Reading?",
     "section": "SQL",
     "topic": "Missing Values and Decisions",
-    "blurb": "Express a row-level decision with CASE while keeping unknown measurements visible and using fallbacks deliberately."
+    "blurb": "A report may need a label derived from the values in each row. CASE expresses that decision as ordered conditions. The first true condition determines the result, so missing values and exact thresholds need deliberate treatment."
   },
   {
     "id": "sql-aggregates",
     "title": "How Much Inspection Time Did We Actually Record?",
     "section": "SQL",
     "topic": "Summarising Maintenance Work",
-    "blurb": "Turn visit rows into a summary without confusing the number of visits with the number of known durations."
+    "blurb": "A total or average summarizes a collection of rows, but missing values affect what it describes. Counting records differs from counting known measurements. We need to keep that distinction visible when reporting a summary or interpreting an empty result."
   },
   {
     "id": "sql-group-by",
     "title": "How Much Work Belongs to Each Asset?",
     "section": "SQL",
     "topic": "Summarising Maintenance Work",
-    "blurb": "Form a separate group for each asset, then calculate summaries without mixing visits from different equipment."
+    "blurb": "An overall total can hide how work is distributed. GROUP BY collects rows with the same key and calculates a summary within each collection. The result describes those groups, rather than the individual records we started with."
   },
   {
     "id": "sql-having",
     "title": "Which Assets Keep Returning with the Same Finding?",
     "section": "SQL",
     "topic": "Summarising Maintenance Work",
-    "blurb": "Filter individual inspections before grouping, then filter the groups according to the evidence they contain."
+    "blurb": "A report can ask which groups have enough evidence to meet a condition. WHERE determines which individual rows contribute; HAVING checks the groups after their summaries are calculated. Putting a condition at the wrong stage changes what we count."
   },
   {
     "id": "sql-inner-joins",
     "title": "Which Site Does Each Inspection Belong To?",
     "section": "SQL",
     "topic": "Connecting Tables Without Changing the Question",
-    "blurb": "Connect inspection facts to the asset register by a declared key, then inspect the row pairs the join actually produces."
+    "blurb": "Related facts often live in separate tables. An inner join places matching records together using a shared key. Each matching pair produces a result row, so repeated keys can change both the size and meaning of the report."
   },
   {
     "id": "sql-left-joins",
     "title": "Which Assets Have No Matching Inspection?",
     "section": "SQL",
     "topic": "Connecting Tables Without Changing the Question",
-    "blurb": "Keep the whole asset register while attaching whatever qualifying inspection evidence exists."
+    "blurb": "Missing matches can be the information a report needs most. A left join retains every row from the starting table, including those without a qualifying match. Its missing-value placeholders need care when we filter or count the result."
   },
   {
     "id": "sql-join-grain",
     "title": "Why Did Joining Readings Double the Inspection Total?",
     "section": "SQL",
     "topic": "Connecting Tables Without Changing the Question",
-    "blurb": "Trace a many-to-many multiplication, then summarise each event stream at the intended grain before combining it."
+    "blurb": "Joining two collections of events can repeat each event across several matching pairs. A total over those pairs may count the same work more than once. Defining what each result row should describe tells us where to summarize before joining."
   },
   {
     "id": "sql-subqueries",
     "title": "Which Inspections Took Longer Than the Usual Visit?",
     "section": "SQL",
     "topic": "Queries Built from Queries",
-    "blurb": "Use one query’s result inside another without losing track of whether that result is one value, several rows, or a value belonging to the current asset."
+    "blurb": "A query can use another query's result as part of its calculation or condition. That result might be one value or many rows. It can also depend on the current outer row, which changes the comparison being made."
   },
   {
     "id": "sql-exists",
     "title": "Which Pumps Still Have No Completed Visit?",
     "section": "SQL",
     "topic": "Queries Built from Queries",
-    "blurb": "Ask whether a related row exists, keep the outer row’s identity, and avoid treating an unknown key as evidence that every candidate is present."
+    "blurb": "Sometimes we only need to know whether a related record is present. EXISTS answers that question without adding a result row for every match. Missing keys need particular care when we ask which records have no qualifying match."
   },
   {
     "id": "sql-set-operations",
     "title": "Which Pumps Appear on Either List but Are Still Unfinished?",
     "section": "SQL",
     "topic": "Queries Built from Queries",
-    "blurb": "Combine, compare and subtract query results while keeping duplicate policy, column meaning and final ordering explicit."
+    "blurb": "Separate queries can return overlapping collections of records. SQL can combine those results or find the rows that differ between them. We need compatible column meanings and an explicit choice about whether repeated results should remain."
   },
   {
     "id": "sql-ctes",
     "title": "Can We Read the Query in the Order We Explain the Job?",
     "section": "SQL",
     "topic": "Queries Built from Queries",
-    "blurb": "Use common table expressions to name meaningful query stages while keeping grain, scope and execution assumptions explicit."
+    "blurb": "A complicated query becomes easier to follow when its intermediate results have names. Common table expressions let later stages refer to those results. Naming a stage helps explain its rows, but does not necessarily mean the database stores it separately."
   },
   {
     "id": "sql-recursive-ctes",
     "title": "How Far Does the Failed Supply Line Reach?",
     "section": "SQL",
     "topic": "Queries Built from Queries",
-    "blurb": "Follow a hierarchy or dependency graph using an anchor, a repeated join and explicit safeguards against cycles and excessive traversal."
+    "blurb": "A hierarchy can have more levels than we know in advance. A recursive query starts with known rows and repeatedly follows their relationships. It also needs a stopping rule, especially when the records contain cycles or the search grows too large."
   },
   {
     "id": "sql-window-functions",
-    "title": "Keep Every Reading While Looking at Its Neighbours",
+    "title": "Keep Every Reading While Looking at Its Neighbors",
     "section": "SQL",
     "topic": "Analysing Change Across Rows",
-    "blurb": "Partition and order individual records for row numbers, ranks and previous-reading comparisons without collapsing them into groups."
+    "blurb": "Some calculations need neighboring records while retaining each individual row. Window functions define which rows belong together and how to order them for a comparison. This supports rankings or previous-value comparisons without reducing the whole group to one summary."
   },
   {
     "id": "sql-window-frames",
     "title": "Which Readings Belong in This Rolling Total?",
     "section": "SQL",
     "topic": "Analysing Change Across Rows",
-    "blurb": "Choose ROWS, peer groups and time ranges deliberately so rolling calculations include the observations the question actually describes."
+    "blurb": "A running calculation depends on which neighboring rows contribute to each answer. A window frame defines that boundary. The last few records can cover a very different interval from the last few days, especially with tied timestamps or gaps."
   },
   {
     "id": "sql-dates",
     "title": "Where Did the Quiet Day Go?",
     "section": "SQL",
     "topic": "Preparing Records for Analysis",
-    "blurb": "Define UTC timestamps, half-open reporting intervals and a calendar spine so missing days do not disappear or midnight events get counted twice."
+    "blurb": "Reporting by date requires an agreed time zone and precise interval boundaries. Adjacent intervals should not count the same event twice. A calendar also supplies the dates absent from an event log, so quiet days remain visible in the report."
   },
   {
     "id": "sql-text",
     "title": "Why Did a Pump Search Return the Wrong Equipment?",
     "section": "SQL",
     "topic": "Preparing Records for Analysis",
-    "blurb": "Clean and compare text under an explicit identifier policy, with literal pattern characters, NULL handling and honest Unicode limits."
+    "blurb": "Text comparisons depend on how we interpret spacing, letter case and special pattern characters. A search can return plausible but unintended matches. We need a consistent comparison policy without assuming that cleaning two names proves they identify the same thing."
   },
   {
     "id": "sql-json",
     "title": "Is That Temperature a Number or Just Text?",
     "section": "SQL",
     "topic": "Preparing Records for Analysis",
-    "blurb": "Extract structured payloads with explicit JSON validity and type checks while preserving the distinction between missing, null, text and numeric data."
+    "blurb": "JSON lets a table store nested information, but extracting a field does not establish what it means. A numeric-looking string differs from a number. Validation and type checks keep those values separate from missing fields or explicit nulls."
   },
   {
     "id": "sql-feature-tables",
     "title": "What Could the Model Have Known at That Moment?",
     "section": "SQL",
     "topic": "Features from Historical Data",
-    "blurb": "Build one feature row per historical decision using event time, availability time and explicit label boundaries, without leaking later evidence into the inputs."
+    "blurb": "Historical training data should contain only information available at the decision being modeled. The time a measurement happened can differ from when it became usable. Both boundaries matter when joining records into model inputs and keeping future outcomes separate."
   },
   {
     "id": "sql-schema-design",
     "title": "What Does One Equipment Record Promise?",
     "section": "SQL",
     "topic": "Designing Reliable Tables",
-    "blurb": "A column called cost can hold cents, pounds or an unexplained string. Give the maintenance team a table whose identities and units mean the same thing on every row."
+    "blurb": "A table needs an agreement about what its rows describe and what its fields mean. A schema records that structure. Choosing identifiers and units makes the stored values interpretable, while the database's actual type rules determine what it will accept."
   },
   {
     "id": "sql-constraints",
     "title": "Can a Job Refer to a Pump We Have Never Recorded?",
     "section": "SQL",
     "topic": "Designing Reliable Tables",
-    "blurb": "A row can have the right types and still contain an impossible reference. Put identity, domain and relationship rules at the database boundary."
+    "blurb": "A record can contain valid-looking values and still refer to something that does not exist. Database constraints reject writes that break declared rules. They help every writer preserve the same requirements for identifiers and relationships between records."
   },
   {
     "id": "sql-normalization",
     "title": "Why Must a Pump Move Be Edited on Every Job?",
     "section": "SQL",
     "topic": "Designing Reliable Tables",
-    "blurb": "Repeated asset details make updates disagree. Find which identity determines each fact and give that fact one deliberate home."
+    "blurb": "Repeating a shared fact across many rows creates several places to update it. Those copies can disagree. Normalization examines which identity determines each fact, so current information has a deliberate home while genuine historical records retain their meaning."
   },
   {
     "id": "sql-insert-update-delete",
     "title": "Change the Requested Jobs Without Rewriting the Rest",
     "section": "SQL",
     "topic": "Changing Shared Data",
-    "blurb": "New inspections arrive, existing ones change, and cancelled drafts leave the queue. Give each write a precise target and preserve newer information."
+    "blurb": "Changing data requires a precise definition of which records should change. SQL can add rows or modify existing ones, but a valid statement can still target the wrong set. Repeated imports also need a policy for existing identities and newer versions."
   },
   {
     "id": "sql-transactions",
     "title": "Move Spare Parts Without Losing Half the Transfer",
     "section": "SQL",
     "topic": "Changing Shared Data",
-    "blurb": "A transfer changes two stock balances and its audit record. Make those changes one unit of work, and learn what a rollback can actually undo."
+    "blurb": "One operation can require several related database changes. A transaction gives those changes a shared boundary, so a failure need not leave half the operation committed. Its rollback applies to work inside that boundary, rather than external effects such as messages already sent."
   },
   {
     "id": "sql-concurrency",
     "title": "What If Someone Changes the Job While Botie Is Reading It?",
     "section": "SQL",
     "topic": "Changing Shared Data",
-    "blurb": "Two valid edits can overwrite each other. Make stale assumptions visible, and distinguish version checks from the database’s isolation guarantees."
+    "blurb": "A record can change between reading it and saving an edit. Checking an expected version helps detect that stale assumption. Database isolation provides further guarantees, whose scope matters when a decision depends on more than one row."
   },
   {
     "id": "sql-indexes",
     "title": "Find One Pump’s Readings Without Checking Every Pump",
     "section": "SQL",
     "topic": "Making Queries Practical",
-    "blurb": "The reading table keeps growing. Arrange useful lookup keys so the database can find a small candidate region, then account for the cost of maintaining that structure."
+    "blurb": "An index keeps an additional structure organized by selected values, giving a query a way to locate records without checking the whole table. Its ordering determines which lookups benefit, and every change to the data may require maintaining that structure."
   },
   {
     "id": "sql-query-plans",
     "title": "Why Does a Short Query Repeat So Much Work?",
     "section": "SQL",
     "topic": "Making Queries Practical",
-    "blurb": "A compact query can scan the same table repeatedly. Read the access plan, preserve the answer, and compare work on data that resembles the real job."
+    "blurb": "A small result can require a large amount of database work. Query plans show the operations used to produce it, including repeated scans. We can use that evidence to investigate a rewrite while checking that the answer stays the same."
   },
   {
     "id": "sql-parameters-permissions",
     "title": "Let a Search Value Stay a Value",
     "section": "SQL",
     "topic": "Making Queries Practical",
-    "blurb": "A search box should select an asset, not rewrite the query or change whose records are visible. Keep values, query structure and permissions at separate boundaries."
+    "blurb": "User-supplied text should remain a value rather than become part of a query's instructions. Parameter binding preserves that separation. Access rules still need to determine whose records the caller may read and which operations the application may perform."
   },
   {
     "id": "sql-data-quality",
     "title": "Which Sensor Records Should Reach the Training Table?",
     "section": "SQL",
     "topic": "Keeping Learning Data Trustworthy",
-    "blurb": "A query can run successfully over duplicate identities, missing readings and impossible timestamps. Turn the dataset’s assumptions into visible checks before building model features."
+    "blurb": "A successful query can use records that violate the dataset's assumptions. Explicit checks expose invalid values or repeated identities before they affect model features. Keeping rejected evidence lets us investigate the problem instead of silently changing the training population."
   },
   {
     "id": "sql-incremental-pipelines",
     "title": "Pick Up New Changes Without Losing Late Readings",
     "section": "SQL",
     "topic": "Keeping Learning Data Trustworthy",
-    "blurb": "Repeated full imports become expensive, but a naive timestamp filter misses corrections and deletions. Track source change position, merge versions and commit the checkpoint with the result."
+    "blurb": "Importing only new changes can save work, but event timestamps alone can miss late arrivals and corrections. A repeatable pipeline needs a source change position and record versions. Its checkpoint must advance with the changes that actually reached the destination."
   },
   {
     "id": "nosql-data-models",
     "title": "Which Records Does the Technician Need Together?",
     "section": "NoSQL",
     "topic": "Choosing the Shape of the Records",
-    "blurb": "A pump screen, a recent-reading lookup and a site report ask different questions of the same records. Start with those requests before choosing how to store the data."
+    "blurb": "The way records are stored affects which requests are straightforward and which require extra work. A key lookup and a report across many records make different demands. Those access patterns give us a reason to compare database designs."
   },
   {
     "id": "nosql-key-value",
     "title": "Which P1 Did the Lookup Mean?",
     "section": "NoSQL",
     "topic": "Choosing the Shape of the Records",
-    "blurb": "Two sites use the same short asset ID. Build keys that preserve the full identity, and distinguish a missing entry from a stored zero."
+    "blurb": "A key gives a stored value the name used to retrieve it. That name needs enough information to distinguish records from different sources. We also need to distinguish an absent key from a stored value of zero."
   },
   {
     "id": "nosql-cache-expiry",
     "title": "How Long Should Botie Trust the Saved Reading?",
     "section": "NoSQL",
     "topic": "Choosing the Shape of the Records",
-    "blurb": "A cache can answer quickly while showing an old reading. Follow its expiry boundary and the load a cold cache sends back to the source."
+    "blurb": "A cache keeps a copy of an earlier answer so we can reuse it. That copy can become outdated while it is still available. An expiry policy limits reuse, but the service must also handle requests when the cached answer is missing."
   },
   {
     "id": "nosql-documents",
     "title": "Can One Record Describe the Pump and Its Sensor?",
     "section": "NoSQL",
     "topic": "Keeping Related Records Together",
-    "blurb": "Read a nested maintenance record field by field. Keep missing data separate from null, preserve measurement types, and decide which rules every document must follow."
+    "blurb": "A document groups named fields and can contain nested records or arrays. That structure can keep related details together, but readers still need rules for the values. An omitted field and an explicit null may communicate different information."
   },
   {
     "id": "nosql-embedding-references",
     "title": "Should Every Pump Keep a Copy of the Supplier’s Phone Number?",
     "section": "NoSQL",
     "topic": "Keeping Related Records Together",
-    "blurb": "A copied contact becomes stale when the supplier changes its number. Separate facts owned by a pump from shared current facts and intentional historical snapshots."
+    "blurb": "Keeping related details inside one document can save a lookup. Copying a shared fact into many documents also creates copies to maintain. Distinguishing current information from an intentional historical snapshot helps us decide what to embed and what to reference."
   },
   {
     "id": "nosql-document-queries",
     "title": "Did the High Value Belong to the Temperature Sensor?",
     "section": "NoSQL",
     "topic": "Working Inside Documents",
-    "blurb": "An array contains several readings. Keep the sensor kind and its value attached to the same member while filtering documents."
+    "blurb": "Conditions on an array need to describe the same member when their evidence belongs together. Otherwise, separate members can satisfy separate conditions and produce a misleading match. A document query must preserve that relationship as it selects records."
   },
   {
     "id": "nosql-document-updates",
     "title": "Can Botie Save a Change Without Erasing Somebody Else’s?",
     "section": "NoSQL",
     "topic": "Working Inside Documents",
-    "blurb": "A technician saves an old copy after another editor has changed the pump. Keep unrelated fields intact and bind the write to the version that was actually reviewed."
+    "blurb": "Saving a whole document can erase changes made by another editor. A targeted update changes only the intended fields, while an expected version checks whether the reviewed state is still current. The database must enforce that condition with the write."
   },
   {
     "id": "nosql-document-indexes",
     "title": "Can We Find North’s Hot Pumps Without Reading Every Document?",
     "section": "NoSQL",
     "topic": "Finding and Summarising Documents",
-    "blurb": "Use a site index to narrow the candidates, then keep the temperature condition. Inspect what an index saves and which work it leaves behind."
+    "blurb": "An index helps a document query locate a smaller set of possible matches. Conditions not answered by the index still need checking. The useful arrangement depends on the requests being made, as well as the cost of maintaining the index."
   },
   {
     "id": "nosql-aggregation-pipelines",
     "title": "How Much Urgent Work Was Hidden Inside the Pump Documents?",
     "section": "NoSQL",
     "topic": "Finding and Summarising Documents",
-    "blurb": "Follow documents through filtering, array expansion and grouping. Keep track of what one row represents so the site total counts visits exactly once."
+    "blurb": "A document report can pass records through several transformations. Expanding an array changes what one row represents, which affects later totals. Following that meaning through each stage helps us avoid counting the same parent record several times."
   },
   {
     "id": "nosql-partition-keys",
     "title": "Why Is One Storage Key Doing All the Work?",
     "section": "NoSQL",
     "topic": "Partitioning for the Questions We Ask",
-    "blurb": "The maintenance service has plenty of records but most requests land on one tenant. Choose a key from the work the service actually performs, then inspect the traffic it concentrates."
+    "blurb": "A partition key groups records so the system can direct related work to the right place. A convenient grouping can also concentrate too many requests. Choosing the key requires understanding the traffic as well as the data being stored."
   },
   {
     "id": "nosql-wide-column",
     "title": "Keep One Asset’s History Together Without Growing Forever",
     "section": "NoSQL",
     "topic": "Partitioning for the Questions We Ask",
-    "blurb": "A technician wants a time range for one pump. Give that request a bounded partition and an ordering that makes the required records reachable."
+    "blurb": "A request for one entity's history needs an efficient way to locate the relevant time range. Wide-column designs combine a partition key with an ordering inside that partition. Time buckets can keep each group bounded as the history grows."
   },
   {
     "id": "nosql-replication-consistency",
     "title": "Why Did the Repair Disappear When Botie Read It Back?",
     "section": "NoSQL",
     "topic": "Reading and Writing Replicated Records",
-    "blurb": "Copies can disagree while an update is travelling. Define what a particular read must guarantee before deciding which replica may answer it."
+    "blurb": "Replicas hold copies of the same data, but an update may reach them at different times. A consistency contract defines what a reader can expect to observe. That promise determines which copy may answer and when waiting or failure is necessary."
   },
   {
     "id": "nosql-conditional-writes",
     "title": "Two Technicians Cannot Both Reserve the Last Kit",
     "section": "NoSQL",
     "topic": "Reading and Writing Replicated Records",
-    "blurb": "A successful read does not reserve the stock it showed. Put the expected version and remaining-stock rule inside the actual write."
+    "blurb": "Reading a value does not reserve it for a later change. A conditional write checks whether the required state still holds when the update is applied. This lets competing requests reject a stale decision instead of overwriting each other's work."
   },
   {
     "id": "nosql-conflicts",
     "title": "How Can Two Offline Teams Keep Both Inspection Counts?",
     "section": "NoSQL",
     "topic": "Reading and Writing Replicated Records",
-    "blurb": "Choosing the last arriving total can lose someone’s work. Give each replica an owned contribution and derive a merge whose repeated delivery does not inflate the count."
+    "blurb": "Disconnected writers can each change their own copy of a value. Keeping a separate contribution for each writer gives a grow-only counter enough information to merge those changes repeatedly. A safe merge depends on what the value represents."
   },
   {
     "id": "nosql-streams-projections",
     "title": "Why Does the Dashboard Still Count a Job That Was Closed?",
     "section": "NoSQL",
     "topic": "Keeping Derived Data Repairable",
-    "blurb": "A source record changes while a dashboard keeps its own count. Build a projection from versioned job images and make repeats, moves and deletions visible."
+    "blurb": "A projection stores a view derived from source records for a particular request. A change stream can keep that view current, provided the consumer handles repeated or out-of-order changes. Record versions help prevent old updates from undoing newer information."
   },
   {
     "id": "nosql-schema-evolution",
     "title": "The New Sensor Sends a Different Document",
     "section": "NoSQL",
     "topic": "Keeping Derived Data Repairable",
-    "blurb": "Some readers still expect temp_c while a new device sends a value and a unit. Introduce an explicit representation version and a reader that can explain both."
+    "blurb": "A document collection can accept a new structure while older readers still expect the previous one. Explicit representation versions let software interpret both deliberately. A compatible reader needs to understand the fields before converting their values into a common form."
   },
   {
     "id": "nosql-recovery",
     "title": "The Bad Update Reached Every Replica. What Can We Restore?",
     "section": "NoSQL",
     "topic": "Keeping Derived Data Repairable",
-    "blurb": "Replication faithfully copies a mistake too. Recover a known snapshot through a complete log interval, then verify the recovered service before switching readers."
+    "blurb": "Replication can copy an accidental change to every replica. Recovery needs retained history from before the mistake. A snapshot and a complete interval of changes can reconstruct a chosen state, which still needs checking before readers use it."
   },
   {
     "id": "nosql-ml-records",
     "title": "A Fast Feature Lookup Still Has to Mean the Right Thing",
     "section": "NoSQL",
     "topic": "Serving Model Data",
-    "blurb": "A model needs the right entity, feature definition and available measurements in a fixed order. Use a serving document for that contract while keeping historical training evidence separately."
+    "blurb": "A fast feature lookup is useful only if its values mean what the model expects. A serving record needs a matching feature definition and sufficiently recent observations in the declared order. Historical training records need their own record of what was available then."
   },
   {
     "id": "graph-database-models",
     "title": "Which Equipment Depends on This Supply?",
     "section": "Graph Databases",
     "topic": "Representing Connected Records",
-    "blurb": "Represent equipment and its directed dependencies as nodes and relationships before choosing how to query the connections."
+    "blurb": "A graph database stores relationships between records explicitly. The direction and meaning of each connection determine what we can infer by following it. This is useful when the question depends on how entities are connected, rather than their properties alone."
   },
   {
     "id": "graph-database-identity",
     "title": "Are These Two Pumps Actually the Same Pump?",
     "section": "Graph Databases",
     "topic": "Representing Connected Records",
-    "blurb": "Separate durable identity from names, qualify external IDs by their source and detect collisions before merging records."
+    "blurb": "A shared name does not establish that two records describe the same entity. Graph connections need identifiers with a clear scope that remain useful when a label changes. Otherwise, merging records can attach relationships to the wrong thing."
   },
   {
     "id": "graph-pattern-matching",
     "title": "Who Inspected This Pump?",
     "section": "Graph Databases",
     "topic": "Asking Questions of a Graph",
-    "blurb": "Match a connected pattern and preserve variable bindings across steps instead of accidentally combining unrelated records."
+    "blurb": "A graph query can describe a connected pattern and find the records that fit it. Variables retain the identity of each matched node, so following another relationship continues from the same record instead of combining unrelated matches."
   },
   {
     "id": "graph-filtering-aggregation",
     "title": "How Many Inspections Were Actually Completed?",
     "section": "Graph Databases",
     "topic": "Asking Questions of a Graph",
-    "blurb": "Filter bound properties and aggregate at the intended grain, distinguishing paths, relationships and distinct inspection identities."
+    "blurb": "A graph query can find several routes to the same record. Counting those matches answers a different question from counting distinct entities. The filters and grouping need to reflect what each matched row actually describes."
   },
   {
     "id": "graph-optional-patterns",
     "title": "Keep the Pumps That Have No Completed Inspection",
     "section": "Graph Databases",
     "topic": "Asking Questions of a Graph",
-    "blurb": "Use optional graph patterns without losing the starting population or mistaking an unmatched placeholder for a real inspection."
+    "blurb": "A required graph pattern returns only successful matches. An optional pattern can retain the starting entity when a relationship is absent, making missing information visible. We need to distinguish that preserved placeholder from a real matched record when counting results."
   },
   {
     "id": "graph-traversal-cycles",
     "title": "Follow a Dependency Without Following It Forever",
     "section": "Graph Databases",
     "topic": "Following Connections",
-    "blurb": "Separate reachability from path enumeration, handle cycles explicitly and interpret bounded traversal results without promising complete discovery."
+    "blurb": "Following relationships can lead back to a node already visited. A traversal needs to distinguish finding reachable entities from listing every route to them. Remembering visited nodes prevents repeated exploration, while a depth limit states how far the search actually went."
   },
   {
     "id": "graph-shortest-paths",
     "title": "The Route with Fewer Stops Takes Longer",
     "section": "Graph Databases",
     "topic": "Following Connections",
-    "blurb": "Distinguish minimum-hop paths from minimum-cost paths and implement Dijkstra’s nonnegative-cost frontier with explicit unreachable and tie semantics."
+    "blurb": "The route with the fewest connections may take longer to travel. A weighted search compares accumulated costs instead of counting edges. Dijkstra's algorithm finds minimum-cost routes when those costs are nonnegative, with explicit treatment of unreachable destinations."
   },
   {
     "id": "graph-constraints-indexes",
     "title": "Which Rules Must Every Asset Write Preserve?",
     "section": "Graph Databases",
     "topic": "Maintaining a Graph",
-    "blurb": "Separate key presence, uniqueness and lookup performance, then audit existing data before installing graph constraints."
+    "blurb": "Graph records need enforceable rules for identity, including whether a key must be present and unique. Constraints protect those rules when data changes. Indexes support lookups, while existing duplicates need investigation before an identity constraint can be installed."
   },
   {
     "id": "graph-safe-updates",
     "title": "The Graph Changed While the Approval Was Waiting",
     "section": "Graph Databases",
     "topic": "Maintaining a Graph",
-    "blurb": "Treat approvals and snapshot checks as preparation, then use authorised, parameterised transactions with explicit conflict and retry behaviour."
+    "blurb": "An approved graph change can become stale while another writer updates the same entity. The final transaction needs to check current state and permissions before committing. Preparing or reviewing a snapshot alone cannot protect the later write from concurrent changes."
   },
   {
     "id": "graph-imports",
     "title": "A Replayed Import Must Not Create Another Relationship",
     "section": "Graph Databases",
     "topic": "Maintaining a Graph",
-    "blurb": "Stage graph imports by stable identity, distinguish exact replays from conflicts and preserve rejected records instead of silently losing relationships."
+    "blurb": "Retrying an import should recognize relationships already applied. Stable identities let us distinguish an exact replay from a conflicting record. Missing endpoints and invalid rows need an explicit rejection path so the graph does not silently lose or duplicate connections."
   },
   {
     "id": "graph-query-performance",
     "title": "Why Did One More Hop Make the Query So Expensive?",
     "section": "Graph Databases",
     "topic": "Maintaining a Graph",
-    "blurb": "Read query plans, reason about candidate expansion and compare access paths without confusing a toy operation count with measured database performance."
+    "blurb": "A graph query can return a few records after exploring many connections. Its starting point and intermediate matches determine much of that work. Query plans help us investigate the search, while representative measurements are needed to assess actual performance."
   },
   {
     "id": "graph-rdf-sparql",
     "title": "Can Two Teams Describe the Same Resource?",
     "section": "Graph Databases",
     "topic": "Shared Meaning and Evidence",
-    "blurb": "Distinguish resource identifiers from literals, read RDF statements and build SPARQL patterns without confusing RDF with the property-graph model."
+    "blurb": "Combining datasets requires a clear way to name resources and state their relationships. RDF represents those statements using resource identifiers and literal values. SPARQL matches patterns of statements, with rules that differ from a property-graph query."
   },
   {
     "id": "graph-provenance",
     "title": "Where Did This Maintenance Claim Come From?",
     "section": "Graph Databases",
     "topic": "Shared Meaning and Evidence",
-    "blurb": "Represent claims and their sources, retain contradictions and apply explicit time boundaries before using graph evidence."
+    "blurb": "A claim becomes easier to assess when we retain its source and the period it applies to. Recording claims separately lets contradictory evidence remain visible. We can then choose relevant information without treating the last imported statement as established truth."
   },
   {
     "id": "graph-ml-retrieval",
     "title": "Which Connected Records Can the Assistant Use?",
     "section": "Graph Databases",
     "topic": "Graphs in ML Systems",
-    "blurb": "Build bounded graph retrieval with access and time boundaries, then preserve evidence and measure whether the added context actually helps."
+    "blurb": "Connected records can give an assistant context that an isolated document lacks. Retrieval still needs limits on which paths it follows and what evidence the user may access. Historical evaluations also need to exclude information unavailable at the original decision."
   },
   {
     "id": "record-quality",
     "title": "What Does One Row Represent?",
     "section": "Data Preparation",
     "topic": "Can We Trust These Records?",
-    "blurb": "Two identical-looking rows might be a duplicated import or two genuine observations. We need to establish a record's identity before cleaning a dataset or trusting its counts."
+    "blurb": "A row needs a clear meaning before its values can be counted or compared. Record identities help us distinguish duplicate imports from genuine repeated observations and preserve the evidence behind corrections."
   },
   {
     "id": "missing-measurements",
     "title": "When a Measurement Is Missing",
     "section": "Data Preparation",
     "topic": "Can We Trust These Records?",
-    "blurb": "An empty thermometer reading does not mean the greenhouse was at zero degrees. We need to distinguish what was measured from what we supplied to keep a calculation working."
+    "blurb": "A missing measurement tells us that information is unavailable. Replacing it with a value keeps a calculation running, but the replacement introduces an assumption that can affect the conclusions we draw from the data."
   },
   {
     "id": "categorical-encoding",
     "title": "Categories Without an Invented Ranking",
     "section": "Data Preparation",
     "topic": "Representing What We Measured",
-    "blurb": "A roof can be glass, plastic, or mesh. Assigning those names arbitrary numbers can accidentally suggest a ranking. We need a representation that preserves category membership without inventing a numerical relationship."
+    "blurb": "Category names identify different kinds of things without necessarily putting them in an order. Separate membership columns let us calculate with those categories while preserving their meaning and avoiding invented numerical distances."
   },
   {
     "id": "cyclical-features",
     "title": "When the End Is Beside the Beginning",
     "section": "Data Preparation",
     "topic": "Representing What We Measured",
-    "blurb": "The hour after 23 is zero, yet ordinary subtraction puts those hour numbers far apart. A repeating feature needs a representation that keeps its beginning beside its end."
+    "blurb": "Hours and seasons repeat, so values at opposite ends of their numbering can be close together. Representing a cycle with coordinates on a circle preserves that relationship when we calculate distances or fit a model."
   },
   {
     "id": "data-leakage",
     "title": "What Could We Know at Prediction Time?",
     "section": "Data Preparation",
     "topic": "Keep Future Answers Out of Training",
-    "blurb": "A model can appear remarkably accurate when a feature contains information that arrives after the decision. We need to reconstruct what was actually available when each prediction would have been made."
+    "blurb": "Evaluation becomes misleading when a prediction uses information that would only become available later. Reconstructing what was known at the decision time helps us test a procedure that can actually be used."
   },
   {
     "id": "class-imbalance",
     "title": "When the Important Class Is Rare",
     "section": "Data Preparation",
     "topic": "Keep Future Answers Out of Training",
-    "blurb": "If almost every sensor is healthy, predicting healthy every time can look accurate while missing every failure. We need to inspect what the score says about each class."
+    "blurb": "When one outcome is much more common than another, overall accuracy can conceal failures on the rare outcome. Looking at errors within each class makes those failures visible and helps us choose an appropriate evaluation."
   },
   {
     "id": "baseline-predictions",
     "title": "What Must a Model Improve On?",
     "section": "Choosing and Checking a Model",
     "topic": "Establish a Fair Comparison",
-    "blurb": "A complicated predictor needs a simple comparison. Before fitting one, we can measure how well a rule that always predicts a training average performs on new observations."
+    "blurb": "A simple prediction rule gives us a reference for judging a more complicated one. Comparing both on the same new observations shows whether the additional work produces a useful improvement."
   },
   {
     "id": "learning-curves",
     "title": "Would More Examples Help?",
     "section": "Choosing and Checking a Model",
     "topic": "Establish a Fair Comparison",
-    "blurb": "Before collecting more data or choosing a more flexible model, we can examine how training and validation errors change as the training set grows."
+    "blurb": "Training and validation errors can change differently as more examples become available. Following both helps us decide whether collecting more data is a useful next experiment or whether the model itself needs attention."
   },
   {
     "id": "decision-thresholds",
     "title": "When Should a Probability Become an Action?",
     "section": "Choosing and Checking a Model",
     "topic": "From a Score to a Decision",
-    "blurb": "A probability is evidence, not a complete instruction. We need to decide how likely a sensor failure must be before an inspection is worth its cost."
+    "blurb": "A predicted probability becomes an action only after we decide what level justifies acting. The consequences of missed events and unnecessary actions affect where that threshold should be set."
   },
   {
     "id": "probability-calibration",
     "title": "Does Eighty Percent Mean Eighty Percent?",
     "section": "Choosing and Checking a Model",
     "topic": "From a Score to a Decision",
-    "blurb": "A model can rank failures well and still overstate its probabilities. We need to compare its confidence with what actually happens across similar predictions."
+    "blurb": "A probability has a practical meaning when outcomes occur at roughly the rates it predicts. Calibration compares predicted chances with observed frequencies, helping us judge whether those probabilities support reliable decisions."
   },
   {
     "id": "grouped-validation",
     "title": "Have We Really Held Out a New Example?",
     "section": "Choosing and Checking a Model",
     "topic": "Establish a Fair Comparison",
-    "blurb": "Several rows can belong to the same greenhouse, patient, or device. If we want to predict for a new entity, a random row split can put familiar entities on both sides of the evaluation."
+    "blurb": "Records from the same person or device can share information. Keeping those groups together when separating training and evaluation gives us a better test of performance on groups the model has not encountered."
   },
   {
     "id": "distribution-shift",
     "title": "What Changed After the Model Was Fitted?",
     "section": "Choosing and Checking a Model",
     "topic": "Know the Limits of the Result",
-    "blurb": "A model tested on one mix of conditions may later face another. Comparing the incoming data with the reference data helps us notice changes without pretending that every change proves an accuracy failure."
+    "blurb": "The data arriving after a system is released can differ from the data used to develop it. Comparing populations helps us find changes worth investigating; their effect on prediction quality still needs to be measured."
   },
   {
     "id": "bootstrap-uncertainty",
     "title": "How Much Does Our Estimate Depend on This Sample?",
     "section": "Choosing and Checking a Model",
     "topic": "Know the Limits of the Result",
-    "blurb": "One average hides how it might change if different observations had been collected. Resampling the observed data gives us a way to study that dependence under explicit assumptions."
+    "blurb": "An estimate depends on which observations were collected. Repeatedly sampling from the observed data and recalculating the estimate helps us examine that variation, provided the resampling respects how the observations are related."
   },
   {
     "id": "model-residual-analysis",
     "title": "What Are the Errors Trying to Tell Us?",
     "section": "Evaluating and Improving Models",
     "topic": "Find the Mistakes Behind the Score",
-    "blurb": "The temperature errors average to zero, but the greenhouse is still too hot some mornings. Keep each mistake beside the reading that produced it and work out what the average concealed."
+    "blurb": "Prediction errors have direction as well as size, so positive and negative errors can cancel in an average. Examining each error alongside its inputs helps reveal conditions under which a model repeatedly misses the outcome."
   },
   {
     "id": "model-precision-recall",
     "title": "Which Alerts Deserve an Inspection?",
     "section": "Evaluating and Improving Models",
     "topic": "Find the Mistakes Behind the Score",
-    "blurb": "A fault detector can look accurate while missing almost every fault. Follow the alerts and the faults separately, then choose a threshold the inspection team can actually use."
+    "blurb": "Precision measures how many positive predictions are correct, while recall measures how many actual positives are found. Changing a decision threshold affects both and changes the amount of work generated by an alert system."
   },
   {
     "id": "model-evaluation-slices",
     "title": "Better for Which Cases?",
     "section": "Evaluating and Improving Models",
     "topic": "Find the Mistakes Behind the Score",
-    "blurb": "Most readings come from the day shift. A model can improve its overall score while getting worse at night. Keep group sizes beside group errors before calling that a repair."
+    "blurb": "An overall score can improve while performance worsens for a particular group. Comparing errors within meaningful subsets and keeping their sizes visible helps us judge who benefits from a revision and where uncertainty remains."
   },
   {
     "id": "model-paired-comparisons",
     "title": "Did the Revision Help on the Same Cases?",
     "section": "Evaluating and Improving Models",
     "topic": "Compare Revisions Fairly",
-    "blurb": "A lower score on an easier dataset tells us little about a revision. Match the cases, inspect their gains and regressions, then resample the paired observations to explore uncertainty."
+    "blurb": "A model revision needs to be compared with its predecessor on the same cases. Paired errors preserve which observations improved or worsened, and resampling those pairs helps examine uncertainty in the difference."
   },
   {
     "id": "model-nested-validation",
     "title": "Who Checks the Model-Choosing Process?",
     "section": "Evaluating and Improving Models",
     "topic": "Compare Revisions Fairly",
-    "blurb": "Trying enough settings can produce an attractive validation score by chance. Put the search inside a separate assessment so the result includes the cost of choosing."
+    "blurb": "Searching many settings can make the best validation score look better than the selection procedure really is. An outer evaluation kept separate from that search tests the process of choosing and fitting a model."
   },
   {
     "id": "model-data-audits",
     "title": "Is the Model Wrong, or Is the Record Wrong?",
     "section": "Evaluating and Improving Models",
     "topic": "Repair the Evidence and the Behaviour",
-    "blurb": "A suspicious label deserves a closer look. Use out-of-fold disagreements to organise review while preserving original records and the boundary around the final assessment."
+    "blurb": "An apparent prediction error may begin with an incorrect label or a mismatched record. Reviewing disagreements from predictions made without fitting those records helps prioritize investigation while preserving the original evidence and evaluation boundaries."
   },
   {
     "id": "model-selective-prediction",
     "title": "When Should the Model Ask for Help?",
     "section": "Evaluating and Improving Models",
     "topic": "Repair the Evidence and the Behaviour",
-    "blurb": "Sending uncertain cases to a person changes both the error rate and the workload. Measure what the model handles and what it leaves for the review team."
+    "blurb": "Referring uncertain predictions for human review changes which cases the model handles. Measuring both accepted-case errors and the volume of referrals shows whether the policy improves the whole system rather than simply moving its workload."
   },
   {
     "id": "model-behaviour-tests",
     "title": "Should This Change the Prediction?",
     "section": "Evaluating and Improving Models",
     "topic": "Repair the Evidence and the Behaviour",
-    "blurb": "The same measurement can arrive in different units or a different batch. State the behaviour that should survive those changes, then test the actual prediction pipeline."
+    "blurb": "A change of units or batch composition can alter an input's representation without changing its meaning. Testing the complete prediction procedure against those changes helps check that preparation and model behavior remain consistent."
   },
   {
     "id": "model-iteration-project",
     "title": "Repair the Night-Shift Model Without Breaking the Day Shift",
     "section": "Evaluating and Improving Models",
     "topic": "Build and Check a Model Revision",
-    "blurb": "Diagnose a missing condition, fit a revised predictor and compare it with the baseline. Botie then checks whether the overall gain survives group and runtime requirements on a fresh shift."
+    "blurb": "A model repair needs a specific explanation for the errors it is meant to reduce. Comparing the revision on shared cases and a fresh dataset checks whether the intended improvement survives group-performance and runtime requirements."
   },
   {
     "id": "conditional-probability",
     "title": "What Does an Alarm Tell Us?",
     "section": "Introductory Mathematics",
     "topic": "Reasoning From Uncertain Evidence",
-    "blurb": "An alarm may catch most faulty sensors and still be wrong surprisingly often. We need to know how common faults are before deciding what an alarm means."
+    "blurb": "New information changes which possibilities we should consider. Conditional probability accounts for that information, including how common an event was before the new evidence arrived."
   },
   {
     "id": "likelihood",
     "title": "Which Rule Could Have Produced These Observations?",
     "section": "Introductory Mathematics",
     "topic": "Reasoning From Uncertain Evidence",
-    "blurb": "A probability rule predicts possible observations. Likelihood holds the observations fixed and compares the rules that might have produced them. That distinction connects probability to fitting a model."
+    "blurb": "Likelihood compares proposed rules by how plausible they make the observations we already have. Varying a rule's parameters while keeping the data fixed gives us a way to choose settings that fit those observations."
   },
   {
     "id": "naive-bayes",
     "title": "Naive Bayes",
     "section": "Classical Machine Learning",
     "topic": "Classification",
-    "blurb": "A warm casing and an unstable reading may each suggest a faulty sensor. We need a way to combine those clues, while being explicit about what we assume about their relationship."
+    "blurb": "Naive Bayes combines evidence from several measurements to estimate a category. Its simplifying assumption treats those measurements as independent within each category, making the calculation manageable while limiting which relationships it can describe."
   },
   {
     "id": "support-vector-machines",
     "title": "Support Vector Machines and Margins",
     "section": "Classical Machine Learning",
     "topic": "Classification",
-    "blurb": "Several lines may separate the same labelled examples. We need a reason to prefer one, and a way to handle examples that cannot all be separated cleanly."
+    "blurb": "Several boundaries may separate the same labeled observations. A support vector machine prefers a wider gap between the classes while allowing a controlled cost for observations that fall inside that gap or on the wrong side."
   },
   {
     "id": "hierarchical-clustering",
     "title": "Hierarchical Clustering",
     "section": "Classical Machine Learning",
     "topic": "Clustering",
-    "blurb": "A collection can have small groups inside larger groups. Joining the closest groups one step at a time lets us inspect that hierarchy without choosing one group count at the outset."
+    "blurb": "Small groups can form parts of larger groups. Hierarchical clustering records that structure by joining nearby groups in stages, leaving us a hierarchy to examine before choosing one level of grouping."
   },
   {
     "id": "density-based-clustering",
     "title": "Density-Based Clustering",
     "section": "Classical Machine Learning",
     "topic": "Clustering",
-    "blurb": "Groups need not form round clouds, and isolated observations need not belong to any group. We can instead ask where enough neighbours support extending a cluster."
+    "blurb": "Dense neighborhoods allow a cluster to grow through connected points. Density-based clustering can follow irregular groups while leaving isolated observations unassigned, with the result depending on what counts as nearby and sufficiently dense."
   },
   {
     "id": "images-as-arrays",
     "title": "Images as Arrays",
     "section": "Classical Machine Learning",
     "topic": "Classical Computer Vision",
-    "blurb": "Before a computer can find a seed in a photograph, it needs measurements to work with. We will look at the rows, columns, channels, and number types that make up an image."
+    "blurb": "A digital image stores measurements at ordered pixel positions. Rows and columns preserve location, while color channels describe each pixel's values. The number type affects what calculations can safely do to those measurements."
   },
   {
     "id": "image-thresholding",
     "title": "Image Thresholding",
     "section": "Classical Machine Learning",
     "topic": "Classical Computer Vision",
-    "blurb": "A bright seed on a dark tray gives us a first rule to try. Compare each pixel with a cutoff, keep the result as a mask, and inspect where that rule fails."
+    "blurb": "A threshold selects pixels whose values meet a cutoff and records those decisions in a mask. This can separate a region from its background when their intensities differ enough, but lighting changes can make one cutoff unreliable."
   },
   {
     "id": "morphology",
     "title": "Cleaning Masks With Morphology",
     "section": "Classical Machine Learning",
     "topic": "Classical Computer Vision",
-    "blurb": "A threshold can leave speckles and gaps. We can test a small shape against the mask to remove or connect particular structures, provided we understand what else that operation will change."
+    "blurb": "Morphological operations use a small shape to examine neighboring pixels in a mask. They can remove isolated marks or connect regions, while also changing boundaries that may matter to later measurements."
   },
   {
     "id": "connected-components",
     "title": "Connected Components",
     "section": "Classical Machine Learning",
     "topic": "Classical Computer Vision",
-    "blurb": "A mask tells us which pixels were selected. To count regions, we need a definition of connected and a way to give each reachable group its own label."
+    "blurb": "Selected pixels form a region only when they are connected under a chosen neighbor rule. Labeling each connected region lets us count and measure it separately, without assuming that every region represents one physical object."
   },
   {
     "id": "image-augmentation",
     "title": "Image Augmentation",
     "section": "Computer Vision with Neural Networks",
     "topic": "Learning From Limited Images",
-    "blurb": "The same seed can appear in several positions or orientations. We can teach a model which changes should preserve an answer, but the transformation must keep the image and its labels consistent."
+    "blurb": "A training image can be transformed into additional examples when the transformation preserves the task's meaning. Spatial labels must move with the image, and related versions must stay together when separating training from evaluation."
   },
   {
     "id": "transfer-learning",
     "title": "Transfer Learning",
     "section": "Computer Vision with Neural Networks",
     "topic": "Learning From Limited Images",
-    "blurb": "A model trained on other photographs may already measure useful visual patterns. We can test those features with a new prediction head before deciding whether the feature extractor also needs to change."
+    "blurb": "A previously trained network may already represent useful visual patterns. Reusing those representations lets us test a smaller new predictor before deciding whether changing the earlier network layers is justified by the available data."
   },
   {
     "id": "bounding-boxes",
     "title": "Bounding Boxes and Overlap",
     "section": "Computer Vision with Neural Networks",
     "topic": "Finding and Counting Objects",
-    "blurb": "Knowing that a seed appears in a photograph does not tell us where it is. Rectangles give us a location to predict, and overlap gives us a way to compare that prediction with a labelled target."
+    "blurb": "Bounding boxes describe where an object appears in an image. Their coordinates need a consistent convention, and the overlap between a predicted box and a labeled box gives us one way to measure localization."
   },
   {
     "id": "non-maximum-suppression",
     "title": "Non-Maximum Suppression",
     "section": "Computer Vision with Neural Networks",
     "topic": "Finding and Counting Objects",
-    "blurb": "A detector can report several rectangles around the same seed. We will rank candidates, keep a strong one, and remove sufficiently overlapping alternatives while preserving candidates for other objects."
+    "blurb": "An object detector can produce several overlapping guesses for one object. Non-maximum suppression keeps higher-scoring boxes and removes nearby alternatives according to an overlap threshold, which can also affect detections of neighboring objects."
   },
   {
     "id": "forecasting-baselines",
     "title": "What Would We Predict Before Fitting Anything?",
     "section": "Time Series and Forecasting",
     "topic": "Predicting the Next Observation",
-    "blurb": "Tomorrow's water demand is unknown. Yesterday's demand gives Botie a prediction he can actually make, and a reference that a more complicated forecast should improve on."
+    "blurb": "Recent observations and historical averages provide simple forecasts that can be made before the next value is known. Their errors give more complicated forecasting methods a reference to improve on."
   },
   {
     "id": "lagged-features",
     "title": "Building Inputs From Earlier Days",
     "section": "Time Series and Forecasting",
     "topic": "Predicting the Next Observation",
-    "blurb": "A prediction row needs information available before its target. We will turn one ordered record into rows of earlier readings without accidentally including the answer."
+    "blurb": "Earlier observations can become inputs for predicting a later value. Keeping those inputs aligned with their target and actual availability prevents a forecast from accidentally using the answer it is meant to predict."
   },
   {
     "id": "seasonality-and-differencing",
     "title": "Separating Repetition From Change",
     "section": "Time Series and Forecasting",
     "topic": "Patterns That Repeat or Move",
-    "blurb": "A demand increase might be a lasting change or a normal part of the weekly schedule. Comparing like positions in a cycle helps us distinguish those possibilities."
+    "blurb": "A series can change because of a lasting trend or a repeating cycle. Comparing each value with a relevant earlier value helps separate those patterns and changes what remains for a forecasting method to explain."
   },
   {
     "id": "exponential-smoothing",
     "title": "Updating a Forecast Without Starting Over",
     "section": "Time Series and Forecasting",
     "topic": "Patterns That Repeat or Move",
-    "blurb": "Botie needs to respond to new demand without letting one unusual day replace everything he knows. A weighted update lets him control how quickly his estimate changes."
+    "blurb": "A running estimate can give recent observations more influence while retaining information from earlier ones. Exponential smoothing controls how quickly that estimate responds, making its response to change a deliberate choice."
   },
   {
     "id": "autoregressive-forecasting",
     "title": "Learning From a Series' Own Past",
     "section": "Time Series and Forecasting",
     "topic": "Fitting and Testing Forecasts",
-    "blurb": "A trailing average gives every lag the same influence. An autoregressive model fits different coefficients for the earlier readings and then uses that same rule to predict ahead."
+    "blurb": "An autoregressive model predicts a series from its own earlier values. Fitted coefficients give those past values different influence, and using predictions as later inputs can carry errors further into the forecast."
   },
   {
     "id": "rolling-forecast-validation",
     "title": "Testing a Forecast as Time Moves Forward",
     "section": "Time Series and Forecasting",
     "topic": "Fitting and Testing Forecasts",
-    "blurb": "One convenient cutoff can hide a forecasting failure. We will replay several prediction dates, preserving what was known at each one, and compare methods on matching targets."
+    "blurb": "A forecast must be judged using only the information available when it would have been made. Repeating that check at several dates shows how methods perform as the observed history grows and conditions change."
   },
   {
     "id": "exploration-and-bandits",
     "title": "Trying an Action Before Knowing Its Value",
     "section": "Reinforcement Learning",
     "topic": "Learning From Consequences",
-    "blurb": "Botie can choose a watering schedule, but sees the result only for the schedule he actually tries. He must balance using his current favourite with learning about alternatives."
+    "blurb": "Trying an action reveals its outcome while leaving the alternatives uncertain. A bandit strategy balances using the action that currently looks best with gathering evidence about choices that have been tried less often."
   },
   {
     "id": "states-actions-and-transitions",
     "title": "Describing What an Action Changes",
     "section": "Reinforcement Learning",
     "topic": "Learning From Consequences",
-    "blurb": "Watering changes the greenhouse Botie will face tomorrow. A state, an action, and a transition model let us describe that consequence before choosing a policy."
+    "blurb": "An action changes the situation in which the next decision will be made. States describe the relevant conditions, and transition probabilities describe the possible consequences of acting under those conditions."
   },
   {
     "id": "discounted-returns",
     "title": "Valuing Rewards That Arrive Later",
     "section": "Reinforcement Learning",
     "topic": "Planning Beyond the Next Reward",
-    "blurb": "An action can cost water now and help a plant later. A return combines a sequence of rewards so Botie can compare more than the immediate outcome."
+    "blurb": "The value of an action can depend on rewards that arrive much later. A return combines rewards over time, with discounting controlling how strongly later rewards influence the comparison between choices."
   },
   {
     "id": "bellman-value-iteration",
     "title": "Planning One Step, Then the Remaining Journey",
     "section": "Reinforcement Learning",
     "topic": "Planning Beyond the Next Reward",
-    "blurb": "A long sequence of choices is difficult to compare directly. We can combine the reward from one action with the value of the state it leaves behind, then improve those estimates repeatedly."
+    "blurb": "A decision's value combines its immediate reward with the value of the situations it may lead to. When transition probabilities are known, repeated updates to those estimates give us a way to compare longer sequences of decisions."
   },
   {
     "id": "q-learning",
     "title": "Learning Action Values From Experience",
     "section": "Reinforcement Learning",
     "topic": "Planning Beyond the Next Reward",
-    "blurb": "Botie may not know the transition probabilities. A sampled action, reward, and next state can still correct one entry in an action-value table."
+    "blurb": "Action values can be updated from observed outcomes even when transition probabilities are unknown. Q-learning combines a received reward with an estimate of the best continuation, then uses the difference to revise the chosen action's value."
   },
   {
     "id": "distributions-and-expectations",
     "title": "Planning for More Than One Possible Outcome",
     "section": "Probabilistic Models and Uncertainty",
     "topic": "Describing What We Do Not Know",
-    "blurb": "A delivery might contain different numbers of damaged sensors. Keep the possible outcomes and their probabilities together before deciding how many replacements to hold."
+    "blurb": "A probability distribution keeps possible outcomes beside their chances. Weighting each outcome by its probability gives an expectation, which helps compare uncertain decisions without assuming that the average must occur in any individual case."
   },
   {
     "id": "parameter-posteriors",
     "title": "Updating an Unknown Failure Rate",
     "section": "Probabilistic Models and Uncertainty",
     "topic": "Describing What We Do Not Know",
-    "blurb": "A few failed sensors give evidence about a failure rate, but do not determine it exactly. Keep a distribution over plausible rates and update it as results arrive."
+    "blurb": "A small sample can support several plausible values for an unknown rate. A posterior distribution combines prior assumptions with the observed results, preserving uncertainty about that rate as more evidence arrives."
   },
   {
     "id": "gaussian-sensor-fusion",
     "title": "Combining Measurements With Different Reliability",
     "section": "Probabilistic Models and Uncertainty",
     "topic": "Combining Noisy Evidence",
-    "blurb": "Two thermometers disagree. Their known error variances tell us how strongly each reading should influence a shared estimate."
+    "blurb": "When measurement errors are independent and have no systematic offset, their known variances tell us how strongly to weight each reading. Under the Gaussian model, the combined estimate also describes the uncertainty that remains."
   },
   {
     "id": "hidden-state-filtering",
     "title": "Tracking a State We Cannot Observe Directly",
     "section": "Probabilistic Models and Uncertainty",
     "topic": "Combining Noisy Evidence",
-    "blurb": "An alarm does not directly reveal whether equipment is healthy. Combine how states change with how each state could produce the observed alarm."
+    "blurb": "A system's condition may be hidden while its measurements are noisy. Filtering predicts how that condition could change, then updates the possible states using the evidence in each new observation."
   },
   {
     "id": "gaussian-process-regression",
     "title": "Predicting Between Measurements With Uncertainty",
     "section": "Probabilistic Models and Uncertainty",
     "topic": "Predictions as Distributions",
-    "blurb": "Botie has measured temperature at only a few positions. A covariance rule connects nearby locations and describes how uncertain an unmeasured location remains."
+    "blurb": "Gaussian processes connect observed and unobserved values through assumptions about how those values vary together. Conditioning on measurements gives predictions with remaining uncertainty, both of which depend on those assumptions and the measurement noise."
   },
   {
     "id": "minibatch-gradients",
     "title": "Learning From a Few Records at a Time",
     "section": "Optimisation and Training",
     "topic": "Making Parameter Updates",
-    "blurb": "Botie has more training records than he can process in one step. A batch gives him a manageable estimate of the direction in which to change the model."
+    "blurb": "Using a subset of training records reduces the work needed for each parameter update. The resulting gradient estimates vary between batches, so batch size affects both the computational cost and the variability of training."
   },
   {
     "id": "momentum-updates",
     "title": "Remembering the Direction of Earlier Updates",
     "section": "Optimisation and Training",
     "topic": "Making Parameter Updates",
-    "blurb": "Successive batches can pull a weight in different directions. A stored velocity lets Botie carry some of the previous update direction into the next step."
+    "blurb": "Successive updates can point in different directions because of the data or the shape of the objective. Momentum carries part of the earlier update direction forward, giving the next adjustment some memory of previous steps."
   },
   {
     "id": "adaptive-gradients",
     "title": "Giving Different Weights Different Step Scales",
     "section": "Optimisation and Training",
     "topic": "Making Parameter Updates",
-    "blurb": "Some parameters repeatedly receive larger gradients than others. Adam keeps separate running estimates of gradient direction and squared magnitude for each parameter."
+    "blurb": "Parameters can receive gradients with very different sizes. Adam keeps running averages of each gradient and its square, using that history to scale parameter updates while accounting for the averages' initial values."
   },
   {
     "id": "initialisation-and-gradient-checks",
     "title": "Checking a Model Before a Long Training Run",
     "section": "Optimisation and Training",
     "topic": "Understanding a Training Run",
-    "blurb": "A network can fail because its starting values suppress the signal or because its derivative is wrong. Test these separately before tuning the optimiser."
+    "blurb": "A network's starting values affect how signals move through it. Separately checking its derivatives against small numerical changes helps distinguish a calculation error from a training problem before a long run begins."
   },
   {
     "id": "training-diagnostics",
     "title": "Deciding When a Training Run Has Done Enough",
     "section": "Optimisation and Training",
     "topic": "Understanding a Training Run",
-    "blurb": "Training loss can improve after predictions on unseen records stop improving. Keep separate curves, choose a stopping rule in advance, and restore the best saved model."
+    "blurb": "Lower training error does not always produce better predictions on new records. Comparing training and validation curves supports a stopping rule and helps us decide when to change the learning rate or restore an earlier model."
   },
   {
     "id": "popularity-baselines",
     "title": "Recommending Something Before Knowing the Reader",
     "section": "Recommendations and Ranking",
     "topic": "Choosing Useful Candidates",
-    "blurb": "Botie has a shelf of guides and a record of which were opened. Begin with a popularity baseline, then examine what those records actually tell us."
+    "blurb": "Interaction counts provide a simple recommendation rule when little is known about a new user. Their meaning depends on which items people had a chance to see, so popularity reflects exposure as well as preference."
   },
   {
     "id": "content-based-ranking",
     "title": "Matching a Reader’s Interests to Guide Descriptions",
     "section": "Recommendations and Ranking",
     "topic": "Choosing Useful Candidates",
-    "blurb": "Guide descriptions give us evidence even before a guide has been opened. Represent topics explicitly and compare them with a reader’s interests."
+    "blurb": "An item's description can help identify who might find it useful before anyone has rated it. Representing item properties and a user's interests in the same coordinates makes that comparison possible, subject to what the descriptions capture."
   },
   {
     "id": "collaborative-filtering",
     "title": "Learning From Readers With Similar Preferences",
     "section": "Recommendations and Ranking",
     "topic": "Learning From Interaction Patterns",
-    "blurb": "A guide’s description may miss what readers value. Shared ratings let Botie compare preferences, provided missing ratings remain distinct from dislikes."
+    "blurb": "People who agree on some items may provide useful evidence about others. Collaborative filtering uses those shared ratings to compare preferences, while keeping an absent rating distinct from a negative opinion."
   },
   {
     "id": "recommendation-factorisation",
     "title": "Compressing a Sparse Table of Preferences",
     "section": "Recommendations and Ranking",
     "topic": "Learning From Interaction Patterns",
-    "blurb": "A rating table can be enormous and mostly empty. Small vectors for readers and guides can share information across its observed entries."
+    "blurb": "A large rating table often contains many unobserved entries. Small vectors for users and items can capture shared patterns in the observed ratings, allowing predictions to reuse information across the table."
   },
   {
     "id": "ranking-evaluation",
     "title": "Checking the List a Reader Actually Sees",
     "section": "Recommendations and Ranking",
     "topic": "Evaluating Recommendations",
-    "blurb": "A recommender usually shows a short list. Evaluate that list’s relevant items, their positions, and the cases where little history is available."
+    "blurb": "The usefulness of a recommendation depends on the short list a person actually sees. Relevant items and their positions need to be evaluated against a defined candidate set, including situations with little earlier interaction history."
   },
   {
     "id": "robust-anomaly-scores",
     "title": "Finding Unusual Readings Without Letting Them Set the Reference",
     "section": "Anomaly Detection",
     "topic": "Recognising Unusual Records",
-    "blurb": "A faulty sensor can pull an ordinary mean toward itself. Use a robust centre and spread, then decide what a large deviation actually warrants."
+    "blurb": "Extreme observations can move the average and spread used to judge them. References based on medians and absolute deviations reduce that influence, helping us identify unusual readings without treating every unusual value as a fault."
   },
   {
     "id": "local-density-anomalies",
-    "title": "Judging a Reading Against Its Neighbours",
+    "title": "Judging a Reading Against Its Neighbors",
     "section": "Anomaly Detection",
     "topic": "Recognising Unusual Records",
-    "blurb": "Different operating regimes can have different spreads. Local outlier factor compares a point’s density with the density around its neighbours."
+    "blurb": "An observation can be unusual relative to its neighbors even when it fits a broader range. Local outlier factor compares surrounding densities, allowing different parts of a dataset to have different ordinary levels of variation."
   },
   {
     "id": "isolation-forests",
     "title": "Finding Readings That Are Easy to Separate",
     "section": "Anomaly Detection",
     "topic": "Different Ways to Detect Unusualness",
-    "blurb": "An isolated reading often needs few random splits to stand apart. Follow paths through small trees before averaging that evidence across a forest."
+    "blurb": "An observation far from the others is often separated by fewer random splits. Isolation forests combine those path lengths across trees to score unusual observations, leaving the meaning of an alert to a separate investigation."
   },
   {
     "id": "reconstruction-alerts",
     "title": "Detecting Patterns a Model Cannot Reconstruct",
     "section": "Anomaly Detection",
     "topic": "Different Ways to Detect Unusualness",
-    "blurb": "A model trained to reproduce normal sensor patterns can expose departures through reconstruction error. The error still needs a validated alert rule."
+    "blurb": "A model trained to reproduce reference patterns can make larger reconstruction errors on unfamiliar ones. Those errors provide an anomaly score whose usefulness depends on the reference data and a separately checked alert threshold."
   },
   {
     "id": "graph-representations",
     "title": "Recording Which Things Are Connected",
     "section": "Graphs and Relational Learning",
     "topic": "Representing Relationships",
-    "blurb": "A table of pump readings leaves out the pipes between pumps. A graph records those relationships so calculations can use the connections."
+    "blurb": "A graph records which objects are connected as well as what is known about each object. Consistent identities and edge directions let calculations use those relationships without confusing the objects or the meaning of their connections."
   },
   {
     "id": "graph-random-walks",
     "title": "Following Probability Through a Network",
     "section": "Graphs and Relational Learning",
     "topic": "Representing Relationships",
-    "blurb": "A random walker chooses among outgoing links. Follow the probability mass to see how graph structure changes where it accumulates."
+    "blurb": "A random walk assigns probabilities to the next connection taken from each location. Following those probabilities reveals how network structure affects where a walk can reach and where it may remain or keep cycling."
   },
   {
     "id": "neighbour-aggregation",
-    "title": "Letting a Node Read Its Neighbours’ Measurements",
+    "title": "Letting a Node Read Its Neighbors’ Measurements",
     "section": "Graphs and Relational Learning",
     "topic": "Learning Across Connections",
-    "blurb": "A pump’s neighbours can provide useful context. Aggregate their readings while retaining the distinction between a node and its surroundings."
+    "blurb": "Connected objects can provide context about one another. Aggregating their measurements combines that context while preserving each object's identity; choosing a sum or a mean changes how the number of connections affects the result."
   },
   {
     "id": "graph-convolution",
-    "title": "Learning From a Node and Its Neighbours Together",
+    "title": "Learning From a Node and Its Neighbors Together",
     "section": "Graphs and Relational Learning",
     "topic": "Learning Across Connections",
-    "blurb": "A graph convolution combines node features, self-connections, degree scaling, and learned weights. Work through these pieces before calling the result a layer."
+    "blurb": "A graph convolution combines an object's measurements with information from its neighbors. Scaling for the number of connections controls their influence, while learned weights determine how the combined features contribute to the next representation."
   },
   {
     "id": "link-prediction",
     "title": "Scoring Connections We Have Not Observed",
     "section": "Graphs and Relational Learning",
     "topic": "Learning Across Connections",
-    "blurb": "Node representations can score possible links, but missing links are not guaranteed negatives. Design the split and candidate set before evaluating."
+    "blurb": "Representations of connected objects can be used to score possible missing links. An unrecorded connection may simply be unobserved, so candidate selection and the separation of training from evaluation affect what those scores can establish."
   },
   {
     "id": "confounding-and-comparisons",
     "title": "Separating a Useful Prediction From a Causal Claim",
     "section": "Causal Inference and Experiments",
     "topic": "Asking What a Change Would Do",
-    "blurb": "Plants receiving extra water may grow poorly because they were already struggling. Compare the question a prediction answers with the question an intervention asks."
+    "blurb": "A treatment and an outcome can share causes that make them appear related. Understanding those common causes helps distinguish a useful prediction from evidence that changing the treatment would change the outcome."
   },
   {
     "id": "randomised-experiments",
     "title": "Making a Fair Comparison by Assignment",
     "section": "Causal Inference and Experiments",
     "topic": "Asking What a Change Would Do",
-    "blurb": "Random assignment separates a treatment decision from the reasons a gardener might otherwise choose it. Estimate an average effect while keeping the experiment’s unit and uncertainty clear."
+    "blurb": "Random assignment separates a treatment choice from the reasons someone might otherwise select it. Comparing outcomes by assignment helps estimate an average causal effect, with uncertainty that depends on the experiment's design and size."
   },
   {
     "id": "causal-adjustment",
     "title": "Comparing Treatments in the Same Population",
     "section": "Causal Inference and Experiments",
     "topic": "Working With Observational Evidence",
-    "blurb": "When starting conditions affect treatment choice, standardisation can compare both treatments using one target population, if the measured conditions suffice to control confounding."
+    "blurb": "Different treatment groups may begin with different conditions. Standardization compares their outcomes using the same target population, provided the measured conditions account for the relevant common causes and both treatments have adequate representation."
   },
   {
     "id": "treatment-effects-and-overlap",
     "title": "Reweighting Records Without Inventing Missing Evidence",
     "section": "Causal Inference and Experiments",
     "topic": "Working With Observational Evidence",
-    "blurb": "Inverse-probability weighting changes which records count most. Understand the treatment probabilities and overlap assumptions before interpreting the resulting contrast."
+    "blurb": "Inverse-probability weighting gives more influence to outcomes from cases less likely to receive their observed treatment. The comparison depends on credible treatment probabilities and enough overlap to support both treatment choices in the population of interest."
   },
   {
     "id": "saving-fitted-pipelines",
     "title": "Saving the Whole Prediction Procedure",
     "section": "Deploying and Maintaining Models",
     "topic": "From Training to a Repeatable Prediction",
-    "blurb": "Weights alone do not reproduce a prediction. Botie also needs feature order, fitted preparation, and the rules connecting them."
+    "blurb": "Reproducing a prediction requires the fitted preparation and input conventions as well as model parameters. Saving the complete procedure and checking it after loading helps preserve the meaning of a prediction across processes."
   },
   {
     "id": "prediction-input-contracts",
     "title": "Checking What Arrives at the Model",
     "section": "Deploying and Maintaining Models",
     "topic": "From Training to a Repeatable Prediction",
-    "blurb": "A model can produce a number from the wrong columns or units. Define and validate the request before trusting its arithmetic."
+    "blurb": "A numerically valid input can still have the wrong meaning. Named fields and explicit units help a prediction service check requests before calculation, making errors in feature order or missing values visible to the caller."
   },
   {
     "id": "serving-predictions",
     "title": "Keeping a Prediction Consistent Across Requests",
     "section": "Deploying and Maintaining Models",
     "topic": "Running and Identifying a Model",
-    "blurb": "The same input should have the same preparation and result whether it arrives alone or in a batch. Keep prediction free of accidental fitting and mutable shared state."
+    "blurb": "Prediction code should apply the same fitted preparation to a record whether it arrives alone or in a batch. Keeping shared state from changing during requests prevents accidental differences between the two."
   },
   {
     "id": "model-versioning",
     "title": "Knowing Which Model Produced an Answer",
     "section": "Deploying and Maintaining Models",
     "topic": "Running and Identifying a Model",
-    "blurb": "A result needs a link to the model, preparation, data, and code that produced it. Version the prediction procedure so comparisons and rollbacks are meaningful."
+    "blurb": "A prediction needs to be traceable to the model and preparation that produced it. Recording the associated data and code versions makes a past result easier to investigate and provides a reproducible target for rollback."
   },
   {
     "id": "monitoring-and-rollback",
     "title": "Checking the Model After It Meets New Data",
     "section": "Deploying and Maintaining Models",
     "topic": "Maintaining the Prediction Service",
-    "blurb": "Inputs, outcomes, and service behaviour can change after launch. Monitor each separately and keep a tested route back to a known compatible version."
+    "blurb": "A released system can encounter new data or changed operating conditions. Separating service measurements from prediction-quality checks helps identify the problem, while a compatible saved procedure provides a route back when a revision fails."
   },
   {
     "id": "project-sensor-investigation",
     "title": "Investigate a Sensor Before Calling It Faulty",
     "section": "Complete Projects",
     "topic": "Putting the Pieces Together",
-    "blurb": "Fit a reference from earlier readings, select an alert rule on validation records, and evaluate that fixed rule on later labelled cases."
+    "blurb": "An alert procedure turns unusual sensor readings into requests for investigation. Its reference and threshold need to be chosen before evaluating later labeled cases, so the reported performance reflects decisions that could actually have been made."
   },
   {
     "id": "project-demand-forecast",
     "title": "Forecast Tomorrow’s Water Demand Without Seeing Tomorrow",
     "section": "Complete Projects",
     "topic": "Putting the Pieces Together",
-    "blurb": "Build lagged inputs, compare an autoregressive model with persistence, and evaluate both through a sequence of later forecast origins."
+    "blurb": "A useful demand forecast must be available before the demand itself is observed. Comparing a fitted model with simple persistence at matching forecast dates helps reveal whether the additional complexity improves planning."
   },
   {
     "id": "project-seed-counting",
     "title": "Count Seeds While Keeping the Image Assumptions Visible",
     "section": "Complete Projects",
     "topic": "Putting the Pieces Together",
-    "blurb": "Turn a small tray image into a binary mask, label connected regions, and investigate when a region count stops matching the number of seeds."
+    "blurb": "Counting seeds from an image depends on separating their pixels into distinct regions. Thresholding and connected components provide a small, inspectable procedure whose failures reveal when dust or touching seeds violate its assumptions."
   },
   {
     "id": "design-from-decisions",
     "title": "What Would This Prediction Actually Change?",
     "section": "Define the ML Problem",
     "topic": "Decisions Before Models",
-    "blurb": "A model can flag a pump that may fail, but someone still has to decide what to do. Begin with that decision and work backwards to the information it needs."
+    "blurb": "A prediction is useful when it informs an action someone can take. Starting with that decision helps define the required information and measurable limits the proposed system needs to meet."
   },
   {
     "id": "design-without-a-model",
     "title": "Do We Need a Learned Model Yet?",
     "section": "Define the ML Problem",
     "topic": "Decisions Before Models",
-    "blurb": "A fixed rule already catches some faults. Work out what a learned model would have to improve before paying for its extra work."
+    "blurb": "An existing rule gives us a baseline for deciding whether machine learning adds useful value. Comparing its consequences and upkeep with a learned model makes the additional benefit and cost visible."
   },
   {
     "id": "design-information-boundaries",
     "title": "What Can the System Know at Decision Time?",
     "section": "Define the ML Problem",
     "topic": "The Information We Can Use",
-    "blurb": "A reading can describe an earlier event and still arrive too late. Design a data contract that respects both clocks."
+    "blurb": "The time an event occurred differs from the time its record became available. A system's input requirements need to account for both, so a past decision is not evaluated using information it could not have received."
   },
   {
     "id": "design-pipeline-capacity",
     "title": "Where Does the Prediction Pipeline Run Out of Room?",
     "section": "Model the System Before Building It",
     "topic": "Throughput and Waiting",
-    "blurb": "A fast model can sit inside a slow service. Follow requests through preparation, inference, and storage to find the stage that limits the whole path."
+    "blurb": "A processing pipeline can finish work only as quickly as its limiting stage allows. Comparing the capacity of preparation and prediction with the surrounding operations helps identify which change would improve the whole service."
   },
   {
     "id": "design-queues-and-bursts",
     "title": "What Happens When Requests Arrive Together?",
     "section": "Model the System Before Building It",
     "topic": "Throughput and Waiting",
-    "blurb": "Average demand can fit while a burst still leaves people waiting. Follow unfinished requests from one interval to the next."
+    "blurb": "A queue holds work that has arrived but has not finished processing. Short bursts can create a long wait even when average demand is manageable, so capacity estimates need to follow unfinished work over time."
   },
   {
     "id": "design-memory-budget",
     "title": "Will the Model Fit on the Device?",
     "section": "Model the System Before Building It",
     "topic": "Memory and Communication",
-    "blurb": "A model file can fit while its running process runs out of memory. Account for parameters, temporary values, and the rest of the runtime."
+    "blurb": "A running model needs memory for intermediate calculations and its execution environment as well as saved parameters. Those additional demands affect which model and batch sizes will fit on a device."
   },
   {
     "id": "design-edge-or-cloud",
     "title": "Should the Prediction Happen Here or on a Server?",
     "section": "Model the System Before Building It",
     "topic": "Memory and Communication",
-    "blurb": "Sending an image away adds work before inference can begin. Compare communication and computation, then examine what happens when the connection disappears."
+    "blurb": "Local and remote prediction divide the work differently between a device and a server. Communication time and connection failures affect that choice alongside computing speed, with separate consequences for energy use and data exposure."
   },
   {
     "id": "design-feasible-tradeoffs",
     "title": "Which Designs Are Actually Acceptable?",
     "section": "Compare Designs Under Constraints",
     "topic": "Requirements and Trade-offs",
-    "blurb": "A design can be fast, accurate, or inexpensive without meeting the job’s requirements. Remove infeasible options before comparing the choices that remain."
+    "blurb": "A design must meet its required limits before its advantages can make it useful. Filtering by those requirements separates unacceptable options from choices that involve a genuine tradeoff between objectives."
   },
   {
     "id": "design-sensitive-assumptions",
     "title": "Which Assumption Could Change Our Decision?",
     "section": "Compare Designs Under Constraints",
     "topic": "Requirements and Trade-offs",
-    "blurb": "An estimate can look convincing because its uncertain inputs were hidden. Vary the assumptions and find where the preferred design changes."
+    "blurb": "A design decision can depend heavily on an uncertain estimate. Varying plausible inputs shows which assumptions could change the preferred design and which new measurement would be most useful."
   },
   {
     "id": "design-prototype-experiments",
     "title": "What Should the Prototype Teach Us?",
     "section": "Test the Design and Plan for Failure",
     "topic": "Evidence Before Release",
-    "blurb": "A prototype should answer a question that could change the design. Test interacting choices together instead of changing everything and guessing what helped."
+    "blurb": "A prototype provides evidence about a design choice before the complete system is built. Testing related factors together can reveal interactions, where the effect of one choice depends on the setting of another."
   },
   {
     "id": "design-fallbacks",
     "title": "What Should Happen When the Model Cannot Help?",
     "section": "Test the Design and Plan for Failure",
     "topic": "Evidence Before Release",
-    "blurb": "A missing reading or unavailable model still requires a response. Build a route that makes the failure visible and sends the case somewhere useful."
+    "blurb": "An unavailable model or unusable input still leaves the application with a decision to handle. A fallback defines what happens in those conditions, including where unresolved cases go and how the system returns to normal operation."
   },
   {
     "id": "design-inspection-review",
     "title": "Can We Defend the Inspection Service Design?",
     "section": "Test the Design and Plan for Failure",
     "topic": "Bring the Design Together",
-    "blurb": "Bring the requirements back to the complete service. Check fault misses and queue capacity separately, then identify what the prototype still has not demonstrated."
+    "blurb": "A complete service needs evidence for its operating requirements as well as its prediction results. Checking missed faults alongside the workload they generate shows whether an inspection design fits the team's actual capacity."
   },
   {
     "id": "agent-introduction",
     "title": "What Makes This an Agent?",
     "section": "Agents",
     "topic": "From an Answer to an Action",
-    "blurb": "Botie can describe a pump, but the technician needs its actual manual. Follow the software that lets a model ask for information and use what comes back."
+    "blurb": "An agent uses a model's output to choose a next step, such as requesting information from a tool. The surrounding program performs that operation and returns its result, giving the model new information for the next decision."
   },
   {
     "id": "agent-prompts",
     "title": "How Do We Give an Agent a Job It Can Follow?",
     "section": "Agents",
     "topic": "Giving the Model a Clear Job",
-    "blurb": "A technician wants help with a noisy pump. Begin prompt engineering with that job and its evidence, then test whether a clearer request produces a useful answer."
+    "blurb": "A prompt gives a language model its task and the information available to answer it. Clear instructions and examples make the requested behavior easier to test, including what the answer should say when evidence is missing."
   },
   {
     "id": "agent-structured-outputs",
     "title": "Can Another Program Use Botie’s Answer?",
     "section": "Agents",
     "topic": "Giving the Model a Clear Job",
-    "blurb": "A technician can read a paragraph, but an application needs agreed fields. Check the response structure without confusing a valid record with a correct diagnosis."
+    "blurb": "Structured outputs put a model's response into fields another program can read. Checking their types and required values catches malformed records, while the accuracy of the information in those fields needs a separate check."
   },
   {
     "id": "agent-tool-contracts",
     "title": "When May Botie Turn a Suggestion into an Action?",
     "section": "Agents",
     "topic": "Letting the Model Use Tools",
-    "blurb": "Booking an inspection changes somebody’s work. Give the tool a precise interface, check the caller’s permission, and keep a retried request from creating a second job."
+    "blurb": "A tool gives an agent access to an operation performed by another program. Its interface needs to define acceptable inputs and permissions, including how repeated requests are handled when the operation changes stored data."
   },
   {
     "id": "agent-context",
     "title": "Which Records Should Botie Bring into the Conversation?",
     "section": "Agents",
     "topic": "Letting the Model Use Tools",
-    "blurb": "The manual collection is larger than one request can hold. Select permitted evidence, leave room for the reply, and keep each excerpt attached to its source."
+    "blurb": "A model can process only a limited amount of information in one request. Selecting relevant, permitted records and retaining their sources helps use that space without losing the evidence needed to support the answer."
   },
   {
     "id": "agent-loops",
     "title": "What Should Botie Do After a Tool Replies?",
     "section": "Agents",
     "topic": "Letting the Model Use Tools",
-    "blurb": "One search may reveal that a second search is needed. Follow the observations through an agent loop, then give that loop explicit ways to finish or ask for help."
+    "blurb": "An agent loop lets a model choose another step after receiving a tool's result. The program keeps track of those steps and decides when to stop, retry a recoverable failure, or ask a person for help."
   },
   {
     "id": "agent-or-workflow",
     "title": "Does Botie Need to Choose the Next Step?",
     "section": "Agents",
     "topic": "Choosing How Much Autonomy to Give",
-    "blurb": "A request to find a maintenance record and an investigation of an unfamiliar fault ask different things of the program. Compare what fixed steps can do before giving a model more decisions."
+    "blurb": "A fixed workflow chooses its steps in code, while an agent lets a model choose some steps from the results it observes. That additional freedom is useful when the task requires it, and adds behavior the application needs to test."
   },
   {
     "id": "agent-pydantic-ai",
     "title": "Give Botie a Typed Job with Pydantic AI",
     "section": "Agents",
     "topic": "Building with Agent Frameworks",
-    "blurb": "Botie can read a manual, but the application still needs a usable answer and real citation IDs. Give the agent its dependencies and check what comes back."
+    "blurb": "Pydantic AI organizes model calls around declared inputs and outputs, with tools for requesting information. Those declarations help the surrounding program check a response, while its factual support still depends on the evidence returned."
   },
   {
     "id": "agent-langchain",
     "title": "Put Limits Around a LangChain Agent",
     "section": "Agents",
     "topic": "Building with Agent Frameworks",
-    "blurb": "Botie keeps looking for a manual that does not exist. Use an agent runtime with explicit tool access and limits, then inspect the messages that explain its decisions."
+    "blurb": "LangChain coordinates the messages and tool calls in an agent run. Explicit limits on those calls help control repeated attempts, while the recorded messages show what information the agent used at each step."
   },
   {
     "id": "agent-langgraph",
     "title": "Resume Botie’s Work with LangGraph",
     "section": "Agents",
     "topic": "Building with Agent Frameworks",
-    "blurb": "The technician returns after a pause. Preserve the right request’s evidence, merge updates deliberately, and resume a review without repeating an external action."
+    "blurb": "LangGraph represents a workflow as connected operations with saved state. That state lets work continue after a pause, but resuming it still requires clear rules for merging changes and avoiding repeated external actions."
   },
   {
     "id": "agent-human-approval",
     "title": "Ask Before Botie Creates the Inspection Job",
     "section": "Agents",
     "topic": "State and Permissions",
-    "blurb": "A technician approves one inspection, then the proposal changes. Bind the decision to what was reviewed and check it again where the job is created."
+    "blurb": "Human approval connects a proposed action to a person's decision about it. The program performing the action needs to confirm that its details still match the proposal and that the approval remains valid."
   },
   {
     "id": "agent-mcp",
     "title": "Connect Botie to Tools with MCP",
     "section": "Agents",
     "topic": "State and Permissions",
-    "blurb": "Several assistants need the same maintenance tools. Share an interface while keeping server identity, permissions and returned content visible."
+    "blurb": "The Model Context Protocol, or MCP, gives applications a shared way to discover and call tools supplied by other programs. A common interface simplifies the connection while leaving permissions and the interpretation of returned information to the application."
   },
   {
     "id": "agent-prompt-injection",
     "title": "What If the Manual Starts Giving Botie Orders?",
     "section": "Agents",
     "topic": "Guardrails at the Point of Action",
-    "blurb": "A retrieved maintenance note tells Botie to export records. Trace where that instruction came from, then keep the application’s permissions intact even when a screening model misses it."
+    "blurb": "Prompt injection occurs when supplied content tries to redirect a model's instructions. Documents and tool results can carry those attempts, so the application still needs to enforce permissions when a model follows an instruction it should have ignored."
   },
   {
     "id": "agent-authorization",
     "title": "Whose Pump Is Botie Allowed to Inspect?",
     "section": "Agents",
     "topic": "Guardrails at the Point of Action",
-    "blurb": "The tool name is allowed, but its arguments point at another customer’s asset. Build the service-side checks that connect the caller, operation and stored record."
+    "blurb": "Authorization determines what an authenticated caller may do with a particular record. Allowing a tool by name is insufficient when its arguments can point to another person's information or a different customer's resources."
   },
   {
     "id": "agent-data-boundaries",
     "title": "How Much of the Maintenance Record Does Botie Need?",
     "section": "Agents",
     "topic": "Guardrails at the Point of Action",
-    "blurb": "A manual lookup needs an asset and a symptom, but the original record also contains private contact details. Build the smaller payload and control where it can go."
+    "blurb": "Permission to read information does not automatically include permission to send it to another service. Restricting a request to the fields its task needs reduces unnecessary disclosure, including through logs and saved conversations."
   },
   {
     "id": "agent-output-guardrails",
     "title": "Can We Safely Use the Answer Botie Returned?",
     "section": "Agents",
     "topic": "Guardrails at the Point of Action",
-    "blurb": "A response can be valid JSON and still name the wrong pump or contain unwanted markup. Check its structure, its relationship to the request, and the context that will consume it."
+    "blurb": "A model's response becomes input to the program that uses it. Its contents need checks appropriate to that use, including whether identifiers match the request and whether displayed text could be interpreted as executable markup."
   },
   {
     "id": "agent-retries-and-effects",
     "title": "Did Botie Create the Inspection, or Did the Reply Get Lost?",
     "section": "Agents",
     "topic": "Keeping an Agent Run Under Control",
-    "blurb": "A request times out after Botie submits an inspection. Work out what the service may already have done before sending another request."
+    "blurb": "A timed-out request may have completed even though its reply never arrived. A stable action identity and a way to recover the receiver's result help prevent a retry from performing the same operation twice."
   },
   {
     "id": "agent-resource-budgets",
     "title": "Can Two of Botie’s Calls Spend the Same Remaining Budget?",
     "section": "Agents",
     "topic": "Keeping an Agent Run Under Control",
-    "blurb": "Two proposed lookups each appear affordable until they start together. Reserve shared resources before dispatch and keep the whole run within its operating limits."
+    "blurb": "Concurrent tool calls can each appear to fit a budget while exceeding it together. Reserving resources before dispatch makes unfinished work part of the limit, including the time and cost already committed to other calls."
   },
   {
     "id": "agent-prompt-examples",
     "title": "Which Examples Should We Put in the Prompt?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Teaching the Task Through Examples",
-    "blurb": "Botie keeps making an inspection sound mandatory. Show what a supported answer looks like, then check that the examples teach the distinction we intended."
+    "blurb": "Examples in a prompt show the relationship between a request and an acceptable response. Their selection affects what distinctions the model is shown, so their usefulness needs to be checked on other requests."
   },
   {
     "id": "agent-tracing",
     "title": "Why Did Botie Take So Long?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Seeing What Happened",
-    "blurb": "An answer arrives late, but the text cannot tell us where the time went. Follow one maintenance request through retrieval, tool calls and the final response."
+    "blurb": "A trace records the operations that contributed to one request, with their timing and relationships. It helps explain where an agent spent time or repeated work without relying on the final answer to describe its execution."
   },
   {
     "id": "agent-langfuse",
     "title": "Can We Find the Run Behind This Score?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Seeing What Happened",
-    "blurb": "A dashboard says answers improved. Connect scores to their requests and prompt versions so we can see which answers were actually checked."
+    "blurb": "Langfuse records agent executions and connects them to prompt versions and evaluation scores. Keeping those identities together lets us inspect the answers behind a reported improvement and see which runs were actually evaluated."
   },
   {
     "id": "agent-evaluation-datasets",
     "title": "What Would Count as Doing the Job?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Building Evaluation Cases",
-    "blurb": "A plausible answer can still come from an unacceptable sequence of actions. Build maintenance cases that check the answer, permitted tools and failure behaviour."
+    "blurb": "An evaluation dataset pairs tasks with the conditions and results expected from them. For an agent, those expectations can include permitted actions and failure behavior as well as the final answer."
   },
   {
     "id": "agent-framework-tests",
     "title": "What Can We Test Without Calling a Model?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Testing the Program Around the Model",
-    "blurb": "An agent framework can run our tools, but a test model and a real model answer different questions. Build contract checks before spending time on live evaluations."
+    "blurb": "A test model supplies controlled responses without contacting a real model provider. This lets us check how an agent program handles arguments and tool results, while answer quality still requires evaluation with the intended model."
   },
   {
     "id": "agent-model-judges",
     "title": "Who Checks the Model That Checks Botie?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Reviewing Answer Quality",
-    "blurb": "Some answers need interpretation rather than an exact comparison. Give a judge a clear rubric, then test its judgements against evidence and human review."
+    "blurb": "A model judge evaluates an answer against a written set of criteria. Its decisions can vary with the wording or presentation, so agreement with human review needs to be checked before relying on its scores."
   },
   {
     "id": "agent-error-analysis",
     "title": "Where Did the Answer First Go Wrong?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Finding a Change Worth Making",
-    "blurb": "Several answers are wrong, but they did not fail for the same reason. Inspect the evidence and tool results before rewriting the prompt."
+    "blurb": "Error analysis traces a failed answer back through the information and operations that produced it. Distinguishing missing evidence from a mistaken interpretation helps identify a repair worth testing instead of changing the prompt at random."
   },
   {
     "id": "agent-ablation-experiments",
     "title": "Did the New Examples Cause the Improvement?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Finding a Change Worth Making",
-    "blurb": "A candidate improves after we change its model and prompt. Separate the changes, pair the task results, and inspect what became worse."
+    "blurb": "Changing several parts of an agent at once can hide which change affected its performance. Comparing versions with individual changes on the same tasks helps separate their effects and reveal cases that became worse."
   },
   {
     "id": "agent-release-checks",
     "title": "Is This Version Ready for the Next Shift?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Deciding Whether to Release",
-    "blurb": "A new agent can improve average answers while introducing an unacceptable failure. Compare the same cases and keep critical behaviour and operating budgets visible."
+    "blurb": "A higher average score can conceal a new failure on an important task. Comparing agent versions on the same cases, with explicit requirements and operating limits, makes those tradeoffs visible before release."
   },
   {
     "id": "agent-adversarial-evaluations",
     "title": "Can We Make Botie Cross the Boundary?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Testing and Operating the Boundaries",
-    "blurb": "A guardrail passes our friendly examples. Try to break a specific boundary, inspect the actual effects, and check whether ordinary maintenance questions still work."
+    "blurb": "Adversarial evaluations deliberately try to violate a stated rule. The useful evidence is what the agent actually did under those conditions, including whether its controls also blocked requests that should have been allowed."
   },
   {
     "id": "agent-incident-response",
     "title": "What Happens When the New Shift Finds a Failure?",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "Testing and Operating the Boundaries",
-    "blurb": "The released assistant attempts an unapproved job. Stop further effects, account for work already in flight, and turn the failure into evidence for a careful restart."
+    "blurb": "Stopping an agent prevents new work only if the stop reaches the programs performing its actions. Requests already in progress may still complete, so recovery also requires finding out what happened before resuming operation."
   },
   {
     "id": "agent-iteration-project",
     "title": "Repair Botie’s Maintenance Assistant",
     "section": "Prompting, Evaluation and Iteration",
     "topic": "A Repair From Failure to Fresh Evidence",
-    "blurb": "Follow a stale-manual failure through a test, a repair and a fresh evaluation. Keep unsupported answers and unapproved actions out of the release decision."
+    "blurb": "An outdated source can produce a convincing answer with the wrong information. Repairing the retrieval rule and evaluating fresh requests connects the original failure to evidence that the revised application handles it better."
   },
   {
     "id": "agent-guardrail-boundaries",
     "title": "What Should Botie Be Unable to Do?",
     "section": "Agent Guardrails and Secure Development",
     "topic": "Deciding Where Authority Belongs",
-    "blurb": "A helpful agent can still propose the wrong operation. Start with the effects we need to prevent, then put a control where each effect would happen."
+    "blurb": "Guardrails limit the effects an agent can have on an application. Instructions describe the intended behavior, while checks where actions occur determine what the agent can actually do."
   },
   {
     "id": "agent-guardrail-coding",
     "title": "Can Botie Fix the Bug Without Rewriting the Rules?",
     "section": "Agent Guardrails and Secure Development",
     "topic": "Working Safely with a Coding Agent",
-    "blurb": "The requested fix belongs in one function. The proposed patch also weakens its test. Review the actual changed files and keep verification outside the patch’s control."
+    "blurb": "A coding agent can change the tests as well as the program being tested. Reviewing its complete patch and checking it independently helps keep the requested repair from weakening the requirements it was meant to satisfy."
   },
   {
     "id": "agent-guardrail-sandbox",
     "title": "Where Should Botie Run Code He Has Just Written?",
     "section": "Agent Guardrails and Secure Development",
     "topic": "Working Safely with a Coding Agent",
-    "blurb": "A test runner executes repository code. Give it a deliberately small environment, then verify the filesystem, network and resource limits that environment really enforces."
+    "blurb": "A sandbox restricts the files and services a running program can reach. Those limits matter when executing agent-written code, including code that attempts to read credentials or consume more resources than expected."
   },
   {
     "id": "agent-guardrail-supply-chain",
     "title": "Are We Releasing the Code We Actually Checked?",
     "section": "Agent Guardrails and Secure Development",
     "topic": "Working Safely with a Coding Agent",
-    "blurb": "Botie adds a dependency and rebuilds the project. Bind the review and independent checks to the exact revision and artifact that will be released."
+    "blurb": "A release includes dependencies and build outputs as well as the code we edited. Review and test results need to identify those exact inputs and outputs, or they may describe a different program from the one being released."
   },
   {
     "id": "agent-guardrail-mcp-trust",
     "title": "What Did We Actually Trust When We Connected the MCP Server?",
     "section": "Agent Guardrails and Secure Development",
     "topic": "Connecting MCP Servers Deliberately",
-    "blurb": "A familiar tool name returns with a different description. Keep server identity, reviewed capabilities and individual calls separate as the connection changes."
+    "blurb": "An MCP connection lets an application discover and use capabilities supplied by another program. The server's identity and the permissions granted to it matter even when its tools have familiar names."
   },
   {
     "id": "agent-guardrail-mcp-auth",
     "title": "A Valid Token for Which Service?",
     "section": "Agent Guardrails and Secure Development",
     "topic": "Connecting MCP Servers Deliberately",
-    "blurb": "A token can be authentic and still belong to another API. Follow delegated authority from the caller to the MCP server without borrowing another service’s credentials."
+    "blurb": "An access token identifies a grant of authority for a particular service. A valid token for one API does not give an MCP server permission to use it elsewhere or read every record it can reach."
   },
   {
     "id": "agent-guardrail-application-actions",
     "title": "What Exactly Did the Person Approve?",
     "section": "Agent Guardrails and Secure Development",
     "topic": "Protecting Applications and Shared State",
-    "blurb": "A reviewed action resumes after its target changes. Keep the approval, current object version and receiver’s action ledger together before allowing another write."
+    "blurb": "Approval applies to the action a person actually reviewed. If its target or details change before execution, the application needs to check that approval again and recognize a retry of the same action."
   },
   {
     "id": "agent-guardrail-memory-delegation",
     "title": "What Should Botie Pass to Another Agent?",
     "section": "Agent Guardrails and Secure Development",
     "topic": "Protecting Applications and Shared State",
-    "blurb": "A saved note and a delegated tool list can carry authority into a later run. Filter memory before use and restrict the child to the parent’s current grants."
+    "blurb": "Saved memory and delegated tasks can carry information into later agent runs. Their ownership and permissions need to remain clear so an old note or a handoff cannot grant new access."
   },
   {
     "id": "agent-guardrail-release-lab",
     "title": "Can the Repaired Agent Survive a Different Shift?",
     "section": "Agent Guardrails and Secure Development",
     "topic": "Testing the Whole Boundary",
-    "blurb": "A refusal can arrive after an unauthorised tool call. Compare recorded effects with the intended policy, preserve blocked legitimate work and decide what evidence supports a limited release."
+    "blurb": "An agent's final answer may hide an unauthorized action taken earlier in the run. Testing the recorded effects against the intended permissions helps reveal those failures, along with legitimate work the controls prevented."
   },
   {
     "id": "software-feature-contracts",
     "title": "The Right Numbers in the Wrong Columns",
     "section": "Software for Models and Agents",
     "topic": "Keeping prediction code dependable",
-    "blurb": "An API changes its field order. Keep the trained model attached to what each feature means."
+    "blurb": "A model associates each input position with a particular measurement. Keeping feature names and their required order together prevents a changed interface from feeding valid numbers into the wrong parts of the calculation."
   },
   {
     "id": "software-fitted-state",
     "title": "A Fitted Object Should Remember Its Training",
     "section": "Software for Models and Agents",
     "topic": "Keeping prediction code dependable",
-    "blurb": "Separate fitting from prediction so a new request cannot quietly redefine the model’s reference."
+    "blurb": "Fitting establishes values that later predictions need to reuse, such as a training mean. Keeping that fitted state separate from new requests prevents each prediction from quietly changing the reference used by the model."
   },
   {
     "id": "software-retrieval-shortlists",
     "title": "Keep the Useful Candidates Without Losing Their IDs",
     "section": "Software for Models and Agents",
     "topic": "Structures for agent workloads",
-    "blurb": "Use indices and a bounded heap to select retrieval candidates while preserving ties and identities."
+    "blurb": "Selecting a small number of high-scoring records requires keeping each score attached to its record. A bounded heap maintains that shortlist without sorting every candidate, with explicit rules for equal scores."
   },
   {
     "id": "software-workflow-dependencies",
     "title": "Which Jobs Can Start Before the Model Is Ready?",
     "section": "Software for Models and Agents",
     "topic": "Structures for agent workloads",
-    "blurb": "Represent a training workflow as dependencies, detect cycles, and separate readiness from completion."
+    "blurb": "A workflow's dependencies describe which jobs require another job's output before they can begin. Tracking those relationships identifies ready work and reveals cycles that would otherwise leave the program waiting indefinitely."
   },
   {
     "id": "software-named-request-contracts",
     "title": "Did the Caller Leave It Out, or Send No Reading?",
     "section": "Model and Tool API Contracts",
     "topic": "Describing a model request",
-    "blurb": "Give absent measurements, explicit nulls and real zeroes different meanings before a request reaches the model."
+    "blurb": "An absent field, an explicit missing value, and a measured zero can mean different things. A request contract preserves those distinctions so validation and preprocessing do not silently assign the same meaning to all three."
   },
   {
     "id": "software-schema-evolution",
     "title": "Yesterday’s Client Still Sends the Old Request",
     "section": "Model and Tool API Contracts",
     "topic": "Describing a model request",
-    "blurb": "Introduce a new request shape without guessing what an older client meant or silently changing its results."
+    "blurb": "An interface version describes the message format a program expects. Translating older requests into a defined internal form lets an application change its interface without guessing what an existing caller intended."
   },
   {
     "id": "software-semantic-contracts",
     "title": "The Number Was Valid, but It Meant Something Else",
     "section": "Model and Tool API Contracts",
     "topic": "Describing a model request",
-    "blurb": "Keep units and score direction attached to numerical values before reusing fitted preprocessing or ranking evidence."
+    "blurb": "Numerical values need an agreed meaning as well as a valid type. Units and the direction of a score affect how values can be compared, transformed, or passed to a model."
   },
   {
     "id": "software-tool-errors",
     "title": "Should Botie Repeat the Request, or Find Out What Happened?",
     "section": "Model and Tool API Contracts",
     "topic": "Handling and testing tool outcomes",
-    "blurb": "Give callers stable failure types, bounded retry rules and a separate path for operations whose outcome is unknown."
+    "blurb": "Different failures require different responses from a caller. A temporary outage may justify a retry, while a lost reply to a completed action requires finding its outcome before attempting the action again."
   },
   {
     "id": "software-contract-tests",
     "title": "One Correct Prediction Did Not Test the Interface",
     "section": "Model and Tool API Contracts",
     "topic": "Handling and testing tool outcomes",
-    "blurb": "Turn expected relationships between requests into tests, then retain the small example that exposed a broken contract."
+    "blurb": "An interface often promises relationships between inputs and outputs, such as preserving a result when field order changes. Testing those relationships on varied requests can expose mistakes that one correct example would miss."
   },
   {
     "id": "data-partition-statistics",
     "title": "One Training Dataset, Several Unequal Files",
     "section": "Data Pipelines for Learning",
     "topic": "Building the training table",
-    "blurb": "Merge sufficient statistics instead of averaging the averages of unequal partitions."
+    "blurb": "Averages from files of different sizes do not contribute equally to the combined average. Retaining each file's count and sum gives us the information needed to combine them without treating a small file like a large one."
   },
   {
     "id": "data-asof-features",
     "title": "Rebuild What the Model Could Have Known",
     "section": "Data Pipelines for Learning",
     "topic": "Building the training table",
-    "blurb": "Choose the latest eligible feature using both event time and availability time."
+    "blurb": "A historical prediction can use only the information available when it was made. A record's event time and arrival time answer different questions, and both affect which feature value belongs in its training example."
   },
   {
     "id": "data-contract-quarantine",
     "title": "Stop a Broken Sensor Batch Before It Reaches Training",
     "section": "Data Pipelines for Learning",
     "topic": "Repairing a changing pipeline",
-    "blurb": "Separate row validation from batch acceptance and preserve rejected evidence for investigation."
+    "blurb": "A data contract defines what incoming records mean and which values are acceptable. Separating rejected rows from accepted data preserves evidence of the problem while allowing an explicit decision about whether the remaining batch is usable."
   },
   {
     "id": "data-stream-windows",
     "title": "The Reading Happened Before the Window Closed",
     "section": "Data Pipelines for Learning",
     "topic": "Repairing a changing pipeline",
-    "blurb": "Assign event-time windows and make late-data policy explicit before updating an online feature."
+    "blurb": "Time windows group events by when they happened, which can differ from their arrival order. Late records require an explicit policy because accepting them may change a result that has already been published."
   },
   {
     "id": "data-artifact-lineage",
     "title": "Which Inputs Produced This Model?",
     "section": "Data Pipelines for Learning",
     "topic": "Repairing a changing pipeline",
-    "blurb": "Bind reusable artifacts to input versions and code versions so a changed dataset invalidates the right work."
+    "blurb": "Data lineage records which inputs and processing steps produced a saved result. Comparing their versions helps determine whether that result can be reused or needs to be rebuilt after a change."
+  },
+  {
+    "id": "what-is-databricks",
+    "title": "What Is Databricks?",
+    "section": "Introduction to Databricks",
+    "topic": "Databricks Fundamentals",
+    "blurb": "Databricks manages a shared environment for working with data. Its workspace and computing services connect programs to stored datasets, while the team still decides what the records mean and which results to publish."
+  },
+  {
+    "id": "databricks-data-lakes",
+    "title": "Data Lakes and Lakehouses",
+    "section": "Introduction to Databricks",
+    "topic": "Databricks Fundamentals",
+    "blurb": "A data lake keeps datasets as files in shared storage. Table formats add rules for reading a consistent set of those files, while a lakehouse combines that storage approach with table management and analytical queries."
+  },
+  {
+    "id": "databricks-workspaces-compute",
+    "title": "Workspaces and Compute",
+    "section": "Introduction to Databricks",
+    "topic": "Databricks Fundamentals",
+    "blurb": "A notebook stores code and displayed results, while compute supplies the resources that execute the program. A result held in a running session needs an explicit storage write before another run can rely on it."
+  },
+  {
+    "id": "databricks-table-names",
+    "title": "Tables and Unity Catalog",
+    "section": "Introduction to Databricks",
+    "topic": "Databricks Fundamentals",
+    "blurb": "A table name identifies a dataset without exposing its storage path. Catalogs and schemas organize those names, while Unity Catalog records table metadata and controls supported access to the data."
+  },
+  {
+    "id": "databricks-basics",
+    "title": "The Basics of Spark",
+    "section": "Introduction to Databricks",
+    "topic": "Databricks Fundamentals",
+    "blurb": "Spark coordinates calculations over portions of a dataset called partitions. The driver plans the work, and executor processes carry out its tasks. Combining partition results lets one calculation work across data stored in separate portions."
+  },
+  {
+    "id": "databricks-notebooks-jobs",
+    "title": "Notebooks and Jobs",
+    "section": "Introduction to Databricks",
+    "topic": "Databricks Fundamentals",
+    "blurb": "A notebook lets us develop a calculation in small steps. A job gives repeated runs a declared order and inputs, so tomorrow’s result does not depend on someone remembering which cells to execute."
+  },
+  {
+    "id": "databricks-mlflow-basics",
+    "title": "Tracking Experiments with MLflow",
+    "section": "Introduction to Databricks",
+    "topic": "Databricks Fundamentals",
+    "blurb": "Changing a model produces new settings, measurements and saved files. MLflow keeps those records associated with the attempt that produced them, so we can inspect a result without guessing what was run."
   },
   {
     "id": "databricks-lazy-dataframes",
-    "title": "Writing the Steps Is Different from Running Them",
+    "title": "Building and Running Spark Queries",
     "section": "Databricks for ML Pipelines",
     "topic": "Following a distributed calculation",
-    "blurb": "A cleaning rule works on one file. What do Spark and Databricks add when a team needs to run that rule across many files, and when does the calculation actually happen?"
+    "blurb": "Spark distributes data processing across workers, while Databricks provides an environment for running and managing that work. A Spark DataFrame describes a calculation whose execution can be delayed until its result is requested."
   },
   {
     "id": "databricks-shuffle-skew",
     "title": "One Busy Pump Can Keep Every Worker Waiting",
     "section": "Databricks for ML Pipelines",
     "topic": "Following a distributed calculation",
-    "blurb": "Most workers have finished, but one pump’s records keep the job running. Follow where matching records must meet before deciding how to share that work."
+    "blurb": "A distributed calculation may need to move related records to the same worker. If some groups are much larger than others, this redistribution can leave most workers waiting for one overloaded worker to finish."
   },
   {
     "id": "databricks-delta-snapshots",
     "title": "Which Version of the Table Did the Model Read?",
     "section": "Databricks for ML Pipelines",
     "topic": "Keeping a dependable table history",
-    "blurb": "The code stayed the same, but a corrected input changed the result. Give the run a particular table version so we can tell a new model from a new dataset."
+    "blurb": "Delta tables retain versions of committed data changes. Identifying the version read by a training run helps distinguish a changed dataset from a change in the code or model that used it."
   },
   {
     "id": "databricks-replay-safe-ingest",
     "title": "A Retried File Should Not Become New Training Data",
     "section": "Databricks for ML Pipelines",
     "topic": "Keeping a dependable table history",
-    "blurb": "A file finished, but its acknowledgement disappeared. Keep enough committed progress for the retry to recognise work that already reached the dataset."
+    "blurb": "An interrupted data import may have committed records before its success was acknowledged. Tracking committed progress lets a restarted job recognize that work instead of adding the same records again."
   },
   {
     "id": "databricks-change-data-capture",
     "title": "The Last Message to Arrive May Be an Older Reading",
     "section": "Databricks for ML Pipelines",
     "topic": "Keeping a dependable table history",
-    "blurb": "A newly arrived file can contain an old correction. Keep each pump’s source version, including its deletion, so delivery order cannot choose the current reading."
+    "blurb": "Change data capture represents updates and deletions as a sequence of changes to stored records. Their source versions determine which state is current, since an older change may arrive after a newer one."
   },
   {
     "id": "databricks-lakeflow-quality",
     "title": "A Quality Check Needs a Decision About Failure",
     "section": "Databricks for ML Pipelines",
     "topic": "Publishing a pipeline result",
-    "blurb": "The dashboard found an invalid reading, yet training still received it. Decide what a failed check should change in the published dataset."
+    "blurb": "A pipeline quality check measures whether incoming data meets a stated condition. Its practical effect depends on whether a failure records a warning, removes a row, or prevents the updated dataset from being published."
   },
   {
     "id": "databricks-mlflow-lineage",
     "title": "A Better Score on Which Dataset?",
     "section": "Databricks for ML Pipelines",
     "topic": "Connecting model evidence to an artifact",
-    "blurb": "A lower error is tempting. First find out which observations produced that score and which saved model belongs to it."
+    "blurb": "MLflow records model development runs and their saved outputs. Connecting a score to its dataset version and model artifact makes it possible to compare results without confusing new evidence with an improved model."
   },
   {
     "id": "databricks-unity-catalog-access",
     "title": "SELECT Is Not the Whole Permission to Read a Table",
     "section": "Databricks for ML Pipelines",
     "topic": "Making feature access explicit",
-    "blurb": "The table is there, and a colleague can read it. Why does the scheduled training job still fail to access the same records?"
+    "blurb": "Unity Catalog controls access to data in Databricks through permissions on related objects. A training job runs under its own identity, so a person's ability to read a table does not establish the job's access."
   },
   {
     "id": "databricks-historical-features",
     "title": "Give Each Prediction the Features It Could Actually Have Seen",
     "section": "Databricks for ML Pipelines",
     "topic": "Making feature access explicit",
-    "blurb": "The current temperature is useful for a prediction now. An old prediction needs the value that was available then, including a deliberate rule for missing or stale readings."
+    "blurb": "Historical training examples need the feature values available at their prediction times. Selecting from a changing feature table requires preserving that timing and deciding what to do when a value is missing or too old."
   },
   {
     "id": "systems-inference-batching",
     "title": "Faster Batches Can Still Make a User Wait",
     "section": "Serving Models and Agent Runs",
     "topic": "Latency under real workloads",
-    "blurb": "Compare throughput with request latency before choosing an inference batch policy."
+    "blurb": "Batching processes several requests together to share computation. It can increase completed work per second while making individual users wait longer, especially when a request waits for a batch to fill."
   },
   {
     "id": "systems-agent-deadlines",
     "title": "A Tool Call Cannot Spend the Whole Deadline Again",
     "section": "Serving Models and Agent Runs",
     "topic": "Latency under real workloads",
-    "blurb": "Propagate remaining time through an agent’s tool calls and preserve an explicit response margin."
+    "blurb": "A deadline limits the time available to finish the whole request. Each tool call needs to use the time still remaining, rather than starting a fresh allowance that can push the final response past that limit."
   },
   {
     "id": "systems-kv-cache-memory",
     "title": "The Model Fits Until the Conversations Grow",
     "section": "Serving Models and Agent Runs",
     "topic": "Memory and reuse",
-    "blurb": "Account for transformer key/value cache growth separately from model weights."
+    "blurb": "A language model keeps intermediate attention calculations for the conversations it is processing. That memory grows with the active text, so fitting the model's weights into memory does not establish how many requests the system can handle."
   },
   {
     "id": "systems-context-cache",
     "title": "A Cached Agent Answer Belongs to a Particular Context",
     "section": "Serving Models and Agent Runs",
     "topic": "Memory and reuse",
-    "blurb": "Separate response reuse from semantic similarity by preserving tenant, evidence and model identity."
+    "blurb": "A cached answer depends on the request's evidence and permissions as well as its wording. Reusing it for a similar question can return outdated information or another customer's data if those dependencies are ignored."
   },
   {
     "id": "serving-prefill-decode",
     "title": "The Answer Starts Late, Then Arrives in Bursts",
     "section": "LLM Inference and Capacity",
     "topic": "When the answer arrives",
-    "blurb": "Botie’s answer can start late or pause halfway through. Follow those two waits separately before deciding what to change in the service."
+    "blurb": "A language model first processes its supplied text, then generates an answer in successive steps. The delay before the first output and the pauses between later outputs describe different parts of the user's waiting time."
   },
   {
     "id": "serving-prefix-reuse",
     "title": "The Same Manual Can Be Read Once, Until Its Prefix Changes",
     "section": "LLM Inference and Capacity",
     "topic": "When the answer arrives",
-    "blurb": "Several questions begin with the same manual. Work out which earlier attention calculations can be reused when the question or model configuration changes."
+    "blurb": "Requests that begin with the same text can sometimes reuse earlier attention calculations. Reuse depends on the exact shared prefix and compatible model settings, while retaining those calculations still consumes memory."
   },
   {
     "id": "serving-continuous-admission",
     "title": "Let the Next Request In Without Overfilling the Cache",
     "section": "LLM Inference and Capacity",
     "topic": "Serving a changing workload",
-    "blurb": "An answer finishes while another keeps generating. Give the next waiting request a place only when its saved attention state will fit too."
+    "blurb": "Continuous batching lets a waiting request join as another request finishes generating. Deciding whether it fits requires considering both the number of active requests and the memory needed for their current and future text."
   },
   {
     "id": "serving-cancellation-pressure",
     "title": "Stop Accepting Work You Cannot Hold",
     "section": "LLM Inference and Capacity",
     "topic": "Serving a changing workload",
-    "blurb": "The reader clicked Stop, but the worker may still hold the request’s memory. Track that release before promising the space to another request."
+    "blurb": "Canceling an answer does not immediately release the resources held by its worker. Tracking confirmed release prevents the service from admitting new work into memory that is still occupied."
   },
   {
     "id": "serving-canary-effects",
     "title": "A Shadow Answer Must Not Book a Second Inspection",
     "section": "LLM Inference and Capacity",
     "topic": "Serving a changing workload",
-    "blurb": "Botie’s candidate model can make a real booking even when its answer stays hidden. Compare model versions while keeping control of which runs may write."
+    "blurb": "A trial model can perform external actions even when its answer is hidden from the user. Comparing live and trial versions therefore requires controlling which run may write, separately from deciding which answer to display."
   },
   {
     "id": "robot-perception-frames",
     "title": "The Detector Found the Object. Where Is It for the Robot?",
     "section": "From Learned Perception to Control",
     "topic": "Making predictions usable for motion",
-    "blurb": "Transform a learned location from camera coordinates into the robot’s coordinate frame."
+    "blurb": "A camera and a robot can describe the same position from different origins and directions. Transforming between those coordinate systems makes a detected location usable by the program deciding where to move."
   },
   {
     "id": "robot-observation-latency",
     "title": "A Correct Detection Can Already Be Out of Date",
     "section": "From Learned Perception to Control",
     "topic": "Making predictions usable for motion",
-    "blurb": "Propagate a timestamped position estimate under an explicit motion assumption and reject stale observations."
+    "blurb": "A position measurement describes an object at its capture time. If the object keeps moving before the reading is used, estimating its current position requires accounting for that delay and the uncertainty in its motion."
   },
   {
     "id": "robot-feedback-corrections",
     "title": "Measure Again Before Choosing the Next Move",
     "section": "From Learned Perception to Control",
     "topic": "Closing the action loop",
-    "blurb": "Use feedback to correct position errors and inspect how gain and timestep affect a simple closed loop."
+    "blurb": "Feedback uses a new measurement to adjust movement toward a target. The size and timing of each correction affect whether the position settles near that target or repeatedly moves past it."
   },
   {
     "id": "robot-actuator-windup",
     "title": "Remember What the Actuator Could Actually Do",
     "section": "From Learned Perception to Control",
     "topic": "Closing the action loop",
-    "blurb": "Add integral correction, then handle saturation with an explicit anti-windup update."
+    "blurb": "A controller can request more movement than a motor can provide. If it keeps accumulating the uncorrected error, that stored correction can cause overshoot even after the original demand has passed."
   },
   {
     "id": "state-predict-correct",
     "title": "Keep a Position Estimate Without Believing Every Detection",
     "section": "Estimating State from Noisy Observations",
     "topic": "Following an estimate through time",
-    "blurb": "The conveyor’s motion and the camera suggest different positions. Carry the uncertainty of each into a position estimate that can be updated as the part moves."
+    "blurb": "A position estimate can combine a motion prediction with a new measurement. The uncertainty assigned to each determines how much the measurement changes the estimate and how confident the updated result should be."
   },
   {
     "id": "state-missing-observations",
     "title": "When the Camera Misses a Frame, Keep Predicting Honestly",
     "section": "Estimating State from Noisy Observations",
     "topic": "Following an estimate through time",
-    "blurb": "The camera misses a frame while the part keeps moving. Continue the motion estimate without pretending that a missing reading measured a position of zero."
+    "blurb": "A missing measurement provides no new observation of position. A motion model can continue the estimate through that gap, while its uncertainty reflects the elapsed time and assumed motion errors."
   },
   {
     "id": "state-gating-association",
     "title": "A Plausible Position Might Belong to the Other Part",
     "section": "Estimating State from Noisy Observations",
     "topic": "When observation and model disagree",
-    "blurb": "Two detections appear near the position Botie is following. Check which readings are plausible and whether that gives enough evidence to choose one."
+    "blurb": "A nearby detection may belong to a different object. Comparing it with the expected position and uncertainty helps identify plausible candidates, but several plausible matches can still leave the object's identity unresolved."
   },
   {
     "id": "state-model-uncertainty",
     "title": "A Small Covariance Can Be Confidently Wrong",
     "section": "Estimating State from Noisy Observations",
     "topic": "When observation and model disagree",
-    "blurb": "Botie reports a small uncertainty while the position is wrong. Check the motion and camera assumptions against reference trajectories before changing the filter’s confidence."
+    "blurb": "An estimate's reported uncertainty depends on its assumptions about motion and measurement errors. Comparing those claims with known trajectories helps identify a filter that reports confidence its actual position errors do not support."
   },
   {
     "id": "security-retrieval-authority",
     "title": "Relevant Evidence Is Not Necessarily Permitted Evidence",
     "section": "Protecting ML Data and Artifacts",
     "topic": "Boundaries around learning systems",
-    "blurb": "Filter retrieval candidates by trusted authority before ranking what the agent may read."
+    "blurb": "A record's relevance does not establish permission to read it. Filtering candidates using the caller's current access rights before ranking them keeps restricted information out of the material an application considers for its answer."
   },
   {
     "id": "security-private-aggregates",
     "title": "How Much Could One Person Change This Statistic?",
     "section": "Protecting ML Data and Artifacts",
     "topic": "Boundaries around learning systems",
-    "blurb": "Derive bounded-mean sensitivity before discussing noise and privacy accounting."
+    "blurb": "A summary statistic can change when one person's record changes. Establishing the largest possible change under stated bounds is part of deciding how much noise a privacy-preserving release would need."
   },
   {
     "id": "security-model-artifacts",
     "title": "A Model File Is Part of the Software Supply Chain",
     "section": "Protecting ML Data and Artifacts",
     "topic": "Boundaries around learning systems",
-    "blurb": "Verify bytes against trusted provenance and choose a constrained loading format before using a downloaded model."
+    "blurb": "A downloaded model file may contain more than numerical weights, depending on its format. Checking its origin and exact contents, together with restricting how it is loaded, helps address risks before the program interprets it."
   },
   {
     "id": "security-training-provenance",
     "title": "Who Was Allowed to Teach the Model?",
     "section": "Threats Across the ML Lifecycle",
     "topic": "Protecting the training process",
-    "blurb": "Trace proposed training records to reviewed sources before they influence a model, while keeping the limits of that evidence visible."
+    "blurb": "Training records influence the behavior a model learns. Keeping their origin and review status attached to them helps control which contributions enter training, while trusted delivery alone does not establish that their contents are correct."
   },
   {
     "id": "security-backdoor-evaluation",
     "title": "The Model Passed Until a Particular Mark Appeared",
     "section": "Threats Across the ML Lifecycle",
     "topic": "Protecting the training process",
-    "blurb": "Separate ordinary accuracy from a declared targeted-failure experiment, keeping eligibility and missing coverage beside the rate."
+    "blurb": "A model can perform well on ordinary inputs and fail under a particular added condition. Paired tests help measure that targeted behavior, provided the input change preserves the correct answer and the tested population is stated."
   },
   {
     "id": "security-adversarial-threat-models",
     "title": "Which Changes Is the Opponent Actually Allowed to Make?",
     "section": "Threats Across the ML Lifecycle",
     "topic": "Assessing exposure through prediction",
-    "blurb": "Define input control and a perturbation budget before interpreting a model failure as evidence about a particular threat."
+    "blurb": "An adversarial test describes what an opponent can change and what failure they are trying to cause. Those limits give meaning to the result; a failure outside the permitted changes answers a different question."
   },
   {
     "id": "security-prediction-api-controls",
     "title": "A Prediction Service Can Reveal More Than One Answer",
     "section": "Threats Across the ML Lifecycle",
     "topic": "Assessing exposure through prediction",
-    "blurb": "Count the work inside a request, minimise exposed prediction details and distinguish practical controls from a guarantee against model extraction."
+    "blurb": "Repeated predictions can reveal information about a model beyond any single answer. Limits on the work a caller requests and the detail returned reduce exposure, without establishing that the model cannot be copied or investigated."
   },
   {
     "id": "simulation-time-steps",
     "title": "The Simulator Invented an Oscillation",
     "section": "Simulating and Learning System Behaviour",
     "topic": "Learning from a numerical world",
-    "blurb": "Follow Euler integration and distinguish a numerical timestep failure from physical behaviour."
+    "blurb": "A simulation approximates continuous change through finite time steps. If those steps are too large, the calculation can introduce oscillation or growth that the modeled system would not exhibit."
   },
   {
     "id": "simulation-paired-trials",
     "title": "Give Two Policies the Same Simulated Shift",
     "section": "Simulating and Learning System Behaviour",
     "topic": "Learning from a numerical world",
-    "blurb": "Compare policies on shared random scenarios and report uncertainty in their paired differences."
+    "blurb": "Random conditions can make one simulated policy look better simply because it faced an easier trial. Giving both policies the same scenarios makes their differences more informative, while repeated trials show how uncertain the comparison remains."
   },
   {
     "id": "simulation-system-identification",
     "title": "Learn the Unknown Part of a Physical Model",
     "section": "Simulating and Learning System Behaviour",
     "topic": "Checking a simulator against observations",
-    "blurb": "Estimate a system gain from measured commands and responses, then inspect identifiability and model mismatch."
+    "blurb": "System identification estimates an unknown relationship from measured inputs and responses. The estimate depends on which inputs were tried and whether the assumed relationship can explain what was observed."
   },
   {
     "id": "simulation-transfer-checks",
     "title": "The Policy Works in One Simulator Setting",
     "section": "Simulating and Learning System Behaviour",
     "topic": "Checking a simulator against observations",
-    "blurb": "Evaluate a learned policy across changed physical conditions and keep the worst tested condition visible."
+    "blurb": "A policy trained in a simulation depends on the conditions represented there. Testing changed physical assumptions helps reveal where its behavior stops meeting requirements before considering use in the real system."
   },
   {
     "id": "numerical-stable-normalisation",
-    "title": "A Finite Vector Broke Our Normalisation",
+    "title": "A Finite Vector Broke Our Normalization",
     "section": "Numerical Methods for Learning",
     "topic": "Where a fitted number can mislead",
-    "blurb": "The encoder returns a larger version of the same direction, and the calculation loses it. Follow the intermediate values to see where that information disappeared."
+    "blurb": "Normalizing a nonzero vector rescales its length while preserving its direction. Intermediate calculations can overflow even when the original values are finite, so the order of the operations affects whether the computer retains that direction."
   },
   {
     "id": "numerical-identifiable-models",
     "title": "A Perfect Fit Left Two Different Answers",
     "section": "Numerical Methods for Learning",
     "topic": "Where a fitted number can mislead",
-    "blurb": "Two heater models fit every recorded total. Which experiment would let us find out how much each heater actually contributes?"
+    "blurb": "Different parameter values can explain the same observations when the experiments do not distinguish their effects. Additional measurements need to vary the right inputs before a good fit can identify which explanation is supported."
   },
   {
     "id": "numerical-gradient-checks",
     "title": "Does This Gradient Describe the Loss We Actually Run?",
     "section": "Numerical Methods for Learning",
     "topic": "Checking derivatives and simulated trajectories",
-    "blurb": "A training step is supposed to reduce the loss. Check the reported slope against changes in the running program, including a case where averaging hides the problem."
+    "blurb": "A gradient describes how a small input change affects a function's output. Comparing it with changes in the running calculation helps check an implementation, with attention to numerical precision and points where the function has a corner."
   },
   {
     "id": "numerical-adaptive-steps",
     "title": "Which Simulation Steps Need More Work?",
     "section": "Numerical Methods for Learning",
     "topic": "Checking derivatives and simulated trajectories",
-    "blurb": "A cooling curve changes quickly at first and slowly later. Let the proposed calculation show when its time interval needs to be shorter."
+    "blurb": "A simulation can need shorter time steps while its state changes rapidly and longer ones when the change is gradual. Comparing alternative step calculations gives an error estimate for deciding whether to accept or repeat an attempted step."
   }
 ]

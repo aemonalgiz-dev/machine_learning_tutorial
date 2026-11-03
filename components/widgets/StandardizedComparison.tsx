@@ -39,13 +39,13 @@ export function StandardizedComparison() {
     title: "Covariance PCA, raw units",
     points: CROWD.map((point) => ({ x: point.x - analysis.mean.x, y: point.y - analysis.mean.y })),
     components: analysis.components,
-    xLabel: "centred height, cm",
-    yLabel: "centred weight, kg",
+    xLabel: "centered height, cm",
+    yLabel: "centered weight, kg",
     matrix: analysis.covariance,
     matrixName: "covariance",
   };
   const standardised = {
-    title: "Standardised PCA, correlation",
+    title: "Standardized PCA, correlation",
     points: CROWD.map((point) => ({ x: (point.x - analysis.mean.x) / analysis.standardized.scale_x, y: (point.y - analysis.mean.y) / analysis.standardized.scale_y })),
     components: analysis.standardized.components,
     xLabel: "height in standard deviations",

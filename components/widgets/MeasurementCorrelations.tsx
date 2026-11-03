@@ -82,7 +82,7 @@ export function MeasurementCorrelations() {
         </tbody>
       </table>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        {body.rows.length} people. The first component carries {(first.share * 100).toFixed(1)} percent of the standardised variance and leans on every measurement with the same sign; the second carries {(second.share * 100).toFixed(1)} percent and sets sitting height against shoe size and leg length, which is the shape of a body rather than its size.
+        {body.rows.length} people. The first component carries {(first.share * 100).toFixed(1)} percent of the standardized variance and leans on every measurement with the same sign; the second carries {(second.share * 100).toFixed(1)} percent and sets sitting height against shoe size and leg length, which is the shape of a body rather than its size.
       </p>
     </div>
   );

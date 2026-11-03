@@ -24,8 +24,8 @@ import { TwinLanguages } from "@/components/widgets/TwinLanguages";
 
 
 export const metadata: Metadata = {
-  title: "Segmenting With a Hidden Model · oop_ml",
-  description: "We can see the characters in a sentence without knowing which ones begin or end a word. A hidden-state model uses learned probabilities to infer a sequence of labels for those positions.",
+  title: "Segmenting With a Hidden Model · Perceptron Lab",
+  description: "Hidden states can describe which characters begin or end a word even when those labels are unobserved. A probabilistic model compares possible state sequences to infer likely word boundaries.",
 };
 
 export default function SegmentingWithAHiddenModelPage() {
@@ -38,7 +38,7 @@ export default function SegmentingWithAHiddenModelPage() {
       playgroundTitle="Choose the most likely sequence of boundary states"
       playgroundIntro="Compare the character observations with their proposed position labels. Follow the complete label sequence and check how it determines the word boundaries."
       title="Segmenting With a Hidden Model"
-      tagline={"We can see the characters in a sentence without knowing which ones begin or end a word. A hidden-state model uses learned probabilities to infer a sequence of labels for those positions."}
+      tagline={"Hidden states can describe which characters begin or end a word even when those labels are unobserved. A probabilistic model compares possible state sequences to infer likely word boundaries."}
       prerequisites={
         <>
           The two dictionary pages of this section, since this one is the repair
@@ -59,74 +59,33 @@ export default function SegmentingWithAHiddenModelPage() {
 <>
               <SubSection title="1. What both dictionary methods have in common">
                 <p>
-                  Both dictionary methods are limited by their entries. Even a better path score cannot select a word the candidate list never included. Could we learn where words begin and end from examples instead? We will use sentences with labelled boundaries to learn a model over character positions.
+
+                  Both dictionary methods are limited by their entries. Even a better path score cannot select a word the candidate list never included. Could we learn where words begin and end from examples instead? We will use sentences with labeled boundaries to learn a model over character positions.
                 </p>
                 <p>
-                  Here is the failure with everything else held still. Three
-                  sentences are handed to all three methods, six words between
-                  them, three of them distinct. A word list is counted from those
-                  sentences and the greedy scan and the best path are run against
-                  it, and the model this page is about is fitted on exactly the
-                  same three sentences. Then all three are asked to read six
-                  characters that spell out three words none of the sentences
-                  contained.
+
+                  The controlled comparison gives all three methods the same three labeled sentences. They contain six word occurrences and three distinct words. The dictionary methods use the counted words, while the hidden-state model learns from the characters and their word-role labels. The test then presents six characters forming three words absent from those sentences, so we can inspect what each representation permits it to recognize.
                 </p>
                 <ThreeMethodsOneCorpus show="novel" />
-                <p>
-                  Both word-list methods answer six single characters, which is
-                  the only thing they can do when nothing in the text matches
-                  anything they hold. The third answers three two-character
-                  words, and it is right, and every one of the three is a word it
-                  had never been shown. The characters were not new; a, c and e
-                  had only ever begun a word in those sentences and b, d and f
-                  had only ever ended one, so what those three sentences taught
-                  about a and about d is still true inside ad, where what they
-                  taught about the words ab and cd reaches nothing in this text
-                  at all.
-                </p>
+                <p>Both dictionary methods return six single characters because none of the complete test words is in their word lists. The hidden-state model returns the intended three two-character words.</p>
+                <p>In the training sentences, a, c and e always began words, while b, d and f always ended them. The test combines these familiar character roles into unseen words such as ad. The model can reuse the role information even though it never stored ad as a dictionary entry. This success depends on the deliberately simple training pattern.</p>
                 <KeepInMind>
-                  A word list can be added to and a scoring can be improved, and
-                  neither of those makes a word off the list producible. What
-                  changes on this page is what the candidates are made of, and
-                  the scoring is a separate question that arrives in Part 4.
+                  {"A bare dictionary search cannot return an unavailable multi-character entry as one word. The character-role model changes what can be represented: it can propose boundaries for new combinations of familiar characters. Its learned scores still decide which proposal wins."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. Asking the character instead of the stretch">
                 <p>
-                  The dictionary methods ask, of a stretch of characters, which
-                  word it is. That question has no answer for a stretch nobody
-                  has written down. Ask instead, of one character, where in its
-                  word it happens to sit, and the question has an answer for
-                  every character in every text, because a character sits
-                  somewhere whatever word it is in.
+                  {"Instead of matching a whole substring against a list, assign each character a role such as beginning or ending a word. The role describes its position in a proposed segmentation. It can be predicted for an unlisted word, though the prediction need not be correct."}
                 </p>
                 <p>
-                  Our own sentence carries the case that made this worth
-                  inventing. Dr. Alvarez didn&rsquo;t expect the low-cost
-                  re-analysis, and Alvarez is a Spanish surname in an English
-                  sentence, which is precisely the sort of word no list holds. In
-                  Chinese a foreign name is written out in characters chosen for
-                  their sound, so Alvarez becomes five characters that are each
-                  ordinary and that together mean nothing. The previous page
-                  showed those five costing five separate pieces and the loss
-                  being unrecoverable by any arrangement of the counts.
+                  {"The supplied dictionary lacks Alvarez and splits the illustrated five-character Chinese transliteration into separate pieces. A dictionary could contain that name. Here it gives us a controlled missing-word example: the character model can represent the name as one word without adding it to a list, while still needing evidence to choose that boundary pattern."}
                 </p>
                 <p>
-                  There is a second thing this buys, and it will matter later. To
-                  build a word list somebody has to have decided where the words
-                  were; to count what this method counts somebody has to have
-                  decided exactly the same thing. So the two methods need the
-                  same evidence and differ only in what they take from it, which
-                  is why every measurement on this page can hand both of them the
-                  identical sentences.
+                  {"For this comparison, the dictionary frequencies and character-role model are built from the same segmented sentences. That keeps their training evidence controlled. Dictionaries can also be compiled or counted in other ways, so this experiment does not claim every dictionary needs exactly this supervision."}
                 </p>
                 <KeepInMind>
-                  One question about a stretch of text, which only a list can
-                  answer, has been swapped for one question about a character,
-                  which anything that has seen that character can answer. The
-                  rest of the page is what the four answers are and how they are
-                  chosen.
+                  {"The model scores character roles rather than requiring a whole-word entry. The labels are supplied during this training procedure and hidden when we segment new text. “Hidden” therefore does not mean this example learns its training boundaries without labels."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -177,10 +136,11 @@ export default function SegmentingWithAHiddenModelPage() {
 
               <SubSection title="4. Every cut is one run of places, and every run is one cut">
                 <p>
+
                   That correspondence deserves to be checked rather than
                   believed, because everything after it depends on the letters
                   being able to say whatever a cut can say. Between any two
-                  neighbouring characters there either is a boundary or there is
+                  neighboring characters there either is a boundary or there is
                   not, so a run of n characters admits two to the power of n
                   minus one cuts. Count the runs of letters instead, allowing
                   only those that describe some cutting, and the count comes out
@@ -224,13 +184,8 @@ export default function SegmentingWithAHiddenModelPage() {
 
               <SubSection title="5. Half the steps from one place to the next cannot happen">
                 <p>
-                  Look at what may follow what. After a character that begins a
-                  word, or one inside a word, the word is still open, so the next
-                  character is either another middle or the end. After a
-                  character that ends a word, or one that was a word by itself, a
-                  word has just closed, so the next character either begins a new
-                  word or is a new word by itself. That rules out eight of the
-                  sixteen pairs before any text has been looked at.
+
+                  A character labeled Begin or Inside leaves its word open, so the next role must be Inside or End. A character labeled End or Single closes a word, so the next role must be Begin or Single. These conventions rule out eight of the sixteen role pairs before estimating any probabilities. They encode valid role sequences, rather than learning every transition from an observed count.
                 </p>
                 <DerivationTable
                   expressionHeading="after this place"
@@ -269,20 +224,10 @@ export default function SegmentingWithAHiddenModelPage() {
                   ]}
                 />
                 <p>
-                  These eight steps are not learned and they are not smoothed
-                  away. They are refused, and the refusal is the reason the
-                  counting in the next Part comes out as small as it does, since
-                  a place has two possible successors rather than four. It is
-                  also what stops the search answering something like B B, which
-                  is a run of letters that cannot be cut into words at all and
-                  would be a wrong answer of a kind no inspection of the words
-                  would explain.
+                  {"The decoder excludes the eight illegal role transitions. Smoothing applies only to the remaining transitions. This preserves the correspondence between an admissible role sequence and a segmentation; it is a structural rule rather than a low learned probability."}
                 </p>
                 <KeepInMind>
-                  Half the structure of this model was fixed by what a word is
-                  before a single sentence was counted. The counting decides which
-                  of the eight remaining steps are common; it never gets a say in
-                  whether the other eight are possible.
+                  {"The state design fixes which transitions are legal. Fitting estimates the probabilities of the allowed ones. Keeping those decisions separate lets us inspect what came from the representation and what came from the examples."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -300,12 +245,12 @@ export default function SegmentingWithAHiddenModelPage() {
                 "Of each gap between characters, whether some entry of the list permits a boundary there",
               ],
               0,
-              "Asking which word a stretch is has no answer for a stretch nobody has written down, and a list can be added to and a scoring improved without that changing. Asking where a character sits has an answer for every character in every text, because a character sits somewhere whatever word it is in.",
+              "The model assigns each character a boundary role, then turns the role sequence into words. That lets it propose multi-character pieces absent from a word dictionary. It still needs learned probabilities and permitted transition rules, so being able to label every position does not guarantee the resulting words are correct.",
             ),
             trueFalse(
-              "This method and a word list need the same evidence, sentences somebody has already cut into words.",
+              "In this comparison, the word dictionary and boundary-state model are built from the same sentences already divided into words.",
               true,
-              "To build a word list somebody has to have decided where the words were, and to count what this method counts somebody has to have decided exactly the same thing. The two differ only in what they take from that evidence, which is why every measurement on the page can hand both of them the identical sentences.",
+              "The experiment uses one labeled corpus to provide both word entries and state-count evidence. That controls the training information when comparing methods. A dictionary can also be curated or obtained elsewhere; this comparison deliberately avoids giving one method extra labeled text.",
             ),
             choice(
               "On twenty-eight characters of ordinary English a word lattice held 2,592 readings out of 134,217,728. How many does a run of the four letters reach?",
@@ -327,7 +272,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 "The eight are learned from the corpus and smoothed down toward zero",
               ],
               [0, 1, 2],
-              "The eight are refused rather than learned, which is why half the structure of this model was fixed by what a word is before a single sentence was counted. Smoothing adds a helping only to an outcome that could have occurred and did not, so the refused steps get no helping and stay impossible rather than merely rare, which is what keeps the search from answering a run of letters that is not a cut. The refusal is also why the counting stays as small as it does, two successors per place rather than four.",
+              "The boundary-role convention permits only eight state transitions. Smoothing adds to all permitted outcomes, including those already observed, while forbidden transitions remain impossible. Those constraints ensure a valid state sequence can be read as a segmentation. They are structural assumptions supplied before fitting, rather than facts the model discovers from the corpus.",
             ),
             trueFalse(
               "Turning a run of the four letters back into words needs the pieces looked up somewhere.",
@@ -342,13 +287,7 @@ export default function SegmentingWithAHiddenModelPage() {
             <>
               <SubSection title="6. Three tables, and all of them are counts">
                 <p>
-                  Take sentences somebody has already cut into words. Write the
-                  four letters under every character, which the third section
-                  showed is a rule with no choices in it. Now three things can be
-                  counted, and the model is those three things and nothing else.
-                  How often a sentence started in each place, how often each place
-                  followed each other place, and how often each place produced
-                  each character.
+                  {"The segmented examples provide a role for every character. We count legal starting roles, adjacent role pairs and characters emitted in each role. Dividing the smoothed counts by their row totals then estimates the model’s probability tables."}
                 </p>
                 <p>
                   Two sentences over three characters are small enough to read
@@ -367,9 +306,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 </p>
 </>
                 <KeepInMind>
-                  Every number in those three tables is a count over a total.
-                  There is no fitting, no optimisation and nothing to converge, so
-                  two people counting the same sentences get identical tables.
+                  {"This is supervised parameter fitting by counting and normalization. It needs no iterative gradient optimizer or convergence loop. With the same data, smoothing, role convention and implementation, the fitted tables are reproducible."}
                 </KeepInMind>
               </SubSection>
 
@@ -377,15 +314,9 @@ export default function SegmentingWithAHiddenModelPage() {
                 <p>
                   A path score multiplies emission and transition probabilities. One zero makes the entire product zero, excluding every path that uses it. With a small corpus, a permitted event may have zero count simply because it was never observed. We therefore add a smoothing amount to allowed outcomes before normalizing the counts. Transitions forbidden by the state design remain forbidden.
                 </p>
-                <Equation>
-                  {"P(next place | this place)  =  (count of the pair + a) / (count of this place + 2a)"}
-                </Equation>
+                <Equation>{"P(next role | current role) = (observed pair count + a) / (observed outgoing-transition total + 2a)"}</Equation>
                 <p>
-                  The two in the denominator is the number of places that may
-                  follow, which the fifth section fixed at two for each of the
-                  four. The eight refused steps get no helping, because a helping is
-                  for an outcome that could have occurred and did not, and those
-                  eight could not have occurred.
+                  {"Each role has two legal successors. The denominator counts the observed transitions leaving that role, then adds smoothing for those two outcomes. A role occurring only at a sentence end contributes no outgoing transition. Forbidden pairs receive no probability mass."}
                 </p>
                 <WorkedExample>
                   <>
@@ -408,13 +339,8 @@ export default function SegmentingWithAHiddenModelPage() {
                     </p>
                   </>
                   <p>
-                    The row for S is the one worth staring at. Nothing at all
-                    followed an S in this corpus, so the counts are zero over
-                    zero, and after the helping the two admissible successors come
-                    out at one half each. That is the model reporting that it has
-                    never seen what follows a one-character word and has nothing
-                    to say about it.
-                  </p>
+                  {"No transition follows S in this corpus. Without smoothing, its outgoing row cannot be normalized from the zero counts. With add-one smoothing, its two allowed successors each receive one half. That is the chosen symmetric estimate, rather than an absence of any model prediction."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
                   Smoothing here makes an estimate exist at all for the outcomes
@@ -426,14 +352,7 @@ export default function SegmentingWithAHiddenModelPage() {
 
               <SubSection title="8. The spare slot, so an unfamiliar character still costs something">
                 <p>
-                  The characters need the same treatment and one thing more. A
-                  place that never produced a given character can be handled the
-                  way the steps were, by adding a helping to every character of
-                  the alphabet. That still leaves a character the corpus never
-                  contained anywhere with no entry in any row, and such a
-                  character is exactly what turns up in a name. So the shares are
-                  spread over the alphabet plus one extra slot standing for
-                  everything else.
+                  {"Emission rows need a policy for characters absent from the observed alphabet. This model reserves an unknown slot alongside the known characters and normalizes over those slots for each role. A new character uses that slot rather than receiving a zero probability or a new fitted row."}
                 </p>
                 <Equation>
                   {"P(character | place)  =  (count of that pair + a) / (count of the place + a × (alphabet + 1))"}
@@ -451,12 +370,7 @@ export default function SegmentingWithAHiddenModelPage() {
                   <Equation>{"P(c | S) = (1 + 1) / (1 + 4) = 2/5\nP(a | S) = P(b | S) = P(unknown | S) = (0 + 1) / (1 + 4) = 1/5"}</Equation>
                 </>
                 <p>
-                  Notice what that last sentence quietly concedes. A character the
-                  corpus contains but that this place never produced gets exactly
-                  the same share as a character the corpus has never seen. The
-                  extra slot exists so that the second case has a number rather
-                  than to tell the two cases apart, and the nineteenth section is
-                  about what follows from their being indistinguishable.
+                  {"Within one role, an observed character with zero emissions in that role gets the same smoothed value as the unknown slot. Other roles may have seen that character and assign it a different value. An entirely unseen character uses the unknown value in every role, which need not be the same value across roles."}
                 </p>
                 <KeepInMind>
                   Every row of the character table sums to one over the alphabet
@@ -468,12 +382,7 @@ export default function SegmentingWithAHiddenModelPage() {
 
               <SubSection title="9. What the helping decides, on a corpus that disagrees with itself">
                 <p>
-                  How much to add is a free number, and on a small corpus it is
-                  not a small decision. Here are four sentences in which the first
-                  two of three characters are a word twice and all three are a
-                  word once, so the corpus contradicts itself about that stretch
-                  and something has to choose. Walk the amount added down from two
-                  to a hundredth and watch the answer turn over.
+                  {"The four training sentences use the research prefix in different word groupings: the two-character entry appears twice, while the three-character entry appears once. Those contexts need not be contradictory annotations. The sweep tests how smoothing changes the model’s reading of the selected five-character sentence. “Majority” and “minority” in the displayed control refer to those prefix-entry counts."}
                 </p>
                 <SmoothingDial />
                 <>
@@ -481,28 +390,16 @@ export default function SegmentingWithAHiddenModelPage() {
                   At the usual value of one, and at a half, and at a quarter, the model answers the majority reading and therefore fails to reproduce a sentence it was itself trained on. Below about 0.238 it answers the minority reading and the training sentence comes back as written. The middle figure in the widget is what moves.
                 </p>
                 <p>
-                  The share of the place inside a word producing the second character rises from 0.1429 at a helping of two to 0.9182 at a hundredth, because that place produced that character every one of the very few times it produced anything, and a large helping drowns a small count while a small one lets it through.
+                  {"In this corpus, M emitted 究 once and no other character. At smoothing two, its probability for 究 is 0.1429; at one hundredth, it is 0.9182. A larger smoothing amount spreads more weight across the other emission slots. A smaller amount gives that single observation more influence, without proving it predicts the intended boundary better."}
                 </p>
 </>
                 <InAModel>
                   <p>
-                    Both answers are defensible and the method contains no
-                    argument for either. Failing to reproduce your own training
-                    sentence sounds like a fault and is the ordinary consequence
-                    of not trusting a single observation, which is what smoothing
-                    is for. Reproducing it sounds like success and is one step
-                    from memorising every accident of the corpus. What I take from
-                    the measurement is narrower, that the number is not a
-                    formality and a page reporting a segmentation without saying
-                    what was added to the counts has left out something that
-                    changed the answer.
-                  </p>
+                  {"The same corpus supports different decoded boundaries under different smoothing values. Reproducing one training example is not, by itself, a generalization test. Choose smoothing using evidence appropriate to the task, such as held-out segmented text, and record the value with the result."}
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  One free number, one corpus, two readings, and a threshold at
-                  0.238 that nothing in the method predicts. The twentieth section
-                  comes back to this as one of the two things that have to be
-                  decided before any counting can begin.
+                  {"In this four-sentence example, the preferred reading changes near smoothing 0.238. That threshold follows from the fitted probabilities for these counts; it is not a universal constant or a failure of the method to define an answer."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -515,35 +412,27 @@ export default function SegmentingWithAHiddenModelPage() {
               <SubSection title="10. What a whole run of places is worth">
                 <>
 <p>
-                  A run of letters over a text is worth the chance of it having happened, and by the three tables that chance is a product. The chance that the first character sat where it did, times the chance it produced the character it produced, times for every character after it the chance of the step that reached it and the chance of the character it produced.
+                  {"To score proposed roles for this observed text, multiply the first role’s start probability by its character-emission probability. For each later character, multiply the transition probability from the previous role and the emission probability under the new role. This is a joint model weight for the roles and observations, not an independently calibrated probability that the word boundaries are correct."}
                 </p>
                 <p>
-                  Taking logarithms turns that product into a sum for the same reason it did on the previous page, which is that a product of many numbers below one falls below what a computer can tell from zero.
+                  {"Logarithms turn the positive path-factor product into a sum and help avoid numerical underflow on long or low-probability sequences. The sequence length at which a direct product underflows depends on the probabilities and number format."}
                 </p>
 </>
                 <Equation>
                   {"score  =  log P(t₁) + log P(c₁ | t₁) + Σ over i ≥ 2 of [ log P(tᵢ | tᵢ₋₁) + log P(cᵢ | tᵢ) ]"}
                 </Equation>
                 <p>
-                  Two properties of that sum decide everything that follows. It
-                  has one term per character and one per step, so it is a sum along
-                  a path, which is the shape the search of the next section needs.
-                  And each term looks at one character and at most one step, so
-                  nothing in it can read two characters at once, which is the
-                  shape of the failure the eighteenth section measures.
+                  {"The score adds an emission term per character and a transition term per adjacent role pair. There is no explicit parameter for the identities of two neighboring characters together. Inference still couples positions through the hidden-role sequence, so the model can capture some observation dependencies indirectly."}
                 </p>
                 <KeepInMind>
-                  A whole reading of a text has one number attached to it, made of
-                  small local pieces. Everything the method claims to know about
-                  the text is in those pieces, and everything it cannot know is
-                  what will not fit into a piece that size.
+                  {"The tables give a local score to each proposed role and transition. The full decoder combines those terms across the text. This limits which patterns the model can distinguish, while still allowing surrounding observations to influence the selected role sequence."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. The same recurrence as the lattice, one level down">
                 <>
 <p>
-                  There are two to the power of n minus one runs of letters over n characters, so scoring them all is not a method. The word lattice page derived the way round it, and the argument is reused here rather than rebuilt. If the best run of letters over a whole text passes through a particular place at a particular character, then the part of it up to there is the best way of reaching that place at that character.
+                  {"The number of admissible role sequences grows rapidly with length. We can avoid scoring them separately by keeping the best score for each role at each character. A best prefix reaching one role can be reused because the next transition depends on that role, not the full earlier path."}
                 </p>
                 <p>
                   Otherwise a better head could be swapped in, leaving the tail untouched and raising the total, which contradicts the run having been best.
@@ -566,10 +455,10 @@ export default function SegmentingWithAHiddenModelPage() {
                 />
                 <>
 <p>
-                  Read the first column. Only two of its four cells carry a number, because a text cannot start in the middle or at the end of a word, and the cells that carry no number carry no number for a reason fixed in the fifth section rather than for want of evidence. Every cell after that is a maximum over the two places that could have led to it.
+                  Only two of the four starting-state cells are populated because a text may begin with a new word or a single-character word, rather than in the middle or at the end of an unfinished one. Later cells compare allowed predecessor paths. Missing entries here can therefore express a structural prohibition, which differs from a low probability caused by limited observations.
                 </p>
                 <p>
-                  The filled cells are the winners at each character and the line joining them is the answer, which for those six characters is B E B E B E and therefore three two-character words.
+                  {"Each filled cell stores the best prefix score ending in that role at that character. Backtracking from the best allowed final role selects the displayed line. It need not choose the highest cell independently in every column. For this example, the selected roles are B E B E B E, giving three two-character words."}
                 </p>
 </>
                 <WhyThisWorks title="The same path search, with states in place of dictionary words">
@@ -578,57 +467,39 @@ export default function SegmentingWithAHiddenModelPage() {
                     The earlier word-lattice search stored a best path value at each text position. Here we need a best value for each possible character role as well, so the table has four entries per character. The dynamic-programming idea is similar, but its state must retain the role needed to score the next transition.
                   </p>
                   <p>
-                    Both are the recurrence Bellman described and Viterbi published, and the difference is only what the states are. The consequence of the change is the whole page, since a state that is a word can only ever be a word somebody listed and a state that is a place is available at every character of every text.
-                  </p>
+                  {"Both searches use dynamic programming, related to Bellman’s principle of optimality and Viterbi decoding. The word lattice stores boundary values; this model stores a value for each boundary role at a character position. Those different states determine which dependencies each recurrence can retain."}
+                </p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  Four numbers per character settle a choice among two to the
-                  power of n minus one runs, and the arithmetic never mentions a
-                  run. The reason four suffice is that a place summarises
-                  everything about the head of a reading that the tail is allowed
-                  to care about.
+                  {"Keep a best prefix score for each of the four roles, along with the preceding role that produced it. Those records are enough to reconstruct one full best path because the next transition depends on the current role rather than the entire earlier sequence."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="12. The number of state comparisons per character" id="12-what-it-costs-which-is-the-same-for-every-text">
                 <p>
-                  Each character offers four places, each place is reached from at
-                  most two, and the fifth section fixed those numbers before any
-                  data arrived. So the work is eight comparisons per character
-                  plus two to start, whatever the text says and whatever the
-                  corpus was.
+                  {"There are at most eight allowed predecessor-transition candidates at each new character and two possible starting-role scores. The formula below counts that dense candidate budget for a nonempty run. The SDK skips unreachable predecessors, so it is not an instrumented count of primitive comparisons actually executed."}
                 </p>
-                <Equation>{"comparisons  =  8 × (n − 1) + 2"}</Equation>
+                <Equation>{"dense candidate-score budget for nonempty run = 8 × (n − 1) + 2"}</Equation>
                 <NumberTable
                   headings={[
                     "text",
                     "characters",
                     "runs of places over them",
-                    "comparisons made",
+                    "dense candidate-score budget",
                   ]}
                   rows={[
                     ["研究生命起源", "6", "32", "42"],
                     ["阿尔瓦雷斯研究生命起源", "11", "1,024", "82"],
                     ["our sentence, spaces removed", "45", "17,592,186,044,416", "354"],
                   ]}
-                  caption="The count of runs is two to the power of one less than the length, which the fourth section checked against a brute-force enumeration; the comparisons follow from four places each reached from at most two. Neither figure depends on the corpus."
+                  caption="The admissible-path count follows the four-state boundary grammar. The displayed work budget allows four roles with up to two predecessor transitions per later character plus two starts. Actual code skips unreachable predecessors; the budget is not a measured runtime."
                 />
                 <p>
-                  Set that beside the previous page, where the work was the length
-                  of the text times the length of the longest entry, and grew when
-                  a longer word joined the list. Here there is no list to grow.
-                  What replaces the dictionary lookup entirely is a table of four
-                  numbers per character, which is why nothing in this method needs
-                  to be optimised and why the interesting costs are all in the
-                  next Part, where they are paid in tagged text rather than in
-                  time.
+                  {"The state count stays four as the corpus grows, so the decoding transition budget does not scale with dictionary word length. Training and storage still depend on the observed characters and counts. This small state space is useful, but it does not make runtime optimization or memory costs irrelevant."}
                 </p>
                 <KeepInMind>
-                  The search is linear in the length of the text with a constant
-                  of eight, fixed by the four places rather than by anything
-                  learned. Two texts of the same length cost exactly the same, and
-                  a longer corpus costs nothing at all at reading time.
+                  {"The dense candidate budget is linear in nonempty run length. Equal-length runs have the same stated upper bound, while actual execution can differ when states are unreachable or lookups differ. A larger training corpus can change stored emissions even though it does not add states."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -646,7 +517,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 "To refine the estimates that the counting had already produced",
               ],
               0,
-              "Without smoothing, an unobserved allowed event receives zero probability and rules out every path containing it. Smoothing gives those events nonzero estimates. It expresses a modelling choice about missing evidence; it does not establish how often they actually occur.",
+              "Without smoothing, an unobserved allowed event receives zero probability and rules out every path containing it. Smoothing gives those events nonzero estimates. It expresses a modeling choice about missing evidence; it does not establish how often they actually occur.",
             ),
             choice(
               "The word lattice kept one number per position. Why does this search keep four per character?",
@@ -657,7 +528,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 "Four is how many characters the longest word of the corpus has",
               ],
               0,
-              "A place summarises everything about the head of a reading that the tail is allowed to care about, so the best way of arriving at each of the four places has to be carried separately, together with the place it came from, and at the end the better of the two places a text may finish in is taken and the record walked backwards. Each place is reached from at most two others, not four, which is the refusal of the fifth section at work. The lattice needed one number because its state was a position; here the state is a place, and a place is available at every character of every text.",
+              "A place summarizes everything about the head of a reading that the tail is allowed to care about, so the best way of arriving at each of the four places has to be carried separately, together with the place it came from, and at the end the better of the two places a text may finish in is taken and the record walked backwards. Each place is reached from at most two others, not four, which is the refusal of the fifth section at work. The lattice needed one number because its state was a position; here the state is a place, and a place is available at every character of every text.",
             ),
             choice(
               "Nothing at all followed the single S in the two-sentence corpus. What does the fitted model say about what follows an S?",
@@ -668,23 +539,23 @@ export default function SegmentingWithAHiddenModelPage() {
                 "The same shares as the row for E, since both of them close a word",
               ],
               0,
-              "The counts there are zero over zero, and the helping is what gives the row numbers at all. One half each is the honest report, and it arrives at two successors rather than four because the other two were refused before any counting began.",
+              "No observed transition leaves S in this corpus. Add-one smoothing gives equal weight to its two permitted successors, producing one half each. That is the estimator’s symmetric prior convention when evidence is absent, not a measured claim that the two successors truly occur equally often.",
             ),
             several(
-              "Four sentences contradict each other about the same three characters. Walking the helping down from two to a hundredth showed which of these?",
+              "The four training sentences use a shared character prefix with different word groupings. Which changes does the supplied smoothing sweep show as the amount decreases from two to a hundredth?",
               [
                 "At one, at a half and at a quarter the model answers the majority reading, so it fails to reproduce a sentence it was itself trained on",
                 "Below about 0.238 it answers the minority reading and the training sentence comes back as written",
                 "The share of the place inside a word producing the second character rises from 0.1429 at a helping of two to 0.9182 at a hundredth",
-                "Nothing inside the method prefers either value, and the effect shrinks only as the counts grow",
+                "Smoothing is a configuration choice. A fixed smoothing contribution becomes smaller relative to growing observed-event counts, while rare or unseen events may remain sensitive.",
               ],
               [0, 1, 2, 3],
-              "All four hold. Both answers are defensible and the method contains no argument for either. Failing to reproduce your own training sentence is the ordinary consequence of not trusting a single observation, and reproducing it is one step from memorising every accident of the corpus. The helping is an estimation question, so more data does settle it as the counts outweigh whatever is added, which on four sentences leaves it deciding outright. What the measurement shows is narrower, that the number is not a formality and a segmentation quoted without it has left out something that changed the answer.",
+              "Changing smoothing changes how strongly this small model relies on sparse observed counts. The best path switches at the tested setting even though the labeled corpus is unchanged. A lower value is not automatically memorization, and reproducing a training sentence is not a general accuracy test. Choose the setting with representative validation data and report it alongside the result.",
             ),
             trueFalse(
-              "Two texts of the same length cost the search exactly the same, however large the corpus they were learned from.",
+              "For equal-length inputs, this decoder considers the same allowed-state transitions regardless of how many sentences were used to fit its tables.",
               true,
-              "Each character offers four places and each place is reached from at most two, so the work is eight comparisons per character after the first plus two to start, and both of those numbers were fixed by what a word is before any data arrived. On the previous page the bound was the length of the text times the length of the longest entry, and it grew whenever a longer word joined the list; here there is no list to grow, so a longer corpus costs nothing at all at reading time and is paid for in tagged text instead.",
+              "The dynamic program has four possible states per character and at most two permitted predecessors for each. Its state-comparison count therefore grows linearly with input length, with a fixed state-space factor. A larger training corpus can change the probabilities and stored character alphabet, but does not add more boundary states. This is an operation-count statement, not a guarantee of identical wall-clock time.",
             ),
         ],
         },
@@ -718,10 +589,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 </p>
 </>
                 <KeepInMind>
-                  The mechanism that finds an unseen word is that a character keeps
-                  its habits when it moves into a word nobody has written down. It
-                  works where the corpus has seen the characters and it does not
-                  work where the corpus has seen nothing.
+                  {"Character-role patterns let this model join new combinations of observed characters in the controlled example. On entirely unseen characters, it still uses learned role priors, transitions and unknown emissions. Those may happen to give suitable boundaries, but they provide no evidence specific to the new character identities."}
                 </KeepInMind>
               </SubSection>
 
@@ -736,39 +604,24 @@ export default function SegmentingWithAHiddenModelPage() {
 </>
                 <CorpusSizeCurve corpusKeys={["characters"]} />
                 <p>
-                  The curves cross between thirty and forty sentences, and they
-                  cross the other way from the way I expected. Below the crossing
-                  the places win, at thirty sentences by 0.8659 against 0.8501; at
-                  and above it the word list wins, at forty by 0.9019 against
-                  0.8792, and by a hundred and sixty sentences the list has seen
-                  every word of a seventy-word language and scores exactly 1.0000
-                  while the places have flattened out at 0.9178.
+                  {"In the synthetic character language, the curves cross between thirty and forty training sentences. At thirty, the role model scores 0.8659 against 0.8501; at forty, the dictionary scores 0.9019 against 0.8792. By 160 sentences, the dictionary has seen every word in this 70-word construction and scores 1.0000, while the role model is at 0.9178. These are outcomes of this controlled vocabulary and held-out set."}
                 </p>
                 <>
 <p>
-                  The split recall says why. Against words the training sentences contained, the list is at 0.9983 and better at every size; against words they did not, the list is at 0.0000 from ten sentences on and the places are between 0.42 and 0.66. So the crossing is not really about sentence counts at all. It sits where the share of held-out words that are new falls below about a tenth, and it is a crossing at all only because a language of seventy words runs out of new words.
+                  {"The familiar/unfamiliar split helps interpret this construction. At thirty training sentences the dictionary’s familiar-word recall is 0.9983, while the role model recalls 0.6560 of unfamiliar words. From ten sentences onward, dictionary recall on unfamiliar multi-character words is 0.0000. The role model’s unfamiliar recall later falls to 0.2632 at eighty sentences, so the earlier approximate 0.42-to-0.66 range does not describe the full curve. Coverage and the composition of the remaining unfamiliar set both change."}
                 </p>
                 <p>
-                  A real vocabulary does not, which is the honest caveat on this measurement and the reason the method is used on real text at corpus sizes far past forty sentences.
+                  {"Open-ended text can keep introducing words outside a fitted dictionary. That motivates unknown-word handling, but it does not guarantee that this role model will outperform the dictionary at every corpus size. Test both coverage and boundary accuracy on representative text."}
                 </p>
 </>
                 <KeepInMind>
-                  Thirty tagged sentences is where the places stopped being ahead
-                  on this language. The quantity that actually moved was the share
-                  of unfamiliar words, and any language that keeps producing new
-                  ones keeps the places ahead however much text is counted.
+                  {"The role model is ahead at thirty sentences in this synthetic setting, and the dictionary overtakes it as coverage improves. The share of unseen words helps explain this experiment. It is not a rule that every language with new words must keep the role model ahead."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. It is the worse of the two on the words it was shown">
                 <p>
-                  There is a cost here and the split recall has already shown it.
-                  This method does not memorise. A word list holds a word and
-                  recovers it whenever it appears; a table of four places holds a
-                  habit and can be talked out of it by the characters on either
-                  side. Across every size measured, on both languages, the places
-                  are worse than the list on exactly the words the corpus
-                  contained.
+                  {"A dictionary stores familiar word forms, but a search can still choose other entries around them. This role model stores character and transition statistics rather than a lookup for each full word. On the measured settings, its familiar-word recall is lower than the dictionary’s. Neither representation guarantees perfect recovery of every training word in context."}
                 </p>
                 <NumberTable
                   headings={[
@@ -784,98 +637,55 @@ export default function SegmentingWithAHiddenModelPage() {
                     ["80", "0.9277", "1.0000", "0.2632", "0.0000"],
                     ["320", "0.9327", "1.0000", "no new words left", "no new words left"],
                   ]}
-                  caption="Recall on the same two hundred held-out sentences of the generated language, split by whether the word had appeared in the training sentences at all. The gap in the first pair of columns is what the method gives up; the gap in the second pair is what it buys."
+                  caption="Recall on the same two hundred held-out generated sentences, split by whether each reference word appeared in training. The first pair compares familiar-word recovery; the second compares unfamiliar-word recovery. These are measured properties of the tested procedures."
                 />
                 <p>
-                  Reading the last column of the first two rows together with the
-                  first is the whole trade in one place. Under a tenth of the
-                  familiar words are given up, in exchange for about half of the
-                  unfamiliar ones being recovered where a list recovers none. Which
-                  of those matters more is a question about the text being read
-                  rather than about either method, and the seventeenth section is
-                  about not having to choose.
+                  {"The early rows show useful unfamiliar-word recall alongside a smaller familiar-word recall than the dictionary. Which matters more depends on the input’s word coverage and the task’s errors. The combined procedure in section 17 tests one way to use both sources of evidence."}
                 </p>
                 <KeepInMind>
-                  A method that generalises to words it has not seen is by the same
-                  token a method that can be argued out of a word it has seen. The
-                  two are one property looked at from either end and no setting
-                  separates them.
+                  {"The measurements show a tradeoff on these data: lower recall on familiar words accompanies better recall on some unseen words. That is evidence about these two fitted procedures, not a theorem that every model capable of generalization must lose the same familiar words."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. A writing system where a character says less">
                 <p>
-                  This method was invented for Chinese, and it is fair to ask what
-                  is special about that. The answer is measurable and it is not
-                  about the language. It is about how much a single character tells
-                  you about where it sits. Take the same measurement on a generated
-                  language built from the eight hundred and ten ordinary English
-                  words of the first page of this section, with the spaces taken
-                  out, and everything changes.
+                  {"The next control uses sequences generated from the 810 English words, with their spaces removed. Compare how informative a character is about its role under that construction with the earlier forty-character synthetic vocabulary. This is a comparison of datasets, not a test of every alphabetic or Chinese writing system."}
                 </p>
                 <CorpusSizeCurve corpusKeys={["letters"]} />
                 <>
 <p>
-                  Before you read a character, which of the four places it is in is worth 1.5590 bits of uncertainty on the English words and 1.7518 on the character language. Reading the character removes 0.4869 of those bits on the English and 0.9207 on the characters, which is roughly twice as much. That is the whole difference, and it shows up as a ceiling.
+                  {"In the English-word construction, the role label has 1.5590 bits of uncertainty and knowing the character removes 0.4869 bits. The earlier character construction has 1.7518 bits, of which character identity removes 0.9207. These summarize the supplied character-role distributions. They do not by themselves determine the decoder’s attainable accuracy, because role transitions and sequence context also contribute."}
                 </p>
                 <p>
-                  The places top out at 0.6087 on the English words and then fall back to 0.5186 as the corpus grows, because a wider vocabulary uses every letter in every position, while on the character language they climb past 0.92.
+                  {"On this English-word experiment, the reported score reaches 0.6087 and later falls to 0.5186 as training size grows. The character-language experiment rises past 0.92. Those curves do not isolate character inventory size as the sole cause, and they do not prove that all letters eventually occur in every role."}
                 </p>
 </>
                 <p>
-                  Our own sentence is where this lands. Handed the sentence with
-                  its spaces taken out, a model fitted on 1,280 English sentences
-                  answers thirteen pieces where a reader answers seven, and it gets
-                  Dr. and nothing else; the word list at the same size answers
-                  twenty-four pieces and gets expect and the. Neither is usable, and
-                  the reason the first one is unusable is the 0.4869 bits above
-                  rather than anything about the sentence.
+                  {"On the running sentence without spaces, a model fitted on 1,280 generated English sentences returns thirteen pieces rather than the seven-unit reference. Only Dr. matches a complete reference unit in that result; the dictionary returns twenty-four pieces and matches expect and the. These are exact-span outcomes for this probe. The information statistic above does not, by itself, explain each individual error."}
                 </p>
                 <InAModel>
                   <p>
-                    So this is a method for writing systems with a large character
-                    set, where each character appears in few words and therefore
-                    keeps its habits, and it is a poor method for an alphabet. The
-                    thing to carry away is that the deciding quantity can be
-                    computed from a corpus before any segmenter is built, which
-                    means the question of whether this approach suits a writing
-                    system has an answer that does not require trying it.
-                  </p>
+                  {"Character-role association is one diagnostic to inspect before fitting, but it cannot replace a held-out segmentation test. Small alphabets do not put an input outside an HMM’s mathematical domain. Whether the four-state model is useful depends on the observed patterns, transitions and task."}
+                </p>
                 </InAModel>
                 <KeepInMind>
-                  In these synthetic experiments, the changed setting doubles the reported bits and lowers the observed ceiling from roughly 0.92 to roughly 0.61. Adding labelled text improves the first setting while worsening the second. This is a result for these constructions and model assumptions, not a general conclusion that more training text harms alphabetic-language segmentation.
+                  {"The character construction has roughly twice the reported character-role information of the English-word construction, alongside scores above roughly 0.92 versus a peak near 0.61. Those are two observed properties, not proof that one statistic sets the ceiling. The opposite training-size trends here do not establish that more labeled text generally harms alphabetic-language segmentation."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="17. Running the two of them together">
                 <p>
-                  The two methods are wrong in different places, and the previous
-                  page ended by pointing at the arrangement that follows from that.
-                  Find the best path through the word list, look for the stretches
-                  of consecutive single characters no entry covered, and hand each
-                  of those stretches to the places. The list keeps its near-perfect
-                  recall on familiar words and the places are asked only about the
-                  characters the list gave up on.
+                  {"The hybrid first finds a dictionary path, then sends runs of unlisted single-character pieces to the fitted role model. The SDK supports that option. Errors made entirely from other listed words may trigger no handoff, so the combination does not automatically repair every dictionary mistake."}
                 </p>
                 <CorpusSizeCurve corpusKeys={["characters", "letters"]} />
                 <p>
-                  The green curve is that arrangement, and on both languages and at
-                  every size measured it is at least as good as either method
-                  alone. On the character language at thirty sentences it reaches
-                  0.9262 where the better of the two singles reaches 0.8659; on the
-                  English words at eighty sentences it reaches 0.7781 against
-                  0.6065. This is what the segmenter most people use in Python
-                  actually does, and it is the reason a page on this method belongs
-                  after a page on the word lattice rather than instead of it.
+                  {"In both generated experiments and at the measured training sizes, the hybrid curve is at least as high as the two individual curves. At thirty character-language sentences it scores 0.9262 against 0.8659 for the better individual method; at eighty English sentences it scores 0.7781 against 0.6065. These are measured comparisons of the supplied hybrid policy, not a guarantee for every input or model."}
                 </p>
                 <p>
                   The combined method leaves this surname result unchanged. No dictionary entry covers its five characters, so that whole span goes to the hidden-state fallback. The fallback returns the same four pieces as it did alone. Combining the methods cannot improve a span where it simply delegates to the same unchanged procedure.
                 </p>
                 <KeepInMind>
-                  Neither method dominates and the union of them dominates both,
-                  because the stretches where a word list gives up are marked out
-                  unmistakably by its own answer. That is a property of the word
-                  lattice as much as of this method.
+                  {"The hybrid improves the measured curves by combining dictionary coverage with a fallback model on selected spans. Its error patterns can still overlap or interact. The dictionary path does not identify every wrong boundary, so the combination is not guaranteed to dominate both methods on arbitrary data."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -887,12 +697,7 @@ export default function SegmentingWithAHiddenModelPage() {
             <>
               <SubSection title="18. One character at a time, so two languages can leave the same counts">
                 <p>
-                  The score of the tenth section has one term per character and one
-                  per step. No term anywhere reads two characters together, so a
-                  boundary whose evidence is a pair of characters has nowhere in
-                  the model to be recorded. That is not a shortage of data and more
-                  text does not fix it, since the quantity is not in the model&rsquo;s
-                  vocabulary.
+                  {"The emission table scores one character identity at a time, conditioned on its role. It has no direct parameter for a particular neighboring character pair. Different word-pair distributions can therefore share the same fitted statistics. The example below constructs that situation while retaining the model’s transition information."}
                 </p>
                 <p>
                   Here is what that costs, arranged so it can be checked rather
@@ -904,34 +709,16 @@ export default function SegmentingWithAHiddenModelPage() {
                 </p>
                 <TwinLanguages />
                 <p>
-                  Thirty-six numbers compared and thirty-six equal, so no quantity
-                  of text in either language could separate them. And the
-                  consequence is not abstract. A fit shown only the first language
-                  reads four characters of the second into two words of the second,
-                  words that its own language does not contain and never could,
-                  with exactly the confidence it reads its own. The mechanism of the
-                  thirteenth section, which recovers a genuine word nobody wrote
-                  down, is the same mechanism inventing one that does not exist.
+                  {"The two supplied corpora produce 36 equal fitted values. Under those statistics, the model cannot distinguish their different word pairings and can return a word absent from its training corpus. Repeating the same balanced examples will not change that equality. Other training distributions could produce different counts, so this is not a claim about every possible larger sample."}
                 </p>
                 <KeepInMind>
-                  A model whose terms read one character each is undetermined
-                  between any two languages that agree character by character. The
-                  repair is a model that scores pairs of characters directly, which
-                  is a different model and is the next page in this section.
+                  {"When two datasets yield the same initial, transition and emission tables, this model assigns the same scores to a given observed string. To distinguish the illustrated pairings, use additional evidence or a model with suitable context features. The next lesson adds such features."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. Characters it has never seen decide nothing at all">
-                <p>
-                  The eighth section put every unfamiliar character on the same
-                  share as every other. Follow that through. If a stretch of a text
-                  is made entirely of characters the corpus never contained, then
-                  every one of them contributes the same number under every place,
-                  those numbers cancel out of every comparison, and the score of a
-                  run of letters over that stretch depends only on the steps. So
-                  the method answers, and what it answers is a fact about the
-                  corpus rather than about the stretch.
-                </p>
+                <p>{"Every unseen character uses the same vector of emission values across the four roles. Those values can differ by role, so they do not cancel when comparing role paths. Initial-role and transition probabilities contribute too. In the five-sentence reference fit, we can see the unequal values directly from the counts below. The model therefore ignores which unknown characters were supplied, while still using a role-dependent score."}</p>
+                <Equation>{"Five-sentence reference fit, smoothing a = 1\nknown alphabet = 10, emission slots = 11\nrole counts: B = 10, M = 0, E = 10, S = 4\n\nP(unknown | B) = P(unknown | E) = 1 / 21\nP(unknown | M) = 1 / 11\nP(unknown | S) = 1 / 15"}</Equation>
                 <p>
                   The widget above lists what that looks like for each length. A
                   run of five characters no corpus of those five Chinese sentences
@@ -943,41 +730,29 @@ export default function SegmentingWithAHiddenModelPage() {
                 </p>
                 <>
 <p>
-                  Unknown-character handling is a policy we must choose. Here each role has its reserved unknown probability. We could estimate different behaviour for character categories, or reject an unknown span and leave it for another method. Those choices change path scores, so the implementation needs to document which one it uses.
+
+                  Unknown-character handling is a policy we must choose. Here each role has its reserved unknown probability. We could estimate different behavior for character categories, or reject an unknown span and leave it for another method. Those choices change path scores, so the implementation needs to document which one it uses.
                 </p>
                 <p>
-                  Taking the first, as here, gives a confident answer that on the surname is wrong; taking the second means estimating four numbers from the one thing the corpus cannot show; taking the third gives no answer and marks the stretch for whatever comes next. Nothing in the mathematics prefers any of the three.
+                  {"The supplied model returns a definite segmentation for an unknown run, though it has no identity-specific emission evidence for those characters. A category-aware fallback would need its own evidence or assumptions; a rejection policy would expose the unsupported span. Evaluate those choices rather than interpreting the returned path as calibrated confidence."}
                 </p>
 </>
                 <KeepInMind>
-                  On a stretch of entirely unfamiliar characters the character
-                  table falls out of the comparison and only the steps remain, so
-                  what comes back describes the corpus&rsquo;s habits about word
-                  lengths. Five such characters come back as four pieces whatever
-                  the five characters are, and nothing in the output distinguishes
-                  that from a reading of the text.
+                  {"All unseen characters use the same emission vector in this fitted model. That makes their identities interchangeable during decoding, but the vector can favor some roles over others. Initial-role probabilities and transitions also contribute. The shown five-character runs return four pieces under this particular fit."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="20. What has to be decided before any counting begins">
                 <>
 <p>
-                  Two decisions sit in front of every number on this page and neither is settled by anything in the method. The first is that somebody had to cut the training sentences into words. That is the input, it is expensive, and it is an opinion, since whether a Chinese compound is one word or two is unsettled in the language itself, and the annotated corpora built for this problem disagree with one another about the same strings.
+                  {"The supervised fit needs segmented examples under a stated annotation convention. Such conventions can differ between corpora. That is a reason to document the target and compare consistently, not a reason to treat every boundary choice as an untestable opinion."}
                 </p>
                 <p>
-                  So a model fitted on one of them is right by that corpus&rsquo;s standard and can be measured wrong by another with nothing having gone amiss.
+                  {"A predicted boundary can follow one annotation convention and differ from another. State the target convention before interpreting that difference as a model error. The fit can still make mistakes under its own training convention."}
                 </p>
 </>
                 <p>
-                  The second is the helping added to the counts, and the ninth
-                  section makes that concrete rather than theoretical. On the same
-                  four sentences and the same five characters the answer is the
-                  majority reading at 1.0, at 0.5 and at 0.25, and the minority
-                  reading at 0.23 and below, turning at 0.238. That is not a
-                  rounding difference; it is two different words. There is no
-                  quantity inside the method that prefers a value, and the effect
-                  shrinks only as the counts grow, which on four sentences leaves
-                  it deciding outright.
+                  {"The same four-sentence corpus changes its selected reading as smoothing moves from 1.0, 0.5 or 0.25 to 0.23 and below, with a switch near 0.238. The fitting procedure defines each result, while validation data can help choose the setting. A fixed smoothing contribution shrinks relative to frequently observed events, but rare or unseen events can remain sensitive."}
                 </p>
                 <WhyThisWorks title="Separating the definition of a boundary from the data used to learn it">
                   <p>
@@ -985,10 +760,7 @@ export default function SegmentingWithAHiddenModelPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  Both of these are choices made before the first count and
-                  reported nowhere in the answer. A segmentation quoted without the
-                  corpus it was learned from and the helping added to its counts is
-                  a number missing two of its inputs.
+                  {"Record the training source, boundary convention, smoothing and unknown-character policy with the model. A returned segmentation does not by itself describe those inputs, even though they can change the result."}
                 </KeepInMind>
               </SubSection>
 
@@ -1006,12 +778,12 @@ export default function SegmentingWithAHiddenModelPage() {
                     {
                       expression: "an outcome the corpus never showed",
                       reason:
-                        "undefined as a ratio, since it is zero over a total that may itself be zero. Something has to be added, and how much is a free number, and on four sentences the same five characters read one way at 1.0 and the other at 0.1, turning at 0.238.",
+                        "With a positive row total, an unobserved event has a defined zero-frequency estimate. A completely unobserved row cannot be normalized without a convention. Smoothing adds mass to allowed outcomes; the five-character example changes reading between the shown settings 1.0 and 0.1, near 0.238.",
                     },
                     {
                       expression: "a character the corpus never contained",
                       reason:
-                        "has no count anywhere, so its share is whatever the spare slot is set to. Set alike for all four places, as here, an unfamiliar character cancels out of every comparison and decides nothing; five such characters come back as four pieces whatever they are.",
+                        "Every unseen character uses the same role-specific unknown-emission vector. Its components can differ across roles, so they do not cancel from role-path comparisons. Identity does not distinguish all-unknown runs of equal length under this fit; the shown five-character runs return four pieces.",
                     },
                     {
                       expression: "two languages that agree character by character",
@@ -1021,27 +793,27 @@ export default function SegmentingWithAHiddenModelPage() {
                     {
                       expression: "a boundary whose evidence is a pair of characters",
                       reason:
-                        "unrepresentable, since every term of the score reads one character. More text cannot help, because the quantity is not in the model’s vocabulary at all, and the repair is a different model.",
+                        "There is no explicit feature for a particular neighboring character pair. Hidden-role transitions can still encode some sequence dependencies. The two constructed corpora share all fitted tables, so this model cannot distinguish their pairings from those statistics alone.",
                     },
                     {
                       expression: "where the training sentences were cut",
                       reason:
-                        "assumed answered, and answered by a person. Whether a compound is one word or two is unsettled in the language, so two annotated corpora disagree about the same string and a model is only ever right by the standard it was taught.",
+                        "The supervised examples supply word boundaries under a stated convention. People or another procedure can provide them. Compare training and evaluation conventions explicitly; differences do not make meaningful boundary evaluation impossible.",
                     },
                     {
                       expression: "a word the corpus did contain",
                       reason:
-                        "not guaranteed to come back, unlike a word list, which holds it outright. Measured on two hundred held-out sentences, recall on familiar words is 0.9117 against a word list’s 0.9983, and no setting recovers the gap without giving up the unfamiliar words.",
+                        "A familiar word is not guaranteed to be selected by either procedure in every context. In the shown thirty-sentence fit, familiar-word recall is 0.9117 for the role model and 0.9983 for the dictionary method. These observations do not prove that no other setting can improve both familiar and unfamiliar results.",
                     },
                     {
                       expression: "a writing system with few characters",
                       reason:
-                        "outside what the method can do, and the boundary is measurable in advance. A character removes 0.9207 of the 1.7518 bits of uncertainty about its place in one language and 0.4869 of 1.5590 in the other, and the second tops out at 0.6087 and then falls as more text is added.",
+                        "Small alphabets remain valid input. The two generated datasets give different character-role information values: 0.9207 of 1.7518 bits and 0.4869 of 1.5590 bits. The English-word experiment peaks at 0.6087 and later declines, but that does not define a universal limitation of alphabetic-language HMMs.",
                     },
                     {
                       expression: "whether an answer is right",
                       reason:
-                        "outside the method, as it was on both dictionary pages. Any accuracy figure is a figure about one annotated corpus, so the numbers on this page are reported against a generated language whose cutting is known by construction rather than against a standard that could be argued with.",
+                        "The generated examples have known construction boundaries, making the comparisons inspectable. Real-data accuracy is also meaningful when the annotation convention and evaluation sample are stated. These synthetic curves do not establish a general Chinese or English segmentation score.",
                     },
                   ]}
                 />
@@ -1072,7 +844,7 @@ export default function SegmentingWithAHiddenModelPage() {
               "The places are worse than the list on exactly the words the corpus contained, at every size and on both languages, because a table of four places holds a habit that the characters on either side can talk it out of, where a list holds the word. By a hundred and sixty sentences the list has seen every word of a seventy-word language and scores exactly 1.0000 while the places have flattened out at 0.9178. The quantity that actually moved was the share of held-out words that are new, and the crossing sits where that falls below about a tenth, so it is a crossing at all only because a language of seventy words runs out of new words, and a real vocabulary does not.",
             ),
             choice(
-              "What makes this a method for a writing system with a large character set rather than for an alphabet?",
+              "Why does this role-conditioned model perform better on the generated character language than on the generated alphabetic-word language?",
               [
                 "How much a single character tells you about where it sits, which is 0.9207 bits removed on the character language against 0.4869 on the English words",
                 "That the language is written without spaces, so no word list can be built from it",
@@ -1083,25 +855,25 @@ export default function SegmentingWithAHiddenModelPage() {
               "In this experiment, the alphabetic-word model peaks at 0.6087 and later falls to 0.5186 as the corpus grows. The character-language model rises above 0.92. The role-conditioned character statistics differ between these constructions, which helps explain the result. It does not establish the same trend for every alphabetic language or every segmentation model.",
             ),
             trueFalse(
-              "Handing the word lattice’s stretches of single characters to the places improves the reading of our own sentence.",
+              "The dictionary-plus-model combination correctly returns the entire unfamiliar surname as one word in this example.",
               false,
-              "It changes nothing there. The five characters of the transliterated surname are exactly a stretch no entry covers, so they are handed over and the places answer the same four pieces they answered on their own. The combination cannot be better than its second half on the stretch where the first half has nothing, though on both generated languages and at every size measured it is at least as good as either method alone, reaching 0.9262 on the character language at thirty sentences where the better single reaches 0.8659.",
+              "The dictionary alone splits the surname into five characters. Both the model and the combined method join only the first two, leaving four surname pieces. The combination has changed the dictionary’s output, but it has not recovered the intended whole name. The broader synthetic evaluation is a separate result and does not repair this individual example.",
             ),
             trueFalse(
-              "Two languages over the same four characters, one making its words by joining the first character to the second and the other by crossing them over, leave exactly the same counts behind, so no quantity of text in either could tell them apart.",
+              "The two supplied paired and crossed corpora produce identical initial, transition and emission tables. Under those fitted parameters, the decoder gives the same scores to the same input even though the training words use different character pairings.",
               true,
-              "Every count either language leaves behind is the same count, thirty-six numbers compared and thirty-six equal, so no quantity of text in either language could separate them. A fit shown only the first reads four characters of the second into two words of the second, words its own language could never contain, with exactly the confidence it reads its own. No term in the score reads two characters together, so the evidence for such a boundary has nowhere in the model to be recorded.",
+              "The supplied corpora give thirty-six equal fitted values. The model therefore scores any given input identically under those two fits. Repeating those same balanced examples cannot teach the missing pairing distinction. Different frequency patterns could change the fitted tables, and adding direct context features changes what evidence the model can retain. Equal model weights are not a calibrated confidence claim.",
             ),
             choice(
-              "A run of five characters no corpus ever held comes back as B E S S S, four pieces, for a transliterated surname, five Latin capitals and five pictograms alike. Why?",
+              "Under the five-sentence reference fit, five entirely unseen characters decode as B E S S S, giving four pieces. Why does changing those unseen character identities leave the result unchanged?",
               [
-                "Every unfamiliar character contributes the same number under every place, so those numbers cancel out of every comparison and only the steps are left",
+                "Every unseen character uses the same role-specific emission vector. Their identities therefore do not distinguish these inputs; initial-role, transition and unknown-emission weights select BESSS for this length.",
                 "Five characters is too short for the search to use more than two of its places",
                 "The model refuses the stretch and falls back to a fixed cut",
                 "Those particular characters happen to carry those habits in the corpus",
               ],
               0,
-              "What comes back is a fact about the corpus’s habits over word lengths rather than about the stretch, and nothing in the output distinguishes the two. The spare slot exists so an unfamiliar character has a number at all rather than to tell one from another, and the alternatives, four shares instead of one or a refusal that leaves the stretch uncut, are choices the mathematics does not prefer between.",
+              "All five unseen characters use the same unknown-emission entry within each state. Their individual identities therefore cannot influence the result. The learned transition probabilities and state-specific unknown-emission probabilities favor BESSS here. Another fallback policy or richer character features could distinguish inputs that this shared unknown slot treats alike.",
             ),
         ],
         },
@@ -1111,7 +883,7 @@ export default function SegmentingWithAHiddenModelPage() {
             exercise(
               "Read the three tables off two sentences",
               [
-  "Fit the supplied two-sentence labelled corpus: [\"ab\", \"c\"] and [\"abc\"]. Use the model’s default add-one smoothing.",
+  "Fit the supplied two-sentence labeled corpus: [\"ab\", \"c\"] and [\"abc\"]. Use the model’s default add-one smoothing.",
   "Print its alphabet, allowed start probabilities and every allowed transition probability. Then print a, c and unseen z’s emission probabilities for the beginning and single-character states.",
   "B begins a multi-character word, M is inside one, E ends one and S is a one-character word. The API stores log probabilities; convert them to ordinary probabilities for the four-decimal report. Omit forbidden transitions."
 ],
@@ -1168,7 +940,7 @@ question: "Which small count tables determine the hidden boundary model’s prob
             exercise(
               "Find three words the sentences never held",
               [
-  "Fit the supplied labelled corpus containing ab/cd, ab/ef and cd/ef. Build a word dictionary from those same sentences, then segment adcfeb with the boundary model and the dictionary-only lattice.",
+  "Fit the supplied labeled corpus containing ab/cd, ab/ef and cd/ef. Build a word dictionary from those same sentences, then segment adcfeb with the boundary model and the dictionary-only lattice.",
   "Print the model’s state sequence, both segmentations and a’s emission probability under all four states to four decimal places.",
   "The dictionary can only match listed words or its single-character fallback. The state model instead scores character positions, so it can propose a word never listed as a unit."
 ],
@@ -1218,9 +990,9 @@ question: "Can a boundary-state model form words absent from its training dictio
             exercise(
               "Walk the helping down on a corpus that contradicts itself",
               [
-  "The supplied labelled corpus contains conflicting ways to group the same opening characters. Fit it at each of the seven smoothing values supplied in the starter.",
+  "The supplied labeled corpus contains conflicting ways to group the same opening characters. Fit it at each of the seven smoothing values supplied in the starter.",
   "For each fit print the segmentation of 研究生很多, whether it equals the supplied training reading, and the emission probability of 究 under M, the within-word state.",
-  "Smoothing adds a positive amount to possible outcomes before normalising their counts. Keep the data fixed so the report isolates that amount’s effect on a sparsely observed state."
+  "Smoothing adds a positive amount to possible outcomes before normalizing their counts. Keep the data fixed so the report isolates that amount’s effect on a sparsely observed state."
 ],
               `import math
 from oop_ml import BoundaryTag, HiddenMarkovSegmenter
@@ -1258,12 +1030,12 @@ question: "How strongly can smoothing change an ambiguous boundary decision?",
   "Construct a fresh model with the current smoothing value, then fit the same corpus.",
   "Compare the returned texts with the supplied reference as lists. Convert the M emission’s log probability with math.exp.",
   "The M state has very little training evidence here. Added counts can therefore materially change its distribution."
-], check: numberCheck("What share does the place inside a word give to 究 at the usual helping of one?", 0.1818, 0.0005, "At smoothing 1.0, the M state assigns 究 probability about 0.1818. The sweep shows that the changed smoothing can alter the best complete state path, not only its displayed confidence.") },
+], check: numberCheck("What share does the place inside a word give to 究 at the usual helping of one?", 0.1818, 0.0005, "At smoothing 1.0, state M assigns 究 emission probability about 0.1818. The sweep also changes which complete role path has the largest score. An emission probability is a model parameter, rather than a displayed confidence in the whole segmentation.") },
             ),
             exercise(
               "Hand the stretch nothing covered to the places",
               [
-  "Fit the boundary model on the supplied five labelled sentences and build a dictionary from those same sentences. Read 阿尔瓦雷斯研究生命起源 with the dictionary alone, the model alone and the dictionary with unknown_segmenter set to the fitted model.",
+  "Fit the boundary model on the supplied five labeled sentences and build a dictionary from those same sentences. Read 阿尔瓦雷斯研究生命起源 with the dictionary alone, the model alone and the dictionary with unknown_segmenter set to the fitted model.",
   "Print each segmentation and piece count. Then print the state sequence assigned to the five-character surname alone.",
   "The combined method hands an uncovered run to the model; it does not replace every dictionary decision. Compare that restricted delegation with the model-only result."
 ],
@@ -1309,7 +1081,7 @@ question: "Can a dictionary delegate only its uncovered stretches to a learned s
   "Pass the already fitted model as unknown_segmenter to DictionaryLatticeSegmenter.",
   "All three results expose texts and n_words, so compare the same measurements.",
   "The surname’s characters are absent from the training alphabet. Their fallback scores leave transition preferences to decide much of its state sequence."
-], check: numberCheck("How many pieces does the combination answer for the eleven characters?", 7, 0.5, "The combined result has seven pieces. Its learned fallback joins the first two surname characters, but this output alone does not establish that the name was analysed correctly.") },
+], check: numberCheck("How many pieces does the combination answer for the eleven characters?", 7, 0.5, "The combined result has seven pieces. Its learned fallback joins the first two surname characters, but this output alone does not establish that the name was analyzed correctly.") },
             ),
           ],
         },

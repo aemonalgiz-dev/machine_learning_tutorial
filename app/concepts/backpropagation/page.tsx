@@ -28,9 +28,9 @@ import { ShapesTable } from "@/components/widgets/ShapesTable";
 import { UpdateThenReforward } from "@/components/widgets/UpdateThenReforward";
 
 export const metadata: Metadata = {
-  title: "Backpropagation · oop_ml",
+  title: "Backpropagation · Perceptron Lab",
   description:
-    "A network can contain many weights between an input and its prediction. Backpropagation works backwards through those calculations to find how each weight contributed to a change in the loss.",
+    "Backpropagation applies the chain rule through a network's calculations. Working backward from the loss gives the derivatives needed to determine how changes to each weight affect that loss.",
 };
 
 const linkClass =
@@ -46,7 +46,7 @@ export default function BackpropagationPage() {
       playgroundTitle="Trace an output error back to the weights"
       playgroundIntro="Follow the prediction forward and the gradients backward. Compare a gradient with the loss change produced by a small numerical nudge to that weight."
       title="Backpropagation"
-      tagline={"A network can contain many weights between an input and its prediction. Backpropagation works backwards through those calculations to find how each weight contributed to a change in the loss."}
+      tagline={"Backpropagation applies the chain rule through a network's calculations. Working backward from the loss gives the derivatives needed to determine how changes to each weight affect that loss."}
       prerequisites={
         <>
           The network is the{" "}
@@ -97,23 +97,10 @@ export default function BackpropagationPage() {
                   or fall, and how sharply?
                 </p>
                 <Equation>{"∂L/∂w, for every w in the network"}</Equation>
-                <p>
-                  On the logistic regression page that question had a short
-                  answer, because a single neuron&rsquo;s weight sat one step
-                  from the loss. A hidden weight here does not. Its effect
-                  travels through its own neuron&rsquo;s score and activation function, then
-                  through the output neuron&rsquo;s score, then through the
-                  prediction, and only then into the loss. The widget draws
-                  that route for whichever hidden weight you choose, with the
-                  values the forward pass kept at every stop, and calculates
-                  nothing.
-                </p>
+                <p>A hidden weight affects the loss through several calculations. It changes its neuron’s score, which changes the activation, which becomes an input to the output neuron. The final prediction then changes the loss. The diagram highlights that dependency path for the chosen weight and displays the intermediate values from the forward pass.</p>
                 <DependencyPath />
                 <KeepInMind>
-                  Backpropagation exists to calculate how much each parameter
-                  contributed to the final loss. The mechanism comes next; the
-                  goal is only that.
-                </KeepInMind>
+                  Backpropagation calculates the loss’s local sensitivity to each parameter. A derivative describes how a sufficiently small change would affect the loss at the current parameter values. It does not divide the existing loss into amounts caused by each weight.</KeepInMind>
               </SubSection>
 
               <SubSection title="3. Following one weight to the loss">
@@ -138,11 +125,7 @@ export default function BackpropagationPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  A distant weight&rsquo;s effect can be found by multiplying
-                  the local effects along the path from the weight to the
-                  loss. Every layer only ever has to know its own local
-                  effects.
-                </KeepInMind>
+                  Along one dependency path, the chain rule multiplies the local derivatives. When a value affects the loss through several paths, their contributions are added. Each layer provides the local derivatives needed to continue that calculation backward.</KeepInMind>
               </SubSection>
             </>
 </>),
@@ -225,22 +208,15 @@ export default function BackpropagationPage() {
                   </>
                 </WorkedExample>
                 <KeepInMind>
+
                   The neuron&rsquo;s delta is shared by all of its parameters,
                   while each weight&rsquo;s gradient is the delta scaled by the
-                  input that travelled across that edge.
+                  input that traveled across that edge.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="6. Passing the gradient to the hidden layer">
-                <p>
-                  The output neuron can now update its own weights. The hidden
-                  layer still knows nothing, because nobody has told it how
-                  its outputs affected the loss. So ask one concrete question.
-                  How did changing h₁ affect the output score? By w₁ per unit,
-                  since h₁ appears in the score once, multiplied by w₁. The
-                  loss&rsquo;s sensitivity to h₁ is therefore the output delta
-                  times w₁, and the same for the other two.
-                </p>
+                <p>We now know the output neuron’s parameter gradients, but keep its current weights in place while calculating the hidden gradients. Changing h₁ changes the output score at a rate of w₁, because h₁ is multiplied by that weight. Multiplying by the output delta therefore gives the loss derivative with respect to h₁. Apply the same rule to the other hidden outputs.</p>
                 <Equation>{"∂z_out/∂h₁ = w₁            ∂L/∂h₁ = δ_out · w₁"}</Equation>
                 <PassDown />
                 <WorkedExample title="The passed-down block">
@@ -287,31 +263,14 @@ export default function BackpropagationPage() {
                     ["h₃", "8", "1", "1", "8"],
                   ]}
                 />
-                <p>
-                  The middle row is the one to look at. h₂ scored −1, the
-                  rectifier turned that into 0 going forward, and going
-                  backward its slope at −1 is 0, so an arriving −4 becomes a
-                  delta of 0. This neuron receives no update from this row.
-                  Nothing it does reaches the loss on this row, so nothing on
-                  this row can tell it what to do. Whether a neuron can get
-                  stuck that way for good belongs to the activation and
-                  regularisation material, not here.
-                </p>
+                <p>The second hidden neuron has score −1, so ReLU outputs zero and has derivative zero there. Its arriving gradient of −4 is multiplied by that zero derivative. The resulting delta is zero, and this example produces no loss-gradient update for that neuron. A different input may activate it; zero gradient on one example does not establish that the unit is permanently inactive.</p>
                 <KeepInMind>
-                  The activation derivative controls whether and how strongly
-                  the arriving gradient passes through the neuron. Switch the
-                  activation function above to a sigmoid or a tangent and every neuron
-                  receives something, and none receives all of it.
-                </KeepInMind>
+                  The activation derivative scales the arriving gradient. At the displayed scores, sigmoid and tanh pass nonzero fractions of it, while ReLU blocks the negative-score unit. Other scores, zero arriving gradients or floating-point saturation can produce different outcomes.</KeepInMind>
               </SubSection>
 
               <SubSection title="8. Calculating the hidden gradients">
                 <>
-                  <p>
-                    Once its delta is known, a hidden neuron follows the same rule as
-                    the output neuron. The first hidden neuron has delta 4 and received
-                    inputs 1 and 2.
-                  </p>
+                  <p>{"A neuron's delta measures how the final loss responds to its score before activation. Once we know that quantity, each incoming weight contributes through the input it multiplies. The first hidden neuron's delta is 4, and its received inputs are 1 and 2. We can therefore use the same weight-gradient rule already applied to the output neuron."}</p>
                   <Equation>{"weight gradients = 4 × (1, 2) = (4, 8)\nbias gradient = 4 × 1 = 4"}</Equation>
                 </>
                 <HiddenGradients />
@@ -348,10 +307,7 @@ export default function BackpropagationPage() {
                   One variable threads the whole walk.
                 </p>
                 <KeepInMind>
-                  Four lines per layer, applied top to bottom, and the third
-                  and fourth are different things. Keep the gradient; pass the
-                  sensitivity.
-                </KeepInMind>
+                  Each layer returns gradients for its parameters and a gradient with respect to its inputs. The optimizer uses the parameter gradients. The preceding layer receives the input gradient as its own arriving gradient.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -362,7 +318,7 @@ export default function BackpropagationPage() {
             trueFalse(
               "A distant weight’s effect on the loss is found by multiplying the local effects along the path from the weight to the loss, so every layer only ever has to know its own local effects.",
               true,
-              "A small change in a weight moves the score by ∂z/∂w times as much, that change moves the activation by ∂a/∂z times as much, and that change moves the loss by ∂L/∂a times as much. Three magnifications in a row multiply, which is the calculus primer’s chain rule and nothing more. It is what lets a hidden weight, whose effect travels through its own neuron, then the output neuron, then the prediction, still be handled one local step at a time.",
+              "Along one path, the chain rule multiplies the local derivatives between a parameter and the loss. If a value feeds several paths, their contributions are added. A layer therefore needs its own local derivatives and the loss gradient arriving from later layers. It can calculate its parameter gradients and pass the appropriate input gradient to the preceding layer.",
             ),
             trueFalse(
               "What travels backwards from the loss into the output neuron is the loss itself.",
@@ -389,7 +345,7 @@ export default function BackpropagationPage() {
                 "It is shared out between h₁ and h₃",
               ],
               1,
-              "The rectifier’s slope at −1 is 0, so the arriving gradient is multiplied by nothing. Nothing this neuron does reaches the loss on this row, so nothing on this row can tell it what to do. Switch the activation to a sigmoid or a tangent and every neuron receives something, and none receives all of it.",
+              "At this negative score, ReLU has derivative zero. The incoming gradient is therefore blocked at this response, giving this neuron zero parameter gradients for this row. Another input can put its score above zero. Sigmoid or tanh would have a nonzero mathematical derivative at this particular score, but neither activation guarantees nonzero parameter gradients in every network.",
             ),
             several(
               "In the SDK’s cached-forward interface, which jobs does a dense layer perform during its backward pass?",
@@ -400,7 +356,7 @@ export default function BackpropagationPage() {
                               "Consult which activation function the layer above used",
                             ],
               [0, 1],
-              "Those two jobs are the whole of the reusable layer interface, and the second is what lets the layer beneath do both in turn. The scores were kept by the forward pass, and once a layer has its arriving gradient every dense layer performs the same four lines whatever sits above or below it.",
+              "The dense layer calculates gradients for its own weights and biases, and calculates the gradient with respect to its inputs. The first result is used for parameter updates; the second lets the preceding layer continue the backward pass. Cached inputs and scores keep these calculations tied to the same forward evaluation.",
               {
                 "description": "The forward response already holds the layer’s inputs, scores and activations. The backward call receives this response and the gradient arriving from the layer above. It does not need to reconstruct the forward response."
               },
@@ -412,15 +368,7 @@ export default function BackpropagationPage() {
           content: (
             <>
               <SubSection title="10. Updating the parameters">
-                <p>
-                  Calculating gradients and applying them are two phases, and
-                  they must not overlap. In the first, backpropagation computes
-                  and stores every gradient while no parameter moves. Moving
-                  one early would change the scores and activations the
-                  remaining gradients are still being computed from. In the
-                  second, every parameter takes one step against its own
-                  gradient, scaled by the learning rate.
-                </p>
+                <p>For this gradient-descent step, calculate every derivative using the same parameter state that produced the forward pass. Store the parameter gradients first, then apply the updates. Using an already-updated output weight to calculate a hidden gradient would mix two network states. Keeping the phases separate avoids that mistake.</p>
                 <Equation>{"θ_new = θ_old − η · ∂L/∂θ"}</Equation>
                 <UpdateThenReforward />
                 <WorkedExample title="One step at η = 0.05">
@@ -462,20 +410,9 @@ export default function BackpropagationPage() {
                     h₁&rsquo;s weight from x₂ gives 8 against 8.000000001.
                   </p>
                 </InAModel>
-                <p>
-                  That is why the nudge is useful, and why it is a check
-                  rather than a method. It costs two forward passes per
-                  parameter, so it is the right tool for confirming that an
-                  implementation of the four lines is correct and the wrong
-                  tool for training anything, where one backward walk finds
-                  every slope at once for about the price of a second forward
-                  pass.
-                </p>
+                <p>A centered finite difference needs two additional loss evaluations for each checked parameter. Backpropagation obtains all parameter gradients in one backward traversal, reusing the forward values. Its cost is typically on the same order as a forward pass, rather than growing by two full passes per parameter. This makes finite differences useful for selected implementation checks and backpropagation practical for training large networks.</p>
                 <KeepInMind>
-                  Finite differences validate an implementation. They are too
-                  expensive to train with, and once the analytic gradient is
-                  trusted they have done their job.
-                </KeepInMind>
+                  Use finite differences to check selected analytical gradients, choosing a step size and tolerance that account for rounding and approximation error. Repeat the checks when changing a layer, loss or backward implementation. A few matching values support the implementation; they do not prove every case correct.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -485,16 +422,7 @@ export default function BackpropagationPage() {
           content: (
             <>
               <SubSection title="12. From one neuron to a layer">
-                <p>
-                  Every calculation so far was on scalars, one neuron and one
-                  weight at a time. A layer does the same thing for several
-                  neurons at once, and the scalars become vectors and
-                  matrices. The input x is a column of the layer&rsquo;s
-                  inputs, W has a row per neuron and a column per input, z and
-                  a are columns with one entry per neuron, δ is a column of
-                  the same length, and the weight gradient has exactly
-                  W&rsquo;s shape, because there is one slope per weight.
-                </p>
+                <p>{"The calculation still has one derivative for every weight when we write it with arrays. The input x is a column of input values. W has one row per neuron and one column per input, so its entries identify those individual connections. The columns z and a hold the scores and activations, and δ holds the corresponding deltas. The weight-gradient matrix has exactly W's shape, letting the optimizer match each derivative to the weight it should update."}</p>
                 <ShapesTable />
                 <p>
                   Read δ xᵀ back against section 5. A column of deltas times a row of inputs is an outer product, and its entry in row j and column i is δⱼ xᵢ, which is the scalar rule for the weight from input i into neuron j. Read Wᵀ δ back against section 6. Input i&rsquo;s entry is Σⱼ w[j, i] δⱼ, the sum over every neuron of that neuron&rsquo;s delta times the weight on the edge, which is section 6&rsquo;s rule with the routes summed because in general an input feeds every neuron.
@@ -503,7 +431,8 @@ export default function BackpropagationPage() {
                   The stack then walks its layers from the top down, handing each one the block the layer above passed down.
                 </p>
                 <KeepInMind>
-                  Vectorised backpropagation is not a different method. It
+
+                  Vectorized backpropagation is not a different method. It
                   performs the same local calculations for many neurons at
                   once, and the matrix lines are the hand calculation written
                   compactly.
@@ -529,10 +458,7 @@ export default function BackpropagationPage() {
                   A dense layer handed None when asked to step refuses, because it does have parameters and a missing gradient for them is a mistake in whoever built the backward pass. The stack&rsquo;s report of the largest slope anywhere skips the parameterless layers rather than counting them as zero, so a network made of nothing but pooling reports no movement at all, which is the true answer.
                 </p>
                 <KeepInMind>
-                  This is a decision about types and interfaces rather than
-                  about the derivation. Absence is declared where it is real
-                  and rejected where it is not.
-                </KeepInMind>
+                  The interface distinguishes an absent parameter gradient from a present gradient containing zeros. That lets the update code handle layers without parameters separately from trainable layers that happen to receive zero gradients.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. Formal derivation">
@@ -560,17 +486,10 @@ export default function BackpropagationPage() {
                   routes.
                 </p>
                 <Equation>{"∂L/∂w[j, i] = δⱼ · xᵢ\n∂L/∂bⱼ = δⱼ\n∂L/∂xᵢ = Σⱼ δⱼ · w[j, i]"}</Equation>
-                <p>
-                  That last line is the induction. The slope of the loss with respect to this layer&rsquo;s inputs is, by definition, the slope of the loss with respect to the outputs of the layer beneath, which is exactly the arriving block that layer needs to run the same three lines. The base case is the loss itself, whose slope at the final output section 4 worked out, and the walk ends at the row, whose slope nobody needs but which costs nothing to report.
-                </p>
-                <p>
-                  Every layer is visited once, every slope is computed once, and the arithmetic is a handful of matrix products against blocks the forward pass already built, which is why the forward responses keep their scores rather than only their outputs.
-                </p>
+                <p>The input gradient from this layer is the output gradient needed by the preceding layer. We can therefore apply the same rule repeatedly, starting from the loss derivative at the final output and continuing to the original input. Input gradients are not needed to update these weights, but they can be useful for sensitivity analysis or for optimizing an input.</p>
+                <p>The backward traversal visits each layer once and combines local derivatives using the values saved during the forward pass. For a dense layer, these operations are matrix products and elementwise multiplications. The saved response supplies the inputs and the activation information this implementation needs.</p>
                 <KeepInMind>
-                  This is the compact form of reasoning the page has already
-                  followed by hand. Nothing in it is new; it is the same walk
-                  with the row and the network left unspecified.
-                </KeepInMind>
+                  The matrix derivation applies the same dependencies as the single-example calculation: first pass the gradient through the activation, then calculate the weight, bias and input derivatives. Writing them as arrays lets the rule handle a full layer at once.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -581,7 +500,7 @@ export default function BackpropagationPage() {
             trueFalse(
               "A parameter may be moved as soon as its own gradient is known, since the gradients still to come belong to other parameters.",
               false,
-              "Calculating and applying are two phases and they must not overlap. Moving one parameter early would change the scores and activations that the remaining gradients are still being computed from, so every gradient is stored first and every parameter steps afterwards.",
+              "All gradients in this backward pass must describe the same parameter values and forward evaluation. Updating a weight before it has been used to propagate an earlier-layer gradient would mix old and new parameter states. This SDK avoids that problem by calculating the full backward result first, then creating the updated stack.",
             ),
             several(
               "What can we conclude from this numerical gradient check?",
@@ -592,7 +511,7 @@ export default function BackpropagationPage() {
                               "A disagreement that small shows the chain rule’s answer is only approximate",
                             ],
               [0, 1, 2],
-              "Both figures are answers to the same question and they agree, and the same check on h₁’s weight from x₂ gives 8 against 8.000000001. A finite difference subtracts two nearby losses, and the digits lost in that subtraction are what the gap is made of. One backward walk finds every slope at once for about the price of a second forward pass, so once the analytic gradient is trusted the nudge has done its job.",
+              "The numerical estimate and backpropagated derivative closely agree at the tested parameters. Finite differences introduce approximation error from the step size and rounding error from the loss evaluations and subtraction. One successful check supports this derivative calculation; it does not prove every parameter or activation case is correct. Backpropagation calculates all parameter derivatives together, which is much cheaper than separate numerical checks in a large network.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "Weight checked: hidden unit h₁ to the output\nAnalytic derivative: 12\nCentral-difference derivative: 11.999999998\nNudge ε: 0.000001\nUnrounded derivative disagreement: about 2.3e-9\nThe two losses being subtracted are near 8.\nEach central difference evaluates L(w + ε) and L(w − ε)."
@@ -607,7 +526,7 @@ export default function BackpropagationPage() {
                 "h₂ comes back to life, because the gradient that arrived at it was negative",
               ],
               0,
-              "The weights changed, so the scores and activations changed, and the old intermediate values and the old gradients describe a network that no longer exists, which is why the row has to go through again. h₂ did not move at all, since its delta was 0, and h₃ moved to (−1.4, 0.2) with a bias of −0.4 and now scores −1.4, so two of the three hidden neurons are dark on the second pass. One step at η = 0.05 takes the loss from 8 to 0.1152 and no further.",
+              "A new forward pass is needed because the updated parameters can change every later score and activation. On this row, the second hidden neuron remains inactive and the third has become inactive. The new prediction is 0.52 and the new loss is 0.1152. These measurements show that this update helped this example; further updates need new gradients.",
             ),
             choice(
               "Why does a pooling layer answer None when asked for a parameter gradient, rather than a block of zeros?",
@@ -618,12 +537,12 @@ export default function BackpropagationPage() {
                 "A zero block would stop the backward walk at that layer",
               ],
               1,
-              "Zero gradients are exactly what h₂ reported, and that was a fact about one row and not about the layer. The rule cuts both ways, since a dense layer handed None refuses, and the stack’s report of the largest slope anywhere skips the parameterless layers, so a network made of nothing but pooling reports no movement at all.",
+              "Pooling has no trainable weights or biases, so there is no parameter-gradient array to return. That differs from a dense layer whose existing parameters happen to receive zero gradients on one input. Pooling still passes an input gradient backward. The stack skips parameterless layers when reporting its largest parameter-gradient magnitude.",
             ),
             trueFalse(
               "Writing the walk as δ xᵀ and Wᵀ δ performs the same local calculations as the hand arithmetic, for many neurons at once.",
               true,
-              "Vectorised backpropagation is not a different method. The outer product’s entry in row j and column i is δⱼ xᵢ, which is the scalar rule for the weight from input i into neuron j, and Wᵀ δ sums over every neuron because in general an input feeds all of them. The matrix lines are the hand calculation written compactly.",
+              "Vectorized backpropagation is not a different method. The outer product’s entry in row j and column i is δⱼ xᵢ, which is the scalar rule for the weight from input i into neuron j, and Wᵀ δ sums over every neuron because in general an input feeds all of them. The matrix lines are the hand calculation written compactly.",
             ),
         ],
         },

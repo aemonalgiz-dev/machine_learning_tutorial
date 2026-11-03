@@ -89,7 +89,7 @@ export function Word2vecWindowPairs() {
           <thead className="sticky top-0 bg-white dark:bg-slate-900">
             <tr className="border-b border-slate-200 dark:border-slate-800">
               <th className="py-1.5 pr-4 font-semibold text-slate-600 dark:text-slate-400">
-                centre
+                center
               </th>
               <th className="py-1.5 pr-4 font-semibold text-slate-600 dark:text-slate-400">
                 window
@@ -130,7 +130,7 @@ export function Word2vecWindowPairs() {
         The sentences are only three words long, so a reach of three is a reach
         of two and the counts stop growing there. In the real corpus the reach is
         redrawn at every position, between one and the number set, which weights
-        near neighbours more heavily without any weighting formula.
+        near neighbors more heavily without any weighting formula.
       </Legend>
       {message && <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>}
     </div>

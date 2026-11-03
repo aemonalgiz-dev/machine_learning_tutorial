@@ -26,9 +26,9 @@ import { OobGrid } from "@/components/widgets/OobGrid";
 import { TreeStability } from "@/components/widgets/TreeStability";
 
 export const metadata: Metadata = {
-  title: "Bagging · oop_ml",
+  title: "Bagging · Perceptron Lab",
   description:
-    "Small changes in the training data can produce very different fitted models. Fitting several models to resampled data and combining their answers can make the result less dependent on one particular fit.",
+    "Small changes to training data can produce different fitted models. Bagging fits models on resampled observations and combines their predictions, reducing the influence of variation in any one fit.",
 };
 
 const linkClass =
@@ -44,7 +44,7 @@ export default function BaggingPage() {
       playgroundTitle="What changes when the models see different samples?"
       playgroundIntro="Compare one tree's answer with the combined answer. As more trees join, watch whether their disagreements cancel or persist."
       title="Bagging"
-      tagline={"Small changes in the training data can produce very different fitted models. Fitting several models to resampled data and combining their answers can make the result less dependent on one particular fit."}
+      tagline={"Small changes to training data can produce different fitted models. Bagging fits models on resampled observations and combines their predictions, reducing the influence of variation in any one fit."}
       prerequisites={
         <>
           This page picks up where{" "}
@@ -80,27 +80,11 @@ export default function BaggingPage() {
                   five random four-fifths of the crowd.
                 </p>
                 <TreeStability />
-                <p>
-                  One label moved the root question from height to weight,
-                  and once the root changes everything under it is decided in
-                  different halves. Five samples of the same crowd put their
-                  root cuts in five different places. The underlying problem
-                  did not change at all. The sample changed a little, and the
-                  tree changed a lot.
-                </p>
+                <p>Changing one label moved the first split from height to weight. Every later split now starts from different groups. The five resampled datasets also produced five different first thresholds. Small changes in the training examples have produced substantial changes in the fitted trees. Bagging asks whether combining such trees can give a more stable prediction.</p>
               </SubSection>
 
               <SubSection title="3. Instability as variance">
-                <p>
-                  That sensitivity has a name. A learner whose fitted model
-                  swings from one plausible training sample to the next has
-                  high variance, in the sense the statistics primer gave the
-                  word. The prediction problem is fixed. The sample is one
-                  draw from it. A high-variance learner reads too much of the
-                  draw into the model, and reads something different from the
-                  next draw. Everything on this page is a way of reducing that
-                  swing without changing the learner.
-                </p>
+                <p>The model changes when the training sample changes. If those changes produce substantially different predictions for the same new observations, we describe the learner as having high variance. Here we want to reduce that sensitivity by combining trees fitted to different samples. The prediction problem and the tree-growing procedure stay the same.</p>
               </SubSection>
             </>
 </>),
@@ -136,14 +120,7 @@ export default function BaggingPage() {
                   difference, and it is what lets one dataset generate many
                   meaningfully different samples.
                 </p>
-                <p>
-                  What the bootstrap does not do is invent anyone. The crowd is
-                  the best available stand-in for the population it came from,
-                  and drawing from it with replacement is drawing repeatedly
-                  from that stand-in. No new people and no new information,
-                  only a rearrangement of how much influence the people
-                  already there have.
-                </p>
+                <p>A bootstrap sample contains only people who were already in the dataset. Sampling changes how often each person contributes; it does not supply new measurements or recover parts of the population we failed to observe. We use the available sample as an estimate of that population, with the limitations that entails.</p>
               </SubSection>
 
               <SubSection title="6. Duplicates and omissions">
@@ -237,7 +214,7 @@ export default function BaggingPage() {
           title: "Questions on Parts 1 to 3",
           quiz: [
             trueFalse(
-              "Relabelling a single person was enough to move the tree’s root question from height to weight.",
+              "Relabeling a single person was enough to move the tree’s root question from height to weight.",
               true,
               "The underlying problem did not change at all, and the sample changed a little. Once the root changes, everything under it is decided in different halves, which is why five samples of the same crowd put their root cuts in five different places. A learner that swings like that from one plausible sample to the next has high variance.",
             ),
@@ -250,7 +227,7 @@ export default function BaggingPage() {
                 "A guarantee that every person turns up in some sample",
               ],
               1,
-              "Without replacement a drawn card stays out, so twenty-five draws reproduce the crowd exactly, every person once. The bootstrap invents nobody. It only rearranges how much influence the people already there have, and that rearrangement is where every member’s difference comes from.",
+              "Drawing twenty-five observations without replacement from twenty-five available rows selects each row once. Drawing with replacement keeps twenty-five sampled rows but allows repeats and omissions, so different samples give observations different training weights. It does not create new source observations.",
             ),
             trueFalse(
               "A person drawn three times into a bootstrap sample influences the tree grown on it three times over, and a person never drawn influences it not at all.",
@@ -286,35 +263,12 @@ export default function BaggingPage() {
                   cell of the plane gains a vote.
                 </p>
                 <CommitteeScrubber />
-                <p>
-                  The left map changes a great deal in the first few members,
-                  24 cells flipping between three and four, and settles as
-                  more arrive, with long runs of zero changed cells past
-                  twenty. The training score reaches 1.000 by eight members
-                  and stays near it. The out-of-bag score, which Part 7
-                  explains, lands around 0.64, because the tangled middle is
-                  nearly noise and a committee cannot learn what is not there.
-                </p>
+                <p>The map changes substantially as the first members arrive: twenty-four cells change between three and four members. After twenty, many additions change no displayed cells. Training accuracy reaches 1.000 by eight members and stays near it, while out-of-bag accuracy is around 0.64. This difference warns against using the training score alone to judge predictions for unseen observations.</p>
               </SubSection>
 
               <SubSection title="12. Vote strength versus predicted class">
-                <p>
-                  Two cells can both be called adult with fifty-one percent of
-                  the members on one and ninety-eight percent on the other.
-                  The right map draws that difference, pale where the vote
-                  was close and dark where it was nearly unanimous. Move the
-                  probe into the tangled middle and the winner is a coin toss
-                  with the paint to match. Move it to the corners and the
-                  committee is unanimous.
-                </p>
-                <p>
-                  The winning class and the strength of agreement are two
-                  outputs, and the second is not a calibrated probability. A
-                  vote share of 0.98 means twenty-four or twenty-five trees
-                  agreed, and whether people in that cell are adults
-                  ninety-eight percent of the time is a separate question,
-                  answered only by data the committee never saw.
-                </p>
+                <p>The agreement map distinguishes a narrow hard-vote majority from near unanimity. Pale cells indicate close votes; darker cells indicate stronger agreement. Move the probe between the tangled middle and the outer regions. This display summarizes member labels; the fitted classifier’s probability-averaging rule is described in section 9.</p>
+                <p>The predicted class and the fraction of members supporting it answer different questions. An agreement share of 0.98 means ninety-eight percent of the member predictions agree, when that fraction is available at the chosen member count. It does not establish that ninety-eight percent of similar observations have that class. Calibration requires separate evaluation on observations not used to fit or select the model.</p>
               </SubSection>
             </>
           ),
@@ -338,13 +292,7 @@ export default function BaggingPage() {
                 </>
                 <Equation>{"P(left out) = (1 − 1/n)ⁿ\n\nn = 25:   (24/25)²⁵ ≈ 0.360\nn → ∞:    (1 − 1/n)ⁿ → 1/e ≈ 0.368"}</Equation>
                 <LeaveOutChart />
-                <p>
-                  The curve settles onto 1/e almost at once, so about 36.8
-                  percent is the figure whatever the crowd&rsquo;s size, and
-                  about 63.2 percent of the crowd appears at least once in a
-                  typical sample. It is an expected proportion, and no single
-                  sample is obliged to hit it.
-                </p>
+                <p>The omitted proportion approaches about 36.8 percent as the sample size grows. For twenty-five observations it is about 36.0 percent, as the calculation shows. These are expected proportions over repeated bootstrap draws; an individual sample can omit more or fewer observations.</p>
               </SubSection>
 
               <SubSection title="14. Expected distinct observations">
@@ -374,11 +322,12 @@ export default function BaggingPage() {
                 <Equation>{"m̄ = (1/B) Σ_β m_β\nVar(m̄) = σ² / B"}</Equation>
                 <AveragingNoise />
                 <p>
+
                   Four independent members cut the variance to a quarter, a
                   hundred to a hundredth, and the spread of the average falls
                   as one over the square root of B. Each new estimate scatters
                   as widely as the first. Their average does not, because
-                  positive and negative errors partly cancel, and that cancelling
+                  positive and negative errors partly cancel, and that canceling
                   is all that averaging does.
                 </p>
               </SubSection>
@@ -400,44 +349,16 @@ export default function BaggingPage() {
               </SubSection>
 
               <SubSection title="17. Correlated member errors">
-                <p>
-                  Bagged trees are not independent. They come from one
-                  dataset, their samples overlap by about two thirds, the same
-                  strong feature dominates most of their roots, and so they
-                  tend to learn similar boundaries and make similar mistakes.
-                  With a common variance σ² and a common pairwise correlation
-                  ρ the variance of the average is
-                </p>
+                <p>Bagged trees share the same original dataset and can contain many of the same observations. Strong predictors may also lead them to similar splits. Their prediction errors can therefore be correlated. Under the simplifying assumptions of common variance σ² and common pairwise error correlation ρ, the variance of their average is</p>
                 <Equation>{"Var(ensemble mean) = ρσ² + (1 − ρ)σ² / B"}</Equation>
-                <p>
-                  Two terms. The second is the reducible part, and it goes to
-                  zero as B grows. The first is the shared part, and B never
-                  touches it. Adding members averages away the variation the
-                  members do not share, and cannot average away a mistake they
-                  all make together.
-                </p>
+                <p>The formula separates variation into two contributions. Increasing B reduces the contribution from variation that the members do not share. The shared contribution remains, because averaging predictions that make the same mistake does not cancel that mistake.</p>
               </SubSection>
 
               <SubSection title="18. The correlation ceiling">
                 <CorrelationCeiling />
-                <p>
-                  At ρ near zero the curve falls like σ²/B and keeps falling.
-                  At ρ of 0.6 it drops to the floor within a dozen members and
-                  then goes flat, with sixty percent of a single member&rsquo;s
-                  variance left however many are added. That floor is the
-                  reason bagging plateaus, and lowering it is the whole idea of
-                  the random forest.
-                </p>
+                <p>With correlation near zero, the variance falls approximately as σ²/B. With ρ = 0.6, it approaches sixty percent of a single member’s variance as B grows, while remaining above that limit for any finite B under this formula. Increasing the member count reduces only the part that is not shared. Random forests try to reduce shared errors by varying candidate features.</p>
                 <KeepInMind>
-                  <p>
-                    The formula assumes numeric member outputs, equal member
-                    variances, one common pairwise correlation, and an
-                    equal-weight average. A majority vote of trees satisfies
-                    none of those exactly. It is a model of the effect that
-                    isolates the role of shared error, and it is the right
-                    picture to hold, not an exact account of any committee on
-                    this page.
-                  </p>
+                  <p>This calculation describes numeric outputs with equal variances, a common pairwise correlation, and equal weights in the average. Real tree committees need not satisfy those simplifying assumptions, and taking a final majority label is an additional operation. The formula helps explain why shared errors limit the benefit of averaging; it does not predict the exact score of these committees.</p>
                 </KeepInMind>
               </SubSection>
             </>
@@ -449,27 +370,27 @@ export default function BaggingPage() {
             choice(
               "A cell on the agreement map shows a vote share of 0.98. What does that number say?",
               [
-                "Twenty-four or twenty-five of the trees agreed on that cell",
+                "About ninety-eight percent of the members agreed on that cell; the corresponding count depends on the ensemble size",
                 "People in that cell are adults ninety-eight percent of the time",
                 "The committee scored 0.98 on the people in that cell",
                 "The cell sits in the tangled middle, where the vote is close",
               ],
               0,
-              "The strength of agreement is the second of the committee’s two outputs, and it is not a calibrated probability. Whether people in that cell are adults ninety-eight percent of the time is a separate question, answered only by data the committee never saw. A close vote is what the tangled middle produces, where the winner is a coin toss with the paint to match, so a share of 0.98 is the opposite case.",
+              "The map reports agreement among member predictions. A share of 0.98 indicates near-unanimity, not a measured 0.98 rate among unseen people in that region. The exact count depends on the selected member count. Evaluate probability calibration separately if the output is to be interpreted as a class probability.",
             ),
             choice(
               "About what share of a crowd is left out of a typical bootstrap sample?",
               ["About 25 percent", "About 36.8 percent", "About 50 percent", "About 63.2 percent"],
               1,
-              "The chance of never drawing one person is (1 − 1/n)ⁿ, which settles onto 1/e almost at once, so the figure barely depends on the crowd’s size. It is an expected proportion and no single sample is obliged to hit it. Across the twenty-five members here the actual omitted counts run from 7 to 12 against an expected 9.",
+              "For n equally likely observations and n independent draws with replacement, a particular observation is omitted with probability:\n\n```math\nP(omitted) = (1 − 1/n)ⁿ → 1/e ≈ 36.8% as n grows\n```\n\nAt n=25 the expected omitted count is about 9.01, or about 36 percent. Individual samples vary; these twenty-five samples omit between seven and twelve people.",
             ),
             trueFalse(
-              "Averaging B independent estimates of one quantity makes the spread of the average fall as one over B.",
+              "For B independent estimates with equal finite variance, their mean's standard deviation falls in proportion to 1/B.",
               false,
-              "The variance falls as one over B, and the spread is its square root, so the spread falls as one over the square root of B. Four independent members cut the variance to a quarter and a hundred to a hundredth, because positive and negative errors partly cancel, and that cancelling is all averaging does.",
+              "Under those assumptions, variance of the mean is the single-estimate variance divided by B. Standard deviation is its square root:\n\n```math\nVar(mean) = σ² / B\nSD(mean) = σ / √B\n```\n\nCorrelated estimates do not receive that full reduction.",
             ),
             trueFalse(
-              "A majority vote is a kind of averaging, so the same variance argument applies to it.",
+              "A class vote share is the average of zero-or-one class votes, so variance reasoning can be applied to that share before selecting the winning class.",
               true,
               "For one class, we can write each tree's vote as one when it selects that class and zero otherwise. Averaging those indicators gives the share of votes, and the largest share wins. When we reason about how much averaging helps, we must also account for agreement between the trees. Bagged trees are not independent, so their shared mistakes can remain in the combined prediction.",
             ),
@@ -477,7 +398,7 @@ export default function BaggingPage() {
               "The variance of the ensemble mean is ρσ² + (1 − ρ)σ² / B. Which part does growing B never touch?",
               ["The first term", "The second term", "Both", "Neither"],
               0,
-              "The second term is the reducible part and goes to zero as B grows. The first is the shared part, and at a ρ of 0.6 the curve drops to its floor within a dozen members and then goes flat, with sixty percent of a single member’s variance left however many are added. Adding members cannot average away a mistake they all make together. The formula assumes equal member variances and one common correlation, which no committee on this page satisfies exactly, so it is the right picture of the effect rather than an account of any particular vote.",
+              "With equal member variances and a common pairwise correlation, the shared term ρσ² does not decrease with B. The remaining term approaches zero as more members are added. At ρ=0.6, the limiting variance is sixty percent of a single member's variance; a finite ensemble approaches that limit rather than reaching it exactly. Actual trees need not satisfy the equal-variance/common-correlation assumptions, but the formula explains why correlated predictions limit averaging gains.",
             ),
         ],
         },
@@ -486,11 +407,7 @@ export default function BaggingPage() {
           content: (
             <>
               <SubSection title="19. One observation's out-of-bag trees">
-                <p>
-                  Every person was left out of about a third of the samples,
-                  so for every person there stands a group of members that
-                  never trained on them. The grid below is who saw whom.
-                </p>
+                <p>For each person, identify the trees whose bootstrap samples omitted them. Those trees can supply an out-of-bag prediction because they did not train on that observation. With a finite committee, some people may have no such tree; the grid shows the actual coverage.</p>
                 <OobGrid />
                 <p>
                   Click a row. The filled cells are the trees that drew that
@@ -508,28 +425,12 @@ export default function BaggingPage() {
                   known label.
                 </p>
                 <Equation>{"OOB prediction for i = aggregate over trees β with i ∉ sample β"}</Equation>
-                <p>
-                  The panel beside the grid gives both verdicts. The whole
-                  committee&rsquo;s vote includes trees that trained on the
-                  person and so tends to get them right, since a deep tree
-                  remembers its own sample. The judges&rsquo; vote is what the
-                  committee would say about a stranger. On this crowd the two
-                  verdicts differ for eight of the twenty-five people, every
-                  one of them in the tangled middle.
-                </p>
+                <p>The panel compares the full committee with the trees that omitted this person. The full committee includes trees trained on the person, so its result benefits from having seen that example. The out-of-bag prediction excludes those trees and estimates how the method handles an unseen observation. On this crowd the predictions differ for eight of the twenty-five people, all in the tangled middle.</p>
               </SubSection>
 
               <SubSection title="21. Calculating the out-of-bag score">
                 <Equation>{"OOB accuracy = correct OOB predictions / people with at least one judge"}</Equation>
-                <p>
-                  Repeat for everyone who has a judge and divide. Different
-                  people are judged by different subsets of trees, which is
-                  unlike a held-out set where one model is judged by every
-                  held-out row, and the score is an estimate assembled from
-                  twenty-five partial ones. On the full committee it reads
-                  0.64 against a training score of 0.96, and the gap is the
-                  truth about this crowd rather than a fault in the method.
-                </p>
+                <p>Aggregate the eligible predictions for each covered observation, then compare them with its label. Different observations use different subsets of trees. For the full committee here, out-of-bag accuracy is 0.64 and training accuracy is 0.96. That gap is evidence about this fitted procedure on this sample, with uncertainty and the evaluation limits discussed below.</p>
               </SubSection>
 
               <SubSection title="22. OOB coverage and stability">
@@ -550,28 +451,15 @@ export default function BaggingPage() {
                     ["13", "25 of 25", "0.640"],
                     ["25", "25 of 25", "0.640"],
                   ]}
-                  caption="The early scores are not better; they are averages of very few verdicts. The score becomes trustworthy as people accumulate judges."
+                  caption="Early scores use fewer covered observations and fewer out-of-bag members. More coverage can improve stability, while sampling uncertainty and selection effects remain."
                 />
               </SubSection>
 
               <SubSection title="23. Limits of out-of-bag evaluation">
-                <p>
-                  Out-of-bag evaluation reuses the training data efficiently, and it obeys the same rules as every other evaluation. It stops being untouched evidence when hyperparameters are chosen by it repeatedly, since it is then part of the selection and no longer a judge of it. It leaks when features were selected or preprocessing was fitted on the whole crowd, because the judges then know something about the person from a step upstream of the bootstrap.
-                </p>
-                <p>
-                  It misleads when the observations are dependent, ordered in time, or grouped, so that ordinary resampling breaks a structure the data has. And it is unstable when the committee is too small to cover everyone well.
-                </p>
+                <p>An out-of-bag score is still an evaluation score, with the same limits as other estimates. Repeatedly choosing settings by that score makes it part of model selection. Preprocessing fitted on the entire dataset can also expose information about an omitted observation before any tree is grown. Keeping the observation out of a tree is insufficient if earlier preparation already used it.</p>
+                <p>Ordinary row-by-row resampling also assumes the rows can be treated as exchangeable. Time order, repeated measurements of one person, or groups of related observations may require a different evaluation design. With too few trees, out-of-bag coverage can also be incomplete or unstable.</p>
                 <InAModel>
-                  <p>
-                    For a final report a separate test set that took no part
-                    in anything can still be the right instrument, and the{" "}
-                    <Link href="/concepts/held-out-evaluation" className={linkClass}>
-                      evaluation page
-                    </Link>{" "}
-                    is where that argument lives. The out-of-bag score is an
-                    efficient internal estimate, and this page calls it that
-                    rather than free or honest without qualification.
-                  </p>
+                  <p>For a final performance estimate, reserve observations that were excluded from fitting, preprocessing and model selection. Out-of-bag evaluation is useful internally, but repeated selection by that score can make it optimistic. The <Link href="/concepts/held-out-evaluation" className={linkClass}>evaluation page</Link>{" "}compares these roles.</p>
                 </InAModel>
               </SubSection>
             </>
@@ -600,24 +488,8 @@ export default function BaggingPage() {
                   question each.
                 </p>
                 <BiasVersusVariance />
-                <p>
-                  The stumps score 0.72 on the training crowd however many
-                  there are, because every one of them cuts the plane once and
-                  the crowd needs a second cut. They make the same structural
-                  mistake, and voting among members that all lack the same
-                  thing does not supply it. Aggregation reduces variance. It
-                  does not reduce bias, and it cannot recover structure that
-                  every member is too restricted to represent.
-                </p>
-                <p>
-                  Nor does it repair the data. Labels that are wrong in the
-                  crowd are wrong in every resample. A feature that is missing
-                  is missing from every tree. A crowd sampled badly, a target
-                  that does not mean what it should, a leak between training
-                  and evaluation, or a shift between the crowd and the people
-                  the model will meet, all of these pass through the bootstrap
-                  untouched. Bagging reduces model variance and nothing else.
-                </p>
+                <p>The twenty-five bagged stumps score 0.72 on this training dataset, compared with 0.80 for the single fitted stump. That result is specific to this resampling and ensemble size; adding members does not guarantee the score stays at 0.72. Combining stumps can create several breakpoints, although an additive collection can still miss interactions a deeper tree can express. Evaluate the aggregate rule rather than treating its capacity as identical to one member’s.</p>
+                <p>Resampling cannot supply a missing feature or correct a label merely by repeating it. A biased sample can remain biased across its resamples, and leakage in the preparation can affect every tree. Bagging addresses sensitivity to the training sample; the quality of the data and evaluation still need their own checks.</p>
               </SubSection>
             </>
           ),
@@ -627,47 +499,15 @@ export default function BaggingPage() {
           content: (
             <>
               <SubSection title="26. Why improvement plateaus">
-                <p>
-                  Read the changed-cells readout in section 11 as the members
-                  are added. Early members change the map by dozens of cells
-                  at a time. Past about twenty the count is mostly zero, with
-                  the odd flip of eleven cells when a tree breaks a near tie.
-                  The training score settled by eight members and the
-                  out-of-bag score by about the same. Every further member
-                  costs another tree to grow and to consult and buys
-                  stability more than accuracy. Additional trees eventually
-                  stabilise the ensemble more than they improve it.
-                </p>
+                <p>In this finite sweep, early additions change many displayed predictions. Later additions often change none, although near ties can still flip. Further trees increase fitting and prediction cost while making the average less sensitive to any one member. The observed plateau does not guarantee that every later addition leaves accuracy unchanged.</p>
               </SubSection>
 
               <SubSection title="27. Similar root questions">
-                <p>
-                  The reason is section 17&rsquo;s floor, and the gallery in
-                  section 7 shows where the floor comes from. Twenty of the
-                  twenty-five members root on height and five on weight, and
-                  seven ask exactly the same first question. The samples
-                  differ, and the strong feature still wins most of the time,
-                  so the trees start alike and their errors stay correlated.
-                  Bootstrap resampling creates diversity, and a strong
-                  predictor can keep the trees correlated regardless.
-                </p>
+                <p>Twenty of the twenty-five members choose height at the root, and seven choose the identical height threshold of 147.5. This shows how similar structures can persist across bootstrap samples. Similar roots can contribute to similar predictions, but root counts alone do not measure error correlation. The diversity measurements compare the actual predictions.</p>
               </SubSection>
 
               <SubSection title="28. From bagging to random forests">
-                <p>
-                  Bagging varies which people each tree sees. The{" "}
-                  <Link href="/concepts/random-forests" className={linkClass}>
-                    random forest
-                  </Link>{" "}
-                  also varies which features each split is allowed to
-                  consider, so that height is sometimes off the table and a
-                  tree has to root on weight whether it wanted to or not. A
-                  strong feature cannot dominate every split when it is
-                  sometimes unavailable, the trees become less alike, ρ
-                  falls, and the floor in section 18 drops. That is not free.
-                  Restricting the features weakens each individual tree, and
-                  the trade is the forest page&rsquo;s subject.
-                </p>
+                <p>Bagging varies which observations each tree sees. A <Link href="/concepts/random-forests" className={linkClass}>random forest</Link> also samples candidate features at each split. With height unavailable, a node can select a weight split or stop if no eligible improvement exists. Feature sampling can reduce shared prediction errors, but may also weaken individual trees; neither effect is guaranteed on every dataset. The forest lesson measures that tradeoff.</p>
               </SubSection>
             </>
           ),
@@ -684,20 +524,11 @@ export default function BaggingPage() {
                 for a classifier and a mean for a regressor, as section 10
                 said.
               </p>
-              <p>Bagging can be applied to many kinds of fitted model. Its benefit depends on how much their predictions change across samples and how differently the members make errors. In our deep-tree example, one relabelled person can change the first question, and different resamples produce different fitted boundaries. Averaging those changing predictions has something useful to work on.</p>
+              <p>Bagging can be applied to many kinds of fitted model. Its benefit depends on how much their predictions change across samples and how differently the members make errors. In our deep-tree example, one relabeled person can change the first question, and different resamples produce different fitted boundaries. Averaging those changing predictions has something useful to work on.</p>
               <p>That does not make low bias or instability a requirement for running the algorithm. They help explain why deep trees are a common choice and why bagging a stable or severely limited model can offer less improvement. Training accuracy alone cannot establish low bias on the wider population.</p>
-              <p>
-                A learner that is already stable, a straight line say, gives
-                nearly the same fit on every resample, and a committee of
-                nearly identical members gains nothing from the vote. Section
-                17&rsquo;s formula says why. Members that agree have a
-                correlation ρ near one, so the floor ρσ² is nearly the whole
-                variance and the part that B removes is nearly nothing.
-                Bagging is a general method whose canonical case is the one
-                that made it worth inventing.
-              </p>
+              <p>A learner whose predictions change little across resamples gives averaging less variation to reduce. A well-determined straight-line fit can behave this way. In the simplified formula from section 17, correlation ρ near one leaves the shared term ρσ² close to the variance of an individual member. Adding members then removes little of that variance.</p>
               <KeepInMind>
-                <p>The stumps in section 25 show the distinction. Their first questions vary, so there is variation to average, but the committee still scores 0.72 because each member can ask only one question. Averaging their predictions cannot supply every interaction that a deeper tree could express.</p>
+                <p>The bagged stumps score 0.72 in this comparison. Their varying thresholds can form a more detailed aggregate rule than one stump, but averaging one-feature stump responses still cannot represent every interaction available to a deeper tree. That capacity limit is distinct from the observed score on this sample.</p>
               <p>Our members are grown deep so each can represent those interactions, while aggregation reduces some of their sample sensitivity. Depth and pruning still remain choices to evaluate. A forest does not make overfitting impossible or remove every reason to restrict its members.</p>
               </KeepInMind>
             </SubSection>
@@ -726,12 +557,12 @@ export default function BaggingPage() {
                 "The committee is large enough that every person has many judges",
               ],
               [0, 1, 2],
-              "Choosing by it makes it part of the selection rather than a judge of it, and fitting anything on the whole crowd lets the judges know something about the person from a step upstream of the bootstrap. Ordinary resampling also breaks a structure that dependent or grouped data has. A small committee is the unstable case, so a committee large enough that every person has many judges is the opposite of a problem.",
+              "Repeatedly choosing settings from out-of-bag results makes them validation evidence used in selection. Upstream feature selection or learned preprocessing on all rows can also expose information from an omitted observation. For grouped or time-dependent data, ordinary row-wise bootstrap omission may fail to represent the intended unseen group or future period. More contributing trees improve coverage and reduce estimate noise, but do not fix those evaluation mismatches.",
             ),
             trueFalse(
               "Bagging twenty-five stumps lifts the training score above what one stump reaches.",
               false,
-              "The stumps score 0.72 however many there are, because every one of them cuts the plane once and the crowd needs a second cut. They make the same structural mistake, and voting among members that all lack the same thing does not supply it. Aggregation reduces variance, not bias, and it cannot recover structure every member is too restricted to represent.",
+              "In this seeded comparison, the bagged stumps score 0.72 on training data while the single stump scores 0.80. Their out-of-bag score is 0.68, slightly above the deep ensemble's 0.64. Combining stumps can produce a rule more complex than one stump, but that does not guarantee higher training accuracy or remove every shared limitation. Bagging mainly aims to reduce sensitivity to resampling; assess the combined predictions rather than assuming it improves every score.",
             ),
             choice(
               "Why does this committee stop improving after about twenty members?",
@@ -747,7 +578,7 @@ export default function BaggingPage() {
             trueFalse(
               "A learner that gives nearly the same fit on every resample gains almost nothing from being bagged.",
               true,
-              "Nothing in the recipe mentions a tree, but the gain depends on the learner. A committee of nearly identical members has nothing for the vote to cancel, which in the two-term formula is a correlation near one and a floor that is nearly the whole variance. Bagging helps most where the base learner is sensitive to its training data, can reach low bias, and produces meaningfully different fits from different resamples, which is the deep tree.",
+              "If resampling produces almost identical predictions, averaging those predictions changes little. In the equal-variance model this corresponds to correlation near one, leaving little variance to reduce by adding members. A more data-sensitive base learner may provide more varied predictions and more opportunity for bagging to help, although held-out performance remains the practical test.",
             ),
         ],
         },
@@ -770,47 +601,20 @@ export default function BaggingPage() {
                   ["out-of-bag scoring", "computed against the training rows the committee keeps for the purpose"],
                 ]}
               />
-              <WhyThisWorks title="Two of those were found the hard way">
-                <p>
-                  A class with two people in a crowd of thirty is missing
-                  from a bootstrap sample about one time in eight, because
-                  both of them have to dodge every one of the thirty draws,
-                  and across a committee of twenty-five the chance that at
-                  least one member never sees the class at all is close to
-                  certain.
-                </p>
+              <WhyThisWorks title="Class Coverage and Member Randomness">
+                <p>A rare class may be absent from a bootstrap sample. If two of thirty observations carry that class, the probability of omitting both is about 0.126. Across twenty-five independent member samples, the probability that at least one member misses it is about 0.966.</p>
                 <Equation>
                   {"P(both missed by one sample) = (1 − 2/30)³⁰ ≈ 0.126\nP(some member of 25 misses the class) = 1 − (1 − 0.126)²⁵ ≈ 0.966"}
                 </Equation>
-                <p>
-                  A member that inferred its own class count from its sample
-                  either refused the gap or handed back a probability matrix
-                  one column short, and a committee cannot average columns
-                  that do not line up. The committee now tells every member
-                  how many classes exist before it fits.
-                </p>
-                <p>
-                  And handing every member the committee&rsquo;s one seed made every member draw the same feature restriction at every node, which reproduced plain bagging exactly while looking like a forest. Each member&rsquo;s seed is offset by its position now, and a test reads which feature each member rooted on.
-                </p>
+                <p>Probability columns must refer to the same classes in every member. The ensemble supplies the complete class count before fitting each sample, including when a sample omits a class. It can then align and average the returned columns consistently.</p>
+                <p>Members also need separate random streams for feature sampling. Reusing an identical stream can create matching restrictions and reduce the intended diversity. This implementation derives member seeds from the ensemble seed and member position, making repeated fits reproducible while allowing different member choices.</p>
               </WhyThisWorks>
-              <p>
-                Two rows of the table are about what the committee refuses
-                to pretend. A person no member omitted has no judge, and
-                their out-of-bag entry is left empty and counted as
-                uncovered rather than filled with a zero, because a zero is
-                a number a later average would quietly include. On this
-                committee nobody is uncovered, since coverage reached all
-                twenty-five at seven members, but at five members five of
-                the twenty-five still had no judge, and a score assembled
-                then rests on the other twenty. And a crowd holding one
-                class is refused before any sample is drawn, since
-                twenty-five copies of a tree that can only answer one way
-                have nothing to vote on.
-              </p>
+              <p>An out-of-bag prediction needs at least one tree whose sample omitted that person. If none did, the estimate marks the row uncovered and leaves its prediction empty. Substituting zero would invent a prediction and could distort the resulting score.</p>
+<p>With five trees, five of these twenty-five people are uncovered, so the score uses only twenty. Coverage reaches all twenty-five by seven trees in this run. This implementation also rejects a single-class target before resampling; that is its classification contract, rather than a general impossibility of predicting a constant class.</p>
               <DerivationTable
                 rows={[
                   { expression: "(1 − 1/n)ⁿ", reason: "one person missed by every one of n independent draws" },
-                  { expression: "→ 1/e ≈ 0.368", reason: "the limit as n grows, reached in practice by n = 25" },
+                  { expression: "→ 1/e ≈ 0.368", reason: "the large-sample limit; for n = 25 the omission probability is approximately 0.360" },
                   { expression: "ρσ² + (1 − ρ)σ²/B", reason: "the committee's variance, a floor plus a part that B removes" },
                 ]}
               />
@@ -820,7 +624,7 @@ export default function BaggingPage() {
         {
           title: "Practice. Growing the Committee With the Library",
           practice: [
-            exercise("Grow the committee of twenty-five and read its two scores",["Fit the page’s committee with the library. The crowd is the tangled crowd of twenty-five, the twenty-five members are deep trees, and the resamples come from seed 7, which is the seed every widget on this page draws from. Read the training score, the out-of-bag score, and which feature each member’s root question asks about.", "Part 7 arrived at 0.96 on the training crowd against 0.64 out of bag, and section 8 counted twenty roots on height and five on weight. All four numbers should come back exactly, since the seed fixes every draw."],`from oop_ml import BaggingClassifier, Feature
+            exercise("Grow the committee of twenty-five and read its two scores",["Fit BaggingClassifier with n_members=25 and random_seed=7 to the twenty-five labeled people below. Its default base model is an unrestricted decision tree. Print training accuracy and out-of-bag accuracy, then count how many fitted trees split first on height and how many on weight.", "Keep the supplied row order and seed while comparing your results with the lesson. The seed makes this implementation's resampling repeatable; it does not guarantee identical results across different random generators or tree implementations."],`from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -845,7 +649,7 @@ print(f"members rooting on height {roots.count('height')}")
 print(f"members rooting on weight {roots.count('weight')}")`,`training score 0.960
 out-of-bag score 0.640
 members rooting on height 20
-members rooting on weight 5`,{...{ hints: ["Construction configures and fitting learns. The member count and the seed go to the constructor, and the two features and the target go to fit, features first as a list.", "The training score is score on the same features and target the committee was fitted to. The out-of-bag score needs no data at all, because the committee kept its training rows for exactly this purpose.", "The fitted members are a tuple on the committee, and each one is an ordinary tree, so its root is a node holding a split, and the split knows the name of the feature it asks about."], check: numberCheck("What out-of-bag score does the committee report?", 0.64, 0.0005, "The out-of-bag score uses only predictions from members whose resamples omitted that person. Its gap from the training score shows why performance on rows used for fitting is a different measurement.") },question:"How does the fitted committee score on training rows and on people its members left out?"}),
+members rooting on weight 5`,{...{ hints: ["Pass the member count and seed to BaggingClassifier, then call fit with the input Feature list and target Feature.", "score receives the training features and target. out_of_bag_score() uses the stored training rows and bootstrap membership records, so it takes no new data argument.", "The fitted members are a tuple on the committee, and each one is an ordinary tree, so its root is a node holding a split, and the split knows the name of the feature it asks about."], check: numberCheck("What out-of-bag score does the committee report?", 0.64, 0.0005, "The out-of-bag score uses only predictions from members whose resamples omitted that person. Its gap from the training score shows why performance on rows used for fitting is a different measurement.") },question:"How does the fitted committee score on training rows and on people its members left out?"}),
             exercise("Count who each member left out",["Every sample contains twenty-five draws with replacement from the twenty-five training people. Repeats mean some people are selected more than once and others are absent. For each member, count the distinct selected people and those omitted.","Print the first sample's draws, distinct-person count and omitted count. Then print the minimum, maximum and mean omitted counts across the committee, beside the theoretical expected omitted count computed from the sample size. Do not treat that expectation as a requirement for each sample."],`from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
@@ -872,8 +676,8 @@ print(f"mean omitted {sum(omitted) / len(omitted):.2f}")
 print(f"expected omitted {25 * (1 - 1 / 25) ** 25:.2f}")`,`first member: 25 draws, 18 distinct people, 7 omitted
 omitted per member, smallest 7 and largest 12
 mean omitted 8.76
-expected omitted 9.01`,{...{ hints: ["samples on a fitted committee is a tuple with one bootstrap sample per member, in member order, so the first member’s is at position zero.", "A sample knows the positions it drew, with repeats, and can report in_bag, one true or false per person, and out_of_bag, the positions it never drew. The length of the sample is the number of draws.", "Summing in_bag counts the distinct people, since a person drawn three times is still one true, and the size of out_of_bag is the omitted count."], check: numberCheck("What is the mean omitted count across the twenty-five members, to two places?", 8.76, 0.005, "The expected omitted count describes an average over random draws, not a requirement for each member. This seeded committee has its own realised range and mean.") },question:"How many people did each bootstrap sample leave out?"}),
-            exercise("Judge every person out of bag",["Section 22 says a person’s judges number between three and thirteen on this committee, and section 20 says the whole committee’s verdict and the judges’ verdict differ for eight people. Build the out-of-bag estimate and read both claims off it.", "Print the number of people with at least one judge, the minimum and maximum judge counts, the mean judge count, and how many people receive different verdicts from the two methods. Compare your mean judge count with the mean omitted count you calculated in the previous problem."],`from oop_ml import BaggingClassifier, Feature
+expected omitted 9.01`,{...{ hints: ["samples on a fitted committee is a tuple with one bootstrap sample per member, in member order, so the first member’s is at position zero.", "A sample knows the positions it drew, with repeats, and can report in_bag, one true or false per person, and out_of_bag, the positions it never drew. The length of the sample is the number of draws.", "Summing in_bag counts the distinct people, since a person drawn three times is still one true, and the size of out_of_bag is the omitted count."], check: numberCheck("What is the mean omitted count across the twenty-five members, to two places?", 8.76, 0.005, "The expected omitted count describes an average over random draws, not a requirement for each member. This seeded committee has its own realized range and mean.") },question:"How many people did each bootstrap sample leave out?"}),
+            exercise("Judge every person out of bag",["Call out_of_bag_estimate() on the fitted ensemble. For each training person, this estimate combines only trees whose bootstrap sample omitted that person. Compare these predictions with predict() from the full ensemble.", "Print the covered and uncovered person counts, the minimum, maximum and mean contributing-tree counts, and the number of predictions that differ from the full ensemble. Compare mean_judges with the previous exercise's mean omitted count. These means agree here because there are twenty-five people and twenty-five trees."],`from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -901,8 +705,8 @@ differ = sum(1 for own, judged in zip(whole, estimate.predictions) if own != jud
 print(f"people whose two verdicts differ {differ}")`,`people with a judge 25, without 0
 judges per person, fewest 3 and most 13
 mean judges 8.76
-people whose two verdicts differ 8`,{...{ hints: ["out_of_bag_estimate answers an object rather than a bare array, because a prediction means nothing without knowing which people it covers and how many members stood behind it. n_covered, n_uncovered, judges and mean_judges are all properties of it.", "judges is one count per person, so its smallest and largest entries are the fewest and most judges anyone has.", "predict on the fitted committee gives the whole committee’s verdict for every person, and the estimate’s predictions give the judges’ verdict in the same order, so zipping the two and counting the disagreements is the whole comparison."], check: numberCheck("For how many people does the judges’ verdict differ from the whole committee’s?", 8, 0.5, "The full committee includes members trained on each person; the out-of-bag prediction excludes those members. Their disagreements expose mistakes concealed by training accuracy. Every member-person omission is also one available out-of-bag vote.") },question:"Which people receive a different prediction from their out-of-bag judges?"}),
-            exercise("Bag stumps and watch the bias stay",["Section 25 bags twenty-five stumps, trees allowed one question each, and finds they score 0.72 on the training crowd. Build that committee by handing the bagging frame a stump as its base model, and compare it with one stump and with the deep committee.", "Print the training scores for a single stump, the bagged stumps and the bagged deep trees. Then print the out-of-bag scores for both ensembles. Compare the stump ensemble's out-of-bag result with the deep trees' reported 0.64."],`from oop_ml import BaggingClassifier, DecisionTreeClassifier, Feature
+people whose two verdicts differ 8`,{...{ hints: ["The estimate stores coverage and contribution counts alongside its predictions. Read n_covered, n_uncovered, judges and mean_judges from that object.", "judges is one count per person, so its smallest and largest entries are the fewest and most judges anyone has.", "predict on the fitted committee gives the whole committee’s verdict for every person, and the estimate’s predictions give the judges’ verdict in the same order, so zipping the two and counting the disagreements is the whole comparison."], check: numberCheck("For how many people does the out-of-bag prediction differ from the full ensemble prediction?", 8, 0.5, "The full committee includes members trained on each person; the out-of-bag prediction excludes those members. Their disagreements expose mistakes concealed by training accuracy. Every member-person omission is also one available out-of-bag vote.") },question:"How do out-of-bag predictions differ from predictions using every fitted tree?"}),
+            exercise("Bag stumps and watch the bias stay",["Fit one DecisionTreeClassifier(max_depth=1) to the training people. Then fit BaggingClassifier with twenty-five copies of that one-split base model under seed 7. Compare these with the existing twenty-five-tree unrestricted ensemble.", "Print the training scores for a single stump, the bagged stumps and the bagged deep trees. Then print the out-of-bag scores for both ensembles. Compare the stump ensemble's out-of-bag result with the deep trees' reported 0.64."],`from oop_ml import BaggingClassifier, DecisionTreeClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])

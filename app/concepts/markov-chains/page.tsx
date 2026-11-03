@@ -26,9 +26,9 @@ import { MarkovSmoothingSweep } from "@/components/widgets/MarkovSmoothingSweep"
 import { MarkovTwoStep } from "@/components/widgets/MarkovTwoStep";
 
 export const metadata: Metadata = {
-  title: "Markov Chains · oop_ml",
+  title: "Markov Chains · Perceptron Lab",
   description:
-    "The next event may depend on what is happening now. A Markov chain describes that dependence using probabilities of moving from one state to another, while leaving earlier history out of the prediction.",
+    "A Markov chain represents a process through states and the probabilities of moving between them. Its next-state prediction depends on the current state, making the choice of what a state includes important.",
 };
 
 const link =
@@ -44,7 +44,7 @@ export default function MarkovChainsPage() {
       playgroundTitle="Where can the next step take us?"
       playgroundIntro="Read one row of the transition table as the possible next states from the current state. Compare one step with several repeated steps."
       title="Markov Chains"
-      tagline={"The next event may depend on what is happening now. A Markov chain describes that dependence using probabilities of moving from one state to another, while leaving earlier history out of the prediction."}
+      tagline={"A Markov chain represents a process through states and the probabilities of moving between them. Its next-state prediction depends on the current state, making the choice of what a state includes important."}
       prerequisites={
         <>
           The same assumption applied to words rather than letters is the
@@ -78,9 +78,7 @@ export default function MarkovChainsPage() {
 <p>
                   The preceding letter does help. In this text, a vowel follows a vowel 14.61 percent of the time, but follows a consonant 52.70 percent of the time. That is a difference of more than a factor of three and a half. A model that uses the previous letter&apos;s category can represent a pattern that independent draws would miss.
                 </p>
-                <p>
-                  Two choices were made before any counting. Spaces are dropped, as Markov dropped them, and y is counted as a consonant, which is the usual convention and is wrong for a word like rhythm; a different choice would move every number on the page slightly.
-                </p>
+                <p>Before counting, we remove spaces and classify y as a consonant. These are rules for the written symbols, rather than a complete phonetic analysis: y can represent a vowel sound in a word such as rhythm. Changing the preprocessing would change some of the resulting counts and probabilities.</p>
 </>
                 <NumberTable
                   headings={[
@@ -119,19 +117,9 @@ export default function MarkovChainsPage() {
                 <p>
                   A sequence satisfying this assumption is a Markov chain. Its possible conditions are called states, and pᵢⱼ is the probability of moving from state i to state j. The assumption is conditional independence: once we know the current state, earlier states add no further information about the next one. That still allows a state two steps back to predict a later state indirectly, through the intervening transition. Step 17 measures this relationship in our example.
                 </p>
-                <p>
-                  A second assumption is folded into that equation, and it is
-                  easy to miss because it has no symbol of its own. The same pᵢⱼ
-                  is used at every position of every sentence, in the first
-                  chapter and the third alike, so the chain is homogeneous in
-                  time. Step 14 checks it by counting each chapter separately.
-                </p>
+                <p>We also reuse the same transition probabilities at every position. This is called time homogeneity. A state has the same outgoing rule in the first chapter as in the third. Step 14 compares the chapter counts to examine that additional modeling assumption.</p>
                 <KeepInMind>
-                  A Markov chain claims that the next state depends on the
-                  present one alone, and that the rule for that dependence
-                  never changes along the sequence. English satisfies neither
-                  claim exactly, and the rest of the page measures by how much.
-                </KeepInMind>
+                  The one-step Markov assumption limits which history the model uses. Reusing one transition table everywhere is a separate time-homogeneity assumption. This page’s model uses both; neither should be mistaken for a guarantee that English follows the resulting probabilities exactly.</KeepInMind>
               </SubSection>
 
               <SubSection title="3. The whole model is one table">
@@ -169,13 +157,7 @@ export default function MarkovChainsPage() {
           content: (
             <>
               <SubSection title="4. One sentence counted by hand">
-                <p>
-                  Fitting a chain means counting its steps. Every adjacent pair
-                  of letters is one observed step from the first letter&rsquo;s
-                  state to the second&rsquo;s, and each row of counts divided by
-                  its total is that state&rsquo;s row of the table. Nothing is
-                  iterated, tuned or searched.
-                </p>
+                <p>For this fully observed, time-homogeneous model without smoothing, fitting consists of counting adjacent transitions and normalizing each outgoing row. More elaborate choices, such as hidden states or shared parameters, need different fitting procedures.</p>
                 <p>
                   Alice calling her cat is short enough to do with a pencil. Oh
                   my dear Dinah is thirteen letters once the spaces go, and each
@@ -221,12 +203,7 @@ export default function MarkovChainsPage() {
                 </Equation>
                 <MarkovCountTable text="chapters" />
                 <KeepInMind>
-                  The one-sentence table and the two-chapter table have the same
-                  shape, a vowel followed less often by a vowel than a consonant
-                  is, and they disagree about how much, 0.2000 against 0.1461.
-                  Twelve steps are a very small sample of a habit that 16,675
-                  steps describe well.
-                </KeepInMind>
+                  The one-sentence and two-chapter estimates both put a vowel after a vowel less often than after a consonant. Their vowel-to-vowel estimates differ, 0.2000 versus 0.1461. The larger count gives more evidence for estimating those transitions, but does not by itself verify the model’s memory assumption.</KeepInMind>
               </SubSection>
 
               <SubSection title="6. Why dividing the counts is the best answer the text allows">
@@ -255,15 +232,8 @@ export default function MarkovChainsPage() {
                     the largest available under this model.
                   </p>
                 </>
-                <WhyThisWorks title="Why the ratio maximises the likelihood, for any number of states">
-                  <p>
-                    Write nᵢⱼ for the count of steps from i to j. The log
-                    likelihood of every counted step is the sum over i and j of
-                    nᵢⱼ ln pᵢⱼ, and the only constraint is that each row sums to
-                    one. Row i appears nowhere but in its own terms, so each row
-                    can be maximised on its own, with one Lagrange multiplier
-                    for its one constraint.
-                  </p>
+                <WhyThisWorks title="Why the ratio maximizes the likelihood, for any number of states">
+                  <p>Let nᵢⱼ count transitions from state i to state j. Their log likelihood adds a count-weighted logarithm for each transition probability. A row’s parameters appear only in that row’s terms, so we can optimize rows separately while requiring each to sum to one. The auxiliary λ below is a Lagrange multiplier enforcing that constraint. The derivative argument applies to positive-count entries; zero-count entries reach the boundary at zero in the unsmoothed fit.</p>
                   <DerivationTable
                     expressionHeading="step"
                     reasonHeading="why"
@@ -290,13 +260,7 @@ export default function MarkovChainsPage() {
                       },
                     ]}
                   />
-                  <p>
-                    A count of zero gives a probability of zero, which is why a
-                    step the text never took is impossible under the fitted
-                    table, the problem the n-grams page spends its middle on.
-                    And a state that never began a step has nᵢ = 0, so its row
-                    is zero over zero, which is where Part 7 starts.
-                  </p>
+                  <p>Without smoothing, an unobserved transition receives probability zero, making it impossible under the fitted model. A state with no observed departures poses a different problem: there is no outgoing total by which to divide. Part 7 examines the choices required for that missing row.</p>
                 </WhyThisWorks>
                 <KeepInMind>
                   The counted table is the maximum-likelihood estimate, row by
@@ -307,24 +271,8 @@ export default function MarkovChainsPage() {
               </SubSection>
 
               <SubSection title="7. What the count leaves out">
-                <p>
-                  Counting stops at the end of each sentence. The last letter of
-                  one sentence and the first of the next are never counted as a
-                  step, because nobody wrote them as one, and each sentence is a
-                  separate sequence. That is why 16,803 letters give 16,675
-                  steps, 128 fewer than one unbroken run of letters would give,
-                  one for each sentence.
-                </p>
-                <p>
-                  The first letter of each sentence is a second thing the count
-                  leaves out. A chain is a table of steps, and a step needs
-                  somewhere to start, so the first state of each sequence is
-                  taken as given. Where sentences tend to start is a separate
-                  distribution over a separate quantity, and a model that wanted
-                  it would have to count it separately; the chain on this page
-                  never learns it, and when it scores a sentence in Part 5 it
-                  scores every letter but the first.
-                </p>
+                <p>Each sentence is counted as a separate sequence. We do not invent a transition from its last letter to the first letter of the next sentence. The 16,803 letters therefore provide 16,675 transitions: one fewer transition than letters within each of the 128 sentences.</p>
+                <p>The transition model conditions on the first state of a sequence. It does not learn how that first state was selected. A model of sentence beginnings would need a separate initial-state distribution. Here the sentence score begins with the transition to its second letter.</p>
                 <KeepInMind>
                   The chain&rsquo;s probability of a sentence is the probability
                   of its steps given its first letter, and the join between two
@@ -340,12 +288,12 @@ export default function MarkovChainsPage() {
             trueFalse(
               "If letters really were drawn independently, the share of vowels following a vowel would match the share following a consonant.",
               true,
-              "That is what independence would mean here, and it is exactly what the counts refuse. A vowel follows a vowel 14.61 percent of the time and follows a consonant 52.70 percent of the time, so the letter just read moves the chance of a vowel by a factor of more than three and a half.",
+              "Under an independent-letter model with a common vowel probability, the previous letter class would not change the next-vowel probability. The measured proportions, 14.61 percent after a vowel and 52.70 percent after a consonant, differ greatly. That is evidence against this simple independence model, rather than a demand that finite-sample counts match exactly under independence.",
             ),
             trueFalse(
               "Counting y as a vowel rather than a consonant would leave the table unchanged.",
               false,
-              "Both choices made before any counting feed straight into the counts, dropping the spaces and treating y as a consonant, and a different choice would move every number on the page slightly. The convention is also wrong for a word like rhythm, which is why it is stated before any figure is quoted.",
+              "Changing which letters count as vowels changes the state sequence and can change the transition counts. Removing spaces is another modeling choice that determines which letters become adjacent. The stated V/C mapping is an orthographic convention for this example, not a full account of pronunciation; words such as rhythm show that distinction.",
             ),
             choice(
               "Oh my dear Dinah is thirteen letters once the spaces are dropped. How many steps does it contribute?",
@@ -373,7 +321,7 @@ export default function MarkovChainsPage() {
                 "A step the text never took is given a small probability so that nothing is impossible",
               ],
               [0, 1],
-              "The probability of the text is a product of one table entry per step, and for the vowel row that is p_VV 933 times and 1 − p_VV 5,451 times, which is largest at 933 over 6,384; the same argument holds row by row for any number of states, since no two rows share a parameter. Counting stops at the end of each sentence, so 128 sentences take 128 steps off 16,803 letters, and the first letter of each sentence begins a step without being predicted. A count of zero gives a probability of zero, which is where smoothing enters in Part 6.",
+              "For the unsmoothed conditional likelihood, each row is fitted from the transitions leaving that state. The maximum-likelihood next-state probabilities are its observed relative counts. Sentence boundaries do not contribute cross-sentence transitions, so:\n\n```math\n16,803 letters − 128 sentence starts = 16,675 transitions\n```\n\nThe model conditions on each first state. Unobserved transitions receive zero probability unless a smoothing rule is added.",
             ),
           ],
         },
@@ -438,12 +386,7 @@ export default function MarkovChainsPage() {
                   two, and 0.00004 after ten.
                 </p>
                 <KeepInMind>
-                  For two states the speed at which a chain forgets its start is
-                  its second eigenvalue exactly, and for more states the largest
-                  eigenvalue after the first sets the pace in the long run. A
-                  chain whose second eigenvalue has size one never forgets, and
-                  Part 7 builds one.
-                </KeepInMind>
+                  For this mixing two-state chain, the magnitude of the second eigenvalue gives the exact geometric contraction factor. In larger finite chains, nontrivial eigenvalues help describe long-run convergence, but multiple modes and the starting distribution also matter. Eigenvalues of magnitude one can prevent convergence from some starts.</KeepInMind>
               </SubSection>
 
               <SubSection title="10. Twenty-seven states forget almost as fast">
@@ -491,11 +434,7 @@ export default function MarkovChainsPage() {
                   by the consonants turning into vowels.
                 </p>
                 <Equation>{"π P  =  π          Σⱼ πⱼ  =  1"}</Equation>
-                <p>
-                  It is called the stationary distribution. For two states the
-                  balance can be solved by hand, since the flow from vowels to
-                  consonants has to equal the flow back.
-                </p>
+                <p>A stationary distribution is unchanged by a transition. Probability may flow between its states, but the incoming and outgoing amounts balance overall. For two states, equating the flow in the two directions lets us solve that distribution by hand.</p>
                 <Equation>
                   {"π_V × p_VC  =  π_C × p_CV\n\nπ_V  =  p_CV ⁄ (p_CV + p_VC)  =  0.5270 ⁄ (0.5270 + 0.8539)  =  0.3816"}
                 </Equation>
@@ -514,11 +453,7 @@ export default function MarkovChainsPage() {
                   </>
                 </WorkedExample>
                 <KeepInMind>
-                  The stationary distribution is a fact about the table and says
-                  nothing about any particular walk. Whether a walk actually
-                  arrives there is a separate question, and Part 7 has a chain
-                  where it never does.
-                </KeepInMind>
+                  A stationary distribution is unchanged by the transition table. It does not mean that a sampled endpoint is certain, or that every starting distribution approaches it. Part 7 separates stationarity, convergence of distributions and long-run time averages.</KeepInMind>
               </SubSection>
 
               <SubSection title="12. Solved rather than walked to">
@@ -543,18 +478,11 @@ export default function MarkovChainsPage() {
                   {"π (P − I)  =  0,   with one of its equations replaced by   Σⱼ πⱼ  =  1"}
                 </Equation>
                 <>
-<p>
-                  Whether it has exactly one is decided by which states can reach which, and none of the magnitudes matter. If every state can eventually reach every other, the chain has exactly one stationary distribution, which is the theorem of Perron and Frobenius applied to a table of probabilities, and more generally it has exactly one whenever there is a single group of states that a walk can enter and never leave.
-                </p>
-                <p>
-                  A table with every entry above zero satisfies both, which is one of the things smoothing does, and Part 7 is about the tables that fail.
-                </p>
+<p>For a finite chain, uniqueness depends on the pattern of possible transitions. If every state can reach every other, there is one stationary distribution. More generally, uniqueness holds when there is only one closed communicating class: one mutually reachable group that cannot be left. Transient states can feed that group without changing uniqueness.</p>
+                <p>Making every transition strictly positive ensures both communication between states and freedom from a fixed return period. It can therefore produce a unique stationary distribution that repeated distribution updates approach. Smoothing changes the model to obtain those properties; Part 7 shows why that change needs interpretation.</p>
 </>
                 <KeepInMind>
-                  Solving and walking give the same answer on a chain like this
-                  one. On a chain whose walk cycles, only solving has an answer,
-                  and Part 7 says what that answer then means.
-                </KeepInMind>
+                  For this chain, repeated distribution updates and the balance equations identify the same limiting probabilities. A periodic chain can still have a stationary distribution even when updates from a known state keep oscillating. Time-averaged occupation is a separate question.</KeepInMind>
               </SubSection>
 
               <SubSection title="13. The long-run shares against the text">
@@ -588,12 +516,7 @@ export default function MarkovChainsPage() {
                   0.0054 of the settled shares for every symbol.
                 </p>
                 <KeepInMind>
-                  A chain counted on a text settles close to that text&rsquo;s
-                  own shares whether or not the chain describes the text well,
-                  so that agreement is no evidence for the chain. Agreement on
-                  text the chain never counted is evidence, and here it holds to
-                  within a hundredth.
-                </KeepInMind>
+                  Agreement with the training text’s overall letter frequencies is largely built into the transition counts. It is a useful consistency check, but weak evidence for the one-step memory assumption. Frequencies in excluded text provide another check; neither comparison alone evaluates the full sequential structure.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. One table for the whole book">
@@ -619,14 +542,7 @@ export default function MarkovChainsPage() {
                   ]}
                   caption="Each chapter counted as a chain of its own. The chain the page uses is the first two together."
                 />
-                <p>
-                  Whether that drift is the third chapter having different
-                  habits or the ordinary variation in a count of a couple of
-                  thousand vowels is a question this chain cannot ask, since it
-                  has one table and no notion of position. A chain allowed a
-                  different table in each chapter would be a different model,
-                  with three times as many numbers to count.
-                </p>
+                <p>Different chapter counts may reflect a changing process or ordinary sampling variation. This homogeneous fit stores only one transition table, so it does not explicitly represent a change by chapter. Giving each chapter a separate table would introduce more quantities to estimate from the available text.</p>
                 <KeepInMind>
                   Homogeneity is an assumption of its own, separate from the
                   one-step memory, and a text can break it while keeping the
@@ -692,22 +608,12 @@ export default function MarkovChainsPage() {
                   ]}
                   caption="Letters are scored on 8,357 positions of the third chapter and classes on 6,506, the same positions for both rows of each pair. A uniform guess would cost 4.7549 bits over twenty-seven symbols and exactly 1 over two classes."
                 />
-                <p>
-                  One letter of memory saves 0.8234 bits on every letter of text
-                  the chain had never seen, a fifth of what the frequencies
-                  alone cost. On Markov&rsquo;s two classes the saving is 0.0992
-                  bits out of a possible one, a tenth. The positions are a
-                  common set, chosen so that every model compared in this Part
-                  and the next can score every one of them, and 71 positions of
-                  the third chapter are set aside because the two letters before
-                  them, or the two ending on them, never occurred together in the
-                  first two chapters, which matters to the pair chain of Part 6
-                  and to nothing here.
-                </p>
+                <p>On the scored positions, one letter of memory reduces average loss by 0.8234 bits compared with the frequency-only baseline. For vowel/consonant classes, the average reduction is 0.0992 bits. These are averages, not identical savings at every position. The comparison uses a common set that all the listed unsmoothed models can score. It excludes 71 positions with unseen pair contexts or destinations, so it does not measure the probability of the complete unfiltered chapter.</p>
                 <KeepInMind>
+
                   Bits per letter on text the model never counted is the fair
                   score, since a model scored on its own text is scored partly
-                  on what it memorised. The third chapter was never counted by
+                  on what it memorized. The third chapter was never counted by
                   any chain on this page.
                 </KeepInMind>
               </SubSection>
@@ -733,9 +639,7 @@ export default function MarkovChainsPage() {
 <p>
                   Part of the gap is not English at all. Grouping twenty-six letters into two classes throws away which vowel and which consonant, and a sequence of classes read off a letter chain is not in general a Markov chain itself. The second view of the widget runs the same check on 20,000 symbols the letter chain wrote, where one letter of memory is true by construction, and the vowel-and-consonant chain still misses two letters on, 0.4560 against 0.4084.
                 </p>
-                <p>
-                  So of the 0.1052 miss on Alice, about half is the grouping and the rest is the text.
-                </p>
+                <p>The simulated letter chain produces a vowel/consonant two-step gap of 0.0476 even though its letter-level Markov assumption is true by construction. Grouping states can therefore explain part of the mismatch in principle. Comparing that simulation with Alice’s gap of 0.1052 is not an exact additive decomposition of the text’s error.</p>
 </>
                 <KeepInMind>
                   A chain&rsquo;s prediction two steps ahead is its table
@@ -767,13 +671,7 @@ export default function MarkovChainsPage() {
                   ]}
                   caption="The letter chain with a smoothing of a half, scored on the 7,940 positions of the third chapter that have ten letters before them."
                 />
-                <p>
-                  Within the length of a short word the chain has forgotten what
-                  it was reading, which is Part 3&rsquo;s eigenvalue arithmetic
-                  seen on real text. The text has not forgotten, as step 17
-                  showed, and the difference between those two statements is
-                  exactly what the one-step assumption throws away.
-                </p>
+                <p>After a few transitions, this chain’s predictions depend little on the starting letter. The text can retain longer relationships, which the multi-step comparison exposes. The model’s loss of dependence on its start does not establish that the underlying language has equally short memory.</p>
                 <KeepInMind>
                   The chain&rsquo;s memory fades as fast as its table mixes,
                   whatever the text does. A model that should use more than one
@@ -790,7 +688,7 @@ export default function MarkovChainsPage() {
             trueFalse(
               "Started from a vowel and from a consonant, the two walks’ chances of a vowel cross over before settling, because the table’s second eigenvalue is negative.",
               true,
-              "After one step they are far apart, 0.1461 against 0.5270; after two they have crossed, 0.4713 against 0.3263, and after three crossed back, 0.3475 against 0.4027. For two states the gap to the settled share is multiplied at every step by the second eigenvalue, p_VV less p_CV, which is 0.1461 less 0.5270, or −0.3808. The sign is the alternation and the size is the speed, each step leaving 0.3808 of the remaining distance, so by the fifth step both walks are within half a hundredth of 0.3816.",
+              "For this two-state chain, deviation from the stationary vowel share is multiplied at each step by the second eigenvalue. Its negative sign reverses the deviation and its magnitude controls contraction:\n\n```math\nsecond eigenvalue = p_VV − p_CV ≈ −0.3808\n```\n\nThe starting-from-vowel and starting-from-consonant distributions therefore alternate around the stationary share. Their distance shrinks because the factor's magnitude is below one.",
             ),
             choice(
               "The chain settles at a vowel with probability 0.3816 and the text it was counted on is 38.14 percent vowels. Why is that agreement no evidence for the chain?",
@@ -801,7 +699,7 @@ export default function MarkovChainsPage() {
                 "Because the agreement is a coincidence of this particular text",
               ],
               0,
-              "On oh my dear Dinah, a single sentence where the two ends are two of its thirteen letters, the gap is 0.3846 against 0.3488; on 128 sentences it is 0.3814 against 0.3816, close but not equal. The checks that count are the ones the construction does not force. The third chapter, never counted, is 39.16 percent vowels, 0.0100 above where the chain settles, and over the letters its largest gap is 0.0097, for d. That agreement is evidence, and it holds to within a hundredth.",
+              "Transition counts approximately balance their empirical starting-state and ending-state shares, differing at sequence boundaries. That makes similarity between fitted stationary shares and training shares a weak independent check. The short Dinah sequence shows a larger boundary effect than the long chapters. Agreement with held-out state frequencies gives some additional evidence, but matching overall frequencies alone does not test whether one-step and multi-step dependencies are correct.",
             ),
             trueFalse(
               "The stationary distribution is where every walk ends up, so a chain whose walk never settles has none.",
@@ -817,7 +715,7 @@ export default function MarkovChainsPage() {
                 "0.0992 bits, the same saving as on the two classes",
               ],
               0,
-              "Bits per letter on text the model never counted is the fair score, since a model scored on its own text is scored partly on what it memorised. A uniform guess would cost 4.7549 bits, the letter shares alone 4.0670 and the letter chain 3.2436, all on the same 8,357 positions. On Markov’s two classes the saving is 0.0992 bits out of a possible one, a tenth, because grouping twenty-six letters into two classes leaves far less to predict.",
+              "On the same held-out positions, uniform symbol probabilities cost 4.7549 bits per letter, empirical letter frequencies cost 4.0670, and the one-letter chain costs 3.2436. The improvement over the frequency baseline is:\n\n```math\n4.0670 − 3.2436 = 0.8234 bits per letter\n```\n\nThis comparison measures predictive log loss on unseen text, with the same symbol and boundary conventions. The two-class problem has less symbol uncertainty to begin with and a smaller measured improvement.",
             ),
             trueFalse(
               "The chain’s prediction that a vowel follows two letters after a vowel 47.13 percent of the time agrees with what the first two chapters actually do two letters on.",
@@ -831,16 +729,7 @@ export default function MarkovChainsPage() {
           content: (
             <>
               <SubSection title="19. A longer memory is a chain on longer states">
-                <p>
-                  A chain that remembers two letters needs no new machinery.
-                  Make each state a pair of adjacent letters, so the text the
-                  becomes the states th and he, and a step from th to he is
-                  exactly a prediction of e from the two letters before it. The
-                  Markov property holds for pairs as it did for letters, and
-                  everything in Parts 2 to 4 applies unchanged, counting
-                  included. A chain remembering k letters is a chain whose states
-                  are runs of k.
-                </p>
+                <p>A state can include more history. In the text <code>the</code>, the two-letter state <code>th</code> is followed by <code>he</code>, predicting the new letter e from the preceding pair. The next-step rule still uses only its current state, but that state now contains two letters. Runs of k letters extend the same construction.</p>
                 <Equation>
                   {"P(xₜ₊₁ | xₜ, xₜ₋₁)  =  P( (xₜ, xₜ₊₁) | (xₜ₋₁, xₜ) )"}
                 </Equation>
@@ -862,22 +751,11 @@ export default function MarkovChainsPage() {
                   and the invented counts start to outweigh the real ones.
                 </p>
                 <KeepInMind>
-                  Longer memory always fits the counted text better, and on text
-                  the chain never counted it helps only while each state has
-                  been seen often enough to trust. On two classes it stops paying
-                  at three to five classes, depending on the smoothing, and on
-                  twenty-seven letters it stops much sooner.
-                </KeepInMind>
+                  On a common set of scored positions, an unsmoothed higher-order maximum-likelihood model can reproduce the shorter-context rule. Its best achievable training likelihood therefore cannot be lower under those conditions. Smoothing, different scored positions and performance on new text are separate comparisons. The held-out examples show that longer context can help and can also perform worse.</KeepInMind>
               </SubSection>
 
               <SubSection title="20. The table grows as a power of the memory">
-                <p>
-                  The price of k letters of memory is a table over 27ᵏ possible
-                  states, each with a row of 27ᵏ entries. The first two chapters
-                  actually produce 27 letters, 363 pairs and 1,982 runs of three,
-                  and those are the states each chain holds, since a state never
-                  seen gets no row at all.
-                </p>
+                <p>There are 27ᵏ possible k-letter states. This general-purpose implementation stores a dense transition table over the states it actually observed: 27 letters, 363 pairs or 1,982 triples in these chapters. That storage design includes many zero entries. It is not an unavoidable cost of longer context: a specialized model can store only legal overlapping transitions or use a sparse representation.</p>
                 <NumberTable
                   headings={[
                     "letters remembered",
@@ -918,13 +796,7 @@ export default function MarkovChainsPage() {
               </SubSection>
 
               <SubSection title="21. Where the longer memory loses to the shorter one">
-                <p>
-                  The pair chain ought to beat the letter chain on the third
-                  chapter, since it knows strictly more. As counted it cannot be
-                  scored at all, because 261 of its steps on the third chapter
-                  were never counted in the first two, so it needs smoothing,
-                  and the widget sweeps how much.
-                </p>
+                <p>A pair state retains more history, but also requires estimates for more transitions. In the third chapter, 261 transitions were absent from the training chapters. Their zero fitted probabilities prevent a finite log score without smoothing. Extra context therefore creates a data requirement as well as a modeling opportunity.</p>
                 <MarkovSmoothingSweep />
                 <p>
                   At a smoothing of a hundredth the pair chain scores 2.8355 bits
@@ -937,9 +809,7 @@ export default function MarkovChainsPage() {
                   3.2645.
                 </p>
                 <>
-<p>
-                  The reason is in the shape of the pair table. Additive smoothing adds the same count to every cell of a row, and a row of the pair chain has 363 cells, one for every pair seen anywhere. After th the next state has to begin with h, and in the first two chapters h was followed by only nine different symbols, so at most nine of those 363 cells can ever be right.
-                </p>
+<p>Additive smoothing in this implementation assigns a count to each of the pair table’s 363 destination states. After <code>th</code>, a legal overlapping destination must begin with h. Only nine such destinations were observed in training. Other symbol continuations could be legal but unseen; destinations beginning with another letter are structurally impossible in this overlapping-state construction.</p>
                 <p>
                   At a smoothing of a half each row is given 181.5 invented steps, against an average of 57.3 real ones, and almost all of the invented ones go to pairs that cannot follow. Drawn at that setting the pair chain writes thaqogsedke umuoumts, and the last sample in step 15 shows the rest of it.
                 </p>
@@ -995,12 +865,8 @@ export default function MarkovChainsPage() {
                   geography, and nowhere else in 128 sentences.
                 </p>
                 <>
-<p>
-                  There are four things anyone can do, and each costs something. Give the stranded state an even row, which invents an observation that it is followed by everything equally. Send it to itself with certainty, which invents a different observation and changes the chain&rsquo;s structure, since the state becomes a trap that every long walk eventually falls into and that then holds the whole stationary distribution.
-                </p>
-                <p>
-                  Refuse to build the table until text arrives that leaves the state. Or add the same small count to every cell of every row, which gives the stranded row an even spread as a side effect of a choice made for every row at once, and carries the cost Part 6 measured.
-                </p>
+<p>An unobserved departure needs an explicit policy. Assigning an even row introduces equal probability for every next state. Assigning a self-transition instead makes that state absorbing: once entered, it cannot be left. That can substantially change long-run behavior, although other closed classes may still exist elsewhere in the chain.</p>
+                <p>Another policy refuses the fit until outgoing evidence exists. Additive smoothing instead supplies a positive amount to every candidate transition, giving an unseen row an even distribution as a consequence. Part 6 showed that smoothing must also respect which transitions are structurally possible.</p>
 </>
                 <KeepInMind>
                   A state that is only ever a last state has no row, and
@@ -1068,21 +934,11 @@ export default function MarkovChainsPage() {
                 </p>
 </>
                 <KeepInMind>
-                  One closed group gives one stationary distribution, with every
-                  state outside that group given a share of zero. Two closed
-                  groups give infinitely many, and no amount of computation picks
-                  one of them, since the choice was made by where the walk began.
-                </KeepInMind>
+                  For a finite chain, one closed communicating class gives a unique stationary distribution, with zero stationary mass on transient states. Multiple closed classes permit mixtures of their stationary distributions. The starting distribution and absorption probabilities determine the eventual mixture; periodicity separately affects whether step-by-step distributions converge.</KeepInMind>
               </SubSection>
 
               <SubSection title="25. Empty transitions, unseen states and tied decisions" id="25-the-edges-gathered">
-                <p>
-                  Beside the three cases above there are other places where the
-                  definition has nothing to say, or says something that has to be
-                  decided before it means anything. Each row is a fact about the
-                  mathematics of a counted chain, and several carry a choice that
-                  somebody has to make.
-                </p>
+                <p>The table records other cases where the counts alone do not define a usable chain. Each response belongs to a specific choice about unseen states, normalization or querying. State those choices when comparing two counted models.</p>
                 <DerivationTable
                   expressionHeading="Sequence or transition evidence"
                   reasonHeading="What the chain can estimate"
@@ -1125,12 +981,12 @@ export default function MarkovChainsPage() {
                     {
                       expression: "every state reaching every other, no lockstep",
                       reason:
-                        "one stationary distribution, reached from every start at a rate set in the long run by the second eigenvalue. Any table with every entry above zero is in this case.",
+                        "a finite irreducible, aperiodic chain has one stationary distribution approached from every start. Nontrivial eigenvalues help describe the convergence rate. Strictly positive transition tables meet these conditions.",
                     },
                     {
                       expression: "every state reaching every other, in lockstep",
                       reason:
-                        "one stationary distribution and no limit. It is the long-run share of time, and a walk read at any single step is certainly at one state or another.",
+                        "a finite irreducible periodic chain has one stationary distribution, but updates from a known state need not converge to it. Long-run time averages can still approach the stationary shares.",
                     },
                     {
                       expression: "one closed group, with states that drain into it",
@@ -1140,7 +996,7 @@ export default function MarkovChainsPage() {
                     {
                       expression: "two or more closed groups",
                       reason:
-                        "every mixture of the groups’ own distributions is stationary, so there is no single answer, and where the walk starts decides where it settles.",
+                        "mixtures of the closed classes’ stationary distributions are stationary. The starting distribution and absorption probabilities determine their weights; periodic classes may prevent stepwise convergence.",
                     },
                     {
                       expression: "the states of a chain grouped into fewer",
@@ -1150,7 +1006,7 @@ export default function MarkovChainsPage() {
                     {
                       expression: "a table that changes along the text",
                       reason:
-                        "outside the model. A chain has one table for every position, and a text whose habits drift is given their average.",
+                        "outside this time-homogeneous model. A time-inhomogeneous Markov chain can use transition probabilities that change by position.",
                     },
                   ]}
                 />
@@ -1189,7 +1045,7 @@ export default function MarkovChainsPage() {
               [
                 "Two of its states, oud and phy, appear only at the ends of sentences",
                 "Those states begin no steps, so their rows would divide zero by zero",
-                "The difficulty is an artefact of toy inputs such as the word spa",
+                "The difficulty is an artifact of toy inputs such as the word spa",
                 "Additive smoothing gives those rows an even spread as a side effect of a choice made for every row at once",
               ],
               [0, 1, 3],
@@ -1211,7 +1067,7 @@ export default function MarkovChainsPage() {
         {
           title: "Practice. Counting Chains With the Library",
           practice: [
-            exercise("Count Oh my dear Dinah with the library",["Part 2 counted the thirteen letters of Oh my dear Dinah by hand into twelve steps, a vowel row of 1 and 4 giving 0.2000 and 0.8000, and a consonant row of 3 and 4 giving 0.4286 and 0.5714. Part 4 then solved the balance for a stationary vowel share of 15 over 43. Fit the chain with the library on the same classes and read every one of those numbers off it.", "The y of my is a consonant by the page’s convention, which the class mapping in the starter already makes. The observed share of vowels is 5 of 13, and the page says why it differs from the stationary share on so short a sentence."],`from oop_ml import MarkovChain
+            exercise("Count Oh my dear Dinah with the library",["Use the starter's V/C sequence for Oh my dear Dinah to fit MarkovChain. Print its letter count, transition count, both transition-count rows and their probabilities. Then print the stationary vowel share and the sentence's observed vowel share.", "The supplied mapping removes spaces and treats y as a consonant. Keep that convention while comparing the library output with the earlier hand count. The stationary share describes the fitted transition rule, so it need not equal one short sequence's vowel fraction."],`from oop_ml import MarkovChain
 
 sentence = "oh my dear dinah"
 dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
@@ -1238,7 +1094,7 @@ after V: counts [1, 4], probabilities [0.2, 0.8]
 after C: counts [3, 4], probabilities [0.4286, 0.5714]
 stationary vowel share 0.3488
 observed vowel share 0.3846`,{...{ hints: ["fit takes a list of sequences, and each sequence is a list of state names, so the one sentence goes in as a list holding one list. A bare string is refused, since it would be read as its letters.", "transition_counts has count_of(source, target) and n_transitions, and probability_of(source, target) on the chain reads the table. All of them take the state names.", "stationary_distribution answers a distribution indexed by state name, so indexing it with V reads the vowel share."], check: numberCheck("What stationary vowel share does the chain on Oh my dear Dinah report?", 0.3488, 0.0005, "The stationary vowel share balances expected flow in each direction under the fitted transition table. It need not equal the empirical vowel fraction of one short sentence, whose beginning and ending also affect the counts.") },question:"Can the letter sequence recover the counted transition table and its stationary distribution?"}),
-            exercise("Walk the Dinah chain forward and watch it forget",["Part 3 carried the two-chapter chain several steps ahead and found the walks from a vowel and from a consonant crossing before settling, with the gap to the settled share shrinking by the table’s second eigenvalue at every step. Do the same on the Dinah chain, whose table is 0.2 and 0.8 after a vowel and 3/7 and 4/7 after a consonant.", "Two steps on from a vowel is a number the page never prints for this chain. The two-chapter chain gave 0.4713 there, and Part 3 says how to get it from the table by hand, the two routes through the letter in between added together."],`from oop_ml import MarkovChain
+            exercise("Walk the Dinah chain forward and watch it forget",["Use the fitted Dinah chain to calculate the vowel probability after one through six steps, first starting from V and then from C. Print both probabilities at each step.", "Print the second eigenvalue, p_VV minus p_CV, and the stationary vowel probability. Compare whether the two probability sequences approach it from alternating sides. This repeats the earlier chapter example on the shorter sentence."],`from oop_ml import MarkovChain
 
 sentence = "oh my dear dinah"
 dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
@@ -1267,7 +1123,7 @@ print(f"settles at {chain.stationary_distribution()['V']:.4f}")`,`1 steps on: vo
 6 steps on: vowel with chance 0.3489 from a vowel, 0.3488 from a consonant
 second eigenvalue -0.2286
 settles at 0.3488`,{...{ hints: ["distribution_after takes a starting state name and a number of steps, and answers a distribution over the chain’s states indexed by name, so indexing it with V reads the chance of a vowel.", "For two states the second eigenvalue is p_VV less p_CV, read off probability_of. Its sign says whether the walks cross and its size says how much of the remaining distance each step leaves."], check: numberCheck("What chance of a vowel does the Dinah chain give two steps after a vowel?", 0.3829, 0.0005, "The two-step prediction includes both possible intermediate letter classes. The negative second eigenvalue explains alternating sides of the stationary share while the distribution approaches it for this aperiodic chain.") },question:"How does the next-letter distribution change over repeated steps?"}),
-            exercise("Score the sentence under its own chain",["Part 2 says the counted table is the one under which the counted text is most probable, and that the probability of a text is a product of one table entry per step, given its first letter. Ask the chain for the log probability of Oh my dear Dinah, confirm it by adding the twelve logarithms yourself, and then score a sentence the chain never counted, the classes of banana.", "The two-chapter chain gives its text a log likelihood of −9,773.73 nats. The number for the thirteen-letter sentence is one the page does not print, and the first letter is never scored, which is why thirteen letters give twelve terms."],`import math
+            exercise("Score the sentence under its own chain",["Score the V/C sequence of Oh my dear Dinah with log_probability_of. Confirm the result by adding the natural logarithm of each of its twelve transition probabilities. Print the log probability, its exponential and your manual log sum, then score the V/C sequence of banana with the same fitted chain.", "The first state is supplied rather than predicted, leaving twelve transition terms for thirteen letters. These scores describe the class sequences, not probabilities for the exact English letters or words."],`import math
 from oop_ml import MarkovChain
 
 sentence = "oh my dear dinah"
@@ -1297,7 +1153,7 @@ print(f"log probability of banana's classes {chain.log_probability_of(banana):.4
 probability 0.000688
 the twelve logarithms added by hand -7.2824 nats
 log probability of banana's classes -2.9882 nats`,{...{ hints: ["log_probability_of takes one sequence of state names and answers the sum of the natural logarithms of each step’s probability, given the first state, so the exponential of it is the probability of the twelve steps together.", "The steps in the sentence are one vowel to vowel, four vowel to consonant, three consonant to vowel and four consonant to consonant, so the sum by hand has those four terms with those four counts.", "banana’s classes are C V C V C V, five steps, every one a step the Dinah chain counted, so nothing in it has probability zero."], check: numberCheck("What log probability does the chain give Oh my dear Dinah, in nats?", -7.2824, 0.0005, "Conditioning on the first class leaves one transition term for each later letter. Adding natural-log transition probabilities calculates the same sequence score without multiplying many small numbers.") },question:"What probability does the fitted chain assign to each sentence?"}),
-            exercise("Count the three chains where the method stops being defined",["Fit the supplied class sequences for spa, banana, and the separate words rhythm and aeiou, both without smoothing and with smoothing 0.5. Print the transition tables and ask each fitted chain for its stationary distribution. Catch and print the library's named refusals.","The unsmoothed spa sequence has a state with no observed outgoing transition. Banana alternates deterministically: its stationary distribution exists, but a start concentrated on one class keeps oscillating. The identity table from the separate words has several stationary distributions. Compare those different failures with the smoothed results."],`from oop_ml import MarkovChain, NonUniqueStationaryDistributionError, TooFewValuesError
+            exercise("Count the three chains where the method stops being defined",["For spa, banana and the separate sequences rhythm and aeiou, fit a chain with smoothing=0.5 and print its stationary vowel share. Then try each case without smoothing. Print any fit error; for successful fits, print the transition table and vowel probabilities over steps zero through five.","Request a stationary distribution from each successful unsmoothed fit and catch any non-uniqueness error. Compare three distinct issues: an outgoing row with no observations, deterministic alternation and separate closed classes. Use the smoothed stationary shares as a comparison, not evidence that the original sequences had those transitions."],`from oop_ml import MarkovChain, NonUniqueStationaryDistributionError, TooFewValuesError
 
 groups = {"spa": ["spa"], "banana": ["banana"], "rhythm and aeiou": ["rhythm", "aeiou"]}
 for label, words in groups.items():

@@ -64,7 +64,7 @@ export function GramMatrixView({ dataset }: { dataset: "three" | "throw" }) {
           <table className="border-collapse font-mono text-sm">
             <thead>
               <tr>
-                <th className="py-1 pr-4 text-left font-medium text-slate-500 dark:text-slate-400">centred height</th>
+                <th className="py-1 pr-4 text-left font-medium text-slate-500 dark:text-slate-400">centered height</th>
                 {gram.centred_x.map((value, index) => (
                   <th key={index} className="px-3 py-1 text-right font-medium text-slate-500 dark:text-slate-400">{format(value)}</th>
                 ))}

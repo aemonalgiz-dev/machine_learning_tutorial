@@ -99,8 +99,9 @@ export function Word2vecSeeds() {
       </div>
 
       <Legend>
-        Both fits are correct and neither is a better answer than the other. The
-        five nearest words to <span className="font-mono">{pair.word}</span>{" "}
+        Both runs group these verb forms despite starting from different random
+        values. That agreement does not require identical coordinates or neighbor
+        rankings. The five nearest words to <span className="font-mono">{pair.word}</span>{" "}
         overlap in {pair.shared_neighbours.length}, shown in bold, and every one
         of the ten is a verb form, so the two runs agree about which list the
         word belongs to and disagree about the order inside it.

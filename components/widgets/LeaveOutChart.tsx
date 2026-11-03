@@ -208,8 +208,10 @@ export function LeaveOutChart() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Whatever the crowd size, roughly the same third goes unseen, which is
-        what makes the out-of-bag score dependable.
+        As the dataset grows, the omitted share approaches about 37%. Those
+        omitted observations can test a tree that did not train on them.
+        Having them available makes out-of-bag evaluation possible; it does
+        not by itself guarantee an accurate estimate on future data.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">

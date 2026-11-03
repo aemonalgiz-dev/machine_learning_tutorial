@@ -74,7 +74,7 @@ export function BoundaryDisagreement() {
             <circle key={index} cx={personX(person.x)} cy={personY(person.y)} r={3.5} fill={person.label === 0 ? CHILD : ADULT} stroke="white" strokeWidth={1} />
           ))}
           <circle cx={mapX(probe.column) + cell / 2} cy={mapY(probe.row) + cell / 2} r={7} fill="none" stroke="#0f172a" strokeWidth={2.5} className="dark:stroke-slate-100" />
-          <text x={MAP.width / 2} y={MAP.height - 6} textAnchor="middle" className="fill-slate-500 text-[10px] dark:fill-slate-400">coloured only where the two committees disagree, in the forest&rsquo;s colour</text>
+          <text x={MAP.width / 2} y={MAP.height - 6} textAnchor="middle" className="fill-slate-500 text-[10px] dark:fill-slate-400">colored only where the two committees disagree, in the forest&rsquo;s color</text>
         </svg>
         <div className="text-sm text-slate-600 dark:text-slate-300">
           <label className="flex items-center gap-2 text-xs">

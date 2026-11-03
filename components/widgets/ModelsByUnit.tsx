@@ -24,9 +24,9 @@ import { CROWD } from "./featureScalingFixtures";
 export type ModelPanel = "descent" | "ridge" | "least_squares" | "tree" | "inverse";
 
 const UNIT_LABELS: Record<HeightUnit, string> = {
-  millimetres: "millimetres",
-  centimetres: "centimetres",
-  metres: "metres",
+  millimetres: "millimeters",
+  centimetres: "centimeters",
+  metres: "meters",
   standardized: "standardized",
 };
 

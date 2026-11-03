@@ -166,9 +166,10 @@ export function NearestInOneSpace() {
 
       <Legend>
         The first document is <span className="font-mono">flour sugar and butter eggs oven</span>.
-        Drag the number of kept directions down to two and every bar on both
-        sides goes to its full length, which is not the fit agreeing with itself
-        but the fit having nothing left to tell these things apart with.
+        Reduce the number of retained directions to two and compare the bars.
+        The document vectors within each topic become indistinguishable under
+        this similarity measure. Their equal scores mean that information was
+        lost, even though the nearest-document results may look consistent.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">

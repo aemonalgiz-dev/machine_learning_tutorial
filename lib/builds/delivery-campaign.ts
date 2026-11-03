@@ -29,7 +29,7 @@ export type CampaignAttempt = {
 };
 export type CampaignState = { mission: CampaignMission; nextId: number; attempts: CampaignAttempt[] };
 
-const line: Choice = { id: "line", label: "Fit a straight correction", explanation: "Allow a fixed adjustment and an adjustment per kilometre." };
+const line: Choice = { id: "line", label: "Fit a straight correction", explanation: "Allow a fixed adjustment and an adjustment per kilometer." };
 const row = (id: string, distance: number, minutes: number, neighborhood?: CampaignRow["neighborhood"]): CampaignRow => ({ id, distance, minutes, ...(neighborhood ? { neighborhood } : {}) });
 
 // These are invented delivery records. A fresh batch changes preparation time
@@ -49,7 +49,7 @@ export function campaignScenario(mission: CampaignMission, seed = 0): CampaignSc
       training: training.map(record => ({ ...record, minutes: curve(record.distance) })),
       validation: validation.map(record => ({ ...record, minutes: curve(record.distance) })),
       choices: [line, { id: "quadratic", label: "Include distance squared", explanation: "Fit an extra correction that can change more quickly on longer routes." }],
-      hints: ["Compare the extra minutes between consecutive kilometre readings. Does each additional kilometre add the same amount?", "A distance-squared term lets the rate of change increase with distance. The next batch will tell us whether that helps here."],
+      hints: ["Compare the extra minutes between consecutive kilometer readings. Does each additional kilometer add the same amount?", "A distance-squared term lets the rate of change increase with distance. The next batch will tell us whether that helps here."],
     };
   }
   if (mission === "small-sample") return { ...base, title: "Five trips are all we have", skill: "Avoided fitting every fluctuation in a small sample",
@@ -99,7 +99,7 @@ export function campaignScenario(mission: CampaignMission, seed = 0): CampaignSc
     };
   }
   return { ...base, title: "The roads changed after the repair", skill: "Responded to a later change without fitting future outcomes",
-    problem: "The dispatch rule worked last month. This week a diversion adds time to each kilometre, and recent deliveries keep arriving after the promise. We have this week's completed records, but tomorrow's outcomes are still unknown.",
+    problem: "The dispatch rule worked last month. This week a diversion adds time to each kilometer, and recent deliveries keep arriving after the promise. We have this week's completed records, but tomorrow's outcomes are still unknown.",
     objective: "Choose which completed records should fit the current correction. Dispatch tomorrow's batch without using its outcomes in the fit.",
     recent: training.map(record => ({ ...record, id: record.id.replace("Record", "This week"), minutes: record.minutes + 1.2 * record.distance })),
     validation: validation.map(record => ({ ...record, minutes: record.minutes + 1.2 * record.distance })),

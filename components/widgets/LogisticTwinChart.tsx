@@ -214,7 +214,7 @@ export function LogisticTwinChart() {
             value={twin.largest_gap.toExponential(1)}
           />
           <Stat
-            label="height, weight standardised about"
+            label="height, weight standardized about"
             value={`${twin.mean_height.toFixed(2)} ± ${twin.deviation_height.toFixed(2)}, ${twin.mean_weight.toFixed(2)} ± ${twin.deviation_weight.toFixed(2)}`}
           />
         </div>
@@ -226,7 +226,7 @@ export function LogisticTwinChart() {
             <tr className="border-b border-slate-200 text-left dark:border-slate-800">
               {[
                 "person",
-                "standardised height, weight",
+                "standardized height, weight",
                 "score",
                 "model probability",
                 "neuron output",

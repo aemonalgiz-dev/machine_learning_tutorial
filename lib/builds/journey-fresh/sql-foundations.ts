@@ -4,7 +4,7 @@ export const sqlFoundationFreshCases: Record<string, FreshJourneyCase> = {
  "sql-tables": {
   name:"Two identical descriptions still have different identities",prompt:"The new register contains P9 and P8, both fans at west. Predict the asset-ID and kind report without collapsing the two real assets.",
   data:{rows:[{asset_id:"P9",site:"west",kind:"fan"},{asset_id:"P8",site:"west",kind:"fan"}]},expected:[{asset_id:"P8",kind:"fan"},{asset_id:"P9",kind:"fan"}],
-  why:"The requested grain remains one registered asset. Equal descriptions do not remove distinct IDs.",
+  why:"Each result row still identifies one registered asset. Equal equipment descriptions do not make P8 and P9 the same asset.",
  },
  "sql-select": {
   name:"Several assets form one pair while a new kind adds another",prompt:"West has two fans and one pump. Predict the unique site-kind pairs, in the requested order.",
@@ -59,6 +59,6 @@ export const sqlFoundationFreshCases: Record<string, FreshJourneyCase> = {
  "sql-join-grain": {
   name:"One asset is present in only one stream",prompt:"P8 has two visits and one reading; P9 has one visit but no reading. Predict this workshop’s inner-joined summaries. The later SQL challenge uses the register to retain every asset.",
   data:{visits:[{asset_id:"P8",inspection_id:1},{asset_id:"P9",inspection_id:2},{asset_id:"P8",inspection_id:3}],readings:[{asset_id:"P8",reading_id:1}]},expected:[{asset_id:"P8",visits:2,readings:1}],
-  why:"Separate counting prevents multiplication, while the explicitly chosen inner join retains only keys present in both summaries. Retention is independent of grain correctness.",
+  why:"Counting each stream first prevents visits and readings from multiplying one another. The chosen inner join then keeps only assets present in both summaries. Keeping every registered asset would require a different join.",
  },
 };

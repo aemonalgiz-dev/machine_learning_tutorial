@@ -9,15 +9,15 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Next-Token Prediction · oop_ml",
-  description: "Text already contains examples of what follows what, giving us a training task without asking someone to label every sentence. A next-token model learns to predict each continuation using only the text available before it.",
+  title: "Next-Token Prediction · Perceptron Lab",
+  description: "Text provides examples of which tokens follow earlier tokens. Training a next-token model uses those continuations as targets while restricting each prediction to the preceding context.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="next-token-prediction"
     title="Next-Token Prediction"
-    tagline={"Text already contains examples of what follows what, giving us a training task without asking someone to label every sentence. A next-token model learns to predict each continuation using only the text available before it."}
+    tagline={"Text provides examples of which tokens follow earlier tokens. Training a next-token model uses those continuations as targets while restricting each prediction to the preceding context."}
     openingTitle="What Is a Language Model Actually Learning to Predict?"
     intuition={lessonIntuitions["next-token-prediction"]}
     technicalStart="Part 2. From Scores to a Training Signal"
@@ -34,15 +34,20 @@ export default function Page() {
 <p>{"The training target at each position is the following token in the original text. The example uses explicit start and end tokens to show the boundaries. Real training pipelines also need policies for document boundaries, sequence packing, padding, and truncation."}</p>
 <Equation>{"Original sequence:  <start>  the  cat  sat  <end>\nInput positions:    <start>  the  cat  sat\nTarget positions:   the      cat  sat  <end>"}</Equation>
 <p>{"Read the two lower rows as columns and each column is one training example. At a given position the model may read every input token up to and including that column, and its target is the token written directly below."}</p>
-<NumberTable headings={["position", "what the model may read", "target", "target ID"]} rows={[["1", "<start>", "the", "1"], ["2", "<start> the", "cat", "2"], ["3", "<start> the cat", "sat", "4"], ["4", "<start> the cat sat", "<end>", "6"]]} caption="Five tokens give four examples. The start token is never a target, because nothing comes before it, and the end token is never an input, because nothing follows it." />
+<NumberTable headings={["position", "what the model may read", "target", "target ID"]} rows={[["1", "<start>", "the", "1"], ["2", "<start> the", "cat", "2"], ["3", "<start> the cat", "sat", "4"], ["4", "<start> the cat sat", "<end>", "6"]]} caption="These five tokens produce four input/target pairs. In this isolated sequence, the start marker is used only as input and the end marker only as a target." />
 <p>{"The target occurrence is one position beyond the text that position may read. A word can appear earlier in the prefix too, but the model cannot inspect this unseen occurrence to obtain the answer. Dog and slept are also in the vocabulary without being in this sentence. The model must still score them at every position, which is why each prediction is a row of seven scores."}</p>
 
 </SubSection>
 <SubSection title="2. Learn from a target without claiming it is the only valid continuation">
 <p>{"The target is the continuation that appeared in this example. Another example can have the same prefix and a different next token. Across data, the model is encouraged to assign probability according to the continuations it observes."}</p>
-<p>{"Suppose the data holds the cat sat in one example and the cat slept in another. After the cat, the first example says the answer was sat and the second says it was slept. A prediction that puts everything on sat is right about the first example and badly wrong about the second. A prediction that shares between sat and slept is partly right about both. Step 4 puts numbers on the two predictions, and the sharing one comes out well ahead. That is the sense in which the model is fitting the proportions in its data, and it is why the output is a distribution over the vocabulary and not one chosen token."}</p>
+<p>
+                  {"Suppose the data includes the cat sat once and the cat slept once. The shared prefix the cat is followed by sat in one example and slept in the other. A prediction that commits all probability to sat cannot account for the second observation."}
+                </p>
+                <p>
+                  {"For these equally weighted examples, the lowest possible mean log loss assigns one half to each observed continuation. Step 4 compares finite score tables approaching that distribution. The model learns a distribution from observed continuations; choosing one token is a separate decoding step."}
+                </p>
 <p>{"This is called self-supervised learning because the text supplies the target without a person labeling each position. It still uses a precise training target and a loss. Data selection, duplication, and coverage influence what the model learns."}</p>
-<p>{"The table in step 1 shows how little the supervision asks of anybody. It was produced by shifting the sentence one place. Nobody decided what the right continuation ought to be, which also means that whatever the text contains, mistakes and repetitions included, becomes a target."}</p>
+
 
 </SubSection>
 
@@ -52,7 +57,9 @@ export default function Page() {
 <p>{"Softmax exponentiates each logit and divides by the sum across the vocabulary. For the default table, the observed target has an assigned logit of one and all six alternatives have a logit of zero."}</p>
 <Equation>{"Target weight = exp(1)\nEach alternative weight = exp(0) = 1\n\nTotal weight = exp(1) + 6\nTarget probability = exp(1) / (exp(1) + 6)\n\nToken loss = −ln(Target probability)"}</Equation>
 <WorkedExample title="The default table, evaluated">
-<p>{"The target weight exp(1) is about 2.7183, and the six alternatives contribute one each."}</p>
+<p>
+                  {"The target weight is about 2.7183, and each of the six alternative weights is one."}
+                </p>
 <Equation>{"Target probability = 2.7183 / (2.7183 + 6) ≈ 0.3118\nEach alternative = 1 / 8.7183 ≈ 0.1147\nToken loss = −ln(0.3118) ≈ 1.1654"}</Equation>
 <p>{"Every scored position in the default table has the same assigned scores, so each shows the same probability and the same loss, and the mean scored token loss is 1.1654 as well. The slider moves the target logit while the alternatives stay at zero."}</p>
 <NumberTable headings={["assigned target logit", "target probability", "token loss"]} rows={[["0", "0.1429", "1.9459"], ["1", "0.3118", "1.1654"], ["2", "0.5519", "0.5944"], ["4", "0.9010", "0.1043"]]} caption="At a logit of zero all seven entries tie at one seventh and the loss is ln 7. Raising the target logit raises its probability and lowers the loss, and the loss never reaches zero, because the alternatives keep a positive share." />
@@ -60,19 +67,25 @@ export default function Page() {
 <p>{"The negative natural logarithm gives a small loss when the target is likely and a large loss when it is unlikely. This does not evaluate whether the sentence is true. It measures how well the distribution predicts the observed text."}</p>
 </SubSection>
 <SubSection title="4. Average over positions and differentiate">
-<p>{"Let p be a vocabulary probability, y the target ID, and N the number of scored positions. The average loss gives each scored position equal weight. The derivative below applies to a logit at one scored position."}</p>
+<p>{"The average treats each scored position as one contribution to the objective. Let p denote a vocabulary probability, y the target ID, and N the number of positions being scored. The derivative below describes one vocabulary score at one such position; averaging scales that position's contribution by the total count."}</p>
 <Equation>{"L = −(1 / N) Σₜ ln pₜ(yₜ)\n\n∂L / ∂logitₜ,ⱼ = (pₜ(j) − 1[j = yₜ]) / N"}</Equation>
-<p>{"For the target, the derivative is negative unless its probability is already one. Gradient descent therefore increases that score locally. In a real network, backpropagation carries this derivative through the vocabulary projection, transformer blocks, and embeddings. Shared parameters couple the effects across examples."}</p>
+<p>
+                  {"If we adjusted each logit directly, gradient descent would raise the target’s score because its derivative is negative. In a network, backpropagation converts those score derivatives into updates for shared parameters. One parameter can affect several scores and examples, so that combined step need not raise every target score."}
+                </p>
 <WorkedExample title="The derivative on the default table">
 <p>{"The default table scores four positions, so N is four. At every position the target has a probability of 0.3118 and each of the six alternatives has 0.1147."}</p>
 <Equation>{"Target logit:      (0.3118 − 1) / 4 ≈ −0.1721\nEach alternative:  (0.1147 − 0) / 4 ≈ 0.0287\n\nSum over the row:  −0.1721 + (6 × 0.0287) ≈ 0"}</Equation>
-<p>{"The probabilities shown are rounded and the derivatives were calculated from the unrounded ones. A descent step moves each score against its derivative. The target’s derivative is negative, so the step raises the target score, and each alternative’s derivative is positive, so the same step lowers it. The seven derivatives in a row sum to zero because the seven probabilities sum to one, so whatever the target gains the alternatives give up between them."}</p>
-<NumberTable headings={["assigned target logit", "target probability", "derivative at the target logit"]} rows={[["0", "0.1429", "−0.2143"], ["1", "0.3118", "−0.1721"], ["2", "0.5519", "−0.1120"], ["4", "0.9010", "−0.0248"]]} caption="The derivative shrinks toward zero as the target becomes likely. A position the model already predicts well asks for almost no change, and a position it predicts badly asks for the most." />
+<p>
+                  {"The displayed probabilities are rounded; these derivatives use the unrounded values. If we adjust the logits directly, a descent step raises the target logit and lowers the alternatives. The derivatives sum to zero because the probabilities sum to one, so those direct logit changes also sum to zero. This balance does not mean that a shared network-parameter update moves each output score independently."}
+                </p>
+<NumberTable headings={["assigned target logit", "target probability", "derivative at the target logit"]} rows={[["0", "0.1429", "−0.2143"], ["1", "0.3118", "−0.1721"], ["2", "0.5519", "−0.1120"], ["4", "0.9010", "−0.0248"]]} caption="For the target logit, a lower target probability makes this derivative more negative. As the target probability approaches one, the derivative approaches zero." />
 </WorkedExample>
 <WorkedExample title="Averaging over two continuations of one prefix">
 <p>{"Return to the two examples from step 2, where the cat is followed by sat once and by slept once. That is two scored positions with the same prefix and different targets, and the average gives them equal weight. Compare a prediction that commits, with a logit of four on sat and zero on the other six entries, with a prediction that shares, with a logit of four on both sat and slept and zero on the other five."}</p>
 <NumberTable headings={["prediction", "probability of sat", "probability of slept", "loss when sat followed", "loss when slept followed", "mean loss"]} rows={[["commits to sat", "0.9010", "0.0165", "0.1043", "4.1043", "2.1043"], ["shares between the two", "0.4781", "0.4781", "0.7379", "0.7379", "0.7379"]]} caption="The same row of scores is used for both examples, because the model reads the same prefix in each." />
-<p>{"Committing is cheap when it is right and very expensive when it is wrong, and over the two examples it averages 2.1043 against 0.7379 for sharing. The average loss therefore pulls the prediction toward the proportions in the data. No row of scores can do better on these two examples than a half each, which would cost 0.6931 on both."}</p>
+<p>
+                  {"On these two targets, the preference for sat has mean loss 2.1043, while the shared preference has mean loss 0.7379. For these equally weighted continuations, the lowest possible loss corresponds to probability one half for each. Its loss is about 0.6931. Finite logits over all seven entries can approach that distribution, but they leave some probability for the five unobserved alternatives."}
+                </p>
 </WorkedExample>
 </SubSection>
 
@@ -89,7 +102,7 @@ export default function Page() {
                 "The start token",
               ],
               0,
-              "The training target at each position is the following token in the original text, so the input positions are start, the, cat, sat and the target positions are the, cat, sat, end. Five tokens give four examples, because the start token is never a target and the end token is never an input.",
+              "The target for sat is the following token, <end>. For this training example, the inputs are <start>, the, cat, sat and the targets are the, cat, sat, <end>. The boundary tokens are used this way in the supplied sequence; other dataset conventions may handle boundaries differently.",
             ),
             trueFalse(
               "The target at a position is the only valid continuation of the prefix before it.",
@@ -105,7 +118,7 @@ export default function Page() {
                 "One, because its logit is the largest",
               ],
               0,
-              "Softmax exponentiates each logit and divides by the sum across the whole vocabulary, and each of the six alternatives contributes exp(0), which is 1. That comes to about 0.3118. One seventh is what the target gets at a logit of zero, where all seven entries tie.",
+              "Softmax divides the target's exponentiated score by the total across all seven tokens.\n\n```math\np(target) = exp(1) / [exp(1) + 6 × exp(0)] ≈ 0.3118\n```\n\nA logit is a score, not a probability. If all seven scores were equal, each token would receive one seventh.",
             ),
             several(
               "Which of these hold on the default table, where every target has a logit of one and the six alternatives have zero?",
@@ -132,19 +145,25 @@ export default function Page() {
 <WorkedExample title="The same loss on scores a network produced">
 <p>{"The transformer block lesson built a small decoder whose parameters are fixed random values. Give it the four input tokens <start>, the, cat and sat and it returns seven scores at each position. Those rows can be scored against the same four targets exactly as the assigned table was."}</p>
 <NumberTable headings={["what the model may read", "target", "target probability", "token loss"]} rows={[["<start>", "the", "0.0988", "2.3145"], ["<start> the", "cat", "0.2438", "1.4114"], ["<start> the cat", "sat", "0.0395", "3.2310"], ["<start> the cat sat", "<end>", "0.0588", "2.8330"]]} caption="The mean scored token loss is 2.4475. Seven equal scores would cost 1.9459 at every position." />
-<p>{"The untrained decoder does worse than a prediction that knows nothing. Its random parameters produce uneven scores, and the larger ones land on the wrong tokens. At the first position it gives sat a probability of 0.4586 when the token that followed was the. Nothing is broken here. This is a model before the objective has been used on it, and training is the work of bringing 2.4475 down."}</p>
+<p>
+                  {"On these four positions, the untrained decoder’s mean loss of 2.4475 is higher than the uniform baseline. Its random parameters favor some alternatives over the observed targets. At the first position it gives sat probability 0.4586, although the observed target is the. Training would adjust these shared parameters to reduce the next-token objective across the training data."}
+                </p>
 </WorkedExample>
 <p>{"Pretraining supplies broad statistical patterns. It does not automatically turn a continuation model into a reliable assistant. Supervised fine-tuning can teach response behavior; retrieval can provide source material at answer time. Neither makes evaluation unnecessary."}</p>
 <KeepInMind>
-<p>{"A loss is read against the vocabulary it was measured over. Equal scores cost the logarithm of the vocabulary size at every position, which is ln 7, about 1.9459, for the seven entries here, and that starting point rises as the vocabulary grows. A loss of 1.9459 means knowing nothing over seven entries, and the same value over a larger vocabulary would mean the model had learned something."}</p>
+<p>{"The vocabulary determines the uniform-probability baseline for this loss. With seven equally scored entries, that baseline is ln 7, about 1.9459. It rises with vocabulary size. A loss of 1.9459 matches the uniform baseline for these seven entries; the same value over a larger vocabulary would improve on that larger uniform baseline. Neither comparison by itself measures factual knowledge."}</p>
 </KeepInMind>
 
 </SubSection>
 <SubSection title="6. Inspect the objective directly">
-<p>{"The SDK example keeps the scores explicit. It calculates the mean loss, individual token losses, probability rows, and exact logit derivatives without fitting a language model."}</p>
+<p>
+                  {"The SDK example below uses one scored position and a three-entry vocabulary, rather than the four-position, seven-entry table above. TokenCrossEntropy receives a two-dimensional logits array with one row per position and a target-ID array with one entry per row. The result contains the mean loss, per-token losses, probabilities and logit derivatives. This program prints the mean loss and gradient; it does not fit a model."}
+                </p>
 <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm leading-relaxed text-slate-100"><code>{"import numpy as np\nfrom oop_ml.numpy.modern import TokenCrossEntropy\n\nlogits = np.array([[1.0, 0.0, 0.0]])\ntargets = np.array([0])\nresult = TokenCrossEntropy().measure(logits, targets)\nprint(result.value)\nprint(result.gradient)"}</code></pre>
 <p>{"During training, earlier input tokens come from the training sequence, so causal positions can be processed together. During generation, the model must use its own selected tokens as the growing context. That difference is the subject of the next lesson."}</p>
-<p>{"The first of those claims can be checked on the small decoder. One pass over the four input tokens returns four rows of scores. Running the decoder again on only the first three tokens gives a last row that agrees with the third row of the full pass, and the same holds for the other prefix lengths, to within rounding in the sixteenth decimal place. A position’s scores depend only on the tokens at or before it. So one pass over a training sequence does the work of four separate predictions, and the loss at every position can be calculated from that single pass."}</p>
+<p>
+                  {"We can check the causal restriction on the small decoder. One pass over all four input tokens returns four rows of scores. Run it again on only the first three tokens: its last row agrees with the third row of the full pass. The other prefix lengths agree in the same way, within rounding in the sixteenth decimal place. Future tokens are blocked, so the full pass produces all four training predictions without revealing a later target occurrence to an earlier position."}
+                </p>
 </SubSection>
 <p>{"The GPT-3 paper provides a concrete example of a large autoregressive language model and distinguishes prompting from gradient-based fine-tuning."}{" "}<a href="https://arxiv.org/abs/2005.14165">Language Models are Few-Shot Learners</a>.</p>
 <p>Continue with <Link href="/concepts/autoregressive-generation">Autoregressive Generation</Link>.</p>
@@ -155,7 +174,7 @@ export default function Page() {
             trueFalse(
               "There is a parameter count above which a model counts as large.",
               false,
-              "A large language model has a large learned parameter set and is trained on substantial language data, and no universal threshold separates the two. What scale changes is model capacity, context length, data and optimization, while the next-token objective stays the same.",
+              "There is no universal parameter threshold for the term large language model. Parameter count describes one aspect of scale. Training data, context limits and optimization are separate design choices; increasing the parameter count does not automatically enlarge the context window. The next-token objective can be used by small and large models alike.",
             ),
             trueFalse(
               "Scored on the lesson’s sentence, the small decoder with fixed random parameters has a higher mean loss than seven equal scores would.",
@@ -171,7 +190,7 @@ export default function Page() {
                 "Enough coverage that evaluation becomes unnecessary",
               ],
               0,
-              "Supervised fine-tuning can teach response behavior and retrieval can provide source material at answer time. Neither of those makes evaluation unnecessary, and pretraining alone does not turn a continuation model into an assistant.",
+              "Pretraining adjusts parameters to predict tokens from language examples, which can produce reusable representations and continuation behavior. It does not by itself guarantee useful instruction following or factual answers. Supervised fine-tuning can train response behavior, and retrieval can supply source material at answer time. Each still needs evaluation for the intended task.",
             ),
             choice(
               "Why can causal positions be processed together while training but not while generating?",
@@ -191,7 +210,7 @@ export default function Page() {
           practice: [
             exercise(
               "Score the default table",
-              ["Build the scores behind the page’s default table, a logit of one on each of the four targets and zero on the other six entries, and measure them with TokenCrossEntropy. Print each target’s probability and token loss to four places, then the mean loss and the derivative at the first target’s logit.", "Part 2 arrived at a probability of 0.3118, a token loss of 1.1654 and a derivative of −0.1721 by hand. The library does the same arithmetic on all four rows at once, so every row should repeat those figures."],
+              ["Create four rows of seven logits, using one at each row's target and zero at its six alternatives. Measure them with TokenCrossEntropy. Print each target's probability and per-token loss to four decimal places. Then print the mean loss and the derivative at the first target's logit.", "Part 2 arrived at a probability of 0.3118, a token loss of 1.1654 and a derivative of −0.1721 by hand. The library does the same arithmetic on all four rows at once, so every row should repeat those figures."],
               `import numpy as np
 from oop_ml.numpy.modern import TokenCrossEntropy
 
@@ -232,7 +251,7 @@ derivative at the first target -0.1721`,
             ),
             exercise(
               "Share one prefix between two continuations",
-              ["Step 4 scored two examples with the same prefix, one followed by sat and one by slept, under a row that commits to sat and a row that shares. Reproduce both mean losses, then add a third row that shares with a logit of eight on sat and on slept, and print the natural logarithm of 2 beside it.", "The lesson says no row of scores can beat a half each. The third row shows how close a stronger shared score gets, which is a number the lesson does not print."],
+              ["Step 4 scored two examples with the same prefix, one followed by sat and one by slept, under a row that commits to sat and a row that shares. Reproduce both mean losses, then add a third row that shares with a logit of eight on sat and on slept, and print the natural logarithm of 2 beside it.", "Both examples have the same prefix, with sat observed once and slept once. Compare the measured mean losses with the ideal distribution that assigns each continuation probability one half. The finite shared logits leave some probability on the other five tokens, so their loss remains slightly higher."],
               `import numpy as np
 from oop_ml.numpy.modern import TokenCrossEntropy
 
@@ -315,7 +334,7 @@ derivative at sat -0.2401`,
             ),
             exercise(
               "Check that one pass does the work of four",
-              ["Part 3 says the positions of a training sequence can be processed together. Run the decoder once over all four input tokens, then once for each prefix length from one to four, and compare the last row of each shorter pass with the matching row of the full pass. Print the largest absolute difference for each length.","For each prefix length, compare its final logit row with the row at the same position in the full pass and print the largest absolute difference. The causal mask should make these results agree for the supplied model and inputs because later tokens are unavailable to earlier rows. Small floating-point differences are acceptable; this example checks those inputs rather than proving every possible implementation correct."],
+              ["Run the decoder once over all four input tokens. Then run it separately on each prefix, from one through four tokens. Compare each prefix's final logit row with the row at the same position in the full pass, and print the largest absolute difference.","Use the same model for every pass. Later input tokens should not affect earlier rows because of the causal mask. Floating-point roundoff can leave tiny differences; this comparison checks the supplied model and inputs rather than proving correctness for every sequence."],
               `import numpy as np
 from oop_ml.numpy.modern import CausalLanguageModel
 

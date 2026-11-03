@@ -27,7 +27,7 @@ const existingCurriculum: Part[] = [
   {
     "id": "mathematics-as-needed",
     "title": "Introductory Mathematics",
-    "intro": "Machine learning uses mathematics to describe data, make predictions, and improve those predictions. Those calculations are much easier to follow when we understand what they are doing. We will work through statistics, linear algebra, and calculus from small examples, so you don't need to arrive with that background.",
+    "intro": "Measurements vary, and the patterns we observe are not always dependable. Statistics and probability help us judge those patterns. Linear algebra and calculus describe relationships between quantities and how those relationships change.",
     "topics": [
       {
         "heading": "Introductory Mathematics",
@@ -36,17 +36,17 @@ const existingCurriculum: Part[] = [
           {
             "title": "Statistics & Probability Primer",
             "href": "/primers/statistics",
-            "blurb": "A collection of measurements does not explain itself. We need ways to describe what is typical, how much the values differ, and how much confidence we should place in the patterns we observe."
+            "blurb": "An average describes a typical value in a collection of measurements. Measures of spread show how much those measurements vary, and probability gives us ways to reason about uncertain outcomes."
           },
           {
             "title": "Linear Algebra Primer",
             "href": "/primers/linear-algebra",
-            "blurb": "A model often needs to work with many measurements at once. Vectors and matrices let us organise those numbers and repeat useful calculations without writing a separate rule for every example."
+            "blurb": "A system of equations can describe several quantities that depend on each other. Vectors and matrices make those relationships easier to calculate with, while geometry helps us picture what the calculations are doing."
           },
           {
             "title": "Calculus Primer",
             "href": "/primers/calculus",
-            "blurb": "If we change a model's setting a little, does its error improve or get worse? Calculus gives us a way to describe that change and use it to decide what to adjust next."
+            "blurb": "Calculus describes how one quantity changes as another changes. A derivative measures the rate of that change, helping us understand a function's behavior and decide which adjustments increase or decrease its output."
           }
         ]
       }
@@ -54,7 +54,7 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Start with a Prediction",
-    "intro": "Suppose we know a person's height and want to estimate their weight. How would we find a useful rule, and how would we know whether it works for someone we haven't measured? We will start with that problem, then look at predictions that choose a category instead of a number.",
+    "intro": "A prediction uses what we know to estimate something we don't. The answer may be a number or a category, and the rule needs to work on examples beyond those used to develop it.",
     "topics": [
       {
         "heading": "Start with a Prediction",
@@ -63,22 +63,22 @@ const existingCurriculum: Part[] = [
           {
             "title": "Simple Linear Regression",
             "href": "/concepts/simple-linear-regression",
-            "blurb": "Taller people tend to weigh more, but height does not determine weight exactly. We will use that relationship to build a prediction rule and work out what makes one line fit the observations better than another."
+            "blurb": "Linear regression represents a relationship with a straight line. Fitting the line means choosing its slope and intercept according to the differences between observed and predicted values."
           },
           {
             "title": "Held-Out Evaluation",
             "href": "/concepts/held-out-evaluation",
-            "blurb": "A rule can fit the examples it has already seen without being useful on new ones. We need to put some examples aside and use them to check the predictions after fitting."
+            "blurb": "Performance on familiar examples can overstate how well a rule predicts new ones. Setting data aside before fitting gives us a separate check of its predictions."
           },
           {
             "title": "Logistic Regression",
             "href": "/concepts/logistic-regression",
-            "blurb": "Suppose our answer needs to be yes or no. We can first estimate a probability from the measurements, then decide how large that probability needs to be before we choose yes."
+            "blurb": "Logistic regression estimates the probability of a category from a set of measurements. A decision threshold turns that probability into a yes-or-no prediction, with different thresholds producing different kinds of mistake."
           },
           {
             "title": "Judging a Classifier",
             "href": "/concepts/judging-a-classifier",
-            "blurb": "A model can make different kinds of mistake, and they may have very different consequences. Counting correct answers alone can hide the errors that matter most for the task."
+            "blurb": "Correct predictions and different kinds of mistake need to be counted separately. Their consequences determine which evaluation measures tell us whether a classifier is useful."
           }
         ]
       }
@@ -86,42 +86,42 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Data Preparation",
-    "intro": "A model works with the numbers we give it, but those numbers may describe very different things. Age, income, and distance do not use the same units or vary by the same amounts. We need to consider what our measurements represent before expecting a model to make useful comparisons.",
+    "intro": "The way data is recorded affects what we can calculate from it. Missing values and inconsistent units need explicit treatment, while categories and dates need representations that preserve their meaning. Historical predictions also need the information that was available at the time.",
     "topics": [
       {
         "heading": "Centres and Scales",
-        "blurb": "A difference of ten means something very different when we are measuring age rather than income. We will look at how changing a measurement's reference point and units changes the comparisons a model makes.",
+        "blurb": "The size of a numerical difference depends on the units we use and the point we measure from. Changing those references can make measurements easier to compare, while also changing how much influence each one has on a calculation.",
         "concepts": [
           {
-            "title": "Centring on the Mean",
+            "title": "Centering on the Mean",
             "href": "/concepts/centring-on-the-mean",
-            "blurb": "Sometimes it is more useful to know how far a measurement is from the average than how far it is from zero. Subtracting the mean gives us that new reference point."
+            "blurb": "Subtracting the mean expresses each measurement relative to the average. The differences between observations stay the same, while zero becomes a useful reference for their departures from that average."
           },
           {
             "title": "The Standard Score",
             "href": "/concepts/the-standard-score",
-            "blurb": "How unusual is a measurement that is ten units above average? That depends on how much the measurements usually vary. A standard score expresses the difference in units of standard deviation."
+            "blurb": "A difference from the average depends on how much the measurements normally vary. A standard score expresses that difference in units of standard deviation, allowing values on different scales to be compared."
           },
           {
             "title": "Feature Scaling",
             "href": "/concepts/feature-scaling",
-            "blurb": "A distance calculation can be dominated by a feature simply because its numbers are larger. We will look at how scaling changes that calculation and why some models are affected more than others."
+            "blurb": "The units of a measurement can affect its influence on a calculation. Scaling changes those units or ranges, which matters when distances or parameter updates are sensitive to the size of the numbers."
           }
         ]
       },
       {
         "heading": "Constructing and Reducing Features",
-        "blurb": "Sometimes the useful relationship is easier to describe with a new measurement, such as area rather than length. Other times we have several measurements describing much the same thing. Both affect what we give the model.",
+        "blurb": "The measurements we collect are not always the most useful inputs for a model. Combining them can express a relationship more directly, while reducing overlapping information can give us a smaller representation. Both choices change what the model can learn.",
         "concepts": [
           {
             "title": "Polynomial Features",
             "href": "/concepts/polynomial-features",
-            "blurb": "A straight line cannot describe every relationship between our measurements and the answer. Adding features such as an input squared gives the model more to work with while keeping its coefficients straightforward to fit."
+            "blurb": "Powers and products of existing measurements can describe relationships a straight line in the original inputs cannot. They add flexibility while keeping the fitted prediction linear in its coefficients."
           },
           {
             "title": "Principal Component Analysis",
             "href": "/concepts/pca",
-            "blurb": "Several measurements may vary together, so storing all of them can repeat much of the same information. Principal component analysis looks for directions that preserve the most variation with fewer coordinates."
+            "blurb": "Measurements that vary together can repeat information. Principal component analysis finds directions that preserve the greatest variation, giving us a smaller set of coordinates with a measurable loss of detail."
           }
         ]
       }
@@ -129,158 +129,158 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Classical Machine Learning",
-    "intro": "Different problems give us different information to work with. We might have examples with known answers, observations we want to group, or a pattern we need to find in a picture. We will work through the methods developed for these problems and why their different approaches can be useful.",
+    "intro": "Learning methods use different assumptions to find useful relationships in data. Some predict an answer from labeled examples; others identify groups or unusual patterns. Those differences affect what each method can explain and where it is useful.",
     "topics": [
       {
         "heading": "Distance",
-        "blurb": "Before we ask a model to find similar examples, we need to decide what similar means. Different ways of measuring distance can give us different answers.",
+        "blurb": "Distance gives a numerical meaning to how different two observations are. That meaning depends on the comparison rule and the scale of the measurements. The nearest examples can change when either choice changes.",
         "concepts": [
           {
             "title": "What Near Means",
             "href": "/concepts/distance-metrics",
-            "blurb": "Which of two examples is nearer depends on how we measure distance. We will compare those choices before using nearness to find neighbours or form groups."
+            "blurb": "Distance depends on which differences we choose to count and how we combine them. Different measures can change which observations are nearest, affecting comparisons and the groups formed from them."
           }
         ]
       },
       {
         "heading": "Regression",
-        "blurb": "A single straight line will not explain every relationship. We can include more measurements or allow a more flexible rule, but we still need to work out how to fit it and when that flexibility stops helping.",
+        "blurb": "Regression describes how a numerical outcome relates to its inputs. Additional measurements or curved relationships can improve a prediction, but they also give the fitted rule more freedom to follow noise. We need to judge that flexibility on new observations.",
         "concepts": [
           {
             "title": "Multiple & Polynomial Regression",
             "href": "/concepts/multiple-polynomial-regression",
-            "blurb": "One measurement may not be enough to explain the outcome. We can give a regression model several inputs, including transformed inputs, and work out how much each contributes to the prediction."
+            "blurb": "A prediction may depend on several measurements and how they interact. Multiple regression combines their contributions, while polynomial terms allow curved relationships in the original inputs."
           },
           {
             "title": "Fitting by Walking",
             "href": "/concepts/gradient-descent-regression",
-            "blurb": "Rather than solving for a fitted line all at once, we can improve an initial guess through small adjustments. The gradient tells us which direction increases the error, so we can try moving the other way."
+            "blurb": "A fitted rule can be improved through repeated adjustments to its coefficients. The gradient describes how the error changes near the current settings, providing a direction in which to try reducing it."
           },
           {
             "title": "Ridge & Lasso",
             "href": "/concepts/ridge-lasso",
-            "blurb": "A flexible model can fit accidental details in the training data. Penalising large coefficients gives us a way to discourage that behaviour, with ridge and lasso making different kinds of adjustment."
+            "blurb": "A model can fit details in the training data that do not hold elsewhere. Ridge and lasso penalize coefficient size in different ways, changing how the fit balances prediction error against complexity."
           }
         ]
       },
       {
         "heading": "Classification",
-        "blurb": "Sometimes we want a category rather than a number. We will look at how nearby examples, a sequence of questions, and scores for different classes can each give us a way to decide.",
+        "blurb": "Classification uses measurements to choose between categories. Different methods make that choice through nearby examples, questions about individual features, or comparisons of class scores. Their assumptions affect which distinctions they can learn and where they make mistakes.",
         "concepts": [
           {
-            "title": "k-Nearest Neighbours",
+            "title": "k-Nearest Neighbors",
             "href": "/concepts/k-nearest-neighbours",
-            "blurb": "If similar examples tend to have similar answers, nearby labelled examples may help us predict a new one. We still need to decide how to measure distance and how many neighbours to ask."
+            "blurb": "Nearby labeled examples can provide evidence about an unfamiliar observation. The distance measure and number of neighbors determine which examples contribute and how local the resulting prediction is."
           },
           {
             "title": "Decision Trees",
             "href": "/concepts/decision-trees",
-            "blurb": "A series of simple questions can narrow down a decision. A decision tree learns which questions to ask from the examples and places a prediction at the end of each route."
+            "blurb": "A decision tree divides observations through a sequence of questions about their measurements. Each route ends in a prediction, making the fitted decisions traceable while leaving their reliability dependent on the examples used."
           },
           {
             "title": "More Than Two Classes",
             "href": "/concepts/multiclass-classification",
-            "blurb": "Some problems have more than two possible answers. We need a way to compare the evidence for each category and decide how the resulting scores become a prediction."
+            "blurb": "Some predictions have several possible categories. Comparing a score for each category requires a consistent decision rule and a clear distinction between scores and probabilities."
           }
         ]
       },
       {
         "heading": "Ensembles",
-        "blurb": "One model may depend too heavily on a few examples or miss a pattern another model captures. Combining models can help, but the way we train and combine them matters.",
+        "blurb": "Several models can contribute to one prediction. Their combined answer can be more dependable when their errors differ, but the training procedure determines whether they correct one another or repeat the same mistakes.",
         "concepts": [
           {
             "title": "Bagging",
             "href": "/concepts/bagging",
-            "blurb": "Small changes in the training data can produce very different fitted models. Fitting several models to resampled data and combining their answers can make the result less dependent on one particular fit."
+            "blurb": "Small changes to training data can produce different fitted models. Bagging fits models on resampled observations and combines their predictions, reducing the influence of variation in any one fit."
           },
           {
             "title": "Random Forests",
             "href": "/concepts/random-forests",
-            "blurb": "A collection of trees is less useful if they all make the same mistakes. Giving them different samples and different feature choices encourages the variety that can make their combined prediction more reliable."
+            "blurb": "Combining trees helps when their errors differ. Random forests vary both the sampled observations and the features available at a split, encouraging different trees to contribute different information."
           },
           {
             "title": "Gradient Boosting",
             "href": "/concepts/gradient-boosting",
-            "blurb": "A model's mistakes tell us what it has not yet explained. Boosting adds models in stages, with each new model learning a correction to the predictions already made."
+            "blurb": "Boosting builds a prediction in stages. Each additional model targets a correction to the current result, allowing a sequence of limited adjustments to describe a more complicated relationship."
           }
         ]
       },
       {
         "heading": "Clustering",
-        "blurb": "We do not always have labels telling us which examples belong together. Clustering tries to find groups from the measurements themselves, using a chosen definition of similarity.",
+        "blurb": "Clustering groups observations without supplied category labels. The groups depend on the similarity rule and the structure the method is designed to find. A useful grouping therefore needs interpretation in terms of the original measurements.",
         "concepts": [
           {
             "title": "k-Means Clustering",
             "href": "/concepts/k-means",
-            "blurb": "We may want to group similar observations without having labels for those groups. K-means uses nearby centres to assign the observations, then moves the centres to better represent their assigned points."
+            "blurb": "Clustering groups observations without requiring category labels. K-means alternates between assigning points to nearby centers and moving each center to the mean of its assigned points."
           }
         ]
       },
       {
         "heading": "Kernels",
-        "blurb": "A pattern that is difficult to separate in its original coordinates may become simple after a transformation. Kernels let us use comparisons in that transformed space without explicitly calculating every new coordinate.",
+        "blurb": "Changing a representation can make a difficult relationship easier to describe. A kernel calculates certain comparisons in a transformed representation without constructing all its coordinates explicitly. That lets a model use relationships that a straight boundary in the original measurements would miss.",
         "concepts": [
           {
             "title": "The Kernel Trick",
             "href": "/concepts/kernel-trick",
-            "blurb": "A pattern may be difficult to separate with a straight boundary until we change how it is represented. A kernel lets us compare examples in a transformed space without explicitly building every new feature."
+            "blurb": "Changing the representation of data can make a complicated separation easier to describe. A kernel calculates inner-product comparisons in a transformed feature space without requiring every transformed coordinate to be constructed explicitly."
           },
           {
             "title": "Kernel Ridge Regression",
             "href": "/concepts/kernel-ridge",
-            "blurb": "Ridge regression gives us a way to control a fit, but its original features may not describe the relationship well. Kernel comparisons let us apply the same idea in a transformed feature space."
+            "blurb": "Kernel ridge regression combines comparisons in a transformed feature space with a penalty that controls the fit. The kernel determines the relationships available to the model, while the penalty limits how closely it follows the observations."
           },
           {
             "title": "Kernel Principal Components",
             "href": "/concepts/kernel-pca",
-            "blurb": "The useful structure in a dataset may not lie along a straight direction in its original coordinates. Kernel PCA looks for variation after a transformation, using comparisons between examples to do the work."
+            "blurb": "Useful variation can become easier to represent after a nonlinear transformation. Kernel PCA uses comparisons between examples to find principal directions in that transformed space."
           }
         ]
       },
       {
         "heading": "Sequences",
-        "blurb": "The order of observations can matter. We will start with a model that uses the current state to predict the next one, so we can see what this limited form of memory allows.",
+        "blurb": "Observations in a sequence can depend on what came before them. A Markov chain describes the next state using the current one. Its usefulness depends on whether that state retains enough information for the prediction we need.",
         "concepts": [
           {
             "title": "Markov Chains",
             "href": "/concepts/markov-chains",
-            "blurb": "The next event may depend on what is happening now. A Markov chain describes that dependence using probabilities of moving from one state to another, while leaving earlier history out of the prediction."
+            "blurb": "A Markov chain represents a process through states and the probabilities of moving between them. Its next-state prediction depends on the current state, making the choice of what a state includes important."
           }
         ]
       },
       {
         "heading": "Classical Computer Vision",
-        "blurb": "A computer receives a picture as an array of pixel values. We need ways to turn those values into useful observations, such as where an edge lies or whether a familiar shape is present.",
+        "blurb": "A digital image stores measurements at pixel positions. Image-processing methods use their arrangement to find boundaries or compare local patterns. Those calculations turn a grid of values into evidence about the objects and structures in a picture.",
         "concepts": [
           {
             "title": "Filters and Edges",
             "href": "/concepts/filters-and-edges",
-            "blurb": "The boundary of an object often appears as a change in brightness. Small image filters compare nearby pixels so we can measure those changes instead of treating each pixel in isolation."
+            "blurb": "Changes in neighboring pixel values reveal boundaries and local patterns in an image. Filters calculate those changes over small regions, making image structure easier to measure."
           },
           {
             "title": "Template Matching",
             "href": "/concepts/template-matching",
-            "blurb": "If we already know what a pattern looks like, we can search for it in a larger picture. Template matching compares that known pattern with each possible location in the image."
+            "blurb": "A known image pattern can be compared with regions of a larger image to locate possible matches. The comparison rule determines how changes in brightness affect the match score."
           },
           {
             "title": "Histogram of Oriented Gradients",
             "href": "/concepts/histogram-of-oriented-gradients",
-            "blurb": "An object's outline can remain recognisable when the lighting changes. Histograms of oriented gradients describe local edge directions, giving a detector information about shape without relying on exact pixel values."
+            "blurb": "Local edge directions describe image shape without requiring every pixel value to match. Histograms of oriented gradients collect those directions into regional summaries that can support object detection."
           },
           {
             "title": "Keypoints and Descriptors",
             "href": "/concepts/keypoints-and-descriptors",
-            "blurb": "Two photographs may show the same scene from different positions. We need distinctive points we can recognise in both pictures and a numerical description that lets us compare their surroundings."
+            "blurb": "Distinctive image locations can be matched across photographs taken from different viewpoints. A descriptor gives each location a numerical account of its surroundings so candidate matches can be compared."
           },
           {
             "title": "Image Alignment",
             "href": "/concepts/image-alignment",
-            "blurb": "A camera can move or turn between photographs. Matching points gives us evidence of that movement, which we can use to work out how to bring the images into alignment."
+            "blurb": "Corresponding points in two images provide evidence about how their coordinates relate. Estimating that transformation allows the images to be aligned, with incorrect matches affecting the result."
           },
           {
             "title": "Haar Cascades",
             "href": "/concepts/haar-cascades",
-            "blurb": "Searching every part of a picture can be expensive, especially when most regions contain nothing relevant. A cascade uses inexpensive checks to reject unlikely regions before applying more demanding tests."
+            "blurb": "Most regions searched by an object detector contain no match. A cascade rejects unlikely regions with inexpensive checks before spending more computation on the candidates that remain."
           }
         ],
         "id": "classical-methods"
@@ -289,7 +289,7 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Choosing and Checking a Model",
-    "intro": "A model can look good on the examples we used to choose it and still make poor predictions on new data. We need a way to compare our choices without giving them access to the answers we will use for the final test.",
+    "intro": "Choosing a model involves deciding how to represent a problem and how to measure a useful result. Comparisons need examples that did not guide the fitting process, with a final assessment kept separate from repeated changes.",
     "topics": [
       {
         "heading": "Choosing and Checking a Model",
@@ -298,17 +298,17 @@ const existingCurriculum: Part[] = [
           {
             "title": "Pipelines",
             "href": "/concepts/pipelines",
-            "blurb": "Preparing data is part of fitting a model. If a scaler learns from our test examples, the test has already influenced the result. A pipeline helps us keep those fitting steps together and inside the training procedure."
+            "blurb": "Data preparation can learn settings from the observations it receives. Keeping preparation and prediction in one fitting procedure helps prevent evaluation data from influencing those settings."
           },
           {
             "title": "Searching for a Setting",
             "href": "/concepts/grid-search",
-            "blurb": "Many model settings must be chosen before fitting. We need a fair way to compare those choices using training and validation data, while keeping the final test separate from the decision."
+            "blurb": "Model settings chosen before fitting affect the result. Grid search compares specified combinations using validation data, while a separate final test checks the choice after the search is complete."
           },
           {
             "title": "Which Feature Mattered",
             "href": "/concepts/feature-importance",
-            "blurb": "A prediction alone does not tell us which measurements the model relied on. Feature importance methods give us ways to investigate that question, although their scores need careful interpretation."
+            "blurb": "Feature importance investigates how input measurements affect a fitted model's results. Different methods answer different questions, and related measurements can complicate how their scores should be interpreted."
           }
         ]
       }
@@ -316,110 +316,110 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Neural Networks",
-    "intro": "How do a collection of connected neurons learn to make a prediction? We will start with what one artificial neuron actually does: how its weights, bias, and activation function affect its output. From there, we can connect neurons and work through how examples are used to adjust their settings.",
+    "intro": "An artificial neuron combines weighted inputs with a bias and applies an activation function. Connecting neurons allows a network to represent more complicated relationships. Training adjusts their settings according to the errors made on examples.",
     "topics": [
       {
         "heading": "Neurons and Layers",
-        "blurb": "An artificial neuron has a few basic components. Once we understand what each does, we can connect neurons and follow how a set of measurements becomes a prediction.",
+        "blurb": "An artificial neuron combines weighted inputs with a bias, then applies an activation function. Connecting neurons into layers lets later calculations use patterns found by earlier ones. The arrangement determines how measurements move through the network and become an output.",
         "concepts": [
           {
             "title": "A Neuron",
             "href": "/concepts/neurons-and-activations",
-            "blurb": "An artificial neuron starts with three fundamental components: weights, a bias, and an activation function. We will work through what each contributes before putting them together to calculate an output."
+            "blurb": "An artificial neuron has weights, a bias and an activation function. The weights control each input's contribution, the bias shifts the combined value, and the activation determines how that value becomes an output."
           },
           {
             "title": "A Dense Layer and the Forward Pass",
             "href": "/concepts/dense-layers",
-            "blurb": "One neuron can only do so much with an input. Connecting several neurons lets us calculate different combinations of the same measurements, then pass those outputs to another layer."
+            "blurb": "A dense layer applies several neurons to the same inputs. Each neuron learns its own weighted combination, producing a collection of outputs that another layer can use."
           },
           {
             "title": "The Shape Guarantee",
             "href": "/concepts/shapes-and-flattening",
-            "blurb": "A layer needs to know which numbers belong to which example and how they are arranged. We will follow those dimensions through a network and see what changes when an image is flattened."
+            "blurb": "An array's shape records how values are arranged and which belong to the same example. Flattening puts each example's values into a vector, so the original spatial organization is no longer explicit."
           }
         ]
       },
       {
         "heading": "Training",
-        "blurb": "A network's first predictions are usually poor. We need a way to measure the mistakes, work out which settings contributed to them, and use that information to make an adjustment.",
+        "blurb": "A network learns by adjusting its parameters to reduce a measured error. Backpropagation calculates how those parameters contributed to the loss, giving an update rule information about which direction to move. We can follow those changes through a small network.",
         "concepts": [
           {
             "title": "Loss Functions",
             "href": "/concepts/loss-functions",
-            "blurb": "Before a network can improve, we need to tell it what counts as an error. A loss function assigns a numerical cost to a prediction, and that choice affects which mistakes the model tries hardest to reduce."
+            "blurb": "A loss function assigns a numerical cost to a prediction's error. Its definition determines which mistakes contribute most strongly to the adjustments made during training."
           },
           {
             "title": "Backpropagation",
             "href": "/concepts/backpropagation",
-            "blurb": "A network can contain many weights between an input and its prediction. Backpropagation works backwards through those calculations to find how each weight contributed to a change in the loss."
+            "blurb": "Backpropagation applies the chain rule through a network's calculations. Working backward from the loss gives the derivatives needed to determine how changes to each weight affect that loss."
           },
           {
             "title": "Training a Small Network",
             "href": "/concepts/training-a-network",
-            "blurb": "We now have a prediction, a way to measure its error, and gradients that describe possible adjustments. Training brings those steps together and repeats them over examples so the network can improve."
+            "blurb": "Training repeatedly calculates predictions and measures their errors. Gradients then guide parameter updates, with the update size and sequence of examples affecting how the network changes."
           }
         ]
       },
       {
         "heading": "Regularisation and Normalisation",
-        "blurb": "Improving the training score is not our only concern. We also want the network to cope with new examples and to train reliably. These methods address different parts of those problems.",
+        "blurb": "A network can fit its training examples and still struggle elsewhere. Dropout changes the connections used during training to discourage reliance on particular combinations. Normalization changes how intermediate values are scaled, addressing a different part of how a network trains.",
         "concepts": [
           {
             "title": "Dropout",
             "href": "/concepts/dropout",
-            "blurb": "A network can become too dependent on particular activations during training. Randomly removing some of them makes it work with different combinations, which can help it cope better with new examples."
+            "blurb": "Dropout randomly removes some activations during training. The network therefore trains with changing combinations of available units, which can reduce overfitting without guaranteeing better predictions on every task."
           },
           {
-            "title": "Normalisation Layers",
+            "title": "Normalization Layers",
             "href": "/concepts/normalisation-layers",
-            "blurb": "The values passed between layers can change in scale as a network trains. Normalisation methods control aspects of those scales, but they differ in which values they compare and what they preserve."
+            "blurb": "Normalization changes the reference and scale of values passed through a network. The values grouped for that calculation distinguish methods such as batch and layer normalization and affect their behavior during training and prediction."
           }
         ]
       },
       {
         "heading": "Other Ways to Learn and Store Patterns",
-        "blurb": "A network can do more than predict a label. We will look at networks that recall damaged patterns, organise similar examples, and learn from relationships between their own inputs and outputs.",
+        "blurb": "Networks can learn relationships without a supplied target label. Some retain patterns that can be recalled from incomplete inputs; others organize examples or learn features from their own activity. The learning rule determines what the stored representation captures.",
         "concepts": [
           {
             "title": "Hopfield Networks",
             "href": "/concepts/hopfield-network",
-            "blurb": "We can often recognise a familiar pattern even when part of it is damaged. A Hopfield network stores patterns in its connections and uses repeated updates to try to recover a stable pattern from a noisy input."
+            "blurb": "A Hopfield network uses repeated updates to settle toward a stable pattern. Its connections can store associations that help recover a familiar pattern from incomplete or noisy input, though other stable states can also occur."
           },
           {
             "title": "Restricted Boltzmann Machines",
             "href": "/concepts/restricted-boltzmann-machine",
-            "blurb": "An observation may reflect several underlying patterns we cannot see directly. A restricted Boltzmann machine uses hidden units to represent those patterns and learn a probability model of the visible data."
+            "blurb": "A restricted Boltzmann machine relates observed values to hidden variables through a probability model. Learning their interactions provides a way to represent patterns shared across the observations."
           },
           {
-            "title": "Self-Organising Maps",
+            "title": "Self-Organizing Maps",
             "href": "/concepts/self-organising-map",
-            "blurb": "A large collection of measurements is difficult to picture at once. A self-organising map arranges representative examples on a small grid, trying to keep similar observations near one another."
+            "blurb": "A self-organizing map places representative vectors on a grid. Nearby positions are encouraged to respond to similar observations, giving a spatial summary of data that may have many dimensions."
           },
           {
             "title": "Hebbian Principal Components",
             "href": "/concepts/hebbian-pca",
-            "blurb": "Can a neuron learn a useful direction from examples arriving one at a time? Oja's rule adjusts its weights using the input and output, while adding a correction that prevents simple Hebbian growth from continuing unchecked."
+            "blurb": "Oja's rule adjusts a neuron's weights from successive inputs and outputs. A normalization-related correction limits unbounded growth, allowing the updates to seek a principal direction under suitable learning conditions."
           }
         ]
       },
       {
         "heading": "Additional Network Layers",
-        "blurb": "Different tasks need different connections. A sequence may need memory, a local pattern may need a nearby reference point, and a deep network may benefit from carrying earlier information forward.",
+        "blurb": "A layer's connections determine what information it can use. Recurrent connections retain information across steps, while other layers compare inputs with reference points or carry earlier values forward. Those choices give networks different ways to represent a relationship.",
         "concepts": [
           {
             "title": "Recurrent Layers",
             "href": "/concepts/recurrent-layers",
-            "blurb": "A measurement in a sequence may only make sense in light of what came before it. Recurrent layers carry a state between steps, and gates give us more control over what information is kept."
+            "blurb": "A recurrent layer retains a state as it processes a sequence, allowing earlier observations to affect later outputs. Gated variants control how information is kept or replaced."
           },
           {
             "title": "Radial Basis Networks",
             "href": "/concepts/radial-basis-networks",
-            "blurb": "Some patterns are useful only near particular examples. A radial basis network measures how close an input is to several reference points, then combines those local responses into a prediction."
+            "blurb": "A radial basis network describes an input through its distance from reference points. Combining those local responses produces a prediction whose behavior depends on the locations and widths of the responses."
           },
           {
             "title": "Residual Connections",
             "href": "/concepts/residual-connections",
-            "blurb": "A new layer may only need to improve a representation we already have. A residual connection carries the input forward so the layer can learn a correction rather than having to recreate the entire representation."
+            "blurb": "A residual connection adds a layer's learned transformation to its input. This gives information a direct route forward and allows the layer to represent an adjustment to an existing representation."
           }
         ]
       }
@@ -427,58 +427,58 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Computer Vision with Neural Networks",
-    "intro": "We can write rules to find an edge or match a known pattern in a picture, but deciding which patterns matter becomes difficult as the task grows. Neural networks let us learn useful image features from examples. We will use them to recognise objects, label individual pixels, and find similar pictures.",
+    "intro": "Images contain patterns that change with position and appearance. Neural networks can learn which patterns help identify objects or label individual pixels. Their predictions depend on the examples used for training and how an image is represented.",
     "topics": [
       {
         "heading": "Spatial Layers",
-        "blurb": "An edge is still an edge when it moves across a picture. We need layers that can apply the same detector in different places and summarise what it finds.",
+        "blurb": "Nearby pixels often form a useful pattern together. Convolution applies shared weights at different image positions, while pooling combines local responses. These operations preserve a connection to location as a network builds larger-scale features.",
         "concepts": [
           {
             "title": "Convolution",
             "href": "/concepts/convolution",
-            "blurb": "A useful image pattern can appear anywhere in a picture. Convolution applies the same small set of weights at different positions, producing a map of where that pattern receives a response."
+            "blurb": "Convolution applies the same small set of weights across different positions. The resulting response map describes where a local pattern appears, using fewer independent weights than a separate rule for every position."
           },
           {
             "title": "Pooling",
             "href": "/concepts/pooling",
-            "blurb": "After detecting local patterns, we may not need every response at its original resolution. Pooling summarises nearby values, reducing the amount of data while giving up some information about exact positions."
+            "blurb": "Pooling combines nearby values into a smaller representation. It reduces spatial resolution, so the choice of operation determines which responses are retained and which positional details are lost."
           }
         ]
       },
       {
         "heading": "Convolutional Networks",
-        "blurb": "Knowing which object is in a picture is one task; knowing exactly which pixels belong to it is another. We will build toward both from the image layers we have already covered.",
+        "blurb": "Convolutional layers can learn image features from labeled examples. A classifier uses those features to identify an image's category, while a segmentation network such as U-Net predicts labels at individual pixel positions. The required output changes how the layers are connected.",
         "concepts": [
           {
             "title": "Convolutional Networks",
             "href": "/concepts/convolutional-networks",
-            "blurb": "Recognising an object usually takes more than finding one edge. A convolutional network combines learned local patterns through layers, using the resulting features to make a prediction about the image."
+            "blurb": "Convolutional networks combine local image patterns through successive layers. Training learns which combinations help predict an image's label, with later representations drawing on larger regions of the input."
           },
           {
             "title": "U-Net",
             "href": "/concepts/u-net",
-            "blurb": "Where does an object begin and end in an image? U-Net learns from images paired with labelled masks, using spatial detail from earlier layers to help predict the region belonging to each object."
+            "blurb": "U-Net learns from images paired with labeled masks to predict a label for each pixel. Connections from earlier layers preserve spatial detail as the network reconstructs a higher-resolution output."
           }
         ]
       },
       {
         "heading": "Embedding Pictures",
-        "blurb": "Two pictures of the same object can have very different pixel values. To search by similarity, we need a representation that preserves the differences relevant to the task.",
+        "blurb": "Pixel differences do not always reflect how similar two pictures seem. A learned feature vector can preserve distinctions relevant to a particular task. Comparing those vectors gives us a way to search image collections, provided we test what their distances actually represent.",
         "concepts": [
           {
             "title": "A Vector for a Picture",
             "href": "/concepts/a-vector-for-a-picture",
-            "blurb": "Two photographs of the same object may look very different pixel by pixel. A trained network can provide a compact vector of features that gives us a more useful way to compare them."
+            "blurb": "A trained image network can represent a picture as a vector of features. Comparing those vectors can capture similarities that direct pixel comparisons miss, depending on what the network learned."
           },
           {
             "title": "Learning the Metric Itself",
             "href": "/concepts/learning-the-metric-itself",
-            "blurb": "What makes two pictures similar depends on the task. By training on examples of useful matches, we can learn a representation in which the differences we care about affect the distance."
+            "blurb": "Similarity depends on which differences matter for a task. Metric learning uses examples of matches and nonmatches to shape a representation in which distances reflect those distinctions."
           },
           {
             "title": "Searching a Collection of Pictures",
             "href": "/concepts/searching-a-collection-of-pictures",
-            "blurb": "Once pictures have numerical representations, we can search for nearby ones. Comparing every picture works for a small collection, but a larger collection gives us a reason to consider search indexes and their compromises."
+            "blurb": "Image vectors allow pictures to be searched by similarity. Comparing every vector provides a reference result, while approximate indexes reduce search work by accepting some missed neighbors."
           }
         ]
       }
@@ -487,262 +487,262 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Natural Language Processing",
-    "intro": "The words we read are comprehensible to us, but a numerical model needs some way to process them. We will start by turning text into pieces with numerical IDs. Then we can ask how a model might learn relationships between those pieces and use the surrounding words to interpret them.",
+    "intro": "Written language needs a representation a computer can calculate with. Tokens identify pieces of text, while learned numerical representations capture relationships between them. The surrounding words help determine how a particular piece is used.",
     "topics": [
       {
         "heading": "Tokens and Basic Units",
-        "blurb": "Before a model can work with text, we need to decide what pieces it will receive. A word, a character, and a byte each give us a different starting point.",
+        "blurb": "A numerical model needs text represented as pieces it can process. Those pieces can be words or smaller units, each with an identifier. The choice affects which distinctions remain visible and how unfamiliar text can be represented.",
         "concepts": [
           {
             "title": "What a Token Is",
             "href": "/concepts/what-a-token-is",
-            "blurb": "We can read the word cat, but a numerical model needs a representation it can process. A tokenizer divides text into pieces and maps those pieces to IDs, giving us a starting point for working with language."
+            "blurb": "A token is a piece of text represented by an ID from a vocabulary. The piece may be a word or part of one; the ID identifies it without expressing its meaning or similarity to other pieces."
           },
           {
             "title": "Bytes and Characters",
             "href": "/concepts/bytes-and-characters",
-            "blurb": "A visible character and the bytes used to store it are not always the same unit. That distinction affects how much text a model receives and whether its representation can handle unfamiliar writing."
+            "blurb": "Text has several units of representation. A visible character can involve multiple code points or bytes, affecting how text is stored and how much input a model has to process."
           },
           {
             "title": "Splitting on Spaces",
             "href": "/concepts/splitting-on-spaces",
-            "blurb": "Spaces give us an obvious first place to divide a sentence. We will try that rule, then look at what it does with punctuation, repeated whitespace, and writing that does not separate words with spaces."
+            "blurb": "Splitting text at spaces gives a simple rule for identifying pieces. Punctuation and repeated whitespace expose its limits, as do writing systems that do not use spaces to mark word boundaries."
           }
         ]
       },
       {
         "heading": "Rules for Word Boundaries",
-        "blurb": "Splitting text on spaces leaves us with questions about punctuation, contractions, and different writing systems. These tokenizers make explicit choices about where one piece ends and another begins.",
+        "blurb": "Spaces alone do not settle where every text unit begins and ends. Punctuation and writing conventions require further decisions. Rule-based tokenizers make those decisions explicit, which helps explain why the same sentence can produce different pieces under different schemes.",
         "concepts": [
           {
             "title": "Unicode Word Boundaries",
             "href": "/concepts/unicode-word-boundaries",
-            "blurb": "Rules written around English letters and spaces do not cover every writing system. Unicode character information gives us a broader basis for deciding where boundaries should fall, though it does not settle every linguistic question."
+            "blurb": "Writing systems use different kinds of characters and boundary conventions. Unicode information supports more general splitting rules than English letters and spaces alone, while some language-specific boundaries still need other methods."
           },
           {
             "title": "Penn Treebank Rules",
             "href": "/concepts/penn-treebank-rules",
-            "blurb": "Should can't remain one piece, or should the negation be separated? Penn Treebank tokenization gives English contractions and punctuation consistent treatment so annotated text can be processed using the same conventions."
+            "blurb": "Penn Treebank tokenization applies consistent rules to English contractions and punctuation. Those conventions let text be divided into pieces that match the assumptions used in annotated datasets."
           },
           {
             "title": "Moses Rules",
             "href": "/concepts/moses-rules",
-            "blurb": "A translation system needs a consistent way to handle punctuation without breaking abbreviations and other language-specific forms. Moses tokenization combines general splitting rules with exceptions for those cases."
+            "blurb": "Moses tokenization separates punctuation while accounting for language-specific forms such as abbreviations. Its exceptions affect which marks remain attached to a word and which become separate pieces."
           },
           {
             "title": "The Pattern Language Models Use",
             "href": "/concepts/the-pattern-language-models-use",
-            "blurb": "Before learning smaller pieces, a tokenizer may need to separate runs of letters, numbers, and punctuation. A regular expression can describe those initial groups while retaining information about the spaces around them."
+            "blurb": "Regular expressions describe patterns of characters that should stay together or be split apart. Initial groups of letters, numbers and punctuation constrain the pieces a tokenizer can learn afterward."
           }
         ]
       },
       {
         "heading": "Scripts Without Spaces",
-        "blurb": "Not every writing system places spaces between words. We need another source of information about the boundaries, whether that comes from a dictionary, a probability model, or labelled examples.",
+        "blurb": "Word boundaries are not always marked by spaces. A segmentation method needs other evidence, such as known words or patterns learned from examples. Different sources of evidence lead to different decisions when several divisions of the same text are plausible.",
         "concepts": [
           {
             "title": "Maximum Matching",
             "href": "/concepts/maximum-matching",
-            "blurb": "When spaces do not tell us where words end, a dictionary gives us one possible guide. Maximum matching takes the longest word it recognises at each position, leaving us to examine when that local choice fails."
+            "blurb": "A dictionary can suggest word boundaries when spaces are absent. Maximum matching chooses the longest available word at each position, so an early local choice can affect the segmentation that follows."
           },
           {
             "title": "The Word Lattice",
             "href": "/concepts/the-word-lattice",
-            "blurb": "Choosing a word early can change which words remain available later in a sentence. A word lattice keeps the alternatives so we can compare complete segmentations before committing to one."
+            "blurb": "A word lattice retains alternative ways to divide a sequence into words. Complete paths represent different segmentations, allowing choices to be compared before committing to an early boundary."
           },
           {
             "title": "Segmenting With a Hidden Model",
             "href": "/concepts/segmenting-with-a-hidden-model",
-            "blurb": "We can see the characters in a sentence without knowing which ones begin or end a word. A hidden-state model uses learned probabilities to infer a sequence of labels for those positions."
+            "blurb": "Hidden states can describe which characters begin or end a word even when those labels are unobserved. A probabilistic model compares possible state sequences to infer likely word boundaries."
           },
           {
             "title": "Learning Boundaries From Examples",
             "href": "/concepts/learning-boundaries-from-examples",
-            "blurb": "If people have already marked word boundaries in example text, we can use those labels to teach a model. The surrounding characters provide clues it can use when deciding where to split new text."
+            "blurb": "Annotated boundaries provide examples of where text should be split. A supervised model uses surrounding character information to learn decisions that can be applied to new sequences."
           }
         ]
       },
       {
         "heading": "Predicting Token Sequences",
-        "blurb": "Some words are more likely after a particular phrase than others. Counting short sequences gives us a simple way to make a next-token prediction and a reason to consider phrases we have never seen.",
+        "blurb": "Counts of short token sequences tell us which continuations have occurred before. They provide a simple next-token model, but limited data leaves many possible sequences unseen. The treatment of those missing counts affects which predictions the model can make.",
         "concepts": [
           {
             "title": "N-Grams",
             "href": "/concepts/n-grams",
-            "blurb": "The words immediately before a position give us clues about what might come next. An n-gram model uses counts of short sequences to make that prediction, with adjustments for sequences missing from its training data."
+            "blurb": "An n-gram model estimates a continuation from counts of short sequences. Its predictions depend on the context length and how probability is assigned to sequences absent from the training data."
           }
         ]
       },
       {
         "heading": "Learning a Subword Vocabulary",
-        "blurb": "A vocabulary containing every possible word would be enormous, and it would still miss new words. Reusing smaller pieces helps, but we need a way to decide which pieces deserve an entry.",
+        "blurb": "A fixed list of whole words cannot anticipate every spelling a reader will encounter. Smaller reusable pieces can represent new combinations. Learning that vocabulary requires deciding which pieces are worth keeping and how to split text using them.",
         "concepts": [
           {
             "title": "Byte Pair Encoding",
             "href": "/concepts/byte-pair-encoding",
-            "blurb": "Common letter combinations need not be stored one character at a time. Byte pair encoding repeatedly joins frequent neighbouring pieces, building a vocabulary that can reuse parts across different words."
+            "blurb": "Byte pair encoding builds reusable pieces by repeatedly merging frequent neighboring pairs. The learned merge order determines how new text is divided and which combinations share a vocabulary entry."
           },
           {
             "title": "WordPiece",
             "href": "/concepts/wordpiece",
-            "blurb": "A tokenizer needs reusable word parts and a consistent way to find them in new text. We will look at the pair-scoring rule used here to build a WordPiece vocabulary, then its longest-match encoding rule."
+            "blurb": "WordPiece represents text through reusable pieces and a longest-match encoding rule. The teaching implementation builds its vocabulary using pair scores, making the distinction between vocabulary learning and later encoding explicit."
           },
           {
             "title": "The Unigram Language Model",
             "href": "/concepts/the-unigram-language-model",
-            "blurb": "A word can have several valid divisions into smaller pieces. A unigram tokenizer assigns probabilities to those pieces so it can compare complete segmentations while learning which vocabulary entries to keep."
+            "blurb": "A unigram tokenizer assigns probabilities to candidate pieces and compares complete segmentations. Vocabulary selection balances the available pieces against how well their combinations describe the observed text."
           },
           {
             "title": "SentencePiece",
             "href": "/concepts/sentencepiece",
-            "blurb": "Requiring text to be split into words first makes tokenization depend on another set of boundary rules. SentencePiece can learn pieces from a text stream that explicitly represents whitespace, reducing that dependence on predefined words."
+            "blurb": "SentencePiece learns text pieces without requiring a separate word-splitting step first. Its explicit representation of whitespace affects how pieces join and how encoded text can be reconstructed."
           },
           {
             "title": "Greedy Coverage",
             "href": "/concepts/greedy-coverage",
-            "blurb": "There is only so much room in a vocabulary. Instead of choosing the most frequent pair to merge, we can ask which new piece covers the most text that our earlier choices have not already covered."
+            "blurb": "A limited vocabulary needs a rule for deciding which pieces deserve space. Greedy coverage selects pieces according to how much previously uncovered text they represent, producing different choices from repeated pair merging."
           },
           {
             "title": "Moving a Vocabulary",
             "href": "/concepts/moving-a-vocabulary",
-            "blurb": "A vocabulary learned under one tokenization scheme may need to be used under another. We will follow what happens to its pieces, including boundaries that disappear and entries that become indistinguishable after the move."
+            "blurb": "Vocabulary entries depend on the boundary rules that produced them. Moving pieces to another tokenization scheme can remove distinctions or make several entries map to the same representation."
           }
         ]
       },
       {
         "heading": "Word Structure",
-        "blurb": "Words such as walk, walked, and walking share more than a few letters. We will look at how recurring word parts can be learned from examples or described with explicit rules.",
+        "blurb": "Related words often reuse parts that carry meaning or grammatical information. Those parts can be inferred from recurring patterns or described with explicit rules. Their boundaries need not match the pieces chosen simply to make a tokenizer's vocabulary smaller.",
         "concepts": [
           {
             "title": "Morfessor",
             "href": "/concepts/morfessor",
-            "blurb": "Words often share stems and endings, such as walk in walked and walking. Morfessor looks for reusable parts by balancing the cost of storing a vocabulary against the cost of describing the observed words."
+            "blurb": "Related words often reuse stems and endings. Morfessor searches for such reusable parts by balancing the cost of a stored vocabulary against the cost of describing the words with it."
           },
           {
             "title": "Finite-State Morphology",
             "href": "/concepts/finite-state-morphology",
-            "blurb": "A word's spelling can reflect a stem, an ending, and a rule that changes how they join. Finite-state morphology describes those relationships explicitly so we can analyse forms and generate them from their components."
+            "blurb": "A word form can be described through its components and the spelling rules that connect them. Finite-state methods represent those relationships so word forms can be analyzed or generated."
           }
         ]
       },
       {
         "heading": "Fixed Tables and Shorter Sequences",
-        "blurb": "A large vocabulary takes up space, while a long sequence takes work to process. Hashing and byte patches make different compromises when those costs become a problem.",
+        "blurb": "Text representations have costs beyond the size of their vocabulary. Hashing shares a fixed table among character patterns, accepting possible collisions. Grouping bytes into patches can shorten the sequence, with a different trade-off in how local information is represented.",
         "concepts": [
           {
             "title": "Hashing Characters",
             "href": "/concepts/hashing-characters",
-            "blurb": "A separate entry for every possible character can make a table large. Hashing maps characters into a fixed number of buckets, at the cost of sometimes giving different characters the same destination."
+            "blurb": "Hashing maps characters into a fixed number of storage locations. It limits the table size, while collisions require different characters to share a location and potentially lose their distinction."
           },
           {
             "title": "Patching Without a Vocabulary",
             "href": "/concepts/patching-without-a-vocabulary",
-            "blurb": "Bytes let us represent text without a learned word vocabulary, but they can produce long sequences. Grouping nearby bytes into patches gives later parts of a model fewer positions to process."
+            "blurb": "Representing text as bytes avoids dependence on a learned word vocabulary. Grouping nearby bytes into patches reduces the number of positions processed by later layers, changing how local information is combined."
           }
         ]
       },
       {
         "heading": "Codes for Numerical Inputs",
-        "blurb": "The idea of assigning a piece an ID can also be applied to numerical data. We will replace continuous values with a limited set of codes and examine what information is lost.",
+        "blurb": "Continuous measurements can be represented using a limited collection of codes. Quantization chooses which code stands for each input, making the representation discrete. The useful question is how much relevant information that replacement preserves.",
         "concepts": [
           {
-            "title": "Codebook Quantisation",
+            "title": "Codebook Quantization",
             "href": "/concepts/codebook-quantisation",
-            "blurb": "We may need to replace a continuous vector with a compact ID. A codebook provides a fixed set of representative vectors, letting us choose a nearby entry and measure how much the replacement changes the input."
+            "blurb": "A codebook replaces a continuous vector with an ID for a nearby representative. The number and placement of representatives determine the available codes and the error introduced by that replacement."
           },
           {
-            "title": "Finite Scalar Quantisation",
+            "title": "Finite Scalar Quantization",
             "href": "/concepts/finite-scalar-quantisation",
-            "blurb": "Instead of choosing a whole vector from a learned codebook, we can give each coordinate a few allowed levels. Combining those choices produces a discrete code with a different way of controlling the available representations."
+            "blurb": "Finite scalar quantization restricts each coordinate to a small set of levels. Combining the coordinate choices produces a discrete code without selecting a whole vector from a learned codebook."
           }
         ]
       },
       {
         "heading": "Word Vectors from Counts",
-        "blurb": "A token ID identifies a word without telling us how it relates to other words. The contexts in which words occur give us information we can use to build more useful numerical representations.",
+        "blurb": "Words used in similar contexts provide evidence of related usage. Counts of those contexts can become numerical features, which we can weight or compress into vectors. Their similarities reflect the evidence and comparison rule used to construct them.",
         "concepts": [
           {
             "title": "A Vector for a Word",
             "href": "/concepts/a-vector-for-a-word",
-            "blurb": "A token's ID tells us which word it identifies, but not how that word relates to another. A vector gives us several numerical coordinates whose learned relationships can support useful comparisons."
+            "blurb": "A token ID identifies an entry but does not describe its relationships to other entries. Learned vectors supply numerical coordinates whose comparisons can capture patterns in how words are used."
           },
           {
             "title": "Distance and Similarity",
             "href": "/concepts/distance-and-similarity",
-            "blurb": "Once words have vectors, we still need to decide what makes two vectors similar. Their distance, direction, and length can give us different answers, depending on the comparison we choose."
+            "blurb": "Vectors can be compared by the differences between their coordinates or by the angle between them. Those choices treat length differently and can change which words count as similar."
           },
           {
             "title": "Latent Semantic Analysis",
             "href": "/concepts/latent-semantic-analysis",
-            "blurb": "Documents about related subjects may use some of the same words in different amounts. Latent semantic analysis starts with a table of word use and keeps a smaller set of shared patterns for representing words and documents."
+            "blurb": "A table of word use across documents can contain shared patterns. Latent semantic analysis keeps a smaller set of those patterns, representing words and documents with fewer coordinates."
           },
           {
             "title": "Pointwise Mutual Information",
             "href": "/concepts/pointwise-mutual-information",
-            "blurb": "Two common words can appear together often simply because both appear everywhere. Pointwise mutual information compares their observed association with what we would expect if their occurrences were independent."
+            "blurb": "Frequent co-occurrence can arise simply because two words are common. Pointwise mutual information compares observed co-occurrence with the level expected under independence, distinguishing frequency from relative association."
           },
           {
             "title": "Random Indexing",
             "href": "/concepts/random-indexing",
-            "blurb": "Counting every possible word-context pair can require a very large table. Random indexing gives contexts small random vectors and accumulates them, keeping the representation a fixed size as new examples arrive."
+            "blurb": "Random indexing accumulates fixed-size context vectors as word occurrences arrive. It summarizes relationships without storing every word-context count, with random projection affecting how precisely those relationships are preserved."
           }
         ]
       },
       {
         "heading": "Word Vectors from Prediction",
-        "blurb": "If a representation helps a model predict the words around it, it must preserve something useful about how that word is used. These methods learn word vectors from that requirement and related observations.",
+        "blurb": "Word vectors can be learned by predicting nearby words or fitting patterns in their co-occurrence counts. The shared coordinates capture relationships useful for that task. Their value depends on which aspects of word usage the training objective preserves.",
         "concepts": [
           {
             "title": "The Embedding Layer",
             "href": "/concepts/embedding-layers",
-            "blurb": "A token ID needs to lead to the vector associated with that token. An embedding layer provides the lookup table, and training adjusts its rows so the retrieved vectors become useful for the task."
+            "blurb": "An embedding layer maps each ID to a row in a table of vectors. Training changes those rows according to the task, while repeated occurrences of the same ID use the same learned representation."
           },
           {
             "title": "Word2vec",
             "href": "/concepts/word2vec",
-            "blurb": "Words used in similar contexts often have something in common. Word2vec uses a word-prediction task to learn vectors that capture useful regularities in those surrounding words."
+            "blurb": "Word2vec learns word vectors through prediction tasks involving nearby words. Shared patterns of use shape the vectors, allowing their numerical relationships to reflect regularities in the training text."
           },
           {
             "title": "FastText",
             "href": "/concepts/fasttext",
-            "blurb": "A rare word may share useful parts with words we have seen many times. FastText includes character fragments in its word representations, allowing those related spellings to share information during learning."
+            "blurb": "FastText represents words using character fragments as well as whole-word information. Shared fragments allow related spellings to contribute to each other's representations, including words with few observed occurrences."
           },
           {
             "title": "GloVe",
             "href": "/concepts/glove",
-            "blurb": "A table of word co-occurrences contains information about how words are used together. GloVe learns vectors whose comparisons account for patterns in those counts, rather than keeping the full table as the representation."
+            "blurb": "GloVe learns vectors from word co-occurrence counts. Their comparisons are fitted to patterns in the counts, providing a compact representation of information drawn from the wider text collection."
           }
         ]
       },
       {
         "heading": "Representing Order and Context",
-        "blurb": "The same word can play different roles depending on where it appears and what surrounds it. A model needs access to that information as well as the word itself.",
+        "blurb": "A word's role depends on where it appears and the words around it. Position information makes order available to the model, while attention lets one position combine information from others. Both affect how a sequence is interpreted.",
         "concepts": [
           {
             "title": "Positional Encoding",
             "href": "/concepts/positional-encoding",
-            "blurb": "The same words in a different order can mean something different. A model that receives token vectors needs a way to know where those tokens occur, which positional information provides."
+            "blurb": "Word order affects meaning, even when the words themselves stay the same. Positional information lets a model distinguish where tokens occur and use that order in its calculations."
           },
           {
             "title": "Attention",
             "href": "/concepts/attention",
-            "blurb": "A word's meaning in a sentence can depend on words some distance away. Attention gives each position a way to compare the available information and combine the parts most relevant to its current representation."
+            "blurb": "Attention calculates how strongly one position should combine information from other positions. Similarity scores become normalized weights, allowing the resulting representation to depend on the available context."
           }
         ]
       },
       {
         "heading": "Representing a Whole Text",
-        "blurb": "Searching or comparing documents often calls for one representation of each text. We can combine its word vectors or learn a document vector, with different consequences for what survives.",
+        "blurb": "Document search often needs one vector for an entire passage. Combining word vectors gives a simple representation, while learned document vectors provide another approach. Each method retains some information and loses other distinctions, including details of word order.",
         "concepts": [
           {
             "title": "Pooling a Text",
             "href": "/concepts/pooling-a-text",
-            "blurb": "Comparing whole sentences often requires one vector per sentence. Pooling combines their token vectors into a fixed-size representation, but the choice of combination determines which details we can still recover."
+            "blurb": "Pooling combines a sequence of token vectors into a single representation. The combination rule determines which information remains useful for comparing whole sentences and which details are lost."
           },
           {
             "title": "Paragraph Vectors",
             "href": "/concepts/paragraph-vectors",
-            "blurb": "A document may have useful characteristics beyond an average of its word vectors. Paragraph vectors learn a document representation by asking it to help predict the words in that document."
+            "blurb": "Paragraph vectors learn a representation of a document by using it to help predict its words. The document vector captures information that a fixed average of word vectors may not preserve."
           }
         ]
       }
@@ -750,36 +750,36 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Large Language Models",
-    "intro": "A language model receives some text and produces more text. To understand how, we need to look at what it was trained to predict and how earlier words influence that prediction. We will follow those steps from a single prediction to a complete response.",
+    "intro": "Language models learn to predict text from its context. Generating a response repeats that prediction process, with each new piece affecting what can follow. Attention determines how information from earlier parts of the context contributes to those predictions.",
     "topics": [
       {
         "heading": "Building a Language Model",
-        "blurb": "We have ways to represent tokens and let them use context. Now we need to put those components together and define a prediction task that provides the model with something to learn.",
+        "blurb": "A language model learns to predict tokens from their context. Transformer blocks combine attention with further learned calculations to produce those predictions. Defining which context is available matters because training must not expose the answer it asks the model to predict.",
         "concepts": [
           {
             "title": "Transformer Blocks",
-            "blurb": "Attention lets tokens exchange information, but that is only part of a transformer. We will put it together with per-token processing, normalisation, and residual connections, explaining the job of each component.",
+            "blurb": "A transformer block combines attention with processing applied to individual positions. Residual connections and normalization regulate how those operations change the representations passed between blocks.",
             "href": "/concepts/transformer-blocks"
           },
           {
             "title": "Next-Token Prediction",
-            "blurb": "Text already contains examples of what follows what, giving us a training task without asking someone to label every sentence. A next-token model learns to predict each continuation using only the text available before it.",
+            "blurb": "Text provides examples of which tokens follow earlier tokens. Training a next-token model uses those continuations as targets while restricting each prediction to the preceding context.",
             "href": "/concepts/next-token-prediction"
           }
         ]
       },
       {
         "heading": "Generating Text",
-        "blurb": "Predicting the next token does not produce a whole answer at once. We need to choose a token, add it to the text, and make another prediction using the updated context.",
+        "blurb": "A next-token prediction gives a distribution of possible continuations. Generating a passage requires choosing from that distribution repeatedly as the context grows. Sampling rules change how often the model takes a less likely continuation and how varied the resulting text becomes.",
         "concepts": [
           {
             "title": "Autoregressive Generation",
-            "blurb": "A next-token model predicts one step ahead. To produce a response, we choose a token, append it to the existing text, and ask the model to predict again with that new context.",
+            "blurb": "Autoregressive generation produces a sequence one token at a time. Each selected token becomes part of the context for the next prediction, so early choices influence the continuations that follow.",
             "href": "/concepts/autoregressive-generation"
           },
           {
             "title": "Sampling and Temperature",
-            "blurb": "The highest-scoring token is not the only token a model could produce. Sampling and temperature control how we choose from its predictions, changing the output without changing the learned weights.",
+            "blurb": "A language model assigns probabilities to possible next tokens. Sampling chooses among them, while temperature changes how concentrated those probabilities are without retraining the model.",
             "href": "/concepts/sampling-and-temperature"
           }
         ]
@@ -788,36 +788,36 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Generative Models",
-    "intro": "Recognising a picture and creating a new one are different problems. To generate examples, a model needs to learn something about how the training examples are put together. We will look at several ways to do this, from reconstructing compressed inputs to learning how to remove noise.",
+    "intro": "Generative models learn patterns that allow them to produce new examples. Different methods represent those patterns through compressed descriptions, competing networks or gradual removal of noise. The quality of a generated result depends on what the model learned and how it is sampled.",
     "topics": [
       {
         "heading": "Learning a Compact Representation",
-        "blurb": "If a model compresses an input, what must it keep to reconstruct it? That question gives us a starting point for learning representations from which we might also generate new examples.",
+        "blurb": "Reconstructing an input from a smaller representation forces a model to decide what information to retain. Autoencoders learn through that reconstruction task. Adding a probability model to the representation provides a way to sample codes for generating new examples.",
         "concepts": [
           {
             "title": "Autoencoders",
-            "blurb": "If we ask a model to compress an input and then reconstruct it, the reconstruction tells us what the compressed representation kept. An autoencoder learns that representation by trying to reduce what is lost.",
+            "blurb": "An autoencoder learns to reconstruct an input through an intermediate representation. Restricting that representation forces choices about which details to preserve, measured by the error in the reconstruction.",
             "href": "/concepts/autoencoders"
           },
           {
             "title": "Variational Autoencoders",
-            "blurb": "A model that reconstructs known examples does not necessarily give us a good way to generate new ones. A variational autoencoder also shapes a distribution of compressed representations from which we can draw new codes.",
+            "blurb": "A variational autoencoder learns a distribution of intermediate representations as well as a reconstruction procedure. Relating those representations to a prior distribution provides a basis for sampling codes that generate new examples.",
             "href": "/concepts/variational-autoencoders"
           }
         ]
       },
       {
         "heading": "Learning to Generate",
-        "blurb": "A generator needs feedback about what to improve. We will compare learning from a model that distinguishes generated examples from real ones with learning to reverse a process that adds noise.",
+        "blurb": "A generative model needs feedback that tells it how to improve its outputs. Adversarial training learns through a discriminator comparing generated and real examples. Diffusion takes a different route by learning to reverse a process that adds noise.",
         "concepts": [
           {
             "title": "Generative Adversarial Networks",
-            "blurb": "A generator needs feedback about whether its examples resemble the training data. A GAN trains a second model to distinguish generated examples from real ones, giving the generator a changing source of feedback.",
+            "blurb": "A generative adversarial network trains a generator against a model that distinguishes generated examples from training examples. The discriminator's changing responses provide feedback that shapes what the generator produces.",
             "href": "/concepts/generative-adversarial-networks"
           },
           {
             "title": "Diffusion Models",
-            "blurb": "Adding noise to an example is easy to control. Learning to remove it gives us a useful training problem, and a trained reverse process can then turn a noisy starting point into a generated example.",
+            "blurb": "A diffusion model learns how to reverse controlled additions of noise. Repeating a learned reverse process from a noisy starting point provides a way to generate an example.",
             "href": "/concepts/diffusion-models"
           }
         ]
@@ -826,41 +826,41 @@ const existingCurriculum: Part[] = [
   },
   {
     "title": "Adapting and Evaluating Modern Models",
-    "intro": "A trained model may be capable of many things without doing the particular job we need. We can teach it from examples, give it feedback, or provide information it did not have during training. We also need to check whether those changes actually make it more useful.",
+    "intro": "A pretrained model can be adapted to a particular task through further training. Retrieved information can also change what it has available when answering. Evaluation needs to establish whether those changes improve the intended task and what failures remain.",
     "topics": [
       {
         "heading": "Adapting a Trained Model",
-        "blurb": "We may already have a useful model but need it to respond differently for a particular task. Examples, smaller parameter updates, and rewards offer different ways to teach that behaviour.",
+        "blurb": "A trained model can be adapted using examples of the behavior we want. Fine-tuning updates its parameters for that task, while low-rank adaptation restricts the form of the update. The training examples still determine what behavior those changes encourage.",
         "concepts": [
           {
             "title": "Supervised Fine-Tuning",
-            "blurb": "A model that can continue text may not respond in the way a task requires. Fine-tuning on examples of prompts and desired responses gives it demonstrations of the behaviour we want.",
+            "blurb": "Supervised fine-tuning adapts a model using examples of prompts and desired responses. The examples determine which response patterns are reinforced, so their coverage and quality affect the resulting behavior.",
             "href": "/concepts/supervised-fine-tuning"
           },
           {
             "title": "Low-Rank Adaptation",
-            "blurb": "Adapting every weight in a large model can be expensive. LoRA keeps the original weights fixed and learns a smaller correction through two narrow matrices, reducing the number of parameters that need updating.",
+            "blurb": "LoRA adapts a model by learning a smaller matrix-based correction while leaving the original weights fixed. This reduces the number of parameters updated and stored for a particular adaptation.",
             "href": "/concepts/low-rank-adaptation"
           },
           {
             "title": "Reinforcement Learning",
-            "blurb": "We cannot always provide the correct answer before an action is taken. Reinforcement learning uses the rewards that follow actions to improve a policy, including decisions whose consequences appear several steps later.",
+            "blurb": "Reinforcement learning improves a policy from the rewards associated with its actions. Delayed consequences make it necessary to consider how an action affects later states as well as its immediate result.",
             "href": "/concepts/reinforcement-learning"
           }
         ]
       },
       {
         "heading": "Grounding and Evaluation",
-        "blurb": "An answer can sound convincing and still be wrong. We need to provide relevant information when the task requires it and evaluate the answer against what the user actually needed.",
+        "blurb": "A convincing answer needs evidence when its claims depend on external information. Retrieval can supply relevant material, but the resulting answer still needs evaluation. We need to check whether it used that evidence correctly and met the task's requirements.",
         "concepts": [
           {
             "title": "Retrieval-Augmented Generation",
-            "blurb": "A model may need information that was absent or out of date when it was trained. Retrieval supplies relevant source material as context, giving the model evidence it can use when answering a question.",
+            "blurb": "Retrieval-augmented generation supplies source material as context for a model's answer. It can provide information absent from training, while the usefulness of the answer still depends on what was retrieved and how the model uses it.",
             "href": "/concepts/retrieval-augmented-generation"
           },
           {
             "title": "Evaluating Generative Models",
-            "blurb": "A fluent answer or convincing picture is not enough to show that a model does its job well. We need evaluation examples and criteria that reflect the task, including failures an overall average might conceal.",
+            "blurb": "Generated content needs to be judged against the task it is meant to perform. Relevant evaluation cases and explicit criteria help distinguish a plausible-looking result from one that meets the requirements.",
             "href": "/concepts/evaluating-generative-models"
           }
         ]
@@ -870,128 +870,129 @@ const existingCurriculum: Part[] = [
 ];
 
 const topicIntroductions: Record<string, string> = {
-  "Describing a model request": "The model expects named measurements. We need to agree on which ones are required and what their values mean before two programs can exchange them.",
-  "Handling and testing tool outcomes": "What should an agent do when a tool times out? It depends on whether the tool did anything before the connection failed. We’ll represent that difference and write tests for it.",
-  "Protecting the training process": "A training pipeline accepts a file. Who supplied it, and what could its contents make the model learn? We’ll keep the source of the records visible while testing a suspected change in behaviour.",
-  "Assessing exposure through prediction": "An attacker may change an input or call a prediction service many times. We need to state which actions are available before an experiment can tell us whether a defence helped.",
-  "Following a distributed calculation": "Spark can spread a calculation across workers. Begin with the instructions it receives, then look at why some records have to move between workers before a result can be calculated.",
-  "Keeping a dependable table history": "The sensor records changed after our first training run. Which version should an old model still refer to? We need to preserve a consistent view of the table for each run.",
-  "Publishing a pipeline result": "A pipeline finds an invalid reading. Should it record the failure and continue, leave that row out, or stop the update? Those choices change what reaches the model.",
-  "Connecting model evidence to an artifact": "One model run has a lower error than another. Before we prefer it, we need to know what each run was evaluated on. MLflow can keep those details alongside the model files.",
-  "Making feature access explicit": "A training job can name a table and still lack permission to read it. A feature can also be present now but unavailable at the time of an older prediction. We’ll handle those as separate requirements.",
-  "When the answer arrives": "The model has to process the prompt before it can emit its first token. It then produces more tokens over time. We’ll measure those waits separately so we know which part of the work we are trying to reduce.",
-  "Serving a changing workload": "A request can finish while others are still generating answers. Work out when its memory becomes available for the next request, including what happens when somebody clicks Stop.",
-  "Following an estimate through time": "The belt moves between camera readings. Use that movement to predict a position, then decide how much a new reading should change the estimate.",
-  "When observation and model disagree": "A nearby camera detection could belong to the wrong part. We’ll first check which detection we can reasonably use, then examine what happens when our motion assumptions are wrong.",
-  "Where a fitted number can mislead": "A document is represented by a list of numbers, but squaring those numbers can exceed what the computer can represent. Another example gives different parameter choices the same fit. We’ll work out why each result needs closer inspection.",
-  "Checking derivatives and simulated trajectories": "A program claims to know how a model’s error will change when a weight moves. We can test that claim by making a small change ourselves. We’ll also compare proposed simulation steps before accepting their results.",
-  "Keeping prediction code dependable": "The same values can reach a model in a different order. A procedure that rescales readings can also reuse statistics from the wrong training run. We’ll write procedures that make those assumptions explicit.",
-  "Structures for agent workloads": "A retrieved passage needs to stay attached to the score that selected it. A training job needs its input job to finish first. Those problems give us reasons to use different data structures.",
-  "Building the training table": "One sensor file has fewer rows than another. Before combining them, we need to know what each row represents and what information was available at the time.",
-  "Repairing a changing pipeline": "The next file uses a different column layout, or a reading arrives after its reporting window. Work out what the existing procedure would do before deciding how to change it.",
-  "Latency under real workloads": "A person waits from the moment they send a request, including any time it spends in a queue. An agent may make several tool calls during that same wait. We’ll measure the time that actually passes for the caller.",
-  "Memory and reuse": "A saved conversation occupies memory. A saved answer is useful only if it still answers the current question. Work out what each kind of reuse requires.",
-  "Making predictions usable for motion": "The camera’s position reading refers to a particular view and time. We need to account for both before using it to move towards an object.",
-  "Closing the action loop": "An action changes what the next observation will show. Use that feedback to adjust the next command, then see what happens when the motor cannot apply the command we requested.",
-  "Boundaries around learning systems": "A useful record may be private, and a downloaded model may execute code when loaded. We’ll examine each operation before deciding what the application can safely permit.",
-  "Learning from a numerical world": "A simulation chooses how to approximate movement and which conditions to generate. Work through those choices before using the examples to judge a learned policy.",
-  "Checking a simulator against observations": "Some relationships in our simulator are unknown. Fit them from measurements, then try the fitted model under conditions it has not already seen.",
-  "Find the Mistakes Behind the Score": "An average can hide the mistakes we most need to understand. Keep predictions beside their observations, follow the inspection queue, and ask which conditions the model struggles with.",
-  "Compare Revisions Fairly": "A lower score may reflect easier cases or repeated searching. Compare revisions on shared observations and keep the model-choosing process inside its own assessment boundary.",
-  "Repair the Evidence and the Behaviour": "Some failures begin in the records or the input adapter. Others need a person to review them. Work out which part needs repair, then test the change without hiding the remaining work.",
-  "Build and Check a Model Revision": "Botie's temperature model misses the night shift. Fit a specific repair, compare it with the original, and check the next shift against requirements written before seeing its results.",
-  "Choosing the Shape of the Records": "The team looks up a pump by its ID many times a day. Other jobs need an entire inspection or a summary across sites. Begin with those questions and see why a useful way to store one answer can be awkward for another.",
-  "Keeping Related Records Together": "An inspection can contain several readings and a technician's notes. Decide which details belong in the same record and which need their own identity, especially when they change independently.",
-  "Working Inside Documents": "A nested record is convenient to save, but we still need to find particular measurements and change the intended field. Follow each path into the document and account for values that are missing.",
-  "Finding and Summarising Documents": "The collection grows beyond what we want to read for every question. Organise a route to likely matches, then follow the selected documents through the operations that produce a useful summary.",
-  "Partitioning for the Questions We Ask": "One site sends far more readings than the others. Work out where those records go and which records a query must visit before choosing how to divide the data.",
-  "Reading and Writing Replicated Records": "Two technicians can see different versions of the same work order. Follow the copies and the updates to understand which answers a read can promise and how a competing write should be handled.",
-  "Keeping Derived Data Repairable": "A summary can fall behind its source, an old document can have a different shape, and a backup can omit recent work. Keep enough information to detect those gaps and rebuild a trustworthy result.",
-  "Serving Model Data": "A fast lookup still gives a model the wrong input if it returns a stale value or information from the future. Bring the storage decisions back to the inspection the model is helping us make.",
-  "Representing Connected Records": "A failed pump can affect equipment connected to it. Give each asset an identity, name the relationships between assets, and decide what information belongs on the connection itself.",
-  "Asking Questions of a Graph": "The team needs inspections of equipment served by a particular pump. Describe that connected pattern, follow its matches, and keep track of what happens when an expected relationship is absent.",
-  "Following Connections": "A fault may reach equipment several connections away. Explore the network without circling forever, then decide whether we need every reachable asset or a particular route.",
-  "Maintaining a Graph": "Imports, corrections and concurrent work can change the network we are querying. Preserve identities and valid relationships while making queries practical on a larger graph.",
-  "Shared Meaning and Evidence": "Two systems can use different names for the same equipment, or disagree about a connection. Make the meaning of a statement explicit and retain the evidence behind it.",
-  "Graphs in ML Systems": "A model or an agent may need the equipment surrounding a fault, together with the documents that explain those connections. Retrieve that context with boundaries on time, access and relevance.",
-  "Reading the Records": "Botie has a table of inspections, but the team needs answers about particular pumps and visits. Start by defining what each row records, then choose the rows and columns that answer the question.",
-  "Missing Values and Decisions": "An empty measurement is different from a measurement of zero. Follow what happens when an unknown value enters a comparison, then write decisions that handle those gaps deliberately.",
-  "Summarising Maintenance Work": "A list of visits does not tell us which site is falling behind. Collect measurements into summaries, keeping the population and missing values visible as the question changes.",
-  "Connecting Tables Without Changing the Question": "Asset details and inspection visits live in separate tables. Match the records that belong together, then investigate why a reasonable-looking join can count the same work several times.",
-  "Queries Built from Queries": "Some questions depend on the answer to another question. Give each intermediate result a clear job, from checking whether a visit exists to following the equipment hierarchy.",
-  "Analysing Change Across Rows": "An average hides the sequence of visits. Keep individual records while comparing neighbouring measurements, ranking results and following totals through time.",
-  "Preparing Records for Analysis": "Dates, notes and nested records bring their own ambiguities. Work out what each value represents before turning it into something a query can compare.",
-  "Features from Historical Data": "A prediction needs the records available when the decision was made. Rebuild that boundary for each training example, including measurements that arrived after the event they describe.",
-  "Designing Reliable Tables": "If an asset appears under two conflicting site names, which record should a query trust? Design the stored relationships and constraints that keep these contradictions from becoming ordinary data.",
-  "Changing Shared Data": "Recording a visit may also change a work order. Keep those changes consistent, then examine what happens when two technicians update the same records at once.",
-  "Making Queries Practical": "The query works on a handful of rows. What happens when the table contains years of inspections? Read its plan, choose useful indexes, and pass user inputs without changing the query's instructions.",
-  "Keeping Learning Data Trustworthy": "A scheduled dataset refresh has to cope with corrections and late records. Build checks that explain failures, then update the dataset without quietly duplicating work or losing older changes.",
-  "From an Answer to an Action": "The manual lives in another system. Follow the pieces that let Botie request it, use what comes back and stop when the evidence is insufficient.",
-  "Teaching the Task Through Examples": "An example can accidentally teach Botie to recommend an inspection every time. Choose demonstrations that show why the right response changes with the evidence.",
-  "Building Evaluation Cases": "Keep the request and its expected outcome together. The next prompt revision needs cases that can reveal a mistake, including cases we did not use to design it.",
-  "Testing the Program Around the Model": "A model can vary its wording while our code keeps passing the wrong asset to a tool. Separate reproducible application checks from evaluations of model behaviour.",
-  "Reviewing Answer Quality": "Some requirements have exact checks. Others need judgement. Define what the reviewer should look for and test whether those judgements are dependable.",
-  "Finding a Change Worth Making": "The answer is wrong. Was the right evidence available? Trace the failure to a specific question, then change one part and inspect what improves or regresses.",
-  "Deciding Whether to Release": "The candidate looks promising on our examples. Check the remaining requirements before allowing it to handle real requests.",
-  "A Repair From Failure to Fresh Evidence": "A stale manual trips up the assistant. Carry that failure through a tool repair, preserve useful behaviour and test the candidate on a new shift.",
-  "Giving the Model a Clear Job": "Botie has a maintenance question to answer. We need to say what a useful answer contains, give him the relevant evidence, and check the result before another program relies on it.",
-  "Letting the Model Use Tools": "The answer may need a manual lookup or a proposed inspection. We will define what each tool accepts, control which records it can reach, and decide when the work should stop.",
-  "Choosing How Much Autonomy to Give": "The maintenance team already follows a procedure. Where does a model's choice actually help? Compare that procedure with an agent on the same tickets before giving the system more freedom.",
-  "Building with Agent Frameworks": "Once we understand the loop, a framework can organise its repeated work. Follow the same maintenance task through Pydantic AI, LangChain, and an explicit LangGraph workflow to see what each one manages.",
-  "State and Permissions": "A paused job may resume after its details have changed. Keep the saved state and the technician's approval tied to the action, then examine what changes when tools come from another service.",
-  "Guardrails at the Point of Action": "A manual can contain misleading instructions, and a valid tool request can still reach the wrong customer's records. Follow each proposal to the place where software can permit or prevent it. Then test what happens when a check is missing or gives the wrong answer.",
-  "Keeping an Agent Run Under Control": "An inspection request times out. Did it fail, or did the service create it before the reply was lost? Work through that uncertainty, then give concurrent jobs a budget they cannot each spend twice.",
-  "Seeing What Happened": "Botie returned the wrong answer, but which step went wrong? Record the work as it happens so we can distinguish a missing manual from a failed tool or an unsupported answer.",
-  "Evaluating the Whole Agent": "A convincing answer on one ticket tells us little about the next shift. Keep representative cases, inspect the failures, and compare a proposed change against the system people already use.",
-  "Testing and Operating the Boundaries": "A guardrail that blocks every request would also stop useful work. Test ordinary jobs alongside attempts to misuse the system, then practise responding when a released version crosses a boundary.",
-  "Deciding Where Authority Belongs": "Botie can produce a correct answer after taking an unauthorised action. Start with the effects we need to control and identify where the application can actually stop them.",
-  "Working Safely with a Coding Agent": "A green test run can hide a deleted assertion or evidence from an older build. Give Botie a reviewable task, run candidate code with limited access, and keep verification attached to the artifact it inspected.",
-  "Connecting MCP Servers Deliberately": "A connected server can advertise new tools, return untrusted content or receive a credential meant for somewhere else. Follow those changes through the host and the service before allowing an operation.",
-  "Protecting Applications and Shared State": "An approved draft can change before it runs, and a saved note can outlive its permission. Keep review attached to the actual action and narrow what another worker may inherit.",
-  "Testing the Whole Boundary": "A refusal at the end of a conversation does not undo an earlier export. Inspect receiver-side effects, keep ordinary work in the evaluation, and decide what the evidence supports next.",
-  "Decisions Before Models": "A prediction helps only if someone can use it. Begin with the inspection decision, identify its limits, and compare a learned model with a rule we can already run.",
-  "The Information We Can Use": "A record in today's database may have arrived too late for yesterday's decision. Define what each input means and when the service could actually use it.",
-  "Throughput and Waiting": "Requests pass through several stages, and unfinished work carries forward. Follow that work to find the limiting stage and see what a burst does to the queue.",
-  "Memory and Communication": "A model needs space to run, and a remote model needs time to receive its inputs. Account for those costs before choosing a device or moving computation to a server.",
-  "Requirements and Trade-offs": "Some limits must hold; other qualities are preferences. Keep that distinction visible while comparing candidates and investigating assumptions that could change the choice.",
-  "Evidence Before Release": "A prototype should answer a question we still have about the design. Plan the comparison and define what the service does when its normal prediction route is unavailable.",
-  "Bring the Design Together": "Return to the inspection team's needs. Connect each requirement to a test, keep failures understandable, and identify what a real trial still has to establish.",
-  "Predicting the Next Observation": "Tomorrow's value is unavailable when we make today's forecast. Begin with a simple prediction, then arrange earlier observations into inputs without borrowing the answer.",
-  "Patterns That Repeat or Move": "A series can repeat, drift, or react to recent observations. We will separate those behaviours before choosing a rule for updating a forecast.",
-  "Fitting and Testing Forecasts": "A useful forecast must work with the information available at its origin. Fit a small model, then recreate that boundary on successive later days.",
-  "Learning From Consequences": "Botie sees feedback only after choosing an action. We will distinguish learning about independent choices from decisions that change the state he faces next.",
-  "Planning Beyond the Next Reward": "An action can pay off later. Keep the reward sequence visible as we calculate returns, plan with a transition model, and learn action values from experience.",
-  "Describing What We Do Not Know": "A single estimate can hide how little evidence supports it. Describe possible outcomes, then update an uncertain failure rate as observations arrive.",
-  "Combining Noisy Evidence": "Measurements can disagree without either being useless. Account for their reliability and the way an underlying condition changes before combining them.",
-  "Predictions as Distributions": "An unmeasured location needs both a prediction and an account of what remains uncertain. We will see how a covariance rule lets measured locations inform it.",
-  "Making Parameter Updates": "A derivative tells us a local direction, but training still needs a rule for using it. Follow small batches, stored velocity, and adaptive scaling through actual parameter changes.",
-  "Understanding a Training Run": "A stalled loss can have several causes. Check the starting values and derivatives, then use separate training and validation evidence to decide whether to continue.",
-  "Choosing Useful Candidates": "A reader should not have to search the whole shelf. Begin with what previous readers opened, then use guide descriptions when interaction history is missing.",
-  "Learning From Interaction Patterns": "Readers can share preferences that item descriptions miss. Keep missing ratings distinct from dislikes while learning from neighbours and compact factor representations.",
-  "Evaluating Recommendations": "A useful guide needs to reach the part of the list someone sees. Evaluate the visible ranking and inspect readers and items with little history separately.",
-  "Recognising Unusual Records": "An unusual reading needs a reference. Compare a robust global baseline with a local neighbourhood, and keep unusualness separate from a confirmed fault.",
-  "Different Ways to Detect Unusualness": "Some observations are easy to isolate; others are hard to reconstruct. Work through both signals before deciding which cases deserve investigation.",
-  "Representing Relationships": "Independent rows leave out who is connected to whom. Record a network carefully, then follow probability through its links.",
-  "Learning Across Connections": "A node's neighbours can supply context. Gather that information, transform it with shared weights, and test what it tells us about missing links.",
-  "Asking What a Change Would Do": "Predicting an outcome and changing it are different questions. Examine why groups differ before using a random assignment to make a treatment comparison.",
-  "Working With Observational Evidence": "An old dataset cannot be rerun as an experiment. Make the assumptions behind adjustment and weighting explicit, including where the data provide no comparison.",
-  "From Training to a Repeatable Prediction": "Saved weights need the preparation and feature meanings that made them useful. Preserve that procedure and validate the records entering it.",
-  "Running and Identifying a Model": "A prediction should stay consistent across requests and traceable to a particular version. Test batch behaviour and preserve complete artifacts before changing the served model.",
-  "Maintaining the Prediction Service": "New inputs and later outcomes can reveal different problems. Monitor data, accuracy, and service behaviour separately, with a tested response when something changes.",
-  "Putting the Pieces Together": "A complete small project needs a question, a baseline, a fair test, and an explanation of failures. Follow Botie through sensor inspection, demand forecasting, and counting seeds in images.",
-  "Reasoning From Uncertain Evidence": "An observation can change what we believe, but we need to keep track of the group we are talking about. We will follow an alarm back to its possible causes, then compare rules that could have produced a recorded sequence.",
-  "Learning From Limited Images": "We may have too few labelled photographs to learn every visual pattern from scratch. We can create appropriate variations of our training images or test features learned elsewhere, while keeping the labels and evaluation honest.",
-  "Finding and Counting Objects": "Knowing an object is present does not tell us where it is or how many we found. We will describe locations with rectangles, measure their overlap, and work through what to do when several predictions point at the same object.",
-  "From a measurement to a calculation": "Before asking a model to learn from numbers, we need to put those numbers in a form we can inspect. We will keep track of what each entry represents as we calculate with arrays.",
-  "Working with whole arrays": "A calculation often needs the same reference for many observations, or only the observations meeting a condition. We need to express those choices without losing which values belong together.",
-  "Calculations We Will Reuse": "Later models will combine feature columns, compare predictions with observations, and summarise their errors. We will calculate those pieces with NumPy and keep their intermediate results visible.",
-  "Keep the Calculation Trustworthy": "A useful result needs to survive new inputs and another run. We will check numerical agreement, repeat random choices, package calculations in functions, and save the information needed to reconstruct them.",
-  "Can We Trust These Records?": "A blank reading, a repeated import, and an unusual observation are different problems. We need to establish what each record represents before deciding how to prepare it.",
-  "Representing What We Measured": "A material name is not a quantity, and an hour of the day repeats. Our representation should preserve those meanings instead of inventing relationships between arbitrary numbers.",
-  "Keep Future Answers Out of Training": "Our fitting procedure must respect what was available at prediction time. We also need to keep rare outcomes visible so an apparently successful score does not hide the mistakes that matter.",
-  "Establish a Fair Comparison": "A score needs a reference and an evaluation population. We will establish a simple baseline, keep related observations together, and examine what changes as more training data become available.",
-  "From a Score to a Decision": "A model's confidence and the action we take are separate questions. We need to understand what the probabilities mean before connecting them to the consequences of a decision.",
-  "Know the Limits of the Result": "A result depends on the observations we collected and the population we tested. We will examine sampling variation and changes in incoming data before carrying a conclusion into a new setting.",
+  "Databricks Fundamentals": "Databricks brings data processing and shared development into a managed platform. Understand where the data lives, how calculations run, and how tables and jobs connect that work. Then use those foundations to record a model experiment.",
+  "Describing a model request": "Two programs need a shared agreement about the values they exchange. A model request must distinguish omitted information from an explicit null and retain the meaning of numerical fields. Changes to that agreement also need to account for older callers.",
+  "Handling and testing tool outcomes": "A failed connection can leave the caller uncertain whether an operation happened. Error types and retry rules need to preserve that distinction. Interface tests should also check expected relationships between requests, beyond one successful example.",
+  "Protecting the training process": "Training data gives its producer influence over a model's behavior. Keeping the source of records visible helps us investigate that influence. Tests also need to look for behaviors triggered by particular inputs that an ordinary evaluation might miss.",
+  "Assessing exposure through prediction": "A prediction interface gives others ways to interact with a model. The risk depends on which inputs they can change and how many queries they can make. An experiment needs those limits stated before its results can support a claim about protection.",
+  "Following a distributed calculation": "Spark describes a calculation before running its work across available workers. Some operations require records with matching keys to meet on the same worker. That movement, and an uneven distribution of keys, can determine how long the whole job takes.",
+  "Keeping a dependable table history": "Changing records can change a training result even when its code stays the same. Table versions give each run a consistent view of its inputs. Repeated deliveries and older corrections also need rules that preserve which changes were actually committed.",
+  "Publishing a pipeline result": "A quality check matters through the action taken when it fails. A pipeline can reject a record or stop an update, depending on the agreed policy. The published dataset should make that decision visible rather than silently admitting known failures.",
+  "Connecting model evidence to an artifact": "A model score needs the dataset and evaluation procedure that produced it. MLflow records run information alongside saved model files, helping us connect a result to the actual candidate. Comparisons require that evidence before a lower error can justify a change.",
+  "Making feature access explicit": "A feature must be both permitted and available for the decision using it. Access controls determine which process may read the data. Historical feature selection separately determines which recorded values could have been known at the time.",
+  "When the answer arrives": "A language model first processes its prompt, then generates an answer over time. Those stages create different kinds of waiting. Reusing a previously processed prefix can reduce some work, provided the cached calculation matches the current request.",
+  "Serving a changing workload": "Requests enter and leave a serving system while other answers are still being generated. Admission decisions need to account for the memory already in use and what each new request may require. Cancellation and test traffic also need clear limits on their effects.",
+  "Following an estimate through time": "An estimate can use known movement to predict what happens between observations. A new reading then updates that prediction according to its uncertainty. Missing a reading should increase uncertainty about the state rather than imply that movement stopped.",
+  "When observation and model disagree": "A plausible measurement may describe the wrong object, and a motion model may be wrong about how an object moves. Choosing which observations to use is separate from checking whether the estimate's reported uncertainty matches its actual errors.",
+  "Where a fitted number can mislead": "Numerical results need interpretation as well as arithmetic. Intermediate values can overflow even when the intended answer is finite. A perfect fit can also leave several parameter choices equally plausible, so the reported numbers may say less than they appear to.",
+  "Checking derivatives and simulated trajectories": "A claimed gradient can be compared with the effect of a small change in the actual calculation. Simulation steps can likewise be checked for numerical error. These comparisons help identify where an approximation needs more work, within the limits of the check itself.",
+  "Keeping prediction code dependable": "Prediction code needs to preserve the meaning and order of its inputs. Fitted preprocessing also needs to retain the statistics learned during training. Making that state explicit helps prevent a new request from quietly changing the procedure being evaluated.",
+  "Structures for agent workloads": "A useful data structure preserves the relationships a calculation depends on. Retrieval candidates need their scores attached to the right records. A workflow needs to represent which jobs depend on others before deciding what can run next.",
+  "Building the training table": "Combining data requires accounting for what each part contributes. An average from a small file carries different weight from one based on many rows. Historical model inputs also need to respect when the underlying information became available.",
+  "Repairing a changing pipeline": "An established pipeline needs an explicit response when incoming records break its assumptions. Validation and late-data rules determine which observations reach a result. Keeping input and code versions with that result makes later repairs possible to reproduce.",
+  "Latency under real workloads": "A caller waits for the complete request, including time in a queue and any tool calls along the way. Faster processing of one stage can leave that total wait unchanged. Shared deadlines help each stage account for the time already spent.",
+  "Memory and reuse": "Conversation state occupies memory for as long as the service retains it. Reusing an answer raises a different question: whether it still belongs to the current context. Both forms of reuse need explicit boundaries as requests and users change.",
+  "Making predictions usable for motion": "A detected position belongs to a coordinate system and a measurement time. A controller needs to translate that position into its own frame and account for movement since observation. Otherwise, an accurate detection can still produce the wrong command.",
+  "Closing the action loop": "Feedback uses the result of an earlier action to choose the next correction. The controller also needs to account for commands the actuator cannot carry out. Continuing to accumulate an impossible correction can make recovery worse when the system can respond again.",
+  "Boundaries around learning systems": "Permission to use a record is separate from its relevance to a prediction. Released statistics can also reveal information about individuals, while loading a model file may execute code. The controls need to address the actual operation and what it can expose.",
+  "Learning from a numerical world": "A simulation approximates how a system changes over time. Its time steps can introduce behavior absent from the system it represents. Comparing policies also requires shared scenarios, so differences in the generated experience do not obscure the effect of the policy.",
+  "Checking a simulator against observations": "Measurements can help estimate unknown relationships inside a simulator. Agreement on those observations does not establish that the model works under other conditions. Testing changed settings helps reveal which assumptions a learned policy still depends on.",
+  "Find the Mistakes Behind the Score": "An overall score combines mistakes that may have very different consequences. Individual errors and results for particular groups help explain what it hides. That evidence connects model evaluation to the cases and decisions the prediction is intended to support.",
+  "Compare Revisions Fairly": "Comparing revisions on the same observations helps separate a model change from a change in the test cases. Repeatedly choosing the best score introduces another source of optimism. The selection procedure needs its own independent assessment.",
+  "Repair the Evidence and the Behaviour": "A prediction failure can originate in the records or in how the application represents them. Some cases may need human review rather than an automatic answer. Behavioral checks help identify what a proposed repair changes and which failures remain.",
+  "Build and Check a Model Revision": "A useful revision should repair an identified error without hiding damage elsewhere. A complete comparison keeps the original model as a reference and tests the changed procedure on fresh data. Acceptance requirements need to be set before those results are known.",
+  "Choosing the Shape of the Records": "A database layout makes some requests easier than others. Looking up a value by its key differs from reading a complete history or producing a report. The requests we need to support provide a practical basis for choosing how to store the records.",
+  "Keeping Related Records Together": "A document can keep related details available in one read. Shared facts that change independently may instead need their own records. Deciding which information belongs together also determines how many copies must be kept current.",
+  "Working Inside Documents": "Nested fields need precise paths when we select or change them. Conditions on an array must keep values attached to the member they describe. Updates also need to preserve unrelated fields and check whether the record has changed since it was read.",
+  "Finding and Summarising Documents": "Indexes help locate possible matches without inspecting every document. Later transformations still need to check the remaining conditions and preserve what each record represents. Expanding an array changes that meaning, which affects how a subsequent summary should count it.",
+  "Partitioning for the Questions We Ask": "Dividing records among machines changes where a query must look and where requests concentrate. A useful partition key accounts for access patterns and uneven traffic. Histories may also need bounded time groups so one entity's records do not grow without limit.",
+  "Reading and Writing Replicated Records": "Copies of a record can temporarily disagree, while competing writers can make decisions from the same old version. Read guarantees determine which observations an application may trust. Conditional writes and suitable merge rules address different kinds of conflicting change.",
+  "Keeping Derived Data Repairable": "Stored summaries and older document formats need a clear relationship to their source records. Versions and retained history make changes interpretable and views rebuildable. Recovery also needs evidence from before a mistake, since replication can copy the mistake itself.",
+  "Serving Model Data": "A model's input needs an agreed identity and feature definition, with values arranged in the expected order. Live lookups must account for stale or missing data. Historical training inputs separately need to reconstruct the information available at the time.",
+  "Representing Connected Records": "A graph gives relationships a place alongside the entities they connect. Each connection needs a meaning and, where relevant, a direction. Clear entity identities prevent unrelated records from becoming connected simply because they share a name.",
+  "Asking Questions of a Graph": "A graph query describes a pattern of connected records. Following its matches requires keeping the same entities bound together and knowing what each result row counts. Optional matches can retain a starting entity when an expected relationship is absent.",
+  "Following Connections": "A graph search can ask which entities are reachable or which route has the lowest cost. Those questions require different procedures. Cycles need stopping rules, and a bound on exploration limits what the search can claim to have found.",
+  "Maintaining a Graph": "A changing graph needs write rules that preserve identities and relationships. Imports must recognize repeated records, while concurrent edits need checks at the actual write. As the graph grows, query plans help explain the cost of following its connections.",
+  "Shared Meaning and Evidence": "Combining graph records requires agreement about what their identifiers and statements mean. Keeping a claim attached to its source and applicable time lets us assess it later. Conflicting statements should remain visible rather than being settled by import order.",
+  "Graphs in ML Systems": "Relationships can guide an assistant towards connected evidence that a document search alone might miss. That context still needs limits on access and time. Evaluation must establish whether following the extra connections actually improves the answer.",
+  "Reading the Records": "A table stores records as rows, with columns describing the values each record contains. Selecting the relevant fields and filtering or ordering the rows turns those stored records into an answer to a particular question.",
+  "Missing Values and Decisions": "A missing value represents information we do not have, rather than a measured zero. SQL comparisons involving that value can produce an unknown result, which affects filtering and the conditions used to assign a label.",
+  "Summarising Maintenance Work": "An aggregate combines several records into a summary, such as a total or average. Grouping determines which records contribute to each result, while missing values and repeated rows can change what that summary means.",
+  "Connecting Tables Without Changing the Question": "A join connects records using a relationship between their tables. One record can match several others, so the number of matches matters when interpreting missing records or calculating totals after the join.",
+  "Queries Built from Queries": "A query can use another query's result as part of its calculation. Named intermediate results make complex questions easier to follow, including comparisons with a summary and searches through a hierarchy.",
+  "Analysing Change Across Rows": "Window calculations compare related rows without replacing them with one summary record. Their ordering and boundaries determine which observations contribute to a running total or a comparison with an earlier measurement.",
+  "Preparing Records for Analysis": "A stored value's format affects what a query can do with it. Dates need a consistent interpretation of time, while text searches and values inside nested records need rules that preserve their intended meaning.",
+  "Features from Historical Data": "A historical training example needs the information available when its prediction would have been made. Event timestamps alone cannot establish that boundary when records arrive late or are corrected afterward.",
+  "Designing Reliable Tables": "Table structure determines how records refer to one another and where a fact is stored. Keys and constraints enforce declared relationships, reducing contradictions and the number of places that must change when a fact changes.",
+  "Changing Shared Data": "Related changes sometimes need to succeed together or leave the stored data unchanged. Transactions provide that grouping, while the handling of concurrent updates determines what happens when several people work on the same records.",
+  "Making Queries Practical": "A query's execution plan describes how the database finds and combines its records. Indexes provide shortcuts to relevant rows, while parameterized inputs keep a user's search values separate from the SQL instructions being executed.",
+  "Keeping Learning Data Trustworthy": "Dataset updates need to account for late records and corrections as well as new arrivals. Validation and a record of committed progress help prevent a refresh from silently changing the meaning or counting of its inputs.",
+  "From an Answer to an Action": "An agent uses a model's output to choose another operation, such as requesting information from a tool. The program performs that operation and returns an observation that can affect the model's next decision.",
+  "Teaching the Task Through Examples": "Examples in a prompt demonstrate which responses are acceptable under different conditions. The distinctions they show affect what the model is asked to imitate, so they need evaluation on requests beyond the examples themselves.",
+  "Building Evaluation Cases": "An evaluation case describes a task and the conditions that count as success. For an agent, that includes the actions it may take and its response to missing information, alongside the final answer.",
+  "Testing the Program Around the Model": "Controlled model responses let us test the program around an agent without relying on a live provider. These checks establish how the code handles its inputs and tools; the quality of a real model's answers needs separate evidence.",
+  "Reviewing Answer Quality": "Some answer requirements can be checked exactly, while others require interpretation. A written set of criteria gives those judgments a common basis, and comparison with human review helps establish whether a model judge is dependable.",
+  "Finding a Change Worth Making": "An incorrect answer can begin with missing evidence or a mistake later in the run. Tracing that failure and comparing isolated changes on the same tasks helps identify which repair actually affected the result.",
+  "Deciding Whether to Release": "A candidate version can improve average performance while introducing a failure on an important task. Release requirements need to account for those individual failures and the resources needed to handle real requests.",
+  "A Repair From Failure to Fresh Evidence": "A repair needs a connection to the failure it addresses and evidence from requests beyond that original example. Retaining earlier checks helps show whether the change also damaged behavior that was already useful.",
+  "Giving the Model a Clear Job": "A model's instructions describe the task and the evidence it may use. An agreed response format lets another program inspect the answer, while factual support remains separate from whether the response has the right shape.",
+  "Letting the Model Use Tools": "Tools let a model request information or propose an operation performed by another program. The application defines what each request accepts and may access, then uses returned results to decide whether more work is needed.",
+  "Choosing How Much Autonomy to Give": "A fixed workflow chooses its route in code; an agent lets a model choose some steps from new observations. Comparing those approaches on the same tasks helps establish whether the additional freedom is useful.",
+  "Building with Agent Frameworks": "Agent frameworks organize model calls and the work surrounding them. Pydantic AI and LangChain provide structures for tools and responses, while LangGraph makes saved state and the route between operations explicit.",
+  "State and Permissions": "Saved state lets an application continue work after a pause, but it does not establish that the original permissions still apply. Approval needs to match the current action, including when its tools are supplied by another service.",
+  "Guardrails at the Point of Action": "An agent's instructions can be redirected by content it reads, and a well-formed request can still be unauthorized. Checks where data is read or actions are performed determine which effects the application actually permits.",
+  "Keeping an Agent Run Under Control": "A lost reply can leave an action's outcome unknown, while concurrent calls can compete for the same budget. Tracking intended actions and reserving unfinished work helps the application recover without repeating effects or exceeding its limits.",
+  "Seeing What Happened": "Execution records connect an agent's answer to the operations and evidence that produced it. Their identities and timing help explain a failed or slow run and connect reported evaluation scores to the answers actually checked.",
+  "Evaluating the Whole Agent": "An agent's usefulness depends on its actions as well as its final response. Representative cases and recorded failures provide a basis for comparing revisions, including behavior that an average answer score could hide.",
+  "Testing and Operating the Boundaries": "A control can prevent misuse while also blocking legitimate work. Evaluating both effects gives a fuller account of its usefulness, and operating procedures determine how the system responds when a released agent crosses a limit.",
+  "Deciding Where Authority Belongs": "An agent proposes actions, but the application determines which proposals can take effect. Placing controls at that point lets permissions remain enforceable even when the model produces an unexpected response.",
+  "Working Safely with a Coding Agent": "A coding agent can change the tests and build instructions as well as the program. Independent checks and restricted execution help keep a repair reviewable, with evidence attached to the exact software being released.",
+  "Connecting MCP Servers Deliberately": "The Model Context Protocol, or MCP, gives applications a shared interface to capabilities supplied by another program. Its identity and advertised tools still need review, and credentials must be intended for the service receiving them.",
+  "Protecting Applications and Shared State": "An approved action can change before execution, and saved information can outlive its permissions. Checking the current action and limiting what a delegated worker inherits helps keep those changes from expanding its authority.",
+  "Testing the Whole Boundary": "An agent's final refusal does not undo an action already performed. Evaluating the effects recorded by the receiving service reveals whether a control prevented the unwanted operation and whether legitimate work remains possible.",
+  "Decisions Before Models": "A prediction becomes useful through the decision it informs. Defining that decision and comparing an existing rule with a proposed model establishes what improvement would justify the additional work.",
+  "The Information We Can Use": "An input has a meaning and a time when it becomes available. Both belong in the system's requirements, because a historical record may describe an event the running application had not yet learned about.",
+  "Throughput and Waiting": "Throughput describes how much work a system finishes over time, while waiting depends on what remains unfinished. The slowest processing stage and short bursts of demand can limit a service even when its average workload appears manageable.",
+  "Memory and Communication": "A running model needs memory beyond its saved parameters, and remote processing adds time to transfer its inputs. Those demands affect whether computation belongs on a device or a server, especially when the connection is unavailable.",
+  "Requirements and Trade-offs": "A requirement defines a limit the design must meet; a preference helps compare designs that meet those limits. Uncertain estimates can change that comparison, making some assumptions more important to investigate than others.",
+  "Evidence Before Release": "A prototype can test a design assumption before the complete system is built. Its evidence is most useful when the comparison can change a decision and the design includes a response when its normal operation is unavailable.",
+  "Bring the Design Together": "A service design needs evidence for its operating limits alongside the accuracy of its predictions. Connecting each requirement to a test shows which claims the prototype supports and which still require a realistic trial.",
+  "Predicting the Next Observation": "A forecast estimates a value that has not yet been observed. Simple baseline predictions give later models something to improve on, while input windows define which earlier measurements are available for that prediction.",
+  "Patterns That Repeat or Move": "A time series can contain repeating patterns and a changing underlying level. Separating those effects helps determine whether a forecast should reuse a past pattern or adjust to more recent observations.",
+  "Fitting and Testing Forecasts": "A forecasting model learns relationships in earlier observations and uses them to predict later values. Repeated tests that move forward through time preserve the information boundary the model would face in use.",
+  "Learning From Consequences": "Reinforcement learning uses feedback from actions to improve later choices. Some tasks reward each choice independently, while others let an action change the situation and opportunities the learner encounters next.",
+  "Planning Beyond the Next Reward": "An action's value can depend on rewards that arrive after several later decisions. Returns summarize those consequences, allowing a learner to plan with a known transition model or estimate action values from experience.",
+  "Describing What We Do Not Know": "A single estimate leaves out the other outcomes still consistent with limited evidence. Probability distributions describe those possibilities and provide a way to update an uncertain rate as new observations arrive.",
+  "Combining Noisy Evidence": "Measurements with different reliability should not necessarily contribute equally to an estimate. Combining them requires assumptions about their errors and, for a changing system, how the underlying condition develops over time.",
+  "Predictions as Distributions": "A prediction distribution describes possible values and the uncertainty remaining between observations. A rule for how measurements vary together allows evidence from observed locations to inform estimates at unmeasured ones.",
+  "Making Parameter Updates": "A gradient describes how changes to a model's parameters affect its error locally. The update rule determines how that information becomes a step, including the effects of small batches and earlier updates.",
+  "Understanding a Training Run": "A stalled training error can reflect the starting values or the calculation of an update, rather than insufficient time. Separate training and validation measurements help distinguish those problems from a model beginning to fit details that do not generalize.",
+  "Choosing Useful Candidates": "A recommendation system selects items likely to be useful to a particular person. Popularity provides a starting point without personal history, while item descriptions offer information that does not depend on earlier interactions.",
+  "Learning From Interaction Patterns": "People's recorded choices can reveal shared preferences that item descriptions leave out. Neighbor comparisons and compact representations of rating patterns use that evidence, while an absent rating must remain distinct from a dislike.",
+  "Evaluating Recommendations": "A recommendation matters only if it reaches a useful position in the list shown to a reader. Ranking measures evaluate that ordering, and separate checks reveal how the system performs for people or items with little history.",
+  "Recognising Unusual Records": "An observation is unusual relative to a reference, which may describe the whole dataset or its local neighbors. References less affected by extreme values help distinguish a meaningful deviation from a distorted comparison.",
+  "Different Ways to Detect Unusualness": "Anomalies can appear as observations that are easy to separate or patterns a model reconstructs poorly. Those signals identify cases worth investigating without establishing that an unusual observation is a confirmed fault.",
+  "Representing Relationships": "A graph records objects and the links between them, preserving relationships that separate rows can leave out. Following probability through those links gives one way to compare positions within the network.",
+  "Learning Across Connections": "Connected objects can provide information about one another. Combining a node's measurements with those of its neighbors lets shared model operations use that context, including when estimating whether an unobserved connection is plausible.",
+  "Asking What a Change Would Do": "Predicting an outcome does not establish what would happen if we changed its cause. Random assignment provides a way to compare interventions while reducing the influence of preexisting differences between groups on average.",
+  "Working With Observational Evidence": "Comparisons from existing records depend on assumptions about why people received different treatments. Adjustment and weighting account for measured differences, but cannot create evidence where the data contain no comparable groups.",
+  "From Training to a Repeatable Prediction": "A fitted model depends on the input preparation and feature meanings used during training. Saving that procedure with the model and validating incoming records helps keep later predictions consistent with those expectations.",
+  "Running and Identifying a Model": "A prediction depends on a particular model version and its saved preparation. Keeping them together preserves that identity, while tests across individual and batched requests check whether the service applies the same calculation consistently.",
+  "Maintaining the Prediction Service": "New data and later outcomes reveal different aspects of a running model. Changes in input distributions need to be distinguished from prediction errors and service failures before deciding which response is appropriate.",
+  "Putting the Pieces Together": "A complete prediction project connects a useful question to a baseline and a fair evaluation. Sensor investigation, demand forecasting and image-based counting each expose different assumptions that need to remain visible when interpreting the result.",
+  "Reasoning From Uncertain Evidence": "An observation can support several possible explanations. Probability connects that evidence to the groups it could have come from, helping interpret an alarm or compare rules that might have produced a recorded sequence.",
+  "Learning From Limited Images": "Limited labeled images make it difficult to learn every visual pattern from scratch. Appropriate variations of training images can provide additional examples, while features learned on other images offer a different starting point.",
+  "Finding and Counting Objects": "Object detection needs a location as well as a prediction that an object is present. Rectangles describe those locations, and their overlap helps identify several predictions that may refer to the same object.",
+  "From a measurement to a calculation": "An array stores measurements in an ordered structure that supports numerical calculations. Its positions and shape need an agreed meaning so an operation combines the intended observations rather than merely producing a number.",
+  "Working with whole arrays": "Array operations can select observations or apply one calculation across many values. Shapes and positions determine which entries work together, including when a shared reference is applied to every row.",
+  "Calculations We Will Reuse": "Numerical models combine measurements into predictions and compare those predictions with observations. NumPy expresses these calculations over whole arrays, making the choice of rows and columns part of what each result means.",
+  "Keep the Calculation Trustworthy": "A calculation needs a defined response to new inputs and enough recorded information to run it again. Numerical tolerances and controlled random choices help distinguish an expected difference from an implementation mistake.",
+  "Can We Trust These Records?": "A record needs a clear identity before repeated entries or missing measurements can be interpreted. Preparation depends on what each row represents and whether an unusual value is plausible for that measurement.",
+  "Representing What We Measured": "A numerical representation can introduce relationships that the original measurement did not have. Category labels need to avoid invented rankings, while repeating quantities such as time of day need to preserve their cyclic relationship.",
+  "Keep Future Answers Out of Training": "Training inputs must reflect information available at prediction time, including during preparation. Evaluation also needs to account for rare outcomes, since a high overall score can hide poor performance on the cases that matter most.",
+  "Establish a Fair Comparison": "A performance score needs a baseline and observations that represent a meaningful new test. Related examples and the amount of training data affect that comparison, so a held-out record is not automatically an independent one.",
+  "From a Score to a Decision": "A predicted probability describes an estimated outcome, while an action also depends on its consequences. Checking whether probabilities match observed frequencies helps establish what those estimates can support before choosing a decision threshold.",
+  "Know the Limits of the Result": "An estimated result depends on the sample used to calculate it and the population that sample represents. Sampling variation and changes in incoming data affect how confidently the conclusion can be carried into another setting.",
 };
 
 function addedTopics(section: string): Topic[] {
@@ -1019,55 +1020,224 @@ const foundationCurriculum: Part[] = existingCurriculum.flatMap(part => {
     return { ...topic, concepts };
   });
   const expanded = { ...part, topics: [...before, ...topics, ...after] };
-  if (part.title === "Data Preparation") expanded.intro = "A model only sees the records we give it. Before fitting, we need to know what a row represents, which measurements are missing, and how categories, units, and time should be represented. We also need to keep information from the future out of a prediction about the present.";
+  if (part.title === "Data Preparation") expanded.intro = "The way data is recorded affects what we can calculate from it. Missing values and inconsistent units need explicit treatment, while categories and dates need representations that preserve their meaning. Historical predictions also need the information that was available at the time.";
   if (part.title !== "Introductory Mathematics") return [expanded];
   return [expanded, {
     id: "python-and-numpy", title: "Python and NumPy",
-    intro: "The courses use Python and NumPy to turn the ideas into calculations we can inspect. We will begin with a few greenhouse readings, learn how to store and select them, then work through array shapes, summaries, matrix calculations, and numerical checks. We will also make the code reusable and keep enough of each experiment to run it again. The examples and challenges run here in the browser.",
+    intro: "Python gives us ways to organize data and express calculations as reusable programs. NumPy works with numerical arrays, allowing the same operation to be applied across many values. Shapes and data types determine how those operations behave and what their results mean.",
     topics: addedTopics("Python and NumPy"),
   }];
 });
 
 const newSection = (title: string, intro: string): Part => ({ title, intro, topics: addedTopics(title) });
 const databaseSections = [
-  newSection("SQL", "Botie's maintenance team has years of inspections, equipment details and sensor readings. How can we use those records to answer a specific question without counting the wrong visits or mixing up assets? Begin with a table and a small query, then work toward analytical queries and dependable databases. The lessons also follow the data into machine learning, where the time a record became available matters as much as its value."),
-  newSection("NoSQL", "A technician wants the whole inspection on one screen. A sensor needs to send readings quickly, while the dashboard keeps asking for the latest one. Should all of those jobs store their records in the same way? Work through keys and documents with Botie, then follow what happens when we divide the records among machines or keep several copies. Each choice changes the questions we can answer easily and the failures we need to handle."),
-  newSection("Graph Databases", "A pump fails. Which equipment depends on it, and which inspection tells us why that connection matters? The answer follows relationships across the records. We will give those relationships a place in the database, learn to query their patterns, and build traversals with Botie. As the graph grows, we will handle repeated routes, conflicting identities and evidence that has gone out of date."),
+  newSection("SQL", "SQL expresses questions about records stored in tables. Filtering and grouping describe which records matter, while joins connect information across tables. Reliable answers also depend on how the data is structured and how updates are kept consistent."),
+  newSection("NoSQL", "Different ways of storing data make different questions easier to answer. Documents keep related details together, while key-based storage supports direct lookups. Dividing records across machines or maintaining several copies introduces further decisions about consistency and failure."),
+  newSection("Graph Databases", "Graph databases store relationships as part of the data. Following those connections lets us ask about dependencies and routes across many records. The answers depend on consistent identities and a clear meaning for each relationship."),
 ];
-const probabilitySection = newSection("Probabilistic Models and Uncertainty", "A prediction is rarely the only plausible outcome. Botie will keep track of possible outcomes, update an uncertain failure rate, and combine noisy readings. We will distinguish uncertainty about a model from variation in the next observation, then use those ideas to predict between measured locations.");
-const modelEvaluationSection = newSection("Evaluating and Improving Models", "The model has a score. What should we change next? Follow its individual mistakes, check which cases a revision helps, and keep the next assessment separate from the decisions that produced the model. Botie will help you test repairs against group errors and the conditions the service actually needs to handle.");
-const optimisationSection = newSection("Optimisation and Training", "A model learns through changes to its parameters. We will follow those changes directly, from a small batch's gradient to momentum and adaptive updates. We will also check derivatives, inspect training curves, and decide when a saved model is a better choice than the final one.");
-const reinforcementSection = newSection("Reinforcement Learning", "Botie sometimes has to act before he knows which choice is best. We will begin with the feedback an action produces, then add changing states and rewards that arrive later. Planning with a known model and learning from observed transitions will give us two ways to improve his decisions.");
+const probabilitySection = newSection("Probabilistic Models and Uncertainty", "An uncertain quantity can have several plausible values. Probability distributions describe those possibilities, and new evidence changes how much support each receives. Predictions need to account for uncertainty in the estimated relationships as well as variation in observations.");
+const modelEvaluationSection = newSection("Evaluating and Improving Models", "A single score can conceal the errors that matter most. Examining individual predictions and relevant groups helps identify what needs to change. A revision needs a fair comparison with the original and further evidence from cases that did not guide the repair.");
+const optimisationSection = newSection("Optimisation and Training", "Training changes a model's parameters to reduce an error measure. The size and direction of each update affect whether that process makes progress. Derivative checks and training curves help distinguish a useful adjustment from numerical or fitting problems.");
+const reinforcementSection = newSection("Reinforcement Learning", "An action changes what happens next and may receive its reward much later. Reinforcement learning uses that feedback to improve decisions over time. The available information determines whether we can plan from known consequences or need to learn them through experience.");
 const reinforcementIntro = existingCurriculum.flatMap(part => part.topics).flatMap(topic => topic.concepts).find(concept => concept.href === "/concepts/reinforcement-learning")!;
 reinforcementSection.topics[0].concepts.unshift(reinforcementIntro);
 
-export const CURRICULUM: Part[] = [
+const canonicalCurriculum: Part[] = [
   ...foundationCurriculum.flatMap(part => part.title === "Python and NumPy" ? [part, ...databaseSections] : part.title === "Choosing and Checking a Model" ? [part, modelEvaluationSection, probabilitySection] : part.title === "Neural Networks" ? [part, optimisationSection] : [part]),
-  newSection("Time Series and Forecasting", "Tomorrow's demand is unknown when Botie needs to prepare for it. Start with a forecast that simply repeats a known value, then introduce earlier observations, repeating patterns, and fitted relationships. Every comparison will respect what could have been known at the time the forecast was made."),
+  newSection("Time Series and Forecasting", "Observations collected over time can contain trends and repeating patterns. Forecasts use the history available at a particular moment to estimate what comes next. A fair comparison must preserve that order and account for changes in the process being observed."),
   reinforcementSection,
-  newSection("Recommendations and Ranking", "Botie has more guides than a reader can inspect. We will work out which ones to suggest using popularity, descriptions, and shared preferences, then evaluate the short list the reader actually sees. Missing interactions and new readers need their own treatment."),
-  newSection("Anomaly Detection", "An unexpected reading can mean a broken sensor, a real event, or an operating condition we have not seen before. We will compare several ways to recognise unusual records and turn their scores into an investigation rule. A high score will remain evidence to inspect, rather than a diagnosis."),
-  newSection("Graphs and Relational Learning", "A pump's reading can depend on the network around it. Graphs let us record those connections and use neighbouring measurements as context. We will begin with the representation, then follow information through walks, aggregation, learned layers, and predictions about missing links."),
-  newSection("Causal Inference and Experiments", "Knowing which plants grew well does not tell us which intervention helped them. We will examine how treatment groups were formed, design a randomised comparison, and state the assumptions needed to learn from observational records. The calculations will keep those assumptions visible."),
-  newSection("Deploying and Maintaining Models", "A model needs to keep behaving as intended after it leaves a training script. Botie will save the full prediction procedure, check incoming records, preserve model versions, and inspect later performance. We will also work through what a useful rollback must restore."),
-  newSection("Agents", "A technician asks Botie about a pump, but the answer needs a manual held in another system. How can a model request that information, and who decides what it may do with it? Start with the pieces of an agent, then build the maintenance assistant using Pydantic AI, LangChain and LangGraph. As the job grows, add permission checks and guardrails, and handle calls whose replies never arrive."),
-  newSection("Prompting, Evaluation and Iteration", "Botie answers the first maintenance question correctly, then gets the next one wrong. Before rewriting the prompt, we need to understand what happened. Choose useful examples, follow the tool calls through their traces, and build tests that expose the failure. We will use Langfuse and other evaluation tools, compare candidate revisions, and carry a repair through a fresh shift without losing the behaviours that already worked."),
-  newSection("Agent Guardrails and Secure Development", "Botie can now write code, call MCP tools and change application records. What should he be unable to do, even if a document misleads him or a proposed fix is wrong? Build the boundaries around those effects. We will inspect patches, restrict execution, check delegated authority and follow reviewed actions through retries, then test the repaired system against a different shift."),
-  newSection("Complete Projects", "Bring the pieces together around a question Botie needs to answer. Each small project includes a baseline, a repeatable procedure, held-out evaluation, and cases where the method fails. The datasets are small enough to inspect, so the reasoning stays visible as the work becomes more complete."),
-  newSection("Define the ML Problem", "A model can produce a prediction without helping anyone make a better decision. We will start with Botie's inspection team, work out what they can act on, and decide what a learned model would need to improve. The information available at decision time will become part of the design."),
-  newSection("Model the System Before Building It", "A prediction service needs more than a fast model. Images must be prepared, requests can arrive together, and devices have limited memory. We will calculate where the work goes, then compare local and remote inference using the same task."),
-  newSection("Compare Designs Under Constraints", "The fastest candidate may miss too many faults, while the most accurate one may respond too late. We will identify which designs meet the requirements, examine the remaining trade-offs, and find the assumptions that could change our choice."),
-  newSection("Test the Design and Plan for Failure", "A promising estimate needs evidence. Botie will compare prototype changes, route unusable inputs to a defined fallback, and bring the inspection service through a design review. Each passing test will have a clear meaning and a clear limit."),
-  newSection("Software for Models and Agents", "The model worked in a notebook. Why does it change when the API reorders fields, another request joins the batch, or a job reads an old artifact? Build the software boundaries around those failures, then use data structures to keep retrieved evidence and workflow dependencies intact."),
-  newSection("Model and Tool API Contracts", "Suppose another program calls our pump model. Which readings does it need to send, and what should happen if they are missing? We’ll work out that agreement, give it a form both programs can check, then test what happens as either program changes."),
-  newSection("Data Pipelines for Learning", "A training table is the result of decisions about records. Follow Botie from unequal input files to historical features, rejected sensor batches and late events. Keep enough history to explain which data actually produced a model."),
-  newSection("Databricks for ML Pipelines", "Databricks gives a team a shared environment for processing data and building ML applications. Apache Spark is one of the tools that performs the calculations, with work spread across several machines. We’ll start with why that became useful, then examine what a training run needs to remember about its data and model files."),
-  newSection("Serving Models and Agent Runs", "A model that fits and an agent that answers once still have to handle concurrent requests. Measure what users wait for, carry deadlines through tool calls, and account for conversation memory. Then decide when a cached answer really belongs to the next request."),
-  newSection("LLM Inference and Capacity", "A language model answers one person quickly, but slows down when several people ask questions at once. Why? We’ll follow what it does with a prompt and what happens as it writes an answer. That gives us a reason to look at shared calculations and the memory each conversation occupies."),
-  newSection("From Learned Perception to Control", "A detector's output is not yet a useful motion command. Give its coordinates a frame and a timestamp, then follow Botie through repeated corrections. When the actuator cannot do what the controller asks, repair the controller's memory as well as its output."),
-  newSection("Estimating State from Noisy Observations", "Botie is watching parts move along a conveyor. The camera reports slightly different positions from frame to frame, and sometimes misses a part completely. How can we combine what we know about the belt’s movement with those imperfect readings? We’ll build a position estimate, then test how well its reported uncertainty describes its errors."),
-  newSection("Protecting ML Data and Artifacts", "A relevant document may belong to another customer, an anonymous statistic may still expose someone's contribution, and a model file may execute code when loaded. Put the checks around those concrete effects and make clear what each check can establish."),
-  newSection("Threats Across the ML Lifecycle", "Suppose a model usually works, but gives the wrong answer whenever an input contains a particular mark. Where did that behaviour come from? We’ll investigate how changes to training records can affect a model, and how someone using the finished model might find a different way to make it fail."),
-  newSection("Simulating and Learning System Behaviour", "Botie can learn from simulated experiences, but we first need to know what that simulator is doing. Inspect numerical time steps, compare policies on shared scenarios, fit unknown physical parameters and test conditions that the original model did not handle."),
-  newSection("Numerical Methods for Learning", "A formula can be correct and still give a bad answer on a computer. A calculation may produce a number too large to represent, or a set of measurements may leave several explanations equally possible. We’ll examine those problems before using numerical results to judge a model or a simulation."),
+  newSection("Recommendations and Ranking", "A recommendation system chooses which items someone is likely to find useful and in what order to show them. Item descriptions and patterns of interaction provide different kinds of evidence. Evaluation needs to consider the short list people actually see, including users and items with little history."),
+  newSection("Anomaly Detection", "An unusual observation may indicate a fault or simply a condition that is uncommon in the data. Anomaly detection measures that departure from expected behavior. Its scores need an investigation rule, since an unusual result alone does not establish its cause."),
+  newSection("Graphs and Relational Learning", "Relationships between records can carry information that their individual measurements leave out. Graph methods use those connections to describe structure or combine information from neighboring records. The direction and meaning of each connection affect what can be inferred."),
+  newSection("Causal Inference and Experiments", "An association between two measurements does not establish what would happen if we changed one of them. Experiments and causal assumptions help distinguish the effect of an intervention from other differences between groups. Conclusions depend on how those groups were formed and what was measured."),
+  newSection("Deploying and Maintaining Models", "A deployed prediction depends on its input preparation and surrounding software as well as the fitted model. Versioned artifacts and checks on incoming records help preserve that behavior. Later observations provide evidence about when the system needs to change or return to an earlier version."),
+  newSection("Agents", "An agent uses a model to help choose its next action from the information available. Tools carry out permitted operations and return observations for subsequent decisions. Frameworks such as Pydantic AI, LangChain and LangGraph organize that process, while the application controls permissions and stopping conditions."),
+  newSection("Prompting, Evaluation and Iteration", "Instructions and examples influence how an agent interprets a task. Recorded runs reveal which information and tool results led to an answer. Evaluations turn those observations into comparisons that help determine whether a revision improved the behavior we intended."),
+  newSection("Agent Guardrails and Secure Development", "An agent's ability to write code or call tools can have effects outside its conversation. Enforced permissions and restricted execution define what those effects may be. Reviews and repeated-action checks need to preserve the same limits when work is retried or delegated."),
+  newSection("Complete Projects", "A complete investigation connects a practical question to a repeatable procedure and evidence about its results. A simple baseline gives later changes a reference. Evaluation on separate examples and inspection of failures establish what the finished approach can support."),
+  newSection("Define the ML Problem", "A useful system begins with the decision it is meant to support. Its requirements need to account for available information and what people can actually do with an answer. A learned model needs a reason to improve on simpler ways of making that decision."),
+  newSection("Model the System Before Building It", "The time and memory a system needs depend on the whole procedure, including data preparation and waiting requests. Estimating those costs helps compare designs before building them. Local and remote processing introduce different limits on the same task."),
+  newSection("Compare Designs Under Constraints", "A design has to satisfy the requirements that make it useful. Improving one measure may worsen another, so comparisons need explicit limits and a shared workload. Uncertain assumptions can change which designs remain practical."),
+  newSection("Test the Design and Plan for Failure", "A design estimate needs evidence from a working implementation. Tests establish how it behaves under stated conditions, including inputs it cannot use. A defined fallback and a recovery plan determine what happens when the intended behavior is unavailable."),
+  newSection("Software for Models and Agents", "Programs need to preserve the meaning of data as it moves between operations. Field order and retained settings can change a result even when the calculation still runs. Data structures also keep retrieved evidence associated with its source and jobs ordered by their dependencies."),
+  newSection("Model and Tool API Contracts", "An interface defines what programs agree to exchange and what each value means. Missing information and failures need explicit responses. Compatible changes and behavior tests help preserve that agreement as callers and services evolve."),
+  newSection("Data Pipelines for Learning", "A data pipeline turns incoming records into a dataset that can be used repeatedly. Its treatment of late arrivals and corrected information affects what the dataset represents. Preserved history makes it possible to explain which records contributed to a result."),
+  newSection("Introduction to Databricks", "Databricks is a managed platform for working with data and the programs that use it. Learn what the platform provides, why it was developed, and how data lakes, Spark and its shared workspace fit together. Follow a dataset from stored files to a repeatable job and a recorded model experiment."),
+  newSection("Databricks for ML Pipelines", "A data pipeline needs to preserve what its records mean as files arrive and calculations are repeated. Use Spark query plans, Delta table histories and recorded model runs to inspect that work. Changes to execution or data should remain visible in the result's history."),
+  newSection("Serving Models and Agent Runs", "Concurrent requests share computing time and memory. Waiting in a queue and calling another service both contribute to the user's response time. Reusing an earlier result helps only when its data and permissions still apply to the current request."),
+  newSection("LLM Inference and Capacity", "A language model processes its prompt before generating an answer piece by piece. Those stages use computing resources differently, and each active conversation occupies memory. Scheduling and safe reuse of earlier calculations affect how many requests the system can handle."),
+  newSection("From Learned Perception to Control", "A position measurement refers to a particular coordinate system and moment in time. Using it to guide movement requires accounting for both. Repeated observations correct the next action, while limits on physical movement affect how the controller should respond."),
+  newSection("Estimating State from Noisy Observations", "Measurements can be inaccurate or temporarily unavailable. A state estimate combines observations with an account of how the system moves between them. Its reported uncertainty needs to reflect the errors it actually makes, including mistaken assumptions about motion."),
+  newSection("Protecting ML Data and Artifacts", "Useful information can still be private, and a downloaded file can contain executable code. Access checks and careful artifact handling address different risks. Privacy calculations also need to account for how much an individual's contribution can affect a released result."),
+  newSection("Threats Across the ML Lifecycle", "Changes to training records can alter a model's behavior, including responses triggered by particular inputs. A prediction service can also reveal information through repeated use. Investigating either risk requires a clear account of what an attacker can change or observe."),
+  newSection("Simulating and Learning System Behaviour", "A simulation uses calculations to represent how a system changes. Its assumptions and numerical steps affect the experiences it produces. Comparisons with observations and tests under different conditions help establish what decisions those experiences can support."),
+  newSection("Numerical Methods for Learning", "Computers represent numbers with limited precision. Calculations can overflow or lose useful information even when their formulas are correct. Numerical checks and well-chosen simulation steps help distinguish those errors from problems in the relationships being fitted."),
 ];
+
+// Authored section names remain stable matching keys for generated lessons.
+// Visible titles can change without changing their URLs or saved-work keys.
+export const SECTION_TITLE_REVISIONS: Record<string, string> = {
+  "Start with a Prediction": "Introduction to Predictive Models",
+  "Choosing and Checking a Model": "Model Selection and Evaluation",
+  "Optimisation and Training": "Optimization and Training",
+  "Adapting and Evaluating Modern Models": "Model Adaptation and Evaluation",
+  "Agents": "AI Agents",
+  "Prompting, Evaluation and Iteration": "Agent Prompting and Evaluation",
+  "Complete Projects": "Applied Machine Learning Projects",
+  "Define the ML Problem": "Problem Definition and Requirements",
+  "Model the System Before Building It": "System Capacity and Resource Limits",
+  "Compare Designs Under Constraints": "Design Constraints and Tradeoffs",
+  "Test the Design and Plan for Failure": "Prototyping and Failure Handling",
+  "Software for Models and Agents": "Data Structures and Program State",
+  "Data Pipelines for Learning": "Data Pipelines",
+  "Databricks for ML Pipelines": "Data Pipelines with Databricks",
+  "Serving Models and Agent Runs": "Serving Models and Agents",
+  "From Learned Perception to Control": "Robot Perception and Control",
+  "Estimating State from Noisy Observations": "State Estimation and Tracking",
+  "Protecting ML Data and Artifacts": "Data Privacy and Model Security",
+  "Threats Across the ML Lifecycle": "Attacks on Training Data and Models",
+  "Simulating and Learning System Behaviour": "Simulating Physical Systems",
+  "Numerical Methods for Learning": "Numerical Methods for Modeling",
+};
+export const displaySectionTitle = (title: string): string => SECTION_TITLE_REVISIONS[title] ?? title;
+export const TOPIC_TITLE_REVISIONS: Record<string, string> = {
+  "Reasoning From Uncertain Evidence": "Conditional Probability and Likelihood",
+  "From a measurement to a calculation": "NumPy Array Fundamentals",
+  "Calculations We Will Reuse": "Array Calculations and Linear Algebra",
+  "Keep the Calculation Trustworthy": "Testing and Reproducing Calculations",
+  "Reading the Records": "Reading Tables with SQL",
+  "Missing Values and Decisions": "Missing Values and CASE Expressions",
+  "Summarising Maintenance Work": "Aggregation and Grouping",
+  "Connecting Tables Without Changing the Question": "Joining Tables",
+  "Analysing Change Across Rows": "Window Functions",
+  "Preparing Records for Analysis": "Dates, Text, and JSON",
+  "Designing Reliable Tables": "Table Design and Normalization",
+  "Changing Shared Data": "Updates and Transactions",
+  "Making Queries Practical": "Query Performance and Security",
+  "Keeping Learning Data Trustworthy": "Data Quality and Incremental Updates",
+  "Choosing the Shape of the Records": "Data Models and Key-Based Lookups",
+  "Keeping Related Records Together": "Documents and References",
+  "Working Inside Documents": "Querying and Updating Documents",
+  "Finding and Summarising Documents": "Document Indexes and Aggregation",
+  "Partitioning for the Questions We Ask": "Partition Keys and Data Distribution",
+  "Keeping Derived Data Repairable": "Derived Views and Data Recovery",
+  "Representing Connected Records": "Graph Data Models and Entity Identity",
+  "Asking Questions of a Graph": "Graph Pattern Queries",
+  "Following Connections": "Graph Traversal and Shortest Paths",
+  "Shared Meaning and Evidence": "RDF and Data Provenance",
+  "Graphs in ML Systems": "Graph-Based Retrieval",
+  "Start with a Prediction": "Introduction to Predictive Models",
+  "Can We Trust These Records?": "Record Quality and Missing Values",
+  "Centres and Scales": "Centering and Scaling",
+  "Representing What We Measured": "Encoding Categories and Cycles",
+  "Keep Future Answers Out of Training": "Data Leakage and Class Imbalance",
+  "Sequences": "Markov Chains",
+  "Establish a Fair Comparison": "Baselines and Validation",
+  "Choosing and Checking a Model": "Pipelines and Model Selection",
+  "From a Score to a Decision": "Probability Calibration and Decision Thresholds",
+  "Know the Limits of the Result": "Distribution Shift and Sampling Uncertainty",
+  "Find the Mistakes Behind the Score": "Error Analysis",
+  "Repair the Evidence and the Behaviour": "Data Quality and Model Behavior Tests",
+  "Build and Check a Model Revision": "Model Improvement Project",
+  "Describing What We Do Not Know": "Probability Distributions and Parameter Uncertainty",
+  "Combining Noisy Evidence": "Sensor Fusion and Hidden-State Filtering",
+  "Predictions as Distributions": "Gaussian Process Regression",
+  "Regularisation and Normalisation": "Regularization and Normalization",
+  "Other Ways to Learn and Store Patterns": "Unsupervised Neural Networks",
+  "Additional Network Layers": "Recurrent, Radial Basis, and Residual Networks",
+  "Understanding a Training Run": "Initialization and Training Diagnostics",
+  "Embedding Pictures": "Image Embeddings and Similarity Search",
+  "Learning From Limited Images": "Image Augmentation and Transfer Learning",
+  "Finding and Counting Objects": "Bounding Boxes and Non-Maximum Suppression",
+  "Tokens and Basic Units": "Tokens and Text Encoding",
+  "Rules for Word Boundaries": "Rule-Based Tokenization",
+  "Scripts Without Spaces": "Word Segmentation",
+  "Predicting Token Sequences": "N-Gram Language Models",
+  "Fixed Tables and Shorter Sequences": "Hashing and Byte Patching",
+  "Codes for Numerical Inputs": "Quantizing Numerical Inputs",
+  "Word Vectors from Prediction": "Learning Word Embeddings",
+  "Representing a Whole Text": "Document Vectors",
+  "Learning a Compact Representation": "Autoencoders",
+  "Learning to Generate": "Adversarial and Diffusion Models",
+  "Adapting a Trained Model": "Fine-Tuning and Low-Rank Adaptation",
+  "Grounding and Evaluation": "Retrieval-Augmented Generation and Evaluation",
+  "Predicting the Next Observation": "Forecasting Baselines and Lagged Inputs",
+  "Patterns That Repeat or Move": "Seasonality and Smoothing",
+  "Learning From Consequences": "Actions and Exploration",
+  "Planning Beyond the Next Reward": "Planning and Learning Action Values",
+  "Choosing Useful Candidates": "Popularity and Content-Based Recommendations",
+  "Learning From Interaction Patterns": "Collaborative Filtering and Matrix Factorization",
+  "Recognising Unusual Records": "Global and Local Anomaly Scores",
+  "Different Ways to Detect Unusualness": "Isolation Forests and Reconstruction Errors",
+  "Representing Relationships": "Graph Representations and Random Walks",
+  "Learning Across Connections": "Graph Neural Networks and Link Prediction",
+  "Asking What a Change Would Do": "Causal Effects and Randomized Experiments",
+  "Working With Observational Evidence": "Causal Inference from Observational Data",
+  "From Training to a Repeatable Prediction": "Saving Models and Validating Inputs",
+  "Running and Identifying a Model": "Serving and Versioning Models",
+  "Putting the Pieces Together": "Applied Prediction Projects",
+  "From an Answer to an Action": "Agent Fundamentals",
+  "Giving the Model a Clear Job": "Agent Prompts and Structured Responses",
+  "Letting the Model Use Tools": "Tool Calling and Retrieval",
+  "Choosing How Much Autonomy to Give": "Agents and Fixed Workflows",
+  "Guardrails at the Point of Action": "Agent Security Controls",
+  "Keeping an Agent Run Under Control": "Agent Retries and Resource Budgets",
+  "Teaching the Task Through Examples": "Examples in Prompts",
+  "Seeing What Happened": "Agent Tracing and Observability",
+  "Testing the Program Around the Model": "Testing Agent Code",
+  "Finding a Change Worth Making": "Error Analysis and Controlled Experiments",
+  "Deciding Whether to Release": "Agent Release Criteria",
+  "Testing and Operating the Boundaries": "Guardrail Testing and Incident Response",
+  "A Repair From Failure to Fresh Evidence": "Agent Evaluation Project",
+  "Deciding Where Authority Belongs": "Permission Enforcement",
+  "Connecting MCP Servers Deliberately": "MCP Server Trust and Authentication",
+  "Protecting Applications and Shared State": "Action Approvals and Agent Delegation",
+  "Testing the Whole Boundary": "Agent Security Testing",
+  "Decisions Before Models": "Problem Definition and Baselines",
+  "The Information We Can Use": "Information Available at Decision Time",
+  "Evidence Before Release": "Prototype Tests and Fallbacks",
+  "Bring the Design Together": "Design Review Project",
+  "Keeping prediction code dependable": "Prediction Inputs and Preprocessing State",
+  "Structures for agent workloads": "Data Structures for Retrieval and Workflows",
+  "Describing a model request": "Request Schemas and Compatibility",
+  "Handling and testing tool outcomes": "Tool Errors and API Tests",
+  "Building the training table": "Combining Files and Historical Features",
+  "Repairing a changing pipeline": "Validating and Tracking Pipeline Inputs",
+  "Following a distributed calculation": "Spark Query Plans and Data Skew",
+  "Keeping a dependable table history": "Table Versions and Incremental Ingestion",
+  "Publishing a pipeline result": "Pipeline Data Quality Checks",
+  "Connecting model evidence to an artifact": "MLflow Dataset and Model Lineage",
+  "Making feature access explicit": "Feature Access and Historical Availability",
+  "Latency under real workloads": "Request Latency and Deadlines",
+  "Memory and reuse": "Conversation Memory and Response Caching",
+  "When the answer arrives": "LLM Generation and Prefix Caching",
+  "Serving a changing workload": "Scheduling and Isolating LLM Requests",
+  "Making predictions usable for motion": "Coordinate Frames and Measurement Timing",
+  "Closing the action loop": "Feedback Control and Actuator Limits",
+  "Following an estimate through time": "State Prediction and Measurement Updates",
+  "When observation and model disagree": "Matching Measurements and Checking Uncertainty",
+  "Boundaries around learning systems": "Data Privacy and Model File Security",
+  "Protecting the training process": "Training Data Provenance and Backdoors",
+  "Assessing exposure through prediction": "Adversarial Inputs and Prediction API Security",
+  "Learning from a numerical world": "Simulation Time Steps and Policy Comparisons",
+  "Where a fitted number can mislead": "Numerical Stability and Parameter Identifiability",
+  "Representing Order and Context": "Positional Encoding and Attention",
+  "Compare Revisions Fairly": "Comparing Model Revisions",
+  "Throughput and Waiting": "Throughput and Queues"
+};
+export const displayTopicTitle = (title: string): string => TOPIC_TITLE_REVISIONS[title] ?? title;
+const originalTitleId = (title: string): string => title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+export const CURRICULUM: Part[] = canonicalCurriculum.map(part => {
+  const title = displaySectionTitle(part.title);
+  return {
+    ...part,
+    id: part.id ?? originalTitleId(part.title),
+    title,
+    topics: part.topics.map(topic => ({
+      ...topic,
+      id: topic.id ?? originalTitleId(topic.heading),
+      heading: TOPIC_TITLE_REVISIONS[topic.heading] ?? (topic.heading === part.title ? title : topic.heading),
+    })),
+  };
+});

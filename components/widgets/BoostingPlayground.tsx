@@ -62,15 +62,15 @@ function toData(px: number, py: number): Point {
 function statusText(answer: BoostedModel | null, rounds: number, depth: number): string {
   if (!answer) return "…";
   if (rounds <= 2) {
-    return "A round or two in, the fit is a shelf or three, the first rough corrections.";
+    return "The first trees divide the input range into a few regions. Each region has a constant prediction, which gives the curve its steps.";
   }
   if (answer.r_squared > 0.999) {
-    return "R² has reached 1 to three decimals, which by now you know to read as a warning rather than a triumph.";
+    return "Training R² rounds to 1. The model closely matches these observations, but we still need held-out data to check whether it predicts new observations well.";
   }
   if (depth > 1) {
-    return `Each round adds up to ${2 ** depth} shelves, so the arc is roughed out in fewer rounds and the noise is reached sooner.`;
+    return `Each tree can add up to ${2 ** depth} constant-valued regions. Deeper trees can follow the curve in fewer rounds, but they can also fit individual fluctuations sooner.`;
   }
-  return "Each round fits a stump to whatever the fit still gets wrong, and the shelves accumulate into the arc.";
+  return "Each round fits a tree with one split to the current prediction errors. Adding its correction changes the prediction on either side of that split.";
 }
 
 export function BoostingPlayground() {

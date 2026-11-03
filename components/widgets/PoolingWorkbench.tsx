@@ -221,8 +221,8 @@ export function PoolingWorkbench() {
           <Legend>
             The bar runs from a similarity of &minus;1 at the far left through
             zero at the middle to +1 at the far right, so a bar past halfway
-            means the two texts point the same way. A word coloured grey carries
-            no subject, and a word the collection never used is drawn grey too,
+            means the two texts point the same way. A word colored gray carries
+            no subject, and a word the collection never used is drawn gray too,
             since it has no place to read. Under either counting rule the list of
             numbers is as long as the vocabulary, so its width is reported
             instead of its contents.

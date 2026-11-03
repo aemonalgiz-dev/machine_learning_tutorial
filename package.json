@@ -5,6 +5,8 @@
   "scripts": {
     "curriculum:generate": "node scripts/build-curriculum.mjs",
     "curriculum:check": "node scripts/build-curriculum.mjs --check",
+    "rewards:generate": "node scripts/build-rewards-catalog.mjs",
+    "rewards:check": "node scripts/build-rewards-catalog.mjs --check",
     "prepare:python": "node scripts/prepare-python.mjs",
     "test:practice": "node scripts/check-practice.mjs",
     "test:practice-bank": "node scripts/check-practice-bank.mjs",
@@ -18,7 +20,7 @@
     "test:backend": "playwright test --config playwright.backend.config.ts",
     "check:backend": "node scripts/check-account-backend.mjs",
     "predev": "npm run prepare:python",
-    "prebuild": "npm run curriculum:check && npm run prepare:python -- --verify",
+    "prebuild": "npm run curriculum:check && npm run rewards:check && npm run prepare:python -- --verify",
     "dev": "next dev",
     "build": "next build",
     "postbuild": "node scripts/finalize-native-image-trace.mjs && node scripts/report-build-size.mjs --max-mib=200",

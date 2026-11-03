@@ -94,7 +94,7 @@ export function DriftChart() {
           onClick={() => setArrangement("none")}
           className={arrangement === "none" ? ACTIVE_BUTTON_CLASS : BUTTON_CLASS}
         >
-          No normalisation
+          No normalization
         </button>
         <button
           onClick={() => setArrangement("batch")}

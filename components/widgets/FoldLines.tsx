@@ -131,7 +131,7 @@ export function FoldLines() {
       )}
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
         Weights are in standard units, so a weight on height of 5 means one
-        deviation of height, 15.6 centimetres, moves the unit&rsquo;s score
+        deviation of height, 15.6 centimeters, moves the unit&rsquo;s score
         by five. The decision boundary can change direction where a hidden neuron switches between zero output and its score.
       </p>
     </div>

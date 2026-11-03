@@ -14,7 +14,7 @@ export function DeliveryPlot({ rows, lines, label }: { rows: readonly Delivery[]
   const outsideRange = sampled.some(line => line.values.some(value => !Number.isFinite(value) || value < 0 || value > 44));
   return <figure className="my-4">
     <svg viewBox="0 0 720 310" role="img" aria-label={label} className="w-full rounded-xl bg-background">
-      <title>{label}</title><desc>The horizontal axis is delivery distance from zero to six kilometres. The vertical axis is delivery time in minutes. Dots are observations. Lines show model predictions. The table below gives the observations.</desc>
+      <title>{label}</title><desc>The horizontal axis is delivery distance from zero to six kilometers. The vertical axis is delivery time in minutes. Dots are observations. Lines show model predictions. The table below gives the observations.</desc>
       <defs><clipPath id={clipId}><rect x={left} y={top} width={width} height={height}/></clipPath></defs>
       {[0, 10, 20, 30, 40].map(tick => <g key={tick}><line x1={left} x2={left + width} y1={y(tick)} y2={y(tick)} stroke="currentColor" opacity=".12"/><text x={left - 10} y={y(tick) + 4} textAnchor="end" fill="currentColor" fontSize="12">{tick}</text></g>)}
       {[0, 1, 2, 3, 4, 5, 6].map(tick => <text key={tick} x={x(tick)} y={height + top + 20} textAnchor="middle" fill="currentColor" fontSize="12">{tick}</text>)}

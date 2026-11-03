@@ -136,7 +136,7 @@ export function PolynomialAssembler() {
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         Dashed lines are the scaled shapes, and a shape that leaves the frame
-        runs along its edge. The solid line is their sum, and the grey dots are
+        runs along its edge. The solid line is their sum, and the gray dots are
         the ideal throw.
       </p>
 

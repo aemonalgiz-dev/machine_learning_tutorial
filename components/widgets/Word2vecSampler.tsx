@@ -136,8 +136,8 @@ export function Word2vecSampler() {
       </div>
 
       <Legend>
-        Grey behind is the share the word would get if wrong answers were drawn
-        in proportion to how often it appears; the coloured bar in front is what
+        Gray behind is the share the word would get if wrong answers were drawn
+        in proportion to how often it appears; the colored bar in front is what
         it gets at the power set above, in{" "}
         <span style={{ color: VERB }}>indigo</span> for a verb form and{" "}
         <span style={{ color: MONEY }}>amber</span> for a word about money.

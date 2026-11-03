@@ -26,9 +26,9 @@ import {
 } from "@/components/widgets/gradientBoostingFixtures";
 
 export const metadata: Metadata = {
-  title: "Gradient Boosting · oop_ml",
+  title: "Gradient Boosting · Perceptron Lab",
   description:
-    "A model's mistakes tell us what it has not yet explained. Boosting adds models in stages, with each new model learning a correction to the predictions already made.",
+    "Boosting builds a prediction in stages. Each additional model targets a correction to the current result, allowing a sequence of limited adjustments to describe a more complicated relationship.",
 };
 
 const link =
@@ -44,7 +44,7 @@ export default function GradientBoostingPage() {
       playgroundTitle="Watch each tree address the errors left behind"
       playgroundIntro="Step through the boosting rounds. Compare the current prediction, the remaining errors, and the correction supplied by the next tree."
       title="Gradient Boosting"
-      tagline={"A model's mistakes tell us what it has not yet explained. Boosting adds models in stages, with each new model learning a correction to the predictions already made."}
+      tagline={"Boosting builds a prediction in stages. Each additional model targets a correction to the current result, allowing a sequence of limited adjustments to describe a more complicated relationship."}
       prerequisites={
         <>
           This page assumes{" "}
@@ -86,7 +86,7 @@ export default function GradientBoostingPage() {
                   As we add rounds, we will also need to decide how deep each tree should be and when to stop. We can check those choices on held-out data. Along the way, we will compare boosting with bagging and with AdaBoost, since growing many trees does not always mean combining them in the same way.
                 </p>
 </>
-                <p>Let&apos;s begin with a constant prediction for the full throw. Its fifteen measured heights have a mean of 12.76 metres, so before fitting any tree the model predicts 12.76 at every time.</p>
+                <p>Let&apos;s begin with a constant prediction for the full throw. Its fifteen measured heights have a mean of 12.76 meters, so before fitting any tree the model predicts 12.76 at every time.</p>
               <p>That flat line predicts too high near launch and too low near the peak. The sum of its squared misses is 654.36. Each later boosting round will fit a correction to the mistakes left by the current prediction, so keep the prediction and the remaining errors separate.</p>
                 <Equation>{"prediction₀(t) = mean of the heights\nresidualᵢ = hᵢ − prediction(tᵢ)"}</Equation>
                 <p>
@@ -107,15 +107,7 @@ export default function GradientBoostingPage() {
               </SubSection>
 
               <SubSection title="2. A stump fitted to the misses">
-                <p>
-                  A stump is a tree one question deep. It asks whether the
-                  time is below some threshold and answers with one number
-                  on each side, the mean of whatever it was fitted to among
-                  the readings on that side. The first thing to notice about
-                  a boosting round is that the stump is never shown the
-                  heights. It is shown the residuals, and its whole job is
-                  to predict the current mistakes.
-                </p>
+                <p>A stump is a tree with one question and a constant answer on each side of the split. In squared-error boosting, its targets are the residuals: the differences between the measured heights and the current predictions. Each leaf predicts the mean residual among the readings it receives. The stump therefore estimates a correction to the current model.</p>
                 <WorkedExample title="Round one on the three readings">
                   <p>
                     The residuals are −4, 0 and 4. The stump&rsquo;s best
@@ -146,15 +138,7 @@ export default function GradientBoostingPage() {
               </SubSection>
 
               <SubSection title="3. Why the miss is the direction downhill">
-                <p>
-                  Fitting the residual looks like a rule of thumb, and the
-                  word gradient in the name is the claim that it is more
-                  than that. Take one reading, hold its true height y still,
-                  and ask how the squared error changes as the
-                  committee&rsquo;s prediction p for that reading moves. The
-                  error is the squared miss with the conventional half in
-                  front.
-                </p>
+                <p>Why fit the residuals? Consider one reading with a fixed measured height y. If the current prediction p changes slightly, we want to know which direction reduces its squared error. That rate of change is the gradient with respect to the prediction. The error below includes a conventional factor of one half.</p>
                 <Equation>{"E = ½·(y − p)²\ndE/dp = −(y − p)"}</Equation>
                 <p>
                   The slope of the error with respect to the prediction is
@@ -167,56 +151,21 @@ export default function GradientBoostingPage() {
                   −4.
                 </p>
                 <WhyThisWorks title="Where the half goes">
-                  <p>
-                    Differentiating (y − p)² by the chain rule gives
-                    2·(y − p)·(−1), and the 2 is a nuisance that would ride
-                    along into every round. Putting a half in front of the
-                    error cancels it, so the derivative comes out as a clean
-                    subtraction. Halving the error changes nothing about
-                    where its minimum is, since every candidate p is halved
-                    alike, so the convention is free. The calculus primer
-                    made the same bookkeeping choice for the same reason.
-                  </p>
+                  <p>Multiplying every candidate squared error by one half leaves its minimizing prediction unchanged. The factor cancels the two from differentiating the square, making the negative gradient equal to the residual. Without that factor, the gradient is twice as large and the learning-rate convention must account for it.</p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  This is the squared-error case. For absolute error the
-                  negative gradient is the sign of the miss, +1 or −1, and
-                  for log loss on a classifier it is the label less the
-                  predicted probability. The recipe fits whatever the
-                  negative gradient is; only for squared error is that the
-                  plain residual.
-                </KeepInMind>
+                  For absolute error, a negative subgradient is the sign of the residual, with a convention needed at zero. For binary log loss differentiated with respect to the score before sigmoid, it is the label minus predicted probability. The quantity fitted in a boosting round therefore depends on both the loss and the coordinates in which we differentiate.</KeepInMind>
               </SubSection>
 
               <SubSection title="4. One round is one gradient step in prediction space">
-                <p>
-                  The calculus primer walked downhill on a curve by moving a
-                  setting a fraction of the slope in the downhill direction.
-                  Here the thing being moved is the prediction itself, one
-                  per reading, rather than a setting, and a step of size η
-                  reads as follows.
-                </p>
+                <p>Gradient descent changes a quantity in the direction that reduces an error. Here the quantities are the current predictions, one for each training reading. The symbol η controls the size of that change.</p>
                 <Equation>{"p  ←  p − η·dE/dp  =  p + η·(y − p)"}</Equation>
                 <>
-<p>
-                  That is exactly what a round does, with one substitution. The residual y − p is known for every training reading, and a stump fitted to those residuals is a rule that can say approximately what the residual is for any time, the readings it saw and the times between them alike. So the stump stands in for the gradient, η times its answer is the step, and the walk takes place in the space of possible prediction rules rather than in the space of a few coefficients.
-                </p>
-                <p>
-                  On the three readings the step from 6 to 4 and 7 was this line applied by hand.
-                </p>
+<p>We know the residual at each training time, but a useful prediction rule must also work at other times. A stump fitted to the residuals supplies such a rule. Multiplying its output by η gives the correction added to the existing prediction. Repeating that process changes the prediction function, rather than adjusting only a fixed list of coefficients.</p>
+                <p>On the three readings, the fitted stump approximates the residual vector. Adding its scaled outputs gives predictions 4, 7 and 7. A direct independent update using each exact residual would give different values; the stump restricts the correction to two constant regions.</p>
 </>
                 <WhyThisWorks title="Why squared error needs no separate step length per leaf">
-                  <p>
-                    Friedman&rsquo;s general recipe fits the tree to the
-                    gradient and then chooses the best number for each leaf
-                    by a small one-dimensional search. Under squared error
-                    that search is already done, because a regression
-                    leaf&rsquo;s answer is the mean of the residuals it
-                    holds and the mean is precisely the constant minimising
-                    squared error over those readings. So the fitted stump
-                    is the best two-shelf correction there is, before the
-                    rate is applied, and the rate is the only dial left.
-                  </p>
+                  <p>Friedman’s procedure fits a tree to the negative gradient, then chooses the correction in each leaf by a one-dimensional search. For squared error, the leaf’s mean residual already minimizes the error among constant corrections for that group. The fitted stump therefore supplies the best piecewise-constant correction for the chosen split before the learning rate reduces its size.</p>
                 </WhyThisWorks>
                 <KeepInMind>
                   A round is a single step, and nothing is refitted from
@@ -324,35 +273,23 @@ export default function GradientBoostingPage() {
                   The first three stumps ask whether t is below 0.43, then below 3.57, then below 0.715, which is the launch, then the landing, then the launch again, because the two ends of the arc are where a flat line is most wrong and each correction leaves the other end as the largest remaining miss. The squared total goes 654.36, 541.09, 434.59, 359.77.
                 </p>
                 <p>
-                  By ten rounds it is 111.58 and R² is 0.829; by twenty, 28.55 and 0.956; by thirty, 9.82 and 0.985; by sixty, 1.84 and 0.997. The largest single miss handed to round one was 12.06 metres and the largest handed to round sixty is 1.24.
+
+                  By ten rounds it is 111.58 and R² is 0.829; by twenty, 28.55 and 0.956; by thirty, 9.82 and 0.985; by sixty, 1.84 and 0.997. The largest single miss handed to round one was 12.06 meters and the largest handed to round sixty is 1.24.
                 </p>
 </>
                 <KeepInMind>
-                  Every stump in the sequence is fitted to a different
-                  target column, and the columns get smaller. Round sixty is
-                  fitting metres and tenths of metres where round one was
-                  fitting tens, which is why the late shelves are hard to
-                  see on the upper picture and easy to see on the lower one.
-                </KeepInMind>
+
+                  The total squared residual decreases through these rounds, so later corrections are generally smaller. Individual residuals need not decrease in every update: observations sharing a leaf receive the same correction. The lower panel makes those remaining differences easier to inspect.</KeepInMind>
               </SubSection>
 
               <SubSection title="8. The leftover never grows on the training readings">
-                <p>
-                  A claim worth checking rather than trusting. At a rate of
-                  0.3 the squared leftover on the fifteen readings fell at
-                  every one of the sixty rounds, and at a rate of 1.0 it fell
-                  at every one as well, from 654.36 to 432.27 after the first
-                  round and to 0.77 after sixty. I measured both sequences
-                  and neither ever went up.
-                </p>
+                <p>We can check the training-error claim directly. At learning rates 0.3 and 1.0, squared residual error decreases in every one of the sixty recorded rounds. At rate 1.0, it begins at 654.36, falls to 432.27 after the first round and reaches 0.77 after sixty. These runs demonstrate the decrease for these data and fitted corrections.</p>
                 <WhyThisWorks title="Why a rate of one or less cannot make it worse">
                   <>
 <p>
                     Inside one leaf the stump answers with the mean of the residuals there, and adding the full mean to every prediction in that leaf lowers the leaf&rsquo;s squared residual to the smallest value a single shared shift can reach. Adding a fraction η of it, for any η between 0 and 1, is somewhere between doing nothing and doing that, and squared error is a bowl, so every point on that path is at least as low as the start.
                   </p>
-                  <p>
-                    Both leaves improve or hold, the total is their sum, and the argument repeats every round.
-                  </p>
+                  <p>A round cannot increase the training squared error under these conditions: each leaf improves or keeps its error, and the total is the sum across leaves. This argument concerns training error. It does not promise that another round helps with new observations.</p>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
@@ -374,8 +311,9 @@ export default function GradientBoostingPage() {
                 </p>
                 <InAModel title="Beyond the last reading">
                   <p>
+
                     The same hundred-round fit at a rate of 0.3 answers 0.80
-                    metres for any time before the launch and 1.35 metres
+                    meters for any time before the launch and 1.35 meters
                     for any time after four seconds, for ever, because
                     outside the readings every stump is on its outermost
                     shelf and there is no slope anywhere in the model to
@@ -387,10 +325,7 @@ export default function GradientBoostingPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  Boosting inherits every limit of its member. A boosted
-                  committee of trees is piecewise constant and cannot
-                  extrapolate, however many rounds it runs.
-                </KeepInMind>
+                  A sum of ordinary regression-tree outputs remains piecewise constant. Outside all their thresholds it stays on an outer constant region, so it cannot continue a numerical trend there. Aggregation can still increase the complexity of the partition compared with one member.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -404,7 +339,7 @@ export default function GradientBoostingPage() {
               "The stump is never shown the heights. It is shown the residuals, and its whole job is to predict the current mistakes, which is why two rounds fitted on the same readings can produce very different stumps. Nothing in the loop resamples, so what changes from round to round is the target column rather than the rows.",
             ),
             choice(
-              "Why is the residual on a reading the direction in which that reading's squared error falls fastest?",
+              "For half the squared error, why is the residual the negative derivative with respect to the current prediction?",
               [
                 "Because the slope of the error with respect to the prediction is minus the residual, so downhill is the residual's own direction and its own size",
                 "Because squaring the miss makes every residual positive, and positive is downhill",
@@ -412,10 +347,10 @@ export default function GradientBoostingPage() {
                 "Because a leaf answers with the mean of the residuals it holds",
               ],
               0,
-              "Holding the true height still and differentiating the squared error by the prediction gives minus the residual, so a reading under-predicted by 4 wants its prediction raised by 4. The conventional half in front of the error cancels the 2 the chain rule would otherwise carry into every round, and halving the error leaves its minimum exactly where it was.",
+              "Holding the observed height fixed, differentiate with respect to its predicted height:\n\n```math\nloss = ½ × (observed − predicted)²\nderivative = predicted − observed = −residual\n```\n\nIncreasing an underprediction moves in the negative-gradient direction. The half removes a factor of two without changing the minimizer. A stump approximates these residual targets across its leaves rather than fitting each row independently.",
             ),
             choice(
-              "The first prediction on the fifteen readings is their mean height of 12.76 metres. Why the mean?",
+              "The first prediction on the fifteen readings is their mean height of 12.76 meters. Why the mean?",
               [
                 "It is the single number with the smallest squared error on the training heights",
                 "It is halfway between the lowest and the highest reading",
@@ -437,9 +372,9 @@ export default function GradientBoostingPage() {
               "All four hold. Both sequences were measured and neither ever went up, and the reason is that squared error is a bowl, so every point on the path from nothing to the full leaf mean is at least as low as the start, in each leaf and therefore in their sum. It is a statement about the training readings and nothing else, since the held-out curve in Part 5 has a turn in it.",
             ),
             trueFalse(
-              "A hundred-round fit at a rate of 0.3 answers 1.35 metres for any time after four seconds, for ever.",
+              "A hundred-round fit at a rate of 0.3 answers 1.35 meters for any time after four seconds, for ever.",
               true,
-              "Outside the readings every stump is already on its outermost shelf, and there is no slope anywhere in the model to continue with. Boosting inherits every limit of its member, so a committee of trees is piecewise constant and cannot extrapolate however many rounds it runs.",
+              "Beyond the largest observed time, every regression tree follows an outermost leaf whose value is constant. Summing these tree outputs therefore stays constant as time increases further. This model returns a value outside its training range, but cannot continue a rising or falling physical trajectory there. Boosting can combine many breakpoints; it does not create a slope outside all those breakpoints.",
             ),
         ],
         },
@@ -461,16 +396,10 @@ export default function GradientBoostingPage() {
 <p>
                   On the three readings the launch residual of −4 became −2 after round one at a rate of a half, which is this line with η at 0.5. On the full throw the first stump is the same stump whatever the rate, t below 0.43 with answers −9.81 and 1.51, and keeping all of it leaves a squared total of 432.27 where keeping three tenths left 541.09.
                 </p>
-                <p>
-                  The larger rate takes more of the correction now, and the question the rest of this part asks is whether taking less now and more rounds later ends somewhere better.
-                </p>
+                <p>A larger learning rate applies more of the current correction. A smaller rate leaves more error for later trees to address. To compare those choices fairly, we need to examine the rate together with the number of rounds.</p>
 </>
                 <KeepInMind>
-                  A rate below one does not make any single round worse at
-                  its job. It makes the committee commit to less of each
-                  round&rsquo;s opinion, which is shrinkage in the sense the
-                  ridge page used the word.
-                </KeepInMind>
+                  Using a rate below one applies only part of the fitted correction. In this squared-error example, the full leaf-mean correction minimizes error for the chosen leaves, so a smaller rate generally improves less in that one round. It may produce a more useful sequence after later rounds and validation.</KeepInMind>
               </SubSection>
 
               <SubSection title="11. Rate against rounds, measured">
@@ -503,12 +432,8 @@ export default function GradientBoostingPage() {
 
               <SubSection title="12. What the small rate bought here, and what it did not">
                 <>
-<p>
-                  The usual claim is that a small rate with many rounds beats a large rate with few, and I measured it on this throw and found that it did not hold. The best held-out scores the four rates reached were 0.8794, 0.8914, 0.8963 and 0.8985, within 0.02 of one another and increasing with the rate, and the largest of them belongs to the rate of 1.0.
-                </p>
-                <p>
-                  What the smaller rates changed was not the height of the peak; it was when the peak came and how gently the curve fell after it. At 1.0 the score had given back 0.013 by round 300, at 0.3 it had given back 0.001, and at 0.1 it had not turned at all.
-                </p>
+<p>Smaller learning rates are often paired with more rounds, but that does not guarantee the highest held-out score. In this experiment, the best scores for the four rates are 0.8794, 0.8914, 0.8963 and 0.8985. They differ by less than 0.02, and the largest belongs to rate 1.0. The comparison needs to be made on the stated data rather than assumed from the rate alone.</p>
+                <p>Within this sweep, smaller rates delay the best observed round and can make the score change less sharply near it. At rate 1.0 the held-out score drops about 0.013 from its peak by round 300; at 0.3 it drops about 0.001. Rate 0.1 has not clearly turned within the displayed budget, so we have not established its eventual peak.</p>
 </>
                 <NumberTable
                   headings={["rate × rounds = 30", "rounds", "training R²", "held-out R²"]}
@@ -517,46 +442,22 @@ export default function GradientBoostingPage() {
                     ["0.3", "100", "0.9816", "0.8924"],
                     ["1.0", "30", "0.9687", "0.8853"],
                   ]}
-                  caption="Three configurations that travel the same total distance, read off the same curves. The two smaller rates reach the same scores and the largest one is slightly behind on both."
+                  caption="Three configurations with the same product of learning rate and round count. That product is a comparison convention, not an exact traveled distance; the two smaller rates give similar scores here."
                 />
                 <>
 <p>
                   Holding the product of rate and rounds fixed makes the trade visible. At a total step of 30 the rates of 0.1 and 0.3 come within 0.001 of each other on both scores, and 1.0 is 0.006 behind on the held-out one, so on this throw the rate and the round count trade almost one for one and the smaller rate is buying a wider, flatter plateau rather than a higher one.
                 </p>
-                <p>
-                  That is a real thing to buy, since it makes the stopping round of Part 5 far less delicate, and it is not the thing the textbook sentence promises. The claim is usually made about tables with many features, more noise and deeper members, where each round has more room to commit to something spurious, and none of those conditions holds for stumps on a single time column.
-                </p>
+                <p>A wider plateau makes the stopping round in Part 5 less sensitive to a small change in the round count. That is the benefit observed here. Different results are possible with noisier data, more features or deeper trees, where an individual round can fit more accidental detail. Stumps fitted to a single time column give us a narrower experiment.</p>
 </>
                 <KeepInMind>
-                  The rate and the round count are one setting seen from two
-                  sides, and halving one without doubling the other changes
-                  how far the committee walks in total. Compare rates at
-                  matched distances or at each one&rsquo;s own best round,
-                  never at a fixed round count.
-                </KeepInMind>
+                  Learning rate and round count interact, but their product is not an exact measure of distance through prediction space. Compare them under the practical constraint that matters: an available training budget, a round limit or validation-selected stopping. Matching their product is one useful comparison for this demonstration.</KeepInMind>
               </SubSection>
 
               <SubSection title="13. Past a rate of one">
-                <p>
-                  The line in section 10 says what happens if the rate is
-                  pushed past one, and it is worth reading before the
-                  playground refuses it. At a rate of 1.5 a residual r is
-                  left as −0.5·r, so every fitted miss changes sign and keeps
-                  half its size, and at 2.5 it is left as −1.5·r, larger
-                  than it started.
-                </p>
+                <p>If a correction exactly matches an individual residual, a rate of 1.5 reverses that residual and leaves half its magnitude. A rate of 2.5 reverses it and increases its magnitude. For a shared leaf correction, the same factor applies to the leaf’s mean residual, rather than necessarily to every observation in the leaf.</p>
                 <Equation>{"η = 1.5:   r − 1.5·r = −0.5·r\nη = 2.5:   r − 2.5·r = −1.5·r"}</Equation>
-                <p>
-                  Between one and two each round overshoots the mistake it
-                  just fitted and the leftover still shrinks, though by
-                  reflection rather than approach; past two the leftover
-                  grows every round and the fit runs away, which is the
-                  calculus primer&rsquo;s runaway in prediction space. No
-                  committee is built with a rate above one at all, so the playground slider hands you its refusal
-                  in words when you cross that mark rather than a diverging
-                  curve. The primer&rsquo;s descent slider is where the
-                  runaway itself can be watched.
-                </p>
+                <p>For a nonzero leaf mean under squared error, rates between one and two overshoot but still reduce the portion of error removable by that shared correction. Rates above two increase it. Individual residuals can behave differently within a leaf. This SDK permits only rates up to one, so the playground reports a validation error rather than running those larger steps.</p>
               </SubSection>
             </>
           ),
@@ -622,9 +523,7 @@ export default function GradientBoostingPage() {
 <p>
                   Push depth to its limit and the reason for keeping the member weak is measured rather than argued. A member six questions deep, kept in full at a rate of 1.0, explains 0.9877 of the training spread in its first round and scores 0.8889 on the held-out readings, which is nearly the whole job done by one tree.
                 </p>
-                <p>
-                  Its second round nudges the held-out score to 0.8893, and from the fifth round on the training score is 0.9937 and the held-out score is 0.8780, where both stay for the remaining 295 rounds because there is nothing left for a later round to fit except noise, and every later round fits it.
-                </p>
+                <p>The second round changes held-out R² to 0.8893. From the fifth round onward, training R² remains 0.9937 and held-out R² remains 0.8780 in the recorded run. Later corrections do not improve this fit. Repeated input times with different observed heights impose the remaining squared-error limit described next.</p>
 </>
                 <p>
                   The ceiling of 0.9937 is not a failure. Three of the
@@ -635,16 +534,7 @@ export default function GradientBoostingPage() {
                   leftover from those pairs is permanent.
                 </p>
                 <KeepInMind>
-                  Bagging averages its members, so their private mistakes
-                  cancel and a deep, unstable member is the right one to
-                  hand it. Boosting adds its members up, so a mistake made
-                  in round one is carried by every later round, and the
-                  member that cannot make a large mistake in one round is
-                  the right one to hand it. The fifty deep bagged trees of
-                  section 22 score 0.8761 on the held-out readings, and the
-                  same depth handed to boosting at the full rate had nothing
-                  left to fit after five rounds.
-                </KeepInMind>
+                  Bagging fits its members separately and averages their outputs. Boosting fits additions to the current prediction, so later rounds can correct earlier errors. Shallow trees and smaller learning rates limit what each correction can change, but neither guarantees better validation performance. The examples compare these design choices rather than establishing one required tree depth for each method.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -677,7 +567,7 @@ export default function GradientBoostingPage() {
                 "The committee converges faster than it does at a rate of one",
               ],
               0,
-              "Between one and two each round overshoots the mistake it just fitted and the leftover still shrinks, by reflection rather than approach; past two it is larger than it started and grows every round. No committee is built with a rate above one at all, which is why the playground hands back a refusal in words rather than a diverging curve.",
+              "In this hypothetical scalar correction, the new residual is the old residual multiplied by one minus the learning rate. A factor of −1.5 reverses its sign and increases its magnitude, so repeating that update diverges. The page's implementation accepts learning rates only up to one; the larger-rate example illustrates the recurrence rather than an executable supported configuration.",
             ),
             several(
               "With the rate held at 0.1 and the depth varied, which of these were measured?",
@@ -739,9 +629,7 @@ export default function GradientBoostingPage() {
 
               <SubSection title="18. Reading the stopping round">
                 <>
-<p>
-                  The round to stop at is the one where the held-out score was highest, and for the three configurations above that is round 5, round 24 and round 77, with held-out scores of 0.8963, 0.8915 and 0.8985 there. The price of running to 300 instead was 0.018, 0.013 and 0.013 of R². Those are small numbers on eighteen held-out readings, and the held-out page measured how far one seeded deal&rsquo;s verdict moves when the seed changes, so a difference of that size between two configurations is not a finding about the configurations.
-                </p>
+<p>The best recorded validation rounds for the three displayed configurations are 5, 24 and 77, with scores 0.8963, 0.8915 and 0.8985. Running to round 300 instead reduces those scores by about 0.018, 0.013 and 0.013. Validation can guide stopping, but selecting the highest observed score makes this group part of model selection. Assess the selected procedure separately and account for uncertainty from the small validation group.</p>
                 <p>
                   What the curves do establish is the shape, a rise, a broad top and a slow fall, and that the fall begins hundreds of rounds before the training score stops improving.
                 </p>
@@ -756,40 +644,17 @@ export default function GradientBoostingPage() {
 
               <SubSection title="19. No out-of-bag score here">
                 <>
-<p>
-                  Bagging got its honest score for free, because every member missed about a third of the readings and those readings could judge it. Boosting has no such readings. Every round is fitted on every row, so no member has a row it never saw, and the held-out readings have to be supplied from outside, by a deal as above or by the folds the held-out page builds.
-                </p>
+<p>Bagging provides out-of-bag observations because each tree omits some training rows. The boosting runs here fit every round on every row, so they do not provide the same evaluation. Set aside validation observations or use cross-validation to choose settings, then keep a separate assessment for the final model.</p>
                 <p>
                   On the same forty-two training readings the deep bagged trees of Part 6 report an out-of-bag score of 0.9029 beside a held-out score of 0.8761, and the boosted stumps can report only the second.
                 </p>
 </>
-                <p>
-                  Every committee on this page is the plain form of the method
-                  and not the stochastic one, where each round is fitted on a random
-                  fraction of the rows and the rest can judge it, so there
-                  is no out-of-bag estimate to show here, and the page says
-                  so rather than inventing one.
-                </p>
+                <p>The runs here use the full training dataset in every round. Stochastic boosting samples a fraction of rows for each round and can use the omitted rows for some diagnostics. Those diagnostics need their own interpretation because later trees depend on earlier rounds; they are not automatically the bagging procedure applied to the final ensemble.</p>
               </SubSection>
 
               <SubSection title="20. Rate, rounds and depth as one budget">
-                <p>
-                  The three settings are one decision about how much
-                  correction the committee is allowed to accumulate and how
-                  finely it is dispensed. Section 12 held the product of
-                  rate and rounds fixed and found the two smaller rates
-                  coming within 0.001 of each other; section 15 held the
-                  rate fixed and found depth moving the peak from round 299
-                  to round 36 without raising it. So a sensible search fixes
-                  the depth low, chooses a rate small enough that the plateau
-                  is wide, and lets a held-out curve choose the round count,
-                  which is the procedure the{" "}
-                  <Link href="/concepts/grid-search" className={link}>
-                    search page
-                  </Link>{" "}
-                  lays out with the round count read off the curve rather
-                  than gridded.
-                </p>
+                <p>Learning rate controls the size of each added correction, round count controls how many are added, and tree depth controls the complexity available to each correction. These settings interact, so compare the complete fitted procedure.</p>
+<p>In the measured experiment, the two smaller rates give scores within 0.001 when rate times round count is fixed. Changing depth moves the held-out peak from round 299 to round 36 without substantially raising it. A practical search can compare a few depths and rates while using a separate validation curve to choose the stopping round. Small rates and shallow trees are candidates to test, not universal requirements. The <Link href="/concepts/grid-search" className={link}>grid-search lesson</Link> explains how to evaluate such choices.</p>
                 <KeepInMind>
                   More rounds is cheap to try, since a committee of k rounds
                   is the first k members of a longer one and the whole curve
@@ -816,7 +681,8 @@ export default function GradientBoostingPage() {
                 <MemberTargets points={SIXTY_THROW} panel="targets" />
                 <>
 <p>
-                  The first three bagged members drew 27, 27 and 28 distinct readings of the 42, and every target they were shown is a height between 4.5 and 21.7 metres, the arc itself with some readings doubled and some absent. The first three boosted rounds were shown all 42 readings each time, and their targets are residuals, the largest 10.13, 10.60 and 8.67 metres, with squared totals of 1142.7, 952.9 and 784.6 falling round by round as the committee explains more of the arc.
+
+                  The first three bagged members drew 27, 27 and 28 distinct readings of the 42, and every target they were shown is a height between 4.5 and 21.7 meters, the arc itself with some readings doubled and some absent. The first three boosted rounds were shown all 42 readings each time, and their targets are residuals, the largest 10.13, 10.60 and 8.67 meters, with squared totals of 1142.7, 952.9 and 784.6 falling round by round as the committee explains more of the arc.
                 </p>
                 <p>
                   Read across the bagged row and the pictures are the same shape with different readings; read across the boosted row and the readings are the same and the shape is changing.
@@ -848,18 +714,16 @@ export default function GradientBoostingPage() {
                     { expression: "each member sees a resample of the rows", reason: "each member sees every row" },
                     { expression: "each member is fitted to the heights", reason: "each member is fitted to the current residuals" },
                     { expression: "members averaged with equal weight", reason: "members summed, each scaled by the rate" },
-                    { expression: "attacks variance, wants a deep member", reason: "attacks bias, wants a shallow member" },
-                    { expression: "more members never hurt", reason: "more rounds eventually hurt" },
-                    { expression: "an out-of-bag score comes free", reason: "held-out rows have to be supplied" },
+                    { expression: "often reduces sensitivity by averaging varied fits", reason: "fits successive corrections; tree complexity remains a setting to evaluate" },
+                    { expression: "more members can stabilize an average; finite accuracy can fluctuate", reason: "more rounds can overfit, so compare validation performance" },
+                    { expression: "bootstrap omissions support an internal out-of-bag estimate", reason: "these full-row fits require separate validation observations" },
                   ]}
                 />
               </SubSection>
 
               <SubSection title="23. AdaBoost reweights the rows rather than fitting residuals">
                 <>
-<p>
-                  AdaBoost is the other sequential committee, and from a distance it looks the same, one weak member after another, each aimed at what the last got wrong. The mechanism is different in every line. Every round is fitted to the same labels, on the same rows, and what changes between rounds is how much each row counts.
-                </p>
+<p>AdaBoost also fits members sequentially, concentrating later work on earlier mistakes. In its usual classification form, it keeps the original labels and changes the weight given to each training row. Squared-error gradient boosting changes the target values to the current residuals instead.</p>
                 <p>
                   A row the last member got wrong has its weight raised, a row it got right has its weight lowered, and the next member is fitted on the reweighted rows, so it is pulled towards the hard cases without ever seeing a residual. The members are then combined by a weighted vote in which a member that did well on its weighted rows gets a louder voice, where a boosted regression gives every round the same rate.
                 </p>
@@ -872,20 +736,10 @@ export default function GradientBoostingPage() {
                     { expression: "the member is a regression tree, whatever the task", reason: "the member is a classifier, a stump by default" },
                     { expression: "each member added at the rate η", reason: "each member's voice set by its own weighted error" },
                     { expression: "a rate above one is refused", reason: "a member no better than guessing stops the walk" },
-                    { expression: "a mislabelled row leaves a residual that never closes", reason: "a mislabelled row gains weight every round until it dominates" },
+                    { expression: "a mislabeled target can attract repeated corrections, depending on the loss and model", reason: "a repeatedly misclassified row can gain weight; later correct classifications can lower it" },
                   ]}
                 />
-                <p>
-                  The two are cousins rather than strangers. Friedman,
-                  Hastie and Tibshirani showed that AdaBoost is the same
-                  stagewise additive fitting under the exponential loss, and
-                  seen from the gradient view the reweighting is what that
-                  loss&rsquo;s negative gradient looks like when the members
-                  are classifiers. AdaBoost here is a classifier and the throw
-                  is a regression, so there is no
-                  side-by-side fit to show on this page, and the contrast is
-                  stated rather than measured.
-                </p>
+                <p>Friedman, Hastie and Tibshirani related AdaBoost to additive fitting under exponential loss. This explains why reweighting observations and fitting corrections can be connected through a choice of loss. The AdaBoost implementation here classifies labels, while the ball example predicts heights, so this comparison explains the procedures rather than claiming a matched experiment.</p>
               </SubSection>
 
               <SubSection title="24. What the three share and where they part">
@@ -894,19 +748,14 @@ export default function GradientBoostingPage() {
                   rows={[
                     ["members fitted", "in parallel", "in sequence", "in sequence"],
                     ["what a member sees", "a resample of the rows", "every row, the residuals", "every row, reweighted"],
-                    ["what a member is", "a deep tree", "a shallow regression tree", "a stump classifier"],
+                    ["members used in these examples", "deep trees", "shallow regression trees", "stump classifiers"],
                     ["how members combine", "equal average", "sum at the rate", "weighted vote"],
                     ["what it attacks", "variance", "bias", "bias"],
-                    ["free honest score", "out of bag", "none", "none"],
+                    ["internal evaluation in these examples", "out-of-bag estimate", "separate validation", "separate validation"],
                   ]}
                 />
                 <KeepInMind>
-                  The word ensemble covers all three committees and says
-                  nothing about which member any of them wants. Which half
-                  of the error a committee attacks, and therefore which
-                  member it wants, follows from how it combines its members,
-                  averaging for bagging and summing for the two boosters.
-                </KeepInMind>
+                  An ensemble combines several fitted predictors. Its behavior depends on both how those predictors are trained and how their outputs are combined. Averaging independent fits can reduce sample sensitivity; fitting successive corrections changes what the later members learn. Neither construction divides all error neatly into one half that it alone can fix.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -928,7 +777,7 @@ export default function GradientBoostingPage() {
                 "The round count is too large for the estimate to be computed",
               ],
               0,
-              "Bagging gets its honest score free because every member missed about a third of the readings and those readings can judge it. On the same forty-two training readings the deep bagged trees report 0.9029 out of bag beside a held-out 0.8761, and the boosted stumps can report only the second. The stochastic form, where each round is fitted on a random fraction of the rows, is what would supply one, and no committee here is that form.",
+              "Every tree in this implementation is fitted using all training rows, so there is no bootstrap omission set for a bagging-style out-of-bag prediction. The separate held-out set is still available for evaluation. Stochastic boosting can omit rows at individual rounds and use those omissions to monitor improvement, but later residuals depend on earlier fitted stages; that is not automatically the same estimate as independent bagging votes.",
             ),
             choice(
               "Both ensembles use fifty one-question regression trees, yet boosting predicts this arc much better. Which description correctly distinguishes how they were trained?",
@@ -950,12 +799,12 @@ export default function GradientBoostingPage() {
                 "Each member is fitted to what the members before it left over",
               ],
               [0, 1],
-              "AdaBoost reweights rows and combines its members by a weighted vote in which a member that did well gets a louder voice, and its members never see a residual. A boosted regression hands every round the same rate and a fresh target column, so the two options about a fixed rate and about fitting what was left over describe this page's committee rather than AdaBoost. The two are cousins rather than strangers, since AdaBoost is the same stagewise additive fitting under the exponential loss, and the reweighting is what that loss's negative gradient looks like when the members are classifiers.",
+              "In the usual discrete AdaBoost procedure, each round fits the original class labels with updated observation weights, and the final class decision combines weighted member votes. This squared-error boosting procedure fits residual targets and adds each tree with the stated learning rate. Both are stagewise additive methods, but the loss and fitting procedure determine how observations and members are weighted.",
             ),
             trueFalse(
-              "Which member a committee wants follows from how it combines them.",
+              "How models are combined influences which base-model settings are useful for the ensemble.",
               true,
-              "Averaging lets private mistakes cancel, so a deep unstable member is the right one to hand bagging. Summing carries a round-one mistake through every later round, so the member that cannot make a large mistake is the right one for boosting. The word ensemble covers all three committees and says nothing about which member any of them wants.",
+              "Bagging often benefits from data-sensitive trees because averaging can reduce their variability. Boosting fits each new tree to remaining errors, so later rounds can correct earlier predictions; they do not simply preserve every earlier mistake. Shallow trees and small learning rates can control the size of each correction, but deeper members can also be appropriate. Choose these settings through validation of the combined model.",
             ),
         ],
         },
@@ -966,50 +815,33 @@ export default function GradientBoostingPage() {
               <SubSection title="25. The loss, starting prediction and rules for each tree" id="25-what-a-complete-implementation-must-specify">
                 <p>Before comparing two boosting runs, check the loss and the starting prediction. Ordinary residuals give the negative gradient for squared error; a different loss can change both the initial constant and the quantities each tree must fit.</p>
                 <p>Then compare the trees and updates: maximum depth, minimum rows in a split and leaf, round count, learning rate and its permitted range. Some procedures search for a step length in each fitted leaf, while others keep the leaf mean. That choice changes the correction added to the model.</p>
-                <p>Row subsampling determines whether an out-of-bag estimate is available. Also check whether a shorter run reproduces the beginning of a longer run, and how the fitted trees answer queries outside the observed times. These details explain disagreements that the word boosting alone cannot.</p>
+                <p>Check whether rows are subsampled and what any omitted-row diagnostic actually estimates. Also check whether a shorter fit reproduces the start of a longer one and how queries outside the observed time range are handled. Two implementations called boosting can differ on these choices.</p>
               </SubSection>
 
               <SubSection title="26. What happens when another boosting round cannot help?" id="26-the-edges-probed">
-                <p>
-                  Every row below was tried on the model itself and, where
-                  this page&rsquo;s door lets it through, through the page as
-                  well. Some are refused, some are accepted with an answer
-                  worth knowing, and some are accepted and documented rather
-                  than defended.
-                </p>
+                <p>The table records the behavior checked in the SDK and, where the page accepts the input, in the interactive example. An accepted fit can still give an unhelpful result, so validation errors and prediction behavior both matter.</p>
                 <DerivationTable
                   expressionHeading="Training data or boosting setting"
                   reasonHeading="What happens during fitting"
                   rows={[
                     { expression: "no features, or an empty column", reason: "refused by name before any round runs, by the guard every model here shares." },
                     { expression: "a single reading", reason: "accepted. The mean is the reading, every member is one leaf, the committee answers that height everywhere, and asking for R² is refused because a single height has no spread to explain. This page's door refuses it a layer earlier, at two readings." },
-                    { expression: "two readings", reason: "accepted. At a rate of one the first stump reproduces both exactly and R² is 1.0 after one round." },
+                    { expression: "two readings", reason: "with distinct input times and different target heights, a rate-one stump can separate the two and gives R² of 1.0 after one round." },
                     { expression: "every height the same", reason: "accepted as a fit, the committee predicts that height and every member is a single leaf; scoring it is refused, since R² is undefined with nothing to explain. That refusal reaches the page unchanged, in the words it was raised in." },
                     { expression: "every time the same", reason: "accepted. No question can separate the readings, every member is a single leaf answering zero, the committee predicts the mean height and R² is exactly 0.0." },
-                    { expression: "two readings at one time with different heights", reason: "accepted, and the pair share their mean for ever. Forty rounds on heights of 4 and 8 at two seconds predict 6.0 for both and leave R² at 0.8." },
+                    { expression: "two readings at one time with different heights", reason: "the pair cannot be distinguished by time alone. In the forty-round example, heights 4 and 8 at two seconds both receive prediction 6.0. Their conflicting targets leave a residual error that a time-only rule cannot remove." },
                     { expression: "a non-finite height or time", reason: "refused as not finite. This page's door refuses it first, since a non-finite number fails its magnitude bound." },
                     { expression: "a learning rate above 1, or of 0", reason: "refused when the committee is constructed, before any data is seen. That refusal comes from construction rather than from reading data, which is why a rate past 1 is refused in this page's own words rather than handed on." },
                     { expression: "zero rounds, or a depth of 0", reason: "refused at construction for the same reason." },
-                    { expression: "a leaf minimum larger than the reading count", reason: "accepted, and documented rather than defended. Every member becomes a single leaf answering zero, the committee is the flat mean and R² is 0.0, with nothing raised." },
+                    { expression: "a leaf minimum larger than the reading count", reason: "accepted. No eligible split is possible, so each correction is a zero leaf and the fitted prediction remains the training mean. For a nonconstant target its training R² is 0.0." },
                     { expression: "more rounds than the door allows", reason: "refused at the door, at 300 for a fit and at 60 for the stepper, which lays every round out and is about the early ones." },
                     { expression: "predicting before fitting", reason: "refused by name, with the model's own name in the message." },
                     { expression: "a feature named differently at prediction", reason: "refused by name; the message says which names were expected and which arrived." },
-                    { expression: "a time outside the readings", reason: "accepted, and answered with the outermost shelf for ever, 0.80 metres before the launch and 1.35 after four seconds on the hundred-round fit." },
+                    { expression: "a time outside the readings", reason: "accepted, and answered with the outermost shelf for ever, 0.80 meters before the launch and 1.35 after four seconds on the hundred-round fit." },
                     { expression: "a committee cut to fewer rounds", reason: "identical to a fresh fit of that many rounds, to the last bit, because each round depends only on the rounds before it. The learning curves rely on this and a test pins it." },
                   ]}
                 />
-                <p>
-                  Two of those deserve the extra sentence. The leaf-minimum
-                  row is the case where a model fits, predicts and scores
-                  without ever having learned anything, and nothing anywhere
-                  says so, since a flat mean is a legal answer; that one is
-                  on the reader to notice. And the
-                  learning rate&rsquo;s bound is enforced by the constructor
-                  rather than by a data check, which is the right place for
-                  a setting whose failure does not depend on the data, and
-                  it means the refusal is not one this page can translate,
-                  only anticipate.
-                </p>
+                <p>A large minimum leaf size can leave every correction at zero, so the fitted prediction remains the learned training mean. That is still a fitted baseline, even though no split was possible. The learning-rate bounds are checked when the model is constructed. Distinguish those setting checks from conditions that depend on the supplied observations.</p>
               </SubSection>
             </>
           ),
@@ -1017,7 +849,7 @@ export default function GradientBoostingPage() {
         {
           title: "Practice. Fitting the Throw Round by Round With the Library",
           practice: [
-            exercise("Run the first round on the fifteen readings",["Section 2 starts the full throw from a flat 12.76 and section 3 fits the first stump to the misses, finding the question t below 0.43 with answers −9.81 and 1.51, and a squared total of 541.09 once three tenths of it is added. Reproduce that round with the library.", "Fit one round at a rate of 0.3 with stumps as members. Read the starting constant, the first member’s question and its two answers off the fitted model, then evaluate it on the readings and print the residual sum of squares and the R squared, which the page does not quote for this round."],`from oop_ml import Feature, GradientBoostingRegressor
+            exercise("Run the first round on the fifteen readings",["Fit GradientBoostingRegressor to the fifteen throw readings with n_rounds=1, learning_rate=0.3 and max_depth=1. This starts with a constant prediction and fits one stump to the remaining errors.", "Print initial_prediction, the first stump's split threshold and its two leaf predictions. Evaluate the model on these readings and print the residual sum of squares and R². Compare the leaf corrections with the initial model's residuals."],`from oop_ml import Feature, GradientBoostingRegressor
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2])
@@ -1045,7 +877,7 @@ first stump asks t < 0.43
 answers -9.81 on the left and 1.51 on the right
 squared total after one round 541.09
 R squared after one round 0.173`,{...{ hints: ["A stump is a tree whose max_depth is 1, and the member depth is a field on the boosting model itself. The rate and the round count are the other two fields, and the data goes to fit.", "initial_prediction is the flat start, a property of the fitted model. members is a tuple of the fitted trees in order, so the first round’s stump is at position zero.", "A tree’s root is a node holding a split with a threshold, and a stump’s root has a leaf on each side, each answering with a prediction. The left leaf answers strictly below the threshold.", "evaluate pairs every prediction with its reading and exposes residual_sum_of_squares and r2_score as properties."], check: numberCheck("What squared total does the committee leave after one round, to two places?", 541.09, 0.005, "The initial constant is the training mean, and the first stump is fitted to its residuals. Adding a learning-rate-scaled correction reduces the training residual sum of squares; the reported R squared measures that reduction against the constant baseline.") },question:"What does the first correction learn from the ball's prediction errors?"}),
-            exercise("Watch the squared leftover fall",["Section 7 reports the squared total on the fifteen readings at 111.58 after ten rounds, 28.55 after twenty, 9.82 after thirty and 1.84 after sixty at a rate of 0.3. Fit a committee at each of those round counts and read the total and the R squared off each.", "A committee of k rounds is the first k members of a longer one, which section 26 pins, so four separate fits give the same numbers one replayed fit would. Then fit sixty rounds at a rate of 1.0, whose squared total the page gives as 0.77, and print its R squared, which the page does not."],`from oop_ml import Feature, GradientBoostingRegressor
+            exercise("Watch the squared leftover fall",["Fit fresh stump-based boosting models with 10, 20, 30 and 60 rounds at learning_rate=0.3. Print training residual sum of squares and R² for each.", "Repeat with 60 rounds at learning_rate=1.0. Keep the data and maximum tree depth fixed. These deterministic fits share the same initial rounds when their settings match, so comparing round budgets is equivalent to inspecting stages of the same procedure."],`from oop_ml import Feature, GradientBoostingRegressor
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2])
@@ -1071,7 +903,7 @@ rate 0.3, 20 rounds: squared total 28.55, R squared 0.956
 rate 0.3, 30 rounds: squared total 9.82, R squared 0.985
 rate 0.3, 60 rounds: squared total 1.84, R squared 0.997
 rate 1.0, 60 rounds: squared total 0.77, R squared 0.9988`,{...{ hints: ["fit answers the fitted model itself, so a fit and an evaluate can be chained on one line.", "The round count and the rate are fields of the constructor, so a loop over round counts constructs a fresh model each time.", "R squared is one minus the squared total over the flat mean’s 654.36, so the two numbers on each line are the same miss in different units."], check: numberCheck("What R squared does the sixty-round committee at a rate of 1.0 reach on the readings, to four places?", 0.9988, 5e-05, "These additional rounds reduce error on the readings used to fit them. The high training score does not establish a good forecast or held-out result; those require separate evaluation.") },question:"How do additional boosting rounds change the training error?"}),
-            exercise("Give the committee two readings at one time",["Section 26 records that two readings at the same time with different heights share their mean for ever. Put heights of 4 and 8 at two seconds between the readings of 2 at one second and 10 at three, run forty rounds, and see what the committee makes of the pair.", "Print the committee’s prediction at each of the four readings, its R squared, and its squared total, which the page does not quote. No rule that reads only the time can tell the two readings at two seconds apart, so their miss is permanent."],`from oop_ml import Feature, GradientBoostingRegressor
+            exercise("Give the committee two readings at one time",["Use times [1, 2, 2, 3] with heights [2, 4, 8, 10]. Fit forty boosting rounds with learning_rate=0.5 and max_depth=1. The repeated time has two different recorded heights; inspect whether the model can give those rows different predictions.", "Print the time, measured height and prediction for each row, followed by R² and the residual sum of squares. A deterministic model using only time must assign the same prediction to both rows at time two."],`from oop_ml import Feature, GradientBoostingRegressor
 
 times = Feature("t", [1, 2, 2, 3])
 heights = Feature("h", [2, 4, 8, 10])
@@ -1097,7 +929,7 @@ t = 2, reading 8, prediction 6.00
 t = 3, reading 10, prediction 10.00
 R squared 0.80
 squared total 8.00`,{...{ hints: ["predict answers one prediction per reading in the order the readings were given, and a feature’s values are the numbers it was built from, so the three can be zipped together.", "The pair at two seconds lands in the same leaf of every stump, since no threshold on time separates them, so every round gives both the same correction.", "The squared total is the two misses of 2 each, squared and summed, and R squared is one minus that over the spread of the four heights about their mean."], check: numberCheck("What R squared does the committee reach on the four readings, to two places?", 0.8, 0.005, "The two observations at the same input must receive the same prediction from a deterministic time-only rule. Their different heights leave an irreducible contribution to squared error unless more informative inputs are supplied.") },question:"Can a model distinguish two heights recorded at the same time?"}),
-            exercise("Hand the same stump to both frames",["Section 22 fits fifty bagged stumps, fifty deep bagged trees and fifty boosted stumps on the same forty-two training readings of the sixty-point throw and scores all three on the eighteen held out. The deal is the site’s seeded one, three tenths of the readings under seed 4, which this script reproduces with the same generator the page uses.", "Fit the three committees and print each one’s training and held-out R squared to four places, then the deep bagged trees’ out-of-bag score, which the boosted committee cannot report. The page gives 0.4758 and 0.2727 for the bagged stumps, 0.9767 and 0.8832 for the boosted stumps, and 0.9849 and 0.8761 for the deep bagged trees."],`import numpy as np
+            exercise("Hand the same stump to both frames",["Use the supplied seeded split of sixty throw readings into forty-two training rows and eighteen held-out rows. Fit fifty bagged stumps, fifty bagged unrestricted trees and fifty boosted stumps at learning_rate=0.3.", "Print each model's training and held-out R² to four decimal places, then the unrestricted bagging model's out-of-bag score. Compare their results on the same held-out observations rather than their training fits alone."],`import numpy as np
 from oop_ml import BaggingRegressor, DecisionTreeRegressor, Feature, GradientBoostingRegressor
 
 times = [0.11, 0.16, 0.25, 0.33, 0.46, 0.54, 0.58, 0.59, 0.64, 0.77, 0.77, 0.81, 1.04, 1.05, 1.11, 1.12, 1.21, 1.25, 1.32, 1.61, 1.64, 1.69, 1.81, 1.84, 1.89, 1.94, 2.04, 2.04, 2.05, 2.06, 2.11, 2.15, 2.16, 2.2, 2.37, 2.45, 2.49, 2.57, 2.73, 2.9, 3.0, 3.01, 3.01, 3.11, 3.15, 3.15, 3.21, 3.28, 3.31, 3.36, 3.41, 3.42, 3.45, 3.51, 3.67, 3.79, 3.8, 3.85, 3.88, 3.92]
@@ -1137,7 +969,7 @@ for name, committee in committees:
 print(f"deep bagged trees, out of bag {committees[1][1].out_of_bag_score():.4f}")`,`bagged stumps: training 0.4758, held out 0.2727
 deep bagged trees: training 0.9849, held out 0.8761
 boosted stumps: training 0.9767, held out 0.8832
-deep bagged trees, out of bag 0.9029`,{...{ hints: ["The bagging frame takes a base_model, the prototype every member copies, and its default is a deep tree. A stump handed in makes every member a stump. The boosting model takes its member depth as a field of its own.", "All three committees fit on the two training features and score on either pair, and score answers R squared for a regressor.", "out_of_bag_score exists on the bagged committees only, because every boosted round is fitted on every row and so no member has a row it never saw."], check: numberCheck("What held-out R squared do the fifty boosted stumps reach, to four places?", 0.8832, 5e-05, "Boosting fits later stumps to the errors of the current ensemble, while bagging averages stumps fitted independently to resampled targets. Either combination can have several breakpoints; the difference here is how those stumps are fitted and combined. The reported advantage belongs to this shared held-out split.") },question:"How do bagged and boosted trees compare on the same held-out readings?"}),
+deep bagged trees, out of bag 0.9029`,{...{ hints: ["The bagging frame takes a base_model, the prototype every member copies, and its default is a deep tree. A stump handed in makes every member a stump. The boosting model takes its member depth as a field of its own.", "Each model fits the single time input Feature against the height target. Use score with either the training time/height pair or the held-out pair to obtain R².", "out_of_bag_score exists on the bagged committees only, because every boosted round is fitted on every row and so no member has a row it never saw."], check: numberCheck("What held-out R squared do the fifty boosted stumps reach, to four places?", 0.8832, 5e-05, "Boosting fits later stumps to the errors of the current ensemble, while bagging averages stumps fitted independently to resampled targets. Either combination can have several breakpoints; the difference here is how those stumps are fitted and combined. The reported advantage belongs to this shared held-out split.") },question:"How do bagged and boosted trees compare on the same held-out readings?"}),
           ],
         },
       ]}

@@ -52,7 +52,23 @@ export default function PrivacyPage() {
           Guest answers, code drafts and workshop constructions stay in memory during the current visit and reset
           when the page reloads. During a signed-in visit, your work and progress save through the account
           service so you can resume later or on another device. Free accounts include this saving. Learning results and drafts are not kept in
-          browser storage. Essential sign-in data and preferences such as the colour theme are separate.
+          browser storage. Essential sign-in data and preferences such as the color theme are separate.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">Streaks and reminder emails</h2>
+        <p>
+          For signed-in learners, the account service records when a quiz is worked through or coding or workshop
+          checks pass. Those server timestamps let the site count consecutive days of practice in your chosen
+          time zone. Opening a page does not extend a streak. Old completion records do not supply missing dates.
+        </p>
+        <p>
+          Reminder emails are optional and off until you ask for them. If you enable them, the service uses your
+          verified account email, time zone and chosen hour to send a reminder on days when no practice has been
+          recorded. Amazon Simple Email Service delivers the email. You can turn reminders off in your account or
+          use the unsubscribe link in an email. The service keeps a delivery record to avoid repeat reminders for
+          the same day. These account records are separate from the reading analytics described above.
         </p>
       </section>
 

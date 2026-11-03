@@ -117,13 +117,12 @@ export function ParagraphOrderProbe() {
       </svg>
 
       <Legend>
-        The grey band is the control, which is how far apart two starting draws
-        of the identical ordering come out; the dot is how far apart the two
-        orderings come out. A dot inside or to the right of the band means the
-        rule did not read the order, and the one{" "}
-        <span style={{ color: FALLING }}>green</span> dot, where it sits well to
-        the left, is the only row on the page where the order of the words
-        changed the answer by more than the descent&rsquo;s own noise.
+        The gray band compares two random starts with the word order unchanged.
+        Each dot compares two different word orders. A dot inside the band does
+        not distinguish an order effect from variation due to the starting values.
+        The <span style={{ color: FALLING }}>green</span> dot lies farther left,
+        showing a larger change after reordering than this control produced.
+        The comparison concerns these texts and inference settings.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>

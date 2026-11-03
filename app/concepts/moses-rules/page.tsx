@@ -22,9 +22,9 @@ import { RoundTripPanel } from "@/components/widgets/RoundTripPanel";
 import { StopProbePanel } from "@/components/widgets/StopProbePanel";
 
 export const metadata: Metadata = {
-  title: "Moses Rules · oop_ml",
+  title: "Moses Rules · Perceptron Lab",
   description:
-    "A translation system needs a consistent way to handle punctuation without breaking abbreviations and other language-specific forms. Moses tokenization combines general splitting rules with exceptions for those cases.",
+    "Moses tokenization separates punctuation while accounting for language-specific forms such as abbreviations. Its exceptions affect which marks remain attached to a word and which become separate pieces.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function MosesRulesPage() {
       playgroundTitle="See how punctuation and language settings change the pieces"
       playgroundIntro="Compare a sentence-ending period, an abbreviation, and a decimal. Inspect which rule applies and where an exception list changes the cut."
       title="Moses Rules"
-      tagline={"A translation system needs a consistent way to handle punctuation without breaking abbreviations and other language-specific forms. Moses tokenization combines general splitting rules with exceptions for those cases."}
+      tagline={"Moses tokenization separates punctuation while accounting for language-specific forms such as abbreviations. Its exceptions affect which marks remain attached to a word and which become separate pieces."}
       prerequisites={
         <>
           The{" "}
@@ -81,25 +81,10 @@ export default function MosesRulesPage() {
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
                 </Equation>
                 <p>
-                  Read it as somebody building a phrase table. The stop after{" "}
-                  <span className="font-mono">Dr</span> has to stay, because{" "}
-                  <span className="font-mono">Dr.</span> and{" "}
-                  <span className="font-mono">Dr</span> would otherwise be two
-                  rows for one title. The stop at the end has to come off, for
-                  the same reason from the other side, since{" "}
-                  <span className="font-mono">re-analysis.</span> and{" "}
-                  <span className="font-mono">re-analysis</span> are one word
-                  written twice. And the apostrophe in{" "}
-                  <span className="font-mono">didn&rsquo;t</span> hides a
-                  negation that the target language will spell as a word of its
-                  own, so it has to be visible to whatever aligns the two sides.
+                  In a phrase-based translation pipeline, separate spellings can divide counts across entries. Keeping <span className="font-mono">Dr.</span> together and separating the final period from <span className="font-mono">re-analysis</span> can make those counts more consistent. Splitting <span className="font-mono">didn&apos;t</span> also gives alignment a smaller unit to work with. Whether the target language expresses negation as a separate word depends on that language and translation.
                 </p>
                 <KeepInMind>
-                  The question here is which runs of characters the counting
-                  will have rows for, and the answer is under a constraint the
-                  other three rules never met, that a reader has to be handed
-                  the text back at the end. Every clause below is one or the
-                  other of those two things.
+                  {"The translation pipeline needs consistent counting units and a way to display generated units as readable text. Those are related requirements, but readable detokenization does not by itself guarantee recovery of an input’s exact original spacing."}
                 </KeepInMind>
               </SubSection>
 
@@ -132,16 +117,10 @@ export default function MosesRulesPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  Read the spans down the right-hand side and they run
-                  continuously through the sentence, skipping only the six
-                  spaces. Every piece is the slice of the sentence its two
-                  numbers name, character for character, and unlike the previous
-                  page that remains true in every part of this one.
+                  {"At the default settings, each displayed piece equals its source slice. Their spans cover the sentence except for its six spaces. Later options deliberately rewrite escaping characters and hyphens, so we will inspect how those mappings affect the output."}
                 </p>
                 <KeepInMind>
-                  Nine pieces from a sentence of 51 characters, with 45 of those
-                  characters inside a piece and the remaining six being the
-                  spaces. Nothing was dropped and nothing was rewritten.
+                  {"The nine spans cover 45 of 51 source characters. Only the six spaces are excluded in this example, and the default pieces are not rewritten. Their strings alone still do not record the original spacing."}
                 </KeepInMind>
               </SubSection>
 
@@ -179,17 +158,7 @@ export default function MosesRulesPage() {
                   caption="Four answers to one sentence. The two nines share seven pieces, and the two that differ are exactly the two halves of the contraction."
                 />
                 <p>
-                  The cut in front of the n is a claim about English, that the
-                  negation is a morpheme spelt{" "}
-                  <span className="font-mono">n&rsquo;t</span>. The cut at the
-                  apostrophe is a claim about nothing at all; it is one rule
-                  applied wherever an apostrophe stands between two letters,
-                  with no list and no exception. Both give back the sentence when
-                  the pieces are joined, so reversibility does not choose between
-                  them. What chose was that the second needs nothing known about
-                  English to state, and the same script had to run over eleven
-                  languages of proceedings while the first would have needed a
-                  linguist for each of them.
+                  Treebank retains the negative ending <span className="font-mono">n&apos;t</span> as a unit. Moses instead cuts at the straight apostrophe according to its language setting. Either split can concatenate back to the source word. That property does not decide which units best suit a grammar annotator or a translation aligner.
                 </p>
                 <KeepInMind>
                   The two rule lists agree on the count and part on one word,
@@ -235,10 +204,7 @@ export default function MosesRulesPage() {
                   argument of that part.
                 </p>
                 <KeepInMind>
-                  One list, of abbreviations, consulted by one clause.
-                  Everything else is a character read in place with at most one
-                  character of context, so the whole method is a single pass and
-                  there is nothing in it to load.
+                  {"The scanner applies character tests, then makes a pass over the units for final periods. The abbreviation entries are part of its configuration. No model is fitted, but reproducing the result still requires the same lists, options and implementation."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -258,23 +224,10 @@ export default function MosesRulesPage() {
                   first wrong while a rule that cuts none off does the reverse.
                 </p>
                 <p>
-                  The annotation rules settle this with a fact about their
-                  pipeline rather than about English. They ran on one sentence
-                  at a time, so the last stop in the text is the
-                  sentence&rsquo;s and every other stop belongs to whatever it
-                  is touching. That is exact when the text really is one
-                  sentence and it is not a claim about words at all.
+                  {"The Treebank-style heuristic separates the last eligible period in an input. It works for the two periods in our running sentence. It does not guarantee that every other period is an abbreviation or that every one-sentence input gets the desired attachment."}
                 </p>
                 <p>
-                  These rules could not use it. Proceedings arrive as paragraphs,
-                  the sentence boundaries were another problem entirely, and the
-                  same script had to run over eleven languages of them. So the
-                  clause here asks about the word instead, and asking about the
-                  word is where a list becomes unavoidable, because{" "}
-                  <span className="font-mono">Dr.</span> and{" "}
-                  <span className="font-mono">away.</span> are the same shape.
-                  Nothing in the characters separates a title from an ordinary
-                  word with a stop after it.
+                  {"The Moses-style rule can examine each period-ending unit without assuming it is the end of the entire input. It uses interior periods, abbreviation entries and the following unit as evidence. A named list is one way to add lexical knowledge; shape and position alone do not settle every case."}
                 </p>
                 <KeepInMind>
                   For this full-stop decision, the Moses-style rule looks at the preceding word&apos;s identity, using a list of forms that should keep their stop. The annotation rule instead uses its position in the text. Let&apos;s try more than Dr. Alvarez, because that one example hides several ways the two rules disagree.
@@ -283,10 +236,7 @@ export default function MosesRulesPage() {
 
               <SubSection title="6. Four clauses, and only one of them is a list">
                 <p>
-                  A word ending in exactly one stop keeps that stop when any of
-                  four things is true, and the list is only the second of them.
-                  Read them as four separate attempts to recognise an
-                  abbreviation, of which three cost nothing to state.
+                  {"The rule retains a single final period when any of the four conditions below holds. Read these as operational tests, not proofs that the unit is an abbreviation. A following lowercase letter, for example, is a useful cue that can still be wrong."}
                 </p>
                 <Equation>
                   {
@@ -301,14 +251,7 @@ export default function MosesRulesPage() {
                   }
                 </Equation>
                 <p>
-                  The first clause catches every initialism at once and needs no
-                  vocabulary, since a word with an interior stop and a letter in
-                  it is not an ordinary English word. The fourth is the
-                  interesting one, and it is a piece of reasoning about writing
-                  rather than about language, that an English sentence begins
-                  with a capital, so a lowercase word after a stop means the stop
-                  did not end a sentence. It costs one character of lookahead and
-                  it rescues abbreviations that nobody ever listed.
+                  {"An interior period plus a letter keeps forms such as the listed initialisms together. It can also match other strings with that shape. The lowercase lookahead assumes a sentence probably did not end before a lowercase word. Informal writing and names with unconventional capitalization can violate that assumption."}
                 </p>
                 <p>
                   The third clause exists because{" "}
@@ -320,11 +263,7 @@ export default function MosesRulesPage() {
                   rather than an unconditional promise.
                 </p>
                 <KeepInMind>
-                  Three of the four clauses read characters and one reads a
-                  list, and which of them carries the weight is a question about
-                  a corpus rather than about the rules. Section 10 answers it on
-                  eighteen sentences and the answer is not the one this section
-                  suggests.
+                  {"The list and the character conditions contribute differently on different inputs. Section 10 counts which conditions actually retain periods in the supplied eighteen-example collection. That lets us separate the implemented tests from the examples that happen to exercise them."}
                 </KeepInMind>
               </SubSection>
 
@@ -370,18 +309,7 @@ export default function MosesRulesPage() {
                   exceptions places four.
                 </p>
                 <p>
-                  The middle number is the one to be careful with. The
-                  annotation rules answered <span className="italic">kept</span>{" "}
-                  on all ten, because none of the ten stops is the last character
-                  of its text and their clause keeps every stop that is not. So
-                  their eight is exactly the number of cases whose answer happens
-                  to be <span className="italic">kept</span>, reached without
-                  distinguishing anything, and a set of ten with the proportions
-                  reversed would have given them two. These rules answered{" "}
-                  <span className="italic">kept</span> five times and{" "}
-                  <span className="italic">split</span> five times, so their
-                  seven is a score a differently balanced set would not move
-                  nearly so far.
+                  {"In this probe set, the Treebank-style rule retains all ten internal periods, so its eight correct answers equal the number labeled “keep.” Moses returns both decisions and gets seven correct. The exception-table comparison also returns both decisions. Accuracy describes these ten cases; class balance and the kinds of errors matter when deciding which procedure fits another collection."}
                 </p>
                 <NumberTable
                   headings={[
@@ -395,13 +323,10 @@ export default function MosesRulesPage() {
                     ["answered kept", "5", "10", "2"],
                     ["stops whose answer is kept", "8", "8", "8"],
                   ]}
-                  caption="A rule with no discrimination at all scores the number in the third row. Only the first column comes from a rule that answered both ways."
+                  caption="On these ten probes, retaining every period yields eight correct labels. Moses and the exception-table rule both return a mix of kept and split decisions."
                 />
                 <KeepInMind>
-                  A score on a set of cases is worth only as much as the balance
-                  of the set, and the honest reading here is that these rules
-                  distinguish and the annotation rules do not, rather than that
-                  the annotation rules are ahead by one.
+                  {"The positional rule has the highest accuracy on these ten probes, while always retaining the period. Moses makes a more varied decision here, but that alone does not establish better accuracy on new data. Compare the errors and intended input pipeline as well as the total."}
                 </KeepInMind>
               </SubSection>
 
@@ -434,24 +359,11 @@ export default function MosesRulesPage() {
                 </p>
                 <WhyThisWorks title="Why a longer list does not close this">
                   <p>
-                    The obvious repair is more entries, and it helps, in the
-                    sense that any particular missing word can be added. What it
-                    cannot do is change the shape of the answer. A word the
-                    clauses examined and left whole and a word no clause covers
-                    come back looking the same, so a caller receives{" "}
-                    <span className="font-mono">Gov</span> and a stop with
-                    nothing anywhere reporting that a list was consulted and
-                    found nothing. Adding{" "}
-                    <span className="font-mono">Gov</span> leaves{" "}
-                    <span className="font-mono">Sen</span>, and adding that
-                    leaves the next one, and the writing gives no signal that
-                    would let a rule notice it has met one.
-                  </p>
+                  Adding <span className="font-mono">Gov</span> would fix that listed title. It would not establish coverage of <span className="font-mono">Sen</span> or other forms. The returned pieces do not say which lexical test failed, so representative tests or added diagnostics are useful alongside list maintenance.
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The rules never refuse and never report, so a text they were
-                  not written for comes back looking exactly like a text they
-                  were. Only reading the pieces says which happened.
+                  {"The result does not include an unknown-abbreviation warning. Inspecting the returned pieces, checking known examples or adding diagnostics can expose a coverage gap that a successful API response does not report."}
                 </KeepInMind>
               </SubSection>
 
@@ -460,44 +372,17 @@ export default function MosesRulesPage() {
                   The English exception list has 55 entries: 27 named forms, 26 individual capital letters for initials, and two forms whose stops are kept only before a number. Let&apos;s measure how often these entries affect the examples rather than infer their usefulness from the list&apos;s length.
                 </p>
                 <p>
-                  Counting over the six-sentence notebook would say nothing,
-                  since it holds one abbreviation, so the corpus below is
-                  eighteen sentences of minuted proceedings written for this
-                  page, with titles, months, article numbers and company
-                  suffixes in them. It is the register the rules were made for
-                  and it is deliberately generous to them.
+                  {"The six-sentence notebook has only one abbreviation, so it exercises little of the list. The second collection contains eighteen examples written for this page in a meeting-minutes style. They include titles, months, article numbers and company suffixes. They are an authored test collection, not a representative sample of proceedings."}
                 </p>
                 <PrefixListPanel />
                 <p>
-                  The question the list answers was asked 39 times over those
-                  eighteen sentences, which is how many runs of characters ended
-                  in exactly one stop, and 19 entries answered it. The other 36
-                  were never consulted at all, so a third of the list is doing
-                  every piece of the work it does here and the remaining
-                  two-thirds is there for writing this corpus does not contain.
-                  Five real abbreviations turn up that no entry covers, which is
-                  five more than the unused entries would suggest.
+                  {"There are 39 period-ending candidate units in the eighteen examples, and 19 distinct list entries match. The other 36 entries do not match this collection. Those numbers measure coverage of the test cases, not how many individual hash-table entries the code physically inspects. Five abbreviations in the collection are absent from the list."}
                 </p>
                 <p>
-                  The table in the middle of the panel is the finding I did not
-                  expect, and it corrects what section 6 implies. Twenty stops
-                  were kept over these eighteen sentences, 18 of them by the
-                  named list and 2 by the figures list, and the two clauses that
-                  read characters kept none at all. The interior-stop clause
-                  needs a word like{" "}
-                  <span className="font-mono">U.S.</span>, which these sentences
-                  happen not to contain, and the lowercase clause needs an
-                  abbreviation followed by an ordinary lowercase word, which in
-                  eighteen separate sentences almost never happens because the
-                  abbreviations here are titles and the next word is a surname.
+                  {"In this collection, the rule retains twenty periods: eighteen through the ordinary prefix list and two through the numeric-only list. Neither the interior-period condition nor lowercase lookahead retains one. The examples contain no matching U.S.-style form, and their titles generally precede capitalized surnames. Another collection can exercise those conditions differently."}
                 </p>
                 <KeepInMind>
-                  19 of 55 entries reached, over eighteen sentences chosen to
-                  suit them, with five abbreviations outside the list in the same
-                  eighteen, and every stop that was kept was kept by a list. The
-                  cheap clauses are cheap and on this corpus they did nothing,
-                  which is why the last part treats the list as the whole of the
-                  method rather than as a supplement to it.
+                  {"The collection reaches 19 of 55 entries and includes five abbreviations absent from the list. Every retained period here is retained by one of the lists. Unused entries and untriggered character conditions remain part of the method, even though this small collection does not test them."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -515,12 +400,12 @@ export default function MosesRulesPage() {
                 "The apostrophe is the only mark the rules are allowed to cut at",
               ],
               1,
-              "Both cuts give back the sentence when the pieces are joined, so reversibility does not choose between them. The cut in front of the n is a claim about English, that the negation is a morpheme, and would have needed a linguist per language. The cut at the apostrophe is one rule applied wherever an apostrophe stands between two letters, with no list and no exception.",
+              "These rules use an apostrophe-based cut, while the Treebank convention separates the negation piece. Both can preserve source characters for this sentence, so reconstruction alone does not select the better convention. The choice depends on what the downstream pipeline expects to count or annotate. Language-specific settings and exceptions still need to be stated.",
             ),
             trueFalse(
               "On the ten scored stops the annotation rules place eight where they belong against these rules’ seven, and a set of ten with the proportions reversed would have given the annotation rules two.",
               true,
-              "The annotation rules answered kept on all ten, because none of the ten stops is the last character of its text. Their eight is exactly the number of cases whose answer happens to be kept, reached without distinguishing anything. These rules answered kept five times and split five times, so their seven is a score a differently balanced set would not move nearly so far, and the honest reading is that one rule distinguishes and the other does not.",
+              "The Treebank rule keeps all ten tested periods, so its eight correct results match the test set’s eight kept-label examples. That constant decision would score differently on a differently balanced set. Moses makes both kept and split decisions here. Compare performance within each labeled group or use a representative test set before drawing a broader conclusion.",
             ),
             choice(
               "The clause that rescues an abbreviation nobody listed reads one character of lookahead. What is it reading, and why?",
@@ -547,7 +432,7 @@ export default function MosesRulesPage() {
             trueFalse(
               "When no clause covers a word, a caller can tell from the output that the list was consulted and found nothing.",
               false,
-              "The rules never refuse and never report. Gov is a title and is not on the list, and the word after it is a capitalised surname, so no clause saves it and Gov comes back beside every other truncated word with the stop it lost beside every sentence-final stop. Adding Gov leaves Sen, and adding that leaves the next one.",
+              "The rules never refuse and never report. Gov is a title and is not on the list, and the word after it is a capitalized surname, so no clause saves it and Gov comes back beside every other truncated word with the stop it lost beside every sentence-final stop. Adding Gov leaves Sen, and adding that leaves the next one.",
             ),
         ],
         },
@@ -570,37 +455,10 @@ export default function MosesRulesPage() {
                     "        otherwise\n" +
                     "                apply the rules"}
                 </Equation>
-                <p>
-                  The reason it is not a longer rule is that the exceptions are
-                  not describable as characters. A rule that ends a word before{" "}
-                  <span className="font-mono">n&rsquo;t</span> produces{" "}
-                  <span className="font-mono">ca</span> from{" "}
-                  <span className="font-mono">can&rsquo;t</span>, which is
-                  wanted, and would produce{" "}
-                  <span className="font-mono">wo</span> from{" "}
-                  <span className="font-mono">won&rsquo;t</span> and{" "}
-                  <span className="font-mono">sha</span> from{" "}
-                  <span className="font-mono">shan&rsquo;t</span>, and any
-                  attempt to fix one of those inside the pattern breaks the
-                  others. As a table it is one line each, checked before the
-                  pattern runs, and the pattern is untouched.
-                </p>
-                <p>
-                  The same argument runs the other way for an abbreviation.{" "}
-                  <span className="font-mono">Mr.</span> is a capital, two
-                  lowercase letters and a stop, which is precisely the shape of{" "}
-                  <span className="font-mono">Ran.</span>, so no reading of the
-                  characters keeps one and cuts the other. A named list is what
-                  is left over when the writing genuinely does not carry the
-                  distinction, and reaching for one is a report that the
-                  characters have been examined and found silent rather than a
-                  shortcut past a rule somebody could have written.
-                </p>
+                <p>A longer pattern could include alternatives for these finite spellings. The lookup table keeps word-specific conventions separate from the general suffix rule, making each exception easier to inspect and change. That is a maintainability choice, not a limit on what regular expressions can match.</p>
+                <p>A shape-based pattern can group abbreviations with ordinary capitalized words ending in a period. A lookup table lets the tokenizer name particular abbreviations explicitly. Its coverage still depends on the maintained entries and language setting; recognizing the punctuation shape does not supply every lexical convention.</p>
                 <KeepInMind>
-                  A table is the right shape exactly when the exception is a fact
-                  about a particular word rather than about a pattern of
-                  characters, and both halves of this page&rsquo;s stop clause
-                  are that.{" "}
+                  A table keeps named lexical exceptions separate from a general rule. The later lessons on {" "}
                   <Link href="/concepts/maximum-matching" className={link}>
                     Maximum matching
                   </Link>{" "}
@@ -608,9 +466,7 @@ export default function MosesRulesPage() {
                   <Link href="/concepts/the-word-lattice" className={link}>
                     the word lattice
                   </Link>{" "}
-                  are this shape carried to its limit, where the table has grown
-                  until it is the whole method and no rule is left underneath it.
-                </KeepInMind>
+                   use larger dictionaries, while still needing search procedures and fallback rules.</KeepInMind>
               </SubSection>
 
               <SubSection title="12. The clause with no list at all">
@@ -620,10 +476,10 @@ export default function MosesRulesPage() {
                   and the annotation rules do. Cutting at the apostrophe is one
                   statement, applied to every apostrophe standing between two
                   letters, and it covers{" "}
-                  <span className="font-mono">didn&rsquo;t</span>,{" "}
-                  <span className="font-mono">it&rsquo;s</span>,{" "}
-                  <span className="font-mono">they&rsquo;re</span> and{" "}
-                  <span className="font-mono">y&rsquo;all</span> alike.
+                  <span className="font-mono">didn&apos;t</span>,{" "}
+                  <span className="font-mono">it&apos;s</span>,{" "}
+                  <span className="font-mono">they&apos;re</span> and{" "}
+                  <span className="font-mono">y&apos;all</span> alike.
                 </p>
                 <Equation>
                   {"didn't   ->  didn   't\n" +
@@ -635,15 +491,7 @@ export default function MosesRulesPage() {
                     "l'analyse->  l'   analyse   under the French setting"}
                 </Equation>
                 <p>
-                  Nothing there is listed and nothing is examined and left alone.
-                  The price is that the halves are not morphemes, so{" "}
-                  <span className="font-mono">didn</span> is not a word and the
-                  negation is spelt <span className="font-mono">&rsquo;t</span>{" "}
-                  here where a linguist writes{" "}
-                  <span className="font-mono">n&rsquo;t</span>. The gain is that
-                  the same clause was written once and turned round for French
-                  and Italian by moving the cut to the other side of the mark,
-                  which is a setting rather than a second table.
+                  These forms do not need individual entries in the apostrophe rule. The output <span className="font-mono">didn</span> plus <span className="font-mono">&apos;t</span> is a character split rather than the Treebank negative unit <span className="font-mono">n&apos;t</span>. For French and Italian, the setting moves an apostrophe between letters to the other piece. This mirrors a common elision convention without claiming complete clitic analysis for either language.
                 </p>
                 <InAModel>
                   <p>
@@ -662,49 +510,28 @@ export default function MosesRulesPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  These rules read a list for the full stop and no list at all
-                  for the apostrophe, and the annotation rules do the reverse on
-                  both counts, which is the neatest summary of what separates
-                  them. Which way round to go is decided by whether the
-                  exception is a fact about one word or about a mark that behaves
-                  the same wherever it stands.
+                  {"The final-period decision combines named prefixes with character context. The apostrophe decision uses context and a language setting instead of a word list. These are different ways to encode a convention; their usefulness depends on the forms the application needs to handle."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="13. An entry says where a word is cut, never what it becomes">
                 <p>
-                  A table of this shape is under one constraint that is easy to
-                  miss and is the reason the shape survives here at all. The
-                  pieces an entry lists must join back to exactly the word the
-                  entry names.
+                  {"The optional rule-and-exception table requires listed pieces to concatenate to the named source form. That is a contract of this interface. A different transformation stage could normalize text, provided it records enough information when reconstruction is required."}
                 </p>
                 <ExceptionEntryTable />
                 <p>
-                  Without that constraint the obvious entries are tempting.{" "}
-                  <span className="font-mono">can&rsquo;t</span> would go to{" "}
-                  <span className="font-mono">can</span> and{" "}
-                  <span className="font-mono">not</span>, which reads better than{" "}
-                  <span className="font-mono">ca</span> and{" "}
-                  <span className="font-mono">n&rsquo;t</span> and gives the
-                  aligner two real words. What it costs is that a piece stops
-                  being a stretch of the source, so the sentence can no longer be
-                  reassembled from the pieces and their positions, and it costs
-                  it for whichever words happen to be listed rather than
-                  uniformly, which is worse than costing it everywhere.
+                  Expanding <span className="font-mono">can&apos;t</span> into <span className="font-mono">can</span> and <span className="font-mono">not</span> would normalize the spelling rather than merely divide its source characters. This exception-table interface rejects that proposal. A different stage could perform it with a source mapping or transformation record when exact reconstruction is required.
                 </p>
                 <p>
-                  Normalising a word to a different word is a real job and it is
+
+                  Normalizing a word to a different word is a real job and it is
                   done elsewhere in a pipeline, before or after this step, where
                   it can be recorded. The one place these rules do change a
                   piece&rsquo;s text is the subject of the next part, and they do
                   it in a way that can be read backwards.
                 </p>
                 <KeepInMind>
-                  Three of the six proposals were refused, and the three refusals
-                  are the same refusal, that an entry may say where a cut goes
-                  and may not say what the pieces are to be spelt as. That single
-                  constraint is what makes the pieces of a listed word no
-                  different in kind from the pieces of an unlisted one.
+                  {"The proposal panel accepts only segmentations whose pieces join to the original form. Three of six fail that check. A valid entry can change boundaries while leaving the source spelling unchanged."}
                 </KeepInMind>
               </SubSection>
 
@@ -716,29 +543,15 @@ export default function MosesRulesPage() {
                   turn the list around, because there is nothing to turn it to
                   unless somebody has written the French file.
                 </p>
-                <p>
-                  That is the honest description of the method rather than a
-                  complaint about it. The original shipped one file per language
-                  and the files were contributed by whoever needed that language,
-                  so a language is supported exactly when somebody has sat down
-                  and listed its abbreviations. On this page every measurement is
-                  English, and the French and Italian settings in the playground
-                  change only where the apostrophe cut falls.
-                </p>
+                <p>The original toolkit used language-specific abbreviation files. Recognizing a particular abbreviation therefore depends on the entries in the selected file. The measured examples here are English. The French and Italian controls in this teaching implementation change the apostrophe split; they do not demonstrate complete coverage of those languages.</p>
                 <WorkedExample title="The Alvarez sentence under the French punctuation rules">
                   <Equation>
                     {"English setting   Dr.  Alvarez  didn  't  expect  the  low-cost  re-analysis  .\n" +
                       "French setting    Dr.  Alvarez  didn'  t  expect  the  low-cost  re-analysis  ."}
                   </Equation>
                   <p>
-                    One piece boundary moved, from in front of the apostrophe to
-                    behind it, and nothing else changed. The title kept its stop
-                    under the French setting for the same reason it kept it
-                    under the English one, which is that the list consulted is
-                    still the English list. A French text gets no help from the
-                    setting with its own abbreviations, and an English title
-                    inside it would be recognised.
-                  </p>
+                  {"In this teaching implementation, switching to French moves the displayed apostrophe boundary while retaining the same English abbreviation list. It therefore does not provide French abbreviation coverage. The original toolkit’s language-specific data files are a separate part of reproducing its language behavior."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
                   The clause is a rule plus a data file, and the file has a
@@ -755,26 +568,14 @@ export default function MosesRulesPage() {
             <>
               <SubSection title="15. What a translation system hands back is text">
                 <p>
-                  Here is the constraint stated plainly. A parser reading a
-                  treebank never has to produce the original paragraph, so the
-                  annotation rules were free to write things into a piece that
-                  were not in the writing. A translation system produces a
-                  sentence for somebody to read, so whatever it does on the way
-                  in has to be undone on the way out.
+                  {"A translation system must turn generated tokens into readable output. That does not require a translation to reproduce the original source sentence or spacing. Here we test a narrower tokenization property: whether the input’s non-whitespace characters survive and which transformations need an inverse."}
                 </p>
                 <p>
                   We can test whether tokenization preserves the non-spacing characters. Discard the spans, concatenate the pieces without separators, and compare the result with the source after removing spacing. State that target clearly: passing this check would not establish that the original spacing can be recovered.
                 </p>
                 <RoundTripPanel />
                 <p>
-                  On the quoted sentence both rule lists give fourteen pieces and
-                  they part completely on that test. These rules rewrite nothing
-                  and the joined pieces are the sentence. The annotation rules
-                  rewrite two pieces, an opening quotation mark into two
-                  backquotes and a closing one into two apostrophes, and the
-                  joined pieces are not the sentence and cannot be made into it.
-                  Over the eighteen minuted sentences the same test passes
-                  eighteen times here and seventeen times there.
+                  {"On the quoted example, both lists give fourteen pieces. Joining the default Moses pieces without separators reproduces the source after whitespace is removed. The Treebank quote spellings fail that direct check because two pieces are rewritten. On the eighteen authored minutes-style examples, the check passes eighteen times for Moses and seventeen for Treebank. A separate inverse mapping can address a known rewrite, but exact source recovery needs enough information to distinguish its possible inputs."}
                 </p>
                 <KeepInMind>
                   Fourteen pieces against fourteen, and no rewriting against
@@ -786,25 +587,14 @@ export default function MosesRulesPage() {
 
               <SubSection title="16. Two texts, one answer, and no way back">
                 <p>
-                  The sharpest way to see why that rewriting cannot be undone is
-                  to write a text in the spelling it produces. Take a sentence
-                  with quotation marks in it and a second sentence typed with two
-                  backquotes and two apostrophes, which is how a typist of the
-                  period produced directional quotes on a machine that had none.
+                  {"Compare a sentence containing straight quotation marks with one containing literal double backquotes and apostrophes. If tokenization normalizes them to the same pieces, the output strings alone cannot identify which spelling was supplied."}
                 </p>
                 <Equation>
                   {'she said "wait" and left\n' +
                     "she said ``wait'' and left"}
                 </Equation>
                 <p>
-                  Under the annotation rules those two come back as the identical
-                  seven pieces. Nothing in the output distinguishes a sentence
-                  whose quotation marks were rewritten from a sentence that was
-                  typed that way, so anything wanting the original has to keep
-                  the original, and the pieces alone are not a division of a text
-                  any more. Under these rules the first gives seven pieces and
-                  the second gives nine, because a backquote is not a quotation
-                  mark and each stands alone, and the two texts are told apart.
+                  Under the annotation rules, these inputs produce the same seven pieces, so those pieces cannot reveal which quotation spelling the source used. The original needs to be retained if that distinction matters. The Moses-style rules here instead produce seven pieces for the first input and nine for the second, because the backquotes remain separate characters. That difference preserves evidence that the annotation normalization removed.
                 </p>
                 <KeepInMind>
                   To reverse a rewrite uniquely, different original forms must remain distinguishable. Replacing plain quotation marks with backquotes can erase that distinction when the source already contains literal backquotes. We need retained source information or an escaping convention to reconstruct both cases correctly.
@@ -828,17 +618,7 @@ export default function MosesRulesPage() {
                     "[  ->  &#91;        ]  ->  &#93;"}
                 </Equation>
                 <p>
-                  Read the mapping in the other direction and every arrow still
-                  points at exactly one thing, which is the whole difference from
-                  the quotation-mark rewriting of the previous section. Nothing
-                  else produces{" "}
-                  <span className="font-mono">&amp;quot;</span>, so the script
-                  that puts the text back together knows what it was reading.
-                  With the switch
-                  on, our quoted sentence has three pieces whose text is no
-                  longer the writing, the two quotation marks and the apostrophe
-                  in the contraction, and putting the mapping back recovers the
-                  sentence exactly.
+                  The inverse is applied to each token’s text with the escaping option known. Escaping ampersands too keeps a literal entity-like spelling distinguishable from an escaped quotation character such as <span className="font-mono">&amp;quot;</span>. In the quoted example, the two quotes and contraction apostrophe become three rewritten pieces. Reversing those mappings restores their non-whitespace source characters, not the discarded spacing.
                 </p>
                 <p>
                   The second rewriting is the compound. Cutting{" "}
@@ -868,10 +648,7 @@ export default function MosesRulesPage() {
                   </p>
                 </WorkedExample>
                 <KeepInMind>
-                  Both rewritings change a piece&rsquo;s text and neither changes
-                  the span it names, so a piece carries where it came from even
-                  when it no longer looks like it. That is what lets a rewriting
-                  be undone by a table rather than guessed at.
+                  {"Both options can change a piece’s spelling while retaining its source span. Reversal also requires knowing which option and mapping produced the spelling. Apply the inverse to token boundaries before joining; positions alone do not explain how an arbitrary rewrite should be undone."}
                 </KeepInMind>
               </SubSection>
 
@@ -894,12 +671,7 @@ export default function MosesRulesPage() {
                   language rather than anything the pieces carry.
                 </p>
                 <p>
-                  So the promise is narrower and more useful than it sounds. The
-                  pieces plus their spans plus the source recover everything
-                  exactly, and the pieces alone recover every character in order
-                  with the spacing to be decided. What the annotation rules give
-                  up is the second of those, and it is the one a system with no
-                  access to the source has.
+                  {"The source plus spans can recover the original text. At the default Moses settings, piece strings alone retain the non-whitespace characters in order; separators still need a convention or a separate record. Treebank-style normalization can additionally merge distinct quotation spellings."}
                 </p>
                 <KeepInMind>
                   Two of eighteen sentences come back from the pieces alone by
@@ -915,20 +687,20 @@ export default function MosesRulesPage() {
           title: "Questions on Parts 3 and 4",
           quiz: [
             choice(
-              "A rule that ends a word before n’t has its awkward cases held in a table that is checked before the pattern runs. Why can they not be written into a longer pattern?",
+              "Why keep word-specific contraction conventions in a lookup table instead of expanding one general suffix pattern?",
               [
                 "A table is faster than a pattern when the same clause runs over eleven languages",
-                "The exceptions are not describable as characters, since a rule cutting before n’t gives wo from won’t and sha from shan’t",
+                "Word-specific conventions are easier to inspect and maintain as entries than folded into a general suffix pattern.",
                 "A pattern cannot read an apostrophe standing between two letters",
-                "The table also records what each half should be spelt as, which a pattern cannot do",
+                "The table also records rewritten spellings that a pattern cannot produce.",
               ],
               1,
-              "Any attempt to fix one of those inside the pattern breaks the others, and as a table it is one line each, checked before the pattern runs, with the pattern untouched. A table is the right shape exactly when the exception is a fact about a particular word rather than about a pattern of characters. Reaching for one is a report that the characters have been examined and found silent.",
+              "A longer regular expression could include alternatives for these finite spellings. A table keeps the word-specific choices separate from the general pattern, making them easier to inspect and change. The reason is maintainability and a clear convention, not that the characters are mathematically impossible to match.",
             ),
             trueFalse(
               "An entry in a table of this shape may say where a word is cut and may not say what the pieces are spelt as, so can’t cannot be listed as can and not.",
               true,
-              "Three of the six proposals were refused and the three refusals are the same refusal. The pieces an entry lists must join back to exactly the word it names, and can and not join to cannot. Without that a piece stops being a stretch of the source, so the sentence can no longer be reassembled, and it stops being one for whichever words happen to be listed rather than uniformly.",
+              "This lookup-table API requires the listed pieces to concatenate to the original spelling. That keeps each piece a literal source span. Listing can and not for can’t would violate that contract, so normalization would need a different operation and enough information to reverse it if exact reconstruction matters. Other tokenization APIs can permit rewritten spellings.",
             ),
             choice(
               "The annotation rules rewrite an opening quotation mark into two backquotes. Why can that not be undone?",
@@ -944,7 +716,7 @@ export default function MosesRulesPage() {
             trueFalse(
               "Joining the pieces with one space between each pair gives back all eighteen minuted sentences.",
               false,
-              "It gives back two of the eighteen, the ones that happen to end in an abbreviation so that every piece was already separated by a space in the writing. The other sixteen have a comma or a final stop standing alone, and a space in front of a comma is not English. The pieces plus their spans plus the source recover everything exactly, and the pieces alone recover every character in order with the spacing still to be decided.",
+              "A single-space join reproduces only two of the eighteen supplied sentences. In the others, separated punctuation and contraction pieces need different joining rules. The pieces retain the non-whitespace character sequence here, but not the original gaps. Spans locate those gaps; the retained source supplies their exact contents.",
             ),
             choice(
               "Under the French setting the contraction of the sentence about Dr. Alvarez is cut behind its apostrophe instead of in front of it. What else in the sentence comes out differently?",
@@ -965,22 +737,15 @@ export default function MosesRulesPage() {
             <>
               <SubSection title="19. More pieces, and everything downstream pays per piece">
                 <p>
-                  The bill is length. Anything reading the text afterwards pays
-                  per piece, and a model that compares every position with every
-                  other position pays roughly with the square of the count, so a
-                  rule that separates marks is spending on every pass over the
-                  corpus for the rest of the pipeline&rsquo;s life.
+                  {"Separating punctuation can increase the number of input positions. The cost depends on how the next stage uses those pieces. Dense attention has quadratic pair counts within a sequence, while lookup, batching and other operations have different scaling."}
                 </p>
                 <MosesCostPanel />
                 <p>
-                  On the eighteen minuted sentences these rules give 228 pieces
-                  where splitting on spaces gives 192, which is 18.75 per cent
-                  more from identical writing, and the written-out table gives
-                  243 because it also cuts every compound at its hyphen.
+                  {"On the eighteen authored minutes-style examples, Moses produces 228 pieces and whitespace splitting produces 192, an increase of 18.75 percent. The exception-table rule gives 243 because it also separates hyphenated compounds."}
                 </p>
                 <Equation>
                   {"228 − 192   =  36 more pieces\n" +
-                    "36 / 192    =  18.75 per cent"}
+                    "36 / 192    =  18.75 percent"}
                 </Equation>
                 <p>
                   The 36 are not spread evenly over the writing. Twenty of them
@@ -1001,22 +766,13 @@ export default function MosesRulesPage() {
                   What separates the four here is where the cuts fall.
                 </p>
                 <KeepInMind>
-                  228 against 192 on the same eighteen sentences, and 32 of the
-                  228 hold no letter and no digit anywhere in them. Whatever
-                  reads the corpus next pays that difference on every pass, and
-                  the next two sections ask what it bought.
+                  {"The collection gives 228 pieces rather than 192, with 32 punctuation-only pieces among the 228. These counts describe representation length and composition. The next comparisons ask whether the different units reduce vocabulary duplication or handle particular forms better."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="20. The vocabulary the rules were meant to shrink">
                 <p>
-                  The motive was to make the surface vocabulary smaller, so it is
-                  fair to ask whether it did, and the measurement here is the one
-                  that surprised me. Over the eighteen minuted sentences,
-                  splitting on spaces produces 137 different pieces and these
-                  rules produce 136. Over the six-sentence notebook, splitting on
-                  spaces produces 47 and these rules produce 49, so at that size
-                  the method makes the vocabulary larger.
+                  {"Separating punctuation is intended to reduce duplicated surface forms, so compare the distinct entries as well as the sequence length. The minutes-style collection has 137 whitespace entries and 136 Moses entries. The notebook has 47 and 49. The small examples therefore show one saving and one increase."}
                 </p>
                 <p>
                   Nothing is wrong with either number. The mechanism is real and
@@ -1050,25 +806,17 @@ export default function MosesRulesPage() {
                       "  under these rules       106 + 24 + 3 + 3   =       136"}
                   </Equation>
                   <p>
-                    The 24 runs in the first row change their spelling and
-                    nothing else, since each gives up a row and the word inside
-                    it takes one. The saving is the next two rows, seven
-                    entries that go without a new word arriving, and against
-                    it stand six new rows that hold no word, three marks and
-                    three pieces of a contraction. Seven against six is the
-                    saving of one. On the notebook the same accounting gives
-                    two entries saved and four opened, which is the loss of
-                    two.
-                  </p>
+                  {"The accounting block distinguishes replacement entries from duplication savings. Some marked spellings are replaced by new bare forms; repeated variants can instead merge into entries already present. Punctuation and contraction pieces add entries of their own. The resulting net difference is one fewer entry in the minutes-style collection and two more in the notebook."}
+                </p>
                 </WorkedExample>
                 <InAModel>
                   <>
 <p>
-                    The argument only pays at corpus scale, and the reason is arithmetic rather than linguistics. The rows a mark opens are bounded, since there are a few dozen marks and each of them is one row however often it turns up. The rows a mark costs are not bounded, because every common noun in the language eventually appears with a comma after it, with a stop after it, and inside a pair of brackets.
-                  </p>
+                  {"Separating a fixed set of punctuation marks introduces a limited set of punctuation entries that can be reused. It may also remove many word-plus-punctuation variants as more words recur in different contexts. The net saving depends on those repetitions and the other cuts; corpus size alone does not guarantee it."}
+                </p>
                   <p>
-                    Of the 137 entries these eighteen sentences give the crude rule, only 5 are a word that reached a second spelling, so the fixed cost of separating the marks is still the larger of the two here. The corpus of proceedings these rules were written for holds millions of sentences, and the fixed cost does not grow with any of them.
-                  </p>
+                  {"Only five whitespace entries in the eighteen examples duplicate a word under an attached mark. That limits the possible saving in this collection. Larger representative corpora may repeat more such variants, but their net entry counts still need to be measured."}
+                </p>
 </>
                 </InAModel>
                 <KeepInMind>
@@ -1111,55 +859,40 @@ export default function MosesRulesPage() {
                       "by Okafor Co.",
                       "Co.",
                       "Co and a stop",
-                      "neither, the stop does both jobs",
+                      "either attachment; annotate the sentence role separately",
                     ],
                     [
                       "in Jan.",
                       "Jan.",
                       "Jan and a stop",
-                      "neither, the stop does both jobs",
+                      "either attachment; annotate the sentence role separately",
                     ],
                     [
                       "residual, etc.",
                       "etc.",
                       "etc and a stop",
-                      "neither, the stop does both jobs",
+                      "either attachment; annotate the sentence role separately",
                     ],
                     [
                       "until Dec.",
                       "Dec.",
                       "Dec and a stop",
-                      "neither, the stop does both jobs",
+                      "either attachment; annotate the sentence role separately",
                     ],
                   ]}
                   caption="The ten disagreements that are a full stop. The first five are abbreviations outside the list, the sixth is the positional rule meeting two sentences in one text, and the last four are that rule reaching the end of a text."
                 />
                 <p>
-                  Five of the ten go to the annotation rules and one goes to
-                  these, and four have no right answer at all and are the subject
-                  of the next part. That is a real defeat on a real corpus, and it
-                  comes about because the minutes are eighteen separate
-                  sentences, which is exactly the arrangement the positional rule
-                  was designed for. Run the same rules over the paragraph those
-                  eighteen sentences would form and the positional rule loses
-                  every internal stop at once, which the previous page measures.
+                  {"Five displayed cases favor the positional attachment and one favors the Moses attachment. Four sentence-final abbreviations use one period for two roles; either token attachment can be paired with a sentence-boundary annotation. These examples test different conventions and input conditions. They do not establish a universal winner or an unavoidable loss."}
                 </p>
                 <KeepInMind>
-                  Where a text really is one sentence, a rule about position
-                  beats a rule about vocabulary and needs no list to do it. These
-                  rules were written for a pipeline where that could not be
-                  assumed, and they pay for the assumption they refused to make.
+                  {"The positional rule handles several listed abbreviations that the shorter Moses list misses. It also keeps an earlier sentence-ending period attached in the joined example. Choose and test the procedure for the supplied sentence structure and annotation convention."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="22. Where the cruder rule wins, and where the annotation rules do">
                 <p>
-                  Pointed at writing that is not prose, these rules come apart in
-                  the way every rule on these pages does, by separating a
-                  character that really is punctuation in a sentence and really is
-                  not one here. A company name written with an ampersand becomes
-                  three pieces, a percentage becomes two, and an address is cut at
-                  the character that makes it an address.
+                  {"Addresses, company names and percentages can occur inside prose. Both listed punctuation rules can split them into several tokens. Whether those splits are suitable depends on whether the application wants whole identifiers, searchable parts or annotation units."}
                 </p>
                 <NumberTable
                   headings={[
@@ -1179,7 +912,7 @@ export default function MosesRulesPage() {
                       "one piece",
                     ],
                   ]}
-                  caption="The crudest rule is right on all four, since none of these separated characters is punctuation. The last row is the only one where the two rule lists differ, and these rules are the ones that come apart."
+                  caption="If the task is to retain each identifier or numeric expression whole, whitespace splitting supplies that result in these four examples. The character categories do not change; the desired grouping does."
                 />
                 <p>
                   The last row is worth dwelling on, because the reason for it is
@@ -1188,11 +921,7 @@ export default function MosesRulesPage() {
                   <span className="font-mono">low-cost</span> survives. The underscore is absent from that rule&apos;s allowed list, so the filename is split there. This difference comes from the written punctuation policy. The annotation rules use another policy and keep this filename together.
                 </p>
                 <KeepInMind>
-                  Anything reading text with identifiers, addresses or code in it
-                  should protect those stretches before any of these rules see
-                  them, because none of the four reports having met one. On the
-                  file name here the method this page is about is the worst of
-                  the three.
+                  {"If whole identifiers are required, preserve their spans or use a tokenizer that supplies them as units. If components are useful, splitting may be appropriate. The example filename is divided differently by these rules, so test that requirement explicitly."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1204,34 +933,18 @@ export default function MosesRulesPage() {
             <>
               <SubSection title="23. The correctness is a property of a data file">
                 <p>
-                  Everything on this page has been a rule except one clause, and
-                  that clause decides whether{" "}
-                  <span className="font-mono">Dr.</span> is one piece or two.
-                  Take the list away and the clause has no content, because the
-                  three clauses beside it cannot recognise an abbreviation that
-                  has no interior stop and is followed by a capital, and that
-                  covers most titles at the head of a sentence.
+                  The prefix table helps retain a title such as <span className="font-mono">Dr.</span> when the other character conditions do not match. Without that entry, the default still gives a defined split. The question is whether that split matches the intended abbreviation convention.
                 </p>
                 <>
 <p>
                   So the method is a rule and a table, and what the method does to a text is not determined until somebody has written the table down. That has three consequences worth separating. The answer for a given text depends on which file was loaded, so two callers running the same rules on the same sentence can get different pieces without either being unfaithful.
                 </p>
                 <p>
-                  The table is per language, so a language nobody has written a file for is not badly handled, it is outside what the method says. And a table is finite while the abbreviations of a language are open, so there is always a next word, and no amount of adding entries changes that.
+                  {"The original toolkit has language-specific tables. Without an appropriate table, its general rules can still return pieces, but abbreviation behavior may not match that language’s convention. The teaching implementation keeps its English table under every supported language setting."}
                 </p>
 </>
                 <p>
-                  The practical consequence is about reporting rather than about
-                  quality. Two numbers measured on the same corpus by two people
-                  who loaded different files are not comparable, and nothing in
-                  the output says so, since a word that lost its stop looks the
-                  same whether the file was short or the word was genuinely not
-                  an abbreviation. Every count on this page was taken with one
-                  file of 55 entries in front of the rules, and a file with{" "}
-                  <span className="font-mono">Gov</span> and{" "}
-                  <span className="font-mono">Sen</span> in it would move the
-                  score in section 8 and the piece counts in section 19 at the
-                  same time.
+                  {"Record which table and options produced the results. Measurements from two configurations can be compared as different configurations, but should not be described as identical runs. Adding Gov or Sen would change decisions on those forms and could change both accuracy and piece counts in this collection."}
                 </p>
                 <KeepInMind>
                   The rules are exact relative to a table, and the table is a
@@ -1251,72 +964,28 @@ export default function MosesRulesPage() {
                     "        Co.  and  .   would invent a character"}
                 </Equation>
                 <p>
-                  A division of a text into pieces gives every character to
-                  exactly one piece, so the two requirements cannot both be met.
-                  Knowing that <span className="font-mono">Co.</span> is an
-                  abbreviation does not help, because the question is not what
-                  the word is, and the position of the stop does not help,
-                  because both readings put it there. These rules answer{" "}
-                  <span className="font-mono">Co.</span> and lose the
-                  sentence&rsquo;s stop; the annotation rules answer{" "}
-                  <span className="font-mono">Co</span> and a stop and lose the
-                  abbreviation&rsquo;s. Neither is wrong, and a third method
-                  would have to be wrong in one of those two ways as well.
+                  {"A nonoverlapping token sequence attaches the period once: to Co. or to a separate punctuation token. That does not prevent a separate sentence annotation from marking the same source position. The two tokenizations encode different attachment conventions; neither must discard knowledge that the period also ends a sentence."}
                 </p>
                 <p>
-                  What is genuinely open here is which of the two losses a
-                  pipeline would rather have, and that is decided by what reads
-                  the pieces. A model counting sentences wants the stop; a table
-                  keyed on surface forms wants the abbreviation whole, since the
-                  alternative puts a truncated title in a row of its own. Four of
-                  the eighteen minuted sentences end this way, which is often
-                  enough that the choice has to be made rather than deferred.
+                  {"The next stage determines which token attachment is convenient. A model counting sentences can use a sentence-boundary annotation, while a surface-form table may keep the abbreviation spelling. Four of the eighteen examples end in abbreviations, so the token and boundary policies should be stated together."}
                 </p>
                 <KeepInMind>
-                  The writing carries one character where the reading carries two
-                  marks, so no method that partitions a text can be right here.
-                  The decision to be made is which of the two things to lose, and
-                  the two rule lists on these pages happen to have made opposite
-                  ones.
+                  {"One period can have two roles. Choose a token attachment and record the sentence boundary separately when needed. A partition of the source does not have to express every linguistic annotation by duplicating characters."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="25. Reversibility is a constraint on what a rule may do">
                 <p>
-                  The other place the method stops is not a case at all, it is a
-                  boundary around the whole method. Requiring that the pieces
-                  join back to the writing rules out a large class of things a
-                  translation pipeline actually wanted, and those things do not
-                  become impossible, they become somebody else&rsquo;s step.
+                  {"Dividing text into source-preserving pieces differs from transforming the spelling. A pipeline can do both, but a transformation stage needs its own reconstruction policy if the original matters. The following examples show where simply joining token strings is insufficient."}
                 </p>
                 <p>
-                  Lowercasing is the plainest example. A phrase table with{" "}
-                  <span className="font-mono">The</span> and{" "}
-                  <span className="font-mono">the</span> as separate rows is
-                  wasting evidence in exactly the way this method exists to
-                  prevent, and folding the case is a rewriting that cannot be
-                  read backwards, since{" "}
-                  <span className="font-mono">the</span> does not say whether it
-                  began a sentence. Expanding a contraction, normalising a
-                  spelling, mapping a number to a placeholder and stripping an
-                  accent are the same shape.
+                  Combining <span className="font-mono">The</span> and <span className="font-mono">the</span> can pool occurrences, but it also removes the case distinction from those token strings. Case may matter to the task. Expanding contractions, changing spellings, replacing numbers or removing accents likewise needs an explicit policy for which distinctions to retain.
                 </p>
                 <p>
-                  So a method under this constraint splits a pipeline in two. One
-                  half is a division of the writing, which is what these rules
-                  are, and the other half is a sequence of changes that a caller
-                  must record if it wants them back. The two changes this method
-                  does allow itself are exactly the two that arrive with an
-                  inverse written down beside them, a table of eight characters
-                  and one marker standing for a hyphen, and what admitted them
-                  was that the mapping can be read in either direction rather
-                  than that they were useful.
+                  This pipeline separates dividing the writing from transforming it. A caller that needs to undo a transformation must retain its inverse or the original source. The two transformations allowed here come with explicit reverse mappings: the table of eight escaped characters and the marker for a hyphen. Their documented mappings make those particular changes recoverable; they do not make every possible input transformation reversible.
                 </p>
                 <KeepInMind>
-                  Anything a translation pipeline wants that cannot be undone has
-                  to happen in a step that is not this one, and the boundary is
-                  drawn by whether an inverse exists rather than by whether the
-                  change is a good idea.
+                  {"A many-to-one transformation needs retained source information if it must be undone exactly. Keeping that record can be part of the tokenizer or another pipeline stage. The location of the stage is a design choice; information preservation is the requirement."}
                 </KeepInMind>
               </SubSection>
 
@@ -1329,7 +998,7 @@ export default function MosesRulesPage() {
                     {
                       expression: "an abbreviation ending a sentence",
                       reason:
-                        "undecidable, with or without a list, because one character closes both the abbreviation and the sentence and a division of the text gives every character to exactly one piece. What must be decided is which loss to take, and the two rule lists on these pages take opposite ones. Four of the eighteen sentences here end this way.",
+                        "The token convention determines whether the period stays with the abbreviation or is separate. A sentence-boundary annotation can record its second role at the same source position. Four of the eighteen examples end this way.",
                     },
                     {
                       expression: "an abbreviation nobody listed",
@@ -1359,7 +1028,7 @@ export default function MosesRulesPage() {
                     {
                       expression: "a rewriting with no inverse",
                       reason:
-                        "refused rather than performed. Lowercasing, expanding a contraction and normalising a spelling all shrink the surface vocabulary, which is the method's own aim, and none can be read backwards, so each has to be a separate step that records what it did.",
+                        "This exception-table interface accepts boundary changes whose pieces concatenate to the named input. A many-to-one normalization needs retained information for exact reversal. It can be implemented in a separate stage or a tokenizer with an explicit source mapping; its vocabulary effect depends on the data.",
                     },
                     {
                       expression: "a rewriting whose output could have been typed",
@@ -1369,18 +1038,12 @@ export default function MosesRulesPage() {
                     {
                       expression: "writing that is not prose",
                       reason:
-                        "outside what the rules were written for. An address is cut at the character that makes it an address, while a file name that the boundary rules cut into three survives whole here. What has to be decided is whether such stretches are protected before any rule sees them, since none of the four will say it met one.",
+                        "An address is split by the listed punctuation rule. The shown filename is also split at its underscore under Moses, while Treebank keeps it whole. Decide whether the application needs whole spans or components, then test that requirement.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Two of these are worth carrying past this page. A method built
-                  on a named list has its correctness located in a document
-                  rather than in the rules, so the honest way to describe it
-                  names the document. And requiring an inverse is a real
-                  restriction with real casualties, which is why the methods
-                  later in this section are described by whether they are
-                  reversible before they are described by anything else.
+                  {"Record the abbreviation table, language setting and rewriting options with the output. Then test coverage, boundary choices and reconstruction separately. Those checks describe what this tokenizer does without treating one successful round trip or one accuracy count as a complete evaluation."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1409,12 +1072,12 @@ export default function MosesRulesPage() {
                 "At scale the pieces holding no letter and no digit stop being counted separately",
               ],
               1,
-              "There are a few dozen marks and each of them is one row however often it turns up, so the cost of separating them does not grow. Of the 137 entries the eighteen sentences give the crude rule, only 5 are a word that reached a second spelling, so at this size the fixed cost is still the larger of the two.",
+              "Repeated punctuation can reuse a small set of vocabulary entries, while separating it can combine several punctuated forms of one word into one base spelling. New compound parts and contraction fragments can also add entries. Whether the total shrinks depends on the corpus and splitting rules; a larger corpus alone does not guarantee a saving.",
             ),
             trueFalse(
-              "A sentence ending in an abbreviation can be divided so that the abbreviation keeps its stop and the sentence keeps its stop as well.",
+              "Can a literal, nonoverlapping partition give a sentence-final abbreviation its period and also return that same source period as a second separate piece?",
               false,
-              "The writing carries one character where the reading carries two marks, and a division of a text gives every character to exactly one piece, so no method that partitions a text can be right here. These rules answer Co. and lose the sentence’s stop, while the annotation rules answer Co and a stop and lose the abbreviation’s. Four of the eighteen minuted sentences end this way, so the choice has to be made rather than deferred.",
+              "A partition assigns each source character to one piece. Duplicating that period into a second piece would change the contract. This does not prevent a separate annotation from recording both its abbreviation and sentence-ending roles. The tokenization policy and the linguistic roles are different questions.",
             ),
             several(
               "Which of these changes to a piece’s text does the method allow itself?",
@@ -1425,7 +1088,7 @@ export default function MosesRulesPage() {
                 "Expanding a contraction into the two words it stands for",
               ],
               [0, 1],
-              "Both allowed rewritings arrive with an inverse written down beside them, and both leave the span the piece names untouched, so a piece carries where it came from even when it no longer looks like it. Lowercasing cannot be read backwards, since the does not say whether it began a sentence, and expanding a contraction is the same shape. Anything a pipeline wants that cannot be undone has to happen in a step that is not this one.",
+              "The permitted rewrites have inverse conventions, and the spans still refer to the original source. Exact recovery also depends on avoiding collisions with literal escape-like input and preserving discarded spacing. Lowercasing or expanding contractions can merge distinct spellings unless extra information is retained, so those operations need an explicit reconstruction policy.",
             ),
             trueFalse(
               "Two people running these rules over the same sentence can get different pieces without either of them being unfaithful to the method.",
@@ -1488,7 +1151,7 @@ question: "Where do two English rule sets disagree on the same contraction?",
               "Give the same abbreviation two different followers",
               [
   "Each supplied pair contains the same abbreviation with different text after it. Split all six texts with the Moses rules and inspect the abbreviation, rather than assuming its spelling determines the result.",
-  "Print the split pieces with a kept/split label for the abbreviation’s full stop. Finish with the total number of stops retained. Keep the supplied text order.",
+  "Print the split pieces with a kept/split label for the abbreviation’s period. Finish with the total retained periods, keeping the supplied text order.",
   "A retained stop is part of the abbreviation piece; a detached stop is its own piece."
 ],
               `from oop_ml import MosesPreTokenizer
@@ -1533,7 +1196,7 @@ kept   Alvarez  et  al.  ran  the  analysis  .
 split  Alvarez  et  al  .  Ran  it  again  .
 3 of 6 stops kept`,
               {
-question: "Can the following word change whether an abbreviation keeps its full stop?",
+question: "Can the following word change whether an abbreviation keeps its period?",
  hints: [
   "Test whether the full abbreviation spelling occurs in the split’s texts.",
   "Accumulate that Boolean test over the six inputs. Compare the following word or digit within each pair to explain the changed decision."

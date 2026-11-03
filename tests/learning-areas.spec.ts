@@ -56,8 +56,8 @@ test("homepage leads to learning areas, and old section links still work", async
   await expect(areas.getByRole("link")).toHaveCount(LEARNING_AREAS.length);
   await expect(areas.getByRole("link").first()).toContainText("Mathematics and Programming");
   await areas.getByRole("link", { name: /^Machine Learning/ }).click();
-  await page.getByRole("link", { name: /^Start with a Prediction/ }).click();
-  await expect(page.getByRole("heading", { name: "Start with a Prediction", exact: true })).toBeVisible();
+  await page.getByRole("link", { name: /^Introduction to Predictive Models/ }).click();
+  await expect(page.getByRole("heading", { name: "Introduction to Predictive Models", exact: true })).toBeVisible();
   await page.goto("/#mathematics-as-needed");
   await expect(page).toHaveURL(/\/sections\/mathematics-as-needed$/);
 });

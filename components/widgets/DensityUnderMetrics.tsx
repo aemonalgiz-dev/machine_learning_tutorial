@@ -171,8 +171,8 @@ export function DensityUnderMetrics() {
         })}
       </div>
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Filled circles share a colour with the people in their group; a hollow
-        circle is a person in no group. Colours mean nothing across panels.
+        Filled circles share a color with the people in their group; a hollow
+        circle is a person in no group. Colors mean nothing across panels.
       </p>
 
       {message && (

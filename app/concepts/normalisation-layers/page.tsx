@@ -25,9 +25,9 @@ import { RunningFiguresChart } from "@/components/widgets/RunningFiguresChart";
 import { ScaleShiftUndo } from "@/components/widgets/ScaleShiftUndo";
 
 export const metadata: Metadata = {
-  title: "Normalisation Layers · oop_ml",
+  title: "Normalization Layers · Perceptron Lab",
   description:
-    "The values passed between layers can change in scale as a network trains. Normalisation methods control aspects of those scales, but they differ in which values they compare and what they preserve.",
+    "Normalization changes the reference and scale of values passed through a network. The values grouped for that calculation distinguish methods such as batch and layer normalization and affect their behavior during training and prediction.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -37,38 +37,13 @@ export default function NormalisationLayersPage() {
     <ConceptPage
       lessonId="normalisation-layers"
       intuition={lessonIntuitions["normalisation-layers"]}
-      technicalStart="Part 2. Standardise Inside the Model"
+      technicalStart="Part 2. Standardize Inside the Model"
       openingTitle="The Inputs Keep Changing While the Layer Learns"
-      playgroundTitle="Compare what each normalisation rule changes"
-      playgroundIntro="Check which axis supplies the statistics. Compare the values before and after normalisation, then distinguish learned scale and shift from the measured statistics."
-      title="Normalisation Layers"
-      tagline={"The values passed between layers can change in scale as a network trains. Normalisation methods control aspects of those scales, but they differ in which values they compare and what they preserve."}
-      prerequisites={
-        <>
-          The move itself is the first row of the{" "}
-          <Link href="/concepts/feature-scaling" className={link}>
-            feature scaling page
-          </Link>
-          , subtract a mean and divide by a deviation, and the mean and the
-          deviation are the{" "}
-          <Link href="/primers/statistics" className={link}>
-            statistics primer
-          </Link>
-          &rsquo;s. The crowd network this page measures on is the{" "}
-          <Link href="/concepts/dropout" className={link}>
-            dropout page
-          </Link>
-          &rsquo;s, and the loop that trains it is the{" "}
-          <Link href="/concepts/training-a-network" className={link}>
-            training page
-          </Link>
-          &rsquo;s; the backward pass in Part 4 assumes the{" "}
-          <Link href="/concepts/backpropagation" className={link}>
-            backpropagation page
-          </Link>
-          , since it is one more layer for the blame to pass through.
-        </>
-      }
+      playgroundTitle="Compare what each normalization rule changes"
+      playgroundIntro="Check which axis supplies the statistics. Compare the values before and after normalization, then distinguish learned scale and shift from the measured statistics."
+      title="Normalization Layers"
+      tagline={"Normalization changes the reference and scale of values passed through a network. The values grouped for that calculation distinguish methods such as batch and layer normalization and affect their behavior during training and prediction."}
+      prerequisites={<>The <Link href="/concepts/feature-scaling" className={link}>feature-scaling page</Link> introduces subtracting a mean and dividing by a standard deviation. The <Link href="/primers/statistics" className={link}>statistics primer</Link> explains those quantities. We reuse the <Link href="/concepts/dropout" className={link}>dropout page’s</Link> network and the <Link href="/concepts/training-a-network" className={link}>training loop</Link>. Part 4 applies <Link href="/concepts/backpropagation" className={link}>backpropagation</Link> through statistics calculated from the layer’s own inputs.</>}
 
       playground={<NormalisationPlayground />}
       sections={[
@@ -82,9 +57,7 @@ export default function NormalisationLayersPage() {
 <p>
                   Recall the network from the dropout lesson. Its sixteen ReLU hidden units read height and weight, and the output unit reads their activations. During training we update both layers. So, while the output unit is learning how to use those sixteen values, the hidden layer is changing the values it supplies. We can measure those changes instead of assuming they are small.
                 </p>
-                <p>
-                  I measured how far they move. Over four hundred epochs on the whole crowd, the mean of one hidden unit over the twenty-five people travels from 0.439 to 1.529, and its deviation from 0.819 to 3.097.
-                </p>
+                <p>The recorded run follows four hundred epochs on all twenty-five people. During that run, one hidden unit’s mean activation changes from 0.439 to 1.529, while its standard deviation changes from 0.819 to 3.097. The output layer is learning from inputs whose scale is changing.</p>
 </>
                 <DriftChart />
                 <p>
@@ -99,30 +72,25 @@ export default function NormalisationLayersPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="2. What standardising once before the model cannot fix">
-                <p>The feature-scaling lesson standardised the measured inputs before they entered the model. That fixes the reference for the first layer, but a later layer reads activations produced by weights that keep changing. Here we insert a normalisation step between layers. During batch-normalisation training, it measures the current batch, meaning the examples processed together on this pass. During prediction it uses saved statistics instead. We will keep those two behaviours separate.</p>
+              <SubSection title="2. What standardizing once before the model cannot fix" id="2-what-standardising-once-before-the-model-cannot-fix">
+                <p>The feature-scaling lesson standardized the measured inputs before they entered the model. That fixes the reference for the first layer, but a later layer reads activations produced by weights that keep changing. Here we insert a normalization step between layers. During batch-normalization training, it measures the current batch, meaning the examples processed together on this pass. During prediction it uses saved statistics instead. We will keep those two behaviors separate.</p>
                 <>
 <p>
-                  Switch the chart above to the batch layer and the sixteen lines start at exactly zero and one, because that is what standardising does to them. What happens afterwards is the claim this page has to be plain about. The block the output layer reads still moves, and by more. The largest mean shift over training is 1.3204 against the plain network&rsquo;s 1.0897, and the largest single-epoch move is 0.3113 against 0.1375.
+
+                  Switch the chart above to the batch layer and the sixteen lines start at exactly zero and one, because that is what standardizing does to them. What happens afterwards is the claim this page has to be plain about. The block the output layer reads still moves, and by more. The largest mean shift over training is 1.3204 against the plain network&rsquo;s 1.0897, and the largest single-epoch move is 0.3113 against 0.1375.
                 </p>
                 <p>
                   What differs is what moved it. Under the batch layer the mean of what the output layer reads equals the layer&rsquo;s shift to within 1.8e−15 at every epoch, so the location and spread of the block are two explicit parameters per unit that the gradient moves on purpose, rather than a by-product of sixteen weight vectors being adjusted for other reasons.
                 </p>
 </>
                 <KeepInMind>
-                  The textbook claim is that the layer holds the distribution
-                  steady, and on the crowd network it did not hold, since what
-                  the output layer read moved further with the batch layer
-                  than without it. What the layer did do is make the location and
-                  the spread learned quantities, which is the reading the 2018
-                  paper argued for and the one the rest of this page uses.
-                </KeepInMind>
+                  These measurements do not show a fixed output distribution: the learned scale and shift can move it during training. Santurkar and colleagues’ 2018 analysis argues that optimization smoothness helps explain batch normalization’s benefits, rather than reduced internal distribution drift alone. The traces here measure means and spreads; they do not establish that optimization explanation by themselves.</KeepInMind>
               </SubSection>
             </>
 </>),
         },
-        {
-          title: "Part 2. Standardise Inside the Model",
+        { id: "part-2-standardise-inside-the-model",
+          title: "Part 2. Standardize Inside the Model",
           content: (
             <>
               <SubSection title="3. The move, on a batch of four">
@@ -135,41 +103,38 @@ export default function NormalisationLayersPage() {
                   first thing it does is find their mean.
                 </p>
                 <Equation>{"7 + 9 + 1 + 7 = 24,   24 / 4 = 6"}</Equation>
-                <p>
-                  The deviations from 6 are 1, 3, −5 and 1, whose squares are
-                  1, 9, 25 and 1, and the variance divides their total by the
-                  number of rows rather than one fewer, which is the biased
-                  form and is the one every implementation of this layer uses
-                  on the way forward, for a reason Part 4 comes back to.
-                </p>
+                <p>For this column, subtracting the mean gives deviations 1, 3, −5 and 1. Their squares are 1, 9, 25 and 1. This SDK divides the squared-deviation total by the number of rows, using the population-form batch variance in its forward calculation. The backward calculation must differentiate that same rule. Some implementations use a different variance convention for the running estimate used at prediction time.</p>
                 <Equation>{"1 + 9 + 25 + 1 = 36,   36 / 4 = 9"}</Equation>
-                <WorkedExample title="The second column, standardised">
+                <WorkedExample title="The second column, standardized">
                   <p>
+
                     Each value becomes its distance from the mean over the
                     deviation, and the playground prints 0.3333, 1.0000,
                     −1.6667 and 0.3333 under that column. The first column runs
                     the same way, a mean of 8 and a deviation of 9, to
                     −0.7778, −0.7778, −0.1111 and 1.6667. Click any cell and
                     change it, and the whole column answers differently,
-                    because the mean it was standardised by has moved.
+                    because the mean it was standardized by has moved.
                   </p>
                   <Equation>{"(7 − 6) / 3 =  0.3333\n(9 − 6) / 3 =  1.0000\n(1 − 6) / 3 = −1.6667\n(7 − 6) / 3 =  0.3333"}</Equation>
                 </WorkedExample>
                 <InAModel title="Twenty of the crowd">
                   <p>
+
                     Press An Ideal Case and the block is twenty of the
-                    crowd, heights in centimetres down one column and weights
+                    crowd, heights in centimeters down one column and weights
                     in kilograms down the other. The layer reads a mean height
                     of 151.9 and a mean weight of 51.85, deviations of 17.2827
-                    and 15.7298, and the first person, 147 centimetres and 41
+                    and 15.7298, and the first person, 147 centimeters and 41
                     kilograms, comes out as −0.2835 and −0.6898, a little short
                     and rather light for this crowd. That is the feature scaling
-                    page&rsquo;s standardisation exactly, made on the block in
+                    page&rsquo;s standardization exactly, made on the block in
                     front of the layer rather than on a table beforehand.
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  A batch layer standardises each feature by the mean and the
+
+                  A batch layer standardizes each feature by the mean and the
                   biased variance of the rows in front of it, so its answer
                   for one row is a fact about the whole batch.
                 </KeepInMind>
@@ -189,52 +154,40 @@ export default function NormalisationLayersPage() {
                 </p>
                 <Equation>{"deviation = √(variance + ε)\n√(9 + 0.00001) = 3.0000017"}</Equation>
                 <>
-                  <p>
-                    Adding epsilon under the square root keeps the denominator positive
-                    even when a column has zero variance. The derivative of the
-                    reciprocal square root is also finite at zero variance for a fixed
-                    positive epsilon. The normalized variance is consequently a little
-                    below one.
-                  </p>
+                  <p>Adding a fixed positive epsilon keeps the denominator positive when a column’s variance is zero. The reciprocal square root also has a finite derivative there. For positive variance, the normalized variance is below one by the ratio shown next. A constant column still has normalized variance zero.</p>
                   <Equation>{"normalized variance = v / (v + ε)\nworked column: 9 / (9 + 0.00001) ≈ 0.9999989"}</Equation>
                   <p>
-                    Type five into every cell of a column. Centring produces zeros, and
+
+                    Type five into every cell of a column. Centering produces zeros, and
                     the normalized output is zero for each row. A learned shift can
                     still move those outputs afterward.
                   </p>
                 </>
                 <KeepInMind>
-                  The epsilon is what makes a constant feature normalise to
+
+                  The epsilon is what makes a constant feature normalize to
                   zeros instead of to nothing, and it is why the deviations on
                   this page carry a seventh decimal.
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="5. The scale and the shift give back what standardising took">
-                <p>
-                  Standardising alone would be a constraint. A layer that could
-                  only answer with mean zero and spread one would be forbidden
-                  from ever passing on an off-centre signal, and the next layer
-                  sometimes needs exactly that. So every normalising layer
-                  computes a second line, one learned multiplier and one
-                  learned offset per feature, which begin at one and zero so
-                  that a fresh layer standardises and does nothing more.
-                </p>
-                <Equation>{"standardised = (value − mean) / √(variance + ε)\nanswer       = scale · standardised + shift"}</Equation>
+              <SubSection title="5. The scale and the shift give back what standardizing took" id="5-the-scale-and-the-shift-give-back-what-standardising-took">
+                <p>After standardizing, this implementation applies a learned scale and shift for each feature. They start at one and zero, leaving the standardized values unchanged initially. The extra parameters let training choose a useful offset and amplitude instead of requiring every output feature to retain the normalized reference. They do not recover information removed by every possible normalization rule.</p>
+                <Equation>{"standardized = (value − mean) / √(variance + ε)\nanswer       = scale · standardized + shift"}</Equation>
                 <ScaleShiftUndo />
                 <>
 <p>
-                  Press Undo exactly and the sliders jump to the column&rsquo;s own deviation and mean, 3.0000017 and 6 for the second feature, and the answer is the raw column back again. The largest gap between the answer and the raw block is 8.9e−16, and the first row&rsquo;s 1 comes back as 0.9999999999999991, which is a rounding of the last bit rather than anything the standardising left behind.
+
+                  Press Undo exactly and the sliders jump to the column&rsquo;s own deviation and mean, 3.0000017 and 6 for the second feature, and the answer is the raw column back again. The largest gap between the answer and the raw block is 8.9e−16, and the first row&rsquo;s 1 comes back as 0.9999999999999991, which is a rounding of the last bit rather than anything the standardizing left behind.
                 </p>
-                <p>
-                  Two learned numbers per feature can undo it completely, so the layer costs the network nothing it could represent before. What changed is how the numbers are parameterised. The weights beneath used to have to produce a signal at the right level and the right spread by themselves, and now they produce a standardised one while the scale and shift set the level and the spread.
-                </p>
+                <p>For this one fixed batch, we can choose scale and shift from its statistics and recover the original values. That explains the identity check below. A learned pair stays fixed across examples and batches, though, while training-time batch statistics can change. The check therefore does not prove that one learned pair undoes normalization for every possible batch.</p>
 </>
                 <WhyThisWorks title="Why the identity is reachable">
                   <p>
+
                     Write γ for the scale, β for the shift, m for the mean and
                     v for the variance, and set the pair to the very numbers
-                    the layer standardised by.
+                    the layer standardized by.
                   </p>
                   <Equation>{"γ = √(v + ε),   β = m\nγ · (x − m) / √(v + ε) + β = (x − m) + m = x"}</Equation>
                   <p>
@@ -244,11 +197,8 @@ export default function NormalisationLayersPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The scale and the shift are what make the layer a
-                  reparameterisation rather than a restriction. They are
-                  learned by gradient like any weight, and Part 1 measured them
-                  moving the block by 1.32 on the crowd network.
-                </KeepInMind>
+
+                  The learned scale and shift change the parameterization of the signals passed onward. They can undo the standardization for a chosen fixed set of statistics. Whether the resulting normalization helps optimization or preserves a useful representation across changing inputs requires a separate argument or measurement.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -259,6 +209,7 @@ export default function NormalisationLayersPage() {
             <>
               <SubSection title="6. A row&rsquo;s answer depends on its company">
                 <p>
+
                   Every statistic the batch layer uses is a fact about the
                   batch rather than about the row being answered, and
                   everything awkward about the layer follows from that. In the
@@ -266,36 +217,20 @@ export default function NormalisationLayersPage() {
                   two it keeps. The first row, (1, 7), answered −0.7778 and
                   0.3333 among the four; among the two it answers 0.0000 and
                   −1.0000, though not a digit of the reading changed, only
-                  the crowd it was standardised by.
+                  the crowd it was standardized by.
                 </p>
-                <p>
-                  That is unusable at prediction time. A request may hold one
-                  person or a thousand, and a person&rsquo;s answer cannot be
-                  allowed to depend on who else happened to be in the same
-                  request, so the layer needs to know which of two things it is
-                  doing. While training it standardises by the batch, since
-                  that is what the gradient will be taken through. While
-                  predicting it standardises by something remembered instead,
-                  which the next two steps build.
-                </p>
+                <p>For ordinary prediction, this SDK aims to give the same example the same result regardless of the other examples in its request. It therefore uses stored statistics instead of measuring the prediction batch. During training, it uses current-batch statistics and differentiates through them. Some other evaluation procedures deliberately adapt statistics at prediction time, so the two-mode choice belongs to this interface.</p>
                 <KeepInMind>
-                  A batch layer has two purposes and behaves differently under
-                  each, and it is the one layer besides dropout that cannot be
-                  written without being told which is happening. Forgetting to
-                  say training costs a slower descent; forgetting to say
-                  predicting makes a person&rsquo;s answer depend on the
-                  request, so predicting is the default.
-                </KeepInMind>
+                  The batch-normalization layer uses current statistics during training and saved statistics during prediction. Selecting the wrong mode changes the calculation and can prevent the running state from being updated as intended. This SDK defaults to prediction mode and requests training mode explicitly in its backward-pass helper.</KeepInMind>
               </SubSection>
 
-              <SubSection title="7. A batch of one cannot be batch-normalised while training">
+              <SubSection title="7. Batch Normalization With One Observation" id="7-a-batch-of-one-cannot-be-batch-normalised-while-training">
                 <>
 <p>
-                  Push the first row through on its own while training and the batch is that one row. Its mean is itself, its deviation is the root of zero plus ε, and the layer answers zeros for both features, which is the same answer the constant column got in step 4 and for the same reason: a batch of one carries no spread to standardise by.
+
+                  Push the first row through on its own while training and the batch is that one row. Its mean is itself, its deviation is the root of zero plus ε, and the layer answers zeros for both features, which is the same answer the constant column got in step 4 and for the same reason: a batch of one carries no spread to standardize by.
                 </p>
-                <p>
-                  Nothing is refused, because a row of zeros is what the arithmetic honestly says, and that is worth knowing, since a training loop fed one row at a time through this layer trains on nothing and raises nothing.
-                </p>
+                <p>This implementation accepts the one-row batch. Centering produces zero for every feature, so the affine output is the learned shift, initially zero. The input gradient and scale gradient vanish for this batch, while the shift and later layers may still receive gradients. It removes the example’s varying input information rather than making every part of the network unable to train.</p>
 </>
                 <NumberTable
                   headings={["the row (1, 7) on its own", "answer"]}
@@ -303,10 +238,10 @@ export default function NormalisationLayersPage() {
                     ["batch layer, while training", "0.0000, 0.0000"],
                     ["batch layer, predicting, fresh running figures", "0.999995, 6.999965"],
                     ["batch layer, predicting, after a hundred steps", "−0.7778, 0.3334"],
-                    ["layer normalisation", "−0.9999994, 0.9999994"],
-                    ["RMS normalisation", "0.2000, 1.4000"],
+                    ["layer normalization", "−0.9999994, 0.9999994"],
+                    ["RMS normalization", "0.2000, 1.4000"],
                   ]}
-                  caption="The same row under each layer and purpose, read from the widget in step 8. Only the batch layer while training has nothing to divide by."
+                  caption="The same row under each layer and purpose, read from the widget in step 8. The training batch variance is zero for a single observation; epsilon still supplies a positive denominator."
                 />
                 <p>
                   While predicting the same row is fine, because the divisor is
@@ -318,16 +253,14 @@ export default function NormalisationLayersPage() {
                   batch answer of step 3 to three places.
                 </p>
                 <KeepInMind>
-                  One row while training normalises to zeros, and that is an
-                  answer rather than an error. The row layers of Part 5 have
-                  no such case, because they read their spread from inside the
-                  row.
-                </KeepInMind>
+
+                  A one-row batch supplies no across-example variation for these batch statistics. Row normalization instead uses the features within the example, so it can work without other examples. Its own behavior still depends on feature count and variation, as Part 5 explains.</KeepInMind>
               </SubSection>
 
               <SubSection title="8. The running figures, and predicting by them">
                 <p>
-                  What prediction standardises by is a running mean and a
+
+                  What prediction standardizes by is a running mean and a
                   running variance, one pair per feature, moved a little toward
                   each batch on every step and consulted only when predicting.
                   They begin at zero and one, which is what an untrained layer
@@ -360,9 +293,7 @@ export default function NormalisationLayersPage() {
 <p>
                   Here momentum 0.9 means retaining nine tenths of the previous estimate and adding one tenth of the new batch statistic. Some frameworks call the new-statistic weight momentum instead, so their 0.1 can describe this same update. A larger representative batch can make a batch statistic less noisy, but it does not change the retention factor or erase the running estimate&apos;s history. Check the update convention when moving between implementations.
                 </p>
-                <p>
-                  On twenty of the crowd the running mean after one step is 15.19 centimetres against a batch mean of 151.9, and a person predicted through that layer would be standardised by a crowd that does not exist.
-                </p>
+                <p>On twenty measured people, the initial running height mean moves from zero to 15.19 centimeters after one update, while the current batch mean is 151.9. Predictions using that early running estimate can differ substantially from training-mode outputs. The estimate reflects its initialization and update history, not a new measured population.</p>
 </>
                 <KeepInMind>
                   The running figures are state that is neither a setting
@@ -382,9 +313,7 @@ export default function NormalisationLayersPage() {
                 </p>
 </>
                 <>
-<p>
-                  The cost of that choice is stated rather than hidden. A forward pass that is never followed by a step contributes nothing to the running figures, so a training pass made for a look rather than for a step leaves prediction where it was. For a training loop that is the correct behaviour, since a batch that was never learned from should not shape what the model believes about its inputs; for a caller used to other frameworks it is a difference, and this is where it is written down.
-                </p>
+<p>A training-mode forward call without an update leaves these running statistics unchanged. That differs from frameworks that update them during forward evaluation. If a caller wants to calibrate statistics on representative batches without changing scale and shift, it must use this SDK’s state-update path deliberately. Neither timing convention is inherently correct for every use.</p>
                 <p>
                   The playground&rsquo;s predicting toggle takes one real step with a slope of zero arriving, which moves neither the scale nor the shift and folds the batch a tenth of the way in.
                 </p>
@@ -420,23 +349,23 @@ export default function NormalisationLayersPage() {
                 "The running variance has already begun to move",
               ],
               0,
-              "The mean is 6 and the squared deviations 1, 9, 25 and 1 total 36, which over four rows is a variance of 9, the biased form. The root is taken of 9 + 0.00001. A rectified unit that is off for every person in the batch produces exactly a constant column, which is an ordinary thing for a hidden block to contain, and the epsilon is what makes such a feature normalise to zeros instead of to nothing.",
+              "This column’s raw population standard deviation is 3. The layer adds epsilon to its variance before taking the square root, giving the slightly larger displayed denominator. Epsilon also keeps the denominator positive for a constant column. After centering, that constant column normalizes to zeros rather than producing a division by zero.",
             ),
             trueFalse(
-              "Setting the scale and shift to the very deviation and mean the layer standardised by returns the raw column.",
+              "Setting the scale and shift to the very deviation and mean the layer standardized by returns the raw column.",
               true,
-              "The root cancels the root and the mean cancels the mean, for every row at once, because the same two numbers served every row of the column. Pressing Undo exactly leaves the largest gap between the answer and the raw block at 8.9e−16, which is why the layer is a reparameterisation rather than a restriction.",
+              "For this same batch, choosing the scale as the exact normalization denominator and the shift as the batch mean reverses the transformation. The tiny reconstruction gap is floating-point error. This shows that scale and shift can reproduce the input for a fixed batch; one pair of learned values need not undo every future batch’s different statistics.",
             ),
             choice(
               "The first row, (1, 7), is pushed through a fresh batch layer on its own while training. What comes back?",
               [
                 "Zeros for both features, with nothing refused",
                 "−0.7778 and 0.3333, as it answered among the four",
-                "A refusal, since a batch of one has no spread to standardise by",
+                "A refusal, since a batch of one has no spread to standardize by",
                 "0.999995 and 6.999965, the row itself to within the epsilon",
               ],
               0,
-              "A batch of one has a mean equal to the row and a deviation of the root of zero plus epsilon, so the layer answers zeros, which is what the arithmetic honestly says. A training loop fed one row at a time through this layer trains on nothing and raises nothing. The row itself to within the epsilon is what the same fresh layer answers while predicting, because then the divisor is the running pair of zero and one and is not read from the row.",
+              "With one observation per feature, each batch mean equals that observation and the centered values are zero. A fresh layer therefore outputs zeros in training mode. The input gradient through this normalization is also zero, although a learned shift can still update. Prediction uses stored running statistics instead, so this fresh layer gives a different result.",
             ),
             several(
               "Which of these hold for the running figures?",
@@ -447,7 +376,7 @@ export default function NormalisationLayersPage() {
                               "On the worked batch they need 53 steps to bring the predicting answer within a hundredth of the training one",
                             ],
               [0, 1, 2, 3],
-              "All four hold. One step moves the pair a tenth of the way from 0 and 1 toward the batch’s 6 and 9, so the 7 that answered 0.3333 while training answers 4.7703 while predicting, and only more steps bring the two together. A larger batch makes each step’s figures a better estimate and does nothing to the number of steps the average needs. A forward pass never followed by a step contributes nothing to them at all.",
+              "In this SDK, stepping the layer updates its running mean and variance toward the current batch statistics. A forward training call without a step leaves them unchanged. Repeated updates on this same batch bring prediction outputs closer to training outputs. Under suitable sampling assumptions, larger batches can reduce statistical noise, but they do not change the configured moving-average coefficient.",
               {
                 "description": "This SDK starts running mean at 0 and running variance at 1. A training forward pass saves batch statistics; the following step updates each running statistic as 0.9 × old + 0.1 × batch.\n\nWorked column: 7, 9, 1, 7; batch mean 6; biased variance 9.\nScale = 1; shift = 0; ε = 0.00001.\nRepeated steps on this same batch first put the largest predicting/training difference below 0.01 at step 53."
               },
@@ -460,11 +389,10 @@ export default function NormalisationLayersPage() {
             <>
               <SubSection title="10. Why the mean is not a constant">
                 <>
-<p>
-                  Now the blame has to pass back through the layer, and the tempting reading is that a standardised value is just the input minus a number over another number, so the slope with respect to the input is one over the deviation. It is wrong in a way that trains. Change one person&rsquo;s reading at a hidden unit and that unit&rsquo;s mean over the batch moves, and with it every other person&rsquo;s standardised value at that unit; the variance moves too.
-                </p>
+<p>{"The backward calculation must include how the group statistics depend on the inputs. Treating the mean and deviation as constants would suggest simply dividing each arriving derivative by the deviation. But changing one person's hidden activation also changes that unit's batch mean and variance, affecting the normalized values of the other people. Those additional dependencies contribute to the correct gradient."}</p>
                 <p>
-                  So one input reaches the loss by three routes, directly through its own standardised value, through the mean, and through the variance, and the gradient has to collect all three.
+
+                  So one input reaches the loss by three routes, directly through its own standardized value, through the mean, and through the variance, and the gradient has to collect all three.
                 </p>
 </>
                 <KeepInMind>
@@ -477,7 +405,8 @@ export default function NormalisationLayersPage() {
 
               <SubSection title="11. The compact form">
                 <p>
-                  Write n for the number of rows, z for the standardised block,
+
+                  Write n for the number of rows, z for the standardized block,
                   s for the deviation of each column with the epsilon inside,
                   and d for the slope arriving at the layer&rsquo;s outputs
                   multiplied by the scale. Collecting the three routes gives
@@ -497,8 +426,9 @@ export default function NormalisationLayersPage() {
                 <WorkedExample title="The second column through the compact form">
                   <>
                     <p>
+
                       Take the second column of the whole-number four again, 7,
-                      9, 1 and 7, which step 3 standardised to 0.3333, 1.0000,
+                      9, 1 and 7, which step 3 standardized to 0.3333, 1.0000,
                       −1.6667 and 0.3333 with a deviation of 3. Let the slopes
                       arriving at that column be 2, 4, 6 and 8, and leave the
                       scale at one, so d is the arriving slope itself. The two
@@ -506,21 +436,14 @@ export default function NormalisationLayersPage() {
                     </p>
                     <Equation>{"Σ d        = 2 + 4 + 6 + 8 = 20\nΣ (d · z)  ≈ 2 × 0.3333 + 4 × 1 + 6 × (−1.6667) + 8 × 0.3333 ≈ −2.6667\nn · s      ≈ 4 × 3 = 12"}</Equation>
                     <p>
+
                       Each row then takes its own direct term, n times its
                       arriving slope, less the first sum, less its own
-                      standardised value times the second sum, all over n
+                      standardized value times the second sum, all over n
                       times the deviation.
                     </p>
                     <Equation>{"row 1   (4 × 2 − 20 − 0.3333 × (−2.6667)) / 12       ≈ −0.9259\nrow 2   (4 × 4 − 20 − 1 × (−2.6667)) / 12            ≈ −0.1111\nrow 3   (4 × 6 − 20 − (−1.6667) × (−2.6667)) / 12    ≈ −0.0370\nrow 4   (4 × 8 − 20 − 0.3333 × (−2.6667)) / 12       ≈  1.0741\n\ncolumn sum    −0.9259 − 0.1111 − 0.0370 + 1.0741 ≈ 0\nnaive form    d / s ≈ (0.6667, 1.3333, 2, 2.6667), which sums to 6.6667"}</Equation>
-                    <p>
-                      The first row arrived with a positive slope of 2 and is
-                      passed down a negative one. Raising that reading alone
-                      raises the column&rsquo;s mean, which lowers every
-                      row&rsquo;s standardised value, and the four rows
-                      together carry an arriving slope of 20 against the 8 of
-                      this row&rsquo;s direct term. The naive form sees only
-                      the direct route and reports 0.6667 for the same cell.
-                    </p>
+                    <p>The first row’s arriving derivative is positive, at 2, but its input derivative is negative. Changing this input affects both the column mean and variance, and therefore the normalized values in other rows as well. Those shared effects outweigh its direct contribution here. The summed arriving derivative is 20, compared with 8 in this row’s direct numerator term; the full formula also includes the variance contribution. Treating the statistics as fixed instead gives 0.6667.</p>
                   </>
                 </WorkedExample>
                 <p>
@@ -539,23 +462,13 @@ export default function NormalisationLayersPage() {
               </SubSection>
 
               <SubSection title="12. The naive form measured against a finite difference">
-                <p>
-                  A finite difference is the oracle, because it knows nothing
-                  about routes. Nudge one input up and down by a small step,
-                  run the forward pass both ways, and difference the objective,
-                  which here is the arriving slope times the outputs, summed.
-                  The widget does that for every cell of the whole-number four
-                  under a slope that counts up from one across the block, and
-                  puts the passed-down block, the naive block
-                  and the finite difference side by side.
-                </p>
+                <p>A finite-difference check gives an independent numerical comparison. Nudge one input slightly upward and downward, recompute the batch statistics for each forward pass, and compare the resulting weighted sum of outputs. The weights are the arriving derivatives, so this scalar check tests the backward calculation’s input gradient. The widget compares that result with the full formula and the fixed-statistics shortcut for every cell.</p>
                 <BackwardCheck initialLayer="batch" initialBlock={0} />
                 <>
-<p>
-                  The passed-down block agrees with the finite difference to 2.1e−10 across every cell. The naive block misses it by 2.0370, on a block whose largest true slope is 1.0741, so the error is larger than the largest slope it was reporting, and every entry of it is the wrong sign in the first column. There is also a check that needs no oracle at all.
-                </p>
+<p>{"The backward calculation agrees with finite differences to 2.1e−10 across the block. Treating the batch statistics as fixed produces an error of 2.0370, larger than the largest true slope of 1.0741. Every derivative in its first column also has the wrong sign. The problem is the missing dependence through the shared statistics, rather than harmless rounding. We can check that dependence another way without using a reference derivative."}</p>
                 <p>
-                  Shifting a whole column by a constant cannot change what a centring layer answers, so the true block&rsquo;s columns must sum to zero, and they do, to 2.2e−16; the naive block&rsquo;s sum to 1.7778 and 6.6667.
+
+                  Shifting a whole column by a constant cannot change what a centering layer answers, so the true block&rsquo;s columns must sum to zero, and they do, to 2.2e−16; the naive block&rsquo;s sum to 1.7778 and 6.6667.
                 </p>
 </>
                 <KeepInMind>
@@ -569,18 +482,13 @@ export default function NormalisationLayersPage() {
 
               <SubSection title="13. The two parameter slopes come out identical under both">
                 <>
-<p>
-                  The scale slope on the worked batch is 8.0 and −2.6667, and the shift slope is 16 and 20, and neither number depends on which passed-down form was used, since both are sums over the standardised block and the arriving slope alone. So a check that only looked at what the layer learns for itself would pass the naive form, and a network built on it would train, with plausible magnitudes and a falling loss, on a gradient that is not the gradient of the loss for every layer beneath.
-                </p>
+<p>The scale gradients are 8.0 and −2.6667; the shift gradients are 16 and 20. These depend on the normalized values and arriving derivatives, so they do not identify an incorrect formula for the gradient passed to earlier layers. Checking only the normalization layer’s own parameter gradients could therefore miss this error. Correct parameter shapes or a decreasing training loss would not prove that the earlier gradients are correct.</p>
                 <p>
                   That is why the check has to be on the block passed down, and why the tests behind this page run the finite difference rather than trusting the derivation.
                 </p>
 </>
                 <KeepInMind>
-                  A layer&rsquo;s own parameter slopes cannot tell the two
-                  forms apart. Only the block it passes down can, and only a
-                  finite difference or the column sum tells you which you have.
-                </KeepInMind>
+                  Check the input gradient as well as the scale and shift gradients. Finite differences compare numerical derivatives, while the zero-sum property supplies a useful necessary condition. A zero column sum alone is not sufficient to prove that every derivative is correct.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -589,18 +497,8 @@ export default function NormalisationLayersPage() {
           title: "Part 5. Reduce Inside the Row Instead",
           content: (
             <>
-              <SubSection title="14. Layer normalisation, the same move along the row">
-                <p>
-                  Everything awkward in Part 3 came from reaching across the
-                  batch, and none of it was about normalising. Layer
-                  normalisation makes the identical move along the row. The
-                  mean and the deviation are read from the numbers one row
-                  already holds, so the answer is the same whether the row
-                  arrives alone or among a thousand others, and it is the same
-                  while training and while predicting because there is nothing
-                  that could differ. No running figures, no purpose, no batch.
-                  Press Layer in the playground and the bands turn sideways.
-                </p>
+              <SubSection title="14. Layer normalization, the same move along the row" id="14-layer-normalisation-the-same-move-along-the-row">
+                <p>Layer normalization measures across the features of one example rather than across examples. It subtracts that row’s mean and divides by its own deviation. Other rows therefore do not affect its result. In this implementation, the calculation is the same during training and prediction, with no running batch statistics. Select Layer in the playground to see the normalization axis change.</p>
                 <WorkedExample title="The first row, (1, 7), across">
                   <p>
                     Its mean is 4, its deviations are −3 and 3, the mean of
@@ -617,7 +515,8 @@ export default function NormalisationLayersPage() {
                 </p>
                 <Equation>{"batch   mⱼ = (1/n) Σᵢ xᵢⱼ,   vⱼ = (1/n) Σᵢ (xᵢⱼ − mⱼ)²     over the rows, one figure per feature\nlayer   mᵢ = (1/d) Σⱼ xᵢⱼ,   vᵢ = (1/d) Σⱼ (xᵢⱼ − mᵢ)²     over the features, one figure per row"}</Equation>
                 <KeepInMind>
-                  Layer normalisation is batch normalisation with the sum
+
+                  Layer normalization is batch normalization with the sum
                   turned sideways, and every piece of state the batch layer
                   needed falls away with the axis. The scale and shift stay,
                   one pair per feature.
@@ -635,16 +534,8 @@ export default function NormalisationLayersPage() {
                   numbers something stranger happens that step 16 is about.
                 </p>
                 <BackwardCheck initialLayer="layer" initialBlock={1} />
-                <p>
-                  On the three-feature block the passed-down block agrees with
-                  the finite difference to 1.5e−09 against a largest true slope
-                  of 0.5123, and its rows sum to zero to 4.5e−16, where the
-                  naive block misses by 5.3404 and its rows sum to as much as
-                  14.1203. Switch the block to the whole-number four and the
-                  true block is zero in every cell, with a naive block that
-                  says otherwise by 2.0, which is the row of two numbers
-                  having nothing to pass down rather than a fault in the check.
-                </p>
+                <p>On the three-feature block, the input gradient agrees with finite differences to 1.5e−09, compared with a largest gradient magnitude of 0.5123. Its row sums are zero to 4.5e−16. The fixed-statistics shortcut misses by 5.3404 and has row sums as large as 14.1203.</p>
+<p>On the two-feature block, the correct input gradients are tiny and round to zero at the displayed precision. The shortcut still differs by about 2.0. The positive epsilon means those small derivatives need not be exactly zero.</p>
                 <KeepInMind>
                   Same three routes, same finite-difference agreement, and the
                   zero-sum check runs along the row instead of down the column.
@@ -653,41 +544,24 @@ export default function NormalisationLayersPage() {
 
               <SubSection title="16. When the row is the wrong axis">
                 <>
-<p>
-                  A row of two numbers has a mean halfway between them and a deviation of half their difference, so each number standardises to exactly one or minus one, whichever side of the mean it was on. That is why the worked row came back as ±0.9999994 whatever its values, and it is what happens if the row layer is put where the batch layer was in step 3, reading a person&rsquo;s height and weight.
-                </p>
-                <p>
-                  Twenty of the crowd go in and twenty rows of 1.0000 and −1.0000 come out, every person&rsquo;s height being the larger number, and the slope through it is zero in every cell, so a network below could not learn anything either.
-                </p>
+<p>For two unequal values, subtracting their mean produces opposite deviations of the same magnitude. Without epsilon, dividing by their standard deviation would give exactly minus one and one. With positive epsilon, the magnitudes are slightly below one and depend on the difference between the inputs. The row (1, 7) therefore gives approximately ±0.9999994, rather than that same value for every possible row.</p>
+                <p>For these twenty height-and-weight rows, height is always the larger raw number. Layer normalization makes all outputs very close to (1, −1), erasing the row mean and leaving very little variation at this scale. The input derivatives are correspondingly tiny, rather than exactly zero merely because there are two features.</p>
 </>
                 <RowAxisDemo />
                 <>
-<p>
-                  The widest distance from ±1 across all forty values is 2.6e−09, which is the epsilon, and the twenty people have become one row. Down the columns the same twenty people keep their differences, because a column of twenty heights has a spread worth dividing by. The row is the right axis when the row is wide and its entries are alike in kind, sixteen hidden units reading the same person, or the hundreds of numbers that describe one token in a sequence model, and it is the wrong axis for two measurements in different units.
-                </p>
+<p>Across these forty outputs, the largest departure from ±1 is 2.6e−09. The normalized rows are almost indistinguishable in this example. Column-wise normalization instead compares each height with other heights and each body weight with other body weights. Row-wise normalization compares centimeters directly with kilograms here, so changing either unit can alter that comparison.</p>
+<p>Layer normalization is often useful on a vector of related hidden features, such as a token representation. It still removes a row-wise reference and changes scale, so choose the axis according to what information the application should preserve.</p>
                 <p>
                   Which is the sentence that decides between the two layers, and it is a sentence about the data.
                 </p>
 </>
                 <KeepInMind>
-                  Layer normalisation asks what a row looks like relative to
-                  itself. Two raw features answer only which is larger; sixteen
-                  hidden units answer a great deal more. Choose the axis by
-                  what a row means.
-                </KeepInMind>
+
+                  Layer normalization describes features relative to the other features in the same example. With only two raw values and a small epsilon, the result can be almost just their ordering. A wider hidden vector can retain more relative structure, but the choice still depends on what those features mean.</KeepInMind>
               </SubSection>
 
-              <SubSection title="17. RMS normalisation drops the centring">
-                <p>
-                  RMS normalisation goes one step further along the row and
-                  subtracts nothing. It divides the row by its root mean square
-                  as it stands, so the row&rsquo;s level survives and only its
-                  size is fixed. The finding behind it was empirical, the
-                  re-scaling was doing the work and the re-centring was not,
-                  and the reward is one reduction instead of two on the way
-                  forward and one route fewer on the way back, since there is
-                  no mean for an input to reach the loss through.
-                </p>
+              <SubSection title="17. RMS normalization drops the centering" id="17-rms-normalisation-drops-the-centring">
+                <p>RMS normalization divides by the row’s root mean square without first subtracting its mean. It preserves relative proportions within the row while changing their overall scale. Zhang and Sennrich’s 2019 paper tested whether that simpler rescaling could retain the benefits of layer normalization in their models. Removing centering saves work and removes the mean-subtraction dependency from the backward calculation; it does not establish that centering is unnecessary for every task.</p>
                 <WorkedExample title="The first row, (1, 7), by its root mean square">
                   <Equation>{"(1 + 49) / 2 = 25,   √(25 + 0.00001) = 5.000001\n1 / 5.000001 = 0.2000,   7 / 5.000001 = 1.4000"}</Equation>
                   <p>
@@ -701,10 +575,12 @@ export default function NormalisationLayersPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  With RMS normalization, the first two rows are [1.3622, 0.3799] and [1.3390, 0.4549]. They remain different because the operation preserves within-row proportions rather than centring first. Conventional RMSNorm omits a shift. This implementation includes a shift initialized to zero; it matches that no-shift form while the shift stays zero, but learning a nonzero shift changes the model.
+
+                  With RMS normalization, the first two rows are [1.3622, 0.3799] and [1.3390, 0.4549]. They remain different because the operation preserves within-row proportions rather than centering first. Conventional RMSNorm omits a shift. This implementation includes a shift initialized to zero; it matches that no-shift form while the shift stays zero, but learning a nonzero shift changes the model.
                 </p>
                 <KeepInMind>
-                  RMS normalisation is layer normalisation with the mean route
+
+                  RMS normalization is layer normalization with the mean route
                   removed, forward and backward alike. The row-sum check no
                   longer applies, because a constant shift of the row is now
                   something the layer can see.
@@ -719,18 +595,18 @@ export default function NormalisationLayersPage() {
             choice(
               "Which check separates the two backward forms without an oracle?",
               [
-                "Every column of the passed-down block must sum to zero, since shifting a whole column cannot change what a centring layer answers",
+                "Every column of the passed-down block must sum to zero, since shifting a whole column cannot change what a centering layer answers",
                 "The scale and shift slopes must come out positive",
                 "The passed-down block must have the same shape as the input",
                 "The passed-down block must sum to the arriving slope",
               ],
               0,
-              "The true block’s columns sum to zero to 2.2e−16 where the naive block’s sum to 1.7778 and 6.6667. On the second column the three routes give −0.9259, −0.1111, −0.0370 and 1.0741, and the naive form gives 0.6667, 1.3333, 2 and 2.6667. The parameter slopes cannot tell the two forms apart, since both are sums over the standardised block and the arriving slope alone, so the check has to be on the block passed down.",
+              "The true block’s columns sum to zero to 2.2e−16 where the naive block’s sum to 1.7778 and 6.6667. On the second column the three routes give −0.9259, −0.1111, −0.0370 and 1.0741, and the naive form gives 0.6667, 1.3333, 2 and 2.6667. The parameter slopes cannot tell the two forms apart, since both are sums over the standardized block and the arriving slope alone, so the check has to be on the block passed down.",
             ),
             trueFalse(
               "A network built on the naive backward form fails visibly, with a loss that will not fall.",
               false,
-              "It trains, with plausible magnitudes and a falling loss, on a gradient that is not the gradient of the loss for every layer beneath. One input reaches the loss by three routes, directly, through the mean and through the variance, and the naive form keeps only the direct one. The scale slope of 8.0 and −2.6667 and the shift slope of 16 and 20 come out the same under both forms, which is why the tests behind this page run the finite difference rather than trusting the derivation.",
+              "A falling training loss does not verify that every backward derivative is correct. Changing an input changes the direct normalized value and also the batch mean and variance. Dividing the incoming derivative by the stored denominator keeps only the direct contribution. A numerical input-derivative check can expose the missing routes even when scale and shift gradients are correct.",
             ),
             choice(
               "What is the whole difference between the batch layer and the row layer?",
@@ -746,55 +622,33 @@ export default function NormalisationLayersPage() {
             trueFalse(
               "A row layer put where the batch layer sat, reading a person’s height and weight, answers twenty rows of 1.0000 and −1.0000.",
               true,
-              "A row of two numbers has a mean halfway between them and a deviation of half their difference, so each standardises to exactly one or minus one, whichever side of the mean it was on. The slope through it is zero in every cell, so a network below could learn nothing either. The row is the right axis when a row is wide and alike in kind, and the wrong one for two measurements in different units.",
+              "With two unequal features, centering places them at equal and opposite distances from their row mean. Without epsilon, normalization would reduce them to a sign pair. With this layer’s positive epsilon, the outputs are close to that pair and the input derivatives can be very small, but they are not generally exactly zero. That loses much of the magnitude information that distinguishes these height-and-weight rows.",
             ),
             choice(
-              "What does RMS normalisation leave out that layer normalisation does?",
+              "What does RMS normalization leave out that layer normalization does?",
               [
                 "Subtracting the row’s mean, so the row’s level survives and only its size is fixed",
                 "The small constant under the square root",
                 "The learned scale, so the answers always have a root mean square of one",
-                "The division, so the row is centred and left at its own spread",
+                "The division, so the row is centered and left at its own spread",
               ],
               0,
-              "It divides the row by its root mean square as it stands, so the row (1, 7) answers 0.2000 and 1.4000, which no longer sum to zero. There is one reduction instead of two on the way forward and one route fewer on the way back, since there is no mean for an input to reach the loss through. The row-sum check stops applying for the same reason, and twenty of the crowd stay apart as rows where layer normalisation turned them all into 1 and −1.",
+              "It divides the row by its root mean square as it stands, so the row (1, 7) answers 0.2000 and 1.4000, which no longer sum to zero. There is one reduction instead of two on the way forward and one route fewer on the way back, since there is no mean for an input to reach the loss through. The row-sum check stops applying for the same reason, and twenty of the crowd stay apart as rows where layer normalization turned them all into 1 and −1.",
             ),
         ],
         },
-        {
-          title: "Part 6. Weight Normalisation, a Different Animal",
+        { id: "part-6-weight-normalisation-a-different-animal",
+          title: "Part 6. Weight Normalization, a Different Animal",
           content: (
             <>
               <SubSection title="18. A direction and a length">
-                <p>
-                  The fourth layer with normalisation in its name standardises
-                  nothing at runtime. Its forward pass is a dense layer&rsquo;s,
-                  value for value. What it changes is where the parameters
-                  live. Instead of a weight vector per neuron it stores a
-                  direction and a length, and rebuilds the vector from the two
-                  on the way past. A weight vector has a length and a direction
-                  whether anyone stores them apart or not, and they do
-                  different jobs, since the direction decides which way the
-                  neuron&rsquo;s boundary faces and the length decides how
-                  sharply it answers.
-                </p>
+                <p>Weight normalization changes how a dense layer stores its weights, rather than normalizing its activation batch. It keeps a nonzero direction vector and a scalar multiplier for each neuron. Dividing the direction vector by its norm gives a unit vector; multiplying by the scalar reconstructs the effective weights.</p>
+<p>This SDK permits a negative scalar. Its absolute value is the weight vector’s norm, and its sign can reverse the orientation. The forward result matches a dense layer using those reconstructed weights and the same activation.</p>
                 <Equation>{"weights = magnitude · direction / ‖direction‖"}</Equation>
-                <p>
-                  Written the ordinary way neither is a parameter, so gradient
-                  descent can only move the length by moving every component at
-                  once and hoping the total comes out right, and any step that
-                  changes the length also swings the direction. Written this
-                  way one number per neuron owns the length, and a step of the
-                  direction cannot change the length at all, because the
-                  length was divided out.
-                </p>
+                <p>With ordinary weight coordinates, an update may change both norm and orientation. Some updates change only one; rotation is not inevitable. In the normalized coordinates, changing the direction while keeping the scalar fixed leaves the effective norm unchanged. Changing the scalar controls that norm and can reverse orientation if its sign changes.</p>
                 <KeepInMind>
-                  Weight normalisation reparameterises the weights and leaves
-                  the function alone. The shared word is the only thing it
-                  shares with the three layers above, and the paper&rsquo;s
-                  own argument is that this is what the batch layer&rsquo;s
-                  benefit looks like once the batch is taken out of it.
-                </KeepInMind>
+
+                  Weight normalization keeps the family of dense-layer functions while changing their parameter coordinates. Gradient descent in those coordinates generally follows a different path. Salimans and Kingma proposed this as a way to separate weight scale from direction without batch-dependent activation statistics.</KeepInMind>
               </SubSection>
 
               <SubSection title="19. The gradient in the new coordinates, and the term that is easy to lose">
@@ -808,38 +662,22 @@ export default function NormalisationLayersPage() {
                   rescaled, with that radial part projected out.
                 </p>
                 <Equation>{"magnitude slope = w · u\ndirection slope = (magnitude / ‖direction‖) · (w − (w · u) u)"}</Equation>
-                <p>
-                  Dropping the projection is the mistake this layer is about.
-                  It leaves a block with the right shape and plausible
-                  magnitudes that trains, and the check is the same finite
-                  difference as Part 4. Three neurons read five of the crowd
-                  in standard units through a hyperbolic tangent, with stored
-                  directions whose lengths are 1, 2.5 and 0.5.
-                </p>
+                <p>The direction-gradient formula removes the radial component associated with rescaling the stored direction. Omitting that projection can produce an incorrect gradient with a plausible shape and magnitude. The finite-difference check below uses three neurons with tanh activation on five standardized examples. Their stored direction norms are 1, 2.5 and 0.5.</p>
                 <ReparameterisationCheck />
                 <>
-<p>
-                  The two layers&rsquo; answers differ by exactly 0, because the forward pass is the same arithmetic. The direction slope agrees with the finite difference to 3.6e−10 and the length slope to 1.1e−10, against a largest true direction slope of 2.9973; the unprojected form misses by 1.8286, which is about six tenths of the largest slope it was trying to report.
-                </p>
+<p>{"The two forward implementations differ by exactly 0 because they perform the same arithmetic. Their gradient checks reveal the distinction: the direction derivative agrees to 3.6e−10 and the length derivative to 1.1e−10, with a largest true direction slope of 2.9973. Omitting the projection misses by 1.8286, about six tenths of that largest slope. Identical predictions alone therefore do not establish that the parameter derivatives are correct."}</p>
                 <p>
                   And there is a structural check here too. Scaling a stored direction by any positive constant leaves every answer unchanged, so the loss is flat along the direction itself and the slope can have no part along it. The projected direction slope dotted with the direction is 8.9e−16, and the unprojected form&rsquo;s is 3.6914.
                 </p>
 </>
                 <KeepInMind>
-                  The direction&rsquo;s slope has to have its radial component
-                  projected out, and the check that costs nothing is the dot
-                  product with the direction, which is zero for the true slope.
-                </KeepInMind>
+                  The true direction gradient is orthogonal to the stored direction because positive rescaling leaves the effective weights unchanged. Their dot product is a useful structural check. It is an additional condition to test, rather than a substitute for the full derivative calculation.</KeepInMind>
               </SubSection>
 
               <SubSection title="20. Same slope, different destination">
                 <>
-<p>
-                  A reparameterisation that moved the parameters to the same place would be a renaming, so the last thing to check is that it does not. One step at a stride of 0.1 from the same slope lands the weight-normalised layer&rsquo;s effective weights 0.0364 away from where the dense layer&rsquo;s land. The lengths say where the difference went.
-                </p>
-                <p>
-                  Neuron 1 goes from a length of 1 to 1.2286 under weight normalisation and to 1.2347 under the dense layer, neuron 3 from 0.5 to 0.3040 and 0.3247, and under the dense layer part of each step that was meant for the direction changed the length as a side effect, where under weight normalisation only the length&rsquo;s own slope could move it.
-                </p>
+<p>Changing parameter coordinates can change the effective weight update produced by the same numerical learning rate. In the displayed example, one step at 0.1 leaves the effective weights 0.0364 away from the ordinary dense-layer update. Comparing the resulting norms shows part of that difference.</p>
+                <p>For neuron 1, the effective norm changes from 1 to 1.2286 under weight normalization and to 1.2347 under the dense-layer update. For neuron 3, it changes from 0.5 to 0.3040 and 0.3247 respectively. The ordinary update changes the weight components directly. The normalized update changes the scalar and direction coordinates separately, producing a different effective step.</p>
 </>
                 <KeepInMind>
                   The same learning rate applied to the same slope arrives
@@ -857,24 +695,14 @@ export default function NormalisationLayersPage() {
             <>
               <SubSection title="21. The experiment">
                 <>
-<p>
-                  Whether any of this helps is a measurement, and the arrangement is the dropout page&rsquo;s. Twenty-five people are too few to hold out a fixed group, so each run deals the crowd into five folds, trains on twenty and holds out five, and repeats until every person has been held out once, so the held-out accuracy is counted over all twenty-five.
-                </p>
+<p>This experiment repeats the dropout page’s five-fold evaluation. Each model trains on twenty of the twenty-five observations and predicts the remaining five, until every observation has an out-of-fold prediction. Repeating the split and initialization seeds helps inspect the variability of this small-sample comparison.</p>
                 <p>
-                  Heights and weights are put into standard units using the training rows of each fold only. The whole of that is repeated under five seeds and five arrangements of the same sixteen-unit network, no normalisation, a batch layer between the hidden and output layers, a layer-normalising layer there, an RMS layer there, and a weight-normalised hidden layer with nothing inserted, which is a hundred and twenty-five training runs of four hundred full-batch epochs.
+
+                  Heights and weights are put into standard units using the training rows of each fold only. The whole of that is repeated under five seeds and five arrangements of the same sixteen-unit network, no normalization, a batch layer between the hidden and output layers, a layer-normalizing layer there, an RMS layer there, and a weight-normalized hidden layer with nothing inserted, which is a hundred and twenty-five training runs of four hundred full-batch epochs.
                 </p>
 </>
-                <p>
-                  Two honest limits before the numbers. The stride of one was
-                  chosen for the plain network on the dropout page and is held
-                  the same under every arrangement, so what is compared is the
-                  arrangement and not a tuned version of each. And the batch
-                  layer comes after the rectifier rather than before it,
-                  because here an activation function belongs to the neuron and a normalising
-                  layer can only go between layers; the original paper
-                  standardises the score before the activation function, and both orders are
-                  used in practice.
-                </p>
+                <p>The comparison keeps the learning rate at one, the value chosen for the plain network in the dropout lesson. It therefore compares these arrangements under one shared setting, rather than a separately tuned version of each.</p>
+                <p>In this SDK, the activation belongs inside the neuron, so the normalization layer follows the rectifier. The original batch-normalization paper normalizes the score before activation. Both orders occur in practice, and the placement is part of what defines the experiment.</p>
                 <KeepInMind>
                   A held-out score on twenty-five people moves by 0.04 per
                   person, so the spread across seeds, and not any one number,
@@ -889,54 +717,34 @@ export default function NormalisationLayersPage() {
                   Across the five seeds the plain network trains to 0.992 and holds out at 0.744, the dropout page&rsquo;s numbers, since it is the same network under the same seeds. The batch layer trains to 0.904 and holds out at 0.640, and its seeds spread from 0.60 to 0.68, every one of them below the plain network&rsquo;s mean.
                 </p>
                 <p>
-                  Layer normalisation trains to 0.910 and holds out at 0.696, RMS to 0.870 and 0.720, and weight normalisation to 0.986 and 0.752, spread 0.68 to 0.80, which is the one arrangement whose seeds are level with the plain network&rsquo;s rather than below them.
+
+                  Layer normalization trains to 0.910 and holds out at 0.696, RMS to 0.870 and 0.720, and weight normalization to 0.986 and 0.752, spread 0.68 to 0.80, which is the one arrangement whose seeds are level with the plain network&rsquo;s rather than below them.
                 </p>
 </>
                 <NumberTable
                   headings={["arrangement", "training accuracy", "held out", "held out across seeds", "training loss at the end"]}
                   rows={[
-                    ["no normalisation", "0.992", "0.744", "0.64 to 0.84", "0.0829"],
+                    ["no normalization", "0.992", "0.744", "0.64 to 0.84", "0.0829"],
                     ["batch layer", "0.904", "0.640", "0.60 to 0.68", "0.2088"],
-                    ["layer normalisation", "0.910", "0.696", "0.64 to 0.76", "0.1604"],
-                    ["RMS normalisation", "0.870", "0.720", "0.64 to 0.80", "0.2392"],
-                    ["weight normalisation", "0.986", "0.752", "0.68 to 0.80", "0.0775"],
+                    ["layer normalization", "0.910", "0.696", "0.64 to 0.76", "0.1604"],
+                    ["RMS normalization", "0.870", "0.720", "0.64 to 0.80", "0.2392"],
+                    ["weight normalization", "0.986", "0.752", "0.68 to 0.80", "0.0775"],
                   ]}
                   caption="Means over five seeds, each seed five folds, four hundred epochs of full-batch descent at a stride of one, sixteen hidden units."
                 />
-                <p>
-                  The textbook claim is that normalising the hidden block makes
-                  a network train better, and on this crowd it did not hold.
-                  The three activation normalisers all trained to a lower
-                  accuracy and a higher loss than the plain network at the same
-                  stride, and the batch layer held out worse by more than the
-                  seed spread can excuse. Weight normalisation, which changes
-                  the surface and not the function, finished 0.008 above the
-                  plain network on held-out accuracy and 0.0054 below it on
-                  loss, which is inside what the seeds move by.
-                </p>
+                <p>At the shared learning rate, the three activation-normalization arrangements finish with lower training accuracy and higher training loss than the plain network. The batch-normalized arrangement also has lower held-out scores in these runs. Weight normalization finishes 0.008 higher in mean held-out accuracy and 0.0054 lower in training loss than the plain comparison. These are results under one common rate, not independently tuned optima or a general ranking of the methods.</p>
                 <KeepInMind>
-                  On twenty-five people at a fixed stride, none of the four
-                  layers raised the held-out score in a way the seeds can
-                  distinguish from chance, and the batch layer lowered it,
-                  which is as far as five seeds on twenty-five people can
-                  carry the comparison.
-                </KeepInMind>
+                  The repeated runs show how these implementations behave on this small dataset under a fixed configuration. The small mean differences and variability limit any claim of improvement, while the batch-normalized configuration performs worse in the tested runs. Further datasets and tuning would be needed for a broader comparison.</KeepInMind>
               </SubSection>
 
               <SubSection title="23. Speed of training, measured">
-                <p>
-                  The original claim was about speed rather than accuracy, and
-                  that is a different measurement. The curves are one seed on
-                  the whole crowd, the loss the backward pass measured after
-                  every epoch, and each is timed against a loss of 0.3.
-                </p>
+                <p>We can also compare how many epochs each run needs to reach a chosen loss. The curves below use one seed on the full crowd and a threshold of 0.3. This measures progress per epoch, not elapsed training time; normalization also adds work within an epoch.</p>
                 <ArrangementCurves />
                 <>
-<p>
-                  The two row layers get there first, at epoch 16 against the plain network&rsquo;s 77, so the speed claim held for them at the start of training. It did not hold for the batch layer, which crossed 0.3 at epoch 119, and it did not carry through to the end for either row layer, where layer normalisation finished at a loss of 0.1041 against the plain 0.0813 and RMS at 0.4284 with an accuracy of 0.76.
-                </p>
+<p>The two row-normalization runs first reach the threshold at epoch 16, compared with epoch 77 for the plain network. The batch-normalized run reaches it at epoch 119. Fewer epochs to this threshold do not guarantee the best final fit: layer normalization finishes at loss 0.1041 versus 0.0813 for the plain network, while RMS finishes at 0.4284 and accuracy 0.76.</p>
                 <p>
-                  Weight normalisation and the plain network start from the identical loss of 0.9863, because the directions are drawn from the same stream in the same order, cross 0.3 on the same epoch, and part only at the end, 0.0753 against 0.0813.
+
+                  Weight normalization and the plain network start from the identical loss of 0.9863, because the directions are drawn from the same stream in the same order, cross 0.3 on the same epoch, and part only at the end, 0.0753 against 0.0813.
                 </p>
 </>
                 <p>
@@ -949,20 +757,20 @@ export default function NormalisationLayersPage() {
                   is not quite the curve the deployed model would report.
                 </p>
                 <KeepInMind>
+
                   Faster at the start is a claim the row layers kept on this
                   crowd and the batch layer did not, and lower at the end is a
-                  claim none of the activation normalisers kept. Time the
+                  claim none of the activation normalizers kept. Time the
                   curve against a threshold and read the end separately.
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="24. Reading a small result honestly">
+              <SubSection title="24. Interpreting the Small-Sample Comparison" id="24-reading-a-small-result-honestly">
                 <>
-<p>
-                  The network the batch layer was built for was dozens of layers deep, trained on mini-batches of a large dataset, and its drift compounded through every layer. The network here has one hidden layer, trains on its whole twenty-row batch at once, and can only overfit the mixed middle of the crowd, which no method can generalise from.
-                </p>
+<p>Batch normalization was introduced and evaluated with deep networks and minibatch training. This page uses one hidden layer and a full training fold of twenty observations per update. That difference in architecture and batch regime matters. The mixed labels make fitting and generalization difficult here, but the small experiment does not prove that no method can learn a useful pattern.</p>
                 <p>
-                  Between those two lies most of practice, and what the measurements support is narrower than the folklore. A normalising layer changes the surface the gradient descends, and at a given stride that surface can come out easier or harder, so whether it helped is measured across seeds rather than read off the name.
+
+                  Between those two lies most of practice, and what the measurements support is narrower than the folklore. A normalizing layer changes the surface the gradient descends, and at a given stride that surface can come out easier or harder, so whether it helped is measured across seeds rather than read off the name.
                 </p>
 </>
                 <KeepInMind>
@@ -980,7 +788,7 @@ export default function NormalisationLayersPage() {
           title: "Questions on Parts 6 and 7",
           quiz: [
             choice(
-              "What does weight normalisation change?",
+              "What does weight normalization change?",
               [
                 "Where the parameters live, storing a direction and a length in place of a weight vector",
                 "The distribution of the hidden block at runtime",
@@ -988,7 +796,7 @@ export default function NormalisationLayersPage() {
                 "The activation the neuron applies",
               ],
               0,
-              "Its forward pass is a dense layer’s, value for value, and the two layers’ answers differ by exactly 0. Written the ordinary way neither the length nor the direction is a parameter, so descent can only move the length by moving every component at once, and any step that changes the length also swings the direction.",
+              "Weight normalization stores a direction vector and a separate magnitude for each neuron, then forms the effective weight vector from them. A dense layer stores the effective vector directly. Both can represent the same forward calculation, but gradient descent acts on different parameters and can therefore follow different update paths. Ordinary dense updates do not necessarily change both length and direction on every step.",
             ),
             trueFalse(
               "The direction’s slope should keep its radial component, since lengthening the vector is part of what a direction does.",
@@ -996,7 +804,7 @@ export default function NormalisationLayersPage() {
               "Scaling a stored direction by any positive constant leaves every answer unchanged, so the loss is flat along the direction itself and its slope can have no part along it. The projected slope dotted with the direction comes to 8.9e−16 where the unprojected form gives 3.6914, and the unprojected block misses the finite difference by 1.8286.",
             ),
             choice(
-              "One step at a stride of 0.1 from the same slope. How far apart do the weight-normalised layer’s effective weights and the dense layer’s land?",
+              "One step at a stride of 0.1 from the same slope. How far apart do the weight-normalized layer’s effective weights and the dense layer’s land?",
               [
                 "0.0364, with the difference showing up in the lengths",
                 "Exactly 0, since the forward pass is the same arithmetic",
@@ -1004,44 +812,45 @@ export default function NormalisationLayersPage() {
                 "1.8286",
               ],
               0,
-              "A reparameterisation that moved the parameters to the same place would be a renaming. Under the dense layer part of each step meant for the direction changed the length as a side effect, taking neuron 1 to 1.2347 where weight normalisation takes it to 1.2286.",
+              "The two layers start with equal effective weights, but their gradients refer to different parameterizations. The same numerical learning rate can therefore produce different effective weights after one update. The comparison demonstrates changed optimization behavior; equal forward expressiveness does not require identical training trajectories.",
             ),
             several(
               "Which of these did the measurement on the crowd network find?",
               [
                               "The batch layer held out at 0.640 against the plain network’s 0.744, with every seed below the plain mean",
-                              "Weight normalisation finished 0.008 above the plain network on held-out accuracy, which is inside what the seeds move by",
+                              "Weight normalization finished 0.008 above the plain network on held-out accuracy, which is inside what the seeds move by",
                               "The two row layers crossed a loss of 0.3 at epoch 16 against the plain network’s 77",
-                              "The three activation normalisers all trained to a higher accuracy than the plain network",
+                              "The three activation normalizers all trained to a higher accuracy than the plain network",
                             ],
               [0, 1, 2],
-              "The three activation normalisers all trained to a lower accuracy and a higher loss at the same stride. A held-out score on twenty-five people moves by 0.04 per person, so the spread across seeds rather than any single number is the ruler the comparison is measured with.",
+              "The three activation normalizers all trained to a lower accuracy and a higher loss at the same stride. A held-out score on twenty-five people moves by 0.04 per person, so the spread across seeds rather than any single number is the ruler the comparison is measured with.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "arrangement | training accuracy | held out | held out across seeds | training loss at the end\nno normalisation | 0.992 | 0.744 | 0.64 to 0.84 | 0.0829\nbatch layer | 0.904 | 0.640 | 0.60 to 0.68 | 0.2088\nlayer normalisation | 0.910 | 0.696 | 0.64 to 0.76 | 0.1604\nRMS normalisation | 0.870 | 0.720 | 0.64 to 0.80 | 0.2392\nweight normalisation | 0.986 | 0.752 | 0.68 to 0.80 | 0.0775\n\nSeed-0 epoch when training loss first falls below 0.3:\nplain: 77; layer normalisation: 16; RMS normalisation: 16."
               },
             ),
             trueFalse(
-              "The same batch-normalisation layer can give different predictions using the current batch statistics and using its running statistics.",
+              "The same batch-normalization layer can give different predictions using the current batch statistics and using its running statistics.",
               true,
               "Training uses statistics from the current batch. Prediction uses a moving estimate gathered over earlier updates. Those estimates can lag or differ from the current batch, so the two modes need not produce identical predictions. The experiment observes that difference during training.",
             ),
         ],
         },
         {
-          title: "Part 8. Using the Same Normalisation Conventions Throughout" , id: "part-8-implementation-and-failure-contracts",
+          title: "Part 8. Using the Same Normalization Conventions Throughout" , id: "part-8-implementation-and-failure-contracts",
           content: (
             <>
               <SubSection title="25. Axes, running statistics and the backward pass" id="25-what-a-complete-implementation-must-specify">
                 <p>Start by identifying the axis over which the statistics are measured. The variance divisor and position of epsilon affect the result, as do the initial scale and shift parameters.</p>
-                <p>Training and prediction can use different statistics. Record which purpose is the default, how running values are initialised, when and how they update, and whether the running variance uses a bias correction. These are necessary to explain why the same row can receive different outputs in the two modes.</p>
-                <p>For the backward pass, account for all three gradient routes and the scale and shift gradients. Weight normalisation has a separate constraint: its direction gradient removes the radial component. A zero direction needs explicit treatment because it supplies no direction to normalise.</p>
+                <p>Training and prediction can use different statistics. Record which purpose is the default, how running values are initialized, when and how they update, and whether the running variance uses a bias correction. These are necessary to explain why the same row can receive different outputs in the two modes.</p>
+                <p>For the backward pass, account for all three gradient routes and the scale and shift gradients. Weight normalization has a separate constraint: its direction gradient removes the radial component. A zero direction needs explicit treatment because it supplies no direction to normalize.</p>
               </SubSection>
 
               <SubSection title="26. A single row, constant features and other revealing inputs" id="26-the-edges-each-one-probed">
                 <p>
+
                   Every row below was run rather than reasoned about, and the
-                  behaviours fall into three kinds, refused with a typed error,
+                  behaviors fall into three kinds, refused with a typed error,
                   accepted with an answer that follows from the arithmetic, and
                   accepted with an answer worth knowing about.
                 </p>
@@ -1050,46 +859,38 @@ export default function NormalisationLayersPage() {
                   reasonHeading="Which statistics the layer uses"
                   rows={[
                     { expression: "an empty block", reason: "refused; a layer needs at least one row to respond to." },
-                    { expression: "one row, batch layer, while training", reason: "accepted, and answers zeros for every feature, since the row is its own batch and has no spread." },
+                    { expression: "one row, batch layer, while training", reason: "accepted; its centered values are zero, and the output is the learned shift, initially zero." },
                     { expression: "one row, batch layer, while predicting", reason: "accepted; the divisor is the running figures, and a fresh layer answers the row itself to within the epsilon." },
                     { expression: "one row, layer or RMS", reason: "accepted, exactly as it would be among any others." },
-                    { expression: "one feature, batch layer", reason: "accepted; a column of readings still has a spread." },
-                    { expression: "one feature, layer normalisation", reason: "accepted, and every row answers zero, since a row of one value has no spread; under RMS each answers one." },
-                    { expression: "a constant column, or a constant row", reason: "accepted and answers zeros for it, which is the epsilon doing its job." },
+                    { expression: "one feature, batch layer", reason: "accepted; multiple observations can supply across-row variance for the single feature. A constant column uses the epsilon rule." },
+                    { expression: "one feature, layer normalization", reason: "accepted; one-feature layer normalization centers to zero before the affine step. RMS preserves the input sign and gives a magnitude below or near one for a nonzero input, depending on epsilon; zero remains zero." },
+                    { expression: "a constant column, or a constant row", reason: "accepted; centering a constant normalization group produces zeros before scale and shift. RMS does not center, so a nonzero constant row need not produce zeros." },
                     { expression: "a value that is not finite", reason: "refused at the boundary, by the same guard every layer's inputs pass through." },
                     { expression: "a block of the wrong width, or a single row without a row axis", reason: "refused, naming the arrangement the layer reads and the one it was handed." },
-                    { expression: "a backward step from a prediction pass, or from another layer's response", reason: "refused; the batch layer's backward step needs the statistics its own training pass measured, and a prediction pass standardised by different numbers." },
+                    { expression: "a backward step from a prediction pass, or from another layer's response", reason: "a prediction response without recorded batch statistics is refused. The type check does not identify which batch-normalization instance produced a same-shaped statistics response; callers must retain the matching response." },
                     { expression: "a slope arriving in the wrong arrangement", reason: "refused, for every layer." },
-                    { expression: "a step with no gradient, or with a plain gradient", reason: "refused; the batch layer steps only by a gradient carrying the batch's mean and variance, and the weight-normalised layer only by one carrying the lengths' slopes." },
+                    { expression: "a step with no gradient, or with a plain gradient", reason: "refused; the batch layer steps only by a gradient carrying the batch's mean and variance, and the weight-normalized layer only by one carrying the lengths' slopes." },
                     { expression: "a momentum of one, or an epsilon of zero", reason: "refused at construction; one would never learn, and zero is a division by zero waiting for a constant column. A momentum of zero is accepted and makes prediction follow the last batch." },
                     { expression: "a negative running variance, or a scale of the wrong length", reason: "refused at construction." },
-                    { expression: "a scale of zero", reason: "accepted, and the layer answers the shift for every row; nothing forbids it, and the gradient will move it." },
-                    { expression: "a direction of all zeros, for weight normalisation", reason: "refused at construction, and a step that lands a direction exactly on zero is refused the same way, since both slopes divide by its length." },
+                    { expression: "a scale of zero", reason: "accepted; the output equals the shift. A subsequent update changes the zero scale only if its computed gradient is nonzero." },
+                    { expression: "a direction of all zeros, for weight normalization", reason: "refused at construction, and a step that lands a direction exactly on zero is refused the same way, since both slopes divide by its length." },
                     { expression: "a negative magnitude", reason: "accepted; the neuron faces the other way, which is a direction and not an error." },
                     { expression: "a batch layer of the wrong width in a stack", reason: "refused when the stack is built, before any row is read." },
                     { expression: "a ragged block in a request", reason: "refused in words, naming the row whose width differs." },
                   ]}
                 />
-                <p>
-                  The single row while training deserves the last word, because
-                  it is the edge that is accepted rather than refused and is
-                  documented rather than defended. A training loop that feeds
-                  one row at a time through a batch layer trains on a block of
-                  zeros and raises nothing, which follows from the arithmetic
-                  and is still a mistake, and the remedy is the axis of Part 5
-                  rather than a guard.
-                </p>
+                <p>With one observation per batch, this per-feature batch-normalization rule removes the varying input values during training. It returns the shift and passes zero input gradients for that batch. If the task requires single-example updates, consider row normalization on a suitable feature representation or prediction-mode use of representative fixed statistics. The choice depends on what information and training behavior the application needs.</p>
               </SubSection>
             </>
           ),
         },
-        {
-          title: "Practice. Standardising a Block With the Library",
+        { id: "practice-standardising-a-block-with-the-library",
+          title: "Practice. Standardizing a Block With the Library",
           practice: [
             exercise(
               "Standardise the four, then undo it",
               [
-  "Send the supplied four-observation, two-feature block through a fresh BatchNormalization layer in training mode. Print batch means, epsilon-adjusted deviations to seven decimals and standardised outputs.",
+  "Send the supplied four-observation, two-feature block through a fresh BatchNormalization layer in training mode. Print batch means, epsilon-adjusted deviations to seven decimals and standardized outputs.",
   "Build a second layer with scale equal to those deviations and shift equal to those means. Apply it in training mode to the same block; print reconstruction and largest absolute difference from the original."
 ],
               `import numpy as np
@@ -1128,7 +929,7 @@ largest gap to the raw block 8.9e-16`,
               { hints: [
   "Batch statistics combine observations down each feature column.",
   "The denominator includes epsilon, so use the actual response deviation rather than a rounded display value when setting the inverse scale."
-], check: numberCheck("What deviation does the layer read down the first column, to seven places?", 9.0000006, 6e-08, "The first deviation is about 9.0000006. Epsilon is included before the square root, so it differs slightly from the raw standard deviation."), question: "Can learned scale and shift undo a batch’s standardisation?" },
+], check: numberCheck("What deviation does the layer read down the first column, to seven places?", 9.0000006, 6e-08, "The first deviation is about 9.0000006. Epsilon is included before the square root, so it differs slightly from the raw standard deviation."), question: "Can learned scale and shift undo a batch’s standardization?" },
             ),
             exercise(
               "Step the running figures a hundred times",
@@ -1180,7 +981,7 @@ widest gap after 1 step 5.7333, after 10 1.0433, after 100 6.5e-05
 first under a hundredth at step 53`,
               { hints: [
   "In this library the running-state update occurs when the layer is stepped, not merely during its forward response.",
-  "Zero upstream derivatives isolate that running-state behaviour from learned scale/shift updates."
+  "Zero upstream derivatives isolate that running-state behavior from learned scale/shift updates."
 ], check: numberCheck("What is the first column’s running variance after one step?", 9.0, 5e-05, "The first running variance becomes 9.0. It is still moving from the initial stored state toward the batch statistic, so prediction and training outputs can differ."), question: "When do running statistics start resembling the repeated batch?" },
             ),
             exercise(
@@ -1235,7 +1036,7 @@ first reading of the first row: passed down -0.1605, by nudging -0.1605, naive 0
               { hints: [
   "Changing one input also changes its column’s batch mean and variance.",
   "Use fresh forward responses for both perturbations; keep the upstream coefficient block fixed for the scalar objective."
-], check: numberCheck("What slope does the layer pass down to the first reading of the first row, to four places?", -0.1605, 0.0005, "The full derivative is -0.1605 and agrees with the input perturbation. The naive division misses how changing one observation also changes its batch mean and variance."), question: "Why does the batch-normalisation derivative include other observations?" },
+], check: numberCheck("What slope does the layer pass down to the first reading of the first row, to four places?", -0.1605, 0.0005, "The full derivative is -0.1605 and agrees with the input perturbation. The naive division misses how changing one observation also changes its batch mean and variance."), question: "Why does the batch-normalization derivative include other observations?" },
             ),
             exercise(
               "One row, three layers",
@@ -1282,9 +1083,9 @@ RMS normalisation, the four rows [[0.2, 1.3999997], [0.1561737, 1.4055637], [1.3
 RMS normalisation, the first row alone [0.2, 1.3999997], the same as among the four True
 RMS normalisation, the second row 0.1562 and 1.4056`,
               { hints: [
-  "Batch normalisation pools statistics across observations; layer and RMS forms here operate within each row.",
-  "RMS normalisation divides by a root-mean-square scale without subtracting the row mean."
-], check: numberCheck("What does RMS normalisation answer for the larger entry of the second row, (1, 9), to four places?", 1.4056, 0.0005, "The larger second-row RMS output is 1.4056. This rule retains the within-row ratio because it scales without first subtracting the mean."), question: "Which normalisation depends on the other observations in a batch?" },
+  "Batch normalization pools statistics across observations; layer and RMS forms here operate within each row.",
+  "RMS normalization divides by a root-mean-square scale without subtracting the row mean."
+], check: numberCheck("What does RMS normalization answer for the larger entry of the second row, (1, 9), to four places?", 1.4056, 0.0005, "The larger second-row RMS output is 1.4056. This rule retains the within-row ratio because it scales without first subtracting the mean."), question: "Which normalization depends on the other observations in a batch?" },
             ),
           ],
         },

@@ -250,10 +250,11 @@ export function ChainCollapse() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The chain&rsquo;s output over the plane, with the tall heavy person
-        marked. The collapsed neuron is the second weight times the first
-        neuron&rsquo;s three numbers, plus the second bias; the plane fit is
-        the least-squares plane through every cell.
+        The surface shows the chain&apos;s output for each height and weight,
+        with the tall, heavy person marked. With identity activations, we can
+        multiply the first neuron&apos;s weights and bias by the second weight,
+        then add the second bias. The resulting single neuron gives the same
+        outputs. The separate plane fit is calculated from the displayed cells.
       </p>
 
       {message && (

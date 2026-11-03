@@ -70,9 +70,9 @@ export function ShiftInvariance() {
       verdict: `largest change ${tiny(invariance.slope_gap)}`,
     },
     {
-      method: "standardising afterwards",
-      raw: "standardised",
-      centred: "standardised",
+      method: "standardizing afterwards",
+      raw: "standardized",
+      centred: "standardized",
       verdict: `largest change ${tiny(invariance.standardized_gap)}`,
     },
   ];
@@ -84,7 +84,7 @@ export function ShiftInvariance() {
           <tr className="border-b border-slate-200 text-left dark:border-slate-800">
             <th className="py-2 pr-4 font-semibold text-slate-600 dark:text-slate-400">method</th>
             <th className="py-2 pr-4 font-semibold text-slate-600 dark:text-slate-400">recorded columns</th>
-            <th className="py-2 pr-4 font-semibold text-slate-600 dark:text-slate-400">centred columns</th>
+            <th className="py-2 pr-4 font-semibold text-slate-600 dark:text-slate-400">centered columns</th>
             <th className="py-2 font-semibold text-slate-600 dark:text-slate-400">what changed</th>
           </tr>
         </thead>

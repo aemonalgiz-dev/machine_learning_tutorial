@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { PositionExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Positional Encoding · oop_ml", description: "The same words in a different order can mean something different. A model that receives token vectors needs a way to know where those tokens occur, which positional information provides." };
+export const metadata: Metadata = { title: "Positional Encoding · Perceptron Lab", description: "Word order affects meaning, even when the words themselves stay the same. Positional information lets a model distinguish where tokens occur and use that order in its calculations." };
 
 export default function PositionalEncodingPage() {
   return <ConceptPage
       lessonId="positional-encoding"
-      intuition={lessonIntuitions["positional-encoding"]} title="Positional Encoding" tagline={"The same words in a different order can mean something different. A model that receives token vectors needs a way to know where those tokens occur, which positional information provides."}
+      intuition={lessonIntuitions["positional-encoding"]} title="Positional Encoding" tagline={"Word order affects meaning, even when the words themselves stay the same. Positional information lets a model distinguish where tokens occur and use that order in its calculations."}
     openingTitle="The Same Words Can Say Something Different"
     technicalStart="Part 2. Building a Position Vector"
     prerequisites={<>Read <Link href="/concepts/embedding-layers">embedding layers</Link> for token vectors and <Link href="/concepts/attention">attention</Link> for how tokens gather information from one another.</>}
@@ -40,10 +40,15 @@ export default function PositionalEncodingPage() {
         <SubSection title="2. Use pairs that change at different rates">
           <p>Let p be the position, starting at zero. Let d be the vector width and k identify a pair of coordinates. B controls the spread of frequencies. Each pair has its own rate, one over B raised to a power that grows with k, so the first pair turns by one radian per position and every later pair turns more slowly. With the default base used here, a width of four has two pairs.</p>
           <Equation>{`B = 10000\nangle(p, k) = p / B^(2k/d)\nPE[p, 2k]   = sin(angle(p, k))\nPE[p, 2k+1] = cos(angle(p, k))\n\nFor d = 4 at p = 1:\nFirst pair angle  = 1 / 10000^0   = 1\nSecond pair angle = 1 / 10000^0.5 = 0.01`}</Equation>
-          <p>A single sine value repeats and can be ambiguous. Pairing sine and cosine gives the phase of one oscillation, which is a point on a circle, and moving forward by a fixed number of positions turns that point by a fixed angle wherever the move started. A layer above can therefore read a distance as a rotation, and the rotation for a given distance is the same everywhere in the sequence.</p>
-          <p>Using several pairs at different frequencies provides patterns over different distances. The first pair completes a turn every 2π positions, which is about 6.28, and the second needs a hundred times as many. The fast pair on its own would nearly confuse position six with position zero, since by then it has come most of the way round.</p>
+          <p>
+                  {"A sine value alone cannot identify the phase of an oscillation. The sine–cosine pair records a point on its circle. Moving by a fixed offset applies the same rotation to that pair wherever the move begins. This provides a relation a model can learn to use; it does not automatically decode an arbitrary distance from a mixed token-and-position row."}
+                </p>
+          <p>{"The sine-cosine pairs vary at different rates, letting the position vector distinguish distances at several scales. The first pair completes a turn every 2π positions, about 6.28; the second takes a hundred times as many positions. Near position six, the fast pair is already close to where it started at position zero. The slower pair supplies additional information that the fast pair alone would nearly lose."}</p>
           <Equation>{`Position 0, first pair  = (0, 1)\nPosition 6, first pair  ≈ (−0.2794, 0.9602)\n\nPosition 0, second pair = (0, 1)\nPosition 6, second pair ≈ (0.0600, 0.9982)`}</Equation>
-          <p>The slow pair has barely moved, and that small movement is what keeps the two positions apart. Lowering the base speeds the slow pairs up. At a base of 2 the second pair&rsquo;s angle at position one is 1 over the square root of 2, about 0.7071, and its entries become 0.6496 and 0.7602 instead of 0.0100 and 0.99995, which is what the frequency base control in the playground shows. None of this makes the finite-width encoding a guarantee of uniquely identifying arbitrarily distant positions.</p>
+          <p>
+                  {"The slow pair keeps position six distinct from position zero while the fast pair nearly returns to its start. For bases above one, lowering the base speeds the later pairs relative to their default rates. The playground shows that change. Finite precision and limited width still prevent a guarantee of uniquely identifying arbitrarily distant positions."}
+                </p>
+                <Equation>{"For B = 2, d = 4, k = 1 and p = 1:\nangle = 1 / √2 ≈ 0.7071\n(sin(angle), cos(angle)) ≈ (0.6496, 0.7602)"}</Equation>
         </SubSection>
         <SubSection title="3. Add the pattern to every sequence">
           <p>The SDK constructs the pattern once, freezes it, and broadcasts it over the batch. Position zero has the same positional vector in every sequence, because position means where a token sits inside its own sequence and not which sequence it belongs to. If the vector width is odd, the last coordinate contains a sine value without its paired cosine.</p>
@@ -52,11 +57,13 @@ export default function PositionalEncodingPage() {
         </SubSection>
       </> },
       { title: "Part 3. Order Is Different from Permission to Look", content: <>
-        <p>A positional encoding gives information about location. A causal mask restricts which locations can contribute. They solve different problems and can be used together. The attention playground lets you enable them separately, and the two controls change different things, since the mask changes which columns of a row may be used and the encoding changes what every row holds.</p>
+        <p>{"Position encoding changes the information stored in each token's row. A causal mask changes which source columns that row may use during attention. The playground exposes them separately because knowing a token's position and preventing access to future tokens are different requirements."}</p>
         <WorkedExample title="Two identical tokens, with and without positions">
           <p>Take the attention lesson&rsquo;s default example, the tokens red, blue, red with projections that leave every vector unchanged, and read the row of shares each red token produces over the three tokens.</p>
           <Equation>{`Positions off, mask off\n  first red = [0.3837, 0.2327, 0.3837]\n  last red  = [0.3837, 0.2327, 0.3837]\n\nPositions on, mask off\n  first red = [0.3349, 0.4053, 0.2599]\n  last red  = [0.2013, 0.1547, 0.6440]\n\nPositions off, mask on\n  first red = [1, 0, 0]\n  last red  = [0.3837, 0.2327, 0.3837]`}</Equation>
-          <p>Without positions the two red tokens are the same input, so their rows are identical and nothing downstream can tell them apart. Adding the pattern makes them different inputs, and the rows differ with no training at all. The mask does something else. It leaves the last red&rsquo;s row exactly as it was, because that token may read everything before it, and it empties the entries the first red is not allowed to use while the remaining shares still total one.</p>
+          <p>
+                  {"With neither positions nor a causal mask, the identical red inputs produce identical attention rows in this example. Adding positions changes those rows. Applying the mask instead restricts the first red to itself, while the last red can still use every input. These results distinguish positional input from permitted attention; they do not rule out other sources of order information elsewhere in a model."}
+                </p>
         </WorkedExample>
         <KeepInMind><p>Being able to calculate a position vector for a longer sequence does not guarantee that a trained model will work well at that length. Position information also does not impose grammatical understanding. It gives the model information from which useful order-dependent behavior can be learned.</p></KeepInMind>
         <p>The sinusoidal construction appears in <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a>. The parameter called <code>wavelength</code> in this SDK supplies the frequency base B in the equations above.</p>
@@ -65,7 +72,7 @@ export default function PositionalEncodingPage() {
         trueFalse(
           "At position zero the added pattern leaves the token vector unchanged.",
           false,
-          "At position zero all the sine entries are zero and all the cosine entries are one, so a token vector of [1, 0, 1, 0] comes out as [1, 1, 1, 1]. The token has not changed, and the different sums are what indicate that its occurrences occupy different places in the sequence.",
+          "The token's identity stays the same, but the vector passed to the next layer changes. At position zero the sine entries are zero and the cosine entries are one. Adding that pattern to [1, 0, 1, 0] produces [1, 1, 1, 1]. Position zero therefore has a nonzero positional contribution.",
         ),
         choice(
           "Why is each coordinate paired with another at the same frequency rather than used on its own?",
@@ -76,7 +83,7 @@ export default function PositionalEncodingPage() {
             "Pairing is what makes the pattern trainable",
           ],
           0,
-          "Using several pairs at different frequencies then provides patterns over different distances. None of that makes a finite-width encoding a guarantee of uniquely identifying arbitrarily distant positions.",
+          "At a shared frequency, sine and cosine describe the phase together. A fixed position offset can be expressed as a rotation of that pair, independent of the starting position. Several frequencies provide patterns that change over different distances. Finite precision and finite width still prevent this from guaranteeing a unique representation for arbitrarily distant positions.",
         ),
         several(
           "Which of these hold for the pattern this SDK builds?",
@@ -103,7 +110,7 @@ export default function PositionalEncodingPage() {
             "10000 and 100",
           ],
           0,
-          "The first pair’s angle is the position over B to the power zero, which is the position itself, and the second pair’s is the position over B to the power one half, which at a base of 10000 is one over 100. That is why the first pair turns by one radian per position and completes a turn every 6.28 positions while the second needs a hundred times as many, and why lowering the base to 2 takes the second angle at position one up to about 0.7071.",
+          "For width four, the first pair uses angle one radian at position one. The second pair divides the position by the square root of the base.\n\n```math\nθ₀ = 1\nθ₁ = 1 / √10000 = 0.01\n```\n\nThe second pair therefore changes a hundred times more slowly. Lowering the base to two increases its angle at position one to about 0.7071 radians.",
         ),
       ] },
         {
@@ -149,7 +156,7 @@ position 3  pattern  [0.1411, -0.9900, 0.0300, 0.9996]
             ),
             exercise(
               "Lower the base and watch the slow pair speed up",
-              ["Part 2 says lowering the frequency base speeds up the slow pairs, and that at a base of 2 the second pair’s entries at position one become 0.6496 and 0.7602 instead of 0.0100 and 0.99995. Build the layer at bases of 10000, 100 and 2, and print the pattern row for position one at each, to five places.", "Watch which entries change. The first pair’s angle is the position itself whatever the base, so its two entries should not move at all."],
+              ["Compare positional patterns at frequency bases 10000, 100 and 2. For each base, build a four-position layer with vector width four and print the pattern at position one to five decimal places. This lets us change the frequency spacing while keeping the position and width fixed.", "Watch which entries change. The first pair’s angle is the position itself whatever the base, so its two entries should not move at all."],
               `from oop_ml import PositionalEncoding
 
 for base in (10000, 100, 2):
@@ -164,11 +171,11 @@ for base in (10000, 100, 2):
               `base 10000  position 1 = [0.84147, 0.54030, 0.01000, 0.99995]
 base 100  position 1 = [0.84147, 0.54030, 0.09983, 0.99500]
 base 2  position 1 = [0.84147, 0.54030, 0.64964, 0.76024]`,
-              { hints: ["The constructor’s wavelength keyword is the frequency base B in Part 2’s equations, and the lesson’s final paragraph says so.", "Position one is the second row of the pattern, since positions start at zero."], check: numberCheck("At a base of 2, what is the sine entry of the second pair at position one?", 0.6496, 0.0005, "The base controls the rate of the slower coordinate pair. Lowering it changes that pair’s angle at a given position, while the first pair keeps the same angle. Comparing the printed rows isolates this frequency choice from any learned token representation.") , question: "Which parts of the positional pattern change when we lower the frequency base?" },
+              { hints: ["Pass the frequency base with the wavelength keyword. It is the B used in the positional-encoding equations.", "Position one is the second row of the pattern, since positions start at zero."], check: numberCheck("At a base of 2, what is the sine entry of the second pair at position one?", 0.6496, 0.0005, "The base controls the rate of the slower coordinate pair. Lowering it changes that pair’s angle at a given position, while the first pair keeps the same angle. Comparing the printed rows isolates this frequency choice from any learned token representation.") , question: "Which parts of the positional pattern change when we lower the frequency base?" },
             ),
             exercise(
               "Tell two identical tokens apart",
-              ["Part 3 reads the attention lesson’s default example, the tokens red, blue, red with projections that leave every vector unchanged, and finds the two red tokens produce the same row of shares until positions are added. Reproduce it. Look the three tokens up through an embedding whose table is the identity, build an attention layer with identity projections, and read the shares with and without the pattern added.", "Print each token’s row of shares to four places under both settings. Without positions the two red rows should be identical, and with positions they should not be."],
+              ["Use the sequence red, blue, red from the attention lesson. Look up its vectors from an identity embedding table and build attention with identity projections. Compare attention shares for the original vectors with shares after adding positional encoding. Keep the weights fixed so positions are the only change.", "Print each token’s row of shares to four places under both settings. Without positions the two red rows should be identical, and with positions they should not be."],
               `import numpy as np
 
 from oop_ml import Embedding, MultiHeadAttention, PositionalEncoding

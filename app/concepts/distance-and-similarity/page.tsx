@@ -25,9 +25,9 @@ import { ThreeWordCounts } from "@/components/widgets/ThreeWordCounts";
 import { WhereNearnessIsUndefined } from "@/components/widgets/WhereNearnessIsUndefined";
 
 export const metadata: Metadata = {
-  title: "Distance and Similarity · oop_ml",
+  title: "Distance and Similarity · Perceptron Lab",
   description:
-    "Once words have vectors, we still need to decide what makes two vectors similar. Their distance, direction, and length can give us different answers, depending on the comparison we choose.",
+    "Vectors can be compared by the differences between their coordinates or by the angle between them. Those choices treat length differently and can change which words count as similar.",
 };
 
 export default function DistanceAndSimilarityPage() {
@@ -40,16 +40,10 @@ export default function DistanceAndSimilarityPage() {
       playgroundTitle="When do closeness and similarity disagree?"
       playgroundIntro="Choose the same pair under different comparison rules. Check whether a high or low score means a close match and whether vector length affects it."
       title="Distance and Similarity"
-      tagline={"Once words have vectors, we still need to decide what makes two vectors similar. Their distance, direction, and length can give us different answers, depending on the comparison we choose."}
+      tagline={"Vectors can be compared by the differences between their coordinates or by the angle between them. Those choices treat length differently and can change which words count as similar."}
       prerequisites={
         <>
-          A model that arranges things so that near means alike has to be asked
-          what near means, and nothing about that question belongs to any one
-          kind of data. It is answered here on word positions, because those are
-          small enough to fit live and to check by hand, and the answers carry
-          over unchanged to the positions a network gives pictures. The six
-          rules themselves are worked through on ordinary measurements over
-          on{" "}
+          {"The same vectors can have different nearest neighbors under different comparison rules. We will calculate those differences on a small word-vector table. These formulas also apply to image vectors, though their usefulness still depends on what the coordinates represent. For examples using ordinary measurements, read "}{" "}
           <Link
             href="/concepts/distance-metrics"
             className="text-indigo-600 hover:underline dark:text-indigo-400"
@@ -81,21 +75,15 @@ export default function DistanceAndSimilarityPage() {
                 <p>
                   Suppose each word already has a vector. We want to use those vectors to find similar words, but we still need to choose what similarity means numerically. Should we compare the distance between their endpoints, or the directions they point in? Those choices can rank the same words differently. Let&apos;s calculate both before deciding which information we want to keep.
                 </p>
-                <p>
-                  So the interesting object is not really the positions. It is the rule, and the positions are worth exactly what the rule can read out of them. Two people can hold the same table, ask the same question of it, and get different answers, and neither of them has made a mistake, because they picked up different rules.
-                </p>
-                <p>The rest of the page asks what each rule keeps and discards. A numerical comparison can be calculated correctly while giving poor search results. We will separate the properties of the comparison rule from evidence that its neighbours are useful for this collection of documents.</p>
+                <p>A representation becomes useful through the comparisons we make with it. The same vectors can produce different rankings under different rules because each rule retains different information. We need to choose that information according to the task.</p>
+                <p>The rest of the page asks what each rule keeps and discards. A numerical comparison can be calculated correctly while giving poor search results. We will separate the properties of the comparison rule from evidence that its neighbors are useful for this collection of documents.</p>
                 <p>
                   The worked numbers use words because a table of them is small enough to check by hand, and the same six rules are asked of a picture in exactly the same way.
                 </p>
                 <KeepInMind>
                   <p>
-                    A table of positions and a rule for comparing two of them
-                    are separate things, and only the pair together says
-                    anything. Where a piece of writing tells you that two words
-                    came out near each other, it has quietly told you which rule
-                    it used, or it has told you nothing.
-                  </p>
+                  {"When reporting nearest neighbors, name the comparison rule. Without it, another reader cannot reproduce the ranking or know which properties were retained."}
+                </p>
                 </KeepInMind>
               </SubSection>
 
@@ -124,44 +112,22 @@ export default function DistanceAndSimilarityPage() {
                 </p>
                 <InAModel>
                   <p>
-                    Twenty-three words at four numbers each is ninety-two
-                    numbers to hold, and twenty-three words make two hundred and
-                    fifty-three distinct pairs that can be asked about. A real
-                    vocabulary is nearer fifty thousand words at three hundred
-                    numbers, which is fifteen million numbers, and the count of
-                    pairs it could be asked about runs past a billion. That the
-                    small collection and the large one are the same shape of
-                    object is what makes the small one worth working on.
-                  </p>
+                  {"This example has 23 words, four coordinates per word and 253 unordered pairs. Larger vocabularies require more storage and comparisons, but the same operations apply. The small table lets us inspect those operations before dealing with scale."}
+                </p>
                 </InAModel>
               </SubSection>
 
               <SubSection title="3. A distance and a similarity are different objects">
+                <p>A distance is normally smaller for nearby representations, while a similarity score is normally larger for a stronger match. Their numerical ranges depend on the rule. Cosine similarity is bounded, for example, while a dot-product score is not generally bounded. The direction of a ranking and the meaning of its scale need to be stated explicitly.</p>
                 <p>
-                  There are two ways of putting a verdict about two positions
-                  into a number, and they point in opposite directions. A
-                  distance answers with something that grows as the two things
-                  get less alike, is zero when there is nothing between them,
-                  and has no upper limit at all, since two positions can always
-                  be moved further apart. A similarity answers with something
-                  that grows as they get more alike, and the useful ones are
-                  bounded, so that the largest value means as alike as this
-                  measure can express.
+                  {"A bounded score gives us a known numerical range, but not a calibrated meaning. A cosine gap near zero indicates nearly aligned vectors; deciding whether that alignment is useful still requires evidence from the representation and task. An unbounded Euclidean distance is also interpretable when its coordinate units and scale are known."}
                 </p>
                 <p>
-                  The boundedness is the difference that matters in practice rather than the direction. Two words that come back 0.0175 apart under a rule whose gap cannot exceed 2 are plainly near the top of what that rule can say, and the same pair is 0.3046 apart under the straight line, which means nothing at all until we know what the typical gap in this table is.
-                </p>
-                <p>
-                  So a similarity can be read on its own and a distance can only be read against other distances from the same table, which is why reported figures in this area are usually similarities.
+                  {"Read either kind of score with its definition and context. Changing preprocessing or the fitted representation can change what the same numerical value implies, even when the formula has fixed bounds."}
                 </p>
                 <NumberTable
                   headings={["", "a distance", "a bounded similarity"]}
-                  rows={[
-                    ["as alike as possible", "0", "the ceiling"],
-                    ["less alike", "grows", "falls"],
-                    ["upper limit", "none in general", "fixed, and known"],
-                    ["comparable across tables", "no", "yes"],
-                  ]}
+                  rows={[["ranking direction","smaller means closer","larger means more similar"],["possible range","depends on the rule and domain","fixed for the stated rule"],["zero or ceiling means","depends on what the rule ignores","may still identify different vectors"],["comparison across tables","requires compatible representation and scale","also requires compatible representation and calibration"]]}
                   caption="Two ways of answering the same question, and what each answer can be read against."
                 />
                 <KeepInMind>
@@ -177,27 +143,10 @@ export default function DistanceAndSimilarityPage() {
 
               <SubSection title="4. Turning one into the other, and what survives">
                 <p>
-                  Given a similarity with a known ceiling we can always make a
-                  distance out of it by subtracting, and the two then order
-                  every pair identically, because subtracting from a constant
-                  reverses an order and reverses nothing else. That is worth
-                  saying plainly, since it means a page reporting an angle and a
-                  page reporting one minus that angle are reporting the same
-                  ranking, and any argument between them is about presentation.
+                  {"Subtract a similarity from a known ceiling to make a dissimilarity score. Higher similarity then means a smaller gap. This preserves the preferred-neighbor ordering when each score is ranked in the appropriate direction. It does not automatically create a mathematical metric."}
                 </p>
                 <Equation>{`gap  =  ceiling  −  similarity`}</Equation>
-                <p>
-                  What the conversion does not give us is a distance in the
-                  full sense. A distance in that sense makes a promise about
-                  three words at once, that going from one to another by way of
-                  a third never comes to less than going straight there, and
-                  this page calls it the detour promise. Reversing an order
-                  preserves which pair is nearer;
-                  it does not preserve the arithmetic relations between the
-                  numbers, so a rule that fails to keep the detour promise fails
-                  it just as badly once it has been subtracted from a ceiling,
-                  which is the failure Part 5 measures on this collection.
-                </p>
+                <p>Reversing the ranking is not enough to create a mathematical distance. Such a distance must also satisfy the triangle inequality: going through an intermediate point cannot make the total shorter than the direct distance. We call that the detour condition here. Subtracting a similarity from a ceiling gives a dissimilarity score, but does not automatically establish that condition. Part 5 tests the resulting scores on this collection.</p>
                 <WhyThisWorks title="Why subtracting similarity reverses its ordering">
                   <p>
                     Take two pairs with similarities s and t and suppose s is
@@ -305,12 +254,7 @@ bake to stir    summed gaps    =  |5 − 2| + |0 − 0|  =  3
 
               <SubSection title="7. Keeping only the coordinate that disagrees most">
                 <p>
-                  Pushing the squaring further, to cubes and fourth powers and
-                  beyond, concentrates more and more of the answer on whichever
-                  single coordinate disagrees most, and in the limit the rule
-                  reads that coordinate and discards the rest. A pair of words
-                  is then as far apart as their worst disagreement and no
-                  further, whatever happens in the other coordinates.
+                  {"For a Minkowski distance, use absolute coordinate gaps raised to a power p, sum them, then take the p-th root. As p grows, the largest gap dominates. The limit is the maximum absolute coordinate difference, called Chebyshev distance."}
                 </p>
                 <Equation>{`worst coordinate  =  max over i of  |aᵢ − bᵢ|`}</Equation>
                 <WorkedExample>
@@ -384,43 +328,18 @@ gap         =  1  −  similarity`}</Equation>
                 </p>
                 <Equation>{`coordinates that differ  =  (how many i have aᵢ ≠ bᵢ) / (how many i there are)`}</Equation>
                 <p>
-                  Asked of a fitted table it produces something worth looking at
-                  rather than something useful. Standing at{" "}
-                  <span className="font-mono">sail</span> it reports the nearest
-                  word as <span className="font-mono">flour</span> at 0.5, and
-                  every other word in the collection at exactly 1.0, so
-                  twenty-one of the twenty-two candidates are tied for last and
-                  the winner won by a coincidence. Across all two hundred and
-                  fifty-three pairs of words only six share even one coordinate
-                  exactly, and the best of those, at two coordinates in common,
-                  is <span className="font-mono">flour</span> with{" "}
-                  <span className="font-mono">sail</span>, a cooking word and a
-                  sailing word, which the collection has arranged as mirror
-                  images of each other.
+                  {"Hamming distance ranks flour nearest to sail here because two coordinates are exactly equal. Most other candidates differ in every coordinate and tie. That equality reflects this constructed table; it does not establish that the two words have similar usage."}
                 </p>
                 <KeepInMind>
                   <p>
-                    Equality between two computed numbers is exact equality, so
-                    a coordinate that differs in the sixteenth digit counts as a
-                    full disagreement, and a rule that reads coordinates as
-                    labels has nothing to say about a table whose coordinates
-                    are quantities. It is on this page because leaving it out
-                    would suggest that all six rules are candidates for a
-                    fitted table, and they are not.
-                  </p>
+                  {"Exact equality treats a tiny numeric difference as a full coordinate mismatch. That makes Hamming distance useful for categorical or binary positions, but generally unsuitable for continuous fitted coordinates where approximate closeness matters."}
+                </p>
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="10. Reading each gap against the size of what it separates">
                 <p>
-                  The sixth rule divides each coordinate&rsquo;s gap by the
-                  total size of the two numbers it sits between, then adds those
-                  fractions up. Every coordinate then contributes somewhere
-                  between nothing and one, whatever units it happens to be in,
-                  so no single coordinate can take over an answer merely by
-                  holding larger numbers. The price is that it is most sensitive
-                  near zero, since a move from one to two costs the same third
-                  as a move from a thousandth to two thousandths.
+                  {"Canberra distance divides each absolute coordinate gap by the sum of the two magnitudes, then adds the fractions. Each nonzero term is at most one. It removes a shared change of units within a coordinate, but becomes sensitive to small absolute changes near zero."}
                 </p>
                 <Equation>{`gaps against their size  =  sum over i of  |aᵢ − bᵢ| / (|aᵢ| + |bᵢ|)`}</Equation>
                 <WorkedExample>
@@ -474,16 +393,7 @@ gap         =  1  −  similarity`}</Equation>
                   caption="Every rule on every pair of the three hand-counted words, from positions (5, 0), (2, 0) and (0, 5)."
                 />
                 <p>
-                  Read the first column against the second. Under the angle,{" "}
-                  <span className="font-mono">bake</span> and{" "}
-                  <span className="font-mono">stir</span> are as close as two
-                  words can be and <span className="font-mono">sail</span> is as
-                  far as a pair of counts can get. Under the summed gaps the
-                  first pair is 3 apart and the second 10, so the ordering
-                  agrees while the scale does not, and under the coordinates
-                  that differ the first pair scores half only because they
-                  happen to share a zero. There is no arrangement of these
-                  numbers under which one rule is a rescaling of another.
+                  {"Cosine gives bake and stir zero gap because their directions agree. The length-sensitive rules retain their different counts. Hamming records only that one coordinate matches. These formulas answer different numerical questions; a single rescaling does not make all six equivalent."}
                 </p>
                 <KeepInMind>
                   <p>
@@ -503,23 +413,23 @@ gap         =  1  −  similarity`}</Equation>
             trueFalse(
               "A table of positions, on its own, says that two words near each other in it are alike.",
               false,
-              "Near is a property of the table together with some rule for turning two rows into one verdict, so only the pair of them says anything. Two people can hold the same table, ask the same question and come away with different answers without either having made a mistake, because they picked up different rules.",
+              "The vectors supply coordinates, but a comparison rule determines what counts as near. Euclidean distance uses separation in those coordinates; cosine compares directions. The same table can therefore produce different neighbor lists without either calculation being numerically wrong. Whether either list is useful requires the task's own evaluation.",
             ),
             choice(
-              "Why are figures in this area usually reported as similarities rather than as distances?",
+              "What useful information does a bounded similarity range provide?",
               [
                 "A similarity is quicker to compute",
-                "The useful similarities are bounded, so a figure can be read on its own",
+                "It gives a fixed numerical scale, while typical values and task usefulness still need evidence",
                 "A distance cannot be computed on a fitted table",
                 "A similarity is symmetric and a distance is not",
               ],
               1,
-              "Two words 0.0175 apart under a rule whose gap cannot exceed 2 are plainly near the top of what that rule can say. The same pair is 0.3046 apart under the straight line, which means nothing until the typical gap in this table is known, so a distance can only be read against other distances from the same table.",
+              "A known range locates a value relative to its numerical endpoints. For example, cosine distance 0.0175 is close to zero on a range ending at two. That does not establish that a pair is usefully similar for a task, or show how unusual the score is. Both bounded similarities and ordinary distances need representative comparisons or validation.",
             ),
             trueFalse(
               "A nearest-word list computed from a bounded similarity and one computed from the gap made by subtracting it from its ceiling are the same list.",
               true,
-              "Subtracting from a constant reverses the order and reverses nothing else, and the map is one to one, so no tie is created and none is broken. A page reporting an angle and a page reporting one minus that angle are therefore reporting the same ranking. What the conversion does not give is a distance in the full sense, since a rule that fails the detour promise fails it just as badly after the subtraction.",
+              "Subtracting a similarity from one fixed constant reverses its order, so descending similarity and ascending transformed distance have the same ranking and ties in exact arithmetic. This does not by itself establish the triangle inequality or any other metric property. Ranking equivalence and the guarantees needed for a particular search algorithm are separate questions.",
             ),
             choice(
               "Under the rule that divides each coordinate’s gap by the size of the two numbers it sits between, bake at (5, 0) and sail at (0, 5) come out at 2. What is that 2?",
@@ -530,7 +440,7 @@ gap         =  1  −  similarity`}</Equation>
                 "The answer the summed gaps give for the same pair",
               ],
               1,
-              "Each coordinate contributes its gap divided by the size of the two numbers it sits between, which comes to exactly 1 whenever one of the two is zero and can never come to more, so two coordinates give 1 + 1. No single coordinate can take over an answer merely by holding larger numbers. The price is that the rule is most sensitive near zero, since a move from one to two costs the same third as a move from a thousandth to two thousandths. The summed gaps give 10 for this pair and the straight line 7.0711.",
+              "Canberra distance measures each coordinate's absolute gap relative to the sum of its absolute values. Exactly one value is nonzero in each coordinate of this pair, so both contributions are one.\n\n```math\nCanberra distance = 1 + 1 = 2\n```\n\nThis prevents a large-valued coordinate from dominating solely through its units, but also makes small changes near zero influential. A both-zero coordinate needs the implementation's stated zero contribution.",
             ),
             several(
               "Which of these does the page report about the rule that reads coordinates as labels?",
@@ -541,7 +451,7 @@ gap         =  1  −  similarity`}</Equation>
                               "It is the right rule for a table whose coordinates are quantities",
                             ],
               [0, 1, 2],
-              "Twenty-one of the twenty-two candidates are tied for last, so the winner won by a coincidence. A rule that reads coordinates as labels has nothing to say about a table whose coordinates are quantities, and it suits codes standing for categories, where there is no sense in which one code is further from another. It is on the page because leaving it out would suggest all six are candidates for a fitted table.",
+              "Hamming distance records exact coordinate matches and ignores the size of unequal gaps. In this fitted numerical table, most candidates therefore tie and one exact equality can decide the winner. The value is defined, but that equality pattern does not represent the intended word resemblance. The same rule can be useful for coordinates that really encode categorical matches.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "The rule counts the fraction of coordinates that differ by exact equality.\nFrom sail: flour scores 0.5; each of the other 21 candidates scores 1.0.\nAcross the 253 word pairs, only 6 share any coordinate exactly.\nThese coordinates are learned numerical quantities, not category labels."
@@ -555,13 +465,7 @@ gap         =  1  −  similarity`}</Equation>
             <>
               <SubSection title="12. Counting one word twice over">
                 <p>
-                  Here is the experiment that separates the rules into two
-                  groups. Leave the collection alone but count one word&rsquo;s
-                  company twice over, as though the same documents had been
-                  gathered twice for that word and once for everybody else. Its
-                  position moves straight out along the direction it already
-                  pointed, and nothing about which words it stood beside has
-                  changed.
+                  {"Multiply bake’s hand-counted vector by two, as a controlled representation change. Its relative context proportions stay fixed while its total count doubles. This experiment does not refit the whole corpus; a joint fitting procedure could also change other vectors."}
                 </p>
                 <ThreeWordCounts />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -572,17 +476,8 @@ gap         =  1  −  similarity`}</Equation>
                 </p>
                 <WorkedExample>
                   <p>
-                    Counting <span className="font-mono">bake</span> twice over
-                    puts it at (10, 0). Its gap to{" "}
-                    <span className="font-mono">stir</span> goes from 3.0000 to
-                    8.0000 under all three of the summed and squared rules, and
-                    from 0.4286 to 0.6667 under the rule that reads each gap
-                    against its size, while the angle stays
-                    at exactly 0.0000 and the share of coordinates that differ
-                    stays at exactly 0.5000. Four rules of six say the two words
-                    have grown apart, and nothing about the way either word was
-                    used has changed.
-                  </p>
+                  {"Bake moves from(5,0) to(10,0), while stir stays at(2,0). The length-sensitive gaps increase in this example. Cosine stays fixed because the direction is unchanged. Hamming also stays fixed for this pair because exactly one coordinate matches before and after scaling."}
+                </p>
                   <p>
                     Each of the six can be redone with a pencil, with{" "}
                     <span className="font-mono">bake</span> at (10, 0) and{" "}
@@ -596,21 +491,13 @@ gaps against their size   8 ∕ (10 + 2) + 0           ≈  0.6667
 angle                     1 − (10 × 2) ∕ (10 × 2)    =  0
 coordinates that differ   1 of 2                     =  0.5`}</Equation>
                   <p>
-                    The doubled count sits on the top and on the bottom of the
-                    angle&rsquo;s fraction and cancels, and the rule that reads
-                    coordinates as labels never looked at its size in the first
-                    place. Nothing cancels it in the other four.
-                  </p>
+                  {"Cosine cancels the positive scale factor. Hamming stays unchanged here because the equality pattern happens to stay the same. Scaling another vector could turn an equal coordinate into an unequal one, or the reverse."}
+                </p>
                 </WorkedExample>
                 <KeepInMind>
                   <p>
-                    The two rules that did not move are not invariant to
-                    everything. Doubling a whole coordinate across the entire
-                    vocabulary, which is what changing the unit of a measurement
-                    would do, moves the angle too. What they ignore is scaling
-                    one word&rsquo;s own position, which is the operation
-                    counting it twice over performs.
-                  </p>
+                  {"Cosine is invariant to positive scaling of a whole nonzero vector. Scaling just one coordinate across all vectors generally changes angles. Hamming has a different property: an invertible shared coordinate transformation preserves equality, while scaling just one word need not."}
+                </p>
                 </KeepInMind>
               </SubSection>
 
@@ -634,37 +521,27 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                   <span className="font-mono">the</span> and{" "}
                   <span className="font-mono">we</span> at eight uses each, have
                   three of the shortest positions, at 0.3708, 0.3667 and 0.5770,
-                  where <span className="font-mono">deck</span> at five uses
+                  where <span className="font-mono">deck</span>  at five uses
                   reaches 1.1628. On the fit that learns by predicting
-                  neighbours, on the identical documents, the same relationship
+                  neighbors, on the identical documents, the same relationship
                   is <span className="font-mono">+0.7005</span>.
                 </p>
                 <p>
-                  The two signs are both explicable and that is the point. A method that scores a pairing by how much it beats chance gives a word occurring everywhere a low score against everything, since it beats chance nowhere, and a method that nudges a position once per occurrence moves a common word further from where it started.
+                  {"The counting and predictive fits produce different frequency–length relationships. Their objectives, weighting and initialization all affect vector norms. More updates to a frequent word do not by themselves prove that its vector must become longer."}
                 </p>
                 <p>
                   So the length of a position records something about the fitting procedure at least as much as something about the word, and the standard argument for the angle is an argument about one family of methods rather than about word positions in general.
                 </p>
                 <KeepInMind>
                   <p>
-                    The argument for comparing by angle survives this in a
-                    weaker form. Length is the part of a position most easily
-                    moved by how the fit was run, and the sign it takes against
-                    a word&rsquo;s use count depends on which method ran, so an
-                    argument beginning from what a length always means has
-                    begun from something these two fits do not agree on.
-                  </p>
+                  {"These two fits rule out a universal interpretation of vector length as word frequency. Choose whether to retain magnitude by checking the fitted representation and the task."}
+                </p>
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="14. On the unit sphere the rules stop disagreeing">
                 <p>
-                  There is a tidy consequence of all this. If every position is
-                  first scaled to length one, so that only direction is left,
-                  then the straight-line gap between two of them is a fixed
-                  function of the angle between them, falling as the similarity
-                  rises. Ranking by one is therefore ranking by the other, and
-                  the question of which rule to use goes away.
+                  {"Normalize every nonzero vector to length one. Euclidean distance and cosine similarity then give the same nearest-neighbor ordering, with reversed score direction. Other rules, such as Manhattan distance, need not agree with them."}
                 </p>
                 <Equation>{`for ‖a‖ = ‖b‖ = 1:    ‖a − b‖  =  √( 2 − 2 (a · b) )`}</Equation>
                 <p>
@@ -702,7 +579,7 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
           title: "Part 4. Which Word Is Nearest, and Under Which Rule",
           content: (
             <>
-              <SubSection title="15. One word&rsquo;s neighbours under all six">
+              <SubSection title="15. One word&rsquo;s neighbors under all six" id="15-one-wordandrsquo-s-neighbours-under-all-six">
                 <p>
                   With the hand-counted table behind us we can put the question
                   to the fitted one. Standing at{" "}
@@ -743,15 +620,13 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
 
               <SubSection title="16. How often two rules name the same nearest word">
                 <p>
-                  One word is an anecdote. Asking every rule for the nearest
-                  word to every one of the twenty-three, and counting how often
-                  two rules gave the same answer, turns the question into a
-                  measurement.
+                  {"Check every word to measure how often the rules agree on this table. That extends the example beyond sail, although it still describes only these 23 fitted words."}
                 </p>
                 <RuleAgreement />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
+
                   Each cell counts the words on which the row rule and the
-                  column rule name the same nearest neighbour, out of
+                  column rule name the same nearest neighbor, out of
                   twenty-three. The diagonal is twenty-three by construction.
                 </p>
                 <p>
@@ -767,13 +642,8 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                 </p>
                 <InAModel>
                   <p>
-                    Fifteen out of twenty-three is a disagreement rate a reader
-                    of a published nearest-word list has no way to see, since
-                    such a list is printed under one rule and the other five
-                    answers are never computed. Where a claim rests on a
-                    particular word appearing near another, the rule is part of
-                    the claim.
-                  </p>
+                  {"Cosine and Euclidean distance agree on fifteen of the twenty-three nearest-word queries and disagree on eight. A list printed under one rule does not reveal how another rule would rank the same vectors. When a conclusion depends on a particular neighbor, the comparison rule is part of the evidence."}
+                </p>
                 </InAModel>
               </SubSection>
 
@@ -811,10 +681,8 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                 </p>
                 <KeepInMind>
                   <p>
-                    A rule can be applied to a table without being applicable to
-                    it. Six of the six run on these positions and return numbers;
-                    five of the six are answering a question about the words.
-                  </p>
+                  {"All six rules return numbers on these inputs. That alone does not make each suitable for the intended word-retrieval task. Evaluate the ranking against the relationships we want to recover."}
+                </p>
                 </KeepInMind>
               </SubSection>
             </>
@@ -832,28 +700,28 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                 "None, since nothing about how the word was used has changed",
               ],
               1,
-              "The gap to stir goes from 3.0000 to 8.0000 under all three of the summed and squared rules, and from 0.4286 to 0.6667 under the rule reading each gap against its size, while the angle stays at exactly 0.0000 and the share of coordinates that differ stays at exactly 0.5000. The two that held still are not invariant to everything, since doubling a whole coordinate across the vocabulary moves the angle too.",
+              "Euclidean, Manhattan and Chebyshev distances rise from 3 to 8 in this pair, while Canberra rises from about 0.4286 to 0.6667. Cosine remains zero because bake's positive rescaling preserves its direction. Hamming remains 0.5 because the pattern of equal and unequal coordinates happens to stay unchanged. Hamming is not generally invariant to rescaling one vector; that result depends on the supplied entries.",
             ),
             trueFalse(
               "The two fits agree that a word used more often ends up with a longer position.",
               false,
-              "On the counting fit the relationship between how often a word was used and the length of its position is −0.6284, and on the fit that learns by predicting neighbours, over the identical documents, it is +0.7005. A method scoring a pairing by how much it beats chance gives a word occurring everywhere a low score, and a method nudging a position once per occurrence pushes a common word further out. Length records something about the procedure at least as much as about the word.",
+              "The two recorded fits have opposite associations between use count and vector length:−0.6284 for the context-count representation and+0.7005 for the predictive fit on the same documents. The objective and finite fitting procedure therefore affect the observed lengths. These correlations do not establish a universal causal rule that frequent words must be longer or shorter.",
             ),
             trueFalse(
               "Once every position has been scaled to length one, choosing between the angle and the ruler is a choice of what to print.",
               true,
-              "Expanding the squared gap leaves two minus twice the dot product when both lengths are one, and the square root is increasing, so the gap rises exactly as the similarity falls. Checked on the twenty-three words the identity holds to 6.1 × 10⁻¹⁶ and the two orders from sail agree word for word. Neither order is the one the straight line gives before the scaling.",
+              "For nonzero vectors scaled to unit length, squared Euclidean distance is determined by their dot product.\n\n```math\n||u − v||² = 2 − 2(u · v)\n```\n\nThe square root is increasing, so ascending Euclidean distance and descending cosine similarity give the same exact ranking on these unit vectors. The measured comparison agrees up to floating-point rounding. Scaling first can change the Euclidean ranking relative to the original, non-unit vectors.",
             ),
             choice(
               "Asked which word is nearest to sail, what do the six rules answer?",
               [
                 "One answer, since the rules mostly agree",
-                "Three say mast and two say rope, and the two candidates swap places",
+                "Euclidean, Manhattan and Chebyshev choose mast; cosine and Canberra choose rope; Hamming chooses flour",
                 "Six different words",
                 "Nothing, since sail sits too near the origin",
               ],
               1,
-              "Rope at 1.0713 is a good deal longer than sail at 0.8225 while mast at 0.8281 is almost exactly as long, so the ruler charges rope for a length difference the angle refuses to look at. Standing at oven instead, five rules of six agree on eggs, which is the ordinary case and worth knowing before spending time on where they part.",
+              "For sail, Euclidean, Manhattan and Chebyshev select mast; cosine and Canberra select rope. Hamming selects a different word through exact coordinate equality. Rope's larger length difference affects Euclidean distance even though its direction is more aligned with sail. For oven, five rules agree on eggs in this run. Agreement on one query does not make the rules equivalent.",
             ),
             several(
               "Every rule was asked for the nearest word to each of the twenty-three. Which of these does the count show?",
@@ -864,7 +732,7 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                               "The rule reading coordinates as labels agrees with the angle twice",
                             ],
               [0, 1],
-              "Fourteen is the count for the five rules that read the coordinates as quantities, which is a majority and not a consensus, and the sixth cannot join them, since it agrees with the straight line on two words and with the angle on none at all. Fifteen out of twenty-three is a disagreement rate a reader of a published nearest-word list has no way to see, since the list is printed under one rule and the other answers are never computed.",
+              "Manhattan and Euclidean choose the same neighbor for all 23 queries. Cosine and Euclidean agree on 15 and disagree on eight. The five numerical-gap rules all agree on 14 queries, while Hamming agrees with Euclidean on two and with cosine on none. Thus 15 is an agreement count, not a disagreement rate. A published neighbor list depends on which comparison produced it.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "Nearest-word comparisons over 23 queries:\nsummed absolute gaps vs Euclidean distance: agree on 23\ncosine vs Euclidean distance: agree on 15\nexact-coordinate disagreement vs Euclidean distance: agree on 2\nexact-coordinate disagreement vs cosine: agree on 0\nAll five numerical-distance rules agree on 14 queries.\nThe exact-coordinate rule is a sixth rule."
@@ -878,15 +746,7 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
             <>
               <SubSection title="18. One question is the whole table">
                 <p>
-                  Asking which word is nearest to{" "}
-                  <span className="font-mono">sail</span> means reading every
-                  other position in the collection, because none of these rules
-                  gives any way of ruling a word out without computing its
-                  answer. On the twenty-three-word table that is twenty-two
-                  comparisons of four numbers each, which is eighty-eight
-                  multiplications and then a sort. It is nothing, and it grows
-                  as the product of the vocabulary and the number of
-                  coordinates.
+                  {"This implementation scans every other vector and sorts the resulting scores. For 23 words and four coordinates, it examines 22 candidate rows. The work per row depends on the rule: Manhattan distance uses absolute differences, while cosine uses products and lengths. Exact indexes can sometimes prune a search, so a full scan is an implementation choice here."}
                 </p>
                 <CostOfOneQuestion />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -896,12 +756,7 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                   do not.
                 </p>
                 <p>
-                  A vocabulary of fifty thousand words at three hundred
-                  coordinates costs fifteen million multiplications for one
-                  question, and two hundred thousand words costs sixty million.
-                  That is a real amount of arithmetic to pay for one answer, and
-                  it is paid every time somebody asks, since nothing was
-                  precomputed at fitting time that a question can reuse.
+                  {"The displayed operation count grows with vocabulary size and vector width. It is a simple product-count estimate, not an exact instruction count for every metric. Normalized vectors, precomputed norms, batching and search indexes can change the work required for repeated queries."}
                 </p>
               </SubSection>
 
@@ -916,33 +771,18 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                 </p>
                 <Equation>{`‖a − b‖²  =  ‖a‖²  −  2 (a · b)  +  ‖b‖²`}</Equation>
                 <p>
-                  The two squared-length terms are one pass over each side, and
-                  the middle term for every pair at once is one block
-                  multiplication, which is the operation numerical libraries have
-                  spent decades making fast. So the count of multiplications is
-                  unchanged and the time is not, and asking a hundred questions
-                  costs far less than a hundred times one question.
+                  {"The identity lets a numerical library compute many dot products in a matrix multiplication, with norms supplied separately. Batching can improve hardware use, but its speedup depends on the implementation and workload. It does not guarantee a particular reduction in runtime."}
                 </p>
                 <KeepInMind>
                   <p>
-                    Nothing about this changes the answer, which is the whole
-                    reason it is allowed. It is the same sum in a different
-                    order, and step 20 is about the one situation where that
-                    turns out not to be true.
-                  </p>
+                  {"The identity is exact over real numbers. Floating-point evaluation changes rounding and can lose accuracy when large terms cancel. The next comparison measures that failure."}
+                </p>
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="20. The shortcut that can lose the answer">
                 <p>
-                  The identity in step 19 recovers a small number by subtracting
-                  large nearly equal ones, and that is the classic way to lose
-                  it. Word positions sit near the origin, so nothing goes wrong
-                  on the table as fitted. It goes wrong when the positions have
-                  been moved, which is not a strange thing to have happened,
-                  since adding a constant offset to every coordinate is
-                  something a preprocessing step can do without meaning
-                  anything by it.
+                  {"The expanded formula subtracts large nearly equal terms to recover a small squared gap. That can lose significant digits. Adding a common offset leaves Euclidean distances unchanged, so it provides a controlled way to expose the numerical issue. It would not preserve cosine similarity, which depends on the origin."}
                 </p>
                 <MovedFarFromOrigin />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -961,15 +801,7 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                   quietly and raise nothing.
                 </p>
                 <p>
-                  The repair is to subtract a common point from both positions
-                  before applying the identity, which leaves every gap unchanged
-                  because shifting everything equally moves no pair relative to
-                  another, and makes the squared lengths numbers of the size of
-                  the spread rather than of the offset. The third column is that,
-                  and it agrees with the direct subtraction at every distance
-                  out. On two thousand four hundred ordinary pairs the two agree
-                  to within four parts in ten thousand million million of the
-                  answer.
+                  {"Subtracting a common reference point before using the identity reduces the large shared offset. In this experiment it agrees closely with direct subtraction. This can improve stability, but cannot recover differences already lost when the original coordinates were rounded."}
                 </p>
                 <WhyThisWorks title="Why the wrong answer is 2.8284 and not some other number">
                   <p>
@@ -987,32 +819,20 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
 a million out            squared lengths  ≈ 4 × 10¹²     step between machine numbers  ≈ 0.0005
                          returned  0.0752                √0.0752  ≈  0.2742`}</Equation>
                   <p>
-                    At a hundred million out nothing smaller than 8 can come
-                    out of the subtraction except zero, so 0.0756 has no way of
-                    surviving it, and the 2.8284 in the table is the square
-                    root of the smallest step available. At a million out the
-                    steps are fine enough to land within one of them of the
-                    truth, which is why that reading is wrong only in its
-                    fourth digit.
-                  </p>
+                  {"At the larger offset, rounding of the squared-length terms overwhelms the true small squared gap. The returned 8 produces the displayed 2.8284 distance. The exact residual depends on evaluation order and floating-point implementation; the important failure is cancellation, not a universal quantization step for every expression."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
                   <p>
-                    Numerical cancellation can erase a small distance even when the inputs are valid. A result rounded to zero still looks like an acceptable nonnegative distance and can enter the neighbour ordering without an error. We need to check the calculation itself when comparing nearly coincident vectors.
+
+                    Numerical cancellation can erase a small distance even when the inputs are valid. A result rounded to zero still looks like an acceptable nonnegative distance and can enter the neighbor ordering without an error. We need to check the calculation itself when comparing nearly coincident vectors.
                   </p>
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="21. Why there is no way to skip most of the table">
                 <p>
-                  Reading every position for every question looks like something
-                  that ought to be avoidable, and for some rules it is, because
-                  they promise that a detour is never shorter than the direct
-                  route. That promise is what lets a search discard a whole
-                  group of words at once, since if a group&rsquo;s representative
-                  is far from the question then everything grouped with it is
-                  far too. The rule that compares by angle does not make the
-                  promise, and on this collection it breaks it often.
+                  {"A metric’s triangle inequality can help an index discard candidates. It needs a bound on each group’s radius as well as the distance to its representative; a distant center alone is not enough. The one-minus-cosine score fails the triangle inequality, so it cannot directly use that particular bound."}
                 </p>
                 <DetourThroughAThirdWord />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -1035,14 +855,8 @@ by way of mast      harbour → mast → crew    0.4469 + 0.2313  =  0.6782
 saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equation>
                 <InAModel>
                   <p>
-                    So a search that prunes on that promise is not available for
-                    the rule this topic most wants to use, and the methods that
-                    make large vocabularies answerable in practice give up exact
-                    answers instead, returning a list that is usually the
-                    nearest words rather than provably the nearest words. That
-                    trade is a subject of its own and this page does not open
-                    it; what belongs here is why the exact route has no shortcut.
-                  </p>
+                  {"This failure rules out applying metric bounds directly to one-minus-cosine. It does not make exact cosine search impossible: normalize nonzero vectors and use Euclidean distance on the unit sphere, which gives the same ranking and satisfies the triangle inequality. Large systems may also choose approximate indexes for speed, with their own recall checks."}
+                </p>
                 </InAModel>
               </SubSection>
             </>
@@ -1057,18 +871,16 @@ saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equ
                   The fitted vectors alone cannot tell us which definition of similarity suits our task. We can test candidate measures against relevant judgments or downstream outcomes. Without such a criterion, collecting more documents does not decide whether length, direction or another property is what we meant by alike.
                 </p>
                 <p>
-                  That is not a counsel of despair, because the choice can be argued from properties rather than guessed. If a word&rsquo;s volume in the collection should not affect who its neighbours are, that argues for the angle and rules out four of the others, and step 12 makes the argument checkable. If some coordinate is a category code, that argues for the rule that reads equality and rules out the rest.
+
+                  That is not a counsel of despair, because the choice can be argued from properties rather than guessed. If a word&rsquo;s volume in the collection should not affect who its neighbors are, that argues for the angle and rules out four of the others, and step 12 makes the argument checkable. If some coordinate is a category code, that argues for the rule that reads equality and rules out the rest.
                 </p>
                 <p>
-                  What cannot happen is for the choice to be made by fitting, since every one of the six will fit any table at all.
+                  {"A system can select a comparison rule by fitting or tuning against task evidence. The task still determines what success means. The vectors alone do not choose the intended relation without such a criterion."}
                 </p>
                 <KeepInMind>
                   <p>
-                    A method that reports which rule performed best on a task
-                    has not escaped this, since somebody chose the task, and the
-                    claim about what alike means has moved into that choice
-                    where it is harder to see.
-                  </p>
+                  {"When selecting a rule from task results, report the task and evaluation procedure. A better score on one criterion may not mean better similarity for another purpose."}
+                </p>
                 </KeepInMind>
               </SubSection>
 
@@ -1089,30 +901,20 @@ saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equ
                   and what came back. Two of the seven have no answer at all,
                   and two more have an answer only because somebody chose one.
                 </p>
+                <p>An undefined score needs a policy. We can reject the input and ask the caller to decide what to do. We can return a documented fallback, but must remember that the number follows a convention rather than the original formula. A NaN can carry the invalid result forward, although it needs explicit handling: ordinary ordering comparisons with NaN are false, and NaN does not compare equal even to itself.</p>
                 <p>
-                  Where a quantity does not exist there are three things an implementation can do, and each costs something. It can refuse, which is honest and forces a caller to decide; it can return a convention, which keeps a calculation running and puts a number that was never measured into a list that will be sorted; or it can return something not a number, which propagates and makes every later comparison false.
-                </p>
-                <p>
-                  The middle one is the usual choice for a zero position under the angle, where the convention is that it sits at a right angle to everything, and it is defensible, though the number it puts into a list that will be sorted was never measured from anything.
+                  {"The implementation uses a documented zero-vector fallback for cosine distance. That keeps a numeric result available, but it is not an angle measured from the original formula. Other libraries may reject the input or return an invalid value."}
                 </p>
                 <KeepInMind>
                   <p>
-                    The convention has a consequence that reads as a paradox. A
-                    position at the origin is at gap 1.0000 from itself, so the
-                    rule that a thing is at gap zero from itself fails, and it
-                    fails at exactly one point.
-                  </p>
+                  {"Under this fallback, the zero vector has cosine distance 1 from itself. That violates the zero-self-distance property of a metric. The exception comes from extending an undefined cosine, not from the ordinary formula for nonzero vectors."}
+                </p>
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. Nearness weakens as the space grows">
                 <p>
-                  Distance discriminates less as coordinates are added, and this
-                  is a property of distance rather than of any table. With more
-                  coordinates each pair of positions accumulates more small
-                  differences, those differences average out, and the nearest
-                  and the farthest positions to a given point draw together
-                  until the word we call nearest is barely nearer than the rest.
+                  {"In some high-dimensional distributions, relative distances concentrate: the nearest and farthest sampled points become less distinct compared with their overall distance. This depends on the data distribution and coordinate structure. Merely adding coordinates does not guarantee it, especially when they are redundant or irrelevant zeros."}
                 </p>
                 <ContrastAsDimensionsGrow />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -1121,31 +923,22 @@ saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equ
                   shape whose numbers were drawn independently.
                 </p>
                 <p>
-                  On the fitted table the figure falls from 39.42 at two coordinates to 7.02 at four, 3.51 at eight and 0.63 at sixteen, so at the widest the farthest word is only about six tenths further off than the nearest one. The usual demonstration of this uses positions drawn independently, and the grey bars are that, and up to eight coordinates the fitted table holds up substantially better, at 3.51 against 1.04.
+
+                  On the fitted table the figure falls from 39.42 at two coordinates to 7.02 at four, 3.51 at eight and 0.63 at sixteen, so at the widest the farthest word is only about six tenths further off than the nearest one. The usual demonstration of this uses positions drawn independently, and the gray bars are that, and up to eight coordinates the fitted table holds up substantially better, at 3.51 against 1.04.
                 </p>
                 <p>
-                  At sixteen the advantage reverses and the fitted table reads 0.63 against 0.70, which is a real crossing rather than noise in one seed and is reported here because the tidier claim would have been that structure always helps.
+                  {"At sixteen coordinates, the fitted table’s reported contrast is 0.63 and the random table’s is 0.70. That is a result of this experiment. One displayed sample does not establish that the crossing is reproducible across seeds."}
                 </p>
                 <KeepInMind>
                   <p>
-                    Twenty-three words in sixteen coordinates is a table with
-                    almost as many numbers as it has room for, so the crossing
-                    says something about this collection being small as much as
-                    about width. What it does not permit is the assertion that a
-                    fitted table escapes the effect.
-                  </p>
+                  {"The fitted table has only 23 words, so these width comparisons use a small sample of pairwise relationships. Check different data and fitting settings before generalizing the curve. The example illustrates possible loss of distance contrast rather than a universal law for learned vectors."}
+                </p>
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="25. Alike, without saying in what respect">
                 <p>
-                  The last limit is the one the rest of this topic inherits and
-                  cannot fix. Every rule on this page answers with one number,
-                  and one number cannot carry a respect. Two words come back
-                  alike, and nothing in the answer says whether they are alike
-                  in subject, in grammatical role, in register, in how often
-                  they were used, or in having been mangled by the same quirk of
-                  the collection.
+                  {"Each score compresses a comparison into one number. The formula and representation determine what it measures, but the returned value alone does not explain which shared properties made the pair score highly. Inspect those properties when the application needs an explanation."}
                 </p>
                 <p>
                   A consequence shows up in the answers themselves. The measure
@@ -1161,67 +954,19 @@ saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equ
                 </p>
                 <WhereNearnessIsUndefined panel="asymmetry" />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  The words whose nearest neighbour has a different nearest
-                  neighbour of its own. The measure reads the same in both
+
+                  The words whose nearest neighbor has a different nearest
+                  neighbor of its own. The measure reads the same in both
                   directions, and yet which word comes first does not.
                 </p>
                 <p>
-                  This is the shape of the objection raised against
-                  similarity-as-distance long before any of these tables
-                  existed, that people judge a small thing to be like a large
-                  one more readily than the reverse, and that the judgement can
-                  break the detour rule as well. What the arithmetic here shows
-                  is a mild version of the same thing arising from a perfectly
-                  symmetric measure, purely because being the nearest is a
-                  comparison against a field of candidates and the field changes
-                  with the word.
+                  {"In 1977, Tversky examined human similarity judgments that do not follow all the assumptions of geometric distance, including symmetry. Our nearest-neighbor example shows a different distinction: symmetric pair scores need not produce reciprocal first choices because each query has different competing candidates. It does not reproduce the psychological experiment."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://doi.org/10.1037/0033-295X.84.4.327">{"Tversky: Features of Similarity (1977)"}</Link></p>
                 <DerivationTable
                   expressionHeading="the question"
                   reasonHeading="what is undefined, or what has to be decided"
-                  rows={[
-                    {
-                      expression: "nearest, under no stated rule",
-                      reason:
-                        "not a question. Six rules answer it here and five of them read the coordinates as quantities, and fourteen of twenty-three words get the same answer from all five.",
-                    },
-                    {
-                      expression: "the angle from the origin",
-                      reason:
-                        "undefined, since the cosine divides by both lengths and one is zero. Refusing forces a caller to decide; the usual convention places it at a right angle to everything, which then makes it 1.0000 from itself.",
-                    },
-                    {
-                      expression: "a word the collection never used",
-                      reason:
-                        "there is no position, so the question names something absent. Nothing about the rule is at fault and no rule can supply the missing row.",
-                    },
-                    {
-                      expression: "two words at the same position",
-                      reason:
-                        "which is nearer has no answer, since both read 0.0000. Whatever order is returned came from outside the rule, usually from where the words happened to sit in the table.",
-                    },
-                    {
-                      expression: "the nearest word in a vocabulary of one",
-                      reason:
-                        "the set the question ranges over is empty once the word itself is struck out, and an empty answer is the correct one rather than a failure.",
-                    },
-                    {
-                      expression:
-                        "is this pair nearer than that pair, across two tables",
-                      reason:
-                        "undefined for an unbounded rule, since its numbers only mean something against other numbers from the same table. A bounded similarity can be compared, though only as far as the two fits share a scale.",
-                    },
-                    {
-                      expression: "how much further apart, at three hundred coordinates",
-                      reason:
-                        "still defined and worth progressively less, since nearest and farthest close on each other as coordinates are added, measured here as 39.42 at two and 0.63 at sixteen.",
-                    },
-                    {
-                      expression: "alike in what respect",
-                      reason:
-                        "not answerable by any of these rules, since each returns one number and a respect is not a number. Anything said about the respect was decided before the comparison, by what the positions were fitted from.",
-                    },
-                  ]}
+                  rows={[{"expression":"nearest, under no stated rule","reason":"not a question. Six rules answer it here and five of them read the coordinates as quantities, and fourteen of twenty-three words get the same answer from all five."},{"expression":"the angle from the origin","reason":"Cosine is undefined for a zero vector. This implementation uses a fallback that gives distance1 even from zero to itself. Rejecting or returning an invalid value are other policies; state which is used."},{"expression":"a word the collection never used","reason":"there is no position, so the question names something absent. Nothing about the rule is at fault and no rule can supply the missing row."},{"expression":"two words at the same position","reason":"Equal scores do not select a unique winner. The tie rule chooses an order. Duplicate nonzero vectors score zero under the listed distances, but zero-vector cosine still needs its fallback."},{"expression":"the nearest word in a vocabulary of one","reason":"the set the question ranges over is empty once the word itself is struck out, and an empty answer is the correct one rather than a failure."},{"expression":"is this pair nearer than that pair, across two tables","reason":"Either bounded or unbounded scores can be compared when the representations, units and evaluation scale are compatible. Fixed bounds alone do not calibrate meaning across independently fitted tables."},{"expression":"how much further apart, at three hundred coordinates","reason":"The formula remains defined for finite compatible vectors. Distance concentration can weaken contrast under some distributions, but is not guaranteed by dimensionality alone."},{"expression":"alike in what respect","reason":"The representation and formula specify the properties being compared. The single returned score usually does not explain which features were responsible; inspect the inputs or use additional analysis."}]}
                 />
               </SubSection>
             </>
@@ -1244,7 +989,7 @@ saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equ
             trueFalse(
               "On this collection the angle breaks the promise that a detour is never shorter than the direct route, and none of the other five rules breaks it once.",
               true,
-              "Fifteen hundred and forty of the ten thousand six hundred and twenty-six triples have a shorter detour under the angle, and the worst is far from marginal, since harbour to crew reads 1.1066 directly and 0.6782 by way of mast. The promise is what lets a search discard a whole group of words at once, so a search that prunes on it is not available for the rule this topic most wants to use.",
+              "Cosine distance violates the triangle inequality for 1,540 of the 10,626 tested triples. For example, harbour to crew is 1.1066 directly but 0.6782 through mast. A search cannot apply a triangle-inequality bound directly to this distance without justification. This does not rule out indexing cosine queries: on nonzero normalized vectors, an equivalent Euclidean or angular formulation can provide different valid search bounds.",
             ),
             choice(
               "What does a position sitting at the origin have?",
@@ -1255,12 +1000,12 @@ saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equ
                 "A gap of zero to everything",
               ],
               0,
-              "A straight line needs no division and the origin is a point like any other, so the gap is just the other word’s own length. The cosine divides by both lengths and one of them is zero, so that quotient does not exist. The usual answer is the convention that the origin sits at a right angle to everything, which has the consequence that it is at gap 1.0000 from itself.",
+              "Euclidean distance from the origin is the other vector’s length. Mathematical cosine is undefined when either vector is zero. This SDK’s DistanceMetric.COSINE leaves zero rows at zero during normalization and returns distance one, even from zero to itself. Its separate word-embedding cosine helper instead rejects zero vectors. These are documented interface policies, not geometric directions assigned to a zero vector.",
             ),
             trueFalse(
               "A fitted table escapes the way distance discriminates less as coordinates are added.",
               false,
-              "On the fitted table the figure falls from 39.42 at two coordinates to 7.02 at four, 3.51 at eight and 0.63 at sixteen. Up to eight coordinates it does hold up substantially better than independently drawn numbers, 3.51 against 1.04, and at sixteen the advantage reverses to 0.63 against 0.70. Twenty-three words in sixteen coordinates is a table with almost as many numbers as it has room for, so the crossing says something about this collection being small as well.",
+              "The reported distance-separation statistic falls from 39.42 at two coordinates to 7.02 at four,3.51 at eight and 0.63 at sixteen. The fitted vectors retain more contrast than the independent draws at some widths, but not at sixteen in this experiment. A learned representation is therefore not automatically protected from distance concentration. The vocabulary size and fitting choices limit how broadly this small comparison can be interpreted.",
             ),
             trueFalse(
               "The measure reads the same in both directions, so being the nearest word is mutual.",
@@ -1317,13 +1062,13 @@ canberra  bake-stir 0.4286  bake-sail 2.0000  tripled bake-stir 0.7647`,
               { hints: [
   "Each metric takes RowBlock inputs and returns pairwise distances.",
   "Compare the effect of scaling within this specific example. Hamming counts unequal coordinates; it is not generally scale-invariant for arbitrary vectors."
-], check: numberCheck("With bake counted three times over, what does the canberra rule answer for bake against stir, to four places?", 0.7647, 5e-05, "Canberra distance is 0.7647. It scales each coordinate difference by the magnitudes present at that coordinate, so increasing one vector can change this distance."), question: "Which distance rules change when one word-count vector grows?" },
+], check: numberCheck("What Canberra distance is returned between tripled bake and stir, to four decimal places?", 0.7647, 5e-05, "Canberra distance is 0.7647. It scales each coordinate difference by the magnitudes present at that coordinate, so increasing one vector can change this distance."), question: "Which distance rules change when one word-count vector grows?" },
             ),
             exercise(
               "Ask every rule for every word’s nearest neighbour",
               [
   "Use the supplied fitted twenty-three-word vector table. For each metric compute the complete pairwise distance matrix and exclude self-matches.",
-  "Print sail’s selected neighbour/distance, then count agreement of all nearest-neighbour IDs with Euclidean and cosine distance. Use the same tie behaviour as the starter."
+  "Print sail’s selected neighbor/distance, then count agreement of all nearest-neighbor IDs with Euclidean and cosine distance. Use the same tie behavior as the starter."
 ],
               `import numpy as np
 from oop_ml.core.data.row_block import RowBlock
@@ -1445,14 +1190,14 @@ hamming   agrees with the straight line on  2, with the angle on  0
 canberra  agrees with the straight line on 19, with the angle on 18`,
               { hints: [
   "Set diagonal distances to infinity before choosing row minima.",
-  "Keep each metric’s full neighbour-index array so the agreement counts compare corresponding words."
-], check: numberCheck("On how many of the twenty-three words do canberra and the angle name the same nearest word?", 18, 0.0, "The two rules agree on eighteen word neighbours. Changing a distance rule changes the ranking question even though the fitted vectors stay fixed."), question: "Can the distance rule change every word’s nearest neighbour?" },
+  "Keep each metric’s full neighbor-index array so the agreement counts compare corresponding words."
+], check: numberCheck("For how many of the 23 words do Canberra distance and cosine distance select the same nearest word?", 18, 0.0, "The two rules agree on eighteen word neighbors. Changing a distance rule changes the ranking question even though the fitted vectors stay fixed."), question: "Can the distance rule change every word’s nearest neighbor?" },
             ),
             exercise(
               "Scale every position to length one",
               [
-  "Normalise every nonzero word vector to length one. Compare Euclidean distances on those rows with cosine distances on the original rows.",
-  "Print the maximum residual in the supplied distance identity over distinct pairs, the count of cosine-neighbour matches before/after scaling and the unit-vector distance from sail to rope."
+  "Normalize every nonzero word vector to length one. Compare Euclidean distances on those rows with cosine distances on the original rows.",
+  "Print the maximum residual in the supplied distance identity over distinct pairs, the count of cosine-neighbor matches before/after scaling and the unit-vector distance from sail to rope."
 ],
               `import numpy as np
 from oop_ml.core.data.row_block import RowBlock

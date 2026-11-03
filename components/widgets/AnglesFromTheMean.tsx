@@ -107,7 +107,7 @@ export function AnglesFromTheMean() {
             <tr className="border-b border-slate-200 text-left dark:border-slate-800">
               <th className="py-2 pr-6 font-semibold text-slate-600 dark:text-slate-400">three nearest chosen by</th>
               <th className="py-2 pr-6 font-semibold text-slate-600 dark:text-slate-400">recorded columns</th>
-              <th className="py-2 font-semibold text-slate-600 dark:text-slate-400">centred columns</th>
+              <th className="py-2 font-semibold text-slate-600 dark:text-slate-400">centered columns</th>
             </tr>
           </thead>
           <tbody>

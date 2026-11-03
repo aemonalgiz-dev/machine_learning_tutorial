@@ -188,7 +188,7 @@ export function MutualInformationPlayground() {
 
       <Legend>
         Amber words come from the cooking half, blue from the sailing half and
-        grey are the three both halves use. Push the fourth slider past 1.6 and
+        gray are the three both halves use. Push the fourth slider past 1.6 and
         the whole table goes to zero, which is worth doing once.
       </Legend>
       {message && (

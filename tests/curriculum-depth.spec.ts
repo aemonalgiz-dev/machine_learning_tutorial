@@ -5,6 +5,8 @@ import { expandedLessons } from '../lib/lessons';
 import supplements from '../lib/lessons/supplements.json';
 import type { ExpandedLesson } from '../lib/lessons/types';
 import { sectionId } from '../components/concept/sectionId';
+import { displayExerciseTitle } from '../lib/exercises';
+import { americanEnglish } from '../lib/american-english';
 
 const staticLessons = supplements as unknown as Record<string, Pick<ExpandedLesson, 'parts' | 'practice'> & { checkpoint?: NonNullable<ExpandedLesson['checkpoints']>[number] }>;
 
@@ -70,7 +72,7 @@ test('a supplementary coding challenge rejects memorised output and accepts a re
   const option = await page.getByRole('combobox', { name: 'Jump to a page' }).first().locator('option').evaluateAll(options => options.find(option => option.textContent?.startsWith('Practice.'))?.getAttribute('value'));
   expect(option).toBeTruthy();
   await page.getByRole('combobox', { name: 'Jump to a page' }).first().selectOption(option!);
-  await page.getByRole('button', { name: new RegExp(`Challenge \\d+: ${exercise.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`) }).click();
+  await page.getByRole('button', { name: new RegExp(`Challenge \\d+: ${americanEnglish(displayExerciseTitle(exercise)).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`) }).click();
   await page.locator('.cm-content').fill(`print(${JSON.stringify(exercise.output)})`);
   await page.getByRole('button', { name: 'Run tests', exact: true }).click();
   await expect(page.getByText('Some tests need another look', { exact: true })).toBeVisible({ timeout: 120000 });

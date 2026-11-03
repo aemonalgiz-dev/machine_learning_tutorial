@@ -24,9 +24,9 @@ import { WhyACorner } from "@/components/widgets/WhyACorner";
 import { WithoutCorners } from "@/components/widgets/WithoutCorners";
 
 export const metadata: Metadata = {
-  title: "Keypoints and Descriptors · oop_ml",
+  title: "Keypoints and Descriptors · Perceptron Lab",
   description:
-    "Two photographs may show the same scene from different positions. We need distinctive points we can recognise in both pictures and a numerical description that lets us compare their surroundings.",
+    "Distinctive image locations can be matched across photographs taken from different viewpoints. A descriptor gives each location a numerical account of its surroundings so candidate matches can be compared.",
 };
 
 const link =
@@ -38,11 +38,11 @@ export default function KeypointsAndDescriptorsPage() {
       lessonId="keypoints-and-descriptors"
       intuition={lessonIntuitions["keypoints-and-descriptors"]}
       technicalStart="Part 3. Scoring A Corner"
-      openingTitle="Find Places You Can Recognise Again"
-      playgroundTitle="Find image locations we could recognise again"
+      openingTitle="Find Places You Can Recognize Again" openingId="find-places-you-can-recognise-again"
+      playgroundTitle="Find image locations we could recognize again"
       playgroundIntro="Compare the detected locations with their descriptors and proposed matches. Check whether a strong local match also makes sense in the two pictures."
       title="Keypoints and Descriptors"
-      tagline={"Two photographs may show the same scene from different positions. We need distinctive points we can recognise in both pictures and a numerical description that lets us compare their surroundings."}
+      tagline={"Distinctive image locations can be matched across photographs taken from different viewpoints. A descriptor gives each location a numerical account of its surroundings so candidate matches can be compared."}
       prerequisites={
         <>
           Start with{" "}
@@ -66,20 +66,9 @@ export default function KeypointsAndDescriptorsPage() {
                 <>
 <p>Suppose we photograph the same scene twice after moving the camera. Which position in the second image corresponds to a corner in the first? To answer, we need locations worth comparing and a way to describe the image near each one.</p>
               <p>Our drawn scene is 48 pixels on each side. It contains a square, a disc, a diagonal bar and three small crosses, with a brightness ramp making one side lighter. We know where those objects were placed, so we can check whether a proposed match found the same feature or merely a similar-looking piece elsewhere.</p>
-                <p>
-                  Answering it by describing every position is the obvious plan. It is expensive, and the more serious trouble is that most of the descriptions it produces do not distinguish anything from anything.
-                </p>
+                <p>We could describe a patch at every image position, but many patches are uninformative. A flat region looks much like another flat region. Along a straight edge, several positions can also look alike. Choosing locally distinctive positions can reduce both the later computation and the ambiguity.</p>
 </>
-                <p>
-                  A five-wide patch fits at 1,936 of the scene&rsquo;s 2,304
-                  pixels, so the obvious plan writes down 1,936 descriptions.
-                  When I counted how many of those are distinct, only 815 were.
-                  The remaining positions share a description with at least one
-                  other position, 1,179 of them in all, and the largest group
-                  that agree exactly runs to 86 positions. Those 86 cannot say
-                  where they came from, however carefully they are compared,
-                  because there is nothing to compare that differs.
-                </p>
+                <p>A five-wide patch fits at 1,936 of the scene&rsquo;s 2,304 pixels. Those positions produce 815 distinct descriptor vectors. Of the positions, 1,179 share their descriptor with at least one other position, and the largest identical group contains 86 positions. Comparing those 86 descriptors alone cannot recover which location each came from.</p>
                 <NumberTable
                   headings={["what was counted", "on the scene above"]}
                   rows={[
@@ -89,15 +78,11 @@ export default function KeypointsAndDescriptorsPage() {
                     ["positions sharing theirs with another", "1,179"],
                     ["largest group agreeing exactly", "86"],
                   ]}
-                  caption="Describing everything produces a great many descriptions that are not descriptions of anything in particular."
+                  caption="Many positions have identical local descriptors, which prevents the descriptors alone from identifying their locations."
                 />
                 <KeepInMind>
-                  The trouble with describing every position is not mainly that
-                  there are many of them. It is that most of them are
-                  indistinguishable from their neighbours, so the description is
-                  a true statement about the brightness there and still says
-                  nothing about where there is.
-                </KeepInMind>
+
+                  In this scene, many positions have identical local descriptions. A descriptor can accurately record brightness around a pixel without identifying its location. We need to check distinctiveness as well as the cost of describing every position.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. Most positions cannot say where they came from">
@@ -114,26 +99,12 @@ export default function KeypointsAndDescriptorsPage() {
                   This is the aperture problem. Imagine looking at a long straight edge through a small hole. Movement across the edge changes the visible patch, but movement along it may leave the patch looking the same. We then lack evidence for one component of motion. A corner contains changes in two directions, so moving it either way can change what we see.
                 </p>
                 <KeepInMind>
-                  A position is worth describing exactly when moving a window
-                  away from it, in any direction, changes what the window sees.
-                  That is a property of the neighbourhood rather than of the
-                  pixel, which is why everything that follows is about a window
-                  and not about a point.
-                </KeepInMind>
+
+                  A useful candidate changes its local appearance when the window moves in either direction. That helps us locate it within its neighborhood. It does not make the appearance unique across the image: several repeated corners can still look identical.</KeepInMind>
               </SubSection>
 
               <SubSection title="3. Find, describe, match">
-                <p>
-                  So the method has three stages and they are worth naming
-                  before any of them is built. Score every position by how
-                  firmly a window there is pinned, and keep the few best.
-                  Describe what surrounds each of the kept ones, in a form that
-                  does not move when the lighting does. Then match one
-                  picture&rsquo;s descriptions against another&rsquo;s, keeping
-                  only the matches that were not close calls. The rest of this
-                  page is those three stages, in that order, and then what they
-                  cost and where they stop.
-                </p>
+                <p>First find positions whose surrounding brightness pattern changes when the window moves in different directions. These are candidate keypoints. Describe a small neighborhood around each selected position, then compare those descriptions between images. We will check both whether a position can be located reliably and whether its appearance can be matched distinctively.</p>
                 <InAModel>
                   The first stage still reads the whole picture. Reporting a few
                   dozen places on a 48 by 48 scene means computing a score at
@@ -151,45 +122,15 @@ export default function KeypointsAndDescriptorsPage() {
           content: (
             <>
               <SubSection title="4. Move the window and see what changes">
-                <p>
-                  Take the square again and look at three positions on it, one
-                  corner, one point in the middle of an edge four pixels clear
-                  of any corner, and one patch of empty ground. At each of them,
-                  draw the nine gradient vectors inside a three by three window,
-                  each arrow pointing the way brightness rises there and as long
-                  as brightness rises fast. The three drawings are the whole
-                  argument of this part, and they say it before any arithmetic
-                  does.
-                </p>
+                <p>For the next measurements, use a clean square with brightness one on a zero background, without the workbench scene&rsquo;s brightness ramp. Inspect a corner, the middle of an edge four pixels from any corner, and a flat background patch. The drawing shows the nine gradient vectors in a three-by-three window at each location. Each arrow points toward increasing brightness; its length records how rapidly brightness changes.</p>
                 <WhyACorner show="probes" />
-                <p>
-                  On flat ground there are no arrows. Along the edge every arrow
-                  points the same way, to the right, because that is the only
-                  direction in which anything is changing. At the corner some
-                  arrows point right and some point down. What separates the
-                  three is how many directions the change comes in, which is a
-                  statement about the spread of the arrows rather than about
-                  their length, and the middle drawing has arrows quite as long
-                  as the corner&rsquo;s.
-                </p>
+                <p>The flat patch has no gradient arrows. At the straight edge they all point right, so brightness changes in only one direction. At the corner some point right and others point down. The edge has long arrows too; a corner score needs to recognize variation in different directions rather than merely large gradients.</p>
                 <KeepInMind>
-                  Flat ground, an edge and a corner differ in the number of
-                  directions the brightness changes in, which is zero, one and
-                  two. Everything the rest of this page does is a way of
-                  measuring that number without ever counting anything.
-                </KeepInMind>
+                  These ideal patches contain brightness changes in zero, one or two independent directions. We will measure how much gradient variation the window contains along its weakest direction. Real images can give small nonzero responses even where the underlying surface looks flat.</KeepInMind>
               </SubSection>
 
               <SubSection title="5. Three averaged products hold all of it">
-                <p>
-                  A spread of directions is awkward to hold, and it turns out
-                  that three numbers hold it exactly. Square the across
-                  gradient, square the down gradient, multiply the two together,
-                  and average each of the three over the window. Those three
-                  averages arrange themselves as a small symmetric matrix, one
-                  per pixel, and every corner measure ever proposed reads that
-                  matrix and nothing else.
-                </p>
+                <p>Summarize the local gradients using their mean squared horizontal response, mean squared vertical response and mean cross-product. These quantities form a small symmetric matrix at each position. The corner scores used here read that matrix to ask whether the neighborhood contains variation in more than one direction.</p>
                 <Equation>
                   {`across energy  =  average over the window of ( across × across )
 shared term    =  average over the window of ( across × down )
@@ -201,8 +142,9 @@ down energy    =  average over the window of ( down × down )
                 </Equation>
                 <WorkedExample>
                   <p>
+
                     At the square&rsquo;s top-left corner, with a three-wide
-                    window and the usual centre-weighted gradient estimate, the
+                    window and the usual center-weighted gradient estimate, the
                     across energy is 5.777778, the down energy is 5.777778 and
                     the shared term is 1.777778. In the middle of the left edge
                     the across energy is 10.666667, the down energy is 0.0 and
@@ -234,51 +176,21 @@ down energy    =  average over the window of ( down × down )
                   <Equation>{"across energy  =  (6 × 4²) / 9  =  96 / 9  ≈  10.666667\ndown energy    =  0\nshared term    =  0"}</Equation>
                 </WorkedExample>
                 <KeepInMind>
-                  The averaging is over a window, so this is a description of a
-                  neighbourhood. The three numbers are not properties of a pixel
-                  and would say nothing if they were.
-                </KeepInMind>
+
+                  Each matrix summarizes gradients across a neighborhood. A single gradient vector describes change at one location; averaging the outer products lets different directions within the window contribute to the score.</KeepInMind>
               </SubSection>
 
               <SubSection title="6. Without the averaging there are no corners at all">
-                <p>
-                  That last point is easy to read as a smoothing step, a
-                  tidying-up applied to numbers that would have worked anyway,
-                  and it is not. Take the window down to a single pixel and the
-                  matrix at every position becomes one gradient vector
-                  multiplied by itself, which describes one direction because
-                  one vector is all it was given. Any score that asks for two
-                  directions is then zero everywhere by construction. Scored
-                  that way, the square has no corners, and neither has any
-                  other picture.
-                </p>
+                <p>The averaging window combines evidence from several gradient directions. At a single pixel there is only one gradient vector, so its outer-product matrix has at most one nonzero direction. A score requiring two nonzero directions would therefore reject every position. The window supplies the local evidence that makes a corner distinguishable from one edge.</p>
                 <WhyACorner show="window" />
-                <p>
-                  The second row of that drawing is the honest answer, four
-                  places on a picture with four corners. The first row is a
-                  one-pixel window, which finds nothing anywhere. The rows below
-                  are wider windows, which is a different failure and is the
-                  subject of Part 7.
-                </p>
+                <p>The second row detects the four intended corners. A one-pixel window detects none because it cannot collect the neighboring gradient variation used by this rule. Wider windows can merge responses from nearby structure, which is the different failure examined in Part 7.</p>
                 <KeepInMind>
-                  Averaging over a neighbourhood is the only reason a matrix
-                  built from gradients can describe two directions at once, so
-                  the window is doing the work that the word corner is standing
-                  for. A quantity computed at a single pixel cannot distinguish
-                  a corner from anything.
-                </KeepInMind>
+
+                  One gradient&rsquo;s outer product has at most one nonzero eigenvalue. Combining gradients from different directions can produce two. This is why this corner measure uses a neighborhood rather than a single gradient.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. Two numbers settle a two by two symmetric matrix">
-                <p>
-                  A symmetric matrix of this size is completely described by two
-                  numbers, its trace and its determinant, and its eigenvalues
-                  follow from those two by the quadratic formula. That is worth
-                  saying because no measure below ever computes an eigenvalue as
-                  such. Every score on this page is read off the same two
-                  pictures, one holding a sum and one holding a difference of
-                  products.
-                </p>
+                <p>The matrix’s trace and determinant determine its two eigenvalues, although they do not determine its orientation. We can calculate the scores below from those two quantities without a separate numerical eigensolver at every pixel. Keep that distinction between the eigenvalues and the complete matrix.</p>
                 <Equation>
                   {`trace        =  across energy + down energy
 
@@ -286,15 +198,7 @@ determinant  =  across energy × down energy − shared term × shared term
 
 eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                 </Equation>
-                <p>
-                  The trace is the total amount of change in the window,
-                  whatever direction it is in, and the page calls it the total
-                  energy from here on. The determinant is the product of the two
-                  eigenvalues, so it is large only when both of them are, and
-                  the page calls it the shape term, since knowing about shape is
-                  the whole of what it adds. The next part is what happens when
-                  each of the two is asked to find a corner.
-                </p>
+                <p>The trace adds the two eigenvalues, so it measures total gradient energy without distinguishing its direction. The determinant multiplies them. It is zero if either direction has zero variation, but a large product alone does not guarantee that the two values are balanced. We will compare these quantities with a score based directly on the smaller eigenvalue.</p>
               </SubSection>
             </>
           ),
@@ -304,14 +208,7 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
           content: (
             <>
               <SubSection title="8. The energy cannot tell a corner from an edge">
-                <p>
-                  Start with the trace, since it is the obvious candidate and
-                  the one most people reach for. It is the total gradient energy
-                  in the window, so it is zero on flat ground and large wherever
-                  brightness is changing. On the square it reads 11.555556 at
-                  the corner and 10.666667 in the middle of the edge, which are
-                  the numbers from the worked example above added up.
-                </p>
+                <p>The trace is a possible score because it measures total gradient energy. It is zero on the flat patch and large where brightness changes. On this square it reads 11.555556 at the corner and 10.666667 in the middle of the edge. Both positions therefore have strong responses, although only the corner is locally identifiable in two directions.</p>
                 <NumberTable
                   headings={["position", "total energy", "share of the corner"]}
                   rows={[
@@ -319,18 +216,9 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                     ["the middle of an edge", "10.666667", "0.923077"],
                     ["flat ground", "0.000000", "0.000000"],
                   ]}
-                  caption="The energy separates the square from its background by everything and a corner from an edge by 8%."
+                  caption="Both the edge and corner have strong total gradient energy; their responses differ much less than either differs from flat ground."
                 />
-                <p>
-                  A corner beats an edge by a factor of 1.083333. On this
-                  square, which is as clean as a picture gets, a threshold
-                  anywhere between 10.666667 and 11.555556 does separate the two,
-                  and that gap is the whole of what the energy has to offer. The
-                  energy grows with the square of the contrast, so an edge with
-                  five per cent more contrast than this one already outscores
-                  the corner, and the ordering holds only while every edge in
-                  the picture is as sharp as every other.
-                </p>
+                <p>A threshold between 10.666667 and 11.555556 separates the corner from the edge on this clean square. The corner&rsquo;s energy is only a factor of 1.083333 higher, though. Gradient energy grows with squared contrast, so an edge with five percent more contrast already outscores this corner. A threshold that worked here may fail when different parts of an image have different contrasts.</p>
               </SubSection>
 
               <SubSection title="9. Along a straight edge the shape term is exactly zero">
@@ -339,32 +227,15 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                 </p>
                 <WhyThisWorks title="Why gradients along one direction give a zero determinant">
                   <>
-<p>
-                    Every gradient inside a window straddling a straight edge points the same way, as the arrows in step 4 show. So each of the nine outer products being averaged is a multiple of the same one, and the average is a multiple of it too, which makes the matrix exactly rank one. A rank one matrix has a zero eigenvalue, and the determinant is the product of the eigenvalues, so the determinant is exactly zero.
-                  </p>
-                  <p>
-                    Nothing about the length of the edge, the sharpness of the step or the width of the window changes that.
-                  </p>
+<p>In the ideal straight-edge window shown here, all nonzero gradients are parallel. Their outer products are multiples of the same rank-one matrix, so averaging preserves rank one. One eigenvalue is therefore zero, which makes the determinant zero too. Noise, texture or another edge within the window can change this result.</p>
+                  <p>Increasing the contrast scales the nonzero eigenvalue but leaves the zero eigenvalue unchanged. Widening the window also preserves rank one as long as it contains only that same ideal straight-edge pattern.</p>
 </>
                 </WhyThisWorks>
-                <p>
-                  Flat ground gives zero for a duller reason, which is that all
-                  three averages are zero there. So the determinant reads 0.0 at
-                  the edge and 0.0 on flat ground, and the number it gives at
-                  the corner is more than thirty times either.
-                </p>
+                <p>Flat ground also has determinant 0.0, because all three gradient averages are zero there. The ideal straight edge and flat region therefore receive the same determinant score for different reasons. The corner gives 30.222222, a positive value that separates it from both in this example; a ratio against zero would not be meaningful.</p>
               </SubSection>
 
-              <SubSection title="10. The ordering everybody quotes does not exist">
-                <p>
-                  Put those two together and the smaller eigenvalue falls out.
-                  It is the direct answer to the question the method asked,
-                  since a window is pinned in both directions exactly as far as
-                  the weaker of the two directions is pinned. On the square it
-                  reads exactly 4.0 at each of the four corners, exactly 0.0
-                  along each of the four edges, and exactly 0.0 on the ground
-                  outside and inside.
-                </p>
+              <SubSection title="10. The Smaller Eigenvalue as a Corner Score" id="10-the-ordering-everybody-quotes-does-not-exist">
+                <p>The smaller eigenvalue measures variation along the direction with the least gradient energy. A strong response requires variation even in that weakest direction. On the clean square it is 4.0 at each corner and 0.0 along the edges and on the flat background.</p>
                 <WorkedExample title="The corner, through the formulas of step 7">
                   <Equation>{"trace        =  5.777778 + 5.777778  =  11.555556\ndeterminant  =  5.777778 × 5.777778 − 1.777778 × 1.777778  ≈  30.222222\n\ntrace² − 4 × determinant  ≈  133.530864 − 120.888889  =  12.641975\n√12.641975  ≈  3.555556\n\nsmaller eigenvalue  =  (11.555556 − 3.555556) / 2  =  4.0\nlarger eigenvalue   =  (11.555556 + 3.555556) / 2  ≈  7.555556"}</Equation>
                   <p>
@@ -399,23 +270,9 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                   ]}
                   caption="The three positions of the square, read four ways. Only the first column has an edge anywhere between a corner and empty ground."
                 />
-                <p>
-                  I had expected a middling number in the middle row and there
-                  is not one, and that is the most interesting thing on this
-                  page. An edge is not partway between a corner and empty ground.
-                  It scores what empty ground scores, because it is exactly as
-                  unlocatable along its own length as empty ground is in every
-                  direction, and a measure that ranked it higher would be
-                  putting keypoints precisely where a keypoint cannot be
-                  pinned.
-                </p>
+                <p>The ideal straight edge receives the same score as flat ground under the smaller-eigenvalue measure. It has strong change across the edge but no local evidence locating a point along it. A corner provides change in both directions. The score is measuring that locatability rather than total brightness change.</p>
                 <KeepInMind>
-                  Corners high, edges middling, flat ground low is a true
-                  statement about the total energy and a false one about every
-                  corner measure. Reading the energy is how a detector ends up
-                  covering an edge in keypoints that no second photograph can
-                  match.
-                </KeepInMind>
+                  The scores measure different properties. Total energy is high at both a corner and an edge. The smaller eigenvalue is zero at the ideal straight edge, while the Harris score is negative there. A large gradient alone is not enough evidence for a distinctive keypoint.</KeepInMind>
               </SubSection>
 
               <SubSection title="11. Harris, and an edge below empty ground">
@@ -429,31 +286,13 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                 <Equation>
                   {`Harris score  =  determinant − sensitivity × trace²`}
                 </Equation>
-                <p>
-                  On the square that is 24.880988 at the corner, 0.0 on flat
-                  ground and −4.551111 along the edge, so an edge scores below
-                  empty ground rather than above it. The subtracted term has
-                  nothing to bite on where the energy is zero and a great deal
-                  to bite on along an edge. Both measures are saying the same
-                  thing in their own words, and neither of them puts an edge
-                  above the ground.
-                </p>
+                <p>The Harris score is 24.880988 at the corner, 0.0 on flat ground and −4.551111 along the edge. At the ideal edge the determinant is zero while the squared-trace penalty is positive, so subtraction gives a negative response. The smaller-eigenvalue score also rejects that edge, but assigns it zero rather than a negative value.</p>
                 <p>
                   Those three figures use a sensitivity of 0.04, and each is
                   one subtraction from numbers already worked above.
                 </p>
                 <Equation>{"corner  =  30.222222 − 0.04 × 11.555556²  ≈  30.222222 − 5.341235  ≈  24.880988\nedge    =  0 − 0.04 × 10.666667²          ≈  −4.551111\nground  =  0 − 0.04 × 0²                  =  0"}</Equation>
-                <p>
-                  The sensitivity is the awkward part. It is a number with no
-                  principled value, and the guidance in the literature amounts
-                  to somewhere between 0.04 and 0.06. It also has a ceiling that
-                  is a fact rather than a convention. The determinant of a real
-                  symmetric matrix is at most a quarter of its squared trace, so
-                  from a sensitivity of a quarter upward the score cannot be
-                  positive anywhere, whatever the picture holds. Just below
-                  that, at 0.24, the square&rsquo;s own corners read −1.825185
-                  and nothing is found at all.
-                </p>
+                <p>The sensitivity controls how strongly Harris penalizes an unbalanced pair of eigenvalues. Values from 0.04 to 0.06 are common starting choices; their suitability still depends on the images and detection threshold. There is also a mathematical upper limit: the determinant of a real symmetric two-by-two matrix is at most a quarter of its squared trace. At a sensitivity of 0.25 or above, no positive score is possible. Even 0.24 makes this square&rsquo;s corner response −1.825185, so the detector finds none.</p>
                 <WhyThisWorks title="Deriving the Harris response from the two eigenvalues">
                   <p>
                     For the two eigenvalues, the trace is their sum and the
@@ -465,27 +304,11 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The smaller eigenvalue takes no parameter and is in the units
-                  of a squared gradient, so a threshold on it means the same
-                  thing on two different pictures. The Harris score is a squared
-                  gradient to the fourth power, so its numbers do not carry from
-                  one picture to another, and the sensitivity is a dial nobody
-                  can set for you.
-                </KeepInMind>
+                  The smaller-eigenvalue score avoids Harris&rsquo;s extra sensitivity parameter, but both methods still need a window and detection threshold. Multiplying contrast scales the smaller eigenvalue quadratically and the Harris response to the fourth power. Neither score makes a fixed threshold automatically transferable between different lighting conditions.</KeepInMind>
               </SubSection>
 
               <SubSection title="12. One corner, one place">
-                <p>
-                  A corner is a few pixels across and the window is three pixels
-                  wide, so the score around a corner is a blob rather than a
-                  spike. On the square, 32 pixels score above a threshold of
-                  0.5, which is four corners reported eight times each. The
-                  repair is to work downward from the strongest score and refuse
-                  any later candidate lying within a few pixels of one already
-                  taken, and because it works downward, anything kept was the
-                  strongest thing within its own radius without a second pass
-                  being needed to check.
-                </p>
+                <p>The corner response spreads over nearby pixels. On the square, 32 pixels exceed a threshold of 0.5, so we need a way to select fewer locations. This implementation considers candidates from strongest to weakest and skips any that are too close to an already selected location. This is called non-maximum suppression. It enforces spacing between selected points; a skipped candidate does not itself suppress later ones.</p>
                 <SuppressionLadder show="separation" />
                 <p>
                   On the square, a separation of two takes 32 answers to 4, and
@@ -499,32 +322,18 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                 </p>
               </SubSection>
 
-              <SubSection title="13. Excluding a corner must not promote its neighbour">
-                <p>
-                  There is one more rule, and it is the one that hides a bug.
-                  A description is a patch cut around a place, so a place too
-                  near the frame has no patch to cut, and those places have to
-                  be left out. The obvious way to write that is to drop them
-                  from the candidates before the suppression runs, and the
-                  obvious way is wrong.
-                </p>
+              <SubSection title="13. Excluding a corner must not promote its neighbor" id="13-excluding-a-corner-must-not-promote-its-neighbour">
+                <p>A descriptor needs a complete patch around its position, so some candidates are too close to the frame to describe. This implementation performs greedy suppression before omitting selected points that lack a complete patch. Those omitted points still suppress their neighbors. Filtering candidates before suppression would therefore select a different set.</p>
                 <SuppressionLadder show="border" />
                 <>
 <p>
                   Dropping a candidate first means the corner inside the border never gets to suppress anything, so the pixel on its shoulder survives and is reported in its place. On a square whose corners sit two pixels from the frame, at a border of three, that answers four places rather than one, three of them a single pixel off, scoring 3.5556 where the corners they stand beside score 4.0.
                 </p>
-                <p>
-                  The count looks right, the strengths look plausible, and every position is wrong. The rule that works is to let a place inside the border suppress its own neighbourhood and then decline to report it.
-                </p>
+                <p>The returned count and strengths can look plausible even when nearby shoulder pixels replace the intended maxima. Under our policy, a maximum can suppress its neighborhood before being omitted for lacking a complete descriptor patch. This preserves the meaning of the selected positions rather than treating every valid patch location as an equivalent replacement.</p>
 </>
                 <KeepInMind>
-                  A threshold on the score can be applied on either side of the
-                  suppression, since a candidate too weak to be kept could not
-                  have suppressed anything a stronger one did not. A border
-                  cannot, because the place it excludes is the strongest thing in
-                  its own neighbourhood, and excluding it early hands that
-                  neighbourhood to the second strongest.
-                </KeepInMind>
+
+                  With this descending-score policy, applying the minimum score before suppression does not remove a weaker candidate that could have displaced a stronger one. Border filtering is different: excluding a strong candidate early can allow a nearby, weaker one to survive. The ordering of these steps is part of the detector&rsquo;s behavior.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -535,7 +344,7 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
             trueFalse(
               "A five-wide patch fits at 1,936 positions of the scene, so describing every position gives 1,936 descriptions that can be told apart.",
               false,
-              "Only 815 of them are distinct. The other 1,179 positions share a description with at least one other, and the largest group that agree exactly runs to 86 positions, which cannot say where they came from however carefully they are compared. The trouble is not mainly how many positions there are, it is that most of them are indistinguishable from their neighbours.",
+              "Only 815 of them are distinct. The other 1,179 positions share a description with at least one other, and the largest group that agree exactly runs to 86 positions, which cannot say where they came from however carefully they are compared. The trouble is not mainly how many positions there are, it is that most of them are indistinguishable from their neighbors.",
             ),
             trueFalse(
               "With the averaging window taken down to a single pixel, a score that asks for two directions is zero at every position, so the square has no corners at all.",
@@ -551,7 +360,7 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                 "The measure is only defined at corners",
               ],
               0,
-              "There is no middling number in the middle row, and a measure that ranked an edge higher would be putting keypoints precisely where a keypoint cannot be pinned. Corners high, edges middling, flat ground low is a true statement about the total energy, which reads 11.555556 at the corner and 10.666667 at the edge, and a false one about every corner measure.",
+              "An ideal straight edge changes strongly across its normal but not along its length. Its structure tensor therefore has one large eigenvalue and one zero eigenvalue. Flat ground has no change in either direction, giving two zeros. The smaller eigenvalue is zero in both cases because neither supports localization in every direction; the trace still distinguishes their total gradient energy.",
             ),
             several(
               "Which of these hold for the Harris score and its sensitivity?",
@@ -562,7 +371,7 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                 "The sensitivity has one principled value, which the mathematics supplies",
               ],
               [0, 1],
-              "The subtracted term has nothing to bite on where the energy is zero and 0.04 × 10.666667² to bite on along the edge. The determinant of a real symmetric matrix is at most a quarter of its squared trace, which makes the ceiling a fact rather than a convention. The other two fail. The score is a squared gradient to the fourth power, so its numbers do not carry between pictures, and the sensitivity has no principled value, only guidance of somewhere between 0.04 and 0.06.",
+              "For this positive-semidefinite structure tensor, determinant cannot exceed one quarter of squared trace. Subtracting a sensitivity of at least one quarter times squared trace therefore leaves no positive response. Smaller sensitivities tune the preference between balanced directional variation and strong one-direction edges. Harris responses also change with intensity scale, so compare thresholds under a stated image and filter convention.",
             ),
             choice(
               "A place too near the frame has no patch to cut, so it cannot be reported. What goes wrong if those candidates are dropped before the suppression runs?",
@@ -573,7 +382,7 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                 "The count of places comes out too low",
               ],
               0,
-              "On a square whose corners sit two pixels from the frame, at a border of three, three of the answers are a single pixel off, scoring 3.5556 beside corners that score 4.0. The count looks right, the strengths look plausible and every position is wrong. A threshold can go on either side of the suppression, because a candidate too weak to be kept could not have suppressed anything a stronger one did not.",
+              "If a true strong corner near the frame is removed before nonmaximum suppression, a weaker nearby pixel may survive in its place. In the supplied square, three reported positions shift by one pixel despite a plausible count. This implementation suppresses weaker local responses before applying the descriptor-border requirement, so it does not replace an unusable corner with a nearby weaker location.",
             ),
         ],
         },
@@ -582,39 +391,16 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
           content: (
             <>
               <SubSection title="14. A position is not something to match on">
-                <p>
-                  We now have a short list of places, and the list on its own is
-                  worth very little. The whole reason for finding them was that
-                  two photographs of one scene put the same corner at different
-                  positions, so the position is the thing being solved for and
-                  cannot be the thing that is matched. What travels between two
-                  photographs is what surrounds the corner.
-                </p>
-                <p>
-                  So the description is the square of brightness around the
-                  place. Five pixels on a side, which is twenty-five numbers,
-                  read row by row. Left there it would be useless, because
-                  turning a lamp up adds to every one of those numbers and
-                  moving a lamp closer multiplies them, and neither of those
-                  changes anything about the scene.
-                </p>
+                <p>A keypoint’s coordinates identify where it is in one image. After the camera moves, those coordinates change. To establish a correspondence, compare the appearance around the point instead of expecting its original coordinates to match. That local appearance description is called a descriptor.</p>
+                <p>The descriptor begins with the five-by-five brightness patch around the selected point, read as twenty-five values in pixel order. A uniform brightness offset changes all those values, even when the local structure is unchanged. Uniform contrast scaling changes their size as well. We need to specify which of those appearance changes the comparison should ignore.</p>
               </SubSection>
 
               <SubSection title="15. Take out the mean, divide out the length">
-                <p>
-                  Two steps repair both. Subtract the patch&rsquo;s own mean
-                  from every one of its numbers, which removes anything that was
-                  added to all of them. Then divide by the length of what is
-                  left, which removes anything that multiplied all of them. What
-                  remains is a direction rather than a quantity, and two of them
-                  can be compared by the straight-line distance between them, a
-                  distance running from zero for two identical patches to two
-                  for a patch against its own exact opposite.
-                </p>
+                <p>Subtracting the patch mean removes a uniform additive brightness offset. For a patch with nonzero variation, dividing the centered vector by its length also removes positive uniform contrast scaling. The resulting unit vectors can be compared by Euclidean distance, from zero for identical descriptors to two for opposite ones. This does not establish invariance to rotation, shadows or arbitrary lighting changes.</p>
                 <Equation>
-                  {`centred      =  patch − mean of patch
+                  {`centered      =  patch − mean of patch
 
-description  =  centred / length of centred
+description  =  centered / length of centered
 
 distance     =  length of ( one description − the other )`}
                 </Equation>
@@ -622,13 +408,15 @@ distance     =  length of ( one description − the other )`}
                 <WorkedExample>
                   <>
                     <p>
+
                       The patch contains nine bright pixels with value one and sixteen
                       background pixels with value zero. Find its mean, subtract it,
-                      then compute the length of the centred vector.
+                      then compute the length of the centered vector.
                     </p>
                     <Equation>{"mean = 9 / 25 = 0.36\ncentred bright pixel = 1 − 0.36 = 0.64\ncentred background pixel = 0 − 0.36 = −0.36\nsquared length = 9 × 0.64² + 16 × (−0.36)² = 5.76\nlength = √5.76 = 2.4"}</Equation>
                     <p>
-                      Divide every centred value by that length.
+
+                      Divide every centered value by that length.
                     </p>
                     <Equation>{"bright entry = 0.64 / 2.4 ≈ 0.266667\nbackground entry = −0.36 / 2.4 = −0.15"}</Equation>
                     <p>
@@ -651,7 +439,8 @@ distance     =  length of ( one description − the other )`}
                 <DescriptorCard show="distances" />
                 <>
 <p>
-                  The other rows of that drawing are the ones that give the scale its meaning. Two different corners of the same square sit 1.443376 apart. A corner against its own picture with the brightness reversed sits at 2.0, the furthest two descriptions can be. And two patches of flat ground, one outside the square and one inside it, sit at exactly 0.0 from each other, because neither has any variation to normalise and both come back as twenty-five zeros.
+
+                  The other rows of that drawing are the ones that give the scale its meaning. Two different corners of the same square sit 1.443376 apart. A corner against its own picture with the brightness reversed sits at 2.0, the furthest two descriptions can be. And two patches of flat ground, one outside the square and one inside it, sit at exactly 0.0 from each other, because neither has any variation to normalize and both come back as twenty-five zeros.
                 </p>
                 <p>
                   That last row is the aperture problem again, now in the description rather than in the score.
@@ -674,12 +463,7 @@ distance     =  length of ( one description − the other )`}
                   </p>
                 </WorkedExample>
                 <KeepInMind>
-                  A flat patch has no length to divide by, so its description
-                  does not exist and the convention is to answer zeros. Every
-                  such answer is zero distance from every other, so a flat patch
-                  matches all flat patches equally well, which is exactly why
-                  places are hunted at corners.
-                </KeepInMind>
+                  A flat patch becomes a zero vector after mean subtraction, so it cannot be divided by a nonzero length. This SDK returns a zero descriptor by convention. All such flat patches then have distance zero from one another, regardless of their original brightness. The caller should not treat that agreement as evidence of a distinctive match.</KeepInMind>
               </SubSection>
 
               <SubSection title="17. The places belong to the scene, the descriptions to the frame">
@@ -698,20 +482,14 @@ distance     =  length of ( one description − the other )`}
 </>
                 <SceneLedger show="lighting" />
                 <>
-<p>
-                  Now turn the picture a quarter circle, which is the one rotation that needs no interpolation, so nothing that follows can be blamed on resampling. All 47 places land exactly where the coordinate map says they should, with strengths that agree to the last bit, because the trace and the determinant do not care how the axes are labelled and a square window is unchanged by a quarter turn.
-                </p>
+<p>A quarter turn maps pixels directly onto the grid without interpolation. All 47 selected locations move to the expected coordinates and retain their strengths in this experiment. Rotating by a right angle preserves the square window and exchanges the gradient axes, leaving the trace and determinant unchanged.</p>
                 <p>
                   The descriptions do not survive it at all. On the square, all four corners end up 1.443376 from their own turned selves, which is precisely the distance between that square&rsquo;s top-left corner and its top-right one. On the workbench scene, where the brightness ramp makes no two corners quite alike, the corresponding pairs come out between 0.052724 and 1.545328 apart, and not one of them at zero.
                 </p>
 </>
                 <KeepInMind>
-                  After a quarter turn this description does not recognise a
-                  corner as itself. It recognises it as a different corner,
-                  which is worse than failing to match, because it is a match
-                  that will be believed. Nothing here assigns an orientation,
-                  and Part 7 says what it would take.
-                </KeepInMind>
+
+                  The selected positions survive this quarter turn, but their frame-aligned descriptors change. A nearest-descriptor search may then favor a different corner. Estimating a local orientation is one way to make the descriptions more comparable; ambiguous proposals still need rejection checks.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -721,32 +499,12 @@ distance     =  length of ( one description − the other )`}
           content: (
             <>
               <SubSection title="18. The nearest description, and why its distance says nothing">
-                <p>
-                  Two pictures are now two short lists of descriptions, and
-                  matching them is the obvious search. For each description in
-                  the first list, find the nearest in the second. The nearest
-                  always exists, whatever the two pictures are of, so the search
-                  answers even when it should not, and the only defence is to
-                  ask whether the answer means anything.
-                </p>
-                <p>
-                  Asking whether the winner is near is the first thing anybody
-                  tries and it does not work. How near is near depends on the
-                  contrast of the pictures, the amount of noise in them and the
-                  size of the patch, and a threshold tuned on one pair is wrong
-                  on the next. There is no number to put there that carries.
-                </p>
+                <p>For each descriptor in one image, search the other image’s descriptors for the nearest. If that second list is nonempty, it has a nearest entry even when no true correspondence exists. We need a way to reject ambiguous or unconvincing proposals before treating them as matches.</p>
+                <p>An absolute distance cutoff needs to be chosen for the descriptor and image conditions. Noise, patch content and the amount of appearance change affect what distances are plausible. A cutoff alone also misses a different question: are several candidates almost equally close?</p>
               </SubSection>
 
               <SubSection title="19. Ask instead whether the nearest is much nearer">
-                <p>
-                  Lowe&rsquo;s rule replaces that question with one that needs
-                  no units. Compare the nearest against the second nearest. A
-                  place that is genuinely distinctive leaves its runner-up far
-                  behind; a place that is one of many similar ones has a
-                  runner-up right behind it, and the ratio of the two distances
-                  says which of those we are in without ever naming a scale.
-                </p>
+                <p>Lowe’s ratio test compares the nearest descriptor distance with the second-nearest. A small ratio indicates that the preferred candidate is substantially closer than its competitor. A ratio near one indicates ambiguity. This is a test of distinctiveness among the available candidates, not proof that the selected point is correct.</p>
                 <Equation>
                   {`ratio  =  distance to the nearest / distance to the second nearest`}
                 </Equation>
@@ -755,49 +513,19 @@ distance     =  length of ( one description − the other )`}
 <p>
                   Three arrangements, on the three buttons above. One square photographed twice, moved down four rows and right five columns, gives four matches, each at a distance of exactly 0.0 against a runner-up at 1.443376, so each ratio is 0.0 and each winner is the corner that moved by the known shift. The same square searched for in a picture holding two identical copies of it gives four matches at a distance of 0.0 against a runner-up also at 0.0, which is a ratio of 1.0 and is refused.
                 </p>
-                <p>
-                  Laying a faint ripple over that second picture breaks the exact tie, and the ratios become numbers the arithmetic computed rather than a convention, 0.980729 for the first of them, which is still refused.
-                </p>
+                <p>A faint ripple breaks the exact descriptor tie in the second picture. The first ratio is 0.980729, still above the acceptance threshold, so the matcher rejects it. This time the ratio is calculated from two nonzero distances rather than assigned by the zero-distance convention.</p>
 </>
                 <KeepInMind>
-                  Refusing all four matches on the twin squares is the right
-                  answer rather than a failure. Both copies are equally good
-                  answers, so any single answer would be one of two
-                  indistinguishable places picked at random, and declining is
-                  the only honest thing left.
-                </KeepInMind>
+                  Rejecting these four matches is useful: the local descriptions cannot distinguish the two identical squares. Additional context might resolve the correspondence, but this ratio test does not have that information. Selecting one copy would conceal the ambiguity.</KeepInMind>
               </SubSection>
 
               <SubSection title="20. Two equally good answers, and a zero over a zero">
-                <p>
-                  The twin squares raise a case the formula cannot evaluate.
-                  Both candidates sit at distance exactly zero, so the ratio is
-                  a zero divided by a zero and there is no value it takes. It
-                  has to be decided rather than derived, and the decision that
-                  agrees with what the number means is one, since one is what
-                  the ratio says when the runner-up is exactly as good as the
-                  winner.
-                </p>
-                <p>
-                  Any other choice does damage. Answering zero would give the
-                  most ambiguous case the score reserved for the most
-                  distinctive one, so every duplicated shape in a picture would
-                  come back as a confident match. That case is not exotic, since
-                  a brick wall, a window grid and a keyboard are all made of it.
-                </p>
+                <p>For the identical squares, both nearest distances are zero. Their ratio is undefined. This SDK assigns a ratio of one to that case so the usual threshold rejects it as ambiguous. The value is a convention chosen to express the tie, not the result of dividing zero by zero.</p>
+                <p>Assigning zero instead would make a perfect tie look maximally distinctive under this test. Repeated patterns occur in brick walls and window grids, so the convention matters beyond our drawn squares. Another implementation could reject ties directly instead of assigning a numeric ratio.</p>
               </SubSection>
 
               <SubSection title="21. The whole method on the shared scene, and six matches it should have refused">
-                <p>
-                  Run all three stages on the workbench scene against its relit
-                  self, which is the easiest test the method will ever be given,
-                  since the two pictures are the same scene under a lamp that
-                  has been turned up. The detector finds 47 places in each. The
-                  ratio test keeps 32 of the 47 matches and refuses 15, and all
-                  15 of the refusals sit on the three identical crosses, which
-                  are the one piece of repeated structure in the scene and are
-                  correctly declined.
-                </p>
+                <p>Now match the workbench scene to a version with a uniform brightness and contrast change, without moving any objects. This removes geometric changes from the test. The detector finds 47 locations in each image. Of the 47 proposed correspondences, the ratio test keeps 32 and rejects 15; all 15 rejections are on the repeated crosses.</p>
                 <SceneLedger show="strays" />
                 <p>
                   Of the 32 it kept, only 26 landed on the position they came
@@ -811,13 +539,7 @@ distance     =  length of ( one description − the other )`}
                   threshold, and six coincidences were reported as matches.
                 </p>
                 <KeepInMind>
-                  The ratio test refuses a tie it can see. It cannot refuse a
-                  tie that has been broken below the last bit of a number, and
-                  on a scene with repeated structure and no noise that is what
-                  most of the ties are. The lowest ratio it refused in this run
-                  was 0.824163, so the two populations were not far apart to
-                  begin with.
-                </KeepInMind>
+                  When two distances are both close to floating-point precision, their ratio can be unstable even though their absolute difference is tiny. Exact tie handling alone does not catch these near-ties. An absolute tolerance, mutual-match checks or a later geometric consistency test can provide additional rejection criteria.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -834,7 +556,7 @@ distance     =  length of ( one description − the other )`}
                 "They turn the patch from a direction into a quantity",
               ],
               0,
-              "Turning a lamp up adds to every number and moving a lamp closer multiplies them, and neither changes anything about the scene. What is left is a direction rather than a quantity, and two of them compare by a straight-line distance running from zero for identical patches to two for a patch against its own exact opposite.",
+              "For a nonconstant patch, subtracting its mean cancels a common additive offset. Dividing by the centered vector's length cancels a positive contrast multiplier. The resulting signed unit vectors have Euclidean distance zero when identical and two when exact negatives. Physical lighting changes may be more complicated than this uniform affine-intensity model.",
             ),
             choice(
               "On the twin squares both candidates sit at a distance of exactly zero, so the ratio is a zero divided by a zero. What value is it given, and why?",
@@ -850,18 +572,18 @@ distance     =  length of ( one description − the other )`}
             choice(
               "Two patches of flat ground, one outside the square and one inside it, sit at exactly 0.0 from each other. Why?",
               [
-                "Neither has any variation to normalise, so both come back as twenty-five zeros and every such answer matches every other equally well",
+                "Neither has any variation to normalize, so both come back as twenty-five zeros and every such answer matches every other equally well",
                 "They happen to share a mean brightness",
                 "The distance is clipped below at zero",
                 "Flat patches are left out of the descriptor stage",
               ],
               0,
-              "A flat patch has no length to divide by, so its description does not exist and the convention is to answer zeros. That is the aperture problem again, now in the description rather than in the score, and it is exactly why places are hunted at corners.",
+              "A constant patch has a zero centered vector, whose unit-length normalization is undefined. This implementation returns a zero descriptor by convention. Different flat intensities can therefore receive identical descriptors and provide no distinctive local pattern. Selecting corners helps find patches with variation in more than one direction.",
             ),
             trueFalse(
-              "After a quarter turn the description recognises a corner as a different corner rather than failing to match it.",
+              "After a quarter turn the description recognizes a corner as a different corner rather than failing to match it.",
               true,
-              "On the square all four corners end up 1.443376 from their own turned selves, which is precisely the distance between that square’s top-left corner and its top-right one, twelve entries each out by 0.416667. That is worse than failing, because it is a match that will be believed. The places and the strengths do survive the turn exactly, since the trace and the determinant do not care how the axes are labelled.",
+              "The patch descriptor uses fixed image axes. After a quarter turn, one square corner's arrangement can resemble a different original corner, creating a wrong correspondence rather than simply a large distance. The ideal square's corner strengths survive this ninety-degree grid rotation, but that does not make the descriptors rotation invariant or guarantee repeatability under arbitrary sampled rotations.",
             ),
             several(
               "Which of these hold for the ratio test on the workbench scene against its relit self?",
@@ -872,7 +594,7 @@ distance     =  length of ( one description − the other )`}
                 "Those six came from the ratio of two rounding errors, a winner near 1.6 × 10⁻¹⁶ against a runner-up near 2.5 × 10⁻¹⁶",
               ],
               [0, 1, 3],
-              "Their ratios landed between 0.5726 and 0.7219, comfortably under the threshold, so nothing flagged them. The test refuses a tie it can see and cannot refuse a tie broken below the last bit of a number, which on a scene with repeated structure and no noise is what most of the ties are. The lowest ratio it did refuse in that run was 0.824163.",
+              "Those six wrong correspondences have very small best and runner-up distances dominated by rounding. Their ratios still fall below the acceptance threshold, so the ratio alone fails to mark them as ambiguous. An explicit tolerance or duplicate-pattern policy can address near-equal numerical distances. This experiment shows a limitation of the current exact-distance convention, not that ambiguity below rounding can never be detected.",
             ),
         ],
         },
@@ -894,37 +616,13 @@ distance     =  length of ( one description − the other )`}
                   1,697.
                 </p>
                 <Equation>{"numbers, every position   =  1,936 positions × 25  =  48,400\nnumbers, the places       =  47 places × 25       =  1,175\n\ncomparisons, every position  =  1,936 × 1,936  =  3,748,096\ncomparisons, the places      =  47 × 47        =  2,209"}</Equation>
-                <p>
-                  A description is twenty-five numbers wherever it is cut, so
-                  the first saving is just the shorter list. The second is the
-                  shorter list squared, because every description of one
-                  picture is compared against every description of the other.
-                  The two timings in the drawing were measured when this
-                  page loaded and will differ from machine to machine, but the
-                  counts will not, and the counts are where the argument is.
-                </p>
+                <p>Each descriptor has twenty-five entries, so selecting fewer points reduces storage. Our brute-force matcher compares every descriptor in one list with every descriptor in the other, which makes its pair count grow with the product of the list lengths. The displayed times were measured on the API server. Their scopes also differ: the dense timer covers pair distances, while the sparse timer includes descriptor construction and matching. Treat the counts as the clearer comparison here, not the timings as a controlled benchmark.</p>
                 <InAModel>
-                  The factor grows with the picture. The number of positions is
-                  roughly the number of pixels and the number of comparisons is
-                  its square, while the number of places follows how much
-                  structure the scene holds rather than how finely it was
-                  sampled. Photographing the same room at four times the width
-                  costs sixteen times as many descriptions and two hundred and
-                  fifty-six times as many comparisons the dense way, and leaves
-                  the count of places where it was.
-                </InAModel>
+                  For brute-force dense matching, increasing both image dimensions by four gives roughly sixteen times as many valid patch positions and 256 times as many descriptor pairs. A keypoint method can reduce that cost, but its selected count is not resolution invariant. Window size, thresholds, separation and the newly visible image detail all affect how many points it finds.</InAModel>
               </SubSection>
 
               <SubSection title="23. Where looking at everything wins">
-                <p>
-                  There is a picture on which the obvious plan beats this one
-                  outright, and it is not a contrived one. Photograph a horizon,
-                  then photograph it again with the camera three rows lower. The
-                  corner score is exactly 0.0 at every pixel of both, so the
-                  method finds nothing, describes nothing and matches nothing,
-                  and it is right to, since there is no corner anywhere in
-                  either picture.
-                </p>
+                <p>Consider the drawn horizon below, shifted down by three rows. Each image contains a perfectly straight brightness boundary with no corners. The smaller-eigenvalue response is zero everywhere, so this detector returns no keypoints. It cannot use the edge&rsquo;s position to recover even the vertical part of the movement.</p>
                 <WithoutCorners />
                 <>
 <p>
@@ -935,12 +633,7 @@ distance     =  length of ( one description − the other )`}
                 </p>
 </>
                 <KeepInMind>
-                  This method answers nothing on a scene with no corners, and a
-                  scene with no corners is common. A horizon, a wall, a sheet of
-                  paper and a clear sky are all of them, and on those the honest
-                  report is that the method declined rather than that the scene
-                  had nothing in it.
-                </KeepInMind>
+                  A corner-based method can miss useful evidence when an image contains only straight edges or flat regions. Dense comparisons can still recover motion across an edge, although movement along a uniform edge remains ambiguous. Choose the representation for the information the task needs.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -950,26 +643,8 @@ distance     =  length of ( one description − the other )`}
           content: (
             <>
               <SubSection title="24. Six choices the method does not make for you">
-                <p>
-                  Everything above needed six numbers that no part of the
-                  mathematics supplies. The width of the averaging window, the
-                  threshold on the score, the separation between two kept
-                  places, the border, the side of the patch, and the ratio a
-                  match must beat. Each of them is a decision about what counts
-                  as a corner rather than a setting that could in principle be
-                  derived.
-                </p>
-                <p>
-                  The window is the one that bites hardest, because it changes
-                  the answer rather than trimming it. Widening it on the square
-                  from three pixels to nine takes the score at the top-left
-                  corner from 4.0 down to 1.62963, and takes the number of
-                  places kept from 4 up to 25, on a picture that has four
-                  corners. At nine pixels the window is large enough that two
-                  different corners share one, so what the extra twenty-one
-                  answers report is the overlap between corners rather than a
-                  corner.
-                </p>
+                <p>The detector and matcher require several choices: averaging-window size, minimum score, separation between selected points, border exclusion, patch size and the maximum accepted distance ratio. They control different stages. Some affect what the detector treats as a corner; others affect whether a descriptor fits or a proposed match is distinctive. Choose them for the image scale and validate them against known correspondences.</p>
+                <p>Widening the averaging window changes the evidence contributing to each score. On this square, increasing its side from three to nine lowers the top-left corner&rsquo;s score from 4.0 to 1.62963 and increases the selected count from 4 to 25. The larger window combines gradients from nearby corners and spreads their response. With the other settings fixed, it no longer localizes just the four intended corners.</p>
                 <NumberTable
                   headings={[
                     "window",
@@ -983,24 +658,14 @@ distance     =  length of ( one description − the other )`}
                     ["7 by 7", "2.040816", "16"],
                     ["9 by 9", "1.629630", "25"],
                   ]}
-                  caption="The averaging window decides what a corner is. Only one row of this table answers the question that was asked."
+                  caption="With the other settings fixed, a three-by-three window selects the four intended corners of this square."
                 />
                 <KeepInMind>
-                  Reporting a number of keypoints without the window, the
-                  threshold and the separation that produced it says almost
-                  nothing, since the same picture answers 0, 4, 12, 16 or 25
-                  depending on the first of those alone.
-                </KeepInMind>
+                  Report the detector settings alongside a keypoint count. Here, changing only the averaging window changes the returned count from 0 to 4, 12, 16 or 25. Those counts describe this detector configuration, not an independent count of objects or geometric corners in the image.</KeepInMind>
               </SubSection>
 
               <SubSection title="25. What a description of this kind never claims">
-                <p>
-                  Three limits are properties of this description rather than of
-                  any particular way of computing it, and it is better to say
-                  them plainly than to let a reader assume otherwise, because
-                  assuming otherwise produces a plausible answer rather than a
-                  complaint.
-                </p>
+                <p>Detecting a repeatable position does not guarantee a stable or unique descriptor. The following cases separate changes of orientation and scale from repeated structure and brightness boundaries. Each can undermine a match for a different reason.</p>
                 <p>The patch descriptor on this page records pixels relative to the image frame. Rotate the image and those pixels move to different coordinates within the descriptor, even if we found the same physical point.</p>
 <p>To reduce this sensitivity, a more developed method can estimate a local orientation from gradients and describe the patch relative to that orientation. This introduces an extra measurement whose repeatability matters.</p>
 <p>Scale creates a related problem: a fixed pixel-sized patch covers a different amount of the scene when the apparent object size changes. Detecting points across several scales and choosing a characteristic scale can make the compared neighborhoods more consistent.</p>
@@ -1021,90 +686,63 @@ distance     =  length of ( one description − the other )`}
               </SubSection>
 
               <SubSection title="26. Flat patches, straight edges and missing corner evidence" id="26-where-it-stops-being-defined">
-                <p>
-                  Beneath the choices there are inputs on which the method does
-                  not become approximate. It becomes undefined, because some
-                  quantity it needs is not there to be had. Each line below is a
-                  fact about
-                  the mathematics rather than a matter of taste, and several of
-                  them are cases where a value has to be decided and something
-                  turns on which.
-                </p>
+                <p>The table distinguishes inputs that make a required quantity undefined from cases handled by an explicit convention. A missing descriptor norm or an ambiguous distance ratio needs a stated response, so the caller can distinguish a fallback from measured evidence.</p>
                 <DerivationTable
                   expressionHeading="Window or local image pattern"
                   reasonHeading="Effect on detecting and describing a point"
                   rows={[
                     {
                       expression: "a window of a single pixel",
-                      reason:
-                        "the matrix is one gradient vector multiplied by itself, which describes exactly one direction because one vector is all it was given. Its determinant is zero everywhere by construction, so the smaller eigenvalue is zero at every pixel of every picture and no corner exists anywhere.",
+                      reason: "The outer product of a single gradient has rank at most one. Its smaller eigenvalue is zero, so this score detects no corners with a one-pixel window, even when the image contains geometric corners.",
                     },
                     {
                       expression: "a window with an even side",
-                      reason:
-                        "there is no centre pixel for the average to be reported at, so the answer belongs half a pixel from where it was computed. The same applies to a patch with an even side, which has no centre for the place to sit on.",
+                      reason: "An even-sized window needs an explicit alignment convention because it has no central pixel. This SDK requires an odd side for both averaging windows and descriptor patches; other implementations can define an offset or interpolate.",
                     },
                     {
                       expression: "a window straddling a perfectly straight edge",
-                      reason:
-                        "every gradient in it points one way, so the matrix is exactly rank one and its determinant is exactly zero. The smaller eigenvalue there is not small, it is the same number flat ground gives, and no amount of contrast in the edge changes that.",
+                      reason: "For an ideal straight edge with parallel nonzero gradients throughout the window, the matrix has rank one. Its smaller eigenvalue and determinant are zero. Texture, noise or another structure within the window can change that response.",
                     },
                     {
                       expression: "a Harris sensitivity of a quarter or more",
-                      reason:
-                        "the determinant of a real symmetric matrix is at most a quarter of its squared trace, so the score is at most trace² × (0.25 − sensitivity), which is zero or below whatever the picture holds. At 0.24 the square’s own corners already read −1.825185 and nothing is found.",
+                      reason: "For this symmetric two-by-two matrix, the determinant is at most a quarter of the squared trace. A sensitivity of 0.25 or more therefore prevents a positive Harris score. On this square, even 0.24 gives a corner response of −1.825185 and detects no points.",
                     },
                     {
                       expression: "a patch with no variation in it",
-                      reason:
-                        "there is no length to divide by, so the unit description does not exist. Answering twenty-five zeros is a convention, and it has the consequence that every flat patch sits at distance zero from every other, so a flat patch matches all of them at once.",
+                      reason: "Mean subtraction gives a zero vector, so unit-length normalization is undefined. This SDK returns twenty-five zeros. All flat patches then have the same descriptor, which provides no evidence for choosing between them.",
                     },
                     {
                       expression: "a place within half a patch of the frame",
-                      reason:
-                        "part of the patch is outside the picture, so the description would be partly of pixels the scene does not contain. Inventing them is worse than refusing, since two pictures’ inventions then match each other rather than matching anything that was photographed.",
+                      reason: "A complete descriptor patch does not fit at this position. The SDK omits it rather than padding it. Padding is another possible policy, but the invented boundary values can affect the resulting comparison.",
                     },
                     {
                       expression: "a set of one description to search in",
-                      reason:
-                        "there is no runner-up, so the ratio cannot be formed and the test cannot be asked. Answering the nearest anyway is exactly the behaviour the ratio test exists to stop.",
+                      reason: "A single candidate has no second-nearest distance, so the ratio test cannot be evaluated. The caller needs to reject it or specify a separate acceptance rule.",
                     },
                     {
                       expression: "two candidates at exactly the same distance",
-                      reason:
-                        "the ratio is a zero over a zero when both are at zero, and undefined rather than large. It has to be decided, and one is the value that agrees with what the number means, since answering zero would call the most ambiguous case the most distinctive one.",
+                      reason: "If both distances are positive and equal, their ratio is one. If both are zero, division is undefined; this SDK assigns one so the ordinary threshold rejects the tie.",
                     },
                     {
                       expression: "two candidates differing only by rounding",
-                      reason:
-                        "the ratio is a ratio of two rounding errors and can land anywhere between zero and one, so the test passes or fails by accident. Measured on the shared scene against its relit self, six of the thirty-two kept matches are this, at ratios from 0.5726 to 0.7219.",
+                      reason: "When both distances are near numerical precision, rounding can dominate their ratio. On the relit shared scene, six of the thirty-two accepted matches are incorrect near-ties, with ratios from 0.5726 to 0.7219.",
                     },
                     {
                       expression: "two places with identical scores",
-                      reason:
-                        "which is reported first is a convention, since the four corners of a square score alike. Any rule will do and no rule is derivable; what matters is that one is written down, or the same picture answers differently on two runs.",
+                      reason: "Equal scores need a deterministic ordering if they compete during suppression. This SDK breaks ties by row and then column. Other documented orderings are possible.",
                     },
                     {
                       expression: "a peak that does not sit on a pixel",
-                      reason:
-                        "the score is only known at whole pixels and the underlying maximum need not be at one, so a position read off the grid carries an error of up to half a pixel that no care in the scoring removes. Fitting a curve through the peak and its neighbours is the usual repair, and it is a further choice rather than a correction.",
+                      reason: "The detector reports whole-pixel positions. The underlying feature need not lie on that grid, and this does not by itself establish a universal localization-error bound. A local curve fit can estimate a subpixel position under additional assumptions.",
                     },
                     {
                       expression: "a picture with no corner in it",
-                      reason:
-                        "there is nothing to describe, and the method answers an empty list. That is correct rather than a failure, but it is a failure to be useful, and a horizon, a wall and a clear sky are all of them.",
+                      reason: "If no response exceeds the threshold after suppression and border checks, the detector returns an empty list. An ideal horizon can still contain useful edge-position information that this corner representation discards.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Two of those are worth carrying away because nothing about
-                  them looks wrong at the time. The rank one edge, since a
-                  measure that reports a middling score there is not being
-                  cautious, it is reporting positions no second photograph can
-                  match. And the ratio of two rounding errors, since it produces
-                  confident matches on exactly the scenes, the repeated and the
-                  noiseless, where the test was supposed to protect you.
-                </KeepInMind>
+                  Two limitations matter when interpreting the matches. An ideal straight edge provides local evidence across the edge but not along it. Repeated patterns can also produce several nearly identical descriptors, making ratios of tiny distances unreliable. A later check should test whether proposed correspondences agree on a plausible image transformation.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -1153,14 +791,14 @@ distance     =  length of ( one description − the other )`}
                 "The candidate is accepted whenever its distance is under the threshold",
               ],
               0,
-              "The test compares the nearest against the second nearest, and with one candidate there is no second. Answering the nearest anyway is exactly the behaviour the ratio test exists to stop, because the nearest always exists whatever the two pictures are of. A ratio of one is the decision for two candidates at the same distance, which is a different case.",
+              "The ratio requires a nearest and a second-nearest candidate. With only one target descriptor, that ratio is undefined and this API raises an error. Another matching procedure could use an absolute-distance criterion, but it would be answering a different question. Two equally good candidates use the stated ratio-one convention, which is a separate case.",
             ),
         ],
         },
         {
           title: "Practice. Scoring, Describing And Matching The Square",
           practice: [
-            exercise("Score the square’s corner, edge and ground",["Draw the bright square Part 2 works by hand, nine pixels on a side in a frame of twenty-one, and read its structure tensor at three positions, the top-left corner, the middle of the left edge and a patch of empty ground. Print the total energy, the shape term, the smaller eigenvalue and the Harris score at each.", "Part 3’s table gives the corner 11.555556, 30.222222, 4.0 and 24.880988, with the Harris sensitivity at 0.04. Reproduce the table, then score the same three positions with the sensitivity at 0.06, the other end of the range Part 3 mentions, which the lesson does not quote."],`import numpy as np
+            exercise("Score the square’s corner, edge and ground",["Use the supplied bright square to inspect three positions: its top-left corner, the middle of its left edge and flat background. Print the structure tensor's trace and determinant, the smaller-eigenvalue score, and the Harris score at each.", "Calculate Harris responses at sensitivities 0.04 and 0.06. Print all values to six decimal places, then the corner's 0.06 response to four places. Compare changing sensitivity with changing the scoring rule."],`import numpy as np
 from oop_ml.core.computer_vision.keypoints import CornerResponse, HarrisMeasure, StructureTensor
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1216,7 +854,7 @@ ground
   Harris at 0.04 0.000000
   Harris at 0.06 0.000000
 corner, Harris at 0.06: 22.2104`,{...{ hints: ["CornerResponse.of takes the picture and, optionally, a measure. With no measure it scores by the smaller eigenvalue. HarrisMeasure takes its sensitivity as a keyword.", "The tensor’s trace and determinant are each a picture of their own, one number per pixel, so their values are indexed by row and column like any array.", "A response answers one position through at(row, column), which is less to hold than its whole table of scores."], check: numberCheck("What does the corner score under Harris at a sensitivity of 0.06, to four places?", 22.2104, 0.0005, "Increasing Harris sensitivity increases the penalty applied to total local gradient energy. The corner score changes, while the smaller-eigenvalue criterion has no such sensitivity parameter.") },question:"How do a corner, an edge and a flat patch differ under corner scores?"}),
-            exercise("Describe one corner and measure how far it is from the others",["Describe the square’s top-left corner by its five-wide patch, print the twenty-five numbers as five rows, and then print how far that description is from the top-right corner’s, from the bottom-right corner’s, from the same corner with every pixel raised by ten, and from the same corner with the brightness reversed.", "Part 4 works the patch by hand to 0.266667 and −0.15, puts two neighbouring corners 1.443376 apart, and puts a corner 2.0 from its own reverse. The diagonally opposite corner is not on the page. Before running it, count how many of the twenty-five entries it should disagree in."],`import numpy as np
+            exercise("Describe one corner and measure how far it is from the others",["Describe the square’s top-left corner by its five-wide patch, print the twenty-five numbers as five rows, and then print how far that description is from the top-right corner’s, from the bottom-right corner’s, from the same corner with every pixel raised by ten, and from the same corner with the brightness reversed.", "Compare the neighboring and diagonally opposite corners before running the distance calculation. Predict which patch entries differ. Adding an offset should disappear under centering; reversing contrast negates the normalized deviation pattern."],`import numpy as np
 from oop_ml.core.computer_vision.keypoints import Keypoint, PatchDescriptor
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1261,8 +899,8 @@ to the top-right corner 1.443376
 to the bottom-right corner 1.666667
 to itself, ten brighter 1.2e-15
 to itself, reversed 2.000000
-opposite corner: 1.6667`,{...{ hints: ["A Keypoint is a row, a column and a strength. The strength plays no part in the description, so any finite number will do for a place you chose by hand.", "A description’s values are one flat run of twenty-five numbers read row by row, so reshape(5, 5) puts them back in the patch’s own arrangement.", "distance_to takes another description and answers one number. The patch around the opposite corner is bright in the one quarter this one is dark in, and the two share only the centre pixel."], check: numberCheck("How far is the top-left corner’s description from the bottom-right corner’s, to four places?", 1.6667, 0.0005, "Opposite corners disagree over more positions in their normalised patches than adjacent corners do. Adding a uniform brightness offset disappears during centring, while reversing contrast changes the descriptor direction.") },question:"Which image changes alter the corner's patch descriptor?"}),
-            exercise("Match a moved square, then a square against its twin",["Photograph one square twice, the second time moved down four rows and right five columns, as Part 5 does. The starter finds and describes the corners of every picture. Match the first picture’s descriptions against the moved one’s and print where each match went, its distance, its runner-up’s distance and its ratio. Then match a single seven-wide square against a picture holding two identical copies of it, once with the ratio test turned off so that every match is reported, and once with it on.", "Part 5 reports four matches at a ratio of 0.0 on the moved square, and four at a ratio of 1.0 on the twins, all refused."],`import numpy as np
+opposite corner: 1.6667`,{...{ hints: ["A Keypoint is a row, a column and a strength. The strength plays no part in the description, so any finite number will do for a place you chose by hand.", "A description’s values are one flat run of twenty-five numbers read row by row, so reshape(5, 5) puts them back in the patch’s own arrangement.", "distance_to compares two descriptor vectors. The opposite corner places its bright three-by-three region in the opposite quadrant: the two bright regions share the center pixel, while some dark entries also agree. Count all differing positions when predicting the distance."], check: numberCheck("How far is the top-left corner’s description from the bottom-right corner’s, to four places?", 1.6667, 0.0005, "Opposite corners disagree over more positions in their normalized patches than adjacent corners do. Adding a uniform brightness offset disappears during centering, while reversing contrast changes the descriptor direction.") },question:"Which image changes alter the corner's patch descriptor?"}),
+            exercise("Match a moved square, then a square against its twin",["Photograph one square twice, the second time moved down four rows and right five columns, as Part 5 does. The starter finds and describes the corners of every picture. Match the first picture’s descriptions against the moved one’s and print where each match went, its distance, its runner-up’s distance and its ratio. Then match a single seven-wide square against a picture holding two identical copies of it, once with the ratio test turned off so that every match is reported, and once with it on.", "For the moved square, inspect the best and runner-up descriptor distances. For the duplicate squares, compare maximum_ratio=1.0 with the default threshold. Equal best alternatives should be treated as ambiguity rather than evidence of a unique correspondence."],`import numpy as np
 from oop_ml.core.computer_vision.keypoints import CornerResponse, Descriptors
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1320,7 +958,7 @@ print(f"kept by the test {len(described['one'].matched_to(described['twins']))}"
 ratios on the twins [1.0, 1.0, 1.0, 1.0]
 reported with the test off 4
 kept by the test 0`,{...{ hints: ["matched_to is called on one set of descriptions with the other as its argument, and what it answers can be looped over. Each match carries first, second, distance, runner_up_distance and ratio.", "A match’s first and second are descriptions, and a description knows the keypoint it was cut around, which is where the row and column are.", "maximum_ratio is the largest ratio still counted as a match. At one, everything is kept, which is the only way to see a ratio the test would otherwise have refused."], check: numberCheck("On the moved square, how far away is each match’s runner-up, to four places?", 1.4434, 0.0005, "The unique moved counterpart is clearly closer than the runner-up. Identical copies create equally good alternatives, so the ratio test rejects their ambiguity under this implementation's stated equal-distance convention.") },question:"Can the ratio test distinguish a unique moved match from identical alternatives?"}),
-            exercise("Search a set that holds one description",["Part 7 lists a set of one description as a case where the ratio test cannot be asked. Describe the square’s corners, keep only the strongest one as the set to search in, and try to match all four corners against it. Catch what the library raises and print its name and its message.", "A search that answered here would be answering the nearest because it was the only candidate, which is the behaviour the test exists to stop."],`import numpy as np
+            exercise("Search a set that holds one description",["Part 7 lists a set of one description as a case where the ratio test cannot be asked. Describe the square’s corners, keep only the strongest one as the set to search in, and try to match all four corners against it. Catch what the library raises and print its name and its message.", "A nearest-descriptor search can still return its only candidate, but this API's ratio test needs a runner-up. Distinguish finding a nearest candidate from measuring how distinctive it is."],`import numpy as np
 from oop_ml import MLLibError
 from oop_ml.core.computer_vision.keypoints import CornerResponse, Descriptors
 from oop_ml.core.computer_vision.picture import Picture

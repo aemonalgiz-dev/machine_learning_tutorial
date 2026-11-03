@@ -89,7 +89,7 @@ export function OnePassOrOneProduct() {
           />
         </label>
         <label className="flex items-center gap-2">
-          <span className="text-xs">a neighbour further away</span>
+          <span className="text-xs">a neighbor further away</span>
           <Choice
             options={[
               { label: "counts the same", value: "uniform" as WeightingName },
@@ -170,7 +170,7 @@ export function OnePassOrOneProduct() {
             every weight in this setting is a number binary can hold exactly, so
             the two answers agree to the last bit and the disagreement is 0.
             The one setting here where they part is the twenty-four documents
-            with a neighbour further away counting less, where a weight of a
+            with a neighbor further away counting less, where a weight of a
             third appears.
           </>
         ) : (

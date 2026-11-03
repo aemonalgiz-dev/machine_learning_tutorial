@@ -33,13 +33,13 @@ function alignmentText(pair: VectorPair): string {
     return "One arrow has no length, so alignment has no meaning here.";
   }
   if (pair.cosine > 0.9) {
-    return "The arrows point almost the same way, so the dot product is large and positive.";
+    return "The arrows point almost the same way, so their dot product is positive. Its size also depends on both arrow lengths; shorten an arrow and compare the readout.";
   }
   if (pair.cosine > 0.1) {
     return "The arrows lean the same way, so the dot product is positive.";
   }
   if (pair.cosine > -0.1) {
-    return "The arrows are close to perpendicular, so the dot product is close to zero.";
+    return "The arrows are nearly perpendicular. Their cosine is close to zero; the dot product also depends on the two lengths. At an exact right angle, the dot product is zero.";
   }
   return "The arrows point against each other, so the dot product is negative.";
 }

@@ -17,7 +17,7 @@ export function addLessonSupplement(id: string, sections: ConceptSection[]): Con
   const finalQuiz = result.findLastIndex(section => section.quiz?.length);
   const practice = result.findIndex(section => section.practice?.length);
   const at = finalQuiz >= 0 ? finalQuiz : practice >= 0 ? practice : result.length;
-  result.splice(at, 0, ...extra.parts.flatMap(part => [{ title: part.title, content: <>
+  result.splice(at, 0, ...extra.parts.flatMap(part => [{ title: part.title, id: part.id, content: <>
     {part.paragraphs.map(text => <p key={text}>{text}</p>)}
     {part.calculation && <Equation>{part.calculation}</Equation>}
     {part.interpretation.map(text => <p key={text}>{text}</p>)}
@@ -29,6 +29,6 @@ export function addLessonSupplement(id: string, sections: ConceptSection[]): Con
       {example.interpretation.map(text => <p key={text}>{text}</p>)}
     </div>)}
     {part.references?.map(reference => <FrameworkReference key={reference.title} reference={reference} />)}
-  </> }, ...(extra.checkpoint?.after === part.title ? [{ title: extra.checkpoint.title, quiz: extra.checkpoint.questions }] : [])]));
+  </> }, ...(extra.checkpoint?.after === part.title ? [{ title: extra.checkpoint.title, id: extra.checkpoint.id, quiz: extra.checkpoint.questions }] : [])]));
   return result;
 }

@@ -69,7 +69,7 @@ export function LengthAfterTheMove() {
             y={14}
             className="fill-slate-500 text-[11px] dark:fill-slate-400"
           >
-            grey is the old vocabulary, blue the new one
+            gray is the old vocabulary, blue the new one
           </text>
           {domains.lengths.map((row, index) => {
             const y = TOP + index * GROUP_HEIGHT;

@@ -235,11 +235,12 @@ export function ParagraphVectorWorkbench() {
           </div>
 
           <Legend>
-            The answer leans towards {result.scores.leans_towards}. Twenty passes
-            is what the published work gives a new text; under distributed memory
-            that is not enough here, and the list above fills with the wrong
-            subject until the count is raised. Moving the starting draw with the
-            passes low changes the answer, which is the whole of Part 6.
+            The inferred vector is closer to {result.scores.leans_towards}.
+            The pass count controls how long this new document&apos;s vector is
+            adjusted while the trained model stays fixed. Compare the nearest
+            documents as you change that count or the random start. More passes
+            give the inference procedure more updates, but do not guarantee
+            that its neighbors will match the topic you intended.
             {busy ? " Working…" : ""}
           </Legend>
         </>

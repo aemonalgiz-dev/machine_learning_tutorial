@@ -244,7 +244,7 @@ export function LeakageBarsPlayground() {
         Amber is the transformer fitted on every person before the folds were
         dealt, indigo is the same transformer refitted inside each fold, and
         the figure over each pair is amber less indigo, averaged over thirty
-        seeds of five-fold k-nearest neighbours.
+        seeds of five-fold k-nearest neighbors.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">

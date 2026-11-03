@@ -145,7 +145,7 @@ export function DescriptorCard({
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="numbers in the description" value={`${report.side * report.side}`} />
         <Stat label="mean of the patch" value={report.patch_mean.toFixed(2)} />
-        <Stat label="length after centring" value={report.centred_length.toFixed(2)} />
+        <Stat label="length after centering" value={report.centred_length.toFixed(2)} />
         <Stat
           label="moved by a shift of the picture"
           value={report.shifted_positions_agree ? "not at all" : "yes"}

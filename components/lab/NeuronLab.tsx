@@ -169,7 +169,7 @@ function NeuronBench({ initialStage }: { initialStage: number }) {
           </div>
 
           <div className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-            <div className="flex flex-wrap justify-between gap-2"><h3 className="text-sm font-semibold">Follow part {part.id} through the neuron</h3><span className="text-xs text-muted">Labelled for {binName(part.bin).toLowerCase()}</span></div>
+            <div className="flex flex-wrap justify-between gap-2"><h3 className="text-sm font-semibold">Follow part {part.id} through the neuron</h3><span className="text-xs text-muted">Labeled for {binName(part.bin).toLowerCase()}</span></div>
             {stage === 3 && !run ? <p className="mt-3 text-sm leading-6 text-muted">Run your code below to see its scores and gate instructions here. The conveyor is waiting for your function.</p> : <>
               <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 <Calculation title="1. Weighted inputs" lines={[`${part.height} × (${format(settings.height)}) = ${format(part.height * settings.height)}`, `${part.mass} × (${format(settings.mass)}) = ${format(part.mass * settings.mass)}`]} />

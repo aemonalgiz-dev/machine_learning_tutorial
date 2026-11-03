@@ -5,7 +5,7 @@ import { journeyFor } from "@/lib/builds/journey";
 
 export const metadata: Metadata = {
   title: "Build a Light-Pattern Detector | Perceptron Lab",
-  description: "Build a neuron that recognises a light pattern. Connect brightness readings, weights, a bias and an activation, then follow each contribution.",
+  description: "Build a neuron that recognizes a light pattern. Connect brightness readings, weights, a bias and an activation, then follow each contribution.",
 };
 
 export default function NeuronLabPage() {

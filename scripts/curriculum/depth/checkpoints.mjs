@@ -15,11 +15,11 @@ export default {
  },
  'density-based-clustering': {
   after: 'Connect Core Points Before Attaching the Border', title: 'Questions on Extending a Dense Region',
-  questions: [q('Core A is near border B. B is near C, but C is not near any core point. B does not meet the core count.', 'Can B extend A’s cluster to C?', ['No: only core points extend the region', 'Yes: any assigned point can extend it', 'Yes: all nearby points are cores'], 0, 'B can join as a border point, but its own neighbours do not extend the dense region. C remains unsupported under the stated setup.')],
+  questions: [q('Core A is near border B. B is near C, but C is not near any core point. B does not meet the core count.', 'Can B extend A’s cluster to C?', ['No: only core points extend the region', 'Yes: any assigned point can extend it', 'Yes: all nearby points are cores'], 0, "B can join as a border point, but its own neighbors do not extend the dense region. C remains unsupported under the stated setup.")],
  },
  'hidden-state-filtering': {
-  after: 'An Impossible Report Cannot Be Normalised', title: 'Questions on Updating a Hidden-State Belief',
-  questions: [q('The predictive belief is [0.7,0.3]. A report has likelihood [0,0] under the two modelled states.', 'What should the filter do?', ['Report that the observation has zero probability under the model', 'Return [0,0] as a valid posterior', 'Choose the first state because it was more likely'], 0, 'The weights have zero total and cannot be normalised. A valid posterior needs a model that assigns positive probability to the observed report.')],
+  after: "An Impossible Report Cannot Be Normalized", title: 'Questions on Updating a Hidden-State Belief',
+  questions: [q('The predictive belief is [0.7,0.3]. A report has likelihood [0,0] under the two modelled states.', 'What should the filter do?', ['Report that the observation has zero probability under the model', 'Return [0,0] as a valid posterior', 'Choose the first state because it was more likely'], 0, "The weights have zero total and cannot be normalized. A valid posterior needs a model that assigns positive probability to the observed report.")],
  },
  'rolling-forecast-validation': {
   after: 'A Forecast Origin Is Not Always the Latest Row in an Export', title: 'Questions on Delayed Forecast Inputs',
@@ -30,16 +30,16 @@ export default {
   questions: [q('A guide was never shown to a reader and has no rating from them.', 'What does that missing rating establish?', ['No explicit preference was observed for that pair', 'The reader disliked the guide', 'The correct rating is zero'], 0, 'Absence can reflect lack of exposure. Treating it as a confirmed negative requires an additional, often unjustified assumption.')],
  },
  'graph-convolution': {
-  after: 'Normalise a three-node chain', title: 'Questions on the Graph Mixing Operator',
-  questions: [q('A is an undirected adjacency. Self-loops are added, then S = D^(-1/2)(A+I)D^(-1/2), using degrees from A+I.', 'Which property should we expect here?', ['S is symmetric, but its rows need not sum to one', 'Every row must sum to one', 'Self-loops can be omitted when computing D'], 0, 'Symmetric degree normalisation differs from row-stochastic random-walk normalisation. Both endpoint degrees use the augmented graph.')],
+  after: "Normalize a three-node chain", title: 'Questions on the Graph Mixing Operator',
+  questions: [q('A is an undirected adjacency. Self-loops are added, then S = D^(-1/2)(A+I)D^(-1/2), using degrees from A+I.', 'Which property should we expect here?', ['S is symmetric, but its rows need not sum to one', 'Every row must sum to one', 'Self-loops can be omitted when computing D'], 0, "Symmetric degree normalization differs from row-stochastic random-walk normalization. Both endpoint degrees use the augmented graph.")],
  },
  'randomised-experiments': {
   after: 'Keep Assignment Separate from Compliance', title: 'Questions on Assignment and Received Treatment',
   questions: [q('Some beds assigned the new watering schedule miss their visits. The intended analysis is intention-to-treat.', 'Which grouping preserves the assigned-policy comparison?', ['Original random assignment', 'Whether water was actually delivered', 'Whether growth improved'], 0, 'Intention-to-treat groups by original assignment. Actual receipt may depend on later conditions and no longer be randomly assigned.')],
  },
  'attention': {
-  after: 'Remove an Unavailable Key and Renormalise', title: 'Questions on Masked Attention',
-  questions: [q('Scores are [1,1,9]. The third key is padding and is excluded before softmax.', 'What shares should the two allowed keys receive?', ['Equal shares summing to one', 'Tiny shares because the padded score is largest', 'Shares summing to less than one'], 0, 'The padded key is outside the normalisation. Equal allowed scores receive equal shares of the complete allowed distribution.')],
+  after: "Remove an Unavailable Key and Renormalize", title: 'Questions on Masked Attention',
+  questions: [q('Scores are [1,1,9]. The third key is padding and is excluded before softmax.', 'What shares should the two allowed keys receive?', ['Equal shares summing to one', 'Tiny shares because the padded score is largest', 'Shares summing to less than one'], 0, "The padded key is outside the normalization. Equal allowed scores receive equal shares of the complete allowed distribution.")],
  },
  'supervised-fine-tuning': {
   after: 'Align the Response Mask after Shifting Targets', title: 'Questions on the First Response Target',

@@ -30,9 +30,9 @@ import { StandardizedComparison } from "@/components/widgets/StandardizedCompari
 import { UnitToggle } from "@/components/widgets/UnitToggle";
 
 export const metadata: Metadata = {
-  title: "Principal Component Analysis · oop_ml",
+  title: "Principal Component Analysis · Perceptron Lab",
   description:
-    "Several measurements may vary together, so storing all of them can repeat much of the same information. Principal component analysis looks for directions that preserve the most variation with fewer coordinates.",
+    "Measurements that vary together can repeat information. Principal component analysis finds directions that preserve the greatest variation, giving us a smaller set of coordinates with a measurable loss of detail.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -47,7 +47,7 @@ export default function PcaPage() {
       playgroundTitle="Find the direction in which the observations vary most"
       playgroundIntro="Rotate the projection direction and compare the spread of the projected points. Then inspect the gap between each original point and its reconstruction."
       title="Principal Component Analysis"
-      tagline={"Several measurements may vary together, so storing all of them can repeat much of the same information. Principal component analysis looks for directions that preserve the most variation with fewer coordinates."}
+      tagline={"Measurements that vary together can repeat information. Principal component analysis finds directions that preserve the greatest variation, giving us a smaller set of coordinates with a measurable loss of detail."}
       prerequisites={
         <>
           This page is where two primers cash their promises, the{" "}
@@ -85,13 +85,7 @@ export default function PcaPage() {
                 <p>
                   How much new information does weight add once we know height? In this group, the two measurements share a pattern: taller people tend to be heavier. A combined measure of size could describe much of that pattern. We would still need another measurement to describe differences such as being heavier or lighter than expected for one&apos;s height.
                 </p>
-                <p>
-                  The idea grows with the number of columns. Measure sixty
-                  people five ways, height, arm span, leg length, sitting
-                  height and shoe size, and the five are genuinely different
-                  measurements that all follow one shared pattern, overall
-                  body size, each with something of its own besides.
-                </p>
+                <p>As more measurements are recorded, several can share a pattern of variation while retaining differences of their own. A shorter representation is useful when it preserves the distinctions relevant to our question. The amount of retained variation gives us one way to evaluate that reduction.</p>
                 <MeasurementCorrelations />
                 <KeepInMind>
                   Two measured features can contain both shared information
@@ -104,16 +98,7 @@ export default function PcaPage() {
               </SubSection>
 
               <SubSection title="2. Features versus directions">
-                <p>
-                  The original features are the axes we happened to measure
-                  along, a height axis and a weight axis. A direction is
-                  something else, a weighted combination of the two. Height
-                  and weight increasing together is one direction; height
-                  increasing while weight decreases is another; any
-                  weighting at all is a third. Turn the arrow below through
-                  the crowd and it combines the two measurements into one
-                  new axis at every angle.
-                </p>
+                <p>The original features give us a height axis and a weight axis. A direction is a weighted combination of those coordinates. One direction increases height and weight together; another increases height while decreasing weight. Rotate the arrow to try other combinations. Each unit direction defines a new axis along which we can measure the observations.</p>
                 <ProjectionExplorer panels={[]} initialAngle={30} />
                 <KeepInMind>
                   A direction through feature space combines several
@@ -125,8 +110,8 @@ export default function PcaPage() {
             </>
 </>),
         },
-        {
-          title: "Part 2. Centre the Data",
+        { id: "part-2-centre-the-data",
+          title: "Part 2. Center the Data",
           content: (
             <>
               <SubSection title="3. The mean point">
@@ -137,15 +122,16 @@ export default function PcaPage() {
                 </p>
                 <Equation>{"mean point = (mean height, mean weight) = (170, 68)"}</Equation>
                 <p>
+
                   Every person is then some horizontal distance and some
                   vertical distance from that point, which the next widget
                   draws as two dashed legs. The mean is the coordinate-wise
-                  centre of the observations, and it is the pivot everything
+                  center of the observations, and it is the pivot everything
                   that follows turns about.
                 </p>
               </SubSection>
 
-              <SubSection title="4. Centring the cloud">
+              <SubSection title="4. Centering the cloud" id="4-centring-the-cloud">
                 <p>
                   Subtract the mean point from every person and each one
                   becomes a deviation, the pair of legs with the pivot moved
@@ -163,8 +149,9 @@ export default function PcaPage() {
                 />
                 <CenteringAnimation />
                 <p>
+
                   Why bother? Because the method is about to measure spread
-                  along directions, and without centring, a direction can
+                  along directions, and without centering, a direction can
                   look important just because the whole cloud sits far from
                   the origin. Untick the switch below and the scores along
                   the arrow stop being deviations and start being positions,
@@ -174,8 +161,9 @@ export default function PcaPage() {
                 <ProjectionExplorer panels={["centre"]} initialAngle={45} people="worked" />
                 <InAModel title="On the four height and weight measurements at 45 degrees">
                   <p>
-                    Centred, the four scores have mean 0, the mean of their
-                    squares is 100, and so is their variance. Uncentred, the
+
+                    Centered, the four scores have mean 0, the mean of their
+                    squares is 100, and so is their variance. Uncentered, the
                     scores have mean 168.3, the mean of their squares is
                     28,422, and their variance about their own mean is still
                     100. The number that changed is location. The number the
@@ -183,7 +171,8 @@ export default function PcaPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  Centring relocates the cloud around the origin without
+
+                  Centering relocates the cloud around the origin without
                   changing its shape, its orientation or any distance between
                   observations. Conventional PCA requires it, so that the
                   directions it finds describe how observations vary around
@@ -200,7 +189,8 @@ export default function PcaPage() {
             <>
               <SubSection title="5. Projecting onto one direction">
                 <p>
-                  Choose a unit direction u. For each centred person, drop a
+
+                  Choose a unit direction u. For each centered person, drop a
                   perpendicular onto the line through the origin in that
                   direction, mark where it lands, and read off the signed
                   distance of the landing point from the origin. That one
@@ -229,8 +219,9 @@ export default function PcaPage() {
                 </p>
                 <ProjectionExplorer panels={["length"]} initialAngle={45} people="worked" />
                 <p>
-                  Second, because the cloud is centred, the scores are
-                  centred too, and their variance is simply the mean of
+
+                  Second, because the cloud is centered, the scores are
+                  centered too, and their variance is simply the mean of
                   their squares.
                 </p>
                 <Equation>{"variance along u = mean of (dᵢ · u)²"}</Equation>
@@ -243,30 +234,14 @@ export default function PcaPage() {
               </SubSection>
 
               <SubSection title="7. Rotating through candidate directions">
-                <p>
-                  Now sweep. Some directions squeeze the people together on
-                  the number line and some spread them out, and the curve
-                  beneath the cloud records the variance at every angle of
-                  the half turn. It has one peak and one trough, a quarter
-                  turn apart.
-                </p>
+                <p>Rotate the direction and watch the projected observations move closer together or farther apart. The curve beneath the cloud records their variance through a half turn. For these four observations, its peak and trough occur a quarter turn apart.</p>
                 <ProjectionExplorer panels={["scores", "sweep"]} initialAngle={10} people="worked" />
                 <KeepInMind>
-                  Every direction gives the cloud a different one-dimensional
-                  shadow, and exactly one direction gives the widest.
-                </KeepInMind>
+                  For these observations, one axis gives the greatest projected variance. Reversing its arrow gives the same variance. Later we will consider tied directions, where more than one axis can be equally good.</KeepInMind>
               </SubSection>
 
               <SubSection title="8. The first principal component">
-                <p>
-                  That widest direction has a name. The first principal
-                  component is the unit direction along which the centred
-                  observations have the greatest variance, and on the four height and weight measurements it sits at 45 degrees, where the variance of
-                  the scores is 100 and every other angle gives less. On the
-                  crowd it sits at 42.2 degrees. The playground at the top of
-                  the page draws it in indigo, and it is not the height axis
-                  and not the weight axis. It is the cloud&rsquo;s own.
-                </p>
+                <p>The first principal component is the unit direction along which the centered observations have the greatest variance. It is chosen from the observations, rather than being fixed to either original measurement axis. The activity shows that direction and lets us compare it with other orientations.</p>
                 <KeepInMind>
                   The first principal component is the unit direction of
                   maximum projected variance. Nothing about a target, a
@@ -283,15 +258,17 @@ export default function PcaPage() {
             <>
               <SubSection title="9. Component loadings and scores">
                 <p>
+
                   At 45 degrees the direction is u₁ = (0.71, 0.71), and a
                   person&rsquo;s score along it is a weighted sum of their
-                  centred features.
+                  centered features.
                 </p>
-                <Equation>{"score = 0.71 × centred height + 0.71 × centred weight"}</Equation>
+                <Equation>{"score = 0.71 × centered height + 0.71 × centered weight"}</Equation>
                 <p>
+
                   Both features contribute positively, and the equal
                   coefficients mean a unit of movement in either contributes
-                  the same, after centring. The coefficients that define the
+                  the same, after centering. The coefficients that define the
                   direction are called the loadings, and the widget builds
                   one person&rsquo;s score from them, the height part in
                   indigo, the weight part in amber, and their sum.
@@ -300,7 +277,8 @@ export default function PcaPage() {
                 <WorkedExample title="Person 1 on the four height and weight measurements">
                   <>
                     <p>
-                      The first person’s centred measurements are (10, 10). At
+
+                      The first person’s centered measurements are (10, 10). At
                       forty-five degrees, both direction coordinates equal the
                       reciprocal square root of two. Multiply each measurement by its
                       direction coordinate and add.
@@ -332,16 +310,7 @@ export default function PcaPage() {
                   the reconstructions.
                 </p>
                 <SignFlip />
-                <p>
-                  Which leads to a caution about names. The first component
-                  on the crowd resembles overall body size, and it would be
-                  natural to call it that, but the method never learned the
-                  phrase. It found a mathematical direction. Whether that
-                  direction deserves a human label depends on the loadings
-                  and on knowing something about bodies, and a component can
-                  combine features in ways with no clean real-world label at
-                  all. When it does, the honest move is to leave it unnamed.
-                </p>
+                <p>The first component resembles overall body size in this dataset, but PCA found a direction of variation rather than a named concept. We can inspect its loadings and use subject knowledge to decide whether that interpretation fits. Some components combine measurements without a useful everyday label. They can still be described precisely by their loadings.</p>
                 <KeepInMind>
                   The sign of a principal component is conventional; the axis
                   is the same either way. And a component is a mathematical
@@ -406,9 +375,9 @@ export default function PcaPage() {
           title: "Questions on Parts 1 to 5",
           quiz: [
             trueFalse(
-              "Centring moves the cloud onto the origin without changing the distance between any two observations.",
+              "Centering moves the cloud onto the origin without changing the distance between any two observations.",
               true,
-              "Subtracting one fixed point from every observation slides the whole cloud and leaves its shape and orientation alone. On the four people the centred scores have mean 0 and mean square 100, while uncentred the mean square is 28,422; the variance about their own mean is 100 either way, so what centring removed was location rather than spread.",
+              "Subtracting one fixed point from every observation slides the whole cloud and leaves its shape and orientation alone. On the four people the centered scores have mean 0 and mean square 100, while uncentered the mean square is 28,422; the variance about their own mean is 100 either way, so what centering removed was location rather than spread.",
             ),
             choice(
               "Why must the direction u be restricted to unit length?",
@@ -416,13 +385,13 @@ export default function PcaPage() {
                 "Otherwise stretching the arrow raises every score, so a direction could look wide merely by being long",
                 "Otherwise the dot product is undefined for vectors of different lengths",
                 "Because the covariance matrix only acts on vectors of length one",
-                "Because the scores would no longer be centred",
+                "Because the scores would no longer be centered",
               ],
               0,
-              "Every score is the dot product of a deviation with u, so doubling u doubles every score and quadruples the variance along it without any change of direction. Fixing u · u = 1 makes a comparison between directions a comparison between directions rather than between vector scales.",
+              "Each component score is a dot product with the proposed direction. A longer direction vector would multiply every score and inflate its variance without changing the axis. Restricting the vector to unit length removes that arbitrary multiplier, so the optimization compares orientations.",
             ),
             choice(
-              "Person 1’s centred measurements are (10, 10) and the first direction at 45 degrees is (0.71, 0.71). What is their score along it?",
+              "Person 1’s centered measurements are (10, 10) and the first direction at 45 degrees is (0.71, 0.71). What is their score along it?",
               [
                 "14.14, the sum of a height contribution of 7.07 and a weight contribution of 7.07",
                 "7.07, since each feature contributes 7.07",
@@ -430,7 +399,7 @@ export default function PcaPage() {
                 "0, since the two contributions cancel as they do for person 3",
               ],
               0,
-              "A score is a dot product, each centred measurement multiplied by its direction coordinate and the products added, and at 45 degrees both coordinates are 1/√2, so 10/√2 + 10/√2 ≈ 14.142. The two contributions of 7.07 are the parts of one score, not two scores. Person 3, at (5, −5), is the case where the parts cancel to 0, which puts them at the mean’s coordinate along this direction while they sit away from it along the perpendicular one.",
+              "Multiply each centered measurement by the corresponding direction coordinate and add the products:\n\n```math\nscore = 10 / √2 + 10 / √2 ≈ 14.142\n```\n\nThe two contributions belong to one component score. Person 3 has centered measurements (5, −5), whose contributions cancel along this axis. That person has score zero here but a nonzero score along the perpendicular component.",
             ),
             trueFalse(
               "Replacing the first component (0.71, 0.71) with (−0.71, −0.71) changes the distances between the projected people.",
@@ -443,7 +412,7 @@ export default function PcaPage() {
                 "It is perpendicular to the first",
                 "Among the perpendicular directions it carries as much of the remaining variance as possible",
                 "Its variance is strictly smaller than the first component’s",
-                "It is uniquely determined in two dimensions, apart from its sign",
+                "Once the first axis is chosen, the perpendicular second axis in two dimensions is fixed apart from its sign",
               ],
               [0, 1, 3],
               "The second component is chosen the same way as the first with one extra rule, perpendicularity, and among those directions it takes the most remaining variance. In two dimensions only one perpendicular axis is left, so it is forced. The ordering is λ₁ ≥ λ₂, not a strict inequality; ties are possible, and when two eigenvalues are equal the directions inside the plane they span are not uniquely determined.",
@@ -456,9 +425,10 @@ export default function PcaPage() {
             <>
               <SubSection title="13. Building the covariance matrix">
                 <p>
+
                   Everything so far was done by rotating and measuring. The
                   covariance matrix is what lets the answer be found without
-                  the rotation. For centred height and weight it holds three
+                  the rotation. For centered height and weight it holds three
                   quantities the statistics primer already defined, the
                   variance of each feature and the covariance of the pair,
                   arranged so that each feature&rsquo;s spread sits on the
@@ -563,8 +533,9 @@ export default function PcaPage() {
                 </p>
                 <Equation>{"S (1, 1)  = (250 + 150,  150 + 250) = (400, 400)  = 400 · (1, 1)\nS (1, −1) = (250 − 150,  150 − 250) = (100, −100) = 100 · (1, −1)"}</Equation>
                 <p>
+
                   Both come back unturned, so the components run along
-                  (1, 1) and (1, −1), normalised to u₁ = (0.707, 0.707) and
+                  (1, 1) and (1, −1), normalized to u₁ = (0.707, 0.707) and
                   u₂ = (0.707, −0.707), with scatter eigenvalues 400 and 100.
                   On the population covariance the same directions come back
                   with eigenvalues 100 and 25, which are actual variances,
@@ -598,11 +569,7 @@ export default function PcaPage() {
                 </p>
                 <Equation>{"share of component 1 = 400 / 500 = 100 / 125 = 0.8\nshare of component 2 = 100 / 500 =  25 / 125 = 0.2"}</Equation>
                 <KeepInMind>
-                  A common divisor changes the variance scale but not the
-                  share attributed to each component. Eighty percent of how
-                  these four people differ is one diagonal fact, bigger or
-                  smaller overall.
-                </KeepInMind>
+                  Changing the covariance divisor rescales every component variance by the same factor, leaving the variance shares unchanged. In this four-person example, the diagonal direction representing height and weight increasing together retains eighty percent of the total numerical variance.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -618,11 +585,12 @@ export default function PcaPage() {
                 </p>
                 <Equation>{"s₁ = d · u₁ = (10, 10) · (0.707, 0.707)  = 14.14\ns₂ = d · u₂ = (10, 10) · (0.707, −0.707) = 0"}</Equation>
                 <p>
+
                   They lie entirely along the first component, and their
                   second coordinate is zero. Person 3, at (5, −5), scores 0
                   on the first and 7.07 on the second, the mirror case. The
                   transform does this for everyone at once. With the
-                  centred rows stacked into a matrix X and the component
+                  centered rows stacked into a matrix X and the component
                   directions as the columns of W, the scores are one
                   product, and the widget writes it out for whichever person
                   is selected.
@@ -641,19 +609,13 @@ export default function PcaPage() {
           content: (
             <>
               <SubSection title="20. Keeping fewer components">
+                <p>Keep only the first score and each person is represented by one number instead of two. Representing observations with fewer coordinates is dimensionality reduction. It can reduce storage and later computation, provided the omitted directions are not needed for the task. Use the flatten toggle to see the one-component reconstruction.</p>
                 <p>
-                  Instead of keeping both scores, keep only s₁, and each
-                  person is one number. That is dimensionality reduction,
-                  and on real data with hundreds of correlated columns it is
-                  the difference between unworkable and workable. Tick the
-                  flatten toggle on the playground and the crowd moves onto
-                  the first component&rsquo;s line.
-                </p>
-                <p>
+
                   One number per person is not the whole of what has to be
                   stored, though. To do anything with those numbers later
                   you also need the original feature means, the feature
-                  scales if standardisation was used, and the retained
+                  scales if standardization was used, and the retained
                   component direction. The scores are meaningless without
                   the axis they are measured along.
                 </p>
@@ -671,9 +633,10 @@ export default function PcaPage() {
                 </p>
                 <Equation>{"d̂ = s₁ u₁\nx̂ = x̄ + d̂"}</Equation>
                 <p>
+
                   On the playground the green dots are exactly this, each
                   person rebuilt from one number, with a dashed stub to
-                  where they really were. If standardisation was used, the
+                  where they really were. If standardization was used, the
                   scaling is reversed as well, in the opposite order it was
                   applied.
                 </p>
@@ -684,14 +647,12 @@ export default function PcaPage() {
               </SubSection>
 
               <SubSection title="22. Reconstruction error">
-                <p>
-                  The stub is the error, and its squared length is the
-                  natural measure of it.
-                </p>
+                <p>The perpendicular segment connects each observation to its reconstruction. PCA measures the loss using the squared length of that segment, in the feature coordinates chosen for the analysis.</p>
                 <Equation>{"errorᵢ = ‖xᵢ − x̂ᵢ‖²           total = Σᵢ ‖xᵢ − x̂ᵢ‖²"}</Equation>
                 <>
 <p>
-                  Now rotate the retained direction instead of accepting the first component, and watch the total. The widget in section 11 is the same instrument, and its discarded readout is this total. It is smallest at the first component, because for centred data the direction that keeps the most variance and the direction that leaves the smallest squared stubs are the same direction.
+
+                  Now rotate the retained direction instead of accepting the first component, and watch the total. The widget in section 11 is the same instrument, and its discarded readout is this total. It is smallest at the first component, because for centered data the direction that keeps the most variance and the direction that leaves the smallest squared stubs are the same direction.
                 </p>
                 <p>
                   Pythagoras is why. Each person&rsquo;s squared distance from the mean splits into a squared score plus a squared stub, and the distances do not depend on the direction, so making the scores as large as possible makes the stubs as small as possible.
@@ -710,7 +671,8 @@ export default function PcaPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  Maximising retained projected variance and minimising
+
+                  Maximizing retained projected variance and minimizing
                   squared reconstruction error lead to the same first
                   component, and the discarded components quantify exactly
                   the variation unavailable to a reconstruction from the
@@ -735,8 +697,9 @@ export default function PcaPage() {
                 <Equation>{"rⱼ = λⱼ / Σₖ λₖ            Rₘ = Σⱼ₌₁ᵐ rⱼ"}</Equation>
                 <CompressionControl />
                 <p>
+
                   The first component alone carries 78.2 percent of the
-                  standardised variance, two carry 87.2, three 94.4, four
+                  standardized variance, two carry 87.2, three 94.4, four
                   99.0, and the reconstruction error falls from 65.3 to 38.5
                   to 16.8 to 2.9 to nothing. Keeping 95 percent is a common
                   rule of thumb and not a law. The right count depends on
@@ -760,30 +723,22 @@ export default function PcaPage() {
           title: "Part 11. Scale and Units",
           content: (
             <>
-              <SubSection title="24. Covariance PCA versus standardised PCA">
+              <SubSection title="24. Covariance PCA versus standardized PCA" id="24-covariance-pca-versus-standardised-pca">
                 <p>
-                  The crowd&rsquo;s heights are in centimetres. Write them
-                  in metres or in millimetres and nothing about the people
+
+                  The crowd&rsquo;s heights are in centimeters. Write them
+                  in meters or in millimeters and nothing about the people
                   changes, but the numbers do, and the covariance matrix is
                   built from the numbers.
                 </p>
                 <UnitToggle />
+                <p>In millimeters the height variance is 52,178, compared with weight variance of 431. The first component is (−0.996, −0.089), almost parallel to the height axis, and retains 99.97 percent of the total variance. In meters, height variance is 0.05 and the first component is (0.011, 1.000), almost parallel to the weight axis, retaining nearly all the variance. The people are unchanged, but the numerical scales change which direction retains the most variation.</p>
                 <p>
-                  In millimetres the height variance is 52,178 against
-                  weight&rsquo;s 431, the first component is (−0.996,
-                  −0.089), almost pure height, and it claims 99.97 percent of
-                  the variance. In metres the height variance is 0.05, the
-                  first component is (0.011, 1.000), almost pure weight, and
-                  it claims all of it. Same people. Covariance PCA is
-                  sensitive to the numerical scale of its features, and a
-                  feature can dominate for no better reason than its units
-                  produce big numbers.
-                </p>
-                <p>
-                  The usual repair is to standardise each feature first,
+
+                  The usual repair is to standardize each feature first,
                   dividing its deviations by its own standard deviation, so
                   every feature starts with variance one. PCA on
-                  standardised features is PCA on the correlation matrix
+                  standardized features is PCA on the correlation matrix
                   rather than the covariance matrix, and the question it
                   answers changes from how the features vary together in
                   their units to how they vary together relative to their
@@ -792,18 +747,20 @@ export default function PcaPage() {
                 <Equation>{"zᵢⱼ = (xᵢⱼ − x̄ⱼ) / sⱼ"}</Equation>
                 <StandardizedComparison />
                 <p>
-                  Whether to standardise is a modelling choice, not a rule.
+
+                  Whether to standardize is a modeling choice, not a rule.
                   Raw covariance PCA is the right instrument when the
                   features share comparable units, when absolute variance
                   means something, and when a feature that varies more
-                  should count for more. Standardised PCA is the right one
+                  should count for more. Standardized PCA is the right one
                   when units differ, when relative variation is what matters,
                   and when no feature should dominate merely because of its
                   measurement scale.
                 </p>
                 <KeepInMind>
-                  Choosing whether to standardise determines what kind of
-                  variation PCA treats as important. Centring is required;
+
+                  Choosing whether to standardize determines what kind of
+                  variation PCA treats as important. Centering is required;
                   scaling is a decision.
                 </KeepInMind>
               </SubSection>
@@ -827,28 +784,28 @@ export default function PcaPage() {
             trueFalse(
               "Dividing the scatter matrix by 4 rather than by 3 scales both eigenvalues by the same factor and leaves the first component’s direction and its share of 0.8 unchanged.",
               true,
-              "The choice of divisor is a common factor on every eigenvalue, so it changes neither the eigenvectors nor the shares. The scatter eigenvalues 400 and 100 become variances 100 and 25 under the population divisor and 133.3 and 33.3 under the sample one, which is what the playground reports, and the share of the first component is 400 over 500, 100 over 125 or 133.3 over 166.7, which is 0.8 every time. Name the matrix you are using, because the variances are comparable only under one divisor.",
+              "Changing from population to sample covariance multiplies every eigenvalue by the same positive factor. The directions and variance shares stay the same. For these four observations:\n\n```math\npopulation variances: 400 / 4 = 100; 100 / 4 = 25\nsample variances: 400 / 3 ≈ 133.3; 100 / 3 ≈ 33.3\nfirst variance share: 400 / (400 + 100) = 0.8\n```\n\nState the divisor when comparing reported variances.",
             ),
             trueFalse(
-              "Keeping the most variance and leaving the smallest squared stubs pull in different directions, so one has to be traded against the other.",
+              "For centered data, maximizing retained variance and minimizing squared perpendicular reconstruction error require a tradeoff between different directions.",
               false,
-              "They are the same direction for centred data, and Pythagoras is the reason. Each squared distance from the mean splits into a squared score plus a squared stub, and the distances do not depend on the direction chosen, so the largest squared scores leave the smallest squared stubs. On the four people the two totals are 400 and 100 at 45 degrees and sum to 500 at every angle.",
+              "A centered observation decomposes into its projection on the chosen axis and a perpendicular residual. Their squared lengths add to the observation's fixed squared distance from the mean. Maximizing the sum of squared projections therefore minimizes the sum of squared residuals. For the four people, the best first axis retains a total of 400 and leaves reconstruction error 100.",
             ),
             trueFalse(
-              "Writing the crowd’s heights in millimetres rather than metres changes which feature the first component is almost entirely made of.",
+              "Writing the crowd’s heights in millimeters rather than meters changes which feature the first component is almost entirely made of.",
               true,
-              "In millimetres the height variance is 52,178 against weight’s 431, and the first component is (−0.996, −0.089), almost pure height, claiming 99.97 percent. In metres the height variance is 0.05 and the first component is (0.011, 1.000), almost pure weight. Same people, different units, and the covariance matrix is built from the numbers.",
+              "In millimeters the height variance is 52,178 against weight’s 431, and the first component is (−0.996, −0.089), almost pure height, claiming 99.97 percent. In meters the height variance is 0.05 and the first component is (0.011, 1.000), almost pure weight. Same people, different units, and the covariance matrix is built from the numbers.",
             ),
             several(
               "Which of these does the page say about choosing how many components to keep?",
               [
                 "Keeping 95 percent of the variance is a rule of thumb rather than a law",
                 "The right count depends on what the reduced representation is for",
-                "On the five-measurement dataset the first component alone carries 95 percent of the standardised variance",
+                "On the five-measurement dataset the first component alone carries 95 percent of the standardized variance",
                 "Reconstruction quality and predictive performance are the same question measured two ways",
               ],
               [0, 1],
-              "On the five-measurement dataset the first component carries 78.2 percent of the standardised variance, two carry 87.2, three 94.4 and four 99.0, so a 95 percent rule would keep four, and the page is explicit that the rule is a convention and not a law. A low-variance direction may carry the information a downstream task needs, which is why reconstruction quality and predictive performance answer different questions rather than one question measured two ways.",
+              "On the five-measurement dataset the first component carries 78.2 percent of the standardized variance, two carry 87.2, three 94.4 and four 99.0, so a 95 percent rule would keep four, and the page is explicit that the rule is a convention and not a law. A low-variance direction may carry the information a downstream task needs, which is why reconstruction quality and predictive performance answer different questions rather than one question measured two ways.",
             ),
         ],
         },
@@ -885,23 +842,9 @@ export default function PcaPage() {
               </SubSection>
 
               <SubSection title="26. Outlier sensitivity">
-                <p>
-                  The method runs on means, squared deviations and
-                  covariances, and every one of those gives a distant
-                  observation more than its share of the say. Add one
-                  stranger to the crowd, tall and light, and the mean moves,
-                  the covariance changes, the first component turns, and the
-                  shares follow.
-                </p>
+                <p>PCA depends on means and squared deviations. An observation far from the others can make a large contribution to these quantities. Add the tall, light person in the widget and inspect how the mean, covariance and component directions change.</p>
                 <OutlierInfluence />
-                <p>
-                  One person in twelve moves the mean from (151.8, 53.4) to
-                  (155.4, 51.4), pulls the covariance of height and weight
-                  from 464 down to 349, turns the first component by 4.6
-                  degrees, and cuts its share from 0.990 to 0.841. A squared
-                  deviation grows with the square of the distance, so a
-                  distant person contributes far more than a twelfth.
-                </p>
+                <p>Adding one person to the eleven moves the mean from (151.8, 53.4) to (155.4, 51.4), changes the height-weight covariance from 464 to 349, rotates the first component by 4.6 degrees and changes its share from 0.990 to 0.841. Its contribution to squared spread can be much larger than its fraction of the row count.</p>
                 <KeepInMind>
                   Because PCA uses means, squared deviations and covariance,
                   distant observations can strongly influence its
@@ -918,13 +861,7 @@ export default function PcaPage() {
                   and fold the two ends onto the same stretch of it.
                 </p>
                 <CurvedPattern />
-                <p>
-                  The first component claims 68 percent of the variance
-                  here and the one-component reconstruction error is 3,316,
-                  against 108 on the crowd, which has one more person. The
-                  numbers say a straight axis is a poor summary; they do not
-                  say why, and the picture does.
-                </p>
+                <p>The first component retains 68 percent of the variance in this curved example, and its one-component reconstruction error is 3,316. The crowd example gives error 108. Raw error totals also depend on scale and observation count, so inspect the variance share and the projected picture rather than comparing those totals alone.</p>
                 <p>
                   The{" "}
                   <Link href="/concepts/kernel-pca" className={link}>
@@ -954,22 +891,24 @@ export default function PcaPage() {
             <>
               <SubSection title="28. PCA versus regression">
                 <p>
+
                   The first component through a cloud looks like a
                   regression line and is not one. Regression chooses an
-                  outcome, predicts it from the other feature, and minimises
+                  outcome, predicts it from the other feature, and minimizes
                   the vertical misses in the picture. PCA treats the features
                   symmetrically after preprocessing, finds a direction
-                  through the cloud, and minimises the perpendicular misses.
+                  through the cloud, and minimizes the perpendicular misses.
                   Different objectives, different lines.
                 </p>
                 <RegressionVersusPca />
                 <p>
+
                   The third line makes the point twice. Predicting weight
                   from height gives a slope of 0.890; predicting height from
                   weight, drawn on the same axes, gives 0.928; the first
                   component sits between them at 0.907. Reversing which
                   feature is the outcome changes the regression line, because
-                  it changes which misses are being minimised, and PCA is
+                  it changes which misses are being minimized, and PCA is
                   not regression without a target. It is a different
                   geometric problem with its own answer.
                 </p>
@@ -987,14 +926,7 @@ export default function PcaPage() {
           content: (
             <>
               <SubSection title="29. Deriving the eigenvector solution">
-                <p>
-                  The claim to earn is that hunting variance leads to the
-                  covariance matrix&rsquo;s eigenvectors, and it walks in
-                  four steps. First, the variance along a unit direction u.
-                  Each deviation d lands on u by the dot product, and
-                  expanding the square of that makes something familiar
-                  appear.
-                </p>
+                <p>We can derive the covariance eigenvector equation from the variance objective. Start by writing the squared projection of a centered observation d onto a unit direction u. Expanding that square exposes the variance and covariance terms.</p>
                 <Equation>{"(d · u)² = (d₁u₁ + d₂u₂)² = d₁²u₁² + 2 d₁d₂ u₁u₂ + d₂²u₂²"}</Equation>
                 <p>
                   Average over the people and the d sums become the
@@ -1003,11 +935,7 @@ export default function PcaPage() {
                   which is the covariance matrix evaluated on u.
                 </p>
                 <Equation>{"variance along u = uᵀ C u"}</Equation>
-                <p>
-                  Second, maximise that subject to u being a unit vector.
-                  Put the constraint in with a Lagrange multiplier and
-                  differentiate.
-                </p>
+                <p>We want to maximize this variance while keeping the direction vector at unit length. Introduce an auxiliary number, a Lagrange multiplier, to represent that constraint in the expression below. Differentiating gives the equations that a constrained maximum must satisfy.</p>
                 <DerivationTable
                   expressionHeading="step"
                   reasonHeading="why"
@@ -1024,15 +952,10 @@ export default function PcaPage() {
                 </p>
                 <Equation>{"uᵀ C u = λ uᵀ u = λ"}</Equation>
                 <p>For a unit-length direction that is an eigenvector of the covariance matrix, the variance of the projected data equals its eigenvalue. The largest eigenvalue therefore identifies a direction with the greatest variance. That direction is the first principal component.</p>
-              <p>For the second component, maximise variance while requiring a direction perpendicular to the first. Otherwise we could rediscover the same projection. Continue with directions perpendicular to all those already chosen. A real symmetric covariance matrix admits an orthonormal eigenbasis, so we can choose perpendicular unit-length eigenvectors even when an eigenvalue is repeated.</p>
+              <p>For the second component, maximize variance while requiring a direction perpendicular to the first. Otherwise we could rediscover the same projection. Continue with directions perpendicular to all those already chosen. A real symmetric covariance matrix admits an orthonormal eigenbasis, so we can choose perpendicular unit-length eigenvectors even when an eigenvalue is repeated.</p>
                 <KeepInMind>
-                  The unit direction maximising projected variance must be an
-                  eigenvector of the covariance matrix, its eigenvalue is the
-                  variance it achieves, and later components maximise the
-                  remaining variance without repeating directions already
-                  retained. Nothing about the eigen machinery was borrowed on
-                  faith.
-                </KeepInMind>
+
+                  The constrained variance calculation gives the covariance eigenvector equation. A unit eigenvector has projected variance equal to its eigenvalue. Choosing the largest value gives the first component; restricting later choices to perpendicular directions gives the remaining components.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -1043,16 +966,18 @@ export default function PcaPage() {
             <>
               <SubSection title="30. Covariance decomposition versus SVD">
                 <p>
+
                   The route the derivation suggests is the one this page has
-                  walked. Centre the data matrix, optionally standardise its
+                  walked. Center the data matrix, optionally standardize its
                   columns, form the covariance matrix, find its eigenvectors
                   and eigenvalues, sort them by decreasing eigenvalue, keep
                   the ones you want, and transform. It matches the concept
                   step for step.
                 </p>
                 <p>
+
                   Practical implementations often skip the covariance matrix
-                  and decompose the centred data matrix directly.
+                  and decompose the centered data matrix directly.
                 </p>
                 <Equation>{"X = U Σ Vᵀ"}</Equation>
                 <p>
@@ -1066,7 +991,8 @@ export default function PcaPage() {
                   page.
                 </p>
                 <KeepInMind>
-                  PCA can be computed directly from the centred data matrix
+
+                  PCA can be computed directly from the centered data matrix
                   without constructing the covariance matrix. The concept is
                   the eigenvector route; the computation is often the SVD.
                 </KeepInMind>
@@ -1083,8 +1009,9 @@ export default function PcaPage() {
                 </p>
                 <Equation>{"z_new = (x_new − x̄_training) W"}</Equation>
                 <p>
-                  The fit here keeps the means and, when it standardised,
-                  the standardiser, and its transform matches features by
+
+                  The fit here keeps the means and, when it standardized,
+                  the standardizer, and its transform matches features by
                   name, so a new observation with its columns in a different
                   order is fine and one with a column missing is refused.
                 </p>
@@ -1101,8 +1028,8 @@ export default function PcaPage() {
           title: "Part 16. Preserving Component Order, Scaling and Sign Conventions" , id: "part-16-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="32. Save the centre, directions and projection convention" id="32-implementation-and-failure-contracts">
-                <p>If two PCA fits disagree, first compare their preparation of the data. Did they centre, scale or do both? Did the covariance use a population or sample divisor, and did the solver decompose that covariance or the data matrix itself?</p>
+              <SubSection title="32. Save the center, directions and projection convention" id="32-implementation-and-failure-contracts">
+                <p>If two PCA fits disagree, first compare their preparation of the data. Did they center, scale or do both? Did the covariance use a population or sample divisor, and did the solver decompose that covariance or the data matrix itself?</p>
                 <p>Next compare the requested component count, ordering, tolerances and treatment of tied or nearly tied eigenvalues. A sign convention is needed if the output must be deterministic. Report scores, components, reconstructions and explained variances with these choices so a numerical difference can be interpreted.</p>
                 <p>
                   Some differences are conventions, while others change the
@@ -1118,9 +1045,10 @@ export default function PcaPage() {
                   evidence of a different geometric fit.
                 </p>
                 <p>
+
                   Feature scaling is different. Converting only one measurement&rsquo;s
                   units changes its influence on covariance and can rotate the
-                  components, as the metre and millimetre examples showed. Compare
+                  components, as the meter and millimeter examples showed. Compare
                   preprocessing first, then divisors, signs and other solver
                   conventions before deciding why two results disagree.
                 </p>
@@ -1129,11 +1057,11 @@ export default function PcaPage() {
                   reasonHeading="Which directions can be identified"
                   rows={[
                     { expression: "empty data, or a missing or non-finite value", reason: "refused at the boundary, by the same guard every feature here passes through." },
-                    { expression: "one observation", reason: "refused; a covariance needs at least two rows to have a spread to decompose." },
-                    { expression: "one feature", reason: "fits, with one component carrying every share." },
-                    { expression: "more components requested than features", reason: "refused at the fit, since the valid rank cannot supply them." },
+                    { expression: "one observation", reason: "refused by this implementation, which requires at least two observations. A sample covariance with divisor n − 1 is undefined for one observation." },
+                    { expression: "one feature", reason: "a varying feature fits with one component retaining all its variance." },
+                    { expression: "more components requested than features", reason: "refused because an orthonormal basis cannot contain more directions than the feature dimension." },
                     { expression: "a constant column, raw", reason: "fits; the column contributes a component of zero variance and zero share." },
-                    { expression: "a constant column, standardised", reason: "refused, because its standard deviation is zero and there is nothing to divide by." },
+                    { expression: "a constant column, standardized", reason: "refused, because its standard deviation is zero and there is nothing to divide by." },
                     { expression: "duplicate features, or rank-deficient data", reason: "fits; the redundant direction comes back with zero variance." },
                     { expression: "a negative eigenvalue from rounding", reason: "clamped at zero, since a covariance matrix cannot truly have one and the solver's −3e−17 is not a fact about the data." },
                     { expression: "new data with reordered columns", reason: "matched by name and accepted; a column missing or unknown is refused." },
@@ -1141,16 +1069,7 @@ export default function PcaPage() {
                   ]}
                 />
                 <InAModel title="The contracts on the crowd">
-                  <p>
-                    Every refusal in the table is a sentence rather than a
-                    crash. Asked for three components of the crowd&rsquo;s two
-                    features, the fit answers that it cannot keep three
-                    components from two features; handed one person, that a
-                    decomposition needs at least two rows to have any spread;
-                    handed height alone after being fitted on height and
-                    weight, that it expected exactly the fitted features and
-                    names them.
-                  </p>
+                  <p>The SDK reports invalid requests through named validation errors. Requesting three components from two input features exceeds the available coordinate count. It also requires at least two observations and, when transforming later inputs, the exact fitted feature names.</p>
                   <p>
                     The accepted edges are quieter. Height fitted beside an
                     exact copy of itself comes back with the first component
@@ -1160,23 +1079,9 @@ export default function PcaPage() {
                     did not look at the shares would miss.
                   </p>
                 </InAModel>
-                <p>
-                  Constant features are the case that deserves particular
-                  care, because the two preprocessing choices treat them
-                  oppositely. Raw, a constant column is harmless and simply
-                  carries nothing. Standardised, it is a division by zero,
-                  and the refusal is the right answer rather than a quiet
-                  substitution.
-                </p>
+                <p>A constant feature has no variation after centering, so it contributes nothing to centered PCA. Standardizing that column would divide by zero unless we define a policy. The implementation here rejects it. Other applications may drop the column or use a declared scale of one; whichever policy we choose must be reused for later inputs.</p>
                 <KeepInMind>
-                  In every one of these the alternative is a number that looks
-                  fine. A sign chosen by the solver, a variance under the
-                  other divisor, a zero-variance component quietly dropped, a
-                  solver&rsquo;s −3e−17 reported as a fact about the data, all
-                  fit and all transform. The rows that refuse are the ones
-                  where no number would be honest, and the rows that accept
-                  are the ones where the honest number is zero.
-                </KeepInMind>
+                  Separate unsupported inputs from harmless conventions. Sign reversals and covariance divisors can change printed values without changing the retained geometry. A zero-variance direction can be represented explicitly, while a standardized constant column requires a declared policy. Read the validation rule before interpreting an accepted or refused request.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -1203,13 +1108,13 @@ export default function PcaPage() {
             choice(
               "Predicting weight from height gives a slope of 0.890 and predicting height from weight gives 0.928. Why do the two differ?",
               [
-                "Because each minimises a different set of misses, the vertical ones for its own chosen outcome",
+                "Because each minimizes a different set of misses, the vertical ones for its own chosen outcome",
                 "Because the two fits were run on different people",
                 "Because one of the two fits has not converged",
-                "Because regression requires the features to be standardised and PCA does not",
+                "Because regression requires the features to be standardized and PCA does not",
               ],
               0,
-              "Regression picks an outcome and minimises the vertical misses in predicting it, so reversing which feature is the outcome changes which misses are being minimised and therefore the line. PCA minimises the perpendicular misses instead and sits between the two at 0.907, which is why it is a different geometric problem rather than regression without a target.",
+              "Each regression minimizes errors in its own target coordinate. Predicting height from weight gives height-per-weight units; predicting weight from height gives weight-per-height units, so the reported slopes cannot be compared directly. Rewriting the reverse regression as weight against height gives a slope of about 1.078. PCA instead minimizes perpendicular coordinate errors and has slope 0.907 here, between that line and the weight-on-height slope of 0.890. This geometry depends on the chosen input units.",
             ),
             several(
               "A fitted PCA is applied to a new observation. Which of these travel with the fit?",
@@ -1220,19 +1125,19 @@ export default function PcaPage() {
                 "A fresh covariance matrix computed from the new observation",
               ],
               [0, 1, 2],
-              "The new observation goes through the same transformation the training data went through, so the mean, the scales when standardisation was fitted, and the retained directions all travel with the scores. Refitting per observation would make the coordinates mean something different every time.",
+              "The new observation goes through the same transformation the training data went through, so the mean, the scales when standardization was fitted, and the retained directions all travel with the scores. Refitting per observation would make the coordinates mean something different every time.",
             ),
             trueFalse(
-              "A constant column is harmless to raw covariance PCA and a division by zero once the features are standardised.",
+              "A constant column is harmless to raw covariance PCA and a division by zero once the features are standardized.",
               true,
-              "The two preprocessing choices treat it oppositely. Raw, the column simply carries nothing; standardised, its deviations are divided by a standard deviation of zero, and refusing is the right answer rather than quietly substituting some other number.",
+              "A constant column has zero centered variance, so raw covariance PCA can include it as a zero-variance direction. Dividing that column by its own standard deviation is undefined because the divisor is zero. This library rejects it when standardization is requested; other implementations may explicitly drop constant columns or apply another documented convention.",
             ),
         ],
         },
         {
           title: "Practice. Turning the Crowd Onto Its Own Axes With the Library",
           practice: [
-            exercise("Work the four people with the library",["Part 7 works the four people by hand to directions of (0.707, 0.707) and (0.707, −0.707), variances of 100 and 25 under the population divisor, and shares of 0.8 and 0.2, and says the playground reports sample variances of 133.3 and 33.3 instead. Fit PrincipalComponentAnalysis on the four and read all of that off the fitted components.", "Then transform the four people and print each one's two scores. Part 8 has person 1 at 14.14 and 0 and person 3 at 0 and 7.07. Expect the sign of the second component, and so of person 3's second score, to come back as the solver chose it, which Part 4 says is a convention and not a fact."],`from oop_ml import Feature, PrincipalComponentAnalysis
+            exercise("Work the four people with the library",["Fit PrincipalComponentAnalysis to the four height-weight pairs below. Print each component's direction, variance and share of total variance. Compare the library's sample variances with the population variances calculated earlier.", "Transform the same four people and print their two component scores. A solver may reverse a component direction and all its scores together; this represents the same axis, so account for that sign choice when comparing results."],`from oop_ml import Feature, PrincipalComponentAnalysis
 
 people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
 
@@ -1256,7 +1161,7 @@ person 1: scores 14.14 and 0.00
 person 2: scores -14.14 and 0.00
 person 3: scores 0.00 and -7.07
 person 4: scores 0.00 and 7.07`,{...{ hints: ["The fitted components can be iterated, and variance_shares on the same object answers one share per component in the same order, so zip pairs them.", "A component carries name, direction and variance as properties. The direction is an array, one entry per feature in the order they were fitted.", "transform answers one Feature per component, named component_1 and component_2, whose values are the scores of the four people in the order they went in."], check: numberCheck("What variance does the library report for the first component?", 133.33, 0.01, "Changing the common variance divisor changes reported component variances without changing their relative shares or directions. Component signs remain conventions, so compare equivalent projections with that sign freedom in mind.") },question:"Can the library recover the supplied principal directions and coordinates?"}),
-            exercise("Flatten the crowd and the arc onto one axis",["Part 5 says the crowd's first component carries 98.97 percent of the variance and Part 3 puts it at 42.2 degrees; Part 12 says the arc's carries 68 percent and that keeping one component leaves a reconstruction error of 3,316 on the arc against 108 on the crowd. Fit each cloud whole for its directions and shares, then fit it again with n_components=1, transform and inverse_transform, and total the squared gaps between the people and their rebuilt copies.", "Report the first component's angle modulo a half turn, since its sign is conventional, and both components' variances, which the lesson does not quote."],`import math
+            exercise("Flatten the crowd and the arc onto one axis",["Fit PCA separately to the eleven-person dataset and the curved dataset below. Print each first-component direction as an angle and its share of variance. Then fit each dataset with n_components=1, transform it and reconstruct it with inverse_transform. Sum the squared differences between each original coordinate and its reconstruction.", "Report angles modulo 180 degrees so opposite direction vectors describe the same axis. Print both component variances as well. Compare how much reconstruction error remains when each dataset is reduced to one straight axis."],`import math
 from oop_ml import Feature, PrincipalComponentAnalysis
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
@@ -1293,7 +1198,7 @@ for label, people in (("the crowd", crowd), ("the arc", arc)):
   one-component reconstruction error 108.10
 the arc: first component at 1.0 degrees, variances 641.44 and 301.50, first share 0.6803
   one-component reconstruction error 3316.45`,{...{ hints: ["Unpacking the fitted components into two names works because a two-feature fit has exactly two of them, in order of variance.", "atan2 of the direction's second entry over its first is the angle; taking it modulo 180 removes the sign the solver chose, since (−0.74, −0.67) and (0.74, 0.67) are one axis.", "inverse_transform takes what transform answered and hands back one Feature per original column, so the error is a double loop, over the two columns and over the people in each."], check: numberCheck("What variance does the crowd's second component carry?", 10.81, 0.01, "The one-dimensional reconstruction loses variation orthogonal to the retained direction. The arc has substantial variation outside one straight axis, so its reconstruction error is much larger than the elongated crowd's.") },question:"What information is lost when each cloud is reconstructed from one component?"}),
-            exercise("Add one stranger to the crowd",["Part 12 adds one tall, light person, 195 cm and 30 kg, to the eleven and reports that the first component turns by 4.6 degrees and its share falls from 0.990 to 0.841. Fit the crowd with and without the stranger and print the first component's angle and share for each.", "Print the second component's variance as well, before and after, which the lesson does not quote and which is where the stranger's say shows most plainly."],`import math
+            exercise("Add one stranger to the crowd",["Fit PCA to the eleven people, then repeat after adding the person of 195 cm and 30 kg. Print the first component's angle and share of variance for each fit.", "Also print the second component's variance before and after adding the observation. Check how the additional person changes variation outside the first component."],`import math
 from oop_ml import Feature, PrincipalComponentAnalysis
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
@@ -1316,7 +1221,7 @@ for label, extra_height, extra_weight in (("the crowd", [], []), ("with the stra
     share = fitted.components.variance_shares[0]
     print(f"{label}: first component at {angle:.2f} degrees with share {share:.4f}, second component variance {second.variance:.2f}")`,`the crowd: first component at 42.21 degrees with share 0.9897, second component variance 10.81
 with the stranger: first component at 37.62 degrees with share 0.8409, second component variance 183.55`,{...{ hints: ["The stranger is appended to both lists before the Features are built, so the second fit sees twelve people and the first sees eleven.", "The angle and the share are read exactly as in the previous problem. The turn is the difference between the two printed angles."], check: numberCheck("What share of the variance does the first component carry once the stranger is in?", 0.8409, 0.0005, "A distant observation contributes a large squared deviation and changes the fitted covariance. Here it increases the second component's variance and rotates the first direction; the result depends on that observation's position.") },question:"How much can one distant observation change the principal directions?"}),
-            exercise("Write the heights in three units, then standardize",["Part 11 writes the crowd's heights in millimetres, where the first component is (−0.996, −0.089) and claims 99.97 percent, and in metres, where it is (0.011, 1.000) and claims all of it. Fit the crowd with the heights in millimetres, centimetres and metres, raw and with standardize=True, and print the first component's direction and share for each of the six fits.", "Then ask the fit for three components of two features and print what the library raises, which the table in Part 16 says is a refusal at the fit."],`from oop_ml import Feature, MLLibError, PrincipalComponentAnalysis
+            exercise("Write the heights in three units, then standardize",["Record height in millimeters, centimeters and meters while leaving weight in kilograms. For each unit, fit PCA both with and without standardize=True. Print the first component's direction and variance share for all six fits.", "Finally request three components from the two-feature dataset. Catch the library error raised during fit and print its class name and message."],`from oop_ml import Feature, MLLibError, PrincipalComponentAnalysis
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1351,7 +1256,7 @@ centimetres, raw: direction [-0.741, -0.672], share 0.9897
 centimetres, standardized: direction [0.707, 0.707], share 0.9896
 metres, raw: direction [0.011, 1.0], share 1.0000
 metres, standardized: direction [0.707, 0.707], share 0.9896
-InvalidValuesError: cannot keep 3 components from 2 features`,{...{ hints: ["standardize is a field of the constructor, so each unit needs two fits, one with it off and one with it on.", "A component can be read by name from components, and the first is component_1.", "The refusal happens at fit, when the number of features is first known, so the try has to wrap the fit rather than the construction."], check: numberCheck("What share does the first component carry once the heights are standardized, in any of the three units?", 0.9896, 0.0005, "Training standardisation removes these positive unit conversions before covariance is calculated. Raw covariance instead uses the changed numerical scales, so it favours different feature directions even for the same people.") },question:"Do raw and standardised PCA react differently to changes of units?"}),
+InvalidValuesError: cannot keep 3 components from 2 features`,{...{ hints: ["standardize is a field of the constructor, so each unit needs two fits, one with it off and one with it on.", "A component can be read by name from components, and the first is component_1.", "The refusal happens at fit, when the number of features is first known, so the try has to wrap the fit rather than the construction."], check: numberCheck("What share does the first component carry once the heights are standardized, in any of the three units?", 0.9896, 0.0005, "Training standardization removes these positive unit conversions before covariance is calculated. Raw covariance instead uses the changed numerical scales, so it favors different feature directions even for the same people.") },question:"Do raw and standardized PCA react differently to changes of units?"}),
           ],
         },
       ]}

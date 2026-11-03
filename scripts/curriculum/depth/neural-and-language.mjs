@@ -1,9 +1,7 @@
 import { p, worked, withProgram as show, supplement as add } from './shared.mjs';
 export default {
  'recurrent-layers': add('Make sequence boundaries, padding and backpropagation through time explicit.', [
-  p('A New Sequence Needs a Deliberate Initial State', `If Botie processes one greenhouse's week and then another greenhouse's week, carrying hidden state across the boundary lets the second prediction depend on the first greenhouse. Reset state for independent sequences unless the task explicitly defines continuity.
-
-For chunks of one continuous record, carrying the numerical state may be appropriate. Detaching its gradient at a chunk boundary truncates backpropagation while retaining the state value. That changes how far a later error can teach earlier computations, not what the retained vector currently contains.`),
+  p('A New Sequence Needs a Deliberate Initial State', "If Botie processes one greenhouse's week and then another greenhouse's week, carrying hidden state across the boundary lets the second prediction depend on the first greenhouse. Reset state for independent sequences unless the task explicitly defines continuity.\n\nFor chunks of one continuous record, we may want the next chunk to remember the earlier readings. Carrying the hidden-state value preserves that information. We can separately stop derivatives at the chunk boundary, so an error in the new chunk does not update computations in an earlier chunk. This is truncated backpropagation through time. The value continues forward while the training calculation reaches back only a limited distance."),
   show(p('Padding Should Not Become an Extra Observation', `A batch can contain sequences of different lengths. Padding gives them a rectangular storage layout, but the padded positions are not additional time steps in the original record. A length mask can keep the previous state when a position is padding.
 
 Distinguish a padded zero from a real zero measurement. Their numerical values can be identical while their roles are different.`), worked('Ignore the storage padding after a short sequence', 'The first two entries are observed inputs; the last two exist only to complete the batch layout.', `inputs = np.array([1.,2.,0.,0.])
@@ -16,17 +14,13 @@ for t, value in enumerate(inputs):
         state = candidate
     history.append(round(float(state), 4))
 print(history)`, '[0.7616, 0.983, 0.983, 0.983]', 'The state stops changing after the last real observation. Updating on the padded zeros would gradually erase information.')),
-  p('Shared Weights Receive Contributions from Every Use', `Unrolling the recurrent computation gives a copy of the update operation at each time step, but those copies share parameters. Backpropagation adds the gradient contributions from every use into the same weight arrays.
-
-Clipping a gradient's norm can limit unusually large updates, but it does not repair a wrong derivative or restore information lost through vanishing gradients. Check a short deterministic sequence with finite differences before trusting a long training run.`),
+  p('Shared Weights Receive Contributions from Every Use', "Draw the recurrent update once for each reading in time order. This is called unrolling. The drawings represent repeated uses of the same weights, rather than separate weights for each date. When we differentiate the error, every use contributes to the derivative of those shared weights, so the backward calculation must add the contributions together.\n\nClipping a gradient's norm can limit unusually large updates, but it does not repair a wrong derivative or restore information lost through vanishing gradients. Check a short deterministic sequence with finite differences before trusting a long training run."),
  ]),
- 'radial-basis-networks': add('Fit the linear output layer, expose centre-width choices and evaluate extrapolation.', [
-  p('A Centre and a Width Define One Local Response', `A radial basis unit responds according to distance from its centre. The width determines how quickly its response falls as the input moves away. Several centres divide the input space into overlapping regions of influence without assigning each input to only one region.
+ 'radial-basis-networks': add("Fit the linear output layer, expose center-width choices and evaluate extrapolation.", [
+  p("A Center and a Width Define One Local Response", `A radial basis unit responds according to distance from its center. The width determines how quickly its response falls as the input moves away. Several centers divide the input space into overlapping regions of influence without assigning each input to only one region.
 
-Choosing centres from training observations or fitted clusters is a modelling step. Learning widths or centres by optimisation is another. Keep those choices separate from fitting the output weights, which is a linear problem once the basis responses are fixed.`),
-  show(p('Turn Local Responses into a Regression Table', `Evaluate each basis at every training input to build a design matrix. Add an intercept column if the output rule needs a baseline. A least-squares solver can then fit the output coefficients.
-
-The basis functions are nonlinear in the original input, but the prediction is linear in these output coefficients. This is the same distinction used in polynomial regression.`), worked('Fit two Gaussian basis responses and an intercept', 'The centres and width are fixed teaching choices, not learned quantities in this program.', `x = np.array([-1.,0.,1.])
+Choosing centers from training observations or fitted clusters is a modeling step. Learning widths or centers by optimization is another. Keep those choices separate from fitting the output weights, which is a linear problem once the basis responses are fixed.`),
+  show(p('Turn Local Responses into a Regression Table', "Give each training input one row and each basis unit one column. Each entry records how strongly that unit responds to that input. This table is the design matrix. The output rule combines its columns using adjustable coefficients, and an optional all-ones column supplies an intercept. We can now fit those coefficients with the least-squares method we used for regression.\n\nThe basis functions are nonlinear in the original input, but the prediction is linear in these output coefficients. This is the same distinction used in polynomial regression."), worked('Fit two Gaussian basis responses and an intercept', "The centers and width are fixed teaching choices, not learned quantities in this program.", `x = np.array([-1.,0.,1.])
 y = np.array([0.,1.,0.])
 centres = np.array([-1.,1.])
 def design(values):
@@ -35,9 +29,9 @@ def design(values):
 w = np.linalg.lstsq(design(x), y, rcond=None)[0]
 print(np.round(design(x)@w, 4).tolist())
 print(design(np.array([10.])).shape)`, '[0.0, 1.0, 0.0]\n(1, 3)', 'Three fitted coefficients interpolate these three targets. That easy fit does not establish useful predictions away from the observations.')),
-  p('Far from Every Centre, Only the Baseline May Remain', `Gaussian basis responses approach zero far from their centres. With an intercept, the prediction then approaches that intercept. Without one, it approaches zero. Neither behaviour necessarily matches the underlying problem.
+  p("Far from Every Center, Only the Baseline May Remain", `Gaussian basis responses approach zero far from their centers. With an intercept, the prediction then approaches that intercept. Without one, it approaches zero. Neither behavior necessarily matches the underlying problem.
 
-Inspect widths that are too narrow and too broad. Narrow units can leave unsupported gaps; broad units can create similar columns and unstable coefficients. Choose centres, widths and regularisation using an evaluation that reflects where new inputs will occur.`),
+Inspect widths that are too narrow and too broad. Narrow units can leave unsupported gaps; broad units can create similar columns and unstable coefficients. Choose centers, widths and regularization using an evaluation that reflects where new inputs will occur.`),
  ]),
  'residual-connections': add('Trace the gradient route and distinguish identity from projection shortcuts.', [
   show(p('The Skip Route Also Carries a Gradient', "A residual block adds a learned correction to its input. When we differentiate that sum, we get a contribution from the unchanged input alongside the derivative through the correction. Follow those two paths in the diagram: both contribute to how an earlier layer receives a gradient.\n\nThe contributions can still cancel in a particular direction. A residual connection gives the gradient another route, but it does not guarantee that gradients remain large throughout the network."), worked('Compare a small correction with a replacement', 'For this scalar illustration, the correction multiplies its input by 0.1.', `x = 4.
@@ -51,9 +45,7 @@ print(correction_weight, 1+correction_weight)`, '0.4 4.4\n0.1 1.1', 'The final l
 That projection is no longer an identity route. Include its parameters and computation when explaining the block. A shape match alone is not the learning objective; the combined representation must still be trained for the downstream task.`),
  ]),
  'embedding-layers': add('Explain repeated-index gradients, padding and what embedding training can identify.', [
-  p('A Lookup Selects Rows, Not Numerical Magnitudes', `A token ID identifies one row of the embedding table. Changing cat's ID from three to seven and moving its embedding row with it should leave the model's behaviour unchanged. The ID itself does not tell the model that cat is closer to one word than another.
-
-The selected vector enters later computations, whose loss supplies a gradient for that row. Rows absent from the batch receive no lookup contribution from it. Their possible regularisation updates are a separate part of training.`),
+  p('A Lookup Selects Rows, Not Numerical Magnitudes', "A token ID identifies one row of the embedding table. If we change cat's ID from three to seven and move its embedding to row seven, that lookup still returns the same vector. The ID itself does not tell the model that cat is closer to one word than another.\n\nThe selected vector enters later computations, whose loss supplies a gradient for that row. Rows absent from the batch receive no lookup contribution from it. Their possible regularization updates are a separate part of training."),
   show(p('Repeated Tokens Send Several Contributions to One Row', `If the same token occurs twice, both positions read the same parameter row. During the backward pass, their gradient contributions must be added. Overwriting the row with the last contribution loses part of the learning signal.
 
 Use an accumulation operation that handles repeated indices. This connects the embedding update directly to the repeated-destination case from NumPy indexing.`), worked('Accumulate two occurrences of the same token', 'Token one appears twice and token three once. Each occurrence has its own two-coordinate upstream gradient.', `ids = np.array([1,3,1])
@@ -78,13 +70,13 @@ print(encoded.tolist())
 print(encoded.shape)`, '[[2.0, 2.0], [3.0, 1.0]]\n(2, 2)', 'Both rows began with the same word vector. Their differing position contributions make their resulting representations different.')),
   p('A Position Rule and a Trained Context Length Are Different Limits', `A sinusoidal formula can be evaluated at positions beyond those seen during training. That does not establish that the trained model will behave well there. Learned absolute tables can also have an explicit maximum index.
 
-Relative-position methods and rotary methods change how positional relationships enter attention. They do not remove memory cost, training-distribution limits or the need to evaluate long-context behaviour. Distinguish a mathematically defined position from a context length the full model has learned to use.`),
+Relative-position methods and rotary methods change how positional relationships enter attention. They do not remove memory cost, training-distribution limits or the need to evaluate long-context behavior. Distinguish a mathematically defined position from a context length the full model has learned to use.`),
  ]),
  'attention': add('Teach padding masks, complete multihead shapes and attention interpretation limits.', [
-  p('Mask a Score before Turning It into a Share', `A padded position should not receive attention merely because a batch needs a rectangular shape. Set its score to an excluded value before softmax so the allowed positions receive the whole normalised share. A causal mask additionally excludes future positions.
+  p('Mask a Score before Turning It into a Share', `A padded position should not receive attention merely because a batch needs a rectangular shape. Set its score to an excluded value before softmax so the allowed positions receive the whole normalized share. A causal mask additionally excludes future positions.
 
 If an entire query row is masked, ordinary softmax has no allowed outcome. Handle that row explicitly according to the task. Replacing excluded scores with a large negative number is a numerical implementation choice; it does not define what an all-masked row should mean.`),
-  show(p('Remove an Unavailable Key and Renormalise', `An attention share is relative to the allowed keys. Removing one key changes the denominator and therefore the shares of the remaining keys, even when their original scores stay unchanged.
+  show(p("Remove an Unavailable Key and Renormalize", `An attention share is relative to the allowed keys. Removing one key changes the denominator and therefore the shares of the remaining keys, even when their original scores stay unchanged.
 
 The resulting vector is a weighted sum of values. Scores and values have separate jobs, so keep both beside the calculation.`), worked('A padded key must not receive a share', 'The third key is padding. The two allowed scores are equal.', `scores = np.array([1.,1.,9.])
 allowed = np.array([True,True,False])
@@ -93,18 +85,14 @@ weight = np.exp(masked-np.max(masked))
 weight /= weight.sum()
 values = np.array([[2.,0.],[0.,4.],[100.,100.]])
 print(weight.tolist())
-print((weight@values).tolist())`, '[0.5, 0.5, 0.0]\n[1.0, 2.0]', 'The very large padded score contributes nothing. Masking the output after softmax instead would have already changed the allowed weights.')),
-  p('Each Head Makes Its Own Comparison', `Multihead attention projects the representation into several query, key and value spaces. Each head calculates its own score table and weighted values. Concatenate those head outputs, then apply an output projection to mix their information.
-
-Heads are learned computational components, not preassigned grammatical jobs. A head may show a recognisable pattern on some examples without reliably representing one human concept. Track batch, head, query, key and feature axes before combining arrays.`),
+print((weight@values).tolist())`, '[0.5, 0.5, 0.0]\n[1.0, 2.0]', "The padded value contributes nothing because its weight is zero. If we included its score in softmax and only then set its weight to zero, the other two weights would still be too small unless we normalized them again.")),
+  p('Each Head Makes Its Own Comparison', "One comparison may help a token find a nearby description, while another may pick out a reference elsewhere in the sequence. Multihead attention allows several comparisons to be learned. Each head has its own transformations for queries, keys and values, and produces its own weighted result. Place those results side by side, which is concatenation, then apply a learned output transformation to combine their coordinates.\n\nHeads are learned computational components, not preassigned grammatical jobs. A head may show a recognizable pattern on some examples without reliably representing one human concept. Track batch, head, query, key and feature axes before combining arrays."),
   p('A Large Attention Weight Is Not a Complete Explanation', `The output depends on value vectors, output projections, residual paths and later layers as well as attention weights. A large weight on one token does not by itself establish that the token caused the final decision in a particular human sense.
 
 Inspect controlled input changes and resulting predictions alongside the attention display. Treat the display as a view of one operation in the model, with a clearly stated mask and layer, rather than a complete explanation of its reasoning.`),
  ]),
  'transformer-blocks': add('Explain batching, feed-forward mechanics, full decoder boundaries and training state.', [
-  p('A Batch Adds an Axis, Not a Conversation between Examples', `A decoder batch commonly stores batch, token and feature axes. Attention should compare positions within the same sequence, not words from unrelated examples in other batch rows.
-
-Different sequence lengths need padding masks, while next-token training also needs a causal mask. Check both with unequal lengths. A triangular mask alone prevents looking forward but does not automatically remove every padded key.`),
+  p('A Batch Adds an Axis, Not a Conversation between Examples', "Suppose we process several sentences together. One array axis identifies the sentence, another the token position, and another the coordinates describing that token. These are the batch, token and feature axes. Attention compares positions within each sentence; putting sentences in the same batch does not make their words context for one another.\n\nDifferent sequence lengths need padding masks, while next-token training also needs a causal mask. Check both with unequal lengths. A triangular mask alone prevents looking forward but does not automatically remove every padded key."),
   show(p('The Feed-Forward Network Reuses Its Rule at Every Position', `Attention mixes information between positions. The feed-forward network applies the same learned transformation independently to each position's current vector. Expanding and then reducing the feature width gives that transformation room to form nonlinear combinations.
 
 This distinction explains why the block needs both operations. Sharing the same feed-forward weights across positions does not mean each position produces the same output.`), worked('Apply one position-wise transformation to two rows', 'The supplied matrices isolate the expand, activate and contract sequence.', `X = np.array([[1.,-1.],[2.,1.]])
@@ -116,15 +104,15 @@ print((hidden@W2).tolist())`, '[[1.0, 0.0, 2.0], [2.0, 1.0, 1.0]]\n[[3.0, 2.0], 
   p('A Block Still Needs a Vocabulary Head and an Objective', `A decoder language model begins with token representations, applies a stack of blocks, and maps each final position to one score per vocabulary entry. The shifted target token supplies the training label at that position.
 
 Gradients must pass from that loss through the vocabulary projection, every block and the input embeddings that participated. A forward pass through one block demonstrates architecture. It is not a pretrained language model and has no learned linguistic competence by itself.`),
-  p('Normalisation Placement Is Part of the Architecture', `Applying normalisation before a sublayer and applying it after the residual addition produce different computations and gradient paths. Preserve the selected convention when reproducing a model; moving a normalisation is not a formatting change.
+  p("Normalization Placement Is Part of the Architecture", `Applying normalization before a sublayer and applying it after the residual addition produce different computations and gradient paths. Preserve the selected convention when reproducing a model; moving a normalization is not a formatting change.
 
-Training and generation also require different execution behaviour for dropout and gradient tracking. Save enough configuration to reconstruct the exact block, including widths, head count, activation, normalisation convention and mask rules.`),
+Training and generation also require different execution behavior for dropout and gradient tracking. Save enough configuration to reconstruct the exact block, including widths, head count, activation, normalization convention and mask rules.`),
  ]),
  'next-token-prediction': add('Complete a fitted language baseline and cover corpus splits, padding and token-weighted loss.', [
   p('Split Documents before Turning Them into Overlapping Windows', `Adjacent training windows share most of their tokens. Randomly splitting those windows can place almost identical passages in training and evaluation. Split at the document or other independent source level before constructing windows, and inspect duplicates across the boundary.
 
 Decide how document boundaries are represented. Joining two unrelated documents without a separator creates a transition that never occurred in either source. The tokenizer, boundary rule and window construction belong to the training procedure.`),
-  show(p('Train a Small Next-Token Model before Adding a Network', `A bigram model keeps one next-token count row per current token. Adding a small count to every possible continuation prevents an unseen pair from receiving zero probability. Normalising each row produces a complete conditional distribution.
+  show(p('Train a Small Next-Token Model before Adding a Network', `A bigram model keeps one next-token count row per current token. Adding a small count to every possible continuation prevents an unseen pair from receiving zero probability. Normalizing each row produces a complete conditional distribution.
 
 This model reads only the immediately preceding token. That limitation makes a useful baseline: the training target is the same kind of next-token target, but the context representation is deliberately restricted.`), worked('Learn transitions from two tiny sequences', 'IDs zero, one and two stand for three vocabulary entries. The sequences are kept separate.', `sequences = [[0,1,2],[0,1,1,2]]
 count = np.ones((3,3))
@@ -141,12 +129,10 @@ print(round(float(loss), 3))`, '[[0.2, 0.6, 0.2], [0.167, 0.333, 0.5], [0.333, 0
 Keep end markers if they are part of the objective, and exclude storage padding. A batch with no valid targets needs an explicit skip or error policy. Dividing by one to hide a zero count does not create a meaningful loss.`),
   p('Low Next-Token Loss Does Not Answer Every User Task', `The objective rewards probability on observed continuations. It does not directly certify factuality, instruction following, useful explanations or safety. A model can exploit repeated boilerplate and frequent tokens while failing on the decisions people care about.
 
-Retain token-level loss as one diagnostic and evaluate relevant tasks separately. Compare losses only under compatible tokenisation, target masking and data conventions; changing those changes what one averaged term represents.`),
+Retain token-level loss as one diagnostic and evaluate relevant tasks separately. Compare losses only under compatible tokenization, target masking and data conventions; changing those changes what one averaged term represents.`),
  ]),
  'autoregressive-generation': add('Clarify cached state, context truncation and batch stopping.', [
-  p('A Cache Reuses Computation from an Unchanged Prefix', `During causal generation, earlier token representations cannot depend on tokens that have not been generated yet. Their key and value projections can therefore be retained while a new query is calculated for the appended token.
-
-The cache must match the model weights, position convention, mask and exact prefix. Editing an earlier token invalidates affected cached state. A cache accelerates the same intended computation; it does not supply additional knowledge or change the probability model by itself.`),
+  p('A Cache Reuses Computation from an Unchanged Prefix', "After generating another token, we need to calculate what follows it. Recomputing every earlier key and value would repeat work. In ordinary causal attention, an earlier position cannot read the new token, so its previously calculated keys and values remain usable. A key-value cache stores them while we calculate the appended token's new projections, including its query, key and value. The new key and value join the cache for later tokens.\n\nThe cache must match the model weights, position convention, mask and exact prefix. Editing an earlier token invalidates affected cached state. A cache accelerates the same intended computation; it does not supply additional knowledge or change the probability model by itself."),
   show(p('Different Sequences Can Finish at Different Times', `In a generated batch, one sequence can emit an end marker while another continues. Keep a finished mask and stop extending completed sequences. The remaining rows still need their own prefix and sampling state.
 
 Also impose a maximum length. Reaching that limit means the run was truncated, which is different from the model choosing an end marker.`), worked('Retain a per-sequence stopping state', 'Token zero is the end marker. The supplied choices illustrate three generation rounds.', `finished = np.array([False,False])
@@ -158,12 +144,10 @@ print(length.tolist())
 print(finished.tolist())`, '[2, 3]\n[True, True]', 'The first sequence stops after its second generated token. The later supplied choice for that row is ignored by the length accounting.')),
   p('Dropping Old Tokens Changes the Available Evidence', `A context limit can require truncating a long prefix. Decide which information is retained, including task instructions and recent conversation. A model cannot reliably use evidence that has been removed from its input.
 
-Position handling and cache updates must remain consistent with the chosen truncation method. Test the complete generation implementation against an uncached reference on short prefixes before relying on an optimisation for long ones.`),
+Position handling and cache updates must remain consistent with the chosen truncation method. Test the complete generation implementation against an uncached reference on short prefixes before relying on an optimization for long ones.`),
  ]),
  'sampling-and-temperature': add('Separate policy order, stochastic reproducibility and evaluation over samples.', [
-  show(p('Filtering Changes the Distribution, Not Just Its Display', `After selecting a permitted set of tokens, normalise the remaining weights again. The sampled probabilities belong to that filtered distribution, which can differ substantially from the original model distribution.
-
-Temperature, top-k and nucleus filtering can be composed in different orders. State the order being used, and preserve at least one candidate. Temperature zero needs a separately defined greedy policy rather than literal division by zero.`), worked('Renormalise after a top-two choice', 'The model probabilities are supplied. No retraining occurs.', `probability = np.array([.5,.3,.2])
+  show({...p("Filtering and Renormalizing Token Probabilities", "Removing a candidate also removes its share of the probability. The remaining shares must add to one before we sample from them, so we divide each retained weight by the retained total. This is renormalization. The resulting probabilities describe the filtered choice, and can differ substantially from the probabilities originally returned by the model.\n\nTemperature, top-k and nucleus filtering can be composed in different orders. State the order being used, and preserve at least one candidate. Temperature zero needs a separately defined greedy policy rather than literal division by zero."), id: "filtering-changes-the-distribution-not-just-its-display"}, worked("Renormalize after a top-two choice", 'The model probabilities are supplied. No retraining occurs.', `probability = np.array([.5,.3,.2])
 keep = np.argsort(-probability)[:2]
 filtered = np.zeros_like(probability)
 filtered[keep] = probability[keep]
@@ -171,6 +155,6 @@ filtered /= filtered.sum()
 print(np.round(filtered, 4).tolist())`, '[0.625, 0.375, 0.0]', 'The retained tokens now carry all probability mass. Their model probabilities were not originally these larger numbers.')),
   p('One Pleasant Completion Is Not a Sampling Evaluation', `A random seed can reproduce a particular draw sequence under the same implementation and request order. It does not establish that a sampling policy usually produces useful responses.
 
-Evaluate several declared prompts and repeated samples, retaining failures as well as successes. Compare diversity, correctness and task constraints separately. Lower temperature can repeat an incorrect favourite more consistently; greater variety can reveal alternatives without making them more reliable.`),
+Evaluate several declared prompts and repeated samples, retaining failures as well as successes. Compare diversity, correctness and task constraints separately. Lower temperature can repeat an incorrect favorite more consistently; greater variety can reveal alternatives without making them more reliable.`),
  ]),
 };

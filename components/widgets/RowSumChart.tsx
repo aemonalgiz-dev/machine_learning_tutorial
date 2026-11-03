@@ -187,7 +187,7 @@ export function RowSumChart() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Grey is the softmax total, and the coloured bar beside it is the
+        Gray is the softmax total, and the colored bar beside it is the
         one-vs-rest total for the same person. The dashed line is one.
       </p>
 

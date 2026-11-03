@@ -14,7 +14,7 @@ const aligned = (...values: Data[][]) => { if (values.some(value => value.length
 export const mlLifecycleSecurityTools: Record<string, Tool> = {
   lifecycleSourceAllowed: {
     title: 'Check the recorded source against the release policy', inputs: ['Training records', 'Approved source IDs'],
-    why: 'Returns a flag for each source ID present in the supplied approved set. Source IDs are already resolved fixture evidence; a real pipeline must authenticate provenance outside attacker-controlled records.',
+    why: "For each source ID, report whether it appears in the approved set. The exercise supplies resolved source identities. A real pipeline must establish those identities from trusted evidence before checking this list.",
     run: ([input, approved]) => { const allowed = array(approved); if (!allowed.every(x => typeof x === 'string')) throw Error('Approved source IDs must be text.'); return records(input).map(row => Number(typeof row.source === 'string' && allowed.includes(row.source))); },
   },
   lifecycleLabelReviewed: {
@@ -39,7 +39,7 @@ export const mlLifecycleSecurityTools: Record<string, Tool> = {
   },
   lifecycleMatches: {
     title: 'Compare aligned class labels', inputs: ['Reference labels', 'Predicted labels'],
-    why: "Returns 1 for an exact matching label and 0 otherwise, keeping one flag per example. The labels in this exercise are already adjudicated fixtures.",
+    why: "Compare each predicted label with its reviewed label and return 1 for a match or 0 for a mismatch. Keep the original example order. The exercise supplies the reviewed labels.",
     run: ([first, second]) => { const a = array(first), b = array(second); aligned(a,b); if (![...a,...b].every(x => typeof x === 'string' || typeof x === 'number' && Number.isFinite(x))) throw Error('Use text or finite numerical class labels.'); return a.map((value,i) => Number(value === b[i])); },
   },
   lifecycleEligiblePairs: {

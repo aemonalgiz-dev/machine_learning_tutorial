@@ -40,13 +40,13 @@ const ordinal = (name: string, count: number, start = 1) => Array.from({ length:
 
 // Older lessons: keep the identities that used to be separated into chip rows.
 align("statistics", [0], ordinal("Person", 5), "Person");
-numberline("statistics", [1], 10, "Both groups centre on 10");
+numberline("statistics", [1], 10, "Both groups center on 10");
 align("linear-algebra", [0], [], "Measurement", 0);
 matrix("linear-algebra", [1], ["Height (cm)", "Body mass (kg)", "Age (years)"], "Person");
 numberline("centring-on-the-mean", [0], 170, "Training mean: 170 cm");
 align("centring-on-the-mean", [1, 2], ordinal("Person", 5), "Same person");
 align("the-standard-score", [2], [], "Position relative to the mean", 0);
-matrix("feature-scaling", [2], ["Centre or lower endpoint", "Spread or upper endpoint"], "Ruler");
+matrix("feature-scaling", [2], ["Center or lower endpoint", "Spread or upper endpoint"], "Ruler");
 matrix("feature-scaling", [3], ["Preparation", "Prediction model"], "When");
 align("logistic-regression", [3], [], "Fixed probability estimate", 0);
 matrix("judging-a-classifier", [1], ["Model flags the case", "Model leaves it alone"], "Known answer");
@@ -161,7 +161,7 @@ align("popularity-baselines", [1], ordinal("Guide", 3, 0), "Guide");
 align("popularity-baselines", [2], ordinal("Rank", 3), "Most opened first");
 matrix("content-based-ranking", [0, 1], ["Topic coordinate 1", "Topic coordinate 2"], "Representation");
 align("content-based-ranking", [2], ["Guide A", "Guide B"], "Guide");
-align("collaborative-filtering", [0, 1], ["Neighbour A", "Neighbour B"], "Reader");
+align("collaborative-filtering", [0, 1], ["Neighbor A", "Neighbor B"], "Reader");
 align("recommendation-factorisation", [0], ordinal("Coordinate", 2), "Latent coordinate");
 align("ranking-evaluation", [0], ordinal("Rank", 3), "Displayed position");
 align("local-density-anomalies", [0, 1, 2], ["Point 0", "Point 1", "Point 10"], "Original point");
@@ -189,7 +189,7 @@ const table = (caption: string, rowHeading: string, columns: string[], rows: [st
 });
 const calculation = (id: string, index: number, caption: string, ...lines: string[]) => replace(id, index, { kind: "calculation", caption, lines });
 const timeline = (id: string, index: number, values: (number | undefined)[], known: number, caption: string, prediction?: { label: string; value: number }, firstDay = 1) => replace(id, index, {
-  kind: "timeline", unit: "litres", caption, prediction,
+  kind: "timeline", unit: "liters", caption, prediction,
   days: values.map((value, day) => ({ label: `Day ${day + firstDay}`, value: day < known ? value : undefined, role: day < known ? "known" : day === known ? "target" : "later" })),
 });
 
@@ -198,24 +198,24 @@ replace("recurrent-layers", 0, { kind:"plot", caption:"Green rises from 18 to 20
 timeline("rolling-forecast-validation", 0, [5, 7, 6, undefined, undefined], 3,
   "We are at the end of day 3. The first forecast can use only the three measurements before the boundary.", { label: "Day 4 prediction: copy day 3", value: 6 });
 timeline("rolling-forecast-validation", 1, [5, 7, 6, 9, undefined], 4,
-  "Day 4 has now arrived: demand was 9 litres. That reading can help predict day 5, but it could not help predict itself.", { label: "Day 5 prediction: copy day 4", value: 9 });
+  "Day 4 has now arrived: demand was 9 liters. That reading can help predict day 5, but it could not help predict itself.", { label: "Day 5 prediction: copy day 4", value: 9 });
 demonstrations["rolling-forecast-validation"][0].explanation = "Imagine stopping the record at the end of day 3. Botie has three measurements and needs a prediction for day 4. Copying the latest reading gives us a simple rule to test. Keep tomorrow's answer covered until tomorrow arrives.";
 demonstrations["rolling-forecast-validation"][1].explanation = "Now let one day pass. We can check the earlier prediction against day 4's reading, add that reading to the history, and make a new prediction for day 5. The boundary moves; information never travels backwards through it.";
 replace("rolling-forecast-validation", 2, table(
   "Read across one target day at a time. Both rules were given the same past measurements and judged against the same later answer.", "Target day", ["Later observation", "Copy latest", "Mean of last two", "Absolute errors: latest / mean"], [
-    ["Day 4", ["9 litres", "6 litres", "6.5 litres", "3 / 2.5 litres"]],
-    ["Day 5", ["8 litres", "9 litres", "7.5 litres", "1 / 0.5 litres"]],
+    ["Day 4", ["9 liters", "6 liters", "6.5 liters", "3 / 2.5 liters"]],
+    ["Day 5", ["8 liters", "9 liters", "7.5 liters", "1 / 0.5 liters"]],
   ]), "We have now waited for both target days. Put each prediction beside the observation it was meant to predict. A trailing-two mean is another possible rule: it averages the two latest readings available at each boundary.");
 timeline("forecasting-baselines", 0, [10, 12, 11, undefined], 3, "Three recorded days, followed by one day we cannot see yet.");
 timeline("forecasting-baselines", 1, [10, 12, 11, undefined], 3, "The prediction belongs to day 4. Its input comes from day 3.", { label: "Day 4 prediction", value: 11 });
-calculation("forecasting-baselines", 2, "The error measures how far the saved prediction missed the later observation.", "Day 4 prediction: 11 litres", "Day 4 observation: 14 litres", "Absolute error = |14 − 11| = 3 litres");
+calculation("forecasting-baselines", 2, "The error measures how far the saved prediction missed the later observation.", "Day 4 prediction: 11 liters", "Day 4 observation: 14 liters", "Absolute error = |14 − 11| = 3 liters");
 timeline("lagged-features", 0, [4, 6, undefined, undefined], 2, "The two preceding days become the inputs for day 3.");
 timeline("lagged-features", 1, [6, 5, undefined], 2, "Move the two-day window forward. Day 3 is now an input for day 4.", undefined, 2);
 replace("lagged-features", 2, table("Each row is one prediction made before its target arrived.", "Predicting", ["Older input", "Recent input", "Later target"], [["Day 3", ["Day 1: 4", "Day 2: 6", "5"]], ["Day 4", ["Day 2: 6", "Day 3: 5", "9"]]]));
 replace("seasonality-and-differencing", 0, { kind: "plot", caption: "The daily level rises by the same amount each time.", xLabel: "Day", yLabel: "Recorded level", points: [[1,10],[2,12],[3,14],[4,16]], paths: [[[1,10],[2,12],[3,14],[4,16]]] });
-calculation("seasonality-and-differencing", 1, "Taking neighbouring differences removes this constant rise from the level series.", "Day 2 minus day 1: 12 − 10 = 2", "Day 3 minus day 2: 14 − 12 = 2", "Day 4 minus day 3: 16 − 14 = 2");
+calculation("seasonality-and-differencing", 1, "Taking neighboring differences removes this constant rise from the level series.", "Day 2 minus day 1: 12 − 10 = 2", "Day 3 minus day 2: 14 − 12 = 2", "Day 4 minus day 3: 16 − 14 = 2");
 calculation("seasonality-and-differencing", 2, "For this two-position cycle, compare each reading with the same position one cycle earlier.", "Cycle 1: 10, 20", "Cycle 2: 12, 22", "First position: 12 − 10 = 2", "Second position: 22 − 20 = 2");
-calculation("exponential-smoothing", 1, "The update fraction controls how far the stored estimate moves towards the new reading.", "Stored level: 10", "New reading: 14", "Fraction to use: 0.25", "Change = 0.25 × (14 − 10) = 1");
+calculation("exponential-smoothing", 1, "The update fraction controls how far the stored estimate moves toward the new reading.", "Stored level: 10", "New reading: 14", "Fraction to use: 0.25", "Change = 0.25 × (14 − 10) = 1");
 calculation("exponential-smoothing", 2, "Carry this updated level into the next prediction, before the next reading arrives.", "Updated level = 10 + 1 = 11", "Next forecast = 11");
 replace("autoregressive-forecasting", 0, table("Both lag columns precede the target in time.", "Training row", ["Older reading", "Recent reading", "Next reading"], [["1", ["2","3","4"]], ["2", ["3","4","5"]], ["3", ["4","5","6"]]]));
 calculation("autoregressive-forecasting", 2, "For the following horizon, the new window contains a prediction, not a newly observed measurement.", "Known window: [8, 12]", "Next prediction = (0.25 × 8) + (0.75 × 12) + 1 = 12", "Next window: [12 observed, 12 predicted]");
@@ -257,8 +257,8 @@ replace("graph-random-walks", 1, network("At the pump, choose either adjacent no
 align("graph-random-walks", [2], nodes, "Node");
 replace("neighbour-aggregation", 0, network("Each node holds its own measurement. Edges tell us which other measurements it can receive.", ["Own reading: 2","Own reading: 8","Own reading: 4"]));
 replace("neighbour-aggregation", 1, network("The pump receives 2 from the intake and 4 from the outlet. Each endpoint receives only the pump's 8.", ["Receives: 8","Receives: 2 and 4","Receives: 8"]));
-replace("neighbour-aggregation", 2, table("Average only the neighbouring readings. The output row still belongs to the receiving node.", "Receiving node", ["Neighbour readings", "Neighbour mean"], [[nodes[0],["8","8"]],[nodes[1],["2, 4","(2 + 4) / 2 = 3"]],[nodes[2],["8","8"]]]));
-replace("graph-convolution", 0, table("Adding self-connections lets each node retain its own feature while receiving its neighbour's.", "Receiving node", ["Node 0", "Node 1"], [["Node 0",["1","1"]],["Node 1",["1","1"]]]));
+replace("neighbour-aggregation", 2, table("Average only the neighboring readings. The output row still belongs to the receiving node.", "Receiving node", ["Neighbor readings", "Neighbor mean"], [[nodes[0],["8","8"]],[nodes[1],["2, 4","(2 + 4) / 2 = 3"]],[nodes[2],["8","8"]]]));
+replace("graph-convolution", 0, table("Adding self-connections lets each node retain its own feature while receiving its neighbor's.", "Receiving node", ["Node 0", "Node 1"], [["Node 0",["1","1"]],["Node 1",["1","1"]]]));
 replace("graph-convolution", 1, table("Both degrees are 2 in this example, so each contribution receives a weight of one half.", "Receiving node", ["From node 0", "From node 1"], [["Node 0",["0.5","0.5"]],["Node 1",["0.5","0.5"]]]));
 calculation("graph-convolution", 2, "Both nodes receive the same mixture in this tiny fully connected graph. The learned scalar weight then scales that mixture.", "Node readings: 2 and 4", "Mixed feature = (0.5 × 2) + (0.5 × 4) = 3", "Output at each node = 3 × 2 = 6");
 replace("serving-predictions", 0, table("Two records enter together. Column meanings must stay in the saved order.", "Request row", ["Feature 1", "Feature 2"], [["1",["1","2"]],["2",["3","4"]]]));
@@ -268,13 +268,13 @@ replace("project-seed-counting", 1, {kind:"tiles",caption:"Values above 5 become
 replace("project-seed-counting", 2, table("Requiring at least two pixels removes the isolated bright pixel. Three regions remain.", "Region", ["Pixels", "Count as a seed?"], [["Top",["4","Yes"]],["Isolated pixel",["1","No"]],["Lower left",["2","Yes"]],["Lower right",["2","Yes"]]]));
 
 // Small worked calculations keep their inputs and intermediate steps together.
-calculation("feature-scaling", 0, "The person has not changed. Only the unit used to record the height has changed.", "Height in metres: 1.70", "Centimetres = 1.70 × 100 = 170");
+calculation("feature-scaling", 0, "The person has not changed. Only the unit used to record the height has changed.", "Height in meters: 1.70", "Centimetres = 1.70 × 100 = 170");
 replace("shapes-and-flattening", 1, table("Read the first row from left to right, then continue along the second. Each cell keeps its value but receives a new flat position.", "Flat position", ["Grid address (zero based)", "Value"], [["0",["Row 0, column 0","0"]],["1",["Row 0, column 1","1"]],["2",["Row 0, column 2","0"]],["3",["Row 1, column 0","1"]],["4",["Row 1, column 1","1"]],["5",["Row 1, column 2","0"]]]));
 sequence("hashing-characters", [0], "Available entry");
 matrix("hashing-characters", [1,2], ["Destination"], "Input");
 replace("moving-a-vocabulary", 0, table("Keep the word beside the row that holds its vector.", "Word", ["Old row"], [["cat",["2"]],["dog",["3"]]]));
 replace("moving-a-vocabulary", 1, table("The word identifies the vector to copy. A new row number does not create a new meaning.", "Word", ["Old row", "New row"], [["cat",["2","5"]],["dog",["3","2"]],["kitten",["No old entry","6"]]]));
-replace("a-vector-for-a-word", 0, table("These IDs are addresses. Cat and invoice have neighbouring IDs here, which tells us nothing about their meanings.", "Word", ["Vocabulary ID"], [["cat",["103"]],["kitten",["814"]],["invoice",["104"]]]));
+replace("a-vector-for-a-word", 0, table("These IDs are addresses. Cat and invoice have neighboring IDs here, which tells us nothing about their meanings.", "Word", ["Vocabulary ID"], [["cat",["103"]],["kitten",["814"]],["invoice",["104"]]]));
 calculation("numpy-axes", 2, "Average across greenhouse columns to produce one summary for each day.", "Monday = (10 + 20 + 30) / 3 = 20", "Tuesday = (14 + 22 + 36) / 3 = 24");
 replace("numpy-reductions", 1, table("The maximum is a measurement. Its index tells us where that measurement was stored.", "Array position", ["Temperature", "Largest?"], [["0",["20","No"]],["1",["27","Yes: maximum 27, index 1"]],["2",["25","No"]],["3",["18","No"]]]));
 calculation("numpy-numerical-checks", 0, "First measure the disagreement, rather than relying on the way rounded output looks.", "Reference: 20", "Calculated: 20.0001", "Absolute difference = |20.0001 − 20| = 0.0001");
@@ -301,7 +301,7 @@ calculation("likelihood", 2, "For two successes followed by one failure, this fi
 calculation("naive-bayes", 1, "The naive Bayes assumption lets us multiply the two feature probabilities within each possible cause.", "Faulty: 0.8 × 0.7 = 0.56", "Working: 0.1 × 0.2 = 0.02");
 sequence("hierarchical-clustering", [0,1], "Group");
 replace("hierarchical-clustering", 2, table("Stopping between join distances 2 and 6 keeps two groups. Joining at distance 6 would combine them.", "Cut", ["Groups left"], [["Above 2, below 6",["{0, 1} and {7, 9}"]],["At least 6",["{0, 1, 7, 9}"]]]));
-replace("images-as-arrays", 1, {kind:"tiles",caption:"Addresses start at zero. Row 1, column 1 is the highlighted centre pixel, whose stored value is 220.",showValues:true,panels:[{label:"Find row 1, column 1",cells:[[10,20,10],[20,220,30],[10,200,20]],maximum:255,selected:[4]}]});
+replace("images-as-arrays", 1, {kind:"tiles",caption:"Addresses start at zero. Row 1, column 1 is the highlighted center pixel, whose stored value is 220.",showValues:true,panels:[{label:"Find row 1, column 1",cells:[[10,20,10],[20,220,30],[10,200,20]],maximum:255,selected:[4]}]});
 replace("image-thresholding", 2, {kind:"bars",caption:"The seed in shadow is darker than the lit tray. A brightness threshold alone cannot reliably distinguish them here.",items:[{label:"Shadowed seed",value:80},{label:"Lit tray",value:110}]});
 calculation("bounding-boxes", 2, "The union includes both boxes but counts their intersection only once.", "First box area: 16", "Second box area: 16", "Shared area: 8", "Union = 16 + 16 − 8 = 24", "Intersection over union = 8 / 24 ≈ 0.3333");
 replace("non-maximum-suppression", 1, table("Choose A first because it has the largest score. Then inspect overlap with that selected box.", "Candidate", ["Score", "Relationship to A"], [["A (index 0)",["0.9","Selected first"]],["B (index 1)",["0.8","Large overlap"]],["C (index 2)",["0.7","No overlap"]]]));
@@ -329,7 +329,7 @@ calculation("momentum-updates", 2, "A zero velocity means this particular update
 calculation("initialisation-and-gradient-checks", 0, "This loss has a known minimum at 3. At weight 1, we can independently check which direction lowers it.", "Loss(w) = (w − 3)²", "Test weight: 1", "Loss(1) = (1 − 3)² = 4");
 calculation("initialisation-and-gradient-checks", 1, "Measure the change across two nearby weights and divide by their separation.", "Step h = 0.00001", "Loss(1 + h) = 3.9999600001", "Loss(1 − h) = 4.0000400001", "Central difference = (3.9999600001 − 4.0000400001) / 0.00002 ≈ −4");
 calculation("initialisation-and-gradient-checks", 2, "Both routes give the same local slope within numerical tolerance. This checks the derivative calculation.", "Analytical derivative = 2 × (1 − 3) = −4", "Numerical derivative ≈ −4");
-calculation("collaborative-filtering", 2, "Weight the neighbours' deviations from their own baselines, then add the target reader's baseline.", "Weighted deviation = (0.75 × 2) + (0.25 × −1) = 1.25", "Predicted rating = 3 + 1.25 = 4.25");
+calculation("collaborative-filtering", 2, "Weight the neighbors' deviations from their own baselines, then add the target reader's baseline.", "Weighted deviation = (0.75 × 2) + (0.25 × −1) = 1.25", "Predicted rating = 3 + 1.25 = 4.25");
 calculation("recommendation-factorisation", 1, "The two matching coordinates contribute separately to the predicted rating.", "Reader vector: [1, 2]", "Guide vector: [2, 1]", "Prediction = (1 × 2) + (2 × 1) = 4", "Observed rating: 5");
 calculation("recommendation-factorisation", 2, "For the half-squared-error loss used here, multiply the residual by the guide coordinates to obtain the reader gradient.", "Residual = 4 − 5 = −1", "Reader gradient = −1 × [2, 1] = [−2, −1]");
 calculation("ranking-evaluation", 1, "Precision begins with what we showed. Recall begins with everything relevant we could have shown. These two metrics do not distinguish the ordering within the top three.", "Retrieved: 3 guides", "Relevant among those retrieved: 2", "Relevant among all candidates: 4", "Precision at 3 = 2 / 3", "Recall at 3 = 2 / 4 = 1 / 2");
@@ -340,7 +340,7 @@ align("link-prediction", [0], ordinal("Coordinate",2), "Node vector coordinate")
 calculation("link-prediction", 1, "Matching coordinates from the two node vectors produce one compatibility score.", "Node A: [1, 0]", "Node B: [2, 1]", "Logit = (1 × 2) + (0 × 1) = 2");
 calculation("link-prediction", 2, "The sigmoid bounds the score between zero and one. This toy score still needs calibration before being interpreted as a reliable event frequency.", "Sigmoid(2) = 1 / (1 + exp(−2)) ≈ 0.881");
 replace("confounding-and-comparisons", 2, table("The pooled groups give very different weights to the starting soil conditions. Their overall means can reverse the within-soil comparisons.", "Group", ["Dry share", "Moist share", "Pooled mean"], [["Extra water",["0.9","0.1","(0.9 × 4) + (0.1 × 9) = 4.5"]],["Usual water",["0.1","0.9","(0.1 × 3) + (0.9 × 8) = 7.5"]]]));
-calculation("randomised-experiments", 1, "Summarise the observed outcomes within each assigned group before comparing them.", "Treatment mean = (6 + 8 + 7) / 3 = 7", "Control mean = (4 + 5 + 6) / 3 = 5");
+calculation("randomised-experiments", 1, "Summarize the observed outcomes within each assigned group before comparing them.", "Treatment mean = (6 + 8 + 7) / 3 = 7", "Control mean = (4 + 5 + 6) / 3 = 5");
 calculation("randomised-experiments", 2, "The observed mean difference is an estimate. We still cannot observe the same bed's outcome under both assignments at once.", "Mean difference = 7 − 5 = 2", "Individual counterfactual outcomes: unobserved");
 calculation("causal-adjustment", 2, "Use the same target-population weights on both outcomes. The mixture is no longer allowed to differ between the comparisons.", "Adjusted treatment mean = (0.6 × 4) + (0.4 × 9) = 6", "Adjusted control mean = (0.6 × 3) + (0.4 × 8) = 5", "Adjusted difference = 6 − 5 = 1");
 calculation("treatment-effects-and-overlap", 2, "A rare observed assignment receives a large inverse-probability weight. That observation can then dominate the estimate.", "Probability of the observed assignment: 0.01", "Weight = 1 / 0.01 = 100");

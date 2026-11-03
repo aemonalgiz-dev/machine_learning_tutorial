@@ -9,31 +9,33 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Diffusion Models · oop_ml",
-  description: "Adding noise to an example is easy to control. Learning to remove it gives us a useful training problem, and a trained reverse process can then turn a noisy starting point into a generated example.",
+  title: "Diffusion Models · Perceptron Lab",
+  description: "A diffusion model learns how to reverse controlled additions of noise. Repeating a learned reverse process from a noisy starting point provides a way to generate an example.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="diffusion-models"
     title="Diffusion Models"
-    tagline={"Adding noise to an example is easy to control. Learning to remove it gives us a useful training problem, and a trained reverse process can then turn a noisy starting point into a generated example."}
+    tagline={"A diffusion model learns how to reverse controlled additions of noise. Repeating a learned reverse process from a noisy starting point provides a way to generate an example."}
     openingTitle="Can Learning to Remove Noise Teach a Model to Create?"
     intuition={lessonIntuitions["diffusion-models"]}
     technicalStart="Part 2. Calculate a Noisy Training Pair"
     prerequisites={<>Useful foundations: <Link href="/concepts/loss-functions">Loss functions</Link>{", "}<Link href="/concepts/convolutional-networks">convolutional networks</Link>{", "}<Link href="/concepts/u-net">U-Net</Link>.</>}
     playgroundTitle="How much of the signal survives the noise?"
-    playgroundIntro="Increase the forward noise step while the oracle fraction stays at zero. Then supply more of the true noise and compare the estimated clean signal. At fraction one the exact noise is available, so recovery is an algebra check, not a learned denoising result."
+    playgroundIntro="Set “Fraction of actual noise used in the estimate” to zero, then increase the forward noise step. Next raise that fraction and compare the estimated clean signal. At fraction one the exact noise is available, so recovery checks the algebra rather than a learned denoiser."
     playground={<ModernLearningExample topic="diffusion-models" />}
     sections={[
 { title: "Part 1. Construct the Supervision Ourselves", content: <>
 <SubSection title="1. Define a forward corruption schedule">
-<p>{"If we want to generate a new picture, we cannot supply one uniquely correct image for every random starting point. We can, however, take an existing picture and add noise whose value we know. That gives us a noisy input with a training target. Diffusion models learn from these deliberately corrupted examples, then use the learned denoising behaviour to generate from fresh noise."}</p>
+<p>{"If we want to generate a new picture, we cannot supply one uniquely correct image for every random starting point. We can, however, take an existing picture and add noise whose value we know. That gives us a noisy input with a training target. Diffusion models learn from these deliberately corrupted examples, then use the learned denoising behavior to generate from fresh noise."}</p>
 <p>{"Begin with a clean image. At each forward step, reduce the current pixel values slightly and add random variation. Our variation uses Gaussian draws: values near zero are common, while large positive or negative changes are less common. The noise schedule sets the strength of each addition. After enough steps, the original image contributes very little and the resulting distribution can be close to Gaussian noise."}</p>
 <p>{"Our first example is a strip of six pixels, [0, 0, 1, 1, 0, 0], with two bright pixels between dark ones. We use twenty equal-strength noise steps. The first scales the signal by about 0.9487 and adds a Gaussian draw scaled by about 0.3162. How much an individual pixel changes depends on the draw. Repeating the process gradually reduces the original signal's contribution."}</p>
 <NumberTable headings={["forward step", "multiplier on the clean strip", "multiplier on the noise"]} rows={[["0", "1", "0"], ["1", "0.9487", "0.3162"], ["5", "0.7684", "0.6399"], ["10", "0.5905", "0.8070"], ["20", "0.3487", "0.9372"]]} caption="What the strip is made of after a given number of steps. Part 2 derives both columns from the schedule." />
 <p>{"The model does not need to learn this forward process because we specify it. Its purpose is to supply noisy inputs with known relationships to clean examples. The small schedule on this page demonstrates the relationship but is not long enough to imply that all signal is gone."}</p>
-<p>{"The last row of the table is that caveat in numbers. After all twenty steps the clean strip still enters with a multiplier of 0.3487, so the bright pixels are faint and not gone. The same per-step noise would have to run for 44 steps before the retained fraction of the signal, which is the square of that multiplier, fell below one percent."}</p>
+<p>
+                  {"After all twenty steps, the clean strip still has a multiplier of 0.3487: its contribution is reduced but nonzero. The schedule’s cumulative retention parameter is the square of that multiplier. With the same per-step noise variance, that parameter first falls below one percent after 44 steps."}
+                </p>
 
 </SubSection>
 <SubSection title="2. Train a predictor that knows the noise level">
@@ -41,7 +43,9 @@ export default function Page() {
 <p>{"One training example on this page looks like this. The clean strip and one noise draw are combined at step 5. The network is shown the noisy strip and the number 5, and the answer it is graded against is the draw."}</p>
 <NumberTable headings={["pixel", "clean value", "noise draw, the target", "noisy value at step 5, the input"]} rows={[["1", "0", "−0.6518", "−0.4171"], ["2", "0", "−0.1747", "−0.1118"], ["3", "1", "1.6637", "1.8331"], ["4", "1", "0.6591", "1.1902"], ["5", "0", "−1.6414", "−1.0504"], ["6", "0", "−0.0052", "−0.0033"]]} caption="The live example at its default step. The clean column is used to build the input and is then put away." />
 <p>{"No person had to label the noise in these pixels. We recorded the random draw when constructing the noisy input, so that draw supplies the target. A new draw or a new step gives another pair from the same clean strip. These are useful variations of one clean example, rather than new independent images."}</p>
-<p>{"The step has to be an input because the noisy values do not reveal it. On this draw the third pixel reads 1.8331 at step 5 and 1.9080 at step 20, nearly the same number. At step 5 the clean signal entered with a multiplier of 0.7684 and at step 20 with 0.3487, so those two similar readings contain very different amounts of noise. A predictor that was not told the step could not know which case it was looking at."}</p>
+<p>
+                  {"We supply the timestep so the predictor knows the corruption level. A noisy value alone does not uniquely identify it. On this draw, the third pixel reads 1.8331 at step 5 and 1.9080 at step 20. The clean-signal multipliers are 0.7684 and 0.3487 respectively. Without the timestep, a predictor would have to infer the noise level as well as the noise."}
+                </p>
 <p>{"A U-Net can serve as this predictor because it combines broad image context with fine spatial detail. Its diffusion target is the known added noise. This differs from the semantic segmentation task, where U-Net is trained with labeled images and corresponding target masks. Conditional diffusion can also use text or class labels."}</p>
 
 </SubSection>
@@ -55,16 +59,20 @@ export default function Page() {
 <WorkedExample title="Step 5 for two of the six pixels">
 <p>{"The cumulative retention at step 5 gives both coefficients. The third pixel is bright and its draw was 1.6637. The first pixel is dark and its draw was −0.6518."}</p>
 <Equation>{"√ᾱ₅ = √0.59049 ≈ 0.7684\n√(1 − ᾱ₅) = √0.40951 ≈ 0.6399\n\nThird pixel:  x₅ = (0.7684 × 1) + (0.6399 × 1.6637) ≈ 1.8331\nFirst pixel:  x₅ = (0.7684 × 0) + (0.6399 × (−0.6518)) ≈ −0.4171"}</Equation>
-<p>{"Those are the values in the table in step 2, and the other four pixels follow the same line of arithmetic. The two coefficients are tied together. Their squares are ᾱ and 1 − ᾱ, which always total one, so whatever scale the signal gives up the noise takes."}</p>
+<p>
+                  {"Those are the values in the table in step 2; the other four pixels use the same calculation. Both coefficients come from the cumulative retention value. Their squared factors sum to one. As retention falls, the signal coefficient decreases and the noise coefficient increases."}
+                </p>
 <NumberTable headings={["step", "cumulative retention ᾱ", "signal coefficient √ᾱ", "noise coefficient √(1 − ᾱ)"]} rows={[["0", "1", "1", "0"], ["1", "0.9", "0.9487", "0.3162"], ["5", "0.5905", "0.7684", "0.6399"], ["10", "0.3487", "0.5905", "0.8070"], ["20", "0.1216", "0.3487", "0.9372"]]} caption="The constant schedule of this page, where every step has a noise variance of 0.1." />
 <p>{"The jump is what makes training practical. Building a training example takes one clean sample, one step number and one draw, and the noisy input comes out of a single line of arithmetic, however late the step is."}</p>
 </WorkedExample>
 </SubSection>
 <SubSection title="4. Predict noise and estimate the clean sample">
-<p>{"Write the network's noise estimate as ε̂. A common simplified training loss compares the predicted noise with the actual draw. Once an estimate is available, the forward expression can be rearranged to estimate the clean sample."}</p>
+<p>{"The predictor receives a noisy input and its noise level, and returns a noise estimate denoted ε̂. During training, the actual draw is known because we created the corruption, so it supplies a target for the estimate. Substituting the estimate into the rearranged forward expression gives an estimate of the clean sample."}</p>
 <Equation>{"L_simple = E_{x₀,t,ε}[‖ε − ε̂_θ(xₜ, t)‖²]\n\nx̂₀ = (xₜ − √(1 − ᾱₜ) ε̂) / √ᾱₜ"}</Equation>
 <p>{"If the estimate equals the exact noise, this recovers the clean sample. During generation that exact noise is unavailable. A predictor must infer useful information from the noisy input and what it learned from training data."}</p>
-<p>{"As signal retention becomes small, division by its square root amplifies noise-estimation errors in this clean-sample estimate. The live oracle control makes that dependence visible."}</p>
+<p>
+                  {"As signal retention becomes small, division by its square root amplifies noise-estimation errors in this clean-sample estimate. The control that supplies a fraction of the actual noise makes that dependence visible."}
+                </p>
 <WorkedExample title="The estimate with all, half and none of the noise">
 <p>{"The live control supplies a chosen fraction of the true draw as the noise estimate. Follow the third pixel at step 5, where the noisy value is 1.8331, the true draw is 1.6637 and the clean value is 1."}</p>
 <Equation>{"All of the draw:   x̂₀ = (1.8331 − (0.6399 × 1.6637)) / 0.7684 ≈ 1.0000\nHalf of the draw:  x̂₀ = (1.8331 − (0.6399 × 0.8319)) / 0.7684 ≈ 1.6928\nNone of it:        x̂₀ = (1.8331 − 0) / 0.7684 ≈ 2.3855"}</Equation>
@@ -81,7 +89,7 @@ export default function Page() {
   trueFalse(
     "The training target for a noisy sample is the noise draw that was used to build it, so nobody has to label anything.",
     true,
-    "The forward schedule is specified rather than learned, and its purpose is to supply noisy inputs whose relationship to clean examples is already known. In the page’s example the third pixel’s target is its draw of 1.6637, which a random number generator produced just before the noisy value of 1.8331 was built from it. What is learned is the predictor that reads a noisy sample and its timestep and estimates that draw.",
+    "The forward process constructs a noisy example from a known clean sample and a random draw. That draw supplies the noise-prediction target automatically; here its third coordinate is 1.6637. Training then teaches the predictor to estimate the draw from the noisy sample and timestep. This removes the need to label the added noise by hand. Conditional diffusion may still use labels, captions or other supplied conditions.",
   ),
   choice(
     "Why does the denoising network read the timestep as well as the noisy sample?",
@@ -97,7 +105,7 @@ export default function Page() {
   trueFalse(
     "A chosen training step can be sampled without simulating every preceding step.",
     true,
-    "Independent Gaussian additions combine into one draw, so the noisy sample at a step is written from the clean sample and a single noise draw scaled by the cumulative retained fraction. On this page’s constant schedule the cumulative retention at step five is 0.59049, and at step zero it is one, so the signal is unchanged.",
+    "The Gaussian forward transitions have a known marginal distribution at each timestep. We can therefore sample that timestep directly from the clean example using one standard-normal draw and the schedule's cumulative coefficients. The signal uses the square root of the retained fraction; noise uses the square root of one minus that fraction. This gives the correct timestep distribution without simulating every earlier transition. It does not reproduce a particular previously sampled trajectory.",
   ),
   choice(
     "What happens to the clean-sample estimate as the signal retention becomes small?",
@@ -120,20 +128,30 @@ export default function Page() {
 <SubSection title="5. Distinguish clean estimation from a reverse sampling step">
 <p>{"A full diffusion sampler starts from noise and repeatedly predicts a less corrupted state. In the DDPM formulation, one reverse update has the following form. The reverse variance σ² depends on the chosen schedule or model; ξ is fresh standard Gaussian noise and is set to zero on the last step."}</p>
 <Equation>{"μ_θ(xₜ,t) = (1 / √αₜ)\n             [xₜ − (βₜ / √(1 − ᾱₜ)) ε̂_θ(xₜ,t)]\n\nxₜ₋₁ = μ_θ(xₜ,t) + σₜ ξ"}</Equation>
-<p>{"This is a sequence of learned reverse transitions, not repeated use of the exact forward noise. Different samplers change the update rule and number of steps. The page's numerical object implements forward noising and clean estimation only."}</p>
+<p>
+                  {"The formula uses a new noise prediction at each reverse step; generation does not supply the known forward draw. Different samplers can change the update rule or the number of steps. The GaussianDiffusion object below provides forward noising and clean estimation. The separate scalar training example in this lesson builds a learned reverse chain around those operations."}
+                </p>
 <WorkedExample title="One reverse update beside one clean estimate">
 <p>{"Both formulas take a noise estimate, and they do different things with it. Take the third pixel at step 5 again, where the noisy value is 1.8331, and give both formulas the exact draw of 1.6637, so that neither is held back by a poor prediction. On this schedule β₅ is 0.1 and α₅ is 0.9."}</p>
 <Equation>{"Clean estimate:  x̂₀ = (1.8331 − (0.6399 × 1.6637)) / 0.7684 ≈ 1.0000\n\nReverse mean:    μ = (1 / √0.9) × [1.8331 − ((0.1 / 0.6399) × 1.6637)]\n                   ≈ 1.0541 × [1.8331 − 0.2600]\n                   ≈ 1.6582"}</Equation>
-<p>{"The clean estimate goes all the way to 1 in one move. The reverse update takes the pixel from 1.8331 to about 1.6582, a short distance in the right direction, and then adds fresh noise scaled by σ unless it is the last step. In the formulation above, a sampler repeats that update once for each step of the schedule, which would be twenty times here. It asks the predictor for a new estimate every time, because after each move the sample is a different noisy input at a different step."}</p>
-<p>{"Step 4 showed the cost of the alternative. A single leap from step 20 to a clean estimate multiplies the predictor’s error by more than two and a half. The reverse mean above was worked by hand from the formula, with the exact draw standing in for a prediction. Nothing on this page runs a reverse sampler."}</p>
+<p>
+                  {"The clean estimate is about 1.0000, while the reverse mean is about 1.6582 in this example. A reverse sample adds fresh noise scaled by σ unless this is the final step. Under the displayed DDPM schedule, repeating the update would take twenty steps. The predictor receives the current noisy sample and timestep at each update, so it must produce a new estimate."}
+                </p>
+<p>
+                  {"The comparison above is calculated directly from the equations using the known forward noise. It separates a clean-sample estimate from one reverse mean. The scalar training example in this lesson uses fitted predictions instead and repeats reverse updates from a fresh random starting sample."}
+                </p>
 </WorkedExample>
 </SubSection>
-<SubSection title="6. Reproduce the oracle check">
+<SubSection title="6. Check Recovery Using the Known Noise" id="6-reproduce-the-oracle-check">
 <p>{"Passing the actual added noise into the recovery method is a useful correctness check. It is not a generative shortcut, because it relies on information that we know only while constructing the training example."}</p>
 <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm leading-relaxed text-slate-100"><code>{"import numpy as np\nfrom oop_ml.numpy.modern import GaussianDiffusion\n\nprocess = GaussianDiffusion(np.full(20, 0.1))\nclean = np.array([0.0, 0.0, 1.0, 1.0, 0.0, 0.0])\nnoise = np.random.default_rng(4).normal(size=6)\nnoisy = process.add_noise(clean, noise, step=5)\nrecovered = process.recover_clean(noisy, noise, step=5)\nprint(recovered)"}</code></pre>
-<p>{"Run as written, the code returns the clean strip, [0, 0, 1, 1, 0, 0], to within rounding in the sixteenth decimal place. Replace the true draw with zeros, which is what a predictor that had learned nothing might offer, and the same call returns [−0.5428, −0.1455, 2.3855, 1.5489, −1.3669, −0.0043]. Every pixel is wrong, and the pixels whose draws were largest are wrong by the most."}</p>
-<p>{"The check passes only because the script still holds the draw it added a line earlier. When generating there is no clean strip, so no draw was ever added to one, and there is nothing to pass in. The only possible source of a noise estimate is a trained predictor."}</p>
-<p>{"To build a working generator around these operations, we would need a trained timestep-conditioned predictor and a reverse sampler. Image quality then depends on that learned model, the training distribution, conditioning, and the sampling procedure."}</p>
+<p>
+                  {"With the actual draw supplied, this call returns the clean strip, [0, 0, 1, 1, 0, 0], within rounding in the sixteenth decimal place. Keep that same noisy strip, but pass zeros as the estimate to recover_clean. It then returns [−0.5428, −0.1455, 2.3855, 1.5489, −1.3669, −0.0043]. In this fixed-step comparison, the pixels with larger original noise values have larger recovery errors."}
+                </p>
+<p>{"The correctness check retains the exact draw used to corrupt a known clean strip. Generation has no such original strip or recorded draw to consult. A learned predictor must estimate what the reverse update needs from the current noisy state and its noise level; the check's privileged information is unavailable."}</p>
+<p>
+                  {"The fitted scalar example supplies a timestep-conditioned predictor and a reverse sampler for a one-dimensional Gaussian source. Generating images requires a predictor and training data suited to image structure. Its quality also depends on conditioning and the sampling procedure."}
+                </p>
 </SubSection>
 <p>{"The paper develops the noise-prediction training formulation and reverse sampling process used in this lesson."}{" "}<a href="https://arxiv.org/abs/2006.11239">Denoising Diffusion Probabilistic Models</a>.</p>
 <p>Continue with <Link href="/concepts/evaluating-generative-models">Evaluating Generative Models</Link>.</p>
@@ -164,7 +182,7 @@ export default function Page() {
       "The estimate of the clean sample",
     ],
     1,
-    "The update takes the mean the model predicts and adds the reverse standard deviation times fresh noise, and that reverse variance depends on the chosen schedule or model. Different samplers change the update rule and the number of steps.",
+    "The symbol ξ is a fresh standard-normal noise draw, independent of the current state. The reverse update scales it by the chosen reverse standard deviation and adds it to the predicted mean. The variance convention and update rule depend on the sampler; some samplers use deterministic updates instead.",
   ),
   trueFalse(
     "The numerical object behind this page implements forward noising and clean estimation only.",
@@ -178,7 +196,7 @@ export default function Page() {
           practice: [
             exercise(
               "Build the training pair, then move the step",
-              ["Build the page’s schedule with GaussianDiffusion, twenty steps with a noise variance of 0.1 each, and noise the clean strip [0, 0, 1, 1, 0, 0] at step 5 with the draw from a generator seeded at 4. Print the clean value, the draw and the noisy value for each pixel. Then print the third pixel’s noisy value at steps 5, 10 and 20 with the same draw.", "The six rows should match the training pair tabulated in Part 1, and Part 1 also quotes the third pixel at steps 5 and 20. Its value at step 10 is not on the page. Notice how little the three readings differ, which is the reason the step has to be handed to the predictor."],
+              ["Build a twenty-step GaussianDiffusion schedule with beta=0.1 at every step. Use the supplied clean strip and seeded noise draw to form the noisy strip at step 5. Print each pixel's clean value, noise draw and noisy value. Then print the third pixel's noisy value at steps 5, 10 and 20, reusing the same draw.", "The six rows should match the training pair tabulated in Part 1, and Part 1 also quotes the third pixel at steps 5 and 20. Its value at step 10 is not on the page. Notice how little the three readings differ, which is the reason the step has to be handed to the predictor."],
               `import numpy as np
 from oop_ml.numpy.modern import GaussianDiffusion
 

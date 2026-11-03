@@ -138,7 +138,7 @@ export function AlignmentPlayground() {
           </div>
           <p className="text-[11px] leading-snug">
             {method === "orb"
-              ? "Centre of brightness for the direction, pixel pairs for the reading."
+              ? "Center of brightness for the direction, pixel pairs for the reading."
               : "Dominant gradient for the direction, a grid of gradient counts for the reading."}
           </p>
         </div>

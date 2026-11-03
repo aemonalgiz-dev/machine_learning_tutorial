@@ -68,10 +68,10 @@ export function ExceptionEntryTable() {
         </div>
       ))}
       <p className="text-xs text-slate-500 dark:text-slate-400">
-        The three pairs are the argument. The same word listed as a place to cut
-        is taken, and listed as something to write instead is not, which is the
-        one constraint that keeps every piece a stretch of the writing it came
-        from.
+        Compare the accepted and rejected entry for each word. The tokenizer
+        accepts instructions for where to split the original text. It rejects
+        instructions that replace those characters, so every returned piece
+        remains an unchanged span of the input.
       </p>
     </div>
   );

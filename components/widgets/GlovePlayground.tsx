@@ -204,7 +204,7 @@ export function GlovePlayground() {
       </svg>
 
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Stat label="what is being minimised, at rest" value={fit.objective_at_rest.toFixed(4)} />
+        <Stat label="what is being minimized, at rest" value={fit.objective_at_rest.toFixed(4)} />
         <Stat label="alike, same half" value={fit.within_topic.toFixed(4)} />
         <Stat label="alike, across the halves" value={fit.across_topic.toFixed(4)} />
         <Stat label="pairs that ever co-occurred" value={String(fit.n_pairs)} />
@@ -263,9 +263,10 @@ export function GlovePlayground() {
         {fit.n_words} distinct words, half of them about cooking (
         <span style={{ color: COOKING }}>amber</span>) and half about astronomy (
         <span style={{ color: ASTRONOMY }}>indigo</span>), with seven words both
-        halves use (<span style={{ color: SHARED }}>grey</span>). Nothing told the
-        fit which half a word came from, so a neighbour in the other colour is the
-        fit getting it wrong and a grey one is a word that carries no topic at all.
+        halves use (<span style={{ color: SHARED }}>gray</span>). The fit receives
+        word co-occurrence counts without these topic labels. Use the colors to
+        check whether nearby vectors tend to belong to the same topic. A gray
+        word appears in both topics, so its presence alone does not distinguish them.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>

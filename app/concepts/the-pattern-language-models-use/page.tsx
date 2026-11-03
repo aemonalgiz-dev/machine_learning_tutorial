@@ -22,9 +22,9 @@ import { PatternPlayground } from "@/components/widgets/PatternPlayground";
 import { SpaceLedger } from "@/components/widgets/SpaceLedger";
 
 export const metadata: Metadata = {
-  title: "The Pattern Language Models Use · oop_ml",
+  title: "The Pattern Language Models Use · Perceptron Lab",
   description:
-    "Before learning smaller pieces, a tokenizer may need to separate runs of letters, numbers, and punctuation. A regular expression can describe those initial groups while retaining information about the spaces around them.",
+    "Regular expressions describe patterns of characters that should stay together or be split apart. Initial groups of letters, numbers and punctuation constrain the pieces a tokenizer can learn afterward.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function PatternWordsPage() {
       playgroundTitle="Watch the pattern separate words, numbers and punctuation"
       playgroundIntro="Make the spaces visible and inspect which piece owns each one. Join the pieces and compare the result with the original text."
       title="The Pattern Language Models Use"
-      tagline={"Before learning smaller pieces, a tokenizer may need to separate runs of letters, numbers, and punctuation. A regular expression can describe those initial groups while retaining information about the spaces around them."}
+      tagline={"Regular expressions describe patterns of characters that should stay together or be split apart. Initial groups of letters, numbers and punctuation constrain the pieces a tokenizer can learn afterward."}
       prerequisites={
         <>
           The{" "}
@@ -84,17 +84,10 @@ export default function PatternWordsPage() {
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
                 </Equation>
                 <p>
-                  Fifty-one characters, of which six are spaces. Every one of
-                  the four rules gives back some arrangement of the other
-                  forty-five, and none of them gives back a single one of the
-                  six.
+                  {"The running sentence contains 51 characters, including six spaces. The earlier word-only outputs omit those spaces. The Unicode method can also return complete segments if requested; here we compare the word-only setting used on the earlier page."}
                 </p>
                 <KeepInMind>
-                  The question this page is about is not where the words are,
-                  which the four earlier rules already answer in four different
-                  ways. It is what happens to the characters between the words,
-                  which all four of them treat as a separator rather than as
-                  part of the writing.
+                  {"This pattern keeps separators in the piece sequence. That allows direct concatenation to reproduce the source, without a separate language-specific spacing convention. It is a different requirement from returning only word-like units."}
                 </KeepInMind>
               </SubSection>
 
@@ -126,13 +119,7 @@ export default function PatternWordsPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  Notice what that does to a word that turns up twice.{" "}
-                  <span className="font-mono">cost</span> at position 34 follows
-                  a hyphen, so it carries no space, while{" "}
-                  <span className="font-mono">expect</span> at position 18
-                  follows a space and carries one. Those are two different
-                  pieces even where they would be the same word, and section 16
-                  counts what that costs.
+                  {"A leading space becomes part of a piece’s spelling. In the running sentence, cost follows a hyphen and has no leading space, while expect follows a space and carries one. To see the effect on one repeated word, compare Alvarez at a sentence start and after a space in the corpus later on."}
                 </p>
                 <KeepInMind>
                   Fourteen pieces holding 51 of the sentence&rsquo;s 51
@@ -174,22 +161,11 @@ export default function PatternWordsPage() {
                     construction.
                   </p>
                   <p>
-                    That is a claim strong enough to be worth attacking, so I
-                    put four thousand texts drawn at random to the pattern,
-                    each up to thirty characters long and each drawn from 1,972
-                    different characters with spacing of four kinds, a fraction,
-                    a Roman numeral, a superscript, a subscript and an
-                    underscore among them, and asked every time whether the
-                    pieces written one after another were the text again. They
-                    were, four thousand times out of four thousand.
-                  </p>
+                  The coverage check tries four thousand generated texts, each up to thirty characters long, drawn from 1,972 candidate characters. The set includes four kinds of spacing and examples such as a fraction, Roman numeral, superscript, subscript and underscore. Concatenating the returned pieces recovers the input in all four thousand tests. This tests the selected character set and engine, alongside the earlier argument about how the branches cover the input.
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  Six of six sentences come back exactly here and none of six
-                  under any of the four earlier rules. The pattern is no better
-                  than the others at saying where the words are, and it is the
-                  only one of the five whose answer can be undone by somebody
-                  who knows nothing about English.
+                  {"The pieces concatenate to all six original notebook sentences. The compared word-only outputs do not preserve those separators directly. This test concerns source reconstruction, not whether one method finds better linguistic word boundaries."}
                 </KeepInMind>
               </SubSection>
 
@@ -212,12 +188,7 @@ export default function PatternWordsPage() {
                   rather than between them.
                 </p>
                 <p>
-                  That looks at first like a small matter of tidiness, and what
-                  it actually bounds is what a model can be asked for. A model
-                  trained on pieces that cannot tell a line break from a space
-                  has no way to produce a line break, and a list, a table or a
-                  program is laid out in precisely the characters those rules
-                  threw away.
+                  {"If tokenization maps a line break and a space to the same input, those tokens alone cannot identify the original layout. A later formatter can still generate a line break by convention. It would be reconstructing a plausible layout rather than recovering a distinction preserved in the encoding."}
                 </p>
                 <KeepInMind>
                   Two texts that differ come back as one answer under every rule
@@ -235,11 +206,7 @@ export default function PatternWordsPage() {
             <>
               <SubSection title="5. The whole rule is one line">
                 <p>
-                  The four earlier rules are lists of clauses, and one of them
-                  needs a data file besides. This one is a single regular
-                  expression, and the expression is the whole of the method.
-                  Every non-empty match is a piece, the matches are taken left
-                  to right without overlapping, and there is nothing else.
+                  {"The initial split is defined by a regular expression and its matching engine. Each nonempty match becomes a piece. The pattern on this page covers the whole input; other expressions can leave gaps, so coverage needs its own check."}
                 </p>
                 <Equation>
                   {"'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+"}
@@ -338,10 +305,7 @@ export default function PatternWordsPage() {
 
               <SubSection title="6. Three branches that carve everything which is not spacing">
                 <p>
-                  The middle three branches are the ones doing nearly all the
-                  work. They say that a run of letters is one thing, a run of
-                  digits is one thing, and a run of anything else that is not
-                  spacing is one thing, and they are tried in that order.
+                  {"The middle branches match runs of Unicode letters, runs of Unicode numbers, and runs of other non-whitespace characters. Numbers include more than decimal digits in the published expression. Part 5 compares that definition with the SDK’s Python-compatible approximation."}
                 </p>
                 <Equation>
                   {" ?\\p{L}+        a run of letters\n" +
@@ -349,61 +313,26 @@ export default function PatternWordsPage() {
                     " ?[^\\s\\p{L}\\p{N}]+   a run of everything else that is not spacing"}
                 </Equation>
                 <p>
-                  Between them those three classes account for every character
-                  that is not spacing, with no character in two of them, which
-                  is why nothing is ever dropped and why every position starts a
-                  match. That is also exactly the repair the pattern was written
-                  for. A run of letters stops at a full stop whether or not a
-                  linguist would call the stop part of the word, so{" "}
-                  <span className="font-mono">dog</span> and{" "}
-                  <span className="font-mono">dog.</span> are never two rows in
-                  anything learned afterwards, and the rule needed no list of
-                  abbreviations and no knowledge of English to say so.
+                  The three classes cover non-whitespace characters, and the remaining branches cover whitespace. Letter runs stop before a period, so <span className="font-mono">dog</span> and a following <span className="font-mono">.</span> enter separate runs. A BPE learner restricted to those runs cannot merge them across that boundary. This controls candidate pieces; it does not define linguistic words.
                 </p>
                 <p>
-                  What it costs is the reverse case. On our sentence{" "}
-                  <span className="font-mono">low-cost</span> comes apart into
-                  three pieces and{" "}
-                  <span className="font-mono">re-analysis</span> into three
-                  more, because a hyphen is not a letter, and{" "}
-                  <span className="font-mono">3.14</span> would come apart into
-                  three as well. The rule knows nothing about compounds and
-                  nothing about numbers, and that is the same fact as its
-                  knowing nothing about abbreviations.
+                  The same class rule separates <span className="font-mono">low-cost</span> and <span className="font-mono">re-analysis</span> into three pieces each. It also separates <span className="font-mono">3.14</span> into number, period and number. It groups character kinds rather than parsing compounds or decimal structure.
                 </p>
                 <KeepInMind>
-                  Letters, digits, and everything else that is not spacing. A
-                  partition of the characters rather than a description of the
-                  language, which is why it applies unchanged to a text in any
-                  script and why it will cut a compound word in half.
+                  {"These branches group character kinds rather than linguistic words. They can process different scripts, but the resulting pieces need not match each language’s word boundaries. A hyphen belongs to the remaining non-whitespace class, so a letter run stops before it."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="7. The question mark in front, which is the whole idea">
                 <p>
-                  Each of those three branches begins with{" "}
-                  <span className="font-mono">&nbsp;?</span>, a space followed by
-                  a question mark, which in this notation means one space if
-                  there is one and nothing if there is not. So a run of letters
-                  reaches backwards by one character and takes the space in front
-                  of it along.
+                  Each of the three run branches begins with <span className="font-mono">{" ?"}</span>: an optional ordinary space. At a space followed by a matching run, the match starts with that space. The engine does not have to move backward after finding the word.
                 </p>
                 <Equation>
                   {'the drift    ->    "the"  " drift"\n' +
                     'thedrift     ->    "thedrift"'}
                 </Equation>
                 <p>
-                  Everything the space attachment buys follows from that one
-                  optional character. The spacing ends up inside the pieces, so
-                  the pieces join back to the writing. A word that begins a line
-                  and the same word in the middle of a sentence become two
-                  different pieces, which is information a model can use, since
-                  in English they are genuinely different situations. And a
-                  vocabulary learned over these pieces afterwards will hold{" "}
-                  <span className="font-mono">&nbsp;the</span> with its space
-                  rather than <span className="font-mono">the</span> without it,
-                  which is why the pieces such a model works in so often look
-                  like words with a space stuck to the front.
+                  {"An optional ordinary space attaches to the following letter, number or punctuation run. That preserves the space within the sequence and can distinguish a spaced occurrence from an unspaced one. A learned subword vocabulary may split either run further, so it can contain both space-prefixed and unprefixed pieces."}
                 </p>
                 <p>
                   It also buys length, which was the stated reason. Deleting
@@ -414,20 +343,13 @@ export default function PatternWordsPage() {
                 </p>
                 <Equation>
                   {"142 − 85   =  57 pieces saved\n" +
-                    "57 / 142   ≈  40 per cent"}
+                    "57 / 142   ≈  40 percent"}
                 </Equation>
                 <p>
-                  That is 57 pieces saved on six sentences, or a text forty per
-                  cent shorter for everything downstream to read. The 57 is
-                  also the number of spaces in the six sentences, since the
-                  only thing the change does is decide whether a space is a
-                  piece of its own or the front of the piece after it.
+                  {"On these six sentences, removing the optional spaces creates 57 additional pieces. Keeping them gives about forty percent fewer pieces than that no-attachment variant. Both variants retain all source characters, so this is a sequence-length saving rather than a difference in text content."}
                 </p>
                 <KeepInMind>
-                  One optional character, written in three places, is what puts
-                  the spacing inside the pieces instead of between them. It costs
-                  nothing to write and it saves 57 pieces on six sentences
-                  against the same pattern with those three characters taken out.
+                  {"The optional space appears in three branches. On this corpus it reduces the number of pieces by 57 compared with the otherwise identical no-attachment pattern, while retaining the same characters."}
                 </KeepInMind>
               </SubSection>
 
@@ -441,13 +363,7 @@ export default function PatternWordsPage() {
                   spacing.
                 </p>
                 <p>
-                  Consider two spaces in a row. The word branches cannot start
-                  there, since each takes at most one space and then needs a
-                  letter. The greedy reading would take both spaces as one piece
-                  and leave the following word bare. This branch refuses to do
-                  that. It takes as much spacing as it can while stopping short
-                  of the next piece of writing, so it hands the final space back
-                  for the following word to claim.
+                  {"Before two ordinary spaces followed by a word, the letter branch cannot yet match. The whitespace lookahead branch consumes the first space but leaves the last one for the following word. At the end of input, it can consume the entire remaining whitespace run. Other whitespace characters do not necessarily attach like an ordinary space."}
                 </p>
                 <WorkedExample title="Two spaces, with the branch and without it">
                   <Equation>
@@ -467,18 +383,10 @@ export default function PatternWordsPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  Attaching the space to the following word is only worth doing
-                  if a word reliably has its space, and irregular spacing is
-                  exactly the case where it would not, which is what the branch
-                  is for. Six sentences of ordinary prose never
-                  reach this branch at all, because a single space is claimed by
-                  the word after it and the branch is never tried.
+                  {"This branch keeps an ordinary leading space attached in the doubled-space example. The notebook has only single internal spaces, which the following runs claim directly, so its six sentences never exercise this branch. More varied whitespace needs additional cases."}
                 </p>
                 <KeepInMind>
-                  Doubled spacing is common in real writing and would otherwise
-                  produce a second spelling of every word that follows it. The
-                  branch costs one lookahead and closes that hole, at no cost in
-                  pieces.
+                  {"The doubled-space example has eight pieces under either variant, but their boundaries differ. The lookahead keeps the final ordinary space with the next run. That is the measured benefit here, not a guarantee of identical piece counts for every whitespace input."}
                 </KeepInMind>
               </SubSection>
 
@@ -493,28 +401,19 @@ export default function PatternWordsPage() {
                   five; the marks branch took 15; the digits branch took one,
                   which is the year in the third sentence; and one of the seven
                   contractions took one, which is the{" "}
-                  <span className="font-mono">&rsquo;t</span> of{" "}
-                  <span className="font-mono">didn&rsquo;t</span>. The other
+                  <span className="font-mono">&apos;t</span> of{" "}
+                  <span className="font-mono">didn&apos;t</span>. The other
                   eight branches, six contractions and both spacing branches,
                   never fired. The spacing branches are unreached because single
                   spaces are claimed by the words after them, which is the
-                  previous section&rsquo;s point arriving as a count.
+                  previous section&apos;s point arriving as a count.
                 </p>
                 <p>
-                  One more thing about the notation, which is a small point and a
-                  real one. An expression that is not well formed is refused
-                  before it reads any text at all, since a bracket that never
-                  closes names no set of matches and therefore no rule. Three
-                  plausible mistypings of a single branch are in the panel above
-                  and all three are refused. That is the one kind of error this
-                  method can report; every other failure it has is silent, which
-                  is Part 6.
+
+                  A malformed expression can be rejected before it reads the input. In the panel, all three mistyped branches fail to compile, making that particular error visible. A pattern that does compile still needs behavioral tests: it can divide text differently from the intended rule without producing a syntax error. Compilation and correct segmentation are separate checks.
                 </p>
                 <KeepInMind>
-                  Twelve branches, four of them reached by six sentences, and one
-                  of them claiming four pieces in five. The remaining eight are
-                  there for writing that ordinary prose does not contain, which is
-                  a description of most of this pattern.
+                  {"Four branches match the notebook. The eight unmatched branches cover other literal endings and whitespace situations. A different collection of ordinary prose can exercise them, so this sample does not characterize all prose."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -532,7 +431,7 @@ export default function PatternWordsPage() {
             trueFalse(
               "Because its pieces give the sentence back exactly, the pattern is also better than the four earlier rules at saying where the words are.",
               false,
-              "It is no better at that, and giving the writing back is a different property. What it does have is that its answer can be undone by somebody who knows nothing about English, where the three rules that read writing need a second set of conventions about the language before they can produce a sentence at all.",
+              "Exact reconstruction checks character preservation, not linguistic word boundaries. This pattern lets a decoder recover the source by concatenating pieces without language-specific joining rules. Earlier tokenizers may discard separators or rewrite spellings, so their output needs another reconstruction policy or retained source information. Which segmentation is useful depends on the downstream task.",
             ),
             several(
               "Which of these follow from the optional space at the front of the three writing branches?",
@@ -543,7 +442,7 @@ export default function PatternWordsPage() {
                 "A vocabulary learned over these pieces holds the with its space in front rather than without it",
               ],
               [0, 1, 2, 3],
-              "All four follow from one optional character written in three places. It puts the spacing inside the pieces, which is why they join back, and it saves 57 pieces on six sentences, one for every space, which is a text forty per cent shorter for everything downstream to read. The price is that a word with its space and the same word without are two pieces, which is why the pieces such a model works in so often look like words with a space stuck to the front.",
+              "All four follow from one optional character written in three places. It puts the spacing inside the pieces, which is why they join back, and it saves 57 pieces on six sentences, one for every space, which is a text forty percent shorter for everything downstream to read. The price is that a word with its space and the same word without are two pieces, which is why the pieces such a model works in so often look like words with a space stuck to the front.",
             ),
             choice(
               "Over the six sentences, how many of the twelve branches claimed a piece?",
@@ -579,48 +478,38 @@ export default function PatternWordsPage() {
                   Being first is what makes them do anything. An apostrophe is
                   not a letter, so without these seven the marks branch would
                   claim it, and{" "}
-                  <span className="font-mono">didn&rsquo;t</span> would come out
+                  <span className="font-mono">didn&apos;t</span> would come out
                   as three pieces rather than two. Deleting them from the pattern
                   and changing nothing else takes our sentence from fourteen
                   pieces to fifteen, with{" "}
-                  <span className="font-mono">&rsquo;</span> and{" "}
+                  <span className="font-mono">&apos;</span> and{" "}
                   <span className="font-mono">t</span> standing separately where{" "}
-                  <span className="font-mono">&rsquo;t</span> stood.
+                  <span className="font-mono">&apos;t</span> stood.
                 </p>
                 <p>
-                  Notice also that these seven carry no optional space, unlike
-                  the three branches beneath them. That is not an oversight. A
-                  contraction ending never has a space in front of it, since it
-                  is glued to the word it belongs to, so an optional space would
-                  match nothing it was not going to match anyway.
+                  {"The seven literal branches have no optional leading space. They can match a suffix immediately after the preceding letter run. A standalone quoted spelling or an archaic word beginning with the same characters can also match; the expression does not verify that a contraction host exists."}
                 </p>
                 <KeepInMind>
-                  Seven spellings, written before everything else so that they
-                  beat the branch which would otherwise claim the apostrophe. It
-                  is the one clause here that could not have been written by
-                  somebody who did not know which language the text was in.
+                  {"Ordering gives these literal spellings priority over the punctuation run that could otherwise claim their apostrophe. The list encodes selected English forms; it does not recognize their grammatical role."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. What the seven catch">
                 <p>
-                  What they catch is a verb ending that English writes as part of
-                  the previous word. Six of the seven are verb forms, and one,
-                  the first, is the possessive that is spelt the same way as the
-                  contraction of <span className="font-mono">is</span>.
+                  {"The seven spellings cover selected English contractions and possessive forms. Their letters can represent different grammatical uses: for example, the same spelling can stand for is, has or a possessive marker. The pattern matches characters rather than choosing among those meanings."}
                 </p>
                 <NumberTable
                   headings={["in the writing", "the pattern", "what the ending is"]}
                   rows={[
-                    ["it’s here", "it / ’s / ·here", "is, or a possessive"],
-                    ["they’re here", "they / ’re / ·here", "are"],
-                    ["I’ve seen it", "I / ’ve / ·seen / ·it", "have"],
-                    ["we’ll see", "we / ’ll / ·see", "will"],
-                    ["he’d gone", "he / ’d / ·gone", "had, or would"],
-                    ["she didn’t go", "she / ·didn / ’t / ·go", "not"],
+                    ["it's here", "it / 's / ·here", "is in this example"],
+                    ["they're here", "they / 're / ·here", "are"],
+                    ["I've seen it", "I / 've / ·seen / ·it", "have"],
+                    ["we'll see", "we / 'll / ·see", "will"],
+                    ["he'd gone", "he / 'd / ·gone", "had in this example"],
+                    ["she didn't go", "she / ·didn / 't / ·go", "a negative contraction; the split follows its spelling"],
                     [
-                      "she’d’ve gone",
-                      "she / ’d / ’ve / ·gone",
+                      "she'd've gone",
+                      "she / 'd / 've / ·gone",
                       "two of them, matched one after the other",
                     ],
                   ]}
@@ -628,50 +517,31 @@ export default function PatternWordsPage() {
                 />
                 <p>
                   The cut falls at the apostrophe every time, which is the
-                  translation rules&rsquo; choice rather than the annotation
-                  rules&rsquo;. On{" "}
-                  <span className="font-mono">didn&rsquo;t</span> the annotation
+                  translation rules&apos; choice rather than the annotation
+                  rules&apos;. On{" "}
+                  <span className="font-mono">didn&apos;t</span> the annotation
                   rules produce <span className="font-mono">did</span> and{" "}
-                  <span className="font-mono">n&rsquo;t</span>, because the
-                  negation is a morpheme spelt with the n; here the pieces are{" "}
+                  <span className="font-mono">n&apos;t</span>, because the
+                  negation is a morpheme spelled with the n; here the pieces are{" "}
                   <span className="font-mono">·didn</span> and{" "}
-                  <span className="font-mono">&rsquo;t</span>, so the second is
+                  <span className="font-mono">&apos;t</span>, so the second is
                   not a morpheme of anything and the first is not a word. What
                   makes that acceptable is that nothing downstream is expected to
                   read a piece as a word.
                 </p>
                 <KeepInMind>
-                  The seven turn one written word into two pieces at the
-                  apostrophe. They are a fact about how English spells a handful
-                  of verb endings, and they get their answer from the spelling
-                  rather than from the grammar.
+                  {"The seven branches can keep an apostrophe with a selected following spelling. That reduces fragmentation for matched forms without assigning them a morpheme label."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="12. What they miss, which was half of what I put to them">
                 <p>
-                  A list of seven literal spellings misses everything that is not
-                  one of those seven spellings, and the interesting part is how
-                  ordinary the misses are. I put twelve texts to the branch,
-                  chosen to be things a person actually types, and six of them
-                  matched nothing.
+
+                  The contraction branch recognizes seven literal spellings. The twelve-text panel includes ordinary alternatives outside that list, and six inputs produce no match in this branch. Reading those examples beside the pattern shows exactly what its shortcut recognizes, rather than treating the list as a general description of contractions.
                 </p>
                 <ContractionGallery />
                 <p>
-                  Two of the misses are the same word written slightly
-                  differently. A sentence in capitals misses, because the seven
-                  are written in small letters and the notation is case
-                  sensitive, so{" "}
-                  <span className="font-mono">IT&rsquo;S</span> comes out as
-                  three pieces where{" "}
-                  <span className="font-mono">it&rsquo;s</span> comes out as two.
-                  A word processor&rsquo;s curved apostrophe misses, because the
-                  seven name the straight one, and{" "}
-                  <span className="font-mono">didn&rsquo;t</span> typed that way
-                  comes out as three pieces where the same word typed with the
-                  straight mark comes out as two. Both of those are the same
-                  sentence to a reader and two different sequences to whatever
-                  reads the pieces.
+                  Capitalization and apostrophe spelling are separate cases. <span className="font-mono">IT&apos;S</span> misses the lowercase literal branch that matches <span className="font-mono">it&apos;s</span>. The curly form <span className="font-mono">didn&rsquo;t</span> misses the ASCII branch that matches <span className="font-mono">didn&apos;t</span>. In each case, the other branches still preserve the characters.
                 </p>
                 <p>
                   One miss is no contraction at all. The apostrophe of{" "}
@@ -682,23 +552,10 @@ export default function PatternWordsPage() {
                   <span className="font-mono">·notes</span>.
                 </p>
                 <p>
-                  The other three are words the list simply does not hold.{" "}
-                  <span className="font-mono">y&rsquo;all</span> and{" "}
-                  <span className="font-mono">o&rsquo;clock</span> come apart
-                  into three pieces each, and a French{" "}
-                  <span className="font-mono">l&rsquo;analyse</span> comes apart
-                  into three as well, with the article and the noun in separate
-                  pieces and the mark alone between them. The annotation rules
-                  keep all three whole, which is one of the two places on this
-                  page where a rule from an earlier page is straightforwardly
-                  ahead of this one, and section 17 is the other.
+                  The selected forms <span className="font-mono">y&apos;all</span>, <span className="font-mono">o&apos;clock</span> and <span className="font-mono">l&apos;analyse</span> are not covered by the seven literals and produce three pieces each. Treebank leaves these examples whole. Which grouping is preferable depends on the desired units; a pretokenizer need not identify a full word or morpheme.
                 </p>
                 <KeepInMind>
-                  Six of twelve ordinary spellings reach no branch, and what
-                  comes back from each of the six is a longer reading of a word
-                  the corpus already holds spelt another way. Nothing is refused,
-                  no piece looks wrong, and nothing anywhere reports that a list
-                  was consulted and found nothing.
+                  {"Six of the twelve probe inputs do not match the contraction branch. Other branches still return pieces and preserve the text. The output has no separate warning that an intended contraction was handled as punctuation, so inspect the cases relevant to the task."}
                 </KeepInMind>
               </SubSection>
 
@@ -706,8 +563,8 @@ export default function PatternWordsPage() {
                 <p>
                   The misses are one half of what a list of spellings does, and
                   this is the other. The branch matching{" "}
-                  <span className="font-mono">&rsquo;t</span> was written for the
-                  end of <span className="font-mono">didn&rsquo;t</span>, and it
+                  <span className="font-mono">&apos;t</span> was written for the
+                  end of <span className="font-mono">didn&apos;t</span>, and it
                   fires on any apostrophe followed by a t, wherever that pair
                   stands.
                 </p>
@@ -716,79 +573,34 @@ export default function PatternWordsPage() {
                     "'twas cold     ->    't      was   ·cold"}
                 </Equation>
                 <p>
-                  In the second the pattern has cut a word at its own beginning
-                  and produced a piece that stands for the elided{" "}
-                  <span className="font-mono">it</span> of an archaic{" "}
-                  <span className="font-mono">it was</span>, using a branch whose
-                  only reason for existing is the negation. Nothing is wrong with
-                  the pieces, in the sense that they join back to the word, and
-                  the piece is nonetheless the wrong piece, since it will share a
-                  row in everything downstream with every negated verb in the
-                  corpus.
+                  {"The second example uses the same token spelling at the beginning of an archaic contraction rather than at a negative ending. Those uses share an ID if a later vocabulary keeps the piece whole. A model can learn different uses from context; sharing the token does not make the piece mathematically or linguistically invalid."}
                 </p>
                 <WhyThisWorks title="Why a longer list does not close this">
                   <p>
-                    The obvious repair is more spellings, and it works for any
-                    particular word. What it cannot change is the shape of the
-                    answer. These branches are spellings, so they fire on the
-                    spelling wherever it appears, and any spelling short enough
-                    to be common is short enough to appear inside something else.
-                    Adding{" "}
-                    <span className="font-mono">&rsquo;a</span> to catch{" "}
-                    <span className="font-mono">y&rsquo;all</span> would then
-                    cut every French{" "}
-                    <span className="font-mono">l&rsquo;analyse</span> after the
-                    article rather than before the noun, which is worse than what
-                    it does now.
-                  </p>
+                  Adding a literal such as <span className="font-mono">&apos;a</span> would also affect other inputs beginning with those characters, including <span className="font-mono">y&apos;all</span> and <span className="font-mono">l&apos;analyse</span>. The branch still would not identify grammatical roles. Context conditions or longer prioritized alternatives can address particular cases, but they introduce further choices to test.
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The same two characters end a negation and begin an archaic
-                  contraction of two other words, and a branch written as a
-                  spelling cannot tell those apart, because it was never given
-                  anything to tell them apart with. Lengthening the list moves
-                  which words are affected without changing that.
+                  {"A literal branch cannot distinguish two uses of the same characters by grammatical role. Adding context conditions or different alternatives can change that behavior, but it also changes the rule. A longer unqualified list alone is not a semantic analysis."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="14. What the pattern that followed changed">
                 <p>
-                  These are not academic complaints, and the evidence is that the
-                  tokenizers released for the models after this one repair two of
-                  them and leave the rest. The panel above shows both changes on
-                  the texts that exhibit them.
+                  {"The panel compares a controlled variant with two changes: case-insensitive matching for the seven forms and a maximum of three decimal digits per run. These choices are used in later tokenizer designs, but the displayed variant holds the other branches fixed to isolate their effects; it is not a complete specification of every later model’s tokenizer."}
                 </p>
                 <Equation>
                   {"'s|'t|'re|'ve|'m|'ll|'d     becomes    (?i:'s|'t|'re|'ve|'m|'ll|'d)\n" +
                     " ?\\p{N}+                    becomes     ?\\p{N}{1,3}"}
                 </Equation>
                 <p>
-                  The first makes the seven spellings insensitive to case, so a
-                  sentence shouted in capitals is cut the same way as the same
-                  sentence written normally, and the seven-piece reading of{" "}
-                  <span className="font-mono">THE DRIFT DIDN&rsquo;T GO AWAY</span>{" "}
-                  becomes a six-piece one. The second caps a run of digits at
-                  three characters, so{" "}
-                  <span className="font-mono">1000000</span> becomes three pieces
-                  rather than one, and a long figure the model has never seen
-                  before becomes groups of digits it has seen many times. That
-                  one costs length, since the same sentence goes from seven
-                  pieces to nine.
+                  Case-insensitive literals change the shown uppercase <span className="font-mono">THE DRIFT DIDN&apos;T GO AWAY</span> example from seven pieces to six. The number change divides <span className="font-mono">1000000</span> into three groups instead of one, changing that probe from seven pieces to nine. Those are segmentation results; they do not show that a model has learned the resulting groups or improved at arithmetic.
                 </p>
                 <p>
-                  What did not change is the case that has no cheap repair.
-                  Nothing in either pattern catches the curved apostrophe, nothing
-                  holds{" "}
-                  <span className="font-mono">y&rsquo;all</span>, and the cut on{" "}
-                  <span className="font-mono">didn&rsquo;t</span> still falls at
-                  the mark rather than in front of the negation. Those are the
-                  ones that would need a list per language rather than a change to
-                  a branch.
+                  The controlled variant leaves curly apostrophes and unlisted forms such as <span className="font-mono">y&apos;all</span> unchanged. The split of <span className="font-mono">didn&apos;t</span> still follows the apostrophe rather than the negative morpheme. Other character alternatives, context rules, lookup tables or learned segmentation could make different choices; a language-specific list is not the sole possible repair.
                 </p>
                 <KeepInMind>
-                  Two changes, one buying consistency at no cost and one buying
-                  arithmetic at a cost in length. Both leave the seven spellings a
-                  list of English forms, which is what section 23 is about.
+                  {"Case-insensitive matching removes the tested capitalization difference. The three-digit limit changes the number grouping and can increase sequence length. Neither comparison measures whether a model performs arithmetic better."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -800,11 +612,7 @@ export default function PatternWordsPage() {
             <>
               <SubSection title="15. More pieces than any rule before it">
                 <p>
-                  The bill is length. Everything reading the text afterwards pays
-                  per piece, and a model that compares every position with every
-                  other position pays roughly with the square of the count, so a
-                  rule that separates a hyphen is spending on every pass over the
-                  corpus for the rest of the pipeline&rsquo;s life.
+                  {"The pattern returns a longer initial piece sequence than the compared word-only rules on this corpus. A later model’s runtime depends on the final tokens and its operations. Dense all-position attention has quadratic pair counts within each sequence, while other costs scale differently."}
                 </p>
                 <PatternCostPanel />
                 <p>
@@ -814,29 +622,14 @@ export default function PatternWordsPage() {
                 </p>
                 <Equation>
                   {"85 − 63   =  22 more pieces\n" +
-                    "22 / 63   ≈  35 per cent"}
+                    "22 / 63   ≈  35 percent"}
                 </Equation>
                 <p>
-                  That is 35 per cent more than the
-                  crudest rule from identical writing, and it is the largest
-                  count of the five. It also keeps all 375 characters where the
-                  three rules that keep the writing keep 318 and the boundary
-                  rules keep 303, so part of the extra length is the spacing
-                  itself now being carried.
+                  {"The pattern gives about 35 percent more pieces than whitespace splitting on this notebook. It also retains all 375 source characters. The earlier word-only outputs retain 318 or 303, so they are not all meeting the same reconstruction requirement."}
                 </p>
-                <p>
-                  The row worth reading twice is the last one, which is the
-                  pattern with its optional space deleted. That gives 142 pieces
-                  for the same six sentences, and it is the honest comparison,
-                  since it is the only other arrangement that also gives every
-                  sentence back. Against a rule that keeps the spacing at all, 85
-                  is the short answer rather than the long one.
-                </p>
+                <p>The last row removes the optional space from the pattern while retaining all source characters. It returns 142 pieces for the same six sentences, compared with 85 when that space is included. Both variants reconstruct the text exactly, so this comparison isolates the effect of attaching spacing to nearby pieces.</p>
                 <KeepInMind>
-                  85 pieces against 63, or 85 against 142 if the comparison is
-                  restricted to rules that can give the writing back. Which of
-                  those two numbers is the fair one depends entirely on whether a
-                  reader has to be handed the text at the end.
+                  {"Compare counts beside the information retained: 85 pattern pieces versus 63 whitespace pieces, or 85 versus 142 for the two full-coverage pattern variants. The appropriate comparison depends on whether exact source reconstruction is required."}
                 </KeepInMind>
               </SubSection>
 
@@ -852,7 +645,7 @@ export default function PatternWordsPage() {
                   Over the six sentences the pattern produces 53 different
                   pieces, where splitting on spaces produces 47, the boundary
                   rules 47, the annotation rules 48 and the translation rules 49.
-                  Forty-one of the 53 begin with a space. Two words are spelt both
+                  Forty-one of the 53 begin with a space. Two words are spelled both
                   ways in the same six sentences, and the panel above names them.{" "}
                   <span className="font-mono">Alvarez</span> begins the third
                   sentence and stands mid-sentence in the first, and{" "}
@@ -863,11 +656,11 @@ export default function PatternWordsPage() {
                 <InAModel>
                   <>
 <p>
-                    That reads like a defeat and the arithmetic is more interesting than that. Deleting the optional space, which removes the doubling entirely, gives 52 different pieces rather than 53. So the whole cost of attaching the space, on this corpus, is one extra row, and what it bought was 57 fewer pieces. Six sentences are far too few to settle anything, and the direction is worth reporting, since the doubling is the objection that is always raised and it is bounded in a way the length saving is not.
-                  </p>
+                  {"Removing optional space attachment gives 52 distinct pieces instead of 53 on this corpus, while increasing occurrences from 85 to 142. The counts show why entry count and sequence length should be considered separately. They do not establish a universal bound on every learned subword vocabulary."}
+                </p>
                   <p>
-                    A word is spelt at most twice however often it appears, while every occurrence of it pays the length.
-                  </p>
+                  {"For a fixed whole letter run, adding or omitting one ordinary leading space gives two variants under this branch. A downstream tokenizer may split those runs into other pieces, so this observation does not bound every representation’s vocabulary."}
+                </p>
 </>
                 </InAModel>
                 <KeepInMind>
@@ -880,10 +673,7 @@ export default function PatternWordsPage() {
 
               <SubSection title="17. Where an earlier rule is the better one">
                 <p>
-                  There is a kind of writing on which this method does nothing
-                  whatever, and it is not an exotic one. Handed a sentence in a
-                  script that puts no spaces between its words, the pattern finds
-                  a single run of letters and answers with one piece.
+                  {"For an unspaced input consisting only of characters in the letter class, the pattern returns one letter run. That preserves the input but does not identify internal linguistic word boundaries. Punctuation, numbers or other classes can still split unspaced text."}
                 </p>
                 <Equation>
                   {"低コストの再分析\n\n" +
@@ -891,11 +681,12 @@ export default function PatternWordsPage() {
                     "        the boundary rules 低  コスト  の  再  分  析"}
                 </Equation>
                 <p>
+
                   The boundary rules of the second sibling page give six pieces
                   there, because the standard has rules about which scripts break
                   between characters and this pattern has a class called
                   &ldquo;letter&rdquo; and nothing else. The pattern is not wrong
-                  in any sense it would recognise, since its pieces do join back
+                  in any sense it would recognize, since its pieces do join back
                   to the sentence; it has simply found nothing. Whatever runs
                   afterwards has to do the entire job, and the pages on{" "}
                   <Link href="/concepts/maximum-matching" className={link}>
@@ -907,47 +698,26 @@ export default function PatternWordsPage() {
                   </Link>{" "}
                   are about doing it.
                 </p>
-                <p>
-                  That is the honest description of what the pattern is for. It
-                  is a cheap first cut that stops a later stage from joining
-                  characters that should not be joined, and where the writing has
-                  no spaces there is almost nothing for it to stop.
-                </p>
+                <p>The pattern supplies an initial split before vocabulary learning. It restricts which characters a later piece can span. In writing without spaces, its boundaries can be sparse, so the learned vocabulary or another segmentation method still needs to account for long letter runs.</p>
                 <KeepInMind>
-                  One piece against six on the same eight characters. A rule
-                  built out of character kinds and a space is a rule about
-                  writing systems that use a space, and it says so by returning
-                  the whole sentence.
+                  {"The shown eight-code-point Japanese text becomes one pattern piece and six word-only Unicode pieces. These are different initial boundary conventions; neither count alone establishes complete Japanese word segmentation."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="18. A first cut, before any vocabulary is learned">
                 <p>
-                  The pieces produced by this pattern are an intermediate representation. A later subword vocabulary can split within them, so they are not necessarily the final tokens a model receives. In particular,{" "}
-                  <span className="font-mono">·Alvarez</span> will very likely be
-                  cut again into two or three smaller pieces by the method on the{" "}
+                  The pieces produced by this pattern are an intermediate representation. A later subword vocabulary can split within them, so they are not necessarily the final tokens a model receives. In particular, a piece such as{" "}
+                  <span className="font-mono">·Alvarez</span> can be split into smaller pieces by the vocabulary learned on the{" "}
                   <Link href="/concepts/byte-pair-encoding" className={link}>
                     byte pair encoding
                   </Link>{" "}
                   page.
                 </p>
                 <p>
-                  What the pattern does is forbid certain joins. A later stage
-                  that counts adjacent pairs and merges the commonest will never
-                  be offered the pair that would make{" "}
-                  <span className="font-mono">dog.</span> one unit, because the{" "}
-                  <span className="font-mono">g</span> and the{" "}
-                  <span className="font-mono">.</span> are in different pieces
-                  and it never sees across a boundary. That is why the pattern
-                  had to come first and why it can be as crude as it is; the
-                  refinement happens afterwards and this stage only has to stop
-                  the refinement from going somewhere it should not.
+                  {"If BPE is trained separately inside each pretokenized run, it cannot merge across those boundaries. A letter run and a following period therefore remain separated. That is a design choice in this pipeline, not a requirement for every BPE system."}
                 </p>
                 <KeepInMind>
-                  The pattern draws walls that the learning is not allowed to
-                  cross, and it draws them out of character kinds because that is
-                  the cheapest description of &ldquo;these two things are not the
-                  same sort of thing&rdquo; that needs no corpus.
+                  {"The initial split constrains the later vocabulary learner. Keeping letter runs apart from punctuation prevents certain merges. Test whether those constraints suit the target text instead of assuming they are always the cheapest or best boundaries."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -957,15 +727,15 @@ export default function PatternWordsPage() {
           title: "Questions on Parts 3 and 4",
           quiz: [
             choice(
-              "The branch that matches an apostrophe and a t was written for the end of didn’t. What does it do to ’twas cold?",
+              "The branch matching straight apostrophe plus t was included for endings such as didn't. What does it do to 'twas cold?",
               [
-                "It fires at the front of the word, giving ’t and was, so a piece standing for an elided it shares a row with every negation",
+                "It matches the straight 't prefix and leaves was, even though the prefix is not a negation here.",
                 "Nothing, since the branch fires only at the end of a word",
-                "It leaves ’twas whole, since no letter stands in front of the apostrophe",
+                "It leaves 'twas whole because no letter precedes the apostrophe.",
                 "It leaves the apostrophe standing alone, as it does in y’all",
               ],
               0,
-              "The seven branches are spellings, so each fires on its spelling wherever that stands, and a spelling short enough to be common is short enough to turn up inside something else. The pieces still join back to the word, and the piece is nonetheless the wrong one for everything downstream. A longer list moves which words are affected without changing that shape.",
+              "The branch matches a spelling wherever that alternative is encountered. It does not check whether the piece is a grammatical negation. Here it also matches at the start of the typed form, while all characters still survive. That matters if a later application interprets the piece as a grammatical label; a language model can also learn to use it simply as a recurring text piece.",
             ),
             several(
               "Twelve ordinary spellings were put to the contraction branches and six matched nothing. Which of these were among the misses?",
@@ -976,7 +746,7 @@ export default function PatternWordsPage() {
                 "didn’t typed with the straight mark, which the list was written for",
               ],
               [0, 1],
-              "IT’S and didn’t with a curved mark each come out as three pieces where the ordinary spelling gives two, and nothing anywhere reports that a list was consulted and found nothing. Two of the seven do match in a row, so she’d’ve comes apart into three pieces with both endings caught, and didn’t with the straight mark is the case the branch exists for. The other misses were y’all, o’clock, a French l’analyse and a possessive whose apostrophe has no letter after it.",
+              "IT’S and didn’t with a curved mark each come out as three pieces where the ordinary spelling gives two, and nothing anywhere reports that a list was consulted and found nothing. Two of the seven do match in a row, so she’d’ve comes apart into three pieces with both endings caught, and didn’t with the straight mark is the case the branch exists for. The other misses were y’all, o’clock, a French l’analyze and a possessive whose apostrophe has no letter after it.",
             ),
             choice(
               "What did the tokenizers released for the models after this one change?",
@@ -987,10 +757,10 @@ export default function PatternWordsPage() {
                 "They dropped the seven spellings so the pattern reads every language alike",
               ],
               0,
-              "One buys consistency at no cost, since a sentence shouted in capitals is then cut the way the same sentence written normally is. The other buys arithmetic at a cost in length, since a long figure becomes groups of digits the model has seen many times and the same sentence goes from seven pieces to nine. The curved apostrophe, y’all and the place of the cut on didn’t are exactly what did not change, and the seven spellings are still a list of English forms.",
+              "The later patterns discussed here change case-sensitive contraction matching and group long digit runs into smaller pieces. Case-insensitive matching keeps differently capitalized suffixes on the same branch without necessarily lowercasing their token spellings. Digit grouping changes the units available for learning numeric patterns, at a cost in sequence length. Whether it improves arithmetic needs evaluation rather than following from the split alone.",
             ),
             choice(
-              "The pattern gives 85 pieces over the six sentences. Which comparison does the page call the honest one?",
+              "Which comparison isolates the optional-leading-space rule while preserving the same source characters?",
               [
                 "85 against the 142 the same pattern gives with its optional space deleted",
                 "85 against the 63 of splitting on spaces",
@@ -998,7 +768,7 @@ export default function PatternWordsPage() {
                 "85 against the 72 of both rule lists",
               ],
               0,
-              "The deleted-space version is the only other arrangement that also gives every sentence back, so it is the one comparison between two rules answering the same question. Against the crudest rule, 85 is 35 per cent more from identical writing and the largest count of the five, and which of the two numbers is fair depends entirely on whether a reader has to be handed the text at the end.",
+              "Removing optional leading spaces changes where retained spaces are grouped while keeping every character recoverable. That directly tests this pattern choice. Comparing with whitespace splitting is still useful, but it also changes source retention and other cuts. State those differences rather than treating either comparison as universally fair or unfair.",
             ),
             trueFalse(
               "Over these six sentences, attaching the space to the following word costs one extra distinct piece and saves 57 pieces of length.",
@@ -1051,10 +821,7 @@ export default function PatternWordsPage() {
                   caption="Three classes, and none of them translates exactly. The first two are the interesting pair, because between them they move 1,151 characters from one class to the other."
                 />
                 <KeepInMind>
-                  The published pattern names its classes by an external
-                  standard, and an engine that cannot name that standard has to
-                  approximate it. The approximation is close and it is not exact,
-                  and the rest of this part is how far off it is.
+                  {"This SDK ports Unicode-property branches into Python’s built-in regex notation. The resulting categories differ on some code points. An engine supporting the original properties, or explicit category ranges, could avoid that particular approximation."}
                 </KeepInMind>
               </SubSection>
 
@@ -1098,14 +865,7 @@ export default function PatternWordsPage() {
               </SubSection>
 
               <SubSection title="21. The exact texts that come out differently">
-                <p>
-                  The letters and the numbers are the pair that cannot be
-                  repaired, and the reason is a disagreement about what counts as
-                  a digit. To measure it, I built the published classes out of
-                  Unicode&rsquo;s own general categories, one codepoint at a time
-                  over all 1,114,112 of them, so both readings run through the
-                  same machinery and the classes are the only thing between them.
-                </p>
+                <p>The letter and number branches also differ in what they classify as a digit. The comparison builds the published classes from Unicode general categories across all 1,114,112 code-point positions. Both patterns then run through the same matching machinery, so the tested difference comes from class membership rather than a change of engine.</p>
                 <DialectPanel />
                 <p>
                   Unicode files 1,831 characters under a number category. Of
@@ -1126,10 +886,10 @@ export default function PatternWordsPage() {
                   the fraction into one run of numbers while here the figure is a
                   digit and the fraction is a letter.{" "}
                   <span className="font-mono">aⅫ</span> is two pieces as published
-                  and one here, for the mirror-image reason. And{" "}
+                  and one here, for the mirror-image reason. The third test text contains both{" "}
                   <span className="font-mono">a²</span> and{" "}
-                  <span className="font-mono">x₂</span> are each cut in two as
-                  published and each kept whole here.
+                  <span className="font-mono">x₂</span>; each is cut in two as
+                  published and kept whole here.
                 </p>
                 <KeepInMind>
                   1,151 characters of Unicode are in one class as published and
@@ -1144,34 +904,13 @@ export default function PatternWordsPage() {
                   A character in the wrong category does not always change token boundaries. If whitespace isolates it on both sides, it remains a one-character run under either classification. Let&apos;s test it next to other characters to expose where the category choice affects the segmentation.
                 </p>
                 <p>
-                  I put each of the 1,151 into four arrangements and asked
-                  whether the two readings gave different pieces. Standing alone
-                  between two spaces, 0 of the 1,151 split differently. Directly
-                  after a letter, all 1,151 did. Directly after a digit, all
-                  1,151 did. Directly before a letter, all 1,151 did. The
-                  condition is exactly adjacency, with no exceptions in either
-                  direction, and{" "}
-                  <span className="font-mono">chapter Ⅻ of the agreement</span>{" "}
-                  is read identically by both while{" "}
-                  <span className="font-mono">1½</span> is not.
+                  {"The test places each of the 1,151 affected code points in four arrangements. Standing between spaces, none changes its piece boundaries. Directly after a letter, directly after a digit, or directly before a letter, every tested code point changes them. These are the tested contexts; more complex runs still depend on the surrounding classes and branches."}
                 </p>
                 <p>
-                  On ordinary English writing it therefore never shows. All six
-                  sentences of the notebook are cut identically by both readings,
-                  as are the Cyrillic and Arabic-digit texts in the panel, and no
-                  alphabetic script can produce a difference at all, since every
-                  one of the 136,104 characters Unicode calls a letter is a
-                  letter under both readings. The difference is confined to
-                  writing that puts one of a particular 1,151 characters directly
-                  against a letter or a digit, which is a real kind of writing
-                  and a narrow one.
+                  {"The six notebook sentences and the shown Cyrillic and Arabic-digit examples produce identical pieces under both category versions. Their tested characters do not trigger the disputed grouping. English can still contain fractions, superscripts or subscripts, so the difference is not restricted to a particular language or excluded from ordinary writing."}
                 </p>
                 <KeepInMind>
-                  0 of 1,151 differ standing alone and 1,151 of 1,151 differ
-                  beside a letter or a digit, so the disagreement is about
-                  adjacency rather than about the characters themselves. Every
-                  count on the rest of this page is unaffected, because none of
-                  the sentences counted contains one.
+                  {"The four context tests give zero disagreements in isolation and disagreements for all 1,151 characters beside the tested letter or digit. The notebook counts elsewhere are unchanged because that corpus contains none of those disputed code points."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1191,41 +930,15 @@ export default function PatternWordsPage() {
                   first.
                 </p>
                 <p>
-                  What that costs on another language is not that the pattern
-                  does the wrong thing there, since it has nothing to say about
-                  the case at all. A French text meets a rule that cuts after{" "}
-                  <span className="font-mono">&rsquo;t</span> and has no clause
-                  at all for{" "}
-                  <span className="font-mono">l&rsquo;</span>, so{" "}
-                  <span className="font-mono">l&rsquo;analyse</span> is three
-                  pieces and{" "}
-                  <span className="font-mono">c&rsquo;était</span> would be
-                  three, while an English contraction beside them is two. There
-                  is no setting to change and nothing to load, because the list is
-                  written into the expression.
+                  The seven literals group selected English forms even in mixed-language input. They have no matching literal for a French article in <span className="font-mono">l&apos;analyse</span>, so other branches separate its apostrophe. That output remains defined; whether it supplies useful boundaries for the next stage is a task question.
                 </p>
                 <p>
-                  What is genuinely open is which way that should be resolved,
-                  and it is a real decision rather than an oversight. Dropping the
-                  seven makes the pattern language-neutral and costs one more
-                  piece per contraction in English, which on our sentence is
-                  fifteen pieces instead of fourteen. Adding a list per language
-                  makes the rule a rule plus a data file, which is the shape the{" "}
-                  <Link href="/concepts/moses-rules" className={link}>
+                  Removing the seven literals removes those explicit English forms and changes the running sentence from fourteen pieces to fifteen. Other approaches can add pattern context, use a language-specific table or learn boundaries. The <Link href="/concepts/moses-rules" className={link}>
                     Moses rules
-                  </Link>{" "}
-                  page describes at length, with the correctness of the method
-                  then located in a document somebody maintains. The published
-                  pattern took neither and hard-coded one language, which is a
-                  choice defensible only when the corpus is mostly that language.
+                  </Link> page illustrates a rule-plus-table design. Compare these choices on the target text rather than treating one dominant language as a condition for validity.
                 </p>
                 <KeepInMind>
-                  Five branches of the twelve would work as well on a Turkish
-                  newspaper as on an English one, and the seven that run before
-                  them were written by somebody looking at English. A word cut by
-                  the second group and a word cut by the first come back looking
-                  the same, so nothing in the output says which of the two
-                  answered.
+                  {"The class branches return defined pieces across scripts, while the literal branches preferentially group selected English forms. A piece list does not explain which branch matched it. The branch display adds that information so the choices can be inspected."}
                 </KeepInMind>
               </SubSection>
 
@@ -1250,19 +963,10 @@ export default function PatternWordsPage() {
                   more.
                 </p>
                 <p>
-                  What follows is that a piece from this method carries no claim
-                  at all about meaning, and treating one as a word is the reader
-                  importing something the method did not supply. That matters
-                  most where the pieces look most like words, which is ordinary
-                  English prose, and least where they obviously do not, which is
-                  a script with no spaces in it.
+                  {"Pretokenization does not assign semantic labels to these pieces. Some happen to be words or useful word parts; others are punctuation or number fragments. A learned vocabulary and model can give them contextual roles later. Do not assume every initial piece is one linguistic word."}
                 </p>
                 <KeepInMind>
-                  The method answers a question about character kinds and a
-                  reader asks a question about words, and in English prose the two
-                  answers coincide often enough to be mistaken for each other.
-                  Where they part, the method is doing what it said it would, and
-                  the reader is the one who has to notice.
+                  {"The pattern’s contract is a character-based split with complete coverage. A word-count task needs a separate convention for which pieces count as words. A model pipeline may instead want subword boundaries and exact reconstruction, so judge the split against its intended use."}
                 </KeepInMind>
               </SubSection>
 
@@ -1275,21 +979,15 @@ export default function PatternWordsPage() {
                 </p>
                 <>
 <p>
-                  The regex engine defines character classes and matching behaviour. Two implementations can therefore interpret similar-looking expressions differently, especially when one uses Unicode properties and another approximates them. Check the actual class membership and matching semantics, including repetition and lookahead, when porting the pattern.
+
+                  The regex engine defines character classes and matching behavior. Two implementations can therefore interpret similar-looking expressions differently, especially when one uses Unicode properties and another approximates them. Check the actual class membership and matching semantics, including repetition and lookahead, when porting the pattern.
                 </p>
                 <p>
-                  The same expression is then two different rules, and both are being applied faithfully.
+                  {"Record the regex dialect, flags and character-property version alongside the expression. Similar notation does not guarantee that two ports match the same strings."}
                 </p>
 </>
                 <p>
-                  The practical consequence is about reporting rather than about
-                  quality. Publishing the expression is not the same as
-                  publishing the method, so two people who ran that expression
-                  over one corpus with different engines have not necessarily
-                  measured the same thing, and nothing in either output would say
-                  so. On the corpus counted here it would have made no
-                  difference, which is the ordinary case and is exactly why the
-                  exceptions are hard to notice.
+                  {"The comparison here compiles two category definitions in the same matching machinery. The notebook gives identical boundaries under both definitions; other probes expose differences. Recording the engine and Unicode version remains necessary when reproducing those results elsewhere."}
                 </p>
                 <KeepInMind>
                   A pattern is exact only relative to an engine, in the way the
@@ -1308,7 +1006,7 @@ export default function PatternWordsPage() {
                     {
                       expression: "a contraction the seven spellings do not hold",
                       reason:
-                        "cut as though the apostrophe were ordinary punctuation, and indistinguishable in the output from a word that has no contraction in it. Six of twelve ordinary spellings put to the branch reached none of the seven, including the same word in capitals and the same word typed with a curved apostrophe.",
+                        "Other branches still split and preserve the text. Six of twelve probes miss the seven literal forms, including uppercase and curly-apostrophe alternatives. The returned pieces contain no separate contraction-coverage diagnostic.",
                     },
                     {
                       expression: "a language other than English",
@@ -1333,7 +1031,7 @@ export default function PatternWordsPage() {
                     {
                       expression: "writing that puts no spaces between its words",
                       reason:
-                        "answered with one piece for the whole sentence, which is faithful and empty. A rule built from character kinds and an optional space has nothing to find where the writing carries no spacing, so the entire question of where the words are is left to whatever runs next.",
+                        "An uninterrupted letter-class run becomes one piece. Other character classes can still split unspaced text. The pattern preserves the source but may leave internal word segmentation to a later stage.",
                     },
                     {
                       expression: "what a piece means",
@@ -1348,12 +1046,7 @@ export default function PatternWordsPage() {
                   ]}
                 />
                 <KeepInMind>
-                  Two of these are worth carrying past this page. A method written
-                  as a pattern has its meaning divided between the expression and
-                  the engine, so quoting the expression is only half of saying
-                  what was done. And a rule built from character kinds is
-                  genuinely general everywhere except the one clause somebody
-                  wrote in a language, which here is the clause that runs first.
+                  {"Record the expression, engine and Unicode properties together. Then check coverage and inspect the branches relevant to the target text. The seven English literal forms are one explicit choice in this otherwise character-based split, not a guarantee about every language’s words."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1363,7 +1056,7 @@ export default function PatternWordsPage() {
           title: "Questions on Parts 5 and 6",
           quiz: [
             choice(
-              "The short form used here for the third class says everything that is not spacing and not a word character. What then happens to an underscore?",
+              "If the punctuation class matches only characters that are neither whitespace nor word characters, what happens to an underscore?",
               [
                 "No branch matches at that position, the engine advances one character, and the character is gone",
                 "The letters branch claims it, since a word character is near enough a letter",
@@ -1374,7 +1067,7 @@ export default function PatternWordsPage() {
               "The published third class says everything that is not spacing, a letter or a number, and the underscore is none of those three, so it is caught. Under the short form it falls into no class at all. Nothing is raised and the pieces look entirely reasonable, which is why the round trip is the test that finds it and reading the pieces is not.",
             ),
             choice(
-              "Unicode files 1,831 characters under a number category. How many of them land in a different class under the two readings?",
+              "In the Unicode data used for this comparison, 1,831 characters have a number category. How many receive different classes in the two pattern readings?",
               ["1,151", "680", "1,831", "136,104"],
               0,
               "The 680 decimal digits are numbers under both readings. The rest, where Roman numerals, vulgar fractions, superscripts and subscripts live, are numbers to the published classes and letters here, because the test for a letter used here is a word character that is not a decimal digit. In the other direction there is no disagreement at all.",
@@ -1601,8 +1294,8 @@ question: "Which part of the pattern is responsible for each change in token cou
               "Put twelve spellings to the seven branches",
               [
   "Apply the supplied pattern to all twelve probe texts. For each print the piece count, whether any piece exactly equals one of the seven supplied contraction suffixes, and the escaped source.",
-  "Finish with the number of probes triggering that exact-suffix test. Preserve capitals and apostrophe characters rather than normalising the inputs.",
-  "A branch match reports what the regular expression did. It does not establish that it recognised the grammatical role intended by the writer."
+  "Finish with the number of probes triggering that exact-suffix test. Preserve capitals and apostrophe characters rather than normalizing the inputs.",
+  "A branch match reports what the regular expression did. It does not establish that it recognized the grammatical role intended by the writer."
 ],
               `from oop_ml import PatternPreTokenizer
 from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN

@@ -24,9 +24,9 @@ import { SuperwordMerges } from "@/components/widgets/SuperwordMerges";
 import { TieBranches } from "@/components/widgets/TieBranches";
 
 export const metadata: Metadata = {
-  title: "Byte Pair Encoding · oop_ml",
+  title: "Byte Pair Encoding · Perceptron Lab",
   description:
-    "Common letter combinations need not be stored one character at a time. Byte pair encoding repeatedly joins frequent neighbouring pieces, building a vocabulary that can reuse parts across different words.",
+    "Byte pair encoding builds reusable pieces by repeatedly merging frequent neighboring pairs. The learned merge order determines how new text is divided and which combinations share a vocabulary entry.",
 };
 
 const MARKER = "</w>";
@@ -42,7 +42,7 @@ export default function BytePairEncodingPage() {
       playgroundTitle="Watch repeated pairs become vocabulary entries"
       playgroundIntro="Inspect the adjacent-pair counts and follow one merge at a time. Then encode a word absent from the training text using the pieces that were learned."
       title="Byte Pair Encoding"
-      tagline={"Common letter combinations need not be stored one character at a time. Byte pair encoding repeatedly joins frequent neighbouring pieces, building a vocabulary that can reuse parts across different words."}
+      tagline={"Byte pair encoding builds reusable pieces by repeatedly merging frequent neighboring pairs. The learned merge order determines how new text is divided and which combinations share a vocabulary entry."}
       prerequisites={
         <>
           You need only one thing from earlier in this section, which is that
@@ -74,20 +74,10 @@ export default function BytePairEncodingPage() {
                 </p>
                 <Equation>{SENTENCE}</Equation>
                 <p>
-                  Cut on its spaces the sentence is seven words, and the corpus
-                  holds 72 distinct words across 133 occurrences. Five of the
-                  seven are absent from it, namely Alvarez, didn&rsquo;t,
-                  expect, low-cost and re-analysis with its full stop attached.
-                  The corpus does have expected, and lower, and cost, and
-                  analysis, which is exactly the situation a real corpus is
-                  always in.
+                  {"Splitting this sentence on spaces gives seven words. The eighteen training sentences contain 72 distinct words across 133 occurrences. Five probe words are absent as complete entries: Alvarez, didn’t, expect, low-cost and re-analysis with its period. Related forms such as expected, lower, cost and analysis are present. That gives us a concrete reason to try reusable pieces."}
                 </p>
                 <KeepInMind>
-                  A tokenizer is judged on text it has not seen. Anything that
-                  reads its own training corpus perfectly has told us nothing,
-                  so every number on this page is either about the corpus the
-                  merges were learned from or about a sentence that was
-                  deliberately kept out of it.
+                  {"Use the training text to inspect how merges are learned, then use held-out text to check how the resulting pieces apply elsewhere. Encoding the training corpus is informative about compression, but cannot establish coverage of new inputs by itself."}
                 </KeepInMind>
               </SubSection>
 
@@ -104,12 +94,7 @@ export default function BytePairEncodingPage() {
                   the five apart.
                 </p>
                 <p>
-                  Making the vocabulary larger does not fix this, it only moves
-                  the boundary. Whatever number we stop at, the words past it
-                  are mostly words the corpus saw once, and a table built from
-                  any corpus at all has a long tail of exactly that kind. A
-                  proper name is the clearest case, since there is no size of
-                  word table that contains the names.
+                  {"A larger whole-word vocabulary can cover more known words, but it cannot guarantee coverage of future names, spellings or compounds. The issue is the lack of a way to compose an absent entry from smaller known pieces."}
                 </p>
                 <KeepInMind>
                   A vocabulary of whole words cannot spell a word it never met,
@@ -120,18 +105,13 @@ export default function BytePairEncodingPage() {
 
               <SubSection title="3. A vocabulary of single characters">
                 <p>
-                  The opposite choice has the opposite problem. Give the vocabulary one row per character and almost nothing is unspellable, since the sentence is made of characters and every character it uses does turn up somewhere in the corpus. The corpus uses 36 distinct characters, and the table comes to 51 rows rather than 36 because a character that ends a word is kept apart from the same character inside one, for a reason section 5 comes to.
+                  {"The character-based starting point uses 36 visible characters from this corpus. With the chosen end-marker convention, internal and word-final forms are distinct, giving 51 starting symbols. Whether a new input is representable depends on those forms, rather than just whether its visible letters appeared somewhere."}
                 </p>
                 <p>
                   Either way it is a very small table, and the sentence encodes to 45 pieces where a word vocabulary needed 7, while the corpus goes from 133 words to 648 pieces.
                 </p>
                 <p>
-                  I wrote almost, and the qualification is not a hedge. One of
-                  those 45 pieces has no row in that table of 51, on a sentence
-                  every character of which the corpus contains, and the reason
-                  is the same distinction between 36 and 51 that the paragraph
-                  above passed over. Sections 11 and 12 are about it, and it is
-                  the most useful thing on this page.
+                  One of the 45 initial pieces has no row in the table of 51, even though the corpus contains every character in the sentence. The extra distinction is the position of a symbol inside a word: a letter at the end has a different form from that letter elsewhere. We need to inspect those starting symbols as well as the visible alphabet to understand this failure.
                 </p>
                 <NumberTable
                   headings={["vocabulary", "rows", "the sentence", "the corpus"]}
@@ -142,13 +122,7 @@ export default function BytePairEncodingPage() {
                   caption="Two extremes on the same corpus and the same sentence, both counted by the code behind this page."
                 />
                 <p>
-                  Length is not a cosmetic cost. Whatever reads these pieces
-                  spends work per piece, and a model that has to look at 45
-                  positions to see one sentence is spending most of its capacity
-                  learning that l followed by o followed by w spells a word it
-                  will meet a thousand times. It also has to carry information
-                  much further, since the beginning and the end of a thought are
-                  now six times as far apart as they were.
+                  {"Longer sequences give the downstream model more positions to process and increase the token distance between related text. The resulting computation and learning difficulty depend on the model. This page measures sequence length; it does not measure how much model capacity is spent learning spelling."}
                 </p>
                 <KeepInMind>
                   Neither table is wrong; they are the two ends of one trade,
@@ -161,24 +135,10 @@ export default function BytePairEncodingPage() {
 
               <SubSection title="4. Byte pair encoding, between the two">
                 <p>
-                  Byte pair encoding is the thing in between, and the way it
-                  gets there is worth stating before any detail. It does not
-                  decide what a piece ought to be. It starts at the character
-                  end, where almost nothing is unspellable, and then repeatedly
-                  buys one shorter sequence with one more row of the table,
-                  always buying whichever row shortens the corpus most. A
-                  frequent word
-                  is bought early and ends up as one piece; a rare one is never
-                  bought and stays as a few pieces that are themselves frequent.
+                  {"BPE starts with small symbols and repeatedly joins a frequent neighboring pair. Each learned joined symbol adds a vocabulary entry and can shorten later encodings. The rule favors repeated combinations, but it does not explicitly choose words, stems or suffixes. A frequent complete word may eventually become one piece."}
                 </p>
                 <p>
-                  So the vocabulary size stops being a choice between two
-                  regimes and becomes a dial. At the smallest setting we have
-                  the character vocabulary; turning it up trades rows for
-                  length, one row at a time, and every setting in between is
-                  available. On the corpus above, a fit that has made no merge at
-                  all reads the sentence in 46 pieces, and 85 merges later reads
-                  it in 26, while the corpus falls from 648 pieces to 263.
+                  {"The requested size controls how many merges may be learned. For this corpus, the no-merge encoding with fallback uses 46 pieces for the held-out sentence. After 85 merges it uses 26. The training corpus falls from 648 to 263 pieces. Requested size and actual final size can differ when no eligible pair remains."}
                 </p>
                 <KeepInMind>
                   The method is one loop with one rule, run as many times as the
@@ -198,38 +158,16 @@ export default function BytePairEncodingPage() {
             <>
               <SubSection title="5. Spelling a word, and marking where it ends">
                 <p>
-                  We need a corpus small enough to work by hand, so for the next
-                  four sections we drop to four words with their counts, which is
-                  the example Sennrich and colleagues worked in their own paper.
-                  The word low occurs five times, lower twice, newest six times
-                  and widest three, sixteen occurrences in all. Every word is
-                  written out as its characters, and the last character of each
-                  word carries a marker saying that a space follows it.
+                  {"For a hand-checkable example, use low five times, lower twice, newest six times and widest three times. These are the four word counts used in the familiar subword BPE example. Here each word is spelled as characters, with an end marker attached to its last character. The marker records a word boundary under this tokenizer’s spacing convention."}
                 </p>
                 <Equation>{`low  =  l  o  w${MARKER}`}</Equation>
                 <p>
-                  The marker matters more than it looks. It makes the w that ends
-                  low a different symbol from the w inside lower, which is
-                  correct, since the two behave differently and a piece that ends
-                  words is a different thing from a piece that continues them.
-                  It also makes gluing the pieces back together a purely
-                  mechanical operation, because the spaces are recorded in the
-                  pieces rather than remembered separately. Counted this way the
-                  four words are spelled in 11 distinct symbols and the corpus is
-                  79 pieces long.
+                  {"The final w in low has a different starting symbol from the internal w in lower. That lets learned pieces distinguish word-final and internal positions. Decoding replaces end markers with spaces; it does not recover arbitrary original whitespace. The four-word corpus has 11 distinct starting symbols and 79 weighted character pieces."}
                 </p>
                 <WhyThisWorks title="Why the marker goes on the last character rather than between words">
                   <p>
-                    A separate space symbol would be one more thing for the loop
-                    to merge, and it would merge greedily with whatever sits
-                    beside it, so a piece could end up straddling the gap between
-                    two words before any word had been assembled. Putting the
-                    marker on the last character instead keeps every merge inside
-                    one word by construction, since the words are counted
-                    separately and no pair ever spans two of them. Part 5 lifts
-                    exactly this restriction on purpose, and the first thing that
-                    happens there is worth seeing.
-                  </p>
+                  {"The within-word constraint comes from counting and merging each word separately. An end marker attached to a character is one way to retain word boundaries for decoding. A separate boundary symbol could also remain protected by the same constraint; it would not automatically allow cross-word merges. Part 5 explicitly changes which pairs are eligible."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
                   The end-of-word marker is not decoration. It separates
@@ -264,10 +202,7 @@ export default function BytePairEncodingPage() {
                   </>
                 </WorkedExample>
                 <KeepInMind>
-                  The count is weighted by how often a word occurs, not by how
-                  many distinct words contain the pair. A pair that appears once
-                  inside a very common word beats a pair appearing in many rare
-                  ones, which is what makes the method learn frequent words whole.
+                  {"Weight each adjacency by its word’s occurrence count. A pair in one very common word can outrank a pair spread across several rare words. This favors frequency, without guaranteeing that every common word will become a complete piece at a given budget."}
                 </KeepInMind>
               </SubSection>
 
@@ -280,25 +215,17 @@ export default function BytePairEncodingPage() {
                   reasonHeading="what it does"
                   rows={[
                     { expression: "count every adjacent pair", reason: "weighted by how often each word occurs, and never across a word boundary" },
-                    { expression: "take the largest count", reason: "which is exactly the number of pieces this merge is about to remove from the corpus" },
-                    { expression: "join it everywhere", reason: "every occurrence at once, so the corpus is respelled in one pass" },
+                    { expression: "take the largest count", reason: "the largest weighted adjacency count; overlapping occurrences can make the actual saving smaller" },
+                    { expression: "join it everywhere", reason: "non-overlapping occurrences, scanning each word from left to right" },
                     { expression: "add the joined symbol", reason: "one new row of the vocabulary, and one new merge on the record" },
                     { expression: "repeat", reason: "until the vocabulary is the size asked for, or nothing occurs twice any more" },
                   ]}
                 />
                 <p>
-                  Notice what the count means once the merge is made. Joining a
-                  pair that occurs nine times removes nine pieces from the
-                  corpus, exactly, because each occurrence was two symbols and is
-                  now one. So the count is not a proxy for anything; it is the
-                  saving, in pieces, that the merge is about to make.
+                  {"For these candidate pairs, occurrences do not overlap, so merging a pair counted nine times removes nine weighted pieces. Repeated-symbol pairs need care: aa occurs twice in aaa, but left-to-right non-overlapping replacement can merge only one of those occurrences. The SDK counts adjacent pairs and then applies non-overlapping merges."}
                 </p>
                 <KeepInMind>
-                  Each merge costs one row of the vocabulary and saves as many
-                  pieces as the pair was seen times. Taking the largest count is
-                  taking the biggest saving available right now, which is not the
-                  same as the biggest saving available over the whole run, and
-                  Part 6 measures the difference.
+                  {"The learner chooses the largest adjacent-pair count. On this example that is also the largest immediate piece saving. In general, overlapping occurrences can make count and saving differ. Even an immediate best saving does not guarantee the shortest encoding after several merges."}
                 </KeepInMind>
               </SubSection>
 
@@ -307,7 +234,7 @@ export default function BytePairEncodingPage() {
                   Run the loop ten times on the four words and the vocabulary assembles itself in front of us. Drag the control and watch the spellings shorten. The first merge joins e and s at 9; the second joins that new es to the marked t, also at 9, so after two steps the ending est with its marker is a single symbol shared by newest and widest.
                 </p>
                 <p>
-                  By the seventh merge the whole word low with its marker is one piece, and by the tenth every one of the four words is a single piece.
+                  {"By merge seven, low with its marker is one piece. After ten merges, newest and widest are whole pieces too, while lower is still lo, w, e and marked r. Its two occurrences account for the remaining difference between 22 corpus pieces and sixteen word occurrences."}
                 </p>
                 <MergeLadder />
                 <NumberTable
@@ -325,26 +252,14 @@ export default function BytePairEncodingPage() {
                 />
                 <InAModel>
                   <p>
-                    Ten merges is a toy. A language model asks for tens of
-                    thousands of rows, learned from a corpus of billions of words
-                    rather than sixteen, and the loop is the same loop. What changes at that scale is
-                    where the merges stop being letters joining into endings and
-                    start being whole common words joining into single rows,
-                    which happens early and then continues for a very long time.
-                  </p>
+                  {"The same weighted-pair loop can be run with a much larger vocabulary budget and corpus. Efficient implementations avoid recounting every pair from scratch after each merge. A larger budget can assemble longer recurring pieces, but the result depends on the corpus and stopping rule."}
+                </p>
                 </InAModel>
                 <p>
-                  This walk, and the twenty-two-row table it ends on, are the
-                  method exactly as Sennrich and colleagues published it, with
-                  nothing added underneath. That is deliberate, because it keeps
-                  the table small enough to read a row at a time; section 12
-                  adds something underneath it and says what that costs.
+                  {"The ten-merge run keeps the complete learned table small enough to inspect: eleven starting symbols, one unknown entry and ten joined symbols. Section 12 adds fallback entries and explains why they are counted separately in this implementation."}
                 </p>
                 <KeepInMind>
-                  Sixteen word occurrences, eleven symbols, ten merges, and the
-                  corpus falls from 79 pieces to 22. At the end every word of
-                  the corpus is one piece, which is what running the loop until
-                  it runs out looks like on a corpus this small.
+                  {"Ten merges reduce the sixteen word occurrences from 79 pieces to 22. Three word types have become single pieces; lower still uses four. The run stops because we requested ten merges, not because no eligible pair remains."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -357,7 +272,7 @@ export default function BytePairEncodingPage() {
               "The sentence is seven words and the word vocabulary built from the corpus has 72 rows. How many of the seven does it find?",
               ["Two", "Five", "Seven", "None, since the corpus does not contain the sentence"],
               0,
-              "Only the and the abbreviation Dr. with its full stop are there. The other five arrive as one stand-in row, five times over, with nothing to tell them apart. A larger table would only move the boundary, since the words past any size are mostly words the corpus saw once, and no size of word table contains the names.",
+              "This fitted whole-word vocabulary contains only the and Dr. from the probe, so the other five words share the unknown entry. A larger or different corpus could add those spellings, including names, but a fixed learned table can still meet unfamiliar words. The issue is coverage of the actual probe, not an inability of word tables to contain names.",
               {"description":"Use these values and conventions.","data":"Text: Dr. Alvarez didn't expect the low-cost re-analysis.\nOf these whole words, the training vocabulary contains Dr. and the. It contains none of the other whole words. Punctuation remains attached."},
             ),
             trueFalse(
@@ -386,12 +301,12 @@ export default function BytePairEncodingPage() {
                 "It marks which pieces are whole words and which are fragments",
               ],
               1,
-              "A separate space symbol would be one more thing for the loop to merge, and it would merge greedily with whatever sits beside it, so a piece could straddle the gap between two words before any word had been assembled. The marker also makes the w that ends low a different symbol from the w inside lower, which is correct, since the two behave differently.",
+              "This implementation learns within pre-tokenized word regions and marks their final character. The marker distinguishes a word-final w from an internal w and helps decoding recover word separation. A separate marker is another possible design if its merge and boundary rules are specified. Preventing cross-word merges depends on the permitted regions, not solely on attaching the marker to a character.",
             ),
             trueFalse(
               "A pair occurring once inside a very common word can outscore a pair occurring in many rare words.",
               true,
-              "The count adds the word’s own occurrence count rather than counting the distinct words, which is what makes the method learn frequent words whole. The count is also exactly the saving, since joining a pair seen nine times turns nine two-symbol occurrences into nine one-symbol ones and removes nine pieces.",
+              "Pair counts are weighted by word occurrences, so one frequent word can contribute more than many rare words. For the nine nonoverlapping occurrences in this example, merging removes nine token positions. Counts and actual savings can differ for overlapping occurrences of a pair, such as repeated identical symbols. The replay rule determines which occurrences can be replaced together.",
             ),
         ],
         },
@@ -401,13 +316,7 @@ export default function BytePairEncodingPage() {
             <>
               <SubSection title="9. Encoding replays the merges in the order they were learned">
                 <p>
-                  Here is the part that is easy to miss. What the fit produced is
-                  not really a list of pieces, it is a list of merges with an
-                  order on them, and the order is load-bearing. To encode a new
-                  word, spell it in characters with the marker on the last one,
-                  then look for the earliest-learned merge that applies anywhere
-                  in it, apply it, and look again. Stop when no learned merge
-                  applies.
+                  {"The fitted tokenizer includes an ordered merge list as well as a vocabulary. To encode, spell a word in its starting symbols, find the earliest learned merge that applies and join its leftmost occurrence. Repeat until no learned merge applies. The stored order resolves competing possible combinations."}
                 </p>
                 <Equation>{"rank of a merge  =  its position in the order it was learned, and earlier is applied first"}</Equation>
                 <WorkedExample title="The word lowest, which those four words never contained">
@@ -419,12 +328,7 @@ export default function BytePairEncodingPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  Reversing two merges gives a different tokenizer even though
-                  the set of pieces is the same, since a merge only applies to
-                  what the merges before it left behind. That is why a vocabulary
-                  cannot be shipped as a set of strings, and why two people
-                  holding the same rows will disagree about how to cut a word
-                  unless they also agree on the order.
+                  {"Competing applicable merges can produce different encodings when their priorities change. A set of vocabulary strings alone does not specify those priorities. Store the merge ranks and the tokenizer’s starting-symbol and boundary conventions with the entries."}
                 </p>
                 <KeepInMind>
                   The model is the ordered list of merges. The vocabulary is what
@@ -445,45 +349,28 @@ export default function BytePairEncodingPage() {
                 </p>
                 <SentenceCuts />
                 <p>
-                  Two of the cuts land where no linguist would have cut, and a third only looks as though it did. The hyphenated low-cost comes apart as lo, w, the hyphen on its own, and cost with its marker, so the first half is split between a piece that ends in the wrong place and a leftover letter.
+                  {"The low-cost encoding is lo, w, the hyphen and marked cost. Those are frequency-based units rather than a proposed linguistic analysis. A split inside low can be useful for encoding even when it is not a morpheme boundary."}
                 </p>
                 <p>
-                  The prefix in re-analysis does come out as re, which looks like morphology and is not, since re was merged at a count of 17 gathered from every word in the corpus holding those two letters, were and results among them. And analysis comes apart as analysi and then a final s carrying the full stop.
+                  {"The re piece in re-analysis resembles a prefix, but its count of 17 also includes occurrences within were and results. The training objective did not identify a prefix category. The remainder becomes analysi followed by a piece containing the final s and period."}
                 </p>
                 <p>
-                  That last one had a reason I did not expect, and the six readings under the widget are what found it. The vocabulary does hold a row for analysis; handed the word on its own it answers one piece. But a row carries an end-of-word marker, and in the sentence the word ends in a full stop rather than in an s, so the row cannot apply and the fit falls back to the longest thing that can.
+                  {"The vocabulary contains marked analysis, which encodes analysis alone as one piece. In the probe, the final period changes the word-final form, so that entry cannot apply. Inspecting the standalone and punctuated spellings explains the longer encoding without assuming the tokenizer knows grammatical stems."}
                 </p>
                 <p>
                   The same happens to cost, which is one piece alone and the last of four inside low-cost. The clearest case of it is expected against expect, where the corpus holds the longer word and not the shorter, so expected is one piece and its own stem is three.
                 </p>
                 <KeepInMind>
-                  The pieces are frequent substrings of one particular corpus and
-                  nothing else. A row for a word is a row for that word ending
-                  where it ended in the corpus, so attaching a full stop, or a
-                  hyphen, or nothing at all where a suffix used to be, can cost
-                  several pieces without changing a letter.
+                  {"Pieces reflect repeated substrings and their boundary forms. Punctuation or a suffix can change which ranked merges apply. That can increase piece count even when much of the visible spelling is shared."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="11. Nothing is out of vocabulary, except a character">
                 <p>
-                  Gluing the pieces back is mechanical. Concatenate them, then
-                  turn every marker into a space. Because the markers are inside
-                  the pieces, no separate record of where the spaces were is
-                  needed, and the round trip is exact on any text spelled
-                  entirely in symbols the corpus taught. That last clause is
-                  doing more work than it looks as though it is.
+                  Decoding concatenates the stored pieces and interprets each boundary marker using the scheme&apos;s spacing convention. This recovers the retained text when every required symbol was represented. Coverage must include the boundary-specific forms of those symbols, not merely the visible letters. A marker convention also needs to be distinguished from preserving every possible original spacing pattern.
                 </p>
                 <p>
-                  The sentence this method is usually sold with is that nothing
-                  it reads is ever out of vocabulary. That sentence is true of
-                  words and false of characters, which is worth separating out
-                  carefully, since the two cases behave nothing alike. A word
-                  the corpus never held is written out of smaller pieces and
-                  arrives intact, and that is the whole achievement of Part 1. A
-                  character the corpus never held has no smaller pieces to be
-                  written out of, so there is nothing for the same mechanism to
-                  do.
+                  {"A new word can be encoded from smaller learned symbols if every required starting symbol is covered. A wholly new character, or a missing word-final form, can break that coverage when fallback is disabled. Word-level novelty and starting-symbol coverage are separate questions."}
                 </p>
                 <p>
                   The reason is the loop rather than any choice made around it.
@@ -495,38 +382,30 @@ export default function BytePairEncodingPage() {
                   happened to contain.
                 </p>
                 <p>
-                  Our own sentence falls into that hole, and I want to be exact about how, because it is narrower than the usual telling. The corpus does contain the letter z, in the word size. What it does not contain is any word ending in z, and since section 5 a letter that ends a word has been a different symbol from the same letter inside one.
+
+                  The held-out sentence exposes that boundary distinction at z. The corpus contains the letter inside size, but no training word ends with it. Our representation treats an end-of-word letter as a different starting symbol. Recognizing ordinary z therefore does not establish coverage for z at a word boundary.
                 </p>
                 <p>
                   So the symbol z-at-the-end-of-a-word was never in the alphabet, no merge could ever have produced it, and Alvarez ends in exactly that. The sentence uses no character the corpus lacks and is still not spellable.
                 </p>
                 <p>
-                  Reading it under the method exactly as published, with nothing
-                  underneath the alphabet, the encoder hands back the stand-in
-                  row and the sentence comes to 25 pieces. Gluing them gives
-                  this, and the space is gone because a stand-in carries no
-                  marker and the marker was attached to the symbol it replaced.
+                  {"With byte fallback disabled, this SDK maps the missing final symbol to its unknown entry. The sentence uses 25 pieces. Decoding loses both the z and its attached boundary marker, producing the altered text below. This is the policy of the demonstrated implementation, rather than a required unknown-symbol policy for every BPE tokenizer."}
                 </p>
                 <Equation>{"Dr. Alvarez didn't   →   Dr. Alvare[UNK]didn't"}</Equation>
                 <p>
-                  Nothing was raised, and nothing about the fit was wrong; the size was met, the merges are the merges, and every number the fit reports about itself is correct. A text went in and a shorter, different text came out, with no signal anywhere that it had. That is the half of this worth dwelling on, because a refusal can be caught and handled and a silent substitution cannot, and the further a text sits from the corpus the more of it goes.
+                  {"Encoding returns an unknown-token ID rather than raising an exception. A caller can detect that ID, or compare the decoded text with the input. If the caller checks neither, the substitution and lost boundary may pass unnoticed. A successful method call therefore does not establish a lossless round trip."}
                 </p>
                 <p>
-                  The Greek sentence in the next section reads as 22 pieces under the published method, 21 of them the same stand-in, and what comes back from gluing those is a run of stand-ins with a full stop on the end.
+                  {"On the Greek probe, the same no-fallback fit emits 22 pieces, including 21 unknown entries. Decoding cannot reconstruct the missing characters. The next section tests a fallback policy that retains them."}
                 </p>
                 <KeepInMind>
-                  A merge can only join what exists, so the alphabet is a fact
-                  about the corpus that no vocabulary size reaches. A character
-                  outside it, or a character in a position outside it, becomes
-                  one stand-in that says something was here and nothing about
-                  what, and the round trip returns text that is not the text
-                  that went in without saying so.
+                  {"Merging cannot construct a starting symbol absent from the alphabet. This no-fallback implementation uses an unknown entry when that occurs. Other implementations can reject the input or retain it through a fallback encoding; the choice belongs in the tokenizer’s contract."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="12. Giving every character a spelling">
                 <p>
-                  The repair is available because every character already has a spelling in something smaller than itself. Written out for storage, any character at all is a run of one to four bytes, and there are exactly 256 byte values whatever any corpus did. Give the table a row for each of those values, written so that it cannot be mistaken for a letter, and a character with no row of its own goes out as the rows of its bytes rather than as a stand-in.
+                  {"For valid Unicode text, UTF-8 spells each character using one to four bytes, drawn from 256 possible byte values. Give those values reserved vocabulary entries. A missing character can then use byte entries instead of losing its identity in an unknown token. The spelling must be reserved so it cannot collide with ordinary text pieces."}
                 </p>
                 <p>
                   This is usually called byte fallback, and it is what SentencePiece offers under that name.
@@ -542,20 +421,12 @@ export default function BytePairEncodingPage() {
                 </p>
                 <ByteFallbackRepair />
                 <p>
-                  On the sentence about Dr. Alvarez the repair costs exactly one piece, 26
-                  against 25, and the interesting part is that not one of the 26
-                  is a byte row. The letter z has a row already; what it lacked
-                  was a row for z at the end of a word. So the fit writes the
-                  ordinary z and then the marker on its own, the space comes
-                  back, and the 256 byte rows are never reached at all. On this
-                  sentence the whole repair is the 257th row.
+                  The repaired held-out sentence uses 26 pieces instead of 25, but none is a byte fallback row. The ordinary z already exists; it is the end-of-word form that was missing. Encoding z and the boundary marker separately preserves the text. In this case the extra marker row, the 257th added row, provides the repair before any of the 256 byte rows are needed.
                 </p>
                 <p>
                   The other two texts are where the bytes do the work. The word café goes from four pieces, the last a stand-in with the accent gone for good, to six, the accented e written as the two byte rows for 195 and 169. The Greek sentence goes from 22 pieces that cannot be read back to 46 that can, 42 of the 46 being byte rows, so 25 characters arrive as 46 positions and whatever reads them has to work back up from bytes to letters nobody taught it.
                 </p>
-                <p>
-                  A vocabulary fitted to Greek would do far better than that, which is the honest thing to say about it, and the alternative on offer here was the text not arriving.
-                </p>
+                <p>This vocabulary was fitted to the report corpus, so its segmentation of Greek is not evidence about a vocabulary trained on representative Greek text. The fallback preserves the ability to encode the example. How efficiently a fitted vocabulary represents a language is a separate question that requires suitable training and evaluation text.</p>
                 <NumberTable
                   headings={["text", "as published", "with byte fallback", "round trip"]}
                   rows={[
@@ -567,12 +438,7 @@ export default function BytePairEncodingPage() {
                   caption="The same 85 merges over the same 51 symbols in every column. The corpus row is the one to notice, since the repair costs the text it was fitted to nothing at all."
                 />
                 <KeepInMind>
-                  257 rows, added once and learned from nothing, buy the
-                  guarantee the method is usually described as already having.
-                  They cost nothing on the corpus, one piece on the running
-                  sentence, and on a text in another script they cost about two
-                  pieces per character, which is the character-level regime this
-                  whole method exists to escape.
+                  {"This implementation adds 257 structural entries: all byte values and a separate word-boundary marker. They leave training-corpus length unchanged and add one piece to this held-out sentence. The Greek probe is longer because unfamiliar characters need byte spellings. Coverage and compactness remain separate measures."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -598,7 +464,7 @@ export default function BytePairEncodingPage() {
                   caption="The gap is 257 at every row and never moves, because nothing about those rows depends on the corpus or on the size."
                 />
                 <p>
-                  Counting them inside the budget instead is the other defensible answer, and it is the one SentencePiece takes. The price of it is a hard floor of 257 on every vocabulary, which would make the twenty-two-row table of section 8 impossible to ask for, and that table is the only reason section 8 can be read a row at a time.
+                  {"SentencePiece includes its required entries in the requested vocabulary budget. Enabling byte fallback reserves 256 byte pieces in addition to its other required symbols. The exact minimum therefore depends on that tokenizer’s configuration, rather than being universally 257. Our small example keeps fallback disabled to expose the eleven-symbol, ten-merge table."}
                 </p>
                 <p>
                   The price of the choice made here is the one the table above shows, which is that the number asked for is not the width of the table, so a model sized from it alone would be 257 rows short.
@@ -613,39 +479,20 @@ export default function BytePairEncodingPage() {
 
               <SubSection title="14. What one more merge is worth">
                 <p>
-                  The vocabulary size is the one number a person setting this up
-                  actually chooses, so it deserves a curve rather than a rule of
-                  thumb. Fit the eighteen sentences at fifteen different sizes
-                  and measure two things at each, what the whole corpus costs in
-                  pieces and what the one held-out sentence costs.
+                  {"Hold the corpus and other settings fixed, then vary the requested vocabulary size. Measure training-corpus length and held-out sentence length separately. Size is one design choice among several, including starting alphabet, boundary convention and minimum pair count."}
                 </p>
                 <PieceCountCurve />
                 <p>
-                  Both curves fall steeply at first and then flatten, which is
-                  the shape the counting guarantees. The first merge is worth the
-                  largest count in the corpus, the second the largest count in
-                  what is left, and so on downward, so each merge saves no more
-                  than the one before it. On this corpus the first merge joins h
-                  to the marked e and saves 31 pieces; the second joins t to the
-                  he-with-a-marker that first merge produced, saves 19, and gives
-                  the word the a row of its own.
+                  {"Both measured curves fall rapidly at first and later flatten. The first merge joins h to marked e and saves 31 training pieces. The second joins t to that result, saves 19 and creates marked the. Training frequency determines those choices; an individual held-out text need not benefit from every merge."}
                 </p>
                 <KeepInMind>
-                  Merges arrive in decreasing order of what they are worth, so
-                  the curve of length against vocabulary size can only ever
-                  flatten. There is no size at which it suddenly starts paying
-                  again.
+                  {"Each additional applicable merge can only shorten an existing deterministic encoding. How much it shortens a particular held-out text depends on which pieces occur there. The displayed flattening is a measured pattern, rather than a guarantee of identical diminishing returns on every text."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="15. Where the curve stops falling">
                 <p>
-                  It flattens completely at 137 rows here. Asking for 150, or
-                  200, or 300 gives exactly 137, because the loop also stops when
-                  no adjacent pair is left that occurs at least twice, and a pair
-                  seen once is a fact about one word rather than about the
-                  language. So the size asked for is a ceiling and not a promise,
-                  and the number actually learned is a fact about the corpus.
+                  {"The learned part stops at 137 entries here. Requests for 150, 200 and 300 all reach that same fit because no adjacent pair meets the minimum count of two. That minimum is a configured policy. A once-observed pair could still be meaningful; the count alone does not settle its linguistic value."}
                 </p>
                 <NumberTable
                   headings={["asked for", "learned", "merges", "corpus", "sentence"]}
@@ -681,15 +528,7 @@ export default function BytePairEncodingPage() {
                   Increasing the vocabulary can shorten the encoded sequences, reducing the number of positions a later model must process. It also adds embedding rows to learn and store. Some new pieces occur rarely, so their vectors receive little training evidence. We need to compare both sequence lengths and table costs for the text we expect to use.
                 </p>
                 <p>
-                  That second effect is the one that decides where to stop in
-                  practice. The rows a large vocabulary buys are, by
-                  construction, the ones that were merged last, which is to say
-                  the least frequent ones, so each of them is seen fewer times
-                  than every row before it. Past some point the sequence gets
-                  barely shorter while the table fills with rows the model has
-                  almost no evidence about, and on this corpus that point is
-                  visible in the table above, where going from 100 rows to 137
-                  buys the sentence two pieces.
+                  {"Larger budgets can add rare pieces whose downstream embeddings receive limited training evidence. That is one reason to examine both length and table cost. On this tokenizer’s probe, increasing learned size from 100 to 137 saves two pieces. No downstream model is trained here, so this table cannot locate its optimal vocabulary size."}
                 </p>
                 <InAModel>
                   <p>
@@ -729,10 +568,10 @@ export default function BytePairEncodingPage() {
                 "The merges were replayed in the wrong order",
               ],
               1,
-              "The row cannot apply, so the fit falls back to the longest thing that can. The same happens to cost, which is one piece alone and the last of four inside low-cost. The clearest case is expected against expect, where the corpus holds the longer word and not the shorter, so the longer is one piece and its own stem is three.",
+              "Encoding replays the learned merges inside the permitted word region; it does not choose the longest vocabulary string independently. Word-final markers and punctuation change which symbol sequences are available. A row learned for a complete word therefore need not be usable inside a longer or differently punctuated spelling. Check the actual marked pieces and merge ranks when explaining this result.",
             ),
             trueFalse(
-              "Asking for a large enough vocabulary eventually gives a row for any character a text might contain.",
+              "With byte fallback disabled, increasing only the requested vocabulary budget eventually gives a row for every character a future text might contain.",
               false,
               "A merge joins two symbols that already exist, so every row the fit adds is built from rows that were already there, and those are the alphabet the corpus arrived in. Ask for a thousand and the alphabet is still whatever the corpus happened to hold, which is why a character outside it becomes a stand-in and the round trip silently returns different text.",
             ),
@@ -756,7 +595,7 @@ export default function BytePairEncodingPage() {
                 "Going from 100 rows to 137 shortens the sentence by about as much as the first 48 merges did",
               ],
               [0, 1],
-              "The loop stops when no adjacent pair is left that occurs at least twice, since a pair seen once is a fact about one word rather than about the language, so 137 is a ceiling the corpus sets and the size asked for is not a promise. The floor is the corpus’s too, one row per symbol it is spelled in plus the stand-in, 52 here, and below it the request cannot be met at all. Each merge is worth the largest count in what is left, 31 for the first and 19 for the second, so the savings only fall, and the last 37 rows buy the sentence two pieces where the first 48 merges took it from 46 to 28.",
+              "This implementation stops when no eligible pair meets its repetition threshold or when it reaches the requested learned-vocabulary budget. The threshold is a training policy, not proof that a once-seen pair has no linguistic value. The base alphabet and unknown entry also set a minimum feasible learned size. Report actual fitted size and held-out length, because a larger request need not produce another merge or the same saving on new text.",
             ),
         ],
         },
@@ -807,7 +646,7 @@ export default function BytePairEncodingPage() {
                   It is not free, and this is the place on the page where a variant is worse than the thing beside it. Fitted to the same eighteen sentences with the same number of merges, the byte alphabet reads the sentence about Dr. Alvarez as 29 pieces where the character alphabet reads it as 26, and reads the corpus as 282 pieces where the character alphabet reads it as 263.
                 </p>
                 <p>
-                  It is paying for two things, the byte values this corpus never uses, which are 220 of the 256 and which no merge can ever be spent on, and the spaces, which it carries as real symbols attached to the word that follows rather than as a marker.
+                  {"This byte fit reserves all 256 byte entries even though the corpus uses only 36 values. It also explicitly represents spaces, while the character fit uses end markers. These are storage and representation differences. Unused byte entries do not themselves explain why the encoded corpus is longer."}
                 </p>
                 <NumberTable
                   headings={["alphabet", "rows in the table", "merges", "the sentence", "the corpus", "Greek"]}
@@ -829,27 +668,16 @@ export default function BytePairEncodingPage() {
                   went out as bytes.
                 </p>
                 <KeepInMind>
-                  On text written in the corpus&rsquo;s own script, merging over
-                  bytes is longer, by 3 pieces in 26 on the sentence and 19 in
-                  263 on the corpus. What it buys is that the alphabet stops
-                  being a fact about the corpus at all, and the two large
-                  families of published models have taken the two different
-                  routes to that, one merging over bytes and one keeping
-                  characters with bytes underneath.
+                  {"For these same-corpus fits, byte-level merging uses 29 rather than 26 pieces on the probe, and 282 rather than 263 on training text. Both cover the shown inputs. A different corpus or spacing convention can reverse a length comparison, as the isolated café example already illustrates."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. Letting a piece cross a space">
                 <p>
-                  The second variant lifts the rule that has been in force since
-                  section 5, which is that a merge never joins two symbols
-                  belonging to different words. That rule was never argued for;
-                  it followed from counting the words separately. Lift it and a
-                  very common two-word sequence can become one row, which is
-                  worth two positions every time it occurs.
+                  {"The second variant permits eligible pairs across original word boundaries. A repeated phrase can then become one piece. The number of saved positions depends on how many pieces represented that phrase before the merge; joining two existing pieces saves one position per non-overlapping occurrence."}
                 </p>
                 <p>
-                  It cannot be lifted from the start, though, and the reason is the same greedy counting as everywhere else. With the boundary gone from the first merge, the commonest adjacent pairs in a corpus are things like the letter that ends one common word followed by the letter that starts the next, and the loop would spend its early merges on those and never build the words at all.
+                  {"Cross-boundary merging can also begin at the character stage. It may then learn frequent fragments spanning spaces before assembling whole words. The two-stage variant demonstrated here first learns within words, then permits broader merges to influence the kind of units it learns."}
                 </p>
                 <p>
                   So the fit runs in two stages, ordinary merging within words up to a size stated in advance, then merging with the boundary ignored for whatever room is left.
@@ -865,13 +693,7 @@ export default function BytePairEncodingPage() {
 
               <SubSection title="20. What a small corpus actually learns there">
                 <p>
-                  Here the measurement was more interesting than the description.
-                  Run the second stage on our four-word corpus and it does not
-                  learn phrases at all, because that corpus has no phrases in it,
-                  only the same four words repeated. What it learns instead is a
-                  word doubled, newest followed by newest and low followed by
-                  low, which is a perfectly correct answer to the question it was
-                  asked and a useless vocabulary row.
+                  {"On the four-word corpus, the second stage learns repeated-word combinations such as newest newest and low low. Those combinations reflect how this artificial corpus was constructed. Whether such entries are useful depends on the intended input, rather than on their being repeated words alone."}
                 </p>
                 <SuperwordMerges />
                 <p>
@@ -945,20 +767,10 @@ export default function BytePairEncodingPage() {
                   caption="Both were asked for thirty rows. The constrained vocabulary is exactly the first fifteen entries of the other."
                 />
                 <p>
-                  What is bought for that doubling is that the un in undo is the
-                  same row as the un in untie, and the do in undo the same row as
-                  the do in redo, so a model reading these pieces can see the
-                  shared structure that the unconstrained vocabulary merged away.
-                  Whether that is worth twice the sequence length is not
-                  something this corpus can settle, and I have not measured it
-                  against a model here.
+                  The constrained vocabulary gives un the same row in undo and untie, and do the same row in undo and redo. Those shared entries make the recurring parts available to the model instead of merging them into unrelated whole forms. The measured cost here is twice the sequence length. Whether the shared structure improves a model enough to justify that cost requires a model experiment, which this tokenizer comparison does not provide.
                 </p>
                 <KeepInMind>
-                  The constraint makes the vocabulary a prefix of the
-                  unconstrained one, stopping where the unconstrained fit would
-                  have started joining across joints. It buys visible structure
-                  and it pays in pieces, and on this corpus the payment is
-                  exactly double.
+                  {"On this particular prefix-and-root corpus, the constrained entries match the first fifteen entries of the unconstrained fit. It uses twice as many pieces but preserves the supplied boundaries. Constraints can change merge order on other data; a constrained vocabulary is not generally a prefix of an unconstrained vocabulary."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -970,14 +782,7 @@ export default function BytePairEncodingPage() {
             <>
               <SubSection title="23. The tie the counts cannot break">
                 <p>
-                  Go back to the very first merge on the four words. The pair e
-                  followed by s scores 9, and so does the pair s followed by the
-                  marked t. The rule says take the largest count and there are
-                  two largest counts, so at this point the method has run out of
-                  instructions. Any tie-break at all is something added from
-                  outside, and the usual choice is whichever pair the
-                  implementation happened to meet first, which makes the answer
-                  depend on the order the texts arrived in.
+                  {"The first pair counts tie: e followed by s and s followed by marked t both score nine. Counts alone do not select one. This SDK chooses the lexicographically smaller pair, making the result independent of input order for the same weighted corpus. Other tie rules can produce different learned entries."}
                 </p>
                 <TieBranches />
                 <p>
@@ -987,21 +792,13 @@ export default function BytePairEncodingPage() {
                   The second tie, three pairs at 6 four merges later, is the interesting one, since all three branches again leave the corpus at 22 pieces and one of them cuts lowest as two pieces rather than three.
                 </p>
                 <KeepInMind>
-                  A tie means the objective is genuinely indifferent, so no
-                  tie-break is more correct than another. What a tie-break does
-                  decide is how words the corpus never contained will be cut,
-                  which is the only thing that was ever in question.
+                  {"Tied pairs have the same immediate count score. A repeatable tie rule makes training reproducible, but the branches can differ in later compression or held-out segmentation. Equality at the current step does not make every downstream consequence equivalent."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. Greedy merging is not shortest merging">
                 <p>
-                  Section 7 noted that taking the largest count is the biggest
-                  saving available now, and that this is not the same as the
-                  biggest saving available over a run. The method is a greedy
-                  one, and greedy methods are not generally optimal. Here that is
-                  not a worry to be waved at, since on a corpus small enough we
-                  can enumerate every sequence of merges and know the answer.
+                  {"On the next corpus, the most frequent candidate also gives the largest immediate saving because its occurrences do not overlap. We can enumerate short sequences of merges to test whether that greedy choice also minimizes length after several steps."}
                 </p>
                 <p>
                   Take three words, report twice, taste eight times and state ten times, which is 102 pieces spelled in characters. Three pairs tie for first place at 18, s followed by t, t followed by a, and t followed by the marked e, and every one of them saves the same 18. Take any of them and one merge leaves the corpus at 84.
@@ -1011,18 +808,11 @@ export default function BytePairEncodingPage() {
                 </p>
                 <WorkedExample title="The second merge on each branch, counted">
                   <>
-                    <p>
-                      Join s to t first, which is the branch the tie rule here
-                      takes, and taste becomes t, a, st, marked e while state
-                      becomes st, a, t, marked e. Count the pairs again. The
-                      three largest, st followed by a, a followed by t, and t
-                      followed by the marked e, all score 10, since each occurs
-                      in one of the two frequent words and not the other. Now
-                      join t to a first instead. Then taste is ta, s, t, marked
-                      e and state is s, ta, t, marked e, and the pair t followed
-                      by the marked e is still intact in both, so it still
-                      scores 8 from taste and 10 from state.
-                    </p>
+                    <p>After merging <span className="font-mono">s + t</span>, the two frequent words are:</p>
+<Equation>{"taste: t, a, st, e</w>\nstate: st, a, t, e</w>"}</Equation>
+<p>The largest next-pair count is 10. If the first merge instead joins <span className="font-mono">t + a</span>, the remaining forms are:</p>
+<Equation>{"taste: ta, s, t, e</w>\nstate: s, ta, t, e</w>\ncount of (t, e</w>): 8 + 10 = 18"}</Equation>
+<p>That pair remains available in both words, giving the second branch a larger next saving despite an equal first-step score.</p>
                     <Equation>{"after s + t:   best pair left scores 10,   84 − 10 = 74\nafter t + a:   t + marked e scores 8 + 10 = 18,   84 − 18 = 66"}</Equation>
                     <p>
                       The first merge spent the same 18 either way. What
@@ -1042,57 +832,28 @@ export default function BytePairEncodingPage() {
                   caption="Every sequence of up to four merges was enumerated, so the right column is the shortest that exists rather than the shortest anything found."
                 />
                 <p>
-                  Eight pieces on a corpus of 102 is about eight per cent, held
-                  steady out to four merges, and the loss is locked in by the
-                  first move. So the method is a heuristic for shortening a
-                  corpus and not a solution to it, and the two failures compound,
-                  since the first move here was a tie and the tie-break chose the
-                  losing branch. Nothing in the counting could have seen that
-                  coming, because at the moment of choosing, the three candidates
-                  were worth exactly the same.
+                  {"The selected greedy branch remains eight pieces above the shortest enumerated encoding at budgets two through four. Relative to the original 102 pieces, that gap is about eight percent. The first count cannot evaluate later opportunities without looking ahead, which is why this example distinguishes a local heuristic from a global search."}
                 </p>
                 <KeepInMind>
-                  Byte pair encoding does not minimise sequence length for a
-                  given vocabulary size. It takes the largest immediate saving,
-                  which on this corpus is eight per cent short of the best
-                  reachable at every budget from two merges on.
+                  {"BPE does not generally minimize corpus length at a fixed merge budget. Here the selected frequency-greedy branch is eight pieces above the enumerated best at budgets two, three and four. Overlapping pair occurrences add a separate reason that an adjacency count need not equal the immediate saving."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="25. A vocabulary carries one corpus, and everything else backs off">
                 <p>
-                  The merges are a summary of one corpus and of nothing else.
-                  That is the source of the method&rsquo;s power, since it is how
-                  frequent things become cheap without anybody deciding which
-                  things are frequent, and it is also permanent in a way that is
-                  easy to underestimate. Whatever that corpus over-represented is
-                  now cheap forever, and whatever it under-represented is now
-                  expensive forever, and neither can be argued with later,
-                  because the vocabulary is fixed before the model that reads it
-                  is trained.
+                  {"The fitted merges summarize recurring combinations in the training corpus. Once deployed, a fixed tokenizer keeps applying those same entries and ranks. Its favored spellings can therefore reflect an unrepresentative training source. Retraining or adapting the tokenizer can change that representation, but requires compatible handling of the downstream model’s token IDs."}
                 </p>
                 <p>
-                  On our eighteen sentences the row for expected exists and the
-                  row for expect does not, because those sentences use the past
-                  tense and never the bare stem. Nothing is wrong with
-                  that fit; it is the right answer for that corpus. But every
-                  text this vocabulary ever reads will be cut that way, so a text
-                  written mostly in the present tense pays three pieces for a
-                  word this one pays one for, and no amount of evidence
-                  afterwards can move the row.
+                  {"The supplied corpus includes expected but not expect. The fitted tokenizer encodes the longer word as one piece and the shorter stem as three. While this tokenizer stays fixed, later text does not change that segmentation. Adaptation is possible, but is a separate operation from training the model on already encoded inputs."}
                 </p>
                 <p>
-                  Which is why what happens on the way down matters more than which rows a vocabulary holds. A piece the merges never built cannot be reached at all, so the word is written out of smaller pieces instead, and how small those get is what decides whether a text is readable or merely present. A text from a different domain backs off to short pieces and gets somewhat longer, the way expect goes from one piece to three here.
+                  {"When no large learned piece applies, smaller pieces retain the spelling if the alphabet or fallback covers it. A domain change can increase sequence length, but need not do so for every text. Measure the intended domain’s encodings rather than inferring length from the domain label alone."}
                 </p>
                 <p>
-                  A text in a script the corpus never contained backs off all the way to bytes, and the Greek sentence of section 12 arrives as 46 pieces for 25 characters, which is worse than the character vocabulary Part 1 rejected. In every one of those cases the vocabulary was doing exactly what it was fitted to do.
+                  For the Greek sentence, the byte fallback uses 46 pieces to cover 25 characters. That is a longer sequence than a character table with the required entries would need. It illustrates the separate questions of coverage and compactness: the fitted vocabulary can retain unfamiliar writing while representing it less efficiently.
                 </p>
                 <KeepInMind>
-                  Two corpora of the same language give two different
-                  vocabularies, and neither is wrong. A vocabulary is fairly
-                  faulted for how badly it degrades on text it was not built
-                  from, which is a property of how far down it has to go, and
-                  unfairly faulted for which pieces it happens to hold.
+                  {"Different corpora can produce different useful vocabularies. Compare coverage, length, reproducibility and downstream cost on the intended inputs. The learned entries themselves are appropriate to examine when they explain an unwanted segmentation or unequal representation."}
                 </KeepInMind>
               </SubSection>
 
@@ -1102,28 +863,21 @@ export default function BytePairEncodingPage() {
                   expressionHeading="Merge or vocabulary condition"
                   reasonHeading="How it affects BPE"
                   rows={[
-                    { expression: "two pairs with the same count", reason: "the objective is indifferent, so no answer is more correct. A choice must be made and any choice is arbitrary; taking the earliest in some fixed order at least makes the fit repeatable, where taking whichever was met first makes it depend on the order the texts arrived in. On the four-word corpus the first tie changes one row of ten and no piece count." },
+                    { expression: "two pairs with the same count", reason: "Counts tie at this step, so a tie rule is needed. This SDK uses lexical pair order. The first tie changes one learned row but not the final corpus count in the shown run; other ties can change later compression and probe encodings." },
                     { expression: "a vocabulary smaller than the alphabet", reason: "there is nothing to give. The floor is one row per symbol the corpus is spelled in, plus whatever stands in for the unspellable, since dropping a symbol leaves part of the training corpus itself unreadable. On the eighteen sentences that floor is 52." },
                     { expression: "a vocabulary larger than the corpus can fill", reason: "the loop runs out of pairs occurring twice and stops. The size asked for is a ceiling, not a promise, and the number learned is a fact about the corpus; 300 and 137 are the same fit here." },
-                    { expression: "a pair seen exactly once", reason: "a decision rather than a fact. Merging it is a row spent on one word, which is memorisation; refusing it means a corpus of entirely distinct words learns nothing at all. Any threshold is a guess at where a count stops being a coincidence." },
+                    { expression: "a pair seen exactly once", reason: "The minimum frequency is configurable. A once-occurring pair can be merged if allowed. A corpus of distinct whole words may still contain repeated internal pairs, so forbidding count-one merges does not necessarily prevent learning." },
                     { expression: "the shortest corpus a given number of merges could reach", reason: "not what the method finds. Greedy choice is optimal at one merge and can be beaten from two onward, by eight pieces in 102 on the three-word corpus of section 24, and finding the true optimum means searching a space that grows with every merge." },
                     { expression: "a character the corpus never used", reason: "unspellable, and permanently so, since a merge only ever joins two symbols that already exist and therefore no vocabulary size can invent an alphabet row. What to do instead is a decision. One stand-in row loses the character and any word boundary attached to it, and loses them silently; a spelling in bytes keeps both, at 257 rows once and, on the Greek sentence, at 46 pieces for 25 characters." },
                     { expression: "a symbol the corpus used only inside words, at the end of one", reason: "also unspellable, and much easier to miss, because the character is there. Marking word ends makes a letter at the end a different symbol from the same letter in the middle, which is what makes decoding mechanical and what leaves this hole. Alvarez falls into it on a corpus containing size, and the repair there costs a single piece, since the letter has a row and only its position did not." },
-                    { expression: "how to count rows that no corpus taught", reason: "a decision with nothing in the mathematics to settle it. Counting the 257 against the size asked for puts that number as a hard floor under every vocabulary, which makes the twenty-two-row table of section 8 impossible to ask for at all; leaving them outside it means the number asked for is not the width of the table, and 137 here comes with 394 rows." },
+                    { expression: "how to count rows that no corpus taught", reason: "The requested budget can include or exclude structural fallback entries. This SDK adds 257 entries outside the learned budget, so a learned size of 137 gives 394 total rows. Another implementation may include bytes, required alphabet symbols and meta symbols within its total budget." },
                     { expression: "where a word’s parts begin and end", reason: "outside the method entirely. Nothing in counting adjacent pairs can distinguish a boundary between two morphemes from any other position, so a piece spanning a prefix and a root is exactly as good to the loop as any other piece. Supplying the joints from elsewhere is the third variant, and it costs twice the pieces on the corpus of section 22." },
                     { expression: "whether a piece may cross a space", reason: "a convention rather than a consequence. Counting words separately makes it impossible; counting whole texts makes it possible from the first merge, at which point the loop spends its early rows on letters that happen to sit either side of a gap. Doing one and then the other needs a transition point, and nothing determines where that goes." },
-                    { expression: "a corpus with no phrase in it", reason: "defined, and it answers the question asked rather than the one intended. On the four-word corpus, lifting the boundary produces rows for newest followed by newest and low followed by low, because the only thing that recurs across a space there is a word beside a copy of itself. Correct, and useless, which is the shape of most degenerate cases here." },
+                    { expression: "a corpus with no phrase in it", reason: "The constructed repeated-word text teaches repeated-word combinations. Here the learned rows include newest newest and low low. Their usefulness must be assessed against the intended text; the algorithm has followed its supplied count objective." },
                   ]}
                 />
                 <KeepInMind>
-                  Five of these are decisions rather than limits, namely the
-                  tie-break, the count below which a pair is ignored, the
-                  alphabet, how the rows that no corpus taught are counted, and
-                  whether a piece may cross a space. Each has defensible answers
-                  on both sides and each changes either what the finished
-                  vocabulary can spell or what its stated size means, so each
-                  belongs in whatever describes a tokenizer rather than being
-                  left to an implementation.
+                  {"Document the alphabet, boundary handling, tie rule, minimum pair count and vocabulary budget convention. Together with the learned entries and ranks, these settings determine what the tokenizer returns. A count table alone does not supply all of those decisions."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1141,7 +895,7 @@ export default function BytePairEncodingPage() {
                 "It reads the Greek sentence in fewer pieces",
               ],
               [0, 1, 2],
-              "The two are exactly level at 46 on the Greek sentence, so reading it in fewer pieces is not a difference either fit can claim. The byte fit is longer on text in the corpus’s own script because it pays for the 220 byte values this corpus never uses and carries the spaces as real symbols, and its table is smaller because it pays for completeness once rather than twice. The two also differ in what the merges see, since with byte rows underneath a character alphabet every merge is over characters, while a byte alphabet spends its early merges reassembling the letters a character fit started with.",
+              "The two fits use the same number of pieces for this Greek probe, but differ on familiar text and total vocabulary storage. Unused byte rows consume vocabulary capacity; they do not directly add tokens to an encoding. Sequence length also depends on retained spaces, boundary conventions and which merges the budget permits. A byte-alphabet learner can spend early merges assembling multibyte characters that a character-based learner starts with.",
             ),
             several(
               "Which of these hold of the fit that respects the joints in undo, untie, redo and retie?",
@@ -1163,12 +917,12 @@ export default function BytePairEncodingPage() {
                 "The first stage is what supplies the end-of-word markers",
               ],
               1,
-              "The loop is greedy, so it spends its early merges wherever the counts are largest, and with the boundary gone from the first merge those counts sit across the gaps. Lifting it later forbids nothing and only permits more, since a merge that stays inside a word can still win in the second stage.",
+              "Allowing cross-boundary pairs changes which candidates can use the merge budget. In this experiment, staging the change first learns within-word pieces, then permits broader combinations. That is a design choice to test, not a guarantee that across-gap pairs always have the largest early count or that one staging policy is best for every corpus.",
             ),
             trueFalse(
               "When two pairs tie for the largest count, the counting is genuinely indifferent between them, and what the tie-break decides is how words the corpus never contained will be cut.",
               true,
-              "A tie means the objective is indifferent, so no tie-break is more correct than another. On the four words both branches of the first tie finish with the corpus at 22 pieces and nine of the ten rows identical, differing only in es against st with its marker, and lowest comes out as the same three pieces either way. The second tie, three pairs at 6, is the one where a branch cuts lowest as two pieces rather than three, which is the only thing a tie-break ever settles.",
+              "A tied current count gives no preference under that immediate score. The tie rule still selects a merge and can change later candidates, later training length and unseen-word encodings. Some branches in this example reach the same training length, while another tie changes lowest. The exhaustive next example shows that equal first-step savings need not imply equal later savings.",
             ),
             choice(
               "On report twice, taste eight times and state ten times, every sequence of merges was enumerated. What did that show?",

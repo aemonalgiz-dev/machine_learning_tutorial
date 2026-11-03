@@ -47,7 +47,7 @@ export const PATH_TOOLS: Record<string, Tool> = {
   probabilityVector: define("Check a probability distribution", "Checks finite probabilities and a total of one, passing the valid distribution through unchanged.", ["Probabilities"], ([value]) => distribution(value)),
   probabilityRows: define("Check transition rows", "Checks that every row is a probability distribution. Rows describe the next possibilities for one current state.", ["Transition table"], ([value]) => rows(value).map(distribution)),
   openProbabilities: define("Check treatment overlap", "Requires every supplied propensity to be strictly between zero and one. This numerical check does not prove causal assumptions.", ["Propensity vector"], ([value]) => probabilities(value,true)),
-  normaliseWeights: define("Normalise non-negative weights", "Divides each weight by their positive total, retaining their relative proportions.", ["Unnormalised weights"], ([value]) => {
+  normaliseWeights: define("Normalize non-negative weights", "Divides each weight by their positive total, retaining their relative proportions.", ["Unnormalized weights"], ([value]) => {
     const xs = numbers(value), total = sum(xs);
     if (xs.some(x => x < 0) || !Number.isFinite(total) || total <= 0) throw Error("Use non-negative weights with a finite positive total.");
     return xs.map(x => x/total);
@@ -90,7 +90,7 @@ export const PATH_TOOLS: Record<string, Tool> = {
     return xs.length%2 ? xs[middle] : (xs[middle-1]+xs[middle])/2;
   }),
   powerTwo: define("Raise two to a power", "An exponent of zero gives one; more negative exponents produce smaller positive values.", ["Exponent"], ([value]) => 2 ** scalar(value)),
-  divideOrZero: define("Divide with an explicit zero fallback", "Divides matching entries. A zero denominator returns zero, as used by the stated empty-neighbour convention.", ["Numerators", "Denominators"], ([a,b]) => {
+  divideOrZero: define("Divide with an explicit zero fallback", "Divides matching entries. A zero denominator returns zero, as used by the stated empty-neighbor convention.", ["Numerators", "Denominators"], ([a,b]) => {
     const x=numbers(a),y=numbers(b); if(x.length!==y.length) throw Error("Numerators and denominators need matching lengths."); return x.map((v,i)=>y[i]===0?0:v/y[i]);
   }),
   addIdentity: define("Add self-connections", "Adds one to each diagonal entry of a square matrix while preserving other edges.", ["Adjacency matrix"], ([value]) => square(value).map((row,i)=>row.map((x,j)=>x+Number(i===j)))),
@@ -102,7 +102,7 @@ export const PATH_TOOLS: Record<string, Tool> = {
   finiteWidth: define("Validate a finite feature table", "Requires a nonempty rectangular table with the declared number of finite numerical columns, then passes the accepted values through.", ["Input rows", "Required width"], ([value,width]) => {
     const a=rows(value),n=scalar(width); if(!Number.isInteger(n)||n<1||a[0].length!==n) throw Error("The feature count does not match the required positive whole-number width."); return a;
   }),
-  regionSizes: define("Count pixels in each labelled region", "Counts each positive integer region ID and ignores background zero. Returns sizes in increasing region-ID order.", ["Region label image"], ([value]) => {
+  regionSizes: define("Count pixels in each labeled region", "Counts each positive integer region ID and ignores background zero. Returns sizes in increasing region-ID order.", ["Region label image"], ([value]) => {
     const a=rows(value),counts=new Map<number,number>();
     for(const x of a.flat()) { if(!Number.isInteger(x)||x<0) throw Error("Use non-negative integer region labels."); if(x) counts.set(x,(counts.get(x)??0)+1); }
     return [...counts.entries()].sort((a,b)=>a[0]-b[0]).map(([,count])=>count);

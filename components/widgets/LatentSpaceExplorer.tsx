@@ -275,8 +275,8 @@ export function LatentSpaceExplorer() {
 
       <Legend>
         Filled dots are words and hollow rings are whole documents, in one
-        picture because they came out of one decomposition. Colour is which half
-        of the corpus a word or document belongs to, and grey is a word both
+        picture because they came out of one decomposition. Color is which half
+        of the corpus a word or document belongs to, and gray is a word both
         halves use. Notice that every point sits to the right of the upright
         line, whatever the corpus and whatever the weighting.
       </Legend>

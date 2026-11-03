@@ -154,7 +154,7 @@ export function LloydStepper() {
           </p>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             <Stat label="inertia at this stage" value={current.inertia.toFixed(1)} />
-            <Stat label={current.shift !== null ? "largest centre move, squared" : "people who switched group"} value={current.shift !== null ? current.shift.toFixed(1) : current.switched !== null ? String(current.switched) : "none yet"} />
+            <Stat label={current.shift !== null ? "largest center move, squared" : "people who switched group"} value={current.shift !== null ? current.shift.toFixed(1) : current.switched !== null ? String(current.switched) : "none yet"} />
             <Stat label="resting inertia of this start" value={walk.resting_inertia.toFixed(1)} />
             <Stat label="best of ten starts, same seed" value={walk.best_of_ten_inertia.toFixed(1)} />
           </div>

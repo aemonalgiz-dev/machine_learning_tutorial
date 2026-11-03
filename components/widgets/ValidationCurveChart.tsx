@@ -207,8 +207,10 @@ export function ValidationCurveChart() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The amber band is how far the five folds disagreed at each degree, and
-        where it explodes the mean above it stops meaning anything.
+        The amber band shows the spread of the five fold scores at each degree.
+        A wide band means performance depends strongly on which observations
+        were held out. Read the mean together with that variation before
+        choosing a degree.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">

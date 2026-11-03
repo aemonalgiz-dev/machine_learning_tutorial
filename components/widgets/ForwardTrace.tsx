@@ -52,7 +52,10 @@ export function ForwardTrace() {
         <div className="space-y-1">{box("loss", show(step.loss_before), stage >= 5)}{box("target", "1", stage >= 5)}</div>
       </div>
       <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        Six kinds of number, all kept. The scores are kept because an activation function&rsquo;s slope has to be evaluated where the forward pass evaluated the activation function; the activations are kept because they are what the next layer&rsquo;s weights multiplied. <span style={{ color: INDIGO }}>Nothing here is a derivative yet.</span>
+        The forward pass saves the values needed for backpropagation. Each
+        score tells us where to evaluate the activation function&apos;s derivative.
+        Each activation is an input to the next layer, so it is needed when
+        calculating that layer&apos;s weight gradients. <span style={{ color: INDIGO }}>The values shown here are the forward calculation.</span>
       </p>
     </div>
   );

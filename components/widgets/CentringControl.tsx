@@ -75,14 +75,14 @@ export function CentringControl() {
         {points.map((point, index) => (
           <circle key={index} cx={plotX(point.x)} cy={plotY(point.y)} r={4} className="fill-slate-800 stroke-white dark:fill-slate-100 dark:stroke-slate-900" strokeWidth={1.5} />
         ))}
-        <text x={FRAME.left} y={FRAME.height - 26} className="fill-slate-500 text-xs dark:fill-slate-400">grey and indigo, the two right fits · rose, the target centred alone · ring, the mean point</text>
+        <text x={FRAME.left} y={FRAME.height - 26} className="fill-slate-500 text-xs dark:fill-slate-400">gray and indigo, the two right fits · rose, the target centered alone · ring, the mean point</text>
         <text x={FRAME.left} y={FRAME.height - 10} className="fill-slate-500 text-xs dark:fill-slate-400">{DATASETS[which].axis}</text>
       </svg>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="ridge slope" value={answer ? answer.ridge.slope.toFixed(4) : "…"} />
         <Stat label="kernel ridge slope" value={answer ? answer.kernel_ridge.slope.toFixed(4) : "…"} />
-        <Stat label="target centred alone" value={answer ? answer.target_only.slope.toFixed(4) : "…"} />
+        <Stat label="target centered alone" value={answer ? answer.target_only.slope.toFixed(4) : "…"} />
         <Stat label="at the mean, right and wrong" value={answer ? `${answer.ridge.at_mean.toFixed(2)}, ${answer.target_only.at_mean.toFixed(2)}` : "…"} />
       </div>
       {message && <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{message}</p>}

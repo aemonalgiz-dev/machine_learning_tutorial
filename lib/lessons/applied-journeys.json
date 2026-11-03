@@ -42,7 +42,7 @@
     }
   },
   "software-fitted-state": {
-    "premise": "An extreme neighbour changes a reading that the model already knew how to process.",
+    "premise": "An extreme neighbor changes a reading that the model already knew how to process.",
     "order": "build-first",
     "construction": {
       "title": "Separate training from serving",
@@ -50,12 +50,12 @@
       "outcome": "The model reference survives a change in request grouping.",
       "hints": [
         "The reference comes from the training readings. A new request must not help set the mean used to judge itself.",
-        "Calculate the training mean on one branch and share it across the request values. An extreme neighbouring request should not move that reference."
+        "Calculate the training mean on one branch and share it across the request values. An extreme neighboring request should not move that reference."
       ]
     },
     "investigation": {
       "title": "Another request joins the batch",
-      "question": "The second request is 100. What should happen to the centred value for 7?",
+      "question": "The second request is 100. What should happen to the centered value for 7?",
       "outcome": "Compare the first entry across both runs; it must stay 3.",
       "caseIndex": 1,
       "kind": "predict",
@@ -254,11 +254,11 @@
     "order": "build-first",
     "construction": {
       "title": "Keep fitted state in its training representation",
-      "start": "Build conversion from a scale and offset, then connect the stored centre and coefficient after it.",
+      "start": "Build conversion from a scale and offset, then connect the stored center and coefficient after it.",
       "outcome": "The physical temperature, rather than the raw transport number, determines the score.",
       "hints": [
-        "Follow one reading through conversion before introducing the fitted centre.",
-        "The centre is already in Celsius. Subtract it after the scale-and-offset branch, then multiply by the coefficient."
+        "Follow one reading through conversion before introducing the fitted center.",
+        "The center is already in Celsius. Subtract it after the scale-and-offset branch, then multiply by the coefficient."
       ]
     },
     "investigation": {
@@ -272,7 +272,7 @@
     "connections": [
       {
         "lessonId": "software-fitted-state",
-        "skill": "Keep the saved training centre fixed",
+        "skill": "Keep the saved training center fixed",
         "why": "A fixed reference is still wrong if a request reaches it in another unit."
       },
       {
@@ -282,7 +282,7 @@
       }
     ],
     "reflection": {
-      "prompt": "What would a Celsius-to-Fahrenheit change do if the model subtracted its centre before conversion?",
+      "prompt": "What would a Celsius-to-Fahrenheit change do if the model subtracted its center before conversion?",
       "carryForward": "Save canonical units and preprocessing order with the fitted artifact."
     },
     "preparation": {
@@ -290,7 +290,7 @@
         0,
         0
       ],
-      "title": "Convert one representation before centring",
+      "title": "Convert one representation before centering",
       "challenge": "Connect readings and the declared unit to both conversion components. Return Celsius values before applying fitted state.",
       "why": "The intermediate Celsius readings make an incorrect offset visible.",
       "hints": [
@@ -332,7 +332,7 @@
     "connections": [
       {
         "lessonId": "software-schema-evolution",
-        "skill": "Version observable failure behaviour",
+        "skill": "Version observable failure behavior",
         "why": "Clients also depend on stable error categories."
       },
       {
@@ -351,15 +351,15 @@
     "order": "investigate-first",
     "construction": {
       "title": "Make the fitted-state promise observable",
-      "start": "Build the transformation and an independent first-reading comparison. Keep the saved centre on the input side of both branches.",
-      "outcome": "A new neighbour cannot silently redefine the first pump’s transformed value.",
+      "start": "Build the transformation and an independent first-reading comparison. Keep the saved center on the input side of both branches.",
+      "outcome": "A new neighbor cannot silently redefine the first pump’s transformed value.",
       "hints": [
         "Build the numerical result before the check so Botie can inspect an actual discrepancy.",
         "Read the first entry from that same result and compare it with the independently supplied expectation, using the declared tolerance."
       ]
     },
     "investigation": {
-      "title": "The first reading stays 2 while its neighbour becomes 100",
+      "title": "The first reading stays 2 while its neighbor becomes 100",
       "question": "Should the first transformed reading change in this fitted row-wise contract?",
       "outcome": "Retest both baseline batches after repairing the reference branch.",
       "caseIndex": 1,
@@ -397,10 +397,10 @@
         0
       ],
       "title": "Inspect the actual transformed list",
-      "challenge": "Return the batch after subtracting the stored centre, before adding a Boolean check.",
-      "why": "A passing flag is easier to assess when the values it summarises remain visible.",
+      "challenge": "Return the batch after subtracting the stored center, before adding a Boolean check.",
+      "why": "A passing flag is easier to assess when the values it summarizes remain visible.",
       "hints": [
-        "The stored centre is a source. A Mean tool applied to the current batch would learn a different reference."
+        "The stored center is a source. A Mean tool applied to the current batch would learn a different reference."
       ]
     }
   },
@@ -591,7 +591,363 @@
     ],
     "reflection": {
       "prompt": "Which configuration setting could change a feature without changing the code?",
-      "carryForward": "Include behaviour-changing configuration in artifact identity."
+      "carryForward": "Include behavior-changing configuration in artifact identity."
+    }
+  },
+  "what-is-databricks": {
+    "premise": "Botie has a directory of maintenance datasets, but the requested program needs one particular input.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Describe the Right Piece of Work",
+      "start": "Resolve the requested dataset name, then connect that result to the program and its separate output name.",
+      "outcome": "The manifest retains the requested input even when directory order or the requested job changes.",
+      "hints": [
+        "Find the requested dataset needs the requested name as well as the directory.",
+        "Describe the processing step keeps the resolved input beside the program and output. It does not run the program."
+      ]
+    },
+    "investigation": {
+      "title": "The Requested Input Changes",
+      "question": "The first request cleans readings; the next extracts dates from inspections. The machine still returns the readings input. Which connection should we inspect?",
+      "outcome": "Trace the requested input into the directory lookup before inspecting the final manifest.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The current requested name reaching dataset lookup",
+          "feedback": "The lookup must resolve the current request instead of keeping the first selected dataset.",
+          "correct": true
+        },
+        {
+          "label": "Whether a shorter program name would execute faster",
+          "feedback": "This construction describes the work. Text length does not repair selecting the wrong input."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "numpy-arrays",
+        "skill": "Keep values attached to their meaning",
+        "why": "The requested name identifies a dataset; its position in a collection does not."
+      }
+    ],
+    "reflection": {
+      "prompt": "What can this manifest tell us before execution, and what would still need to be checked during a real run?",
+      "carryForward": "Keep the description of the work separate from evidence that the work actually ran."
+    },
+    "preparation": {
+      "path": [
+        1
+      ],
+      "title": "Resolve the Current Input",
+      "challenge": "Return only the selected dataset’s name and location from the supplied directory.",
+      "why": "Inspecting the selected input first makes a mistaken dataset visible before it is wrapped into a larger request."
+    }
+  },
+  "databricks-data-lakes": {
+    "premise": "The first file gave the expected readings. A second file has appeared before it was included in the published table.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Put publication state before file reading",
+      "start": "First choose the requested version’s active file keys. Use those keys to read the supplied stored records, keeping every field of each selected observation.",
+      "outcome": "A pending or superseded file stays outside the requested table even while its bytes remain in storage.",
+      "hints": [
+        "Select a committed file list needs both the retained manifests and the requested version.",
+        "Connect that key list to Read only the named files. Its other input is the complete supplied storage listing."
+      ]
+    },
+    "investigation": {
+      "title": "The pending reading appeared in version 0",
+      "question": "Version 0 lists only batch-0.parquet, containing P7 and P2. A new batch-1.parquet contains P9 but is not listed. The output unexpectedly includes P9. What should we inspect first?",
+      "outcome": "Predict the selected file list before opening its records.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Whether the read uses the manifest’s keys or all stored files",
+          "feedback": "The added P9 record belongs to an existing file, but not to the requested committed version.",
+          "correct": true
+        },
+        {
+          "label": "Whether P9 should be renamed to P7",
+          "feedback": "Changing a record identifier would hide the wrong-file read rather than repair it."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "what-is-databricks",
+        "skill": "Separate stored data from the service that works with it",
+        "why": "A platform can find and process data, but each table read still needs a defined input state."
+      }
+    ],
+    "reflection": {
+      "prompt": "If version 0 remains named but its only data file is removed, what should the read do?",
+      "carryForward": "Keep the version identity, its active file list and the data needed to read it."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Choose the committed file keys",
+      "challenge": "Return the object keys belonging to the requested version without reading any rows.",
+      "why": "Inspecting the keys separates a publication mistake from a later record-processing mistake."
+    }
+  },
+  "databricks-workspaces-compute": {
+    "premise": "The cleaning result is visible, but Botie needs it to remain available after a process restart.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Place the Save at the Right Point",
+      "start": "Build the state sequence so the calculated preview is saved before the process holding it is restarted.",
+      "outcome": "A later process finds the requested saved records even though the preview has been cleared.",
+      "hints": [
+        "Put the calculated rows in memory changes only the preview.",
+        "Save the preview records must receive that live state. Connect its output to Restart the teaching process."
+      ]
+    },
+    "investigation": {
+      "title": "The Empty Result Is Not Saved",
+      "question": "The new calculation accepts no rows. After restart, the saved table still contains yesterday’s rejected row. Which decision needs repairing?",
+      "outcome": "Distinguish a live empty preview from null, which means there is no preview to save.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Treating an empty list as a valid preview that must be saved",
+          "feedback": "No accepted rows is still a result. Skipping that save leaves the earlier table unchanged.",
+          "correct": true
+        },
+        {
+          "label": "Keeping the old row because it was once visible",
+          "feedback": "The requested output follows the current calculation, not an earlier display."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-data-lakes",
+        "skill": "Keep persistent storage separate from compute",
+        "why": "The saved table remains available independently of the temporary process."
+      },
+      {
+        "lessonId": "what-is-databricks",
+        "skill": "Separate requested work from its execution",
+        "why": "A notebook or manifest can describe a result without having saved the calculated records."
+      }
+    ],
+    "reflection": {
+      "prompt": "Where would you look if the displayed output was correct but the next run still read the earlier table?",
+      "carryForward": "Inspect the explicit write and its destination, rather than assuming a display changed persistent data."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Inspect the State Before Restart",
+      "challenge": "Return the state after the preview has been saved but before restart clears it.",
+      "why": "At this point, both saved and preview should contain the calculated rows. That makes the effect of restart directly visible."
+    }
+  },
+  "databricks-table-names": {
+    "premise": "The maintenance lookup worked in its original session. A changed current schema now sends the same short name to commissioning’s test readings.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Make the selected table identity visible",
+      "start": "Resolve missing name components, find the exact registered table and carry its name into the permitted read. Inspect that name before interpreting its measurements.",
+      "outcome": "The result reports the table selected by the actual reference and session context, with no fallback to a different namespace.",
+      "hints": [
+        "Resolve a table name receives a list of name parts and both defaults. It fills only missing components.",
+        "Find the registered table needs the resolved name and the registry. Read as the named principal then checks that chosen entry before exposing its rows."
+      ]
+    },
+    "investigation": {
+      "title": "The same short reference returns test equipment",
+      "question": "The reference is readings. The current catalog is operations, but the schema changed from maintenance to commissioning. TEST_P7 now appears. Which explanation fits?",
+      "outcome": "Predict the complete table name for each supplied reference before running it.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The one-part name used the new current schema",
+          "feedback": "The naming context changed. An explicit operations.maintenance.readings reference would still identify maintenance.",
+          "correct": true
+        },
+        {
+          "label": "Parquet changed P7’s identifier during compression",
+          "feedback": "The selected table is different; this is not a file-encoding transformation."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-workspaces-compute",
+        "skill": "Inspect the context in which code runs",
+        "why": "A query’s current catalog and schema belong to its execution context, not its notebook folder name."
+      },
+      {
+        "lessonId": "databricks-data-lakes",
+        "skill": "Separate a dataset’s identity from its data files",
+        "why": "A registered name is an interface to a table, not a single physical object key."
+      }
+    ],
+    "reflection": {
+      "prompt": "Why can a fully qualified table name prevent a naming mistake without guaranteeing permission to read the table?",
+      "carryForward": "Keep the requested identity, the session defaults and the actual requesting principal explicit."
+    },
+    "preparation": {
+      "path": [
+        0,
+        1
+      ],
+      "title": "Resolve the full name first",
+      "challenge": "Return catalog.schema.table for the supplied parts and current defaults, without reading any records.",
+      "why": "A visible name lets you diagnose a namespace change before inspecting the table contents."
+    }
+  },
+  "databricks-basics": {
+    "premise": "The readings are divided into partitions. Botie needs a count that describes the records rather than the layout.",
+    "order": "build-first",
+    "construction": {
+      "title": "Combine the Partial Counts",
+      "start": "Count records within each partition, add the partial counts, and return both the individual counts and their total.",
+      "outcome": "Changing partition boundaries changes the partial counts while preserving the count of the same records.",
+      "hints": [
+        "Follow the nesting: the outer list contains partitions and the inner lists contain readings.",
+        "Keep the partial count list on one branch. Add those counts on another branch, then collect the two results."
+      ]
+    },
+    "investigation": {
+      "title": "Move the Same Records into Different Partitions",
+      "question": "The first arrangement has two partitions with two records each. The next has one record, an empty partition, and three records. Predict both the new count list and the total before running.",
+      "outcome": "Compare the list of partial counts as well as the total. Counting only the outer list would change the answer even though no reading changed.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-workspaces-compute",
+        "skill": "Separate saved data from the processes calculating a result",
+        "why": "Spark tasks use the selected compute while the table remains a persistent input."
+      },
+      {
+        "lessonId": "databricks-table-names",
+        "skill": "Identify the table before asking for a calculation",
+        "why": "The count describes the requested table’s records, even when execution divides them into partitions."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which result should change if we move the same records between partitions, and which should stay the same?",
+      "carryForward": "Separate the logical data from the way the calculation divides it."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Inspect the Partial Counts",
+      "challenge": "Return one record count for every supplied partition, preserving empty partitions.",
+      "why": "Inspect the partial results before adding them so a mistaken partition count is visible."
+    }
+  },
+  "databricks-notebooks-jobs": {
+    "premise": "The calculation works interactively, but the daily update still depends on remembering which step comes next.",
+    "order": "build-first",
+    "construction": {
+      "title": "Make the Waiting Conditions Visible",
+      "start": "Inspect each task’s prerequisites before collecting its ready ID.",
+      "outcome": "Only unfinished tasks with successful prerequisites are returned.",
+      "hints": [
+        "Give the prerequisite checker both the task records and completed IDs.",
+        "The ready-ID component should read the inspection result, not the original task list."
+      ]
+    },
+    "investigation": {
+      "title": "The Check Has Finished",
+      "question": "Read, clean and check have succeeded. Which task becomes ready, and why should the completed tasks stay out of the result?",
+      "outcome": "Inspect the readiness records, then compare them with the returned IDs.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-basics",
+        "skill": "Separate pieces of work from the data they process",
+        "why": "The task plan describes the procedure; it does not change what a reading means."
+      },
+      {
+        "lessonId": "databricks-workspaces-compute",
+        "skill": "Distinguish saved code from the processes running it",
+        "why": "A repeated job needs explicit task dependencies and inputs instead of an old interactive session."
+      }
+    ],
+    "reflection": {
+      "prompt": "What would happen if publish depended only on clean and skipped the quality check?",
+      "carryForward": "Keep the prerequisites that justify an output attached to the repeated procedure."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Inspect What Each Task Is Waiting For",
+      "challenge": "Return the readiness records for every task before selecting the ready IDs.",
+      "why": "The intermediate records explain why publish must wait."
+    }
+  },
+  "databricks-mlflow-basics": {
+    "premise": "The workflow repeats successfully, but model files and recorded measurements have become easy to confuse.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Connect the Attempt Before Attaching Its Files",
+      "start": "Select the requested run, inspect its input identity, then match output ownership to that same ID.",
+      "outcome": "The returned manifest describes only the requested attempt and its own saved outputs.",
+      "hints": [
+        "Give the selection component both the run collection and the requested ID.",
+        "The artifact component must read that selected record and the output-owner records."
+      ]
+    },
+    "investigation": {
+      "title": "The Requested Attempt Changes",
+      "question": "The request now asks for B, but a construction still returns A’s model.json. Which lookup must follow the changed request?",
+      "outcome": "Inspect the selected run before attaching its artifact paths.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The exact run selection and matching artifact owner",
+          "feedback": "The same selected run identity must control both metadata and file ownership.",
+          "correct": true
+        },
+        {
+          "label": "The smaller error value",
+          "feedback": "This problem asks for one requested attempt. It is not selecting a model by performance."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-notebooks-jobs",
+        "skill": "Distinguish a reusable procedure from one execution",
+        "why": "A repeated task may produce a new model attempt that needs its own tracking identity."
+      },
+      {
+        "lessonId": "databricks-table-names",
+        "skill": "Keep the full input table identity",
+        "why": "The table name and its version remain attached to the attempt, even when a short name appears elsewhere."
+      }
+    ],
+    "reflection": {
+      "prompt": "What is still unknown about model quality after this manifest has been recorded correctly?",
+      "carryForward": "Keep evidence linked to the attempt before making a decision from it."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Inspect the Requested Run",
+      "challenge": "Return the exact selected run before attaching artifacts.",
+      "why": "A wrong selection is easier to see before a familiar filename hides the mismatch."
     }
   },
   "databricks-lazy-dataframes": {
@@ -626,8 +982,13 @@
     },
     "connections": [
       {
+        "lessonId": "databricks-basics",
+        "skill": "Separate the stored records from the work performed on them",
+        "why": "Counting the supplied partitions established which records were present. Now describe a filter and explicitly request its result."
+      },
+      {
         "lessonId": "data-partition-statistics",
-        "skill": "Keep record meaning while changing how work is organised",
+        "skill": "Keep record meaning while changing how work is organized",
         "why": "Distributed execution still has to preserve which observations contributed."
       }
     ],
@@ -759,7 +1120,7 @@
       ]
     },
     "investigation": {
-      "title": "The acknowledgement disappears after success",
+      "title": "The acknowledgment disappears after success",
       "question": "The output already contains r1 and the checkpoint contains f1. The scheduler discovers f1 again. Predict the complete next state.",
       "outcome": "Progress and output must remain consistent even when the request is repeated.",
       "caseIndex": 1,
@@ -807,7 +1168,7 @@
       "options": [
         {
           "label": "The deletion’s source sequence",
-          "feedback": "That version is needed to recognise the arriving record as older.",
+          "feedback": "That version is needed to recognize the arriving record as older.",
           "correct": true
         },
         {
@@ -982,7 +1343,7 @@
       {
         "lessonId": "databricks-mlflow-lineage",
         "skill": "Name the exact source table",
-        "why": "A manifest identifies what to read; it does not authorise the job to read it."
+        "why": "A manifest identifies what to read; it does not authorize the job to read it."
       },
       {
         "lessonId": "sql-parameters-permissions",
@@ -1329,7 +1690,7 @@
       }
     ],
     "reflection": {
-      "prompt": "When might skipping an unfit head help utilisation, and whose waiting time could worsen?",
+      "prompt": "When might skipping an unfit head help utilization, and whose waiting time could worsen?",
       "carryForward": "State the scheduling policy beside its capacity calculation."
     }
   },
@@ -1337,18 +1698,18 @@
     "premise": "Botie’s earlier scheduler freed a reservation when a request finished. Now the technician closes an answer before the worker has stopped. Reusing that reservation immediately would promise the same memory twice.",
     "order": "investigate-first",
     "construction": {
-      "title": "Add an acknowledgement boundary before freeing capacity",
-      "start": "Use the worker’s acknowledgements to update the request states. Count the rows that still hold resources, then handle new arrivals with the waiting queue’s separate limit.",
+      "title": "Add an acknowledgment boundary before freeing capacity",
+      "start": "Use the worker’s acknowledgments to update the request states. Count the rows that still hold resources, then handle new arrivals with the waiting queue’s separate limit.",
       "outcome": "The stopped display and the released reservation can be checked separately when the next burst arrives.",
       "hints": [
-        "The acknowledgement list identifies which cancellation requests actually released resources.",
+        "The acknowledgment list identifies which cancellation requests actually released resources.",
         "After applying those events, count held rows and sum their blocks. The waiting queue has its own limit and rejected-arrival list."
       ]
     },
     "investigation": {
       "title": "The display stopped but no release arrived",
-      "question": "A is cancellation-requested with no acknowledgement. Which repair belongs between the user event and the capacity counter?",
-      "outcome": "Compare the same rows after A’s acknowledgement, without changing waiting arrivals.",
+      "question": "A is cancellation-requested with no acknowledgment. Which repair belongs between the user event and the capacity counter?",
+      "outcome": "Compare the same rows after A’s acknowledgment, without changing waiting arrivals.",
       "caseIndex": 1,
       "kind": "diagnose",
       "options": [
@@ -1395,7 +1756,7 @@
     "investigation": {
       "title": "The comparison run inherits a broad capability",
       "question": "The copied run has capability set to 1 and shadow set to 1. Which check must stop it from making a second booking?",
-      "outcome": "Check an unauthorised stable-model request too; model version must never substitute for permission.",
+      "outcome": "Check an unauthorized stable-model request too; model version must never substitute for permission.",
       "caseIndex": 1,
       "kind": "diagnose",
       "options": [
@@ -1414,7 +1775,7 @@
       {
         "lessonId": "serving-cancellation-pressure",
         "skill": "Separate computation from external effects",
-        "why": "Hiding, cancelling or rerouting an answer cannot undo an action already committed."
+        "why": "Hiding, canceling or rerouting an answer cannot undo an action already committed."
       },
       {
         "lessonId": "agent-retries-and-effects",
@@ -1787,7 +2148,7 @@
     "construction": {
       "title": "Place permission before evidence consumption",
       "start": "Combine tenant membership and the resolved document grant before selecting IDs.",
-      "outcome": "Only authorised evidence can enter a later ranking or prompt.",
+      "outcome": "Only authorized evidence can enter a later ranking or prompt.",
       "hints": [
         "A relevant document can still belong to another customer. Relevance does not supply permission.",
         "Require both the current tenant match and the application’s resolved document grant before selecting the corresponding IDs. The supplied grant flags stand in for checks made by a trusted service."
@@ -1815,7 +2176,7 @@
       {
         "lessonId": "software-retrieval-shortlists",
         "skill": "Keep candidate identities through selection",
-        "why": "The candidate set must now be authorised before its final shortlist is formed."
+        "why": "The candidate set must now be authorized before its final shortlist is formed."
       }
     ],
     "reflection": {
@@ -1856,7 +2217,7 @@
     }
   },
   "security-model-artifacts": {
-    "premise": "A downloaded file is data to the transport but may be executable behaviour to its loader.",
+    "premise": "A downloaded file is data to the transport but may be executable behavior to its loader.",
     "order": "investigate-first",
     "construction": {
       "title": "Put verification before loading",
@@ -1876,7 +2237,7 @@
       "options": [
         {
           "label": "No; its loader policy still fails",
-          "feedback": "Matching approved bytes does not by itself permit the chosen execution behaviour.",
+          "feedback": "Matching approved bytes does not by itself permit the chosen execution behavior.",
           "correct": true
         },
         {
@@ -1889,7 +2250,7 @@
       {
         "lessonId": "data-artifact-lineage",
         "skill": "Bind artifacts to immutable identities",
-        "why": "We now distinguish identifying an artifact from trusting its origin and loading behaviour."
+        "why": "We now distinguish identifying an artifact from trusting its origin and loading behavior."
       }
     ],
     "reflection": {
@@ -2161,7 +2522,7 @@
         },
         {
           "label": "Yes; the simulator is always ground truth",
-          "feedback": "A numerical approximation can create behaviour absent from the model it approximates."
+          "feedback": "A numerical approximation can create behavior absent from the model it approximates."
         }
       ]
     },
@@ -2294,7 +2655,7 @@
     }
   },
   "numerical-stable-normalisation": {
-    "premise": "A new encoder changes numerical scale and breaks the normalisation Botie used for retrieval.",
+    "premise": "A new encoder changes numerical scale and breaks the normalization Botie used for retrieval.",
     "order": "investigate-first",
     "construction": {
       "title": "Protect the products before they are formed",
@@ -2391,7 +2752,7 @@
       "outcome": "The report explains why a central zero can have different meanings.",
       "hints": [
         "Build weight-minus-step and weight-plus-step before evaluating the loss. Each loss machine uses the same target and kind.",
-        "The left slope uses centre-minus-left; the right uses right-minus-centre. Their average is the central difference, which must not replace the separate evidence."
+        "The left slope uses center-minus-left; the right uses right-minus-center. Their average is the central difference, which must not replace the separate evidence."
       ]
     },
     "investigation": {

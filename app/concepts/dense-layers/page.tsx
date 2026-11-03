@@ -27,9 +27,9 @@ import { SharedRowLedger } from "@/components/widgets/SharedRowLedger";
 import { WidthAgainstDepth } from "@/components/widgets/WidthAgainstDepth";
 
 export const metadata: Metadata = {
-  title: "A Dense Layer and the Forward Pass · oop_ml",
+  title: "A Dense Layer and the Forward Pass · Perceptron Lab",
   description:
-    "One neuron can only do so much with an input. Connecting several neurons lets us calculate different combinations of the same measurements, then pass those outputs to another layer.",
+    "A dense layer applies several neurons to the same inputs. Each neuron learns its own weighted combination, producing a collection of outputs that another layer can use.",
 };
 
 const link =
@@ -45,24 +45,8 @@ export default function DenseLayersPage() {
       playgroundTitle="Follow the inputs through a layer of neurons"
       playgroundIntro="Follow one example through the neurons. Compare each neuron's inputs, score, and activated output before following the next layer."
       title="A Dense Layer and the Forward Pass"
-      tagline={"One neuron can only do so much with an input. Connecting several neurons lets us calculate different combinations of the same measurements, then pass those outputs to another layer."}
-      prerequisites={
-        <>
-          One neuron, its weighted sum and the activation function applied to it, is the{" "}
-          <Link href="/concepts/neurons-and-activations" className={link}>
-            neurons page
-          </Link>
-          , and the matrix multiply a layer turns out to be is the{" "}
-          <Link href="/primers/linear-algebra" className={link}>
-            linear algebra primer
-          </Link>
-          &rsquo;s. The row the page works by hand is the same row the{" "}
-          <Link href="/concepts/backpropagation" className={link}>
-            backpropagation page
-          </Link>{" "}
-          sends back down, so what is kept here is what is needed there.
-        </>
-      }
+      tagline={"A dense layer applies several neurons to the same inputs. Each neuron learns its own weighted combination, producing a collection of outputs that another layer can use."}
+      prerequisites={<>The <Link href="/concepts/neurons-and-activations" className={link}>neurons page</Link> introduces weights, bias and activation. The <Link href="/primers/linear-algebra" className={link}>linear algebra primer</Link> explains the matrix multiplication used here. We will follow the same input row again in <Link href="/concepts/backpropagation" className={link}>backpropagation</Link>, where the saved values from this forward pass are used to calculate gradients.</>}
 
       playground={<DenseForwardPlayground />}
       sections={[
@@ -95,19 +79,12 @@ export default function DenseLayersPage() {
                   </>
                 </WorkedExample>
                 <KeepInMind>
-                  A layer is several neurons that all read the identical row.
-                  The row is shared, and every neuron forms its own score
-                  from it with its own weights.
-                </KeepInMind>
+                  A dense layer contains several neurons that read the same input row. Each neuron has its own weights and bias, so each can produce a different response to that input.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. Why the widths inside a layer cannot disagree">
-                <p>
-                  Because every neuron in the layer is handed the same row, a neuron expecting a different number of inputs is not an odd member of the group, it is one that can never be fed. Give the layer a neuron holding two weights and another holding three and there is no row that satisfies both.
-                </p>
-                <p>
-                  So the width a layer reads is a fact about the group, settled when the group is formed, and a group that cannot agree on it is refused at construction rather than discovered when a row arrives. I tried it, and the refusal reads &ldquo;every neuron in a layer reads the same row, so they must agree on its width, got [2, 3]&rdquo;.
-                </p>
+                <p>Every neuron in this dense layer receives the same row. A neuron with two weights needs two input values; one with three weights needs three. Putting both in the same layer leaves no row width that can satisfy them.</p>
+                <p>The SDK checks the neurons’ input widths when constructing the layer. For widths of two and three, it reports “every neuron in a layer reads the same row, so they must agree on its width, got [2, 3]”. The mismatch is caught before a forward pass starts.</p>
                 <Equation>{"a layer of m neurons over n inputs holds exactly n weights in every neuron"}</Equation>
                 <p>
                   The neurons page already made the count of weights the
@@ -125,26 +102,10 @@ export default function DenseLayersPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="3. The width answered owes nothing to the width read">
-                <p>
-                  Three neurons answer with three numbers whether they read
-                  two inputs or two hundred, so the width a layer answers with
-                  is how many neurons it holds, and nothing about the row it
-                  reads bears on it. The two widths are separate choices. The
-                  first is forced by whatever feeds the layer; the second is
-                  free, and choosing it is what designing a network mostly
-                  consists of.
-                </p>
+              <SubSection title="3. Input Width and Output Width" id="3-the-width-answered-owes-nothing-to-the-width-read">
+                <p>Three neurons produce three outputs whether each reads two inputs or two hundred. The input width must match the data or preceding layer. The output width is the number of neurons we choose for this layer, and it determines how many inputs the next layer must accept. Choosing widths is one part of designing a network, alongside its depth, connections and activation functions.</p>
                 <Equation>{"reads (n,)   answers (m,)        here (2,) and (3,)"}</Equation>
-                <p>
-                  Widening a layer changes what the next layer must expect and
-                  changes nothing about what this one accepts, which is why a
-                  network&rsquo;s shape is a chain of separate equalities
-                  rather than one number carried the whole way through. On the
-                  playground the hidden layer reads (2,) and answers (3,), and
-                  the output layer reads (3,) and answers (1,), and the second
-                  pair is a consequence of the first only at its left end.
-                </p>
+                <p>Widening a hidden layer changes its output width and the next layer’s required input width. It does not change how many values this layer reads. In the playground, the hidden layer reads (2,) and outputs (3,). The output layer must therefore read (3,); its single neuron produces (1,).</p>
                 <KeepInMind>
                   A layer&rsquo;s two widths are independent. What it reads is
                   decided by whatever feeds it; what it answers is how many
@@ -164,15 +125,7 @@ export default function DenseLayersPage() {
                   </p>
                 </>
                 <Equation>{"parameters in a layer = m · n + m\n\nhidden  3 · 2 + 3 =  9\noutput  1 · 3 + 1 =  4\nnetwork              13"}</Equation>
-                <p>
-                  Thirteen numbers is small enough to write out, and the
-                  point of doing so is that nothing else exists. There is no
-                  stored answer anywhere in a layer, only these numbers and
-                  the two lines of arithmetic that Part 2 writes down. Change
-                  a cell in the playground and every node re-prints, because
-                  nothing from the last pass is kept that a new one could
-                  reuse.
-                </p>
+                <p>The thirteen learned parameters determine the weighted sums in this network. Activations then transform those scores. Changing a parameter changes the next forward calculation; the playground updates each displayed score and output so we can trace its effect. Part 3 explains the intermediate values a pass saves for training.</p>
                 <InAModel title="On the crowd">
                   <>
                     <p>
@@ -190,10 +143,7 @@ export default function DenseLayersPage() {
                   </>
                 </InAModel>
                 <KeepInMind>
-                  A dense layer is m · n weights and m biases and nothing
-                  else. The count grows with the product of the two widths,
-                  which is what makes wide layers reading wide rows expensive.
-                </KeepInMind>
+                  A dense layer with m neurons and n inputs has m · n weights and m biases. That parameter count grows with both widths. Processing a large batch also requires space for its intermediate scores and outputs.</KeepInMind>
               </SubSection>
             </>
 </>),
@@ -281,16 +231,7 @@ export default function DenseLayersPage() {
                   axis with its own width.
                 </p>
                 <Equation>{"Z = X Wᵀ + b        (rows, n)(n, m) = (rows, m)"}</Equation>
-                <p>
-                  The transpose is bookkeeping and not a new operation. A
-                  matrix product pairs each row of its left factor with each
-                  column of its right factor. The people are the rows of X,
-                  and section 5 wrote the neurons as the rows of W, so W is
-                  turned on its side to put each neuron&rsquo;s weights in a
-                  column. The entry in row i and column j of the product is
-                  then person i&rsquo;s dot product with neuron j, the same
-                  score section 1 formed for one person and one neuron.
-                </p>
+                <p>To calculate every person’s score at every neuron, each row of X must be paired with a neuron’s weight vector. Both are stored as rows, while matrix multiplication pairs a row on the left with a column on the right. Transposing W puts each neuron’s weights into a column without changing their values. Entry (i, j) of the product is then the score for person i at neuron j, before adding the bias.</p>
                 <p>
                   The bias vector is added to every row alike, because a
                   neuron&rsquo;s bias does not depend on which person it is
@@ -300,9 +241,8 @@ export default function DenseLayersPage() {
                 </p>
                 <BlockPass />
                 <WorkedExample title="Three people through the two layers">
-                  <p>
-                    The tall heavy person (1, 2), someone exactly average at (0, 0), and someone a deviation shorter and half a deviation heavier at (−1, 0.5) go in as a block of shape (3, 2). The hidden layer answers a (3, 3) block whose rows are (3, 0, 1), (0, 0, 0) and (0, 0, 1.5), since the third person&rsquo;s scores were (−0.5, −1.5, 1.5) and the rectifier kept only the last, and the output layer answers a (3, 1) block holding 5, 0 and 3.
-                  </p>
+                  <p>Stack the profiles (1, 2), (0, 0) and (−1, 0.5) into a block of shape (3, 2). The rows describe the taller, heavier person, a person at both measurement means, and a person one deviation shorter and half a deviation heavier.</p>
+<p>After ReLU, the hidden output block has shape (3, 3), with rows (3, 0, 1), (0, 0, 0) and (0, 0, 1.5). The final output block has shape (3, 1), holding 5, 0 and 3. The calculation below follows the third row separately.</p>
                   <p>
                     The first person is the row worked in section 1. The third
                     person&rsquo;s row of each block is the same arithmetic on
@@ -333,21 +273,9 @@ export default function DenseLayersPage() {
                   After the weighted sums, each neuron applies its activation to its own score. An elementwise activation therefore keeps the shape of z, and we can apply it across the layer in one call. Softmax behaves differently: each output depends on the whole row of scores. That is why it is treated separately from the four elementwise activations here.
                 </p>
                 <Equation>{"a = f(z), entry by entry\n\nrectifier   (3, −1, 1) → (3, 0, 1)\nsigmoid     (3, −1, 1) → (0.9526, 0.2689, 0.7311)\ntangent     (3, −1, 1) → (0.9951, −0.7616, 0.7616)"}</Equation>
-                <p>
-                  Each neuron carries its own activation function, so nothing in the
-                  mathematics stops a layer from mixing them, and a layer
-                  whose first neuron is straight and whose second is a sigmoid
-                  is accepted; I checked, and it answers (3, 0.2689)
-                  at the row. A uniform layer is a fact about ordinary
-                  practice rather than a law, and it is the case a vectorised
-                  pass can exploit, since one activation function over a whole block is one
-                  call where a mixed layer needs one per column.
-                </p>
+                <p>In this SDK, each neuron owns its activation function. A layer can therefore mix an identity activation with a sigmoid. The tested mixed layer returns (3, 0.2689) for the supplied row. A shared activation across the layer is a common design choice that also permits one vectorized activation call across the output block. It is not required by the definition of a dense layer.</p>
                 <KeepInMind>
-                  The activation function acts on each score alone, which is what makes it
-                  one call over a block. A layer may mix activation functions; nearly every
-                  layer in practice does not.
-                </KeepInMind>
+                  An elementwise activation preserves the score block’s shape. When every neuron uses the same activation, the SDK applies it in one call to the whole block. Mixed activations require applying the appropriate function to each neuron’s column.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -370,7 +298,7 @@ export default function DenseLayersPage() {
               "A hidden layer of three neurons over two inputs, and an output layer of one neuron over three, hold how many numbers between them?",
               ["6", "9", "13", "26"],
               2,
-              "A dense layer is m times n weights plus m biases and nothing else, which gives 2 × 3 + 3 = 9 for the hidden layer and 3 × 1 + 1 = 4 for the output layer. Six counts the hidden weights alone and nine stops at the hidden layer. Thirteen is small enough to write out, and the point of writing it out is that nothing else exists, so changing a cell re-prints every node because nothing from the last pass is kept that a new one could reuse.",
+              "Count a weight for each input-to-neuron connection and a bias for each neuron. The hidden layer has six weights and three biases; the output layer has three weights and one bias. There are thirteen trainable parameters altogether. Intermediate scores and activations are calculated from them and are not additional trainable parameters.",
             ),
             choice(
               "The weight matrix here is arranged as (neurons, inputs). What does reading down one of its columns give?",
@@ -414,16 +342,7 @@ export default function DenseLayersPage() {
           content: (
             <>
               <SubSection title="9. What one layer keeps from a pass">
-                <p>
-                  A layer asked about a row answers with more than the row it
-                  hands on. It keeps three blocks together, the block it read,
-                  the scores it formed, and the outputs it answered with, and
-                  it keeps them as one object so that the three cannot be
-                  separated or mispaired. The scores and the outputs share a
-                  shape, since the same entry in each describes the same
-                  neuron on the same person, and the inputs share the row
-                  count.
-                </p>
+                <p>{"The layer returns a record containing its inputs, scores and activated outputs. Keeping them together prevents a backward pass from accidentally pairing values from different forward calls. Scores and outputs have the same shape because matching positions describe the same neuron and observation; the input block has the same observation count."}</p>
                 <ResponseLedger />
                 <p>
                   On the running row the hidden layer&rsquo;s response holds
@@ -491,26 +410,9 @@ export default function DenseLayersPage() {
 
               <SubSection title="11. Why the scores are kept, and the inputs too">
                 <p>A forward pass produces the values the next layer needs. Training also needs derivatives, which describe how a small change would affect the result. The SDK keeps the inputs, scores and outputs from this pass so its backward calculation can reuse them. Different activations need different saved quantities. For example, the sigmoid derivative can be calculated from its output, while an activation can also be differentiated from its input score. Keeping all three is this implementation&apos;s choice, rather than a requirement to recover every score from an output.</p>
-                <p>
-                  The inputs are kept for the same reason, since the correction owed to a layer&rsquo;s weights multiplies by what the layer read, and the forward pass is the only thing that knows it.
-                </p>
+                <p>A weight’s gradient also depends on the input value it multiplied. Saving the input block in the layer’s response lets the backward calculation use the same values that produced these scores.</p>
                 <Equation>{"kept per layer:   inputs, scores, outputs\nread forward:     outputs only\nread backward:    all three"}</Equation>
-                <p>
-                  The{" "}
-                  <Link href="/concepts/backpropagation" className={link}>
-                    backpropagation page
-                  </Link>{" "}
-                  is where those three blocks are spent, walking the same row
-                  back down this same network, and it is not repeated here.
-                  What belongs here is only the design decision that makes it
-                  a plain reversed loop rather than a reconstruction of what
-                  each layer once read. An earlier version of this design kept
-                  only the scores and outputs, and the backward walk had to
-                  rebuild the list of inputs by shifting the outputs down one
-                  and pushing the caller&rsquo;s row on the front, which was
-                  rebuilding something the forward pass had known and thrown
-                  away.
-                </p>
+                <p>The <Link href="/concepts/backpropagation" className={link}>backpropagation page</Link> uses these saved blocks in reverse layer order. Keeping each layer’s inputs in its own response avoids reconstructing them from the preceding layer’s outputs. The backward calculation can read the required values directly from the matching response.</p>
                 <KeepInMind>
                   This response caches the intermediate values used by the
                   backward calculation. The inputs are needed for the weight
@@ -521,25 +423,12 @@ export default function DenseLayersPage() {
               </SubSection>
 
               <SubSection title="12. Why a pass says why it is happening">
-                <p>
-                  A dense layer does the same arithmetic whether the network is learning or answering, and so do a convolution and a pooling window. Two layers do not. A dropout layer damages its own answers on purpose while learning, and a batch normalisation layer standardises by the batch in front of it while learning and by remembered statistics while answering.
-                </p>
+                <p>Dense, convolutional and pooling layers use the same forward calculation during training and prediction. Some other layers behave differently. Dropout randomly removes selected activations during training. Batch normalization uses the current batch’s statistics while training and stored statistics when predicting.</p>
                 <p>
                   So every pass here states its purpose, predicting or training, and hands it to every layer whether or not the layer reads it, so that a layer which starts caring later does not change the interface for the rest.
                 </p>
                 <Equation>{"purpose ∈ {predicting, training}        the default is predicting"}</Equation>
-                <p>
-                  The default is predicting, and the direction is chosen
-                  deliberately. Forgetting to say training costs a slightly
-                  slower descent; forgetting to say predicting would make every
-                  answer the model gives a matter of luck. The playground says
-                  its passes ran for predicting, which it states out loud
-                  even though it is the default, and the{" "}
-                  <Link href="/concepts/dropout" className={link}>
-                    dropout page
-                  </Link>{" "}
-                  is where the other value earns its keep.
-                </p>
+                <p>This API defaults to predicting. That keeps dropout inactive and makes batch normalization use its stored statistics. A training pass must request training behavior so those layers operate as intended. Using the wrong purpose can change both the outputs and the model state; the effect is more than a change in learning speed. The <Link href="/concepts/dropout" className={link}>dropout page</Link> demonstrates the difference.</p>
                 <KeepInMind>
                   A pass carries its purpose. A dense layer ignores it, and
                   the layers that cannot ignore it are the reason it exists.
@@ -547,20 +436,14 @@ export default function DenseLayersPage() {
               </SubSection>
 
               <SubSection title="13. Two routes to one answer, and how far apart they are">
-                <p>
-                  The definition of a layer is a loop, ask each neuron in turn, and the matrix multiply is that loop written as one call. Both are kept, the multiply for every fit and the loop as an observed route for anyone who wants to see one neuron&rsquo;s arithmetic, and a test asserts that they agree, because a fast path and a slow path with nothing between them are two implementations rather than one calculation read two ways.
-                </p>
-                <p>
-                  They agree to within floating point and not to the last bit, since the multiply sums the products in a different order than a loop does.
-                </p>
+                <p>The SDK provides two ways to inspect a dense layer. The matrix implementation processes a block efficiently. The neuron-by-neuron route returns the separate calculations for a single row, which is useful for the diagram. Tests compare the results so the display and the computation used in training stay consistent.</p>
+                <p>The results can differ slightly because floating-point products may be accumulated in a different order. Compare them with a numerical tolerance rather than requiring every stored bit to match.</p>
                 <RouteAgreement />
                 <InAModel title="Measured">
                   <p>
                     On the running network, two and three inputs wide, the two routes agree exactly, a gap of 0. On a seeded layer of eight neurons reading eight inputs the largest gap in the scores is 4.4 × 10⁻¹⁶, and on sixty-four neurons reading sixty-four inputs, 4,160 parameters, it is 7.1 × 10⁻¹⁵ in the scores and 5.3 × 10⁻¹⁵ in the outputs.
                   </p>
-                  <p>
-                    A dot product of sixty-four terms summed in two different orders parts in the fifteenth decimal place, and the scores in the table beneath the sliders differ only in their last digit or two.
-                  </p>
+                  <p>{"The two implementations can add the same sixty-four products in different orders. Floating-point addition does not preserve every small contribution equally in every order, which explains a difference in the fifteenth decimal place. The scores beneath the sliders agree apart from their last digit or two."}</p>
                 </InAModel>
                 <KeepInMind>
                   The loop and the multiply are the same calculation, and
@@ -577,27 +460,10 @@ export default function DenseLayersPage() {
           content: (
             <>
               <SubSection title="14. A shape is a pair of tuples, not a pair of numbers">
-                <p>
-                  A dense layer knows two things about itself before any data arrives, the width it reads and the width it answers with, and each is recorded as a tuple of extents rather than as a number. For a dense layer the tuple has one entry, (2,) or (3,), and the distinction looks pedantic. It stops being pedantic the moment a layer answers with something arranged, a convolution handing on a stack of pictures, say.
-                </p>
-                <p>
-                  A dense layer reading a row that holds exactly as many numbers still cannot read it, because a row and a stack of pictures are different arrangements of the same count, and a check that compared counts would wave that mismatch through as an agreement.
-                </p>
+                <p>A shape records how values are arranged along each axis. A dense layer reads a row, so its input shape has one entry, such as (2,). Its output shape might be (3,). Python uses a trailing comma to distinguish a one-entry tuple from a parenthesized number. A convolution instead works with several axes: channels, height and width.</p>
+                <p>A convolution’s output can contain the same total number of values as a dense layer expects and still have the wrong arrangement. A stack of feature maps has separate channel, height and width axes. A dense layer expects one feature axis, so a flattening operation is needed to connect these representations.</p>
                 <Equation>{"dense        reads (2,)          answers (3,)\nconvolution  reads (1, 28, 28)   answers (8, 26, 26)\n\n8 · 26 · 26 = 5408 = (5408,) as a count, and not as an arrangement"}</Equation>
-                <p>
-                  A count says how many numbers there are and a tuple says
-                  how they are arranged, and the{" "}
-                  <Link href="/concepts/shapes-and-flattening" className={link}>
-                    shape guarantee page
-                  </Link>{" "}
-                  is where that difference bites, with a flatten layer as the
-                  bridge. On
-                  this page every tuple has one entry, and the refusals still
-                  print the tuples, because a refusal that printed
-                  &ldquo;5408 and 5408&rdquo; on the case the check exists to
-                  catch would send a reader looking for a bug in the check
-                  rather than for the missing layer.
-                </p>
+                <p>Equal element counts therefore do not establish that two layers can connect. The <Link href="/concepts/shapes-and-flattening" className={link}>shapes and flattening page</Link> follows the conversion from feature maps to a feature row. Reporting complete shape tuples makes a missing conversion visible, even when both sides hold 5408 numbers.</p>
                 <KeepInMind>
                   A layer&rsquo;s shape is what it reads and what it answers,
                   each an arrangement. A dense layer&rsquo;s arrangements are
@@ -634,12 +500,8 @@ export default function DenseLayersPage() {
               </SubSection>
 
               <SubSection title="16. The whole chain is checked at construction, and the seam is named">
-                <p>
-                  An answer nobody is obliged to read is not a guarantee. A caller can ask whether two layers join, discard the answer, and discover the disagreement inside a matrix multiply later. So the check is not left to the caller. A stack of layers refuses to exist unless every seam holds, and a stack that has been built is one whose shape is already known to be sound, so no forward pass anywhere re-establishes it.
-                </p>
-                <p>
-                  The check is a walk down a list of integers, two comparisons for three layers, and it costs nothing that could be measured.
-                </p>
+                <p>The stack constructor checks every adjacent pair of layers before accepting the network. If an output shape differs from the next input shape, construction fails with the two shapes identified. This validates the configured connections before processing a batch. Each layer still validates the actual block it receives during a forward pass.</p>
+                <p>For three layers, the constructor checks two adjacent joins. These checks compare shape tuples and do not need a training batch or a forward calculation.</p>
                 <ChainChecker />
                 <WorkedExample title="A chain of three">
                   <p>
@@ -672,33 +534,14 @@ export default function DenseLayersPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  A network that cannot work is refused when it is built, in
-                  integer comparisons, before a row is read, and the refusal
-                  names the seam. That is the whole claim of the network
-                  pages and this is where it is kept.
-                </KeepInMind>
+                  The stack rejects incompatible layer shapes before training begins and identifies the join that failed. This catches arrangement errors early; it does not guarantee that the resulting network will learn a useful model.</KeepInMind>
               </SubSection>
 
               <SubSection title="17. Only the two ends are the data's business">
-                <p>
-                  A stack that exists has a shape of its own, the first
-                  layer&rsquo;s reads paired with the last layer&rsquo;s
-                  answers, and the playground prints it as (2,) → (1,).
-                  Everything between those two ends is internal, already
-                  agreed, and nobody else&rsquo;s business. The data supplies
-                  two facts. The first layer&rsquo;s width has to match how
-                  many measurements a person carries, and the last
-                  layer&rsquo;s has to match what the task wants back, one
-                  number for a regression or a yes-or-no decision, one per
-                  class otherwise.
-                </p>
+                <p>The stack reports the first layer’s input shape and the final layer’s output shape. Here that is (2,) → (1,). The two input positions match our measurements. The single output matches this prediction task. Other tasks can require a vector, such as one score per class. The intermediate shapes describe how the network transforms those inputs.</p>
                 <Equation>{"stack reads (2,)  ←  two measurements per person\nstack answers (1,)  →  one number per person"}</Equation>
-                <p>
-                  The first of those is checked by the first layer itself the moment a block arrives, which is the refusal section 7 provoked with a row of width three. Nothing downstream checks anything, because every interior seam was settled when the stack was built. And a mismatch the widths cannot see stays invisible, since a row handed over with height and weight swapped has the right width and is scored wrongly with nothing raised.
-                </p>
-                <p>
-                  I sent (2, 1) through the running network and it answered 2 where (1, 2) answers 5. The weights carry no names and match inputs by position, so the order is the contract, and this is documented rather than defended.
-                </p>
+                <p>The first layer checks the incoming block against its declared input shape. Each later layer also checks the block it receives, although the stack has already checked that its configured joins agree. Shape checks still cannot identify a semantic mistake such as swapping height and body-weight columns: the row would have the right width.</p>
+                <p>For example, (2, 1) produces 2 in this network, while (1, 2) produces 5. The weights are matched to inputs by position. A caller must keep the feature order used to build or train the network.</p>
                 <KeepInMind>
                   Two widths belong to the data, the first layer&rsquo;s reads
                   and the last layer&rsquo;s answers. The first layer checks
@@ -716,7 +559,7 @@ export default function DenseLayersPage() {
               "At the running row the hidden outputs under the rectifier are (3, 0, 1), and the output neuron holds weights (1, −1, 2) and no bias under the identity. What does the network answer?",
               ["5", "6", "4", "2"],
               0,
-              "The output score is 1 × 3 + (−1) × 0 + 2 × 1 = 5, and the identity leaves it there. The middle connection contributes nothing because it multiplies a zero, which is why the playground draws it faint. Six is what the same weights answer when both activation functions are the identity and the −1 gets through, and 2 is the answer to the row with its two columns swapped.",
+              "The three hidden outputs contribute through their matching output weights. Their contributions total 5, and the identity activation leaves that score unchanged. The middle connection contributes zero because its hidden output is zero. With identity in the hidden layer too, the negative hidden score would contribute instead, producing 6 for the same input.",
             ),
             choice(
               "Why does this SDK's layer response cache scores as well as outputs?",
@@ -732,7 +575,7 @@ export default function DenseLayersPage() {
             trueFalse(
   "Under this SDK's exact per-sample shape check, a convolution output of (8,26,26) cannot directly enter a dense layer that expects (5408,).",
   true,
-  "A count says how many numbers there are and a tuple says how they are arranged, and a stack of pictures and a row are different arrangements of the same count. A check that compared counts would wave that mismatch through as an agreement. The refusals print the tuples for that reason, since one reading 5408 and 5408 would send a reader looking for a bug in the check rather than for the missing layer.",
+  "The convolution output is arranged as eight grids, each with 26 rows and 26 columns. The dense layer expects one flat row of 5,408 values. These shapes contain the same number of entries, but the SDK compares their arrangements too. A flattening layer makes the intended conversion explicit.",
   {
     "description": "This stack checks exact per-sample shape tuples and does not insert a flattening operation automatically.",
     "data": "Convolution output shape: (8,26,26)\nDense input shape: (5408,)\nBoth contain 5408 values."
@@ -747,7 +590,7 @@ export default function DenseLayersPage() {
                   "With the first seam broken as well, the refusal names the first seam",
                 ],
   [0, 1, 2, 3],
-  "All four hold. The count is (2 × 3 + 3) + (3 × 4 + 4) + (4 × 1 + 1) = 30, and the stack’s own shape is the first layer’s reads paired with the last layer’s answers. A stack refuses to exist unless every seam holds, in the words “layer 1 answers with (4,) and layer 2 reads (5,)”, and the walk stops at the first seam that fails, so that is the one it names.",
+  "The three layers hold 30 weights and biases altogether. The stack takes its input shape from the first layer and its output shape from the last. Each intermediate output must match the next layer’s input shape. The constructor reports the first mismatch, including the layer positions and the two incompatible shapes.",
   {
     "description": "Each dense neuron has one weight per input and one bias. The stack constructor checks adjacent shape tuples in order and stops at the first mismatch.",
     "data": "Layer widths: 2 -> 3 -> 4 -> 1"
@@ -756,7 +599,7 @@ export default function DenseLayersPage() {
             trueFalse(
               "Handing the running network (2, 1) in place of (1, 2) is caught by the first layer’s width check.",
               false,
-              "A row with the height and the weight swapped has exactly the right width, so nothing is raised and the network answers 2 where it answers 5 on the correct row. The weights carry no names and match inputs by position, so the order is the contract, and that is documented rather than defended.",
+              "Both rows contain two values, so both pass the width check. The first weight still multiplies the first value and the second weight still multiplies the second. Reversing the values therefore changes the output from 5 to 2. Keep feature order consistent when preparing inputs; a shape check cannot check their meaning.",
             ),
         ],
         },
@@ -807,7 +650,7 @@ export default function DenseLayersPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="19. What one rectifier folds, and what a layer of them carves">
+              <SubSection title="19. Combining ReLU Responses" id="19-what-one-rectifier-folds-and-what-a-layer-of-them-carves">
                 <>
                   <p>
                     A ReLU neuron has two regimes: it outputs zero when its score is
@@ -826,12 +669,8 @@ export default function DenseLayersPage() {
                 <Equation>{"y = Σⱼ vⱼ · max(0, wⱼ · x + bⱼ) + c\n\nunit j is flat where wⱼ · x + bⱼ < 0 and tilted where it is not"}</Equation>
                 <FoldLines />
                 <InAModel title="Three creases on the crowd">
-                  <p>
-                    The best run at three units, from seed 2, calls every one of the twenty-five people correctly at a loss of 0.0725, and its three creases have weights (−5.912, −2.63), (−4.088, −2.577) and (5.092, 2.849) on standardised height and weight, with biases −1.853, −0.069 and −0.528. All three run across the plane at similar angles, and the boundary between the two shaded regions turns only where it meets one of them.
-                  </p>
-                  <p>
-                    At two units there are two creases and the boundary cannot close around the children in the middle, and the best run leaves four adults wrongly called.
-                  </p>
+                  <p>{"The best three-unit run, from seed 2, classifies every one of the twenty-five people correctly at a loss of 0.0725. The units have weights (−5.912, −2.63), (−4.088, −2.577) and (5.092, 2.849) on standardized height and weight, with biases −1.853, −0.069 and −0.528. Each unit changes from zero to a linear response across one line. Those three lines have similar angles in this run, and the final classification boundary changes direction only where it crosses one of them."}</p>
+                  <p>{"With two units, there are only two lines where the ReLU responses switch between zero and a weighted score. In this experiment the resulting boundary does not enclose the children in the middle, and the best run misclassifies four adults. Those lines are the changes in activation regions called creases above."}</p>
                 </InAModel>
                 <KeepInMind>
                   <p>
@@ -885,12 +724,7 @@ export default function DenseLayersPage() {
                   </p>
                 </>
                 <KeepInMind>
-                  On this crowd three creases are enough to exist and eight
-                  are needed to be found reliably. Width past what the
-                  boundary needs is buying the loop more ways to arrive, and
-                  that is a fact about the loop rather than about the
-                  boundary.
-                </KeepInMind>
+                  One tested three-unit network fits all twenty-five examples. At width eight, all six tested initializations reach correct classifications. This experiment shows that extra width can help this training procedure find a fit; it does not establish a minimum width for reliable training in general.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. Width against depth at twenty-five parameters">
@@ -926,40 +760,23 @@ export default function DenseLayersPage() {
                     two of its three second-layer neurons are inactive for the whole
                     crowd and accuracy is 0.76.
                   </p>
-                  <p>
-                    When the deeper model succeeds, its best log loss is 0.0045,
-                    compared with 0.0388 for the wide model. Both predict the correct
-                    classes, but the deeper run assigns them higher probabilities. Two
-                    layers of six succeed from every tested start, with losses below
-                    0.004. These outcomes describe this training experiment, not a
-                    universal advantage of width or depth.
-                  </p>
+                  <p>When the deeper model succeeds, its best average log loss is 0.0045, compared with 0.0388 for the wide model. Both runs classify everyone correctly. The lower loss means a higher average log probability for the true classes; it does not require a higher true-class probability for every individual. Two layers of six succeed from every tested start, with losses below 0.004. These results describe this training experiment.</p>
                 </>
                 <KeepInMind>
-                  At equal parameter count, depth did not beat width on this
-                  crowd in accuracy and did beat it in loss when it arrived.
-                  Which of those matters depends on what the network is for,
-                  and neither is the textbook&rsquo;s clean win.
-                </KeepInMind>
+                  At the same parameter count, the wider arrangement reaches correct classifications more often across these starts. The successful deeper runs achieve a lower average log loss. Comparing both measurements helps distinguish how often training finds a fit from the probabilities produced once it does.</KeepInMind>
               </SubSection>
 
               <SubSection title="22. What the guarantee promises and what the loop finds">
-                <p>
-                  The universal approximation results promise that a network exists. Every number in the two tables above is about whether this loop, from this start, found it, and the gap between the two is the honest content of the section. Three units suffice for this crowd, since seed 2 proves it, and five of the six starts at three units did not get there.
-                </p>
+                <p>An approximation theorem concerns the existence of suitable parameters. The tables test whether this training procedure finds suitable parameters from particular initializations. Three hidden units can fit this example, as seed 2 demonstrates, but five of the six runs at that width do not reach the same fit. Existence alone does not establish that an optimizer will find the parameters.</p>
                 <p>
                   One of the six starts at eight units ended with a unit dead for everyone, contributing a constant, and it still called every person correctly with the seven that were left, at a loss of 0.0813 against the 0.0347 of the best start.
                 </p>
                 <Equation>{"a network exists        ≠        this walk from this start arrives"}</Equation>
-                <p>A rectified unit returns zero whenever its score is non-positive. In this experiment the first layer reads fixed measurements. If a unit returns zero for every training row, it receives no gradient through those responses and these updates cannot move it back into use. That is a dead ReLU in this setting. In a deeper network, changing an earlier layer can change the inputs reaching the unit, so current inactivity alone does not prove that it will stay inactive. Initialisation and the update rule both matter. The <Link href="/concepts/training-a-network" className={link}>
+                <p>A rectified unit returns zero whenever its score is non-positive. In this experiment the first layer reads fixed measurements. If a unit returns zero for every training row, it receives no gradient through those responses and these updates cannot move it back into use. That is a dead ReLU in this setting. In a deeper network, changing an earlier layer can change the inputs reaching the unit, so current inactivity alone does not prove that it will stay inactive. Initialization and the update rule both matter. The <Link href="/concepts/training-a-network" className={link}>
                     training page
                   </Link> follows the complete update loop.</p>
                 <KeepInMind>
-                  The theorem says a network of three units exists for this
-                  crowd, and seed 2 found it; the other five starts did not,
-                  and a report giving only the first number would be quoting
-                  the theorem as if it were the loop.
-                </KeepInMind>
+                  The three-unit result is demonstrated by a fitted run, rather than supplied by the general approximation theorem. Reporting all six starts also shows how often this training procedure reaches that result. A representable function and a reliably trained model are different questions.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -980,19 +797,14 @@ export default function DenseLayersPage() {
               </SubSection>
 
               <SubSection title="24. Failure contracts">
-                <p>
-                  Every row below was probed. The playground&rsquo;s request
-                  refuses some of these at the door, with its own bounds,
-                  before the layer is reached, and where that happens the
-                  row says what the layer itself does when asked directly.
-                </p>
+                <p>The table distinguishes the playground’s request limits from the SDK’s layer checks. Some configurations are rejected before the layer is constructed; others reach the layer and are validated there. The rows name which check applies.</p>
                 <DerivationTable
                   expressionHeading="Layer configuration"
                   reasonHeading="What the layer accepts and returns"
                   rows={[
                     { expression: "a layer with no neurons", reason: "refused, ‘a layer needs at least one neuron’; a layer answering nothing has no width for the next layer to agree with." },
                     { expression: "neurons of different widths in one layer", reason: "refused, ‘every neuron in a layer reads the same row, so they must agree on its width, got [2, 3]’." },
-                    { expression: "a layer of one neuron", reason: "accepted; it reads (2,) and answers (1,), and is the neurons page’s model wearing a layer." },
+                    { expression: "a layer of one neuron", reason: "accepted; it reads (2,) and answers (1,), grouping one neuron in the layer interface." },
                     { expression: "a stack with no layers", reason: "refused, ‘a stack needs at least one layer’; there is no network to describe." },
                     { expression: "a stack of one layer", reason: "accepted; it has no seams and its shape is the layer’s own." },
                     { expression: "a seam that does not hold", reason: "refused at construction, naming the seam and both arrangements, before any row exists." },
@@ -1003,24 +815,24 @@ export default function DenseLayersPage() {
                     { expression: "a three-dimensional block into a dense layer", reason: "refused as an arrangement mismatch, ‘this layer reads (2,), got a block arranged (2, 1)’, which is the shape page’s case." },
                     { expression: "a non-finite value in a row", reason: "refused, ‘inputs must contain only finite values’; it cannot be written in a request at all, since JSON cannot spell it." },
                     { expression: "text in a row", reason: "refused, ‘inputs must be readable as a float array’." },
-                    { expression: "integers, or booleans, in a row", reason: "accepted and coerced, so true reads as 1; documented rather than defended." },
+                    { expression: "integers, or booleans, in a row", reason: "accepted and converted to floating point, so true reads as 1. Check input types separately if this conversion is unwanted." },
                     { expression: "a non-finite weight or bias", reason: "refused when the neuron is built, in words, before any layer holds it." },
-                    { expression: "an overflow produced inside a layer", reason: "accepted by the layer that produced it and refused by the next, ‘inputs must contain only finite values’, one seam later than it began; a response does not scan its own outputs, by decision." },
+                    { expression: "an overflow produced inside a layer", reason: "the response can contain a non-finite output; a following layer rejects it with ‘inputs must contain only finite values’. The caller must check a final output when no following layer performs that check." },
                     { expression: "mixed activation functions in one layer", reason: "accepted, and answers (3, 0.2689) at the row with a straight first neuron and a sigmoid second." },
-                    { expression: "softmax requested as an activation function", reason: "refused; it is not on the list and cannot be, since it reads a row." },
+                    { expression: "softmax requested as an activation function", reason: "refused by this scalar activation interface; softmax needs all scores in the vector." },
                     { expression: "a width of zero, or a boolean, as an extent", reason: "refused, ‘n_inputs extents must be at least 1, got 0’ and ‘n_inputs must be whole numbers, not bools’, because true would otherwise read as a width of one." },
                     { expression: "a step handed no gradient", reason: "refused, ‘a dense layer has parameters and needs a gradient to step by’; absence is for layers with nothing to learn." },
                     { expression: "new parameters of the wrong shape", reason: "refused, ‘this layer’s weights are (3, 2), got (2, 3)’, so a transposed matrix cannot be installed quietly." },
-                    { expression: "a row with its columns swapped", reason: "not detectable; (2, 1) answers 2 where (1, 2) answers 5, with nothing raised. Positional weights are the contract. Documented rather than defended." },
+                    { expression: "a row with its columns swapped", reason: "not detectable from width alone; (2, 1) answers 2 where (1, 2) answers 5. The caller must keep each feature in the position used when fitting or building the network." },
                     { expression: "unfitted use", reason: "nothing to refuse; a layer is built complete from its neurons and has no fit of its own. Fitting is the training page’s job." },
                     { expression: "a weight beyond a million, a block of more than six rows, a chain of more than six layers, or a width beyond eight", reason: "refused at the door as a request larger than the page allows, with the limit named." },
                   ]}
                 />
                 <p>
-                  Two rows deserve a second look. The overflow row is a decision rather than an omission, since a layer&rsquo;s response is built once per layer per call, and scanning every block on the way out as well as on the way in would double the check for a value that finite inputs and finite weights can still produce, so it is caught one seam later, where the next layer scans what it is given.
+                  The layer checks its incoming values for finiteness. Its calculation can still overflow even when the inputs and parameters are finite. This implementation checks that result when the next layer reads it, so the final output also needs a check by the caller.
                 </p>
                 <p>
-                  And the swapped-columns row is the price of a unit that reads unnamed coordinates from the layer beneath it. Past the first layer there are no names to check against, so the first layer cannot have them either, and the order a caller assembles a row in is the whole of the agreement.
+                  The swapped-column example has the correct input width, so it passes the shape check. Each weight multiplies the value at its matching position; the layer has no feature names to compare. The caller must preserve the feature order used when building or fitting the network.
                 </p>
               </SubSection>
             </>
@@ -1038,7 +850,7 @@ export default function DenseLayersPage() {
                   "Nothing, since the identity discards the scores",
                 ],
   1,
-  "Two affine transformations compose into one, with matrix W₂W₁ and bias W₂b₁ + b₂, and stacking more affine layers does not change that. At the running row the combined weights are (−2, 4) and the answer is 6 by either route. A nonlinear activation between the layers is what lets further layers widen the kinds of function the network can represent. Identity is an activation function and simply does not provide that widening.",
+  "With identity activations, the two layers combine into one weight matrix and bias. In the zero-bias example, the combined weight row is (−2, 4). For input (1, 2):\n\n```math\n(-2 × 1) + (4 × 2) = 6\n```\n\nBoth routes produce that result. A nonlinear operation between layers permits relationships that this single affine map cannot represent.",
   {
     "description": "Every neuron includes a bias. There is no additional nonlinear operation between the layers.",
     "data": "Architecture: two inputs -> three hidden neurons -> one output neuron\nBoth layers use identity activations."
@@ -1053,16 +865,16 @@ export default function DenseLayersPage() {
                   "Nowhere, since the rectifier is continuous",
                 ],
   1,
-  "The neuron answers zero while its score is negative and its score once the score is positive, so with two inputs the changeover is the line where the score is zero. The output layer combines several such responses, which makes its score affine within each region of the plane with its slope able to change where a hidden neuron switches regime. That is what a piecewise-linear decision boundary means.",
+  "For a negative score, ReLU outputs zero. For a positive score, it outputs the score itself. With two inputs and a nonzero weight vector, the zero-score boundary is a straight line. Combining several such responses gives a surface with affine regions whose slopes can change at these boundaries. This is the piecewise-linear behavior shown here.",
   {
     "description": "The bias is finite and at least one input weight is nonzero.",
     "data": "score = w1*x1 + w2*x2 + bias\noutput = max(0,score)"
   },
 ),
             trueFalse(
-  "One three-unit network classifies every observation correctly, while five other starts at that width do not. This shows that three units can represent the labels even though most of these optimisation runs did not find such a fit.",
+  "One three-unit network classifies every observation correctly, while five other starts at that width do not. This shows that three units can represent the labels even though most of these optimization runs did not find such a fit.",
   true,
-  "Seed 2 found it, at a loss of 0.0725, which proves a network of three units exists for this crowd. The other five starts did not arrive, and it takes eight units before all six starts call everyone. Width past what the boundary needs buys the loop more ways to arrive, which is a fact about the loop and not about the boundary.",
+  "The run with seed 2 classified all the supplied observations correctly at three units, so that width can represent these labels. Other starts at the same width failed to find such a fit. In this comparison, all six starts succeeded at eight units. Those results describe the tested data and optimization settings; they do not guarantee that increasing width will always make training succeed.",
 ),
             choice(
   "What does this six-start comparison tell us about the two equally sized networks?",
@@ -1082,7 +894,7 @@ export default function DenseLayersPage() {
             trueFalse(
   "In this implementation, a non-finite result is checked on the way out of the same layer.",
   false,
-  "It is caught one seam later, where the next layer scans what it is given. A response is built once per layer per call, and scanning every block on the way out as well as on the way in would double the check for a value that finite inputs and finite weights can still produce, so the placement is a decision rather than an omission.",
+  "This implementation checks a layer’s incoming values for finiteness. A non-finite output from an earlier layer can therefore be rejected when the next layer reads it, rather than when it is first produced. Finite inputs and parameters can still overflow during calculation. Callers also need to check the final output because there is no following layer to perform that input check.",
   {
     "description": "Trace the documented validation placement.",
     "data": "Each layer checks its incoming values. It does not run an additional outgoing finiteness scan. If another layer follows, that next layer checks the values it receives."
@@ -1196,7 +1008,7 @@ the one map answers [11.75, 5.75, 9.75]`,
             ),
             exercise(
               "Let a stack refuse a broken seam",
-              ["Each supplied pair gives a layer's input width and output width, with the first layer listed first. Build the zero-weight layers and try each chain. The zeros isolate shape compatibility from any learned numerical behaviour.","For a valid stack, print its input width, output width and total number of weights and biases. For an invalid chain, catch and print the shape error. Check each adjoining pair: a layer must receive the number of values produced by the previous layer."],
+              ["Each supplied pair gives a layer's input width and output width, with the first layer listed first. Build the zero-weight layers and try each chain. The zeros isolate shape compatibility from any learned numerical behavior.","For a valid stack, print its input width, output width and total number of weights and biases. For an invalid chain, catch and print the shape error. Check each adjoining pair: a layer must receive the number of values produced by the previous layer."],
               `from oop_ml import DenseLayer, Identity, LayerStack, Neuron, ShapeMismatchError
 
 chains = [

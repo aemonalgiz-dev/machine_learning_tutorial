@@ -335,8 +335,8 @@ export function PlaneSlicesPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Drag to turn the room. The indigo line is the cut at the fixed age, the
-        amber line the cut at the fixed height.
+        Drag to rotate the prediction surface. The indigo line shows predictions
+        at the selected age; the amber line shows them at the selected height.
       </p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">

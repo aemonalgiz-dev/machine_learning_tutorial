@@ -1,3 +1,5 @@
+import { americanEnglish } from "./american-english";
+
 export interface SearchEntry {
   title: string;
   description: string;
@@ -9,7 +11,7 @@ export interface SearchEntry {
   terms: string;
 }
 
-const normalise = (text: string) => text.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+const normalise = (text: string) => americanEnglish(text).toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
 
 export function searchLessons(entries: SearchEntry[], query: string, areaId = ""): SearchEntry[] {
   const phrase = normalise(query);

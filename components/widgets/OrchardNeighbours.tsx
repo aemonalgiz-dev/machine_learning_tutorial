@@ -99,7 +99,7 @@ export function OrchardNeighbours({ tree = 16 }: { tree?: number }) {
           y={VIEW.height - 8}
           className="fill-slate-500 text-[10px] dark:fill-slate-400"
         >
-          trunk girth, millimetres
+          trunk girth, millimeters
         </text>
         <text
           x={12}
@@ -108,7 +108,7 @@ export function OrchardNeighbours({ tree = 16 }: { tree?: number }) {
           textAnchor="middle"
           className="fill-slate-500 text-[10px] dark:fill-slate-400"
         >
-          water, metres
+          water, meters
         </text>
         {orchard.girth.values.map((girth, index) => {
           const inFirst = ringed[0].has(index);
@@ -172,7 +172,7 @@ export function OrchardNeighbours({ tree = 16 }: { tree?: number }) {
                 nearest three, measured
               </th>
               <th className="py-2 pr-4 font-semibold text-slate-600 dark:text-slate-400">
-                their water, metres
+                their water, meters
               </th>
               <th className="py-2 pr-4 font-semibold text-slate-600 dark:text-slate-400">
                 trunk&rsquo;s share of the gap
@@ -197,7 +197,7 @@ export function OrchardNeighbours({ tree = 16 }: { tree?: number }) {
                     style={{ backgroundColor: RING_COLOURS[index] }}
                   />
                   {reading.reading === "recorded"
-                    ? "in millimetres and metres"
+                    ? "in millimeters and meters"
                     : "in standard scores"}
                 </td>
                 <td className="py-2 pr-4 font-mono text-slate-800 dark:text-slate-200">

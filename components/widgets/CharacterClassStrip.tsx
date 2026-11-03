@@ -109,7 +109,7 @@ export function CharacterClassStrip() {
       </div>
 
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Each character is drawn with its number and its position, coloured by the
+        Each character is drawn with its number and its position, colored by the
         class the rules put it in, and a thin red rule stands wherever a boundary
         fell. There are {view.n_characters} characters and{" "}
         {view.n_characters - 1} places a boundary could have fallen, of which{" "}

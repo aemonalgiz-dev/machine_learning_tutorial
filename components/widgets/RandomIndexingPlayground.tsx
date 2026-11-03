@@ -115,7 +115,7 @@ export function RandomIndexingPlayground() {
           />
         </label>
         <label className="flex items-center gap-2">
-          <span className="text-xs">a neighbour further away</span>
+          <span className="text-xs">a neighbor further away</span>
           <Choice
             options={[
               { label: "counts the same", value: "uniform" as WeightingName },

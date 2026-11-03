@@ -89,7 +89,7 @@ export const sqlAnalysisTools: Record<string, Tool> = {
     run: ([input,replacement],settings) => rows(input).map(row=>({ ...row, [String(settings.field)]:field(row,String(settings.field)) === null ? replacement : field(row,String(settings.field)) })),
   },
   saNormaliseText: {
-    title: 'Normalise an ASCII identifier', why: 'Trim ordinary surrounding spaces and lowercase A through Z. This deliberately matches SQLite default trim/lower for this identifier policy; it does not perform general Unicode normalization.', inputs: ['Text records'], settings: [{ key: 'field', label: 'Source field', initial: 'code' }, { key: 'output', label: 'Normalised field', initial: 'normalised' }],
+    title: "Normalize an ASCII identifier", why: 'Trim ordinary surrounding spaces and lowercase A through Z. This deliberately matches SQLite default trim/lower for this identifier policy; it does not perform general Unicode normalization.', inputs: ['Text records'], settings: [{ key: 'field', label: 'Source field', initial: 'code' }, { key: 'output', label: "Normalized field", initial: 'normalised' }],
     run: ([input],settings) => rows(input).map(row => { const value=field(row,String(settings.field)); if(value!==null&&typeof value!=='string')throw Error('Use text identifiers or null.'); const normalised=value===null?null:(value as string).replace(/^ +| +$/g,'').replace(/[A-Z]/g,char=>char.toLowerCase()); return add(row,String(settings.output),normalised); }),
   },
   saLiteralPrefix: {

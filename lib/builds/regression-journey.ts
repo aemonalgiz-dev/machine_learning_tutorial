@@ -261,14 +261,14 @@ export function outlierDeliveries(minutes: number): Delivery[] {
 export const DELIVERY_PREDICTOR_BUILD: Build = {
   id: "delivery-predictor", title: "Give distance a place in the estimate",
   problem: "A customer needs an estimate before their delivery arrives. Distance tells us something, but a nearby delivery still takes time to prepare.",
-  challenge: "Build a provisional rule using 2 minutes per kilometre and 6 minutes for preparation. The distance source changes for each check. Choose the operations and constants yourself, then connect their answer to Result. These checks test the rule, not whether it matches every real delivery.",
-  why: "Multiplication turns kilometres into travel minutes. Adding preparation time allows a nearby order to take time too. These constants are our starting assumptions; the recorded deliveries will help us decide whether to change them.",
+  challenge: "Build a provisional rule using 2 minutes per kilometer and 6 minutes for preparation. The distance source changes for each check. Choose the operations and constants yourself, then connect their answer to Result. These checks test the rule, not whether it matches every real delivery.",
+  why: "Multiplication turns kilometers into travel minutes. Adding preparation time allows a nearby order to take time too. These constants are our starting assumptions; the recorded deliveries will help us decide whether to change them.",
   sources: { distance: "Delivery distance (km)" },
   cases: [1, 3, 5, 0].map(distance => ({ name: `${distance} km delivery`, data: { distance }, expected: 2 * distance + 6 })),
   recipe: op("add", [op("multiply", [source("distance"), constant(2)]), constant(6)]),
   extras: ["subtract", "divide"],
   hints: [
-    "The rate tells us how many travel minutes to allow for each kilometre. Which operation combines a distance with an amount per kilometre?",
+    "The rate tells us how many travel minutes to allow for each kilometer. Which operation combines a distance with an amount per kilometer?",
     "Preparation happens once per delivery. Find where its fixed time should enter after you have calculated the travel time.",
     "Use one Multiply piece for distance and a constant of 2. Pass its output and a constant of 6 into Add, then connect Add to Result.",
   ],
@@ -279,7 +279,7 @@ export const DELIVERY_ERROR_BUILD: Build = {
   id: "delivery-squared-errors", title: "Why did two mistakes add up to zero?",
   problem: "One prediction is too early and another is too late. Adding the signed errors could make those mistakes disappear from the total.",
   challenge: "A prediction is two minutes early; another is two minutes late. The current score says nothing went wrong. Repair the scoring machine so both mistakes count. For this version, a mistake twice as large should contribute four times as much. The final score should average those contributions, so repeating a batch does not change it. Choose your pieces, then test more than one delivery pair.",
-  why: "Squaring keeps early and late mistakes from cancelling. The mean lets us compare different numbers of deliveries on the same scale. Its units are minutes squared, so it is a scoring rule rather than an average wait in minutes.",
+  why: "Squaring keeps early and late mistakes from canceling. The mean lets us compare different numbers of deliveries on the same scale. Its units are minutes squared, so it is a scoring rule rather than an average wait in minutes.",
   sources: { predicted: "Predicted delivery times (min)", actual: "Observed delivery times (min)" },
   cases: [
     { name: "Our provisional line", data: { predicted: [8, 10, 12, 14, 16], actual: [8, 11, 12, 15, 16] }, expected: .4 },

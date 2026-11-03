@@ -95,7 +95,7 @@ export const servingDepthTools: Record<string, Tool> = {
   },
   servingCancelAcknowledgements: {
     title: 'Apply confirmed cancellation releases', inputs: ['Running request records', 'Acknowledged cancellation IDs'],
-    why: 'Only a cancel_requested row named by the execution engine becomes released. Asking to cancel is not acknowledgement that computation and cache ownership have ended.',
+    why: "Only a cancel_requested row named by the execution engine becomes released. Asking to cancel is not acknowledgment that computation and cache ownership have ended.",
     run: ([data, acknowledgements]) => {
       const records = rows(data), ack = ids(acknowledgements), names = ids(records.map(row => field(row, 'id')));
       if (records.some(row => !['running', 'cancel_requested', 'released'].includes(String(field(row, 'state'))))) throw Error('Use running, cancel_requested or released states.');
@@ -104,7 +104,7 @@ export const servingDepthTools: Record<string, Tool> = {
     },
   },
   servingHeldRequests: {
-    title: 'Count work still owned by the engine', inputs: ['Request records after acknowledgements'],
+    title: 'Count work still owned by the engine', inputs: ["Request records after acknowledgments"],
     why: 'Keeps running and cancellation-requested work. Only released rows stop owning slots and reserved KV blocks.',
     run: ([data]) => rows(data).filter(row => {
       if (!['running', 'cancel_requested', 'released'].includes(String(field(row, 'state')))) throw Error('A request has an unknown ownership state.');

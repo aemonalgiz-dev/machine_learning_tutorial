@@ -75,8 +75,8 @@ export function CenteringAnimation() {
         })}
         <circle cx={plotX(centre.x)} cy={plotY(centre.y)} r={5} fill="white" stroke={FIRST} strokeWidth={2.5} />
         <text x={plotX(centre.x) + 9} y={plotY(centre.y) + 14} className="text-[10px] font-medium" fill={FIRST}>mean ({centre.x.toFixed(0)}, {centre.y.toFixed(0)})</text>
-        <text x={PAD.left + (VIEW.width - PAD.left - PAD.right) / 2} y={VIEW.height - 8} textAnchor="middle" className="fill-slate-500 text-xs dark:fill-slate-400">height, cm, then centred height</text>
-        <text x={16} y={VIEW.height / 2} textAnchor="middle" transform={`rotate(-90 16 ${VIEW.height / 2})`} className="fill-slate-500 text-xs dark:fill-slate-400">weight, kg, then centred weight</text>
+        <text x={PAD.left + (VIEW.width - PAD.left - PAD.right) / 2} y={VIEW.height - 8} textAnchor="middle" className="fill-slate-500 text-xs dark:fill-slate-400">height, cm, then centered height</text>
+        <text x={16} y={VIEW.height / 2} textAnchor="middle" transform={`rotate(-90 16 ${VIEW.height / 2})`} className="fill-slate-500 text-xs dark:fill-slate-400">weight, kg, then centered weight</text>
       </svg>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         The labels are each person&rsquo;s deviation from the mean, and they do not change as the cloud slides. Neither do the distances between people, the shape, or the way it leans.

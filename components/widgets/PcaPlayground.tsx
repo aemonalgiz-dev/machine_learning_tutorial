@@ -213,7 +213,7 @@ export function PcaPlayground() {
           onClick={() => setPoints(CROWD)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          The crowd, unlabelled
+          The crowd, unlabeled
         </button>
         <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
           <input

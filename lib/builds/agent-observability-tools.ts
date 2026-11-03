@@ -126,9 +126,9 @@ export const agentObservabilityTools: Record<string, Tool> = {
     }),
   },
   agentObsDisagreement: {
-    title: 'Flag disputed judgements',
+    title: "Flag disputed judgments",
     why: 'Returns 1 when the two configured labels differ or either is uncertain (-1). Agreement does not prove the labels are true.',
-    inputs: ['Records with judgement labels'],
+    inputs: ["Records with judgment labels"],
     settings: [{ key: 'first', label: 'First label field', initial: 'human' }, { key: 'second', label: 'Second label field', initial: 'judge' }],
     run: ([data], settings) => rows(data).map(row => {
       const a = label(field(row, String(settings.first)));

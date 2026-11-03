@@ -61,7 +61,7 @@ function captionFor(layer: NormalisationLayer, mode: Mode): string {
     return "The same rows, answered by the running figures after one training pass and one step. They began at a mean of 0 and a variance of 1 and have moved a tenth of the way toward the batch.";
   }
   if (layer === "batch") {
-    return "The band runs down each column, so every statistic is read across the batch, and a cell’s answer depends on which rows travelled with it.";
+    return "The band runs down each column, so every statistic is read across the batch, and a cell’s answer depends on which rows traveled with it.";
   }
   if (layer === "layer") {
     return "The band runs along each row, so every statistic is read from that row alone, and a row’s answer is the same whatever else arrived.";

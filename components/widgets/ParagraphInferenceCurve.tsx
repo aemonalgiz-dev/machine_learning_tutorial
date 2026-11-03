@@ -4,8 +4,8 @@
 //
 // Two curves per architecture, how near the answer is to the cooking documents
 // and how near it is to the sailing ones, against the number of passes on a
-// logarithmic axis. The dashed line is the twenty passes the published work
-// gives a new text. Under distributed memory the two curves have not yet
+// logarithmic axis. The dashed line is the SDK's twenty-pass default for
+// a new text. Under distributed memory the two curves have not yet
 // crossed there. The API runs every descent; the browser draws the curves.
 
 import { useEffect, useState } from "react";
@@ -122,7 +122,7 @@ export function ParagraphInferenceCurve() {
           textAnchor="middle"
           className="fill-slate-500 text-[10px] dark:fill-slate-400"
         >
-          the published twenty
+          SDK default: twenty
         </text>
         <path d={cookingPath} fill="none" stroke={COOKING} strokeWidth={2} />
         <path d={sailingPath} fill="none" stroke={SAILING} strokeWidth={2} />

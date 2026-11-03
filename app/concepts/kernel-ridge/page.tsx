@@ -26,9 +26,9 @@ import { MercerProbe } from "@/components/widgets/MercerProbe";
 import { PenaltySweepChart } from "@/components/widgets/PenaltySweepChart";
 
 export const metadata: Metadata = {
-  title: "Kernel Ridge Regression · oop_ml",
+  title: "Kernel Ridge Regression · Perceptron Lab",
   description:
-    "Ridge regression gives us a way to control a fit, but its original features may not describe the relationship well. Kernel comparisons let us apply the same idea in a transformed feature space.",
+    "Kernel ridge regression combines comparisons in a transformed feature space with a penalty that controls the fit. The kernel determines the relationships available to the model, while the penalty limits how closely it follows the observations.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -43,7 +43,7 @@ export default function KernelRidgePage() {
       playgroundTitle="Fit a prediction using comparisons with training points"
       playgroundIntro="Compare the ordinary and kernel-based fits. Vary the penalty and watch how closely the prediction follows individual training points."
       title="Kernel Ridge Regression"
-      tagline={"Ridge regression gives us a way to control a fit, but its original features may not describe the relationship well. Kernel comparisons let us apply the same idea in a transformed feature space."}
+      tagline={"Kernel ridge regression combines comparisons in a transformed feature space with a penalty that controls the fit. The kernel determines the relationships available to the model, while the penalty limits how closely it follows the observations."}
       prerequisites={
         <>
           The model being rewritten is the one from the{" "}
@@ -74,11 +74,10 @@ export default function KernelRidgePage() {
 <>
               <SubSection title="1. Ridge as the penalty page left it">
                 <>
-<p>
-                  The ridge page fits a line to the thrown ball and to the crowd by choosing one weight per feature, and it chooses the weights by solving a system as wide as there are features. On the fifteen throws there is one feature, the time, and the line that comes out scores an R² of 0.003, since the ball goes up and comes down and a line can do only one of those.
-                </p>
+<p>Ridge regression gives each input feature a coefficient and adds a penalty for coefficient size. With time as its only feature, its prediction is still a straight line. The fifteen ball measurements rise and then fall, so that line fits poorly: its R² is 0.003. We need a richer representation if we want the prediction to follow the trajectory.</p>
                 <p>
-                  On the fifteen people the line scores 0.890 with a slope of 0.826 kilograms per centimetre. Nothing on this page changes what ridge minimises.
+
+                  On the fifteen people the line scores 0.890 with a slope of 0.826 kilograms per centimeter. Nothing on this page changes what ridge minimizes.
                 </p>
 </>
                 <Equation>{"minimise  ‖y − Xw‖² + λ‖w‖²"}</Equation>
@@ -86,29 +85,22 @@ export default function KernelRidgePage() {
                 <p>The earlier system has one row and column for each input feature. If there are p features, it is a p-by-p system. We can express the same ridge prediction using one coefficient for each of the n training observations instead, giving an n-by-n system.</p>
               <p>Those coefficients have different jobs: one weights features, while the other combines comparisons with stored observations. The second form needs inner products between observations. That is where a kernel can replace explicitly constructed feature coordinates. We will first check the equivalent linear forms before changing the comparison.</p>
                 <KeepInMind>
+
                   The penalty page owns the penalty. Everything it says about
                   λ shrinking the weights and about scaling the columns first
                   still holds here, since the objective has not changed.
-                  What changes is how the minimiser is written down.
+                  What changes is how the minimizer is written down.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. The same line written as a sum over rows">
-                <p>
-                  Ridge&rsquo;s answer can be pushed through to a second
-                  form. Instead of one weight per feature it becomes one
-                  weight per training row, and the fitted w is the sum of
-                  the rows, each multiplied by its own weight. The two forms
-                  describe the same line, and the derivation is three lines
-                  of algebra with one honest condition on it, which section
-                  17 returns to.
-                </p>
+                <p>The same ridge prediction can be written using one coefficient per training row instead of one per feature. These are called dual coefficients. They combine the training rows to recover the original feature-weight vector. The equivalence below assumes the centering convention returned to in section 17.</p>
                 <Equation>{"w = Xᵀ (XXᵀ + λI)⁻¹ y = Xᵀ a"}</Equation>
                 <Equation>{"a = (K + λI)⁻¹ y,   K = XXᵀ"}</Equation>
                 <p>
                   The vector a contains the dual weights, one for each training row. The n-by-n matrix K records the inner product of every training row with every other row. This is the Gram matrix. The solve uses those comparisons rather than the feature vectors directly. For a new observation, we compare it with each training row and combine the comparisons using a.
                 </p>
-                <Equation>{"prediction(x) = xᵀw = Σᵢ aᵢ (x · xᵢ) + ȳ"}</Equation>
+                <Equation>{"prediction(x) = xᵀw + ȳ = Σᵢ aᵢ (x · xᵢ) + ȳ"}</Equation>
                 <WhyThisWorks title="Why the two forms agree">
                   <DerivationTable
                     expressionHeading="step"
@@ -119,17 +111,11 @@ export default function KernelRidgePage() {
                       { expression: "(XᵀX + λI)⁻¹ Xᵀ = Xᵀ (XXᵀ + λI)⁻¹", reason: "the same two multiplications on the right side; both inverses exist for any λ above zero" },
                     ]}
                   />
-                  <p>
-                    The condition is that X is what the derivation says it
-                    is, a matrix of centred columns with no intercept
-                    column, since the intercept is exempt from the penalty
-                    on the left and there is no way to exempt one row of K on
-                    the right. Centring both the columns and the target does
-                    the intercept&rsquo;s job instead.
-                  </p>
+                  <p>Here X contains centered feature columns and no intercept column. Center the target as well, then restore its mean when predicting. This handles the offset separately from the penalized coefficients. An arbitrary row of the kernel table represents a training observation, so exempting that row from the penalty would not exempt an intercept.</p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The dual form is ridge regression&rsquo;s own minimiser
+
+                  The dual form is ridge regression&rsquo;s own minimizer
                   written as a combination of the training rows, and under
                   the plain inner product it has to give the identical line.
                 </KeepInMind>
@@ -137,80 +123,58 @@ export default function KernelRidgePage() {
 
               <SubSection title="3. Where the features went">
                 <p>
-                  Take the three people at 169, 170 and 171 centimetres,
-                  weighing 64, 70 and 76 kilograms. Centred on their mean of
+
+                  Take the three people at 169, 170 and 171 centimeters,
+                  weighing 64, 70 and 76 kilograms. Centered on their mean of
                   170 the heights are −1, 0 and 1, and the Gram matrix is
                   the three by three table of their products, which is the
                   only thing the solve ever reads about them. The middle row
                   and column are all zero, because the middle person is at
-                  the mean and has no centred height to multiply.
+                  the mean and has no centered height to multiply.
                 </p>
                 <GramMatrixView dataset="three" />
                 <p>
+
                   Switch to the radial basis kernel and the same three people
                   produce a different table, with ones down the diagonal,
-                  0.368 for the two pairs a centimetre apart and 0.018 for
-                  the pair two centimetres apart. The rows have not changed.
+                  0.368 for the two pairs a centimeter apart and 0.018 for
+                  the pair two centimeters apart. The rows have not changed.
                   What changed is the function that turns two rows into one
                   number, and that function is what the rest of the page
                   varies.
                 </p>
                 <p>
+
                   The fifteen throws make a fifteen by fifteen table, and
                   drawn as a heat map the three kernels look nothing alike.
                   The linear kernel&rsquo;s table is the outer product of one
                   column with itself, bright in the corners and zero along
-                  the middle where the centred time passes through nought;
+                  the middle where the centered time passes through nought;
                   the radial one is a band along the diagonal, each throw
-                  similar to its neighbours in time and to nothing far away.
+                  similar to its neighbors in time and to nothing far away.
                 </p>
                 <GramMatrixView dataset="throw" />
-                <p>
-                  The eigenvalues under each table say how many directions
-                  the table can tell apart. Under the linear kernel fourteen
-                  of the fifteen are zero to within rounding, the largest at
-                  about 4e−15, and one is 22.834; a rank-one table can fit
-                  exactly one direction, which is a line. The squared
-                  polynomial kernel has three nonzero eigenvalues and the
-                  radial kernel has fifteen, its smallest 8.1e−9.
-                </p>
+                <p>Eigenvalues describe the independent directions represented by the kernel table. For the linear kernel, fourteen are numerically near zero, the largest of those about 4e−15; the remaining eigenvalue is 22.834. The squared polynomial kernel has three nonzero eigenvalues. The radial kernel has fifteen, with smallest value 8.1e−9. These counts concern this finite set of observations.</p>
                 <KeepInMind>
-                  Once the Gram matrix exists the features are gone. The
-                  solve reads an n by n table of pairwise comparisons and
-                  nothing else, which is exactly the property that lets a
-                  kernel be swapped in.
-                </KeepInMind>
+                  The linear system can be solved from the Gram matrix and centered targets. It does not need the explicit transformed coordinates at that stage. Prediction still needs comparisons with the saved training inputs, so those original references have not disappeared.</KeepInMind>
               </SubSection>
 
               <SubSection title="4. The identity holds on the throw, to the number">
-                <p>
-                  A derivation is a claim, and the fifteen throws are where
-                  it is checked. Fit ridge regression feature by feature and
-                  the dual form row by row under the plain inner product, at
-                  the same penalty, and compare everything that can be
-                  compared.
-                </p>
+                <p>We can check the linear-kernel implementation against ordinary ridge under matching centering and penalty conventions. The derivation predicts equivalent fitted functions. The display compares their coefficients, scores and sampled predictions, allowing for floating-point differences.</p>
                 <IdentityLedger />
                 <p>
+
                   At a penalty of one, ridge reports a slope of 0.261135 and
-                  the dual weights, added up through the centred times, give
+                  the dual weights, added up through the centered times, give
                   0.261135. Sampled at 81 times across the throw the two
                   lines part by at most 3.7e−14, both score 0.002588, and
-                  both answer 12.76 metres at two seconds, which is the mean
+                  both answer 12.76 meters at two seconds, which is the mean
                   height because two seconds is the mean time. Drag the
                   penalty through six orders of magnitude and the two
                   columns stay equal to the last printed digit.
                 </p>
                 <InAModel title="What the control is for">
-                  <p>
-                    Under the radial basis kernel there is no independent
-                    right answer to compare a kernel fit against, so a bug
-                    that produced a plausible curve would go unseen. Under
-                    the linear kernel there is one, and it is ridge exactly.
-                    Section 17 shows the bug that this control found, which
-                    came within two percent of the right slope and was wrong
-                    for a reason.
-                  </p>
+                  <p>The linear case provides an independently formulated comparison with ordinary ridge. A mismatch can expose a centering or penalty-convention error that a plausible curve would hide. Nonlinear fits can also be checked through small hand-solved matrices or explicit feature maps where available; the linear control is one useful check.</p>
                 </InAModel>
               </SubSection>
             </>
@@ -223,7 +187,8 @@ export default function KernelRidgePage() {
               <SubSection title="5. The dual weights on three people">
                 <>
                   <p>
-                    The three centred heights are minus one, zero and one; their centred
+
+                    The three centered heights are minus one, zero and one; their centered
                     weights are minus six, zero and six. With a ridge penalty of one,
                     the primal calculation is short.
                   </p>
@@ -243,41 +208,38 @@ export default function KernelRidgePage() {
                     </p>
                     <Equation>{"a₂ = 0\n2a₁ − a₃ = −6\n−a₁ + 2a₃ = 6\n\nsolution: a₁ = −2, a₂ = 0, a₃ = 2"}</Equation>
                     <p>
+
                       The fit returns those three coefficients. Recover the ordinary
                       slope by multiplying each coefficient by its training person’s
-                      centred height and adding.
+                      centered height and adding.
                     </p>
                   </>
                   <Equation>{"(−2)(−1) + (0)(0) + (2)(1) = 4"}</Equation>
                   <>
                     <p>
-                      Use the recovered slope to predict half a centimetre above the
+
+                      Use the recovered slope to predict half a centimeter above the
                       mean height.
                     </p>
-                    <Equation>{"prediction = mean weight + slope × centred height\n           = 70 + 4 × 0.5 = 72 kg"}</Equation>
+                    <Equation>{"prediction = mean weight + slope × centered height\n           = 70 + 4 × 0.5 = 72 kg"}</Equation>
                     <p>
                       Both formulations give this result.
                     </p>
                   </>
                 </WorkedExample>
                 <p>
+
                   The person at the mean carries a weight of zero and
                   contributes nothing to any prediction, and the two outer
                   people carry equal and opposite weights. A row at the
-                  centre of the data tells a straight fit nothing about its
+                  center of the data tells a straight fit nothing about its
                   slope, and the dual form says so directly where the
                   per-feature form never mentions individual rows at all.
                 </p>
               </SubSection>
 
               <SubSection title="6. A dual weight is a residual divided by the penalty">
-                <p>
-                  There is a plainer reading of what each weight is, and it
-                  holds under every kernel. Rearrange the system that defines
-                  the weights and the left side becomes the fitted values,
-                  so the weights are the misses of the fit, each divided by
-                  the penalty.
-                </p>
+                <p>Rearranging the fitted system gives another interpretation of each dual coefficient. It equals that training observation’s residual divided by the penalty. The signs therefore indicate which observations the fitted prediction underestimates and overestimates.</p>
                 <Equation>{"K a + λ a = y_centred   ⇒   λ a = y_centred − K a = residuals"}</Equation>
                 <Equation>{"aᵢ = residualᵢ / λ"}</Equation>
                 <p>
@@ -298,23 +260,14 @@ export default function KernelRidgePage() {
                   residuals stay where they are and the divisor shrinks.
                 </p>
                 <KeepInMind>
-                  A dual weight is a scaled residual. A row the fit passes
-                  through has a weight of zero however far from the centre it
-                  is, and a row the fit misses badly pulls hard on every
-                  prediction near it, so the largest weight on the throw went
-                  from 12 to 12,105 when the penalty fell from one to a
-                  thousandth while the line hardly moved.
-                </KeepInMind>
+
+                  A dual coefficient equals the training residual divided by λ under this solve. An exactly fitted row therefore has coefficient zero. How a nonzero coefficient affects a new query also depends on the kernel: radial influence is local, while a linear kernel is not. Large dual coefficients need not imply a large change in the final function, as this nearly unchanged line demonstrates.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. What the model keeps instead of coefficients">
                 <>
-<p>
-                  Ridge regression on the crowd keeps three numbers, a weight for height, an intercept, and nothing else, and &ldquo;0.826 kilograms per centimetre&rdquo; is a sentence about height. The dual model keeps every training row and a weight for each, so on fifteen people it keeps fifteen heights and fifteen weights, and a prediction is a sum over all of them.
-                </p>
-                <p>
-                  There is no per-feature number to report. It is possible to add the weights up through the centred heights and recover the slope, as section 5 did, only because under the linear kernel there is a slope to recover; under the radial kernel there is not, and the playground says so rather than inventing one.
-                </p>
+<p>Ordinary ridge regression on this single-feature crowd needs a height coefficient and an intercept. The coefficient, 0.826 kilograms per centimeter, describes how its prediction changes with height. This dual implementation instead retains the training rows and one coefficient for each. Fifteen people therefore require fifteen stored heights and fifteen dual coefficients.</p>
+                <p>A dual coefficient describes a training row’s contribution, rather than an original feature’s effect. With the linear kernel we can combine those contributions to recover the ordinary slope, as section 5 did. A radial-kernel prediction has no single constant slope to report, because its response changes with the query’s position.</p>
 </>
                 <Equation>{"the model = the n training rows + the n dual weights + ȳ"}</Equation>
                 <InAModel title="On the fifteen throws">
@@ -326,11 +279,7 @@ export default function KernelRidgePage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  Kernel ridge regression has no coefficients, and no
-                  implementation could supply them, since in the space a
-                  kernel implies the features have no names for a weight to
-                  be bound to.
-                </KeepInMind>
+                  This interface exposes dual coefficients rather than one coefficient on each original input feature. For a known finite feature map, feature-space weights can sometimes be reconstructed; the linear example does so. A general radial fit has no single constant coefficient describing its response to each original feature.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -342,22 +291,22 @@ export default function KernelRidgePage() {
               "What separates the dual form from ridge’s per-feature form?",
               [
                 "It solves a system as wide as the rows rather than as wide as the features, and writes the answer as a combination of the training rows",
-                "It minimises a different objective, with the penalty falling on the rows rather than the features",
+                "It minimizes a different objective, with the penalty falling on the rows rather than the features",
                 "It carries an intercept that the per-feature form has to do without",
                 "It reaches the answer by iteration where the other reaches it in one solve",
               ],
               0,
-              "Nothing on this page changes what ridge minimises. The matrix ridge inverts is as wide as the features and the dual’s is as wide as the rows, and under the plain inner product the two describe the same line. There is no iteration anywhere here.",
+              "With the linear kernel and the same centering and penalty convention, primal and dual ridge describe the same fitted line. The primal system is indexed by input features; the dual system is indexed by training observations. A solver can solve either linear system without explicitly computing a matrix inverse. Nonlinear kernels change the implied feature representation while retaining the dual organization.",
             ),
             trueFalse(
-              "The dual derivation holds whether or not the columns are centred, since the penalty is the same either way.",
+              "The dual derivation holds whether or not the columns are centered, since the penalty is the same either way.",
               false,
-              "The condition is that the rows come in centred with no intercept column. The intercept is exempt from the penalty in the per-feature form and there is no way to exempt one row of the Gram matrix on the other side, so centring both the columns and the target does the intercept’s job instead.",
+              "The derivation shown here removes the unpenalized intercept by centering inputs and target, then adds the training target mean back to predictions. The simple dual system matches that convention. Other formulations can include an explicit free intercept and its corresponding constraint, so centering is required for this derivation rather than the only possible dual formulation.",
             ),
             trueFalse(
-              "A dual weight is a residual divided by the penalty, so a row the fit passes through carries a weight of zero however far from the centre it sits.",
+              "A dual weight is a residual divided by the penalty, so a row the fit passes through carries a weight of zero however far from the center it sits.",
               true,
-              "Rearranging the system that defines the weights puts the fitted values on the left, so the penalty times a weight is that row’s miss. On the three people at a penalty of one the fitted weights are 66, 70 and 74 kilograms, the residuals are −2, 0 and 2, and dividing by one gives the dual weights back.",
+              "The defining system can be rearranged so that each centered-target residual equals penalty times its dual weight. Here penalty is one:\n\n```math\nresiduals = [64 − 66, 70 − 70, 76 − 74] = [−2, 0, 2]\ndual weights = residuals / 1 = [−2, 0, 2]\n```\n\nThis identity uses the same prediction and centering convention as the fitted system.",
             ),
             choice(
               "Under the linear kernel on the throw, the penalty drops from one to a thousandth. What happens?",
@@ -368,7 +317,7 @@ export default function KernelRidgePage() {
                 "The fit is refused, a thousandth being below the smallest penalty accepted",
               ],
               0,
-              "The residuals stay where they are and the divisor shrinks, so the weights grow as one over the penalty. That is also why a weight is not an importance, since the largest one belongs to the row the fit missed by most whatever that row had to say about the shape.",
+              "In this linear fit, reducing the penalty changes predictions only slightly while dividing similar residuals by a much smaller number. The dual weights therefore become much larger. Their magnitude reflects residuals and the penalty convention; it is not by itself a measure of a training observation's importance.",
             ),
             several(
               "Which of these make up a fitted kernel ridge model on the fifteen throws?",
@@ -379,7 +328,7 @@ export default function KernelRidgePage() {
                 "The mean height, added back to every prediction",
               ],
               [0, 1, 3],
-              "That is 31 numbers against ridge’s three, and every prediction touches all fifteen rows. There is no per-feature number to report and no implementation could supply one, since in the space a kernel implies the features have no names for a weight to be bound to. A slope can be recovered under the linear kernel only because there is a slope there to recover.",
+              "The stored representation includes training times, dual weights and the target mean, plus the kernel and preprocessing configuration. A nonlinear kernel need not expose a finite list of named feature coefficients. For a linear or finite polynomial map, coefficients can be reconstructed if the map is explicitly defined, but that reconstruction is unnecessary for pairwise-kernel prediction.",
             ),
         ],
         },
@@ -388,28 +337,13 @@ export default function KernelRidgePage() {
           content: (
             <>
               <SubSection title="8. The swap, and what stays the same">
-                <p>
-                  Everything in Part 1 reads the rows through one function,
-                  the inner product of two of them. The kernel trick page
-                  argues that any function which is an inner product in some
-                  expanded space, whether or not that space is ever built,
-                  can stand in for it, and this page takes that as given.
-                  Replace the inner product wherever it appears, in the Gram
-                  matrix and in the prediction, and nothing else about the
-                  fit changes.
-                </p>
+                <p>The dual formulation uses inner products between pairs of rows. A valid kernel can compute those inner products in another feature representation without listing its coordinates. Replace the training inner products and the query-to-training inner products with the same kernel. The solve then combines comparisons in that representation.</p>
                 <Equation>{"K[i, j] = k(xᵢ, xⱼ)"}</Equation>
                 <Equation>{"a = (K + λI)⁻¹ y_centred"}</Equation>
                 <Equation>{"prediction(x) = Σᵢ aᵢ k(x, xᵢ) + ȳ"}</Equation>
-                <p>
-                  The solve is the same solve, the penalty is the same
-                  penalty on the same diagonal, and the dual weights are
-                  still the residuals over the penalty. What the swap buys is
-                  a curve, drawn without a single manufactured column, in the
-                  original picture of time against height.
-                </p>
+                <p>The matrix solve and diagonal penalty keep the same form. Changing the comparisons changes the prediction shapes the model can express. A nonlinear kernel can therefore produce a curve in the original time-and-height plot without explicitly building polynomial or other transformed feature columns.</p>
                 <NumberTable
-                  headings={["kernel", "what it computes on centred rows", "on the throw, penalty 1"]}
+                  headings={["kernel", "what it computes on centered rows", "on the throw, penalty 1"]}
                   rows={[
                     ["linear", "a · b", "R² 0.003, a line"],
                     ["polynomial, degree d", "(a · b + 1)ᵈ", "R² 0.981 at degree 2"],
@@ -427,60 +361,43 @@ export default function KernelRidgePage() {
               </SubSection>
 
               <SubSection title="9. Polynomial kernels and the degree, on the throw">
-                <p>
-                  The polynomial kernel raises the inner product plus one to
-                  a power, and the plus one is what lets every lower power
-                  ride along with the highest. On the fifteen throws the
-                  degree does what the polynomial page&rsquo;s manufactured
-                  columns did, except that no column is ever built.
-                </p>
+                <p>The polynomial kernel raises the inner product plus one to the chosen power. Expanding that expression would include lower powers as well as the highest one. It is related to constructing polynomial features, but the kernel computes the comparisons without building those columns for the fifteen throws.</p>
                 <KernelGallery family="polynomial" dataset="throw" values={[1, 2, 3, 4, 5, 6]} />
                 <p>
+
                   Degree 2 follows the arc at 0.981, degree 3 reaches 0.985,
                   and degrees 4, 5 and 6 come out at 0.981, 0.982 and 0.980,
                   so past the square the extra powers buy nothing on this
                   throw at this penalty. What they cost is visible in the
                   condition number of the system, which goes 23.8, 72.4,
                   262, 1061, 4597 and 20,781 as the degree rises, since the
-                  largest entries of the Gram matrix are centred times raised
+                  largest entries of the Gram matrix are centered times raised
                   to the degree and the smallest stay near zero.
                 </p>
                 <KeepInMind>
-                  The degree sets how many directions the Gram matrix can
-                  tell apart, and on one feature that is the degree plus one.
-                  Raising it past what the data needed left the score where it
-                  was on this throw and multiplied the condition number by
-                  about four per degree.
-                </KeepInMind>
+                  On one input, a degree-d polynomial kernel can represent at most degree plus one independent feature directions. The finite Gram matrix may have lower rank if there are too few distinct inputs or dependent features. Here the higher degrees change the score little at this penalty while increasing the condition number substantially.</KeepInMind>
               </SubSection>
 
               <SubSection title="10. Degree one with a constant is the linear kernel here">
-                <p>
-                  The textbook reading is that the polynomial kernel at
-                  degree one is not the linear kernel, because the plus one
-                  adds a constant to every entry of the Gram matrix and a
-                  constant entry is a feature that is always one. I measured
-                  it and found the two fits identical here. On the
-                  throw at a penalty of one the two curves part by 2.0e−14,
-                  and on the three people by 3.9e−12, which is the arithmetic
-                  of a solve and not a difference of model.
-                </p>
+                <p>At degree one, the polynomial kernel includes an added constant, so its Gram matrix differs from the linear kernel’s. In these recorded fits, however, the predictions differ only by numerical rounding: 2.0e−14 for the throw at penalty one and 3.9e−12 for the three-person case. A difference in the kernel formula need not produce a visible difference on a particular fitted example.</p>
                 <Equation>{"K_degree1 = K_linear + 11ᵀ"}</Equation>
-                <WhyThisWorks title="Why centring makes the constant vanish">
+                <WhyThisWorks title="Why centering makes the constant vanish">
                   <p>
-                    The fit centres the rows, so every column of X sums to
+
+                    The fit centers the rows, so every column of X sums to
                     zero and the Gram matrix K sends the all-ones vector to
-                    zero. The fit also centres the target, so y_centred is
+                    zero. The fit also centers the target, so y_centred is
                     perpendicular to the all-ones vector. The added 11ᵀ acts
                     only along that vector, and the solve never leaves the
                     space perpendicular to it, so the added term is never
-                    touched. Without the centring the textbook reading would
-                    hold and the constant would act as a penalised intercept.
+                    touched. Without the centering the textbook reading would
+                    hold and the constant would act as a penalized intercept.
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
+
                   Which claims hold depends on what the implementation
-                  centres. This one centres both the rows and the target, and
+                  centers. This one centers both the rows and the target, and
                   under that choice the polynomial kernel at degree one is
                   the linear kernel to the last bits.
                 </KeepInMind>
@@ -488,6 +405,7 @@ export default function KernelRidgePage() {
 
               <SubSection title="11. The radial basis kernel and gamma, on the throw">
                 <p>
+
                   The radial basis kernel reads two rows as similar when
                   they are close, one at zero distance and falling toward
                   zero as the distance grows, with gamma setting how fast.
@@ -495,57 +413,40 @@ export default function KernelRidgePage() {
                   reads 1.0 at itself, then 0.919, 0.723, 0.477, 0.273,
                   0.129, 0.054 and 0.018 for the throws stepping outward at
                   gamma 1, so each throw is compared mainly with its
-                  neighbours in time.
+                  neighbors in time.
                 </p>
                 <KernelGallery family="rbf" dataset="throw" values={[0.01, 0.1, 0.3, 1, 3, 10]} />
                 <>
-<p>
-                  At gamma 0.01 every throw looks like every other and the fit is a curve that is nearly straight at 0.012. At 0.1 it reaches 0.450, at 0.3 it follows the arc at 0.797, at 1 it scores 0.873, at 3 it peaks at 0.880, and by 10 each throw is similar only to itself, the smallest Gram eigenvalue has risen from 8.1e−9 at gamma 1 to 0.202, and the curve dips toward the mean between the throws for a score of 0.844.
-                </p>
-                <p>
-                  At a hundred the table is the identity to four decimals and the fit is the mean plus a bump at each throw.
-                </p>
+<p>At gamma 0.01, broad comparisons give R² of 0.012. The scores rise to 0.450 at 0.1, 0.797 at 0.3, 0.873 at one and 0.880 at three. At ten the comparisons are more local, the smallest Gram eigenvalue is 0.202 rather than 8.1e−9, and R² is 0.844. Neighboring inputs can still have substantial comparisons; the matrix is not yet the identity.</p>
+                <p>At gamma one hundred, the table is closer to the identity and the prediction resembles the restored mean plus narrow contributions around the training inputs.</p>
 </>
                 <KeepInMind>
-                  Gamma is a reach in the feature&rsquo;s units. At a hundredth
-                  the fit was too inflexible to follow the curve and scored 0.012; at ten it followed the curve
-                  only within a fraction of a second of each throw and dipped
-                  toward the mean between them. It has to be chosen, and the
-                  penalty page&rsquo;s cross-validation is the way to choose it.
-                </KeepInMind>
+                  Gamma controls the inverse squared distance scale of the radial comparison. In this example, very broad comparisons fit poorly and narrow ones become localized around individual readings. Compare gamma and the coefficient penalty together using validation data.</KeepInMind>
               </SubSection>
 
               <SubSection title="12. Gamma is in the feature's own units, on the crowd">
-                <p>
-                  Gamma multiplies a squared distance, so it carries the
-                  inverse square of whatever the feature is measured in.
-                  The gamma of 1 that suited times in seconds is a reach of
-                  one second; applied to heights in centimetres it is a reach
-                  of one centimetre, and the people are three apart.
-                </p>
+                <p>Gamma multiplies a squared distance. With one physical input, its units are the inverse square of that input’s units. The distance where the radial comparison falls to exp(−1) is the reciprocal square root of gamma. A gamma suited to time in seconds therefore need not suit height in centimeters.</p>
                 <KernelGallery family="rbf" dataset="crowd" values={[1, 0.1, 0.01, 0.001, 0.0003, 0.0001]} />
                 <>
 <p>
-                  At gamma 1 on the crowd the Gram matrix is the identity to four decimals, the smallest eigenvalue 0.99976, so every dual weight is half that person&rsquo;s centred weight and the curve visits each person and returns to the mean of 72 between them. Asked about the person at 173 centimetres it answers 74.0, halfway from the mean to their 76 kilograms, and asked about 174.5, between two people, it answers 72.16.
+
+                  At gamma 1 on the crowd the Gram matrix is the identity to four decimals, the smallest eigenvalue 0.99976, so every dual weight is half that person&rsquo;s centered weight and the curve visits each person and returns to the mean of 72 between them. Asked about the person at 173 centimeters it answers 74.0, halfway from the mean to their 76 kilograms, and asked about 174.5, between two people, it answers 72.16.
                 </p>
                 <p>
                   The score is 0.750, below the line&rsquo;s 0.890. Widen the reach to a hundredth and the score is 0.835; at a thousandth 0.824; at a ten-thousandth the kernel can no longer tell the tallest from the shortest and the score falls to 0.481. Nothing here beats the line, because the crowd was drawn along one.
                 </p>
 </>
                 <KeepInMind>
-                  The same gamma means different things in seconds and
-                  centimetres. Either scale the feature first, as the
-                  kernel-trick page does, or expect the useful gamma to
-                  change by the square of the unit change, which here was a
-                  factor of a hundred to a thousand.
-                </KeepInMind>
+
+                  For a pure unit conversion that multiplies every input difference by a common factor, divide gamma by that factor squared to preserve the radial kernel values. Switching from time to height is a different problem, not a unit conversion. In multiple dimensions, feature scaling also determines how differences combine.</KeepInMind>
               </SubSection>
 
               <SubSection title="13. Three people under three kernels">
                 <p>
+
                   The three people are small enough that every kernel&rsquo;s
                   answer can be read whole. Each fit is asked the same
-                  question, what a person of 170.5 centimetres weighs, and
+                  question, what a person of 170.5 centimeters weighs, and
                   each answers from its own three dual weights.
                 </p>
                 <NumberTable
@@ -557,15 +458,7 @@ export default function KernelRidgePage() {
                   ]}
                   caption="Every number is read from the fit endpoint on the three people; the middle weight is zero under all three because the middle person is at both means."
                 />
-                <p>
-                  The middle weight is zero under every kernel, for the
-                  reason section 6 gave. The middle person weighs the mean,
-                  every one of these fits passes through the mean, so their
-                  residual is zero and so is their weight. The outer weights
-                  differ because the kernels differ about how much the outer
-                  two people resemble each other, 1 against −1 under the
-                  linear kernel and 0.018 under the radial one.
-                </p>
+                <p>The middle coefficient is zero in these three symmetric fits. The inputs are symmetric around 170 and the targets around 70, with the middle target equal to its mean. For these kernel choices, the fitted contributions balance at the middle input. That symmetry does not imply that every nonlinear kernel fit passes through the raw-input mean.</p>
               </SubSection>
             </>
           ),
@@ -575,94 +468,36 @@ export default function KernelRidgePage() {
           content: (
             <>
               <SubSection title="14. Every diagonal entry takes the penalty">
-                <p>
-                  On the ridge page the penalty matrix has a zero in its
-                  first slot so the intercept is not shrunk, and the page
-                  records the bug that came from zeroing that slot when there
-                  was no intercept column to exempt. The dual system has no
-                  columns at all. Its matrix is indexed by training rows on
-                  both sides, and no row is an intercept, so the penalty is
-                  added to every entry of the diagonal with no exemption.
-                </p>
+                <p>The Gram matrix has a row and column for each training observation. None represents an explicit intercept feature, so every diagonal entry receives λ. Exempting an arbitrary training index would define a different regularizer, rather than preserving an unpenalized intercept.</p>
                 <Equation>{"K + λI,   every diagonal entry, no exemption"}</Equation>
-                <p>
-                  Exempting row zero would leave one arbitrary person
-                  unpenalised, a fit that still runs, still draws a curve,
-                  and is quietly wrong. What does the intercept&rsquo;s job
-                  instead is the centring. Both the rows and the target have
-                  their means removed before the solve and the target mean is
-                  added back to every prediction, which is why every fit on
-                  this page passes through the mean point and why the throw
-                  answers exactly 12.76 at two seconds under any kernel.
-                </p>
+                <p>This SDK centers the original input columns and the target, solves the kernel system, then adds the target mean to each prediction. For the linear kernel, this reproduces ordinary ridge with an unpenalized intercept. For a nonlinear kernel, centering original inputs does not generally center the transformed features. Adding the target mean therefore does not guarantee that the fitted function passes through the input-mean point or that its predictions average to the target mean.</p>
                 <KeepInMind>
-                  Ridge exempts its intercept from the penalty; the dual has
-                  no intercept to exempt and centres instead. The two are the
-                  same rule reached two ways, and section 17 shows what
-                  centring only half of the data does.
-                </KeepInMind>
+
+                  The exact ordinary-ridge equivalence here applies to the centered linear kernel. To fit a freely optimized unpenalized intercept in a nonlinear feature space, center that feature representation through its kernel comparisons or solve for the intercept explicitly. That is a different convention from simply centering the original inputs and restoring a fixed target mean.</KeepInMind>
               </SubSection>
 
               <SubSection title="15. A small penalty interpolates and ill-conditions">
-                <p>
-                  The ridge page describes the penalty as a trade of fit
-                  against restraint. In the dual there is a second thing it
-                  does that has no counterpart on that page, since the Gram
-                  matrix of a radial kernel on distinct rows is positive
-                  definite and only barely, its smallest eigenvalue on the
-                  throw at gamma 1 being 8.1e−9, and adding the penalty to
-                  the diagonal is what makes the solve possible at all.
-                </p>
+                <p>A positive penalty also improves the numerical stability of the solve. The radial kernel matrix is positive definite for distinct inputs, but its smallest eigenvalue on the throw at gamma 1 is only 8.1e−9. The unpenalized system is therefore invertible in exact arithmetic yet sensitive to numerical error. Adding to its diagonal makes the small-eigenvalue directions less fragile.</p>
                 <PenaltySweepChart />
-                <p>
-                  At a penalty of a billionth the radial curve scores
-                  0.999998 on the throws and swings 122 metres from the mean
-                  between them, the largest dual weight is 1.6e7 and the
-                  condition number of the system is 6.2e8, which is nine
-                  digits of accuracy lost from sixteen. At a millionth the
-                  score is still 0.99955 with a condition number of 5.6e6 and
-                  a swing of 17.8; at a tenth it is 0.987 with a condition
-                  number of 57.5 and the curve stays within 11 metres of the
-                  mean; at one, 0.873 and 6.65.
-                </p>
+                <p>At penalty one billionth, radial training R² is 0.999998. The curve deviates from the mean by as much as 122 meters between readings, its largest dual coefficient is 1.6e7 and the system condition number is 6.2e8. That condition number warns of potentially severe sensitivity; it does not prove that nine digits are lost in every computed answer. At one millionth, R² is 0.99955, the condition number is 5.6e6 and the deviation is 17.8. At one tenth they are 0.987, 57.5 and within 11 meters. At penalty one, R² is 0.873 and the condition number is 6.65.</p>
                 <WhyThisWorks title="Why the condition number is what it is">
                   <>
-                    <p>
-                      Adding a positive penalty to the diagonal shifts every eigenvalue
-                      by that amount. The condition number compares the largest shifted
-                      eigenvalue with the smallest.
-                    </p>
+                    <p>Adding a positive penalty to the diagonal increases every eigenvalue by that amount. The condition number compares the largest resulting eigenvalue with the smallest. A large ratio warns that small numerical changes can produce large changes in the solution.</p>
                     <Equation>{"condition number = (largest eigenvalue + λ) / (smallest eigenvalue + λ)"}</Equation>
                     <p>
                       On the throw with gamma one, the largest eigenvalue is about 5.650
                       and the smallest about 8.1 billionths.
                     </p>
                     <Equation>{"at λ = 1:    condition number ≈ 6.650 / 1 ≈ 6.65\nat λ = 10⁻⁹: condition number ≈ 5.650 / (8.1 × 10⁻⁹ + 10⁻⁹)\n                             ≈ 6.2 × 10⁸"}</Equation>
-                    <p>
-                      The linear kernel has fourteen zero eigenvalues and a condition
-                      number around 23 billion at the smaller penalty. Its fitted curve
-                      still changes very little here because the target lies in the one
-                      direction its Gram matrix represents.
-                    </p>
+                    <p>The linear Gram matrix has fourteen zero eigenvalues in exact arithmetic. A small penalty gives a condition number around 23 billion here. Large dual components in directions that the linear kernel cannot represent can nevertheless cancel when forming predictions. The fitted line can therefore remain nearly unchanged even when the dual coefficient vector is numerically sensitive.</p>
                   </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The penalty is not optional here in the way it is optional
-                  for least squares. At zero the radial solve is numerically
-                  hopeless and the fit passes through every training row,
-                  and a zero penalty is refused at construction
-                  rather than at the solve.
-                </KeepInMind>
+                  This SDK requires a positive penalty. The unpenalized linear Gram system is singular when its rows are dependent. A Gaussian Gram matrix on distinct inputs is invertible in exact arithmetic, but can be poorly conditioned, as this example shows. Numerical difficulty at zero penalty is not universal for every radial dataset.</KeepInMind>
               </SubSection>
 
               <SubSection title="16. A large penalty flattens onto the mean">
-                <p>
-                  At the other end the penalty dominates and the curve goes
-                  flat. With the dual weights being residuals over the
-                  penalty, a large penalty makes every weight small whatever
-                  the residuals are, and a prediction is the mean plus a sum
-                  of small numbers.
-                </p>
+                <p>As the penalty becomes large, the dual coefficients shrink. For a fixed query, their kernel contributions then approach zero and the prediction approaches the restored target mean. The model becomes less responsive to differences between inputs.</p>
                 <NumberTable
                   headings={["penalty", "R², radial gamma 1", "largest weight", "farthest from the mean"]}
                   rows={[
@@ -674,7 +509,8 @@ export default function KernelRidgePage() {
                   caption="The upper end of the sweep on the throws; the largest weight falls by a factor of ten per step, which is the residuals dividing by the penalty."
                 />
                 <p>
-                  By a thousand the curve is within three centimetres of
+
+                  By a thousand the curve is within three centimeters of
                   the mean everywhere across the throw and the score is
                   0.005. Under the linear kernel the same thing happens more
                   slowly, its score going from 0.002588 at one to 0.000114 at
@@ -689,27 +525,21 @@ export default function KernelRidgePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="17. Centring both sides, and the control that caught it">
-                <p>
-                  The derivation in section 2 holds on centred data. Both
-                  the target and the rows have to have their means removed,
-                  and when this model was first built here only
-                  the target was. The result is the most instructive kind of
-                  bug, a fit that still ran, still drew a plausible line and
-                  agreed with ridge to within two percent, 4.2841 against
-                  4.3580 on the fixture it was first measured on.
-                </p>
+              <SubSection title="17. Centering both sides, and the control that caught it" id="17-centring-both-sides-and-the-control-that-caught-it">
+                <p>To compare against ordinary ridge with an intercept, the linear-kernel route must use consistent input and target centering. The control below contrasts both-centered and target-only versions. The displayed fixture gives slopes 4.3580 and 4.2841 respectively, showing that a small numerical discrepancy can reflect a different model rather than rounding.</p>
                 <CentringControl />
                 <>
 <p>
-                  On the crowd the mistake is not subtle at all. The heights are a hundred and seventy centimetres from the origin, so the uncentred Gram matrix is dominated by that offset, and the half-centred fit reports a slope of 0.0046 kilograms per centimetre where both right fits report 0.8259, and answers 72.80 at the mean height where the right lines answer exactly 72.
+
+                  On the crowd the mistake is not subtle at all. The heights are a hundred and seventy centimeters from the origin, so the uncentered Gram matrix is dominated by that offset, and the half-centered fit reports a slope of 0.0046 kilograms per centimeter where both right fits report 0.8259, and answers 72.80 at the mean height where the right lines answer exactly 72.
                 </p>
                 <p>
                   Drop the penalty to a thousandth and the right fits rise to 0.8262 while the wrong one stays at 0.0046. On the throw, where the times are near the origin, the wrong slope is 0.0742 against 0.2611, which is the closer-looking version of the same failure.
                 </p>
 </>
                 <KeepInMind>
-                  A fit that centres the target and not the rows is
+
+                  A fit that centers the target and not the rows is
                   answering a different question, and no penalty moves it
                   toward the right one. The linear kernel is what caught it,
                   which is the argument for keeping a control whose right
@@ -723,9 +553,9 @@ export default function KernelRidgePage() {
           title: "Questions on Parts 3 and 4",
           quiz: [
             trueFalse(
-              "The polynomial kernel at degree one is not the linear kernel, because the plus one adds a constant to every entry of the Gram matrix.",
+              "In this centered linear-kernel regression comparison, using a degree-one polynomial kernel with constant one instead produces different fitted predictions.",
               false,
-              "That is the textbook reading, and measured the two fits are identical here, parting by 2.0e−14 on the throw and 3.9e−12 on the three people. This fit centres the rows and the target, so the added term acts only along the all-ones vector and the solve never leaves the space perpendicular to it. Without the centring the textbook reading would hold and the constant would act as a penalised intercept.",
+              "The two kernel functions differ by a constant, but these centered inputs and centered targets make the constant term contribute zero to the fitted predictions. The measured predictions agree up to rounding. This is an equivalence of these fitted models under their centering convention, not an identity between the two kernel functions.",
             ),
             choice(
               "On the fifteen throws the polynomial degree is raised from 2 to 6. What did that buy, and what did it cost?",
@@ -736,18 +566,18 @@ export default function KernelRidgePage() {
                 "Nothing at all, since the Gram matrix is the same table at every degree",
               ],
               0,
-              "Degree 2 follows the arc at 0.981 and degree 3 reaches 0.985, and 4, 5 and 6 come out at 0.981, 0.982 and 0.980. The degree sets how many directions the Gram matrix can tell apart, which on one feature is the degree plus one, and the largest entries are centred times raised to the degree while the smallest stay near zero.",
+              "Degree 2 follows the arc at 0.981 and degree 3 reaches 0.985, and 4, 5 and 6 come out at 0.981, 0.982 and 0.980. The degree sets how many directions the Gram matrix can tell apart, which on one feature is the degree plus one, and the largest entries are centered times raised to the degree while the smallest stay near zero.",
             ),
             trueFalse(
-              "Gamma is a pure number, so the gamma of 1 that suited times in seconds is the same reach on heights in centimetres.",
+              "Gamma is a pure number, so the gamma of 1 that suited times in seconds is the same reach on heights in centimeters.",
               false,
-              "Gamma multiplies a squared distance, so it carries the inverse square of whatever the feature is measured in, and a gamma of 1 is a reach of one unit, one second on the throw and one centimetre on the crowd, whose people stand three apart. At gamma 1 on the crowd the Gram matrix is the identity to four decimals, so the curve visits each person and returns to the mean of 72 between them for a score of 0.750 against the line’s 0.890. Either scale the feature first or expect the useful gamma to change by the square of the unit change, which here was a factor of a hundred to a thousand.",
+              "Gamma multiplies a squared distance, so it carries the inverse square of whatever the feature is measured in, and a gamma of 1 is a reach of one unit, one second on the throw and one centimeter on the crowd, whose people stand three apart. At gamma 1 on the crowd the Gram matrix is the identity to four decimals, so the curve visits each person and returns to the mean of 72 between them for a score of 0.750 against the line’s 0.890. Either scale the feature first or expect the useful gamma to change by the square of the unit change, which here was a factor of a hundred to a thousand.",
             ),
             several(
               "Which of these hold for the radial kernel at gamma 1 on the fifteen throws as the penalty is swept?",
               [
-                "At a penalty of a billionth the curve scores 0.999998 on the throws and swings 122 metres from the mean between them",
-                "At a penalty of a thousand the curve strays at most 0.031 metres from the mean and scores 0.005",
+                "At a penalty of a billionth the curve scores 0.999998 on the throws and swings 122 meters from the mean between them",
+                "At a penalty of a thousand the curve strays at most 0.031 meters from the mean and scores 0.005",
                 "The condition number of the system falls as the penalty falls, since a smaller penalty disturbs the Gram matrix less",
                 "A penalty of zero would score exactly 1 and is where the sweep ends",
               ],
@@ -755,9 +585,9 @@ export default function KernelRidgePage() {
               "The penalty is added to every eigenvalue of the Gram matrix, so the condition number is the largest shifted eigenvalue over the smallest, 6.65 at a penalty of one and 6.2e8 at a billionth, where the smallest Gram eigenvalue of 8.1e−9 is nearly all that holds the system up. A penalty of zero is refused at construction, and the sweep stops at a billionth because that is where the solve still completes. At the other end the dual weights are residuals over the penalty, so a thousand makes every weight small whatever the residuals are and the curve flattens onto the mean.",
             ),
             trueFalse(
-              "Centring the target but not the rows gave a fit that still ran and agreed with ridge to within two percent on the fixture it was first measured on.",
+              "Centering the target but not the rows gave a fit that still ran and agreed with ridge to within two percent on the fixture it was first measured on.",
               true,
-              "4.2841 against 4.3580, which is close enough to read as rounding. On the crowd the same mistake is not subtle at all, reporting a slope of 0.0046 kilograms per centimetre where both right fits report 0.8259, and dropping the penalty moves the right fits and leaves the wrong one where it is. The linear kernel is what caught it, which is the argument for keeping a control whose right answer is known.",
+              "The two slopes, 4.2841 and 4.3580, are close enough to overlook in a cursory comparison, but a two-percent discrepancy is not ordinary floating-point rounding here. On the larger example, omitting input centering gives 0.0046 instead of 0.8259 kg/cm. The known linear-kernel equivalence provides a useful correctness check: close-looking predictions are not a substitute for verifying the same objective and intercept convention.",
             ),
         ],
         },
@@ -776,26 +606,11 @@ export default function KernelRidgePage() {
                   boundary checks included.
                 </p>
                 <CostChart />
-                <p>
-                  On the machine I measured on, the kernel fit took 0.09
-                  milliseconds at fifty rows and 121 milliseconds at sixteen
-                  hundred, roughly a thousandfold for a thirty-twofold
-                  increase in rows, which is the n-cubed solve of an n by n
-                  system, while ridge stayed between 0.02 and 0.06
-                  milliseconds throughout. Growing the features instead,
-                  from two to sixty-four at two hundred rows, took ridge from
-                  0.04 to 0.30 milliseconds and the kernel fit from 1.2 to
-                  3.1, the kernel&rsquo;s share coming from building the Gram
-                  matrix, which touches every feature once per pair of rows.
-                </p>
+                <p>In the recorded benchmark, kernel fitting takes 0.09 milliseconds at fifty rows and 121 milliseconds at sixteen hundred. Ridge stays between 0.02 and 0.06 milliseconds over those cases. The kernel method solves a system indexed by training observations, so increasing the row count enlarges that system. These timings describe one runtime rather than a fixed speed ratio.</p>
+                <p>With two hundred rows and the feature count increasing from two to sixty-four, ridge time rises from 0.04 to 0.30 milliseconds and kernel time from 1.2 to 3.1. Building the Gram matrix compares every pair of rows using their features, so its cost also grows with feature width.</p>
                 <Equation>{"ridge:  solve p × p,   kernel ridge:  solve n × n"}</Equation>
                 <KeepInMind>
-                  The dual is a saving when the features outnumber the rows,
-                  which is what an expanded space does to a small dataset,
-                  and a cost when the rows outnumber the features. A million
-                  rows make a million by million table, and the saving runs
-                  the other way.
-                </KeepInMind>
+                  A dual solve can save work when the feature representation is much wider than the observation count. A full Gram matrix instead becomes expensive for many observations: a million rows require a million-by-million table. The practical comparison also depends on kernel cost, solver and available approximations.</KeepInMind>
               </SubSection>
 
               <SubSection title="19. The model is the training set">
@@ -812,16 +627,7 @@ export default function KernelRidgePage() {
                   ridge&rsquo;s three.
                 </p>
                 <InAModel title="What that means for saving a fitted model">
-                  <p>
-                    A saved kernel ridge model is its training rows. There
-                    is no smaller description of the fit, since every
-                    prediction needs the kernel against each row, and a
-                    document that dropped them would silently lose the
-                    ability to predict. The support vector machine on the
-                    kernel-trick page keeps only the rows that touch its
-                    margin, which is the one respect in which it is the
-                    smaller model.
-                  </p>
+                  <p>This implementation saves the training rows because prediction compares each query with them. Saving only the dual coefficients would lose that ability. The linear case can be compressed back into ordinary feature coefficients; a general nonlinear fit needs its stored references or another representation of their contributions. A support-vector classifier can instead omit rows whose dual coefficients are zero.</p>
                 </InAModel>
               </SubSection>
             </>
@@ -832,44 +638,24 @@ export default function KernelRidgePage() {
           content: (
             <>
               <SubSection title="20. No extrapolation beyond the radial reach">
-                <p>
-                  A radial kernel is a bump around each training row, and a
-                  query far from every row is similar to none of them, so
-                  every term in its prediction is near zero and what is left
-                  is the mean. The throw was measured for four seconds. Ask
-                  the radial fit what the ball is doing at six.
-                </p>
+                <p>A radial comparison approaches zero as a query moves far from a training row. Far from all the rows, nearly every contribution disappears and the restored target mean remains. The throw was observed for four seconds. Asking about six seconds tests that extrapolation behavior.</p>
                 <ExtrapolationView />
                 <>
 <p>
-                  At gamma 1 and a penalty of a tenth the curve answers 7.47 metres at five seconds, already off the last throw, 12.46 at six, 12.758 at seven and 12.759998 at eight, against a mean of 12.76. Two seconds past the data the fit has forgotten the ball entirely and is answering the average height of the throw.
+
+                  At gamma 1 and a penalty of a tenth the curve answers 7.47 meters at five seconds, already off the last throw, 12.46 at six, 12.758 at seven and 12.759998 at eight, against a mean of 12.76. Two seconds past the data the fit has forgotten the ball entirely and is answering the average height of the throw.
                 </p>
                 <p>
                   The squared polynomial kernel does the opposite and keeps its shape, answering −19.5 at five seconds, −49.8 at six and −136.5 at eight, which is the polynomial page&rsquo;s runaway drawn without columns. The line answers 14.33 at eight seconds and would keep the same slope forever.
                 </p>
 </>
                 <KeepInMind>
-                  None of the three answers is a fact about the ball. The
-                  radial fit&rsquo;s return to the mean is the least
-                  dangerous of them only because a mean is a number a reader
-                  recognises as ignorance, where a polynomial&rsquo;s −136
-                  looks like a prediction.
-                </KeepInMind>
+
+                  These outputs follow from the fitted model and its extrapolation behavior. Returning to the mean is not automatically safer or more accurate than continuing a polynomial or line. Outside the observed range, additional domain assumptions or observations are needed to assess the prediction.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. No coefficient per feature, no intercept to report">
-                <p>
-                  Two things ridge reports that this model cannot. A
-                  coefficient per feature, for the reason section 7 gave,
-                  and an intercept, because there was never an intercept
-                  column. What there is instead is the target mean, added
-                  back to every prediction, and on the crowd it is 72
-                  kilograms. Under the linear kernel a slope and an
-                  intercept can be reconstructed from the weights and the
-                  mean, and the centring widget does exactly that to compare
-                  against ridge; under any other kernel the reconstruction
-                  has nothing to reconstruct.
-                </p>
+                <p>The SDK does not expose a constant slope for each original input under a general nonlinear kernel. It exposes dual coefficients and a restored target mean. The linear case permits reconstruction of ordinary coefficients and an intercept. A known finite polynomial map also permits feature-space coefficient reconstruction, although those coefficients describe transformed powers and products rather than one effect per original feature.</p>
                 <KeepInMind>
                   Do not read the dual weights as importances. Section 6
                   showed they are residuals over the penalty, so the largest
@@ -881,12 +667,15 @@ export default function KernelRidgePage() {
               <SubSection title="22. An indefinite kernel is refused by the solver">
                 <p>
 
-                  A valid positive-semidefinite kernel produces a Gram matrix with no negative eigenvalues for every finite set of inputs. The sigmoid comparison fails that requirement at many settings. This implementation attempts a Cholesky factorisation of the Gram matrix after adding the penalty to its diagonal. That checks the shifted system used by this solve, rather than proving that the original comparison is a valid kernel.
+
+
+                  A valid positive-semidefinite kernel produces a Gram matrix with no negative eigenvalues for every finite set of inputs. The sigmoid comparison fails that requirement at many settings. This implementation attempts a Cholesky factorization of the Gram matrix after adding the penalty to its diagonal. That checks the shifted system used by this solve, rather than proving that the original comparison is a valid kernel.
                 </p>
                 <MercerProbe />
                 <>
 <p>
-                  On the throws at gamma 1 and a constant of −0.5 the smallest eigenvalue of the Gram matrix is −4.313. At every penalty up to 4.3 the sum with the smallest eigenvalue is negative and the fit is refused, in a message naming Mercer&rsquo;s condition. At 4.4 the sum is positive, the factorisation goes through, and the fit is accepted with a score of −228, which is a curve far worse than answering the mean; at 5 it scores −4.49, at 10 −0.069, and at 100 it is 0.006, the flat line the penalty forces.
+
+                  On the throws at gamma 1 and a constant of −0.5 the smallest eigenvalue of the Gram matrix is −4.313. At every penalty up to 4.3 the sum with the smallest eigenvalue is negative and the fit is refused, in a message naming Mercer&rsquo;s condition. At 4.4 the sum is positive, the factorization goes through, and the fit is accepted with a score of −228, which is a curve far worse than answering the mean; at 5 it scores −4.49, at 10 −0.069, and at 100 it is 0.006, the flat line the penalty forces.
                 </p>
                 <p>
                   Even at a constant of zero the smallest eigenvalue is −0.878, hidden at a penalty of one, and the accepted fit scores 0.0023.
@@ -894,15 +683,18 @@ export default function KernelRidgePage() {
 </>
                 <KeepInMind>
 
-                  A large enough diagonal penalty can make this particular shifted system positive definite even when the original Gram matrix is indefinite. A successful factorisation establishes that the numerical solve can proceed under its checks. It does not supply the usual kernel-ridge interpretation based on a positive-semidefinite kernel and its associated feature-space norm.
+
+
+                  A large enough diagonal penalty can make this particular shifted system positive definite even when the original Gram matrix is indefinite. A successful factorization establishes that the numerical solve can proceed under its checks. It does not supply the usual kernel-ridge interpretation based on a positive-semidefinite kernel and its associated feature-space norm.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="23. A zero penalty has no answer on a singular Gram matrix">
                 <p>
+
                   Under the linear kernel on the fifteen throws the Gram
                   matrix has one nonzero eigenvalue and fourteen at zero,
-                  because fifteen rows of one centred feature span one
+                  because fifteen rows of one centered feature span one
                   direction. Without the penalty the system to be solved is
                   that rank-one table, which has no unique solution, and
                   under the squared polynomial kernel twelve of the fifteen
@@ -911,14 +703,7 @@ export default function KernelRidgePage() {
                   8.1e−9, and section 15 showed what solving near it costs.
                 </p>
                 <Equation>{"λ = 0:  K a = y_centred has no unique a when K is singular"}</Equation>
-                <p>
-                  A penalty of zero is refused when the model is
-                  constructed, before any data is seen, and this page
-                  refuses it a layer earlier still. The sweep in section 15
-                  stops at a billionth for the same reason, since that is
-                  where the solve still completes and the condition number
-                  is already 6.2e8.
-                </p>
+                <p>A zero penalty is rejected when this model is constructed. The displayed sweep stops at one billionth, where the example already has condition number 6.2e8. That is the range chosen for this demonstration, not a universal smallest solvable penalty.</p>
                 <KeepInMind>
                   For ordinary least squares a zero penalty is the default;
                   for the dual it is a singular system whenever the rows
@@ -934,48 +719,32 @@ export default function KernelRidgePage() {
           title: "Part 7. Keeping Kernel Parameters and the Solver in Agreement" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="24. Centre, regularise and solve under one stated convention" id="24-what-a-complete-implementation-must-specify">
-                <p>To reproduce a kernel-ridge prediction, keep the kernel parameters and training rows as part of the fitted model. If the rows and target are centred, record those references and where the target mean is restored. Later query columns must match the fitted feature identities.</p>
-                <p>The regularisation penalty is added to every diagonal entry of the kernel system. State its minimum accepted value, which solver factorises the system and how factorisation failure is reported. Exposed dual weights describe contributions from training rows; they are not coefficients on the original features.</p>
-                <p>
-                  The model here centres both, adds the penalty everywhere,
-                  solves by Cholesky, keeps the rows, matches features by
-                  name, exposes the dual weights and the training rows as
-                  copies, and refuses a penalty that is not positive at
-                  construction. Every row of the table below was run against
-                  it.
-                </p>
+              <SubSection title="24. Center, regularize and solve under one stated convention" id="24-what-a-complete-implementation-must-specify">
+                <p>To reproduce a kernel-ridge prediction, keep the kernel parameters and training rows as part of the fitted model. If the rows and target are centered, record those references and where the target mean is restored. Later query columns must match the fitted feature identities.</p>
+                <p>The regularization penalty is added to every diagonal entry of the kernel system. State its minimum accepted value, which solver factorizes the system and how factorization failure is reported. Exposed dual weights describe contributions from training rows; they are not coefficients on the original features.</p>
+                <p>This model centers the original inputs and target, adds the penalty to every Gram diagonal entry, and solves by Cholesky factorization. It retains the training inputs and fitted centering references for prediction, matches input columns by name, and exposes copies of learned arrays. The table separates its accepted inputs from the page’s stricter request limits.</p>
               </SubSection>
 
               <SubSection title="25. Singular comparisons and parameter choices that break the solve" id="25-the-edges-probed">
                 <DerivationTable
-                  expressionHeading="Data, kernel or regularisation"
+                  expressionHeading="Data, kernel or regularization"
                   reasonHeading="Whether the system can be solved"
                   rows={[
                     { expression: "empty data, or a missing or non-finite value", reason: "refused at the boundary, in the same words every feature here is refused with; this page refuses fewer than two points a layer earlier." },
-                    { expression: "one row", reason: "accepted by the model; the centred row is zero, its dual weight is zero, and every prediction is the one target value. The page refuses it a layer earlier, before the fit." },
+                    { expression: "one row", reason: "accepted by the model; the centered row is zero, its dual weight is zero, and every prediction is the one target value. The page refuses it a layer earlier, before the fit." },
                     { expression: "two rows", reason: "accepted; on the first two throws the radial fit scores 0.144 with weights of ±2.082." },
-                    { expression: "a constant column", reason: "accepted by the kernel model, whose Gram matrix is all zeros so the weights are the centred targets over the penalty and every prediction is the mean; this page refuses it, because the ridge control fitted beside it refuses a zero-variance column." },
+                    { expression: "a constant column", reason: "accepted by the kernel model. With only a constant input, all centered rows coincide; the linear Gram entries are zero, while radial entries are one. The centered targets give the mean prediction in these examples. The page refuses the case because its ordinary-ridge control rejects zero input variance." },
                     { expression: "a constant target", reason: "fits, with every dual weight exactly zero and every prediction the constant; the score is refused as undefined, since R² divides by the target's variance." },
-                    { expression: "two rows at the same input", reason: "accepted; the Gram matrix has two equal rows and a zero eigenvalue at 2.4e−17, and the penalty makes the system solvable." },
+                    { expression: "two rows at the same input", reason: "accepted; equal inputs give duplicate Gram rows and an exact zero eigenvalue. The computed value of 2.4e−17 reflects rounding. A positive penalty makes the shifted system solvable for a valid positive-semidefinite kernel." },
                     { expression: "a penalty of zero or below, a gamma of zero, a negative polynomial constant", reason: "refused at construction, by the model's own field bounds, before any data is seen." },
-                    { expression: "a sigmoid kernel whose Gram matrix is indefinite", reason: "refused at the solve, when the Cholesky factorisation meets a non-positive pivot, with a message naming Mercer's condition; a penalty larger than the negative eigenvalue lets it through, documented in section 22." },
+                    { expression: "a sigmoid kernel whose Gram matrix is indefinite", reason: "the shifted matrix is refused if Cholesky encounters a nonpositive pivot. A penalty greater than the magnitude of the most negative eigenvalue can make the shifted matrix positive definite, without making the original function a valid kernel." },
                     { expression: "a polynomial kernel overflowing on large raw inputs", reason: "at inputs near 1e5 and degree 6 the table loses positive definiteness to rounding and is refused with the Mercer message, which names the wrong cause; only at absurd magnitudes does the non-finite guard fire and name overflow. Documented rather than defended." },
                     { expression: "unfitted use", reason: "reading the dual weights, the training rows or a prediction before fit is refused as not fitted, in a sentence rather than as an attribute error." },
                     { expression: "a query with a feature missing, renamed or added", reason: "refused; prediction demands exactly the fitted feature names, in any order." },
                     { expression: "more than a hundred points, or a curve range that runs backward", reason: "refused with the limit named, a layer before any fit." },
                   ]}
                 />
-                <p>
-                  The constant column deserves the extra sentence, because
-                  the two models on this page treat it oppositely. The kernel
-                  model alone accepts it and answers the mean everywhere,
-                  since with no spread in the column there is nothing for a
-                  kernel to compare; the ridge control fitted beside it for
-                  the comparison refuses, so the page&rsquo;s endpoint
-                  refuses, and the refusal belongs to ridge rather than to
-                  the dual.
-                </p>
+                <p>With one constant input feature, all centered training inputs coincide. The kernel comparison against every stored input is then the same for a given query. Under the displayed kernels and centered targets, the combined prediction is the restored target mean. The ordinary-ridge control rejects the zero-variance input, so the shared page endpoint refuses it even though the kernel model itself accepts it.</p>
               </SubSection>
             </>
           ),
@@ -992,12 +761,12 @@ export default function KernelRidgePage() {
                 "The kernel fit grew in proportion to the number of rows",
               ],
               0,
-              "That is the cubed cost of solving a system as wide as the rows, roughly a thousandfold for a thirty-twofold increase. Growing the features instead took ridge from 0.04 to 0.30 milliseconds and the kernel fit from 1.2 to 3.1, its share coming from building the Gram matrix. So the dual is a saving when the features outnumber the rows and a cost when the rows outnumber the features.",
+              "The recorded kernel-fit time rises from 0.09 to 121 milliseconds as rows increase from fifty to sixteen hundred, while the small feature-indexed ridge solve changes little. Dense factorization has cubic asymptotic cost in its system dimension, but these timings also include overhead, matrix construction and optimized-library effects. The dual can be useful when features greatly outnumber observations; a large observation-indexed system can instead be expensive.",
             ),
             trueFalse(
               "Asked about the ball two seconds past the last throw, the radial fit answers close to the mean height of the whole throw.",
               true,
-              "At gamma 1 and a penalty of a tenth it answers 12.46 at six seconds, 12.758 at seven and 12.759998 at eight, against a mean of 12.76, because a query far from every row resembles none of them and every term in the sum is near zero. The squared polynomial kernel does the opposite and answers −136.5 at eight, which is the more dangerous of the two only because a mean is a number a reader recognises as ignorance.",
+              "At distant times the radial comparisons with every observed time become very small. Their weighted correction fades, leaving the stored mean height of 12.76 meters. The polynomial model instead continues its algebraic shape and predicts −136.5 meters at eight seconds. Neither behavior establishes physical reliability; a mean prediction is not automatically a signal that the model knows its uncertainty.",
             ),
             choice(
               "The sigmoid comparison has a smallest Gram eigenvalue of −4.313 on these throws. At penalty 4.4 the shifted solve succeeds. What does that establish?",
@@ -1019,25 +788,25 @@ export default function KernelRidgePage() {
                 "For ordinary least squares a zero penalty is the default",
               ],
               [0, 1, 3],
-              "Fifteen rows of one centred feature span one direction, so fourteen of the linear table’s eigenvalues are zero and twelve of fifteen are under the squared polynomial kernel. The radial table has no exact zero, its smallest sitting at 8.1e−9, and solving near it is what costs nine digits of accuracy out of sixteen at a penalty of a billionth.",
+              "The linear Gram matrix from one nonconstant centered input has rank one. A degree-two polynomial kernel has at most three independent feature directions on this input, while the distinct-row radial Gram matrix is mathematically positive definite. Its smallest measured eigenvalue is about 8.1e−9, making the lightly penalized system sensitive to numerical errors. A large condition number warns of possible accuracy loss; it does not specify an exact number of digits lost in every solve.",
             ),
             choice(
               "Handed a constant input column, the page’s endpoint refuses. Where does that refusal come from?",
               [
                 "From the ridge control fitted beside the kernel model, which refuses a zero-variance column; the kernel model alone accepts the column and answers the mean everywhere",
-                "From the kernel model, whose Gram matrix is all zeros and so cannot be factorised",
+                "From the kernel model, whose Gram matrix is all zeros and so cannot be factorized",
                 "From the solver, which meets a pivot that is not positive and names Mercer’s condition",
                 "From the model’s own field bounds at construction, before any data is seen",
               ],
               0,
-              "With no spread in the column there is nothing for a kernel to compare, so the Gram matrix is all zeros, the system is the penalty times the identity, the dual weights are the centred targets over the penalty and every prediction is the mean. That is a fit, not a refusal, and the factorisation has nothing to object to. The refusal belongs to the ridge control the page fits beside it for the comparison, which refuses a zero-variance column, so the page’s endpoint refuses and the reason is ridge’s rather than the dual’s.",
+              "The constant input does not distinguish any pair of observations. A linear kernel on the centered inputs gives a zero Gram matrix; a radial kernel gives a constant matrix instead. With centered targets and positive regularization, both produce zero fitted correction and return the target mean. The endpoint's error comes from the ordinary ridge control fitted beside the kernel model, which rejects the constant input.",
             ),
         ],
         },
         {
           title: "Practice. One Weight Per Row, With the Library",
           practice: [
-            exercise("Recover ridge’s slope from three dual weights",["Part 2 solved the dual system on the three people by hand and found dual weights of minus two, nought and two, then recovered ridge’s slope of four by multiplying each weight by its person’s centred height and adding. Fit the same model with the library under the linear kernel at a penalty of one, read the dual weights and the target mean off it, recover the slope the same way, and ask it for the weight of someone 170.5 centimetres tall.", "The weights should come back whole, the slope should be 4, and the prediction should be 72 kilograms, which is the mean weight plus half a centimetre of slope."],`from oop_ml import Feature, KernelRidgeRegression, LinearKernel
+            exercise("Recover ridge’s slope from three dual weights",["Fit KernelRidgeRegression with LinearKernel and penalty=1 to the three height-weight pairs below. Print its dual_weights and target_mean. Recover the ordinary height slope by multiplying each dual weight by its centered training height and summing.", "Predict the weight at height 170.5 cm. Compare the recovered slope and prediction with the earlier one-feature ridge calculation. Keep the training row order when pairing weights and heights."],`from oop_ml import Feature, KernelRidgeRegression, LinearKernel
 
 heights = [169, 170, 171]
 weights = [64, 70, 76]
@@ -1063,8 +832,8 @@ print(f"recovered slope {slope:.4f} kg per cm")
 print(f"predicted weight at 170.5 cm {predicted:.2f} kg")`,`dual weights [-2.0, 0.0, 2.0]
 target mean 70.0 kg
 recovered slope 4.0000 kg per cm
-predicted weight at 170.5 cm 72.00 kg`,{...{ hints: ["The kernel is a field of the model, so the model is constructed with kernel=LinearKernel() and penalty=1.0, and then fit takes a list holding one Feature of heights and a Feature of weights as the target.", "dual_weights is a property of the fitted model holding one number per training row in the order the rows were given, and target_mean is the mean the fit adds back to every prediction.", "The centred heights are each height less the mean of 170, so the slope is the sum over the three people of dual weight times centred height, which is the arithmetic Part 2 wrote out."], check: numberCheck("What slope do the dual weights add up to through the centred heights, in kilograms per centimetre?", 4.0, 0.0005, "Under the linear kernel, the dual weights recover the same centred-feature slope as the corresponding ridge fit. The two formulations organise the calculation around observations and features respectively.") },question:"Can the dual weights recover the ordinary ridge slope?"}),
-            exercise("Take the throw’s gamma to the crowd",["Part 3 says the gamma of 1 that suited times in seconds is a reach of one centimetre on the crowd, whose people stand three apart, and that the radial fit scores 0.750 there against the line’s 0.890. Fit the line and the radial kernel at gamma 1, a hundredth and a ten-thousandth on the fifteen people, all at a penalty of one, and print each fit’s R², its largest dual weight and its answer for the person at 173 centimetres.", "At gamma 1 the Gram matrix is the identity to four decimals, so Part 3 says every dual weight is half that person’s centred weight. The largest of them is a number the page does not print, and the fifteen weights say whose it is."],`from oop_ml import Feature, KernelRidgeRegression, RadialBasisKernel, RidgeRegression
+predicted weight at 170.5 cm 72.00 kg`,{...{ hints: ["The kernel is a field of the model, so the model is constructed with kernel=LinearKernel() and penalty=1.0, and then fit takes a list holding one Feature of heights and a Feature of weights as the target.", "dual_weights is a property of the fitted model holding one number per training row in the order the rows were given, and target_mean is the mean the fit adds back to every prediction.", "The centered heights are each height less the mean of 170, so the slope is the sum over the three people of dual weight times centered height, which is the arithmetic Part 2 wrote out."], check: numberCheck("What slope do the dual weights add up to through the centered heights, in kilograms per centimeter?", 4.0, 0.0005, "Under the linear kernel, the dual weights recover the same centered-feature slope as the corresponding ridge fit. The two formulations organize the calculation around observations and features respectively.") },question:"Can the dual weights recover the ordinary ridge slope?"}),
+            exercise("Take the throw’s gamma to the crowd",["Fit ordinary RidgeRegression to the fifteen people below at penalty=1. Compare it with radial KernelRidgeRegression at gamma values 1, 0.01 and 0.0001, also using penalty=1. Print training R², the largest absolute dual weight and the prediction at 173 cm for each kernel fit.", "Compare how close different people are under each radial kernel. At gamma=1, the three-centimeter gaps give very small cross-similarities. Inspect how the resulting weights relate to the centered target values."],`from oop_ml import Feature, KernelRidgeRegression, RadialBasisKernel, RidgeRegression
 
 heights = [152, 155, 158, 161, 164, 167, 170, 173, 176, 179, 182, 185, 188, 191, 194]
 weights = [51, 61, 56, 66, 62, 71, 66, 76, 71, 81, 75, 86, 81, 91, 86]
@@ -1091,8 +860,8 @@ for gamma in (1, 0.01, 0.0001):
     print(f"gamma {gamma}: R2 {model.score(rows, target):.3f}, largest dual weight {largest:.4f}, at 173 cm {at_173:.2f} kg")`,`line R2 0.890
 gamma 1: R2 0.750, largest dual weight 10.4997, at 173 cm 74.00 kg
 gamma 0.01: R2 0.835, largest dual weight 9.2864, at 173 cm 72.19 kg
-gamma 0.0001: R2 0.481, largest dual weight 15.4921, at 173 cm 72.01 kg`,{...{ hints: ["RadialBasisKernel takes gamma as its one field, and a RidgeRegression at the same penalty is the line to compare against. Both fit on the same list of Features and both score with score(rows, target).", "dual_weights is a numpy array with one entry per person, so the largest in size is the max of abs over it, and predict takes a list holding one Feature of the heights to ask about."], check: numberCheck("What is the largest dual weight, in size, at gamma 1 on the crowd?", 10.4997, 0.0005, "At this short comparison range, different training people have almost no cross-similarity. The dual solve therefore depends heavily on each person's centred target, which explains why the largest absolute weight belongs to a target far from the mean.") },question:"What happens when a kernel width suited to seconds is applied to centimetres?"}),
-            exercise("Ask each fit what the ball does after the data",["Part 6 asks the radial fit what the ball is doing two seconds past the last throw and finds it has forgotten the ball. Fit the widget’s three settings on the fifteen throws, the radial kernel at gamma 1 and a penalty of a tenth, the squared polynomial kernel at a penalty of one, and the line at a penalty of one, and ask each for the height at five, six, seven and eight seconds.", "The radial answers should land on 7.47, 12.46, 12.758 and 12.759998 against a mean of 12.76, and the polynomial ones on −19.5, −49.8 and −136.5 at five, six and eight. What the polynomial kernel answers at seven seconds is a number the page does not quote."],`from oop_ml import Feature, KernelRidgeRegression, LinearKernel, PolynomialKernel, RadialBasisKernel
+gamma 0.0001: R2 0.481, largest dual weight 15.4921, at 173 cm 72.01 kg`,{...{ hints: ["RadialBasisKernel takes gamma as its one field, and a RidgeRegression at the same penalty is the line to compare against. Both fit on the same list of Features and both score with score(rows, target).", "dual_weights is a numpy array with one entry per person, so the largest in size is the max of abs over it, and predict takes a list holding one Feature of the heights to ask about."], check: numberCheck("What is the largest dual weight, in size, at gamma 1 on the crowd?", 10.4997, 0.0005, "At this short comparison range, different training people have almost no cross-similarity. The dual solve therefore depends heavily on each person's centered target, which explains why the largest absolute weight belongs to a target far from the mean.") },question:"What happens when a kernel width suited to seconds is applied to centimeters?"}),
+            exercise("Ask each fit what the ball does after the data",["Fit the three supplied settings to the fifteen throw readings: radial kernel with gamma=1 and penalty=0.1, degree-two polynomial with penalty=1, and linear kernel with penalty=1. Predict height at 5, 6, 7 and 8 seconds using each fitted model.", "Print the four predictions for each model to three decimal places. Also print the radial model's prediction at eight seconds to six decimal places and its retained target mean. Compare their behavior beyond the observed interval with the assumptions of free flight."],`from oop_ml import Feature, KernelRidgeRegression, LinearKernel, PolynomialKernel, RadialBasisKernel
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
 heights = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1131,8 +900,8 @@ print(f"mean height {radial.target_mean:.2f} m")`,`radial, gamma 1, penalty 0.1:
 polynomial, degree 2, penalty 1: -19.494, -49.782, -88.799, -136.545 m at 5, 6, 7 and 8 s
 linear, penalty 1: 13.543, 13.805, 14.066, 14.327 m at 5, 6, 7 and 8 s
 radial at 8 s to six places 12.759998 m
-mean height 12.76 m`,{...{ hints: ["predict takes a list holding one Feature, and that Feature can hold several times at once, so the four later times go in as one Feature and four predictions come back in the same order.", "The penalty differs between the settings, so build a fresh KernelRidgeRegression for each kernel and penalty rather than refitting one model.", "target_mean is the mean height the fit adds back to every prediction, which is what the radial fit returns to once every kernel term has fallen to nothing."], check: numberCheck("What height does the squared polynomial kernel answer at seven seconds, in metres?", -88.799, 0.001, "The polynomial kernel continues its fitted algebraic pattern beyond the observations. The radial comparisons instead fade with distance, leaving the retained target mean. Neither behaviour is a guarantee about a ball outside the measured interval.") },question:"How do the fitted kernels extrapolate beyond the ball's observations?"}),
-            exercise("Refuse what is not a kernel, then watch it slip through",["First construct KernelRidgeRegression with a zero penalty and catch the constructor's validation error. Then use the supplied throw data with a sigmoid kernel at gamma 1 and constant -0.5. Try the listed penalties around the point at which its shifted Gram system becomes positive definite.","Print each refusal's class and message, then the accepted fit's R squared at penalty 4.4. Distinguish the library's numerical factorisation check from proving that the original kernel is positive semidefinite. A successful solve need not provide the usual kernel-ridge interpretation."],`from oop_ml import Feature, KernelRidgeRegression, MLLibError, SigmoidKernel
+mean height 12.76 m`,{...{ hints: ["predict takes a list holding one Feature, and that Feature can hold several times at once, so the four later times go in as one Feature and four predictions come back in the same order.", "The penalty differs between the settings, so build a fresh KernelRidgeRegression for each kernel and penalty rather than refitting one model.", "target_mean is the mean height the fit adds back to every prediction, which is what the radial fit returns to once every kernel term has fallen to nothing."], check: numberCheck("What height does the squared polynomial kernel answer at seven seconds, in meters?", -88.799, 0.001, "The polynomial kernel continues its fitted algebraic pattern beyond the observations. The radial comparisons instead fade with distance, leaving the retained target mean. Neither behavior is a guarantee about a ball outside the measured interval.") },question:"How do the fitted kernels extrapolate beyond the ball's observations?"}),
+            exercise("Refuse what is not a kernel, then watch it slip through",["First construct KernelRidgeRegression with a zero penalty and catch the constructor's validation error. Then use the supplied throw data with a sigmoid kernel at gamma 1 and constant -0.5. Try the listed penalties around the point at which its shifted Gram system becomes positive definite.","Print each fitting error's class name and whether its message contains Mercer. For accepted fits, print R². Distinguish the numerical factorization check from a proof that the kernel function is positive semidefinite. A successful solve need not have the usual kernel-ridge interpretation."],`from oop_ml import Feature, KernelRidgeRegression, MLLibError, SigmoidKernel
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
 heights = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1166,7 +935,7 @@ for penalty in (1.0, 4.3, 4.4, 5.0):
 penalty 1.0: InvalidValuesError, names Mercer: True
 penalty 4.3: InvalidValuesError, names Mercer: True
 penalty 4.4: accepted, R2 -228.4
-penalty 5.0: accepted, R2 -4.5`,{...{ hints: ["A penalty of zero is refused by the model’s field bounds, so the error is pydantic’s and arrives as a ValueError before fit is ever called. The sigmoid’s refusal comes out of fit and is one of the library’s own, so catch MLLibError there.", "SigmoidKernel takes gamma and constant as its two fields. Build one kernel and a fresh KernelRidgeRegression for each penalty, since the penalty is a field too.", "type(refusal).__name__ gives the class and str(refusal) the message, and the message names Mercer’s condition, so the in operator on the string is enough to confirm it."], check: numberCheck("What R² does the sigmoid fit score once a penalty of 4.4 lets it through?", -228.4, 0.1, "A large diagonal shift can make this particular linear system positive definite even though the original Gram matrix is indefinite. A successful solve therefore does not establish a valid positive-semidefinite kernel or the usual RKHS ridge interpretation. Its poor score is a separate measured result.") },question:"Can regularisation make a solve succeed without making its kernel valid?"}),
+penalty 5.0: accepted, R2 -4.5`,{...{ hints: ["A penalty of zero is refused by the model’s field bounds, so the error is pydantic’s and arrives as a ValueError before fit is ever called. The sigmoid’s refusal comes out of fit and is one of the library’s own, so catch MLLibError there.", "SigmoidKernel takes gamma and constant as its two fields. Build one kernel and a fresh KernelRidgeRegression for each penalty, since the penalty is a field too.", "type(refusal).__name__ gives the class and str(refusal) the message, and the message names Mercer’s condition, so the in operator on the string is enough to confirm it."], check: numberCheck("What R² does the sigmoid fit score once a penalty of 4.4 lets it through?", -228.4, 0.1, "A large diagonal shift can make this particular linear system positive definite even though the original Gram matrix is indefinite. A successful solve therefore does not establish a valid positive-semidefinite kernel or the usual RKHS ridge interpretation. Its poor score is a separate measured result.") },question:"Can regularization make a solve succeed without making its kernel valid?"}),
           ],
         },
       ]}

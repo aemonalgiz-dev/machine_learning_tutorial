@@ -27,9 +27,9 @@ import { Word2vecTwoTables } from "@/components/widgets/Word2vecTwoTables";
 import { Word2vecWindowPairs } from "@/components/widgets/Word2vecWindowPairs";
 
 export const metadata: Metadata = {
-  title: "Word2vec · oop_ml",
+  title: "Word2vec · Perceptron Lab",
   description:
-    "Words used in similar contexts often have something in common. Word2vec uses a word-prediction task to learn vectors that capture useful regularities in those surrounding words.",
+    "Word2vec learns word vectors through prediction tasks involving nearby words. Shared patterns of use shape the vectors, allowing their numerical relationships to reflect regularities in the training text.",
 };
 
 const link =
@@ -41,15 +41,14 @@ export default function Word2vecPage() {
       lessonId="word2vec"
       intuition={lessonIntuitions["word2vec"]}
       technicalStart="Part 3. Which Side Predicts Which"
-      openingTitle="Learn a Word by Trying to Predict Its Neighbours"
-      playgroundTitle="Move word vectors by changing their neighbours"
-      playgroundIntro="Inspect the centre-context training pairs before the learned neighbours. Compare the resulting similarities across training settings and random starts."
+      openingTitle="Learn a Word by Trying to Predict Its Neighbors" openingId="learn-a-word-by-trying-to-predict-its-neighbours"
+      playgroundTitle="Move word vectors by changing their neighbors"
+      playgroundIntro="Inspect the center-context training pairs before the learned neighbors. Compare the resulting similarities across training settings and random starts."
       title="Word2vec"
-      tagline={"Words used in similar contexts often have something in common. Word2vec uses a word-prediction task to learn vectors that capture useful regularities in those surrounding words."}
+      tagline={"Word2vec learns word vectors through prediction tasks involving nearby words. Shared patterns of use shape the vectors, allowing their numerical relationships to reflect regularities in the training text."}
       prerequisites={
         <>
-          Every score on this page is a dot product turned into a probability by
-          the{" "}
+          {"The negative-sampling example turns dot products into binary scores with the "}{" "}
           <Link href="/concepts/logistic-regression" className={link}>
             logistic function
           </Link>
@@ -68,8 +67,8 @@ export default function Word2vecPage() {
 
       playground={<Word2vecPlayground />}
       sections={[
-        {
-          title: "Part 1. Counting a Word’s Neighbours",
+        { id: "part-1-counting-a-words-neighbours",
+          title: "Part 1. Counting a Word’s Neighbors",
           defaultOpen: true,
           content: (<>
 <>
@@ -86,53 +85,22 @@ export default function Word2vecPage() {
                   These generated sentences are deliberately artificial. We sample from the two word lists without writing grammatical sentences, so we know which contextual pattern the experiment supplies. If the learned vectors separate the lists, we can check that result against the construction. It would not establish that the method had learned grammar or a general account of meaning.
                 </p>
                 <KeepInMind>
-                  The one thing that is true of this corpus and hidden from every
-                  method on this page is that it has two groups. Nobody tells a
-                  fit which list a word came from, so the two mean cosines the
-                  page keeps reporting, how alike two words of one list are and
-                  how alike a word of each are, are the whole score.
+                  {"The training receives no list labels. We use within-list and cross-list mean cosines to inspect whether the learned vectors reflect the constructed separation. Those measures do not test all the relationships an embedding may need."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. The table counting gives you">
-                <p>
-                  The oldest way to use that structure is to count it. Walk
-                  along every sentence, and for each word write down which words
-                  turned up within three positions of it, with a neighbour two
-                  away counting a half and one three away a third, since a word
-                  next door tells you more than a word at the far end. What
-                  comes out is a square table with a row and a column for each
-                  of the 31 words, and the row for a word is that word&rsquo;s
-                  description.
-                </p>
+                <p>One possible representation counts nearby words. In this experiment, a neighbor one position away contributes more than one farther away, using the stated inverse-distance weighting. Each row of the resulting word-context table describes the contexts observed for one word.</p>
                 <Equation>{"row(w)[v] = how often v occurred within reach of w, discounted by how far"}</Equation>
-                <p>
-                  Two things about that table matter for the rest of the page.
-                  The first is that it works. Comparing two whole rows by the
-                  cosine between them gives 0.8558 on average for two words of
-                  the same list and exactly 0.0000 for a word of each, because
-                  two words from different lists have no neighbour in common at
-                  all and their rows are perpendicular. The second is its shape.
-                  It has 961 cells, 440 of which are zero, which is 45.8% of the
-                  table holding no information at all.
-                </p>
-                <p>
-                  Thirty one words is too few to see the shape, though, and a
-                  corpus built to have two lists is too tidy to be believed
-                  about it. So the same counting is done below on the first
-                  three chapters of a real book, where the vocabulary is 364
-                  words and nobody arranged anything. A row of that table is
-                  still a word&rsquo;s description, and a description is a
-                  direction, so the honest picture is not the table but where
-                  the words end up.
-                </p>
+                <p>The count rows already separate the constructed word lists. Their mean within-list cosine is 0.8558, while cross-list rows have a cosine of zero because they share no observed context coordinates. The table has 961 cells, including 440 zero counts. That size motivates looking for a more compact representation, rather than treating zero counts as information that is always useless.</p>
+                <p>The first three chapters of the book provide a less controlled comparison with 364 vocabulary words. A count vector then has one coordinate per context word. Comparing that representation with a learned shorter vector lets us examine what the reduction preserves on text whose groups were not arranged for the experiment.</p>
                 <Word2vecBookSpace />
                 <>
 <p>
                   The toggle is the rest of this page in one control. The same words are drawn twice, once from a row of 364 counts and once from a vector of 24 numbers that a fit produced, and the figure to watch is how much of the spread three directions can hold. For the counted rows it is 19.8%, so the picture is showing a fifth of what is there and the description really is as wide as it looks.
                 </p>
                 <p>
-                  For the learned vectors it is 76.4%. The second description was small all along; the first was merely large.
+                  {"The learned vectors’ three plotted directions retain 76.4% of their measured spread. That makes this projection easier to inspect, but a larger plotted share does not by itself establish a better representation."}
                 </p>
 </>
                 <KeepInMind>
@@ -156,7 +124,7 @@ export default function Word2vecPage() {
                 </p>
                 <>
 <p>
-                  The alternative is to fix the width in advance. Give every word twelve numbers whatever the vocabulary holds, and the whole description of this corpus is 372 numbers rather than 961, and the description of a forty-thousand-word vocabulary is 480,000 rather than 1.6 billion. That is only worth having if twelve numbers can carry what thirty one counts carried, and nothing suggests the counts themselves could be read back out of twelve numbers.
+                  {"Fix the retained width at twelve coordinates per word. The output then grows linearly with vocabulary size. Training also uses an output table of comparable size; the table below counts only the retained vectors, against a dense count matrix rather than sparse storage."}
                 </p>
                 <p>
                   What has to survive the squeezing is the comparisons rather than the counts, so that words of one list still come out near each other and words of different lists still do not.
@@ -172,78 +140,46 @@ export default function Word2vecPage() {
                   caption="The first row is measured on the corpus this page uses; the other two are the same two formulas, the square of the vocabulary against twelve times it."
                 />
                 <KeepInMind>
-                  A fixed width is a promise that the interesting content of a
-                  row survives being squeezed into a dozen numbers. Nothing so
-                  far says it does. The rest of the page is one way of finding
-                  those numbers and a measurement of whether the promise was
-                  kept.
+                  {"A fixed-width representation is a capacity choice, not a guarantee that all useful context distinctions survive. We can test what it retains by checking the comparisons needed for the task."}
                 </KeepInMind>
               </SubSection>
             </>
 </>),
         },
-        {
-          title: "Part 2. Predicting a Neighbour Instead",
+        { id: "part-2-predicting-a-neighbour-instead",
+          title: "Part 2. Predicting a Neighbor Instead",
           content: (
             <>
               <SubSection title="4. The change of question">
                 <p>
-                  Word2vec does not squeeze the counting table. It asks a
-                  different question altogether, and the answer to that question
-                  is thrown away. The question is a prediction task that nobody
-                  wants the answer to. Given a word from the corpus, how likely
-                  is each other word to have appeared beside it? Set that up as a
-                  model with a vector per word, train it until it predicts
-                  neighbours reasonably well, then delete the prediction
-                  machinery and keep the vectors it needed in order to do the
-                  predicting.
+                  {"Mikolov and colleagues introduced the word2vec architectures in 2013 to learn useful word representations efficiently from large text collections. Instead of explicitly decomposing a count table, train a small prediction model on nearby words, then use its input vectors as the representation. The training task supplies evidence about context without labeled word-similarity pairs."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://arxiv.org/abs/1301.3781">{"Mikolov et al.: Efficient Estimation of Word Representations in Vector Space (2013)"}</Link></p>
                 <p>
-                  The bet is that a model cannot predict which words appear
-                  beside walked without having discovered, somewhere in its
-                  weights, that walked keeps the same company as walking and
-                  none of the company of market. It never gets told there are two
-                  lists; it gets told, 19,519 separate times over five passes of
-                  this corpus, which word turned up beside which, and the only
-                  cheap way to be right about that is to give words with the same
-                  neighbours the same vector.
+                  {"Walked and walking occur in the same constructed list, while market occurs in the other. Their training pairs therefore offer different context evidence. Sharing statistical patterns can encourage related vectors, but the objective does not require identical vectors for every word in a group."}
                 </p>
                 <WhyThisWorks title="Why an impossible task is the right one to set">
                   <p>
-                    Predicting neighbours is easy to score and impossible to be
-                    right about. Nothing in the corpus determines which of the
-                    twenty verb forms follows walked, so the best any model can
-                    do is spread its confidence across the twenty, and the way to
-                    do that with twelve numbers per word is to put those twenty
-                    words in one place. The prediction task is hopeless in a way
-                    that is useful, since its irreducible uncertainty is precisely the
-                    structure we were after.
-                  </p>
+                  {"The exact next context word remains uncertain even in this controlled corpus. A probability model can represent that uncertainty rather than choose one correct neighbor for every occurrence. Similar context distributions can make related representations useful; they do not require all twenty words to occupy one point."}
+                </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The vectors are a by-product, which is why Part 7 has to come back
-                  to how they are judged. Nothing computed during the fit says
-                  whether they are any good, because the quantity the fit lowers
-                  is about predicting neighbours and nothing else.
+                  {"The training objective measures the prediction task. It provides useful diagnostics, while the retained vectors need additional checks for the way they will be used."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="5. Sliding a window over the corpus">
                 <p>
+
                   The corpus becomes training data by sliding a window along
-                  every sentence. At each position one word is the centre and the
+                  every sentence. At each position one word is the center and the
                   words within reach on either side are its context, and that
                   pairing is one piece of training. Nothing more elaborate than
                   that happens; there is no parse, no grammar, and no notion of
-                  which side a neighbour was on.
+                  which side a neighbor was on.
                 </p>
                 <p>
-                  The widget below runs that on three short sentences, small
-                  enough to check by hand. The corpus is walk walked talks, bond
-                  market price, and walked talks walk, which is nine word
-                  occurrences over six distinct words, and it is here for the
-                  mechanics rather than for any vectors, since nine occurrences
-                  teach nothing.
+                  {"Use walk walked talks, bond market price, and walked talks walk to inspect the window mechanics. These nine word occurrences provide twelve skip-gram pairs at reach one. They are enough to demonstrate an update, but much too limited for claims about general language relationships."}
                 </p>
                 <Word2vecWindowPairs />
                 <p>
@@ -265,41 +201,25 @@ export default function Word2vecPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  A window is the whole of what word2vec means by context. Word
-                  order inside the window is discarded, sentence boundaries stop
-                  the window, and a word that was dropped for being too rare is
-                  removed before the windows are formed, so its neighbours become
-                  each other&rsquo;s neighbours.
+                  {"In these implementations, context is defined by a window within each sentence, without left-versus-right labels. Filtering rare tokens before constructing windows can bring the remaining words closer. Other window and position rules are possible, so record this preprocessing choice."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="6. Scoring a pair with a dot product">
                 <p>
-                  Every word gets two vectors, not one. It has a vector for when
-                  it is the word being read, and a row for when it is the word
-                  being predicted, and a pair is scored by multiplying the two
-                  together coordinate by coordinate and adding up. That number is
-                  large and positive when the two vectors point the same way,
-                  large and negative when they point opposite ways, and the
-                  logistic function turns it into a probability between zero and
-                  one.
+                  {"Assign separate input and output vectors to each word. Their dot product scores a center–context pair. Its sign reflects alignment, while its magnitude also depends on both lengths. In negative sampling, sigmoid turns this score into a binary probability for the observed-versus-noise classification objective. It is not a normalized probability over all neighboring words."}
                 </p>
                 <Equation>{"score = u · h        probability = 1 / (1 + exp(−score))"}</Equation>
                 <p>
-                  The training says the probability should be near one when the
-                  pair really did occur and near zero when it did not, which is
-                  ordinary logistic regression with the vectors playing both the
-                  weights and the input. The cost of one such judgement is the
-                  usual logarithm, and the step it asks for pushes the two
-                  vectors towards each other when they should agree and apart
-                  when they should not.
+                  {"Observed pairs receive label 1; sampled noise pairs receive label 0. A sampled pair need not be linguistically impossible or absent elsewhere in the corpus. Gradient updates increase or decrease its dot-product score according to that training label, rather than directly minimizing Euclidean distance between word vectors."}
                 </p>
                 <Equation>{"cost = −log(probability) when the pair occurred,  −log(1 − probability) when it did not"}</Equation>
                 <Word2vecPairStep />
                 <WorkedExample title="One pair, three rows, by hand">
                   <>
                     <p>
-                      Put the input word at (0.5, 0). Give the true neighbour vector (1,
+
+                      Put the input word at (0.5, 0). Give the true neighbor vector (1,
                       0), and give two sampled alternatives vectors (−1, 0) and (0, 1).
                       Their dot products are 0.5, −0.5 and zero. Sigmoid converts those
                       scores into the probabilities used by the loss.
@@ -338,18 +258,14 @@ export default function Word2vecPage() {
                 <Word2vecTwoTables />
                 <>
 <p>
-                  The right-hand column is the model doing the job it was actually trained for, and it does it. Asked which words belong beside walked, the discarded table names says, player, stays, stayed and walked itself, all of them verb forms, at probabilities between 0.28 and 0.31, while every word about money comes back far lower.
+                  {"The output table assigns higher sigmoid scores to the listed verb forms than to the money words for walked. These scores evaluate the binary training objective. They do not sum to a context-word distribution, so 0.28 is not a 28% next-neighbor probability."}
                 </p>
                 <p>
-                  Averaged over the whole vocabulary its readiness to say a verb form appeared beside walked is 0.2672 and its readiness to say a word about money did is 0.0061, which is a working, if not very confident, predictor of neighbours. Half of everything the fit learned goes into it, and none of it is kept.
+                  {"The mean binary score is 0.2672 for verb forms and 0.0061 for money words in this query. That shows separation under the training objective. Calling the model unconfident from those scores alone would ignore the negative-sampling ratio and noise distribution."}
                 </p>
 </>
                 <KeepInMind>
-                  Some later methods keep both tables and add or join them, and
-                  word2vec keeps only the first, so what is thrown away is
-                  something the corpus really did teach. There is no argument
-                  from the mathematics that the kept table is the right one to
-                  keep; it is a choice the method makes and reports.
+                  {"This SDK retains the input-vector table for word comparisons. Keeping or combining output vectors is another representation choice. Evaluate that choice under the intended task; the training objective alone does not identify one universally best stored table."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -361,18 +277,18 @@ export default function Word2vecPage() {
             choice(
               "Two rows of the counting table give a cosine of 0.8558 on average within a list and exactly 0.0000 across the two. Why exactly zero?",
               [
-                "Two words from different lists share no neighbour at all, so their rows are perpendicular",
+                "Two words from different lists share no neighbor at all, so their rows are perpendicular",
                 "The cosine was clipped at zero before being reported",
                 "A table with 45.8% of its cells at zero compares any two of its rows at zero",
-                "The discount leaves a neighbour three away contributing nothing",
+                "The discount leaves a neighbor three away contributing nothing",
               ],
               0,
-              "No sentence is drawn from both lists, so no word of one list ever turns up within reach of a word of the other, and no coordinate is nonzero in both rows. The zeros alone do not do it, since two rows of one list compare at 0.8558 in the same table, and a neighbour three away still counts a third.",
+              "No sentence is drawn from both lists, so no word of one list ever turns up within reach of a word of the other, and no coordinate is nonzero in both rows. The zeros alone do not do it, since two rows of one list compare at 0.8558 in the same table, and a neighbor three away still counts a third.",
             ),
             trueFalse(
               "What has to survive a fixed width of twelve numbers is the comparisons between words, not the counts themselves.",
               true,
-              "Nothing suggests the 31 counts of a row could be read back out of twelve numbers, and nothing needs them to be. Words of one list still have to come out near each other and words of different lists apart, which is why word2vec does not squeeze the table at all and sets a prediction task instead.",
+              "The twelve coordinates are learned for predicting nearby words. The objective does not ask them to reconstruct all 31 context counts. In this experiment we judge the resulting vectors by whether they distinguish the two supplied word groups. A short vector can preserve useful comparisons without preserving every original count.",
             ),
             choice(
               "Why does every word get two vectors rather than one?",
@@ -390,11 +306,11 @@ export default function Word2vecPage() {
               [
                               "Word order inside the window is discarded",
                               "Sentence boundaries stop the window",
-                              "A word dropped for being too rare is removed before the windows are formed, so its neighbours become each other’s neighbours",
+                              "A word dropped for being too rare is removed before the windows are formed, so its neighbors become each other’s neighbors",
                               "On the two-list corpus the reach is redrawn at random between one and three at every position",
                             ],
               [0, 1, 2, 3],
-              "All four hold. A window is the whole of what word2vec means by context, with no parse, no grammar and no notion of which side a neighbour was on. Redrawing the reach puts a word next door inside the window three times as often as a word three away, which is why the pair count moves from 3,968 to 3,865 to 3,901 across passes.",
+              "The window determines which nearby word occurrences become training examples. This implementation does not label a neighbor as left or right and does not parse a sentence's grammar. It redraws the window radius, so nearby occurrences are included more often than distant ones. That sampling changes the number of pairs from pass to pass: the reported counts are 3,968, 3,865 and 3,901.",
               {
                 "description": "This lesson’s word2vec setup uses ordinary unordered skip-gram/CBOW contexts. It removes words below its minimum-count threshold before building windows, never crosses sentence boundaries and draws a reach uniformly from 1 through 3 at each remaining position. It does not use a positional or directional context variant."
               },
@@ -402,7 +318,7 @@ export default function Word2vecPage() {
             trueFalse(
               "The second table is deleted because it had learned nothing useful.",
               false,
-              "Asked which words belong beside walked it names five verb forms at probabilities between 0.28 and 0.31, and averages 0.2672 for a verb form against 0.0061 for a word about money. Half of everything the fit learned goes into it, and there is no argument from the mathematics that the kept table is the right one to keep.",
+              "The output table learned binary scores for distinguishing observed word-context pairs from sampled noise pairs. For walked, its reported sigmoid scores average 0.2672 over the verb forms and 0.0061 over the money words. These are not a normalized distribution over neighboring words. Choosing to retain only the input table does not mean the output table learned nothing; either table or a combination can be evaluated for the intended use.",
             ),
         ],
         },
@@ -410,55 +326,48 @@ export default function Word2vecPage() {
           title: "Part 3. Which Side Predicts Which",
           content: (
             <>
-              <SubSection title="8. The centre predicting each neighbour">
+              <SubSection title="8. The center predicting each neighbor" id="8-the-centre-predicting-each-neighbour">
                 <p>
-                  The first arrangement is skip-gram. Read the centre
+
+                  The first arrangement is skip-gram. Read the center
                   word&rsquo;s vector, and use it to predict each of its context
-                  words in turn, one piece of training per neighbour. At a
-                  position with three words in its window the centre word&rsquo;s
+                  words in turn, one piece of training per neighbor. At a
+                  position with three words in its window the center word&rsquo;s
                   vector is read three times, corrected three times, and each of
-                  the three neighbours has its row corrected once.
+                  the three neighbors has its row corrected once.
                 </p>
                 <Equation>{"score for neighbour v of the centre w   =   u(v) · h(w)"}</Equation>
                 <p>
-                  The consequence worth carrying is arithmetical rather than
-                  linguistic. Every occurrence of a word produces as many pieces
-                  of training as it has neighbours, so a word that appears rarely
-                  still generates several corrections each time it appears, which is
-                  why skip-gram is the usual choice where the corpus is small
-                  and why it is the slower of the two arrangements.
+                  {"Skip-gram creates one training example per selected context word. That often gives more updates than CBOW from the same token sequence. Runtime and the quality of rare-word representations still depend on the objective, sampling and implementation; pair count alone does not settle either."}
                 </p>
               </SubSection>
 
-              <SubSection title="9. The neighbours predicting the centre">
+              <SubSection title="9. The neighbors predicting the center" id="9-the-neighbours-predicting-the-centre">
                 <p>
+
                   The second arrangement runs the same window the other way.
                   Average the vectors of all the context words into one vector,
-                  and use that average to predict the centre word. One piece of
+                  and use that average to predict the center word. One piece of
                   training per position, whatever the reach, and the correction
                   the average receives is shared out equally among the words that
                   went into it.
                 </p>
                 <Equation>{"h = the mean of the context vectors        score = u(centre) · h"}</Equation>
                 <p>
-                  The averaging is where the name comes from, since a mean
-                  discards the order of what went into it, and it is also where
-                  the behaviour differs. A rare word in the context contributes
-                  one summand out of several and receives a share of one
-                  correction, which is a much weaker signal than the same word
-                  would get as a centre under skip-gram.
+                  {"The continuous bag-of-words model, or CBOW, ignores context order and uses the context summary to predict the center. Here it averages the vectors, so each context vector receives a fraction of the gradient to that average. That update is not automatically weaker in every meaningful sense than a skip-gram update."}
                 </p>
                 <WorkedExample title="The twelve and the nine, counted">
                   <>
                     <p>
+
                       Part 2 left two counts unexplained. At a reach of one the
                       three short sentences gave twelve pieces of training one
                       way round and nine the other. Take the first of them,
-                      walk walked talks. The middle word has a neighbour on
-                      each side and each end word has one neighbour.
+                      walk walked talks. The middle word has a neighbor on
+                      each side and each end word has one neighbor.
                     </p>
                     <NumberTable
-                      headings={["centre", "words within reach", "pieces, centre predicting", "pieces, neighbours predicting"]}
+                      headings={["center", "words within reach", "pieces, center predicting", "pieces, neighbors predicting"]}
                       rows={[
                         ["walk", "walked", "1", "1"],
                         ["walked", "walk, talks", "2", "1"],
@@ -468,9 +377,10 @@ export default function Word2vecPage() {
                     />
                     <Equation>{"centre predicting each neighbour = (1 + 2 + 1) × 3 sentences = 12\nneighbours predicting the centre = (1 + 1 + 1) × 3 sentences = 9"}</Equation>
                     <p>
-                      The first arrangement counts neighbours and the second
+
+                      The first arrangement counts neighbors and the second
                       counts positions. Widen the reach to two and every word
-                      of a three-word sentence has two neighbours, so the first
+                      of a three-word sentence has two neighbors, so the first
                       count becomes eighteen. The second stays at nine, because
                       a position is still one average and one prediction
                       however many vectors went into the average.
@@ -481,29 +391,14 @@ export default function Word2vecPage() {
 
               <SubSection title="10. What swapping the direction changes">
                 <p>
-                  On this corpus the difference shows up first in the pair count.
-                  Skip-gram produces 3,968 pieces of training in a pass and the
-                  bag of words 1,311, exactly one per word occurrence, so the
-                  bag of words is doing about a third as much work. What it buys
-                  with the saving is worse separation at every setting the page
-                  tried.
+                  {"Skip-gram produces 3,968 training pairs in the stated pass, while CBOW produces 1,311 context summaries. CBOW updates several context rows per summary, so this ratio is not a runtime ratio. The following table compares their resulting representations under the chosen training settings."}
                 </p>
                 <Word2vecCombinations word="walked" />
                 <p>
-                  Read the four bars at the doubled first step. Skip-gram with
-                  drawn wrong answers separates the lists by 0.8266 and the bag
-                  of words by 0.2813, which is the same ordering the counts
-                  predict, since the bag of words saw a third of the training. At
-                  the published first step, which Part 5 comes to, the
-                  same pair reads 0.7033 and 0.0034, and that second number is a
-                  fit that did not separate anything.
+                  {"At the doubled initial learning rate, negative-sampling skip-gram gives a topic gap of 0.8266 and CBOW gives 0.2813. The objectives and update patterns differ as well as their pair counts, so this experiment does not isolate number of training examples as the cause."}
                 </p>
                 <KeepInMind>
-                  The choice of direction is a choice about how much training a
-                  given corpus produces, and it matters most when the corpus is
-                  small. On a corpus of billions of words the bag of words being
-                  three times cheaper is the argument that wins, which is the
-                  opposite of what happens here.
+                  {"Skip-gram and CBOW use the same contexts in different prediction arrangements. Compare speed and representation quality for the actual corpus and settings. A larger corpus does not automatically decide which tradeoff wins."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -514,80 +409,49 @@ export default function Word2vecPage() {
           content: (
             <>
               <SubSection title="11. Why scoring every word is out of the question">
-                <p>
-                  So far a pair has been scored against one row. Asking properly
-                  how likely each word is to be the neighbour means scoring the
-                  centre word against every row in the table and normalising, so
-                  the probabilities add to one across the vocabulary. That is the
-                  softmax, it is the honest version of the question, and its
-                  gradient touches every row in the table for every pair.
-                </p>
+                <p>So far we scored one center-context pair. To define a normalized probability over possible context words, we score the center against every context row and apply softmax. The probabilities then sum to one across the vocabulary. Calculating that objective touches every output row for each training pair, which becomes costly as the vocabulary grows.</p>
                 <Equation>{"P(v | w) = exp(u(v) · h(w)) / Σ over every word v′ of exp(u(v′) · h(w))"}</Equation>
                 <p>
-                  On this corpus that means 31 rows per pair and 19,519 pairs
-                  across five passes, which is 605,089 row updates and no trouble
-                  at all. On a forty-thousand-word vocabulary the same five
-                  passes over a billion words means forty thousand rows touched at
-                  every one of five billion word positions, and the sum in the
-                  denominator has to be recomputed for each of them. The method is not slightly
-                  expensive at that size; it is the only thing the computer would
-                  ever do.
+                  {"Full softmax updates every output row for each pair. This example is small enough for that cost to be modest; a much larger vocabulary multiplies the work at every training step. The following alternatives reduce output scoring work using different objectives or factorizations."}
                 </p>
                 <KeepInMind>
-                  Everything in the rest of this Part is an answer to that one
-                  denominator, and the two answers are answers of different
-                  kinds. The first replaces the question with an easier one and
-                  gives up the distribution; the second keeps the question and
-                  changes the route to the answer, and gives up nothing.
+                  {"Negative sampling changes the objective to binary discrimination. Hierarchical softmax keeps a normalized distribution by parameterizing paths through a tree. The latter is exact for its tree model, but is not generally the same distribution family as a flat linear softmax with the same embedding width."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="12. A handful of wrong answers instead">
                 <p>
+
                   The first answer replaces the question &ldquo;which of the
-                  thirty one words is the neighbour&rdquo; with a much easier
+                  thirty one words is the neighbor&rdquo; with a much easier
                   one. Take the word that really did appear, and take five words
                   drawn at random, and ask of each of the six separately whether
-                  it is a real neighbour or a random word. That is six
-                  independent yes-or-no judgements, six rows touched, and the
+                  it is a real neighbor or a random word. That is six
+                  independent yes-or-no judgments, six rows touched, and the
                   number six does not grow when the vocabulary does.
                 </p>
                 <Equation>{"cost = −log σ(u(v) · h)  −  Σ over the k drawn words of log(1 − σ(u(v′) · h))"}</Equation>
-                <p>
-                  This is called negative sampling, and the drawn words are the
-                  negatives. What the model learns is no longer a distribution
-                  over the vocabulary, since the six probabilities do not add to
-                  anything in particular, and it does not need to be. What it
-                  needs is for the true neighbour&rsquo;s row to be pulled
-                  towards the word and the random rows pushed away, repeated
-                  often enough that the pulls from words with shared company
-                  accumulate in one place.
-                </p>
+                <p>Negative sampling trains a binary discrimination task for observed word-context pairs and sampled alternatives. Those separate scores do not form a normalized next-word distribution over the whole vocabulary. Repeated updates encourage the model to distinguish the observed pairs from its noise samples, which is a different objective from full softmax prediction.</p>
                 <WhyThisWorks title="Why contrasting against noise is enough">
                   <>
 <p>
                     A model that only ever saw true pairs could satisfy every one of them by making all vectors identical and very long, since then every score is large and every probability near one. The drawn words are what stops that, because the same trick would make their probabilities near one too and they are asked for zero.
                   </p>
                   <p>
-                    The pull and the push together force a geometry in which some words are near a given word and others are not, and there is no cheaper way to satisfy both than to put words with the same neighbours in the same place.
-                  </p>
+                  {"Negative examples prevent the all-high-score solution from satisfying the binary labels. The learned geometry must balance observed and sampled evidence, but many parameter settings can do so. Identical contexts do not prove that the stored vectors must become identical."}
+                </p>
 </>
                 </WhyThisWorks>
               </SubSection>
 
               <SubSection title="13. Where the wrong answers come from">
                 <p>
-                  How the negatives are drawn turns out to matter. Draw them in
-                  proportion to how often each word appears and nearly every
-                  negative is one of the commonest words, so the model spends its
-                  effort learning to say no to those. Draw them uniformly and a
-                  word seen seventeen times is offered as a wrong answer as often
-                  as one seen seventy three, which tells the model little about
-                  the words it actually meets.
+                  {"The noise distribution controls which alternatives receive updates. Sampling by frequency emphasizes common words; uniform sampling gives relatively more attention to rare words. Neither is automatically useless. Compare the resulting representations under the task."}
                 </p>
                 <p>
+
                   Word2vec raises each count to the power three quarters before
-                  normalising, which sits between the two. The exponent has no
+                  normalizing, which sits between the two. The exponent has no
                   derivation behind it; the paper reports it as the value that
                   worked, and it has stayed.
                 </p>
@@ -604,36 +468,15 @@ export default function Word2vecPage() {
 </>
                 </WorkedExample>
                 <KeepInMind>
-                  The exponent does more where the counts are more spread out.
-                  This corpus was built by drawing words uniformly from two
-                  lists, so its counts are nearly flat and the flattening has
-                  little to flatten; on real text, where the commonest word
-                  outnumbers the thousandth by several orders, it is the
-                  difference between a useful draw and a useless one.
+                  {"The three-quarters exponent changes a highly skewed count distribution more than this comparatively flat one. That explains why its effect differs across these examples; it does not prove that another exponent would make a real-text draw useless."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="14. A path down a tree instead of a sweep">
-                <p>
-                  The second answer keeps the honest question and changes how the
-                  answer is reached. Arrange the words as the leaves of a binary
-                  tree, and reaching a word becomes a sequence of left-or-right
-                  choices, one at each branch point on the way down. Give every
-                  branch point its own row, ask it the same yes-or-no question
-                  the pairs were asked before, and the probability of a word is
-                  the product of the probabilities along its path.
-                </p>
+                <p>Hierarchical softmax keeps a normalized probability model while organizing its calculation as a binary tree. Words occupy the leaves. Each internal node has weights for a binary decision, and a word’s probability is the product of the decision probabilities on its path. Scoring one observed word therefore uses that path rather than every vocabulary row.</p>
                 <Equation>{"P(v | w) = Π over the branch points on v’s path of σ(±  u(node) · h(w))"}</Equation>
                 <p>
-                  The probabilities of all the words still add to one, because
-                  the probabilities at every branch point add to one and the
-                  paths partition the leaves, so nothing has been approximated.
-                  What has changed is that the number of rows touched is the
-                  length of one path rather than the size of the vocabulary. Any
-                  binary tree works; the shape decides the cost, and word2vec
-                  uses Huffman&rsquo;s arrangement, which gives frequent words
-                  the short paths and is the arrangement with the smallest
-                  average path length there is.
+                  {"Complementary branch probabilities define a normalized distribution over the leaves of a finite tree. Scoring a target touches only the nodes on its path. A Huffman tree minimizes expected binary code length for its given symbol frequencies; it does not guarantee the fastest implementation or the best learned representation."}
                 </p>
                 <Word2vecTree />
                 <WorkedExample title="The six-word corpus, arranged">
@@ -656,7 +499,7 @@ export default function Word2vecPage() {
                 </p>
                 <>
 <p>
-                  The second disappointment is that Huffman&rsquo;s arrangement is barely earning its keep here either. Its average path is 4.9008 where a tree that ignored the counts entirely and split evenly would cost 4.9542, a difference of five hundredths of a branch point, because the counts on this corpus run from 73 down to 17 and there is no long tail of rare words to give long paths to.
+                  {"Here the Huffman tree’s mean path length is close to that of a balanced tree. The modest frequency range leaves less opportunity to shorten common-word paths. The larger synthetic comparison below uses a more skewed frequency distribution."}
                 </p>
                 <p>
                   Give the same construction counts that fall as one over the rank, which is roughly how word counts really fall, and at forty thousand words the average path is 10.7469 against the balanced tree&rsquo;s 15.2877.
@@ -672,14 +515,7 @@ export default function Word2vecPage() {
                   caption="Rows touched per training pair. Every figure is computed from the arrangement itself; the counts in the realistic column fall as one over the word’s rank."
                 />
                 <KeepInMind>
-                  Negative sampling touches six rows at every vocabulary size while
-                  the tree touches a number that grows, so which is cheaper
-                  depends on the size. At thirty one words a path costs 4.14
-                  against six; at a thousand it costs 7.52 against the same six,
-                  and the ordering has reversed. What the tree has that the
-                  drawn answers do not is that it is still computing the real
-                  distribution, and the next Part shows it producing a visibly
-                  different geometry because of that.
+                  {"For five noise samples, negative sampling evaluates six binary output terms per pair. Hierarchical softmax evaluates a target’s path. Their relative operation count changes with the tree and vocabulary, and they optimize different models. Both can produce useful word vectors; normalization alone does not establish better geometry."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -694,15 +530,15 @@ export default function Word2vecPage() {
                 "One per word occurrence, whatever the reach",
                 "One per sentence",
                 "One per distinct word",
-                "One per neighbour of each centre word",
+                "One per neighbor of each center word",
               ],
               0,
-              "The context vectors are averaged into one vector and that average predicts the centre, so a position is one piece of training however wide the window is. Skip-gram makes one per neighbour instead, which is why it produces 3,968 in a pass and is the slower of the two.",
+              "Continuous bag of words makes one prediction for each center position by averaging its context vectors. This corpus supplies 1,311 such positions in a pass. Skip-gram makes a prediction for each selected neighbor instead, producing 3,968 pairs in the reported pass. That gives skip-gram more prediction updates here; elapsed runtime also depends on the implementation and settings.",
             ),
             trueFalse(
               "At the published first step the bag of words with drawn wrong answers still separated the two lists.",
               false,
-              "It came out at 0.0034, which is a fit that did not separate anything, where skip-gram at the same step reads 0.7033. At the doubled step the same pair reads 0.8266 and 0.2813, so skip-gram is ahead at both and the bag of words, which saw a third of the training, needs the larger step to separate anything.",
+              "At initial learning rate 0.025, the bag-of-words fit has a within-minus-across cosine gap of 0.0034, compared with 0.7033 for skip-gram. At 0.05 the gaps are 0.2813 and 0.8266 respectively. The smaller-rate bag-of-words run barely distinguishes these lists after five passes. This comparison does not establish that it must always use a larger rate; more updates or different data could change the result.",
             ),
             choice(
               "Why does word2vec raise each count to the power three quarters before drawing negatives?",
@@ -713,18 +549,18 @@ export default function Word2vecPage() {
                 "It guarantees every word is drawn at least once in a pass",
               ],
               0,
-              "In proportion to frequency nearly every negative is one of the commonest words, and uniformly a word seen seventeen times is offered as often as one seen seventy three. The exponent has no derivation behind it, and on this corpus, whose counts run from 73 down to 17, it has little to flatten.",
+              "Sampling directly in proportion to frequency favors common words. Uniform sampling gives rare and common words equal probability. Raising counts to three quarters keeps common words more likely while reducing that imbalance. The exponent is an empirical design choice, not a value forced by the objective. Here the counts range from 17 to 73, so the imbalance is modest compared with a large natural-language corpus.",
             ),
             several(
               "Which of these are true of arranging the vocabulary as the leaves of a binary tree?",
               [
-                "The leaf probabilities sum to one, giving an exactly normalised tree distribution rather than a truncated probability sum",
+                "The leaf probabilities sum to one, giving an exactly normalized tree distribution rather than a truncated probability sum",
                 "A tree over n words has n − 1 branch points, so its table is one row shorter than a sweep would need",
                 "On the two-list corpus Huffman’s arrangement saves more than a whole branch point over a tree that split evenly",
                 "The number of rows touched is six, whatever the vocabulary holds"
               ],
               [0, 1],
-              "Branch probabilities sum to one and complete root-to-leaf paths partition that probability. Hierarchical softmax therefore defines a normalised distribution, although its parameterisation is different from a flat softmax. A full binary tree with n leaves has n − 1 internal nodes. Here Huffman saves only about 0.0534 decisions over the evenly split tree; touching six rows belongs to the separately configured negative-sampling comparison.",
+              "Branch probabilities sum to one and complete root-to-leaf paths partition that probability. Hierarchical softmax therefore defines a normalized distribution, although its parameterization is different from a flat softmax. A full binary tree with n leaves has n − 1 internal nodes. Here Huffman saves only about 0.0534 decisions over the evenly split tree; touching six rows belongs to the separately configured negative-sampling comparison.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "Vocabulary: 31 words.\nHierarchical softmax uses a full binary tree with one leaf per word.\nEvery branch assigns complementary probabilities to its two children.\nAverage decisions per target, weighted by corpus use:\nHuffman tree: 4.9008\nevenly split tree: 4.9542\nNegative-sampling comparison: 1 positive + 5 negative rows."
@@ -733,7 +569,7 @@ export default function Word2vecPage() {
             trueFalse(
               "Which of the tree and negative sampling touches fewer rows depends on the size of the vocabulary.",
               true,
-              "Negative sampling touches six rows at every vocabulary size while a path down the tree touches a number that grows with it, and by a thousand words the ordering has already reversed. What the tree has in exchange is that it is still computing the real distribution.",
+              "With five negative samples, each negative-sampling update scores one positive target and five sampled targets. That configured count stays fixed as the vocabulary grows, although repeated samples can reuse a row. A tree update follows the target's path, whose length depends on the tree and word frequency. Hierarchical softmax defines a normalized distribution over the vocabulary; negative sampling uses a different training objective.",
             ),
         ],
         },
@@ -743,13 +579,7 @@ export default function Word2vecPage() {
             <>
               <SubSection title="16. The objective falling, pass by pass">
                 <p>
-                  A fit is a number of passes over the corpus, and after each one
-                  the mean cost of a training pair is recorded. That number is
-                  the only thing the fit itself knows about how it is doing, and
-                  it is a strange quantity, since under negative sampling it
-                  depends on which words happened to be drawn as negatives and is
-                  therefore not comparable between two runs that drew
-                  differently.
+                  {"The recorded mean loss describes the sampled training examples in each pass. Different draws introduce variation, so use repeated or fixed evaluation samples when comparing runs. Their losses can still estimate a common expected objective when the sampling protocol is the same."}
                 </p>
                 <InAModel title="Five passes, skip-gram, drawn wrong answers">
                   <p>
@@ -763,19 +593,10 @@ export default function Word2vecPage() {
                   </p>
                 </InAModel>
                 <p>
-                  The playground at the top of the page draws that curve for
-                  whatever settings are chosen, and the useful habit is to watch
-                  the shape rather than the value. A curve that does not fall is
-                  a step size too large; a curve that falls and flattens
-                  immediately, as this one does, usually means the corpus is
-                  small enough that the model has learned everything available in
-                  a pass or two.
+                  {"Inspect both the loss value and its trend. A flat or rising curve can reflect an unsuitable learning rate, sampling variation, limited capacity or other issues. A quick plateau does not prove that every useful pattern in the corpus has been learned."}
                 </p>
                 <KeepInMind>
-                  The recorded cost is what the optimiser is lowering and not what
-                  anyone wants. Nothing on this page reports it as a measure of
-                  quality, and Part 7 shows a case where it falls while the
-                  vectors get worse.
+                  {"Training loss measures the objective being optimized. A lower value need not improve the word-comparison task, as Part 7 illustrates. Use that distinction when deciding which evaluations to run."}
                 </KeepInMind>
               </SubSection>
 
@@ -789,7 +610,7 @@ export default function Word2vecPage() {
                 </p>
                 <>
 <p>
-                  Fitted at 0.025 with the bag of words and drawn wrong answers, five passes leave the two lists at 0.9907 within a list and 0.9873 across the two, a difference of 0.0034. Every vector points very nearly the same way as every other, which is the state a fit starts in and has barely left, and the nearest words to market come back as trade, stock, cash, bond and stays, with a verb form fifth.
+                  {"At learning rate 0.025, this CBOW run leaves within-list and cross-list cosines both near 1. The representation provides little topic separation by that measure. This is an outcome of these updates, not the initial state: the input vectors start as small signed random values rather than all pointing the same way."}
                 </p>
                 <p>
                   Doubling the step size to 0.05 takes the same arrangement to 0.9929 and 0.7116, a difference of 0.2813, and the verb form is gone from the list.
@@ -810,25 +631,17 @@ export default function Word2vecPage() {
                   This is worth dwelling on because it is a published default producing a result that looks like a working fit. Nothing raises, the cost curve falls from 4.1568 to 2.8830, and the nearest-word list for a verb form is full of verb forms. It is only the second number, how alike two words from different lists came out, that says the fit answered the same thing for everything.
                 </p>
                 <p>
-                  The default is not wrong; it was chosen for corpora of billions of words, where five passes is tens of billions of corrections and a small first step is plenty.
+                  {"A default is a starting setting, not a guarantee for every corpus and objective. Here an initial rate of 0.05 improves the reported separation for this arrangement. Check the effect on the chosen evaluation rather than assuming corpus size alone explains it."}
                 </p>
 </>
                 <KeepInMind>
-                  The value a program ships with was chosen against the data its
-                  author had, and this corpus is four orders of magnitude smaller
-                  than that. Reading only the within-list number, 0.9907, would
-                  have passed this fit, which is why a second number that ought
-                  to come out small is worth computing every time.
+                  {"Check cross-group comparisons as well as within-group ones. A representation that gives nearly every pair a high cosine can look good if only the within-group score is reported."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="18. The four combinations, side by side">
                 <p>
-                  Two directions and two ways round the softmax make four
-                  arrangements, and they are genuinely four methods rather than
-                  four settings. Compare them on the same corpus at the same
-                  width, reach, passes and start, and the first thing to notice
-                  is that the numbers are not on a common scale.
+                  {"The two architectures and two objectives give four training arrangements. Their cosine values share the same numerical definition, but a task evaluation is needed to decide which geometry is useful. Compare settings under a documented training and evaluation protocol."}
                 </p>
                 <p>The two tree fits report mean cross-list cosines of −0.5570 and −0.9618; the negative-sampling fits report 0.1696 and 0.7116. These numbers come from different training objectives, so a more negative value does not by itself mean a better representation. Tree decisions and sampled pair decisions apply different constraints. Negative sampling trains dot products between input and output vectors to distinguish observed pairs from sampled alternatives. It does not require the stored word vectors to become perpendicular, and these measurements do not establish a universal angle for unrelated words.</p>
                 <Word2vecCombinations word="walked" />
@@ -843,23 +656,13 @@ export default function Word2vecPage() {
                   appears in all four lists.
                 </p>
                 <KeepInMind>
-                  Two fits that agree completely about which words are alike can
-                  disagree about almost every ranking inside that agreement, and
-                  here they do, sharing one word of five. What a nearest-word
-                  list supports is that the words in it are alike; which of them
-                  came first is one of several orderings the corpus permits
-                  equally.
+                  {"All four runs return verb-form neighbors for walked, but their top-five lists differ. That shows agreement on this broad grouping without agreement on the finer ranking. It does not prove that the competing rankings are equally useful for another task."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="19. What a seed fixes">
                 <p>
-                  Four things in the fit are random, namely where every vector starts,
-                  how far the window reaches at each position, which words are
-                  drawn as negatives, and which occurrences of frequent words
-                  are thinned out. One seed fixes all four, so two fits from the same
-                  seed are identical to the last bit, and two fits from different
-                  seeds are two different answers.
+                  {"The seed controls the initialization and random choices in this implementation. With the same inputs, code and numeric environment, repeated runs are reproducible. A different seed may change the result; it does not guarantee that every output will differ."}
                 </p>
                 <Word2vecSeeds />
                 <p>
@@ -873,12 +676,7 @@ export default function Word2vecPage() {
                   0.0073 on average.
                 </p>
                 <KeepInMind>
-                  A seed makes a fit repeatable without making its answer the one
-                  the corpus implied. What the corpus determines is the geometry,
-                  which the two runs agree on to 0.9996; the coordinates are
-                  whatever fell out of where the vectors happened to start, so
-                  comparing one run&rsquo;s numbers against another&rsquo;s is
-                  comparing two arbitrary choices.
+                  {"The two runs have strongly correlated pairwise cosines but different coordinates. Shared rotations can account for some coordinate differences; the remaining geometry can differ too. Use invariant comparisons or align the spaces before drawing conclusions from coordinate changes."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -933,22 +731,10 @@ export default function Word2vecPage() {
 
               <SubSection title="21. Where counting still wins">
                 <p>
-                  On this corpus, plain counting beats word2vec, and hiding that
-                  would misrepresent what the method is for. Two rows of the
-                  counting table compared directly give 0.8558 within a list and
-                  exactly 0.0000 across the two, which is a perfect separation
-                  reached in one pass with nothing to tune, no random start and no
-                  seed. The best of the four word2vec arrangements at the doubled
-                  step gives 0.9962 and 0.1696, which separates the lists and
-                  does not separate them cleanly.
+                  {"Raw count rows give zero cross-list cosine by construction, while the displayed negative-sampling word2vec fits retain positive cross-list cosine. Counts therefore separate the two groups more directly under this criterion. They still require a window and weighting rule, and this comparison does not establish universal superiority over every word2vec arrangement."}
                 </p>
                 <p>
-                  The zero is not luck. Two words from different lists never share
-                  a sentence, so they share no neighbour, so their count rows have
-                  no coordinate nonzero in both and the cosine between them is
-                  exactly zero by construction. Word2vec cannot reach that,
-                  because its vectors are twelve numbers rather than thirty one
-                  and it is not trying to reproduce the rows at all.
+                  {"The count rows have disjoint support across these lists, making their cosine zero. A twelve-dimensional space can also hold vectors from two orthogonal groups. Word2vec’s nonzero cross-list score is therefore not forced simply by reducing 31 coordinates to 12. Its objective and training determine the observed geometry."}
                 </p>
                 <NumberTable
                   headings={["method", "same list", "across lists", "numbers per word"]}
@@ -957,15 +743,10 @@ export default function Word2vecPage() {
                     ["skip-gram, drawn wrong answers", "0.9962", "0.1696", "12"],
                     ["bag of words, drawn wrong answers", "0.9929", "0.7116", "12"],
                   ]}
-                  caption="Mean cosine within a list and across the two, after five passes at a first step of 0.05. Counting takes one pass and has nothing to choose."
+                  caption="Mean cosines for the two negative-sampling fits shown, after five passes at initial learning rate 0.05. The count baseline uses the stated context and weighting choices."
                 />
                 <KeepInMind>
-                  A method whose whole argument is about what happens at forty
-                  thousand words and a billion occurrences should be expected to
-                  lose at thirty one words and thirteen hundred, and it does.
-                  The measurement is evidence against demonstrating word2vec on
-                  a corpus this size, and it says nothing either way about the
-                  method at the size it was built for.
+                  {"This controlled corpus is useful for inspecting pair construction, losses and updates. It is too limited to establish performance on broader language tasks. Keep those purposes separate when interpreting the comparison."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -977,13 +758,7 @@ export default function Word2vecPage() {
             <>
               <SubSection title="22. The objective is not what anyone wanted">
                 <p>
-                  The fit lowers the cost of predicting neighbours. Nobody wants
-                  a neighbour predicted, and no quantity computed during the fit
-                  says anything about whether the vectors are good. That is not a
-                  gap in any particular implementation; it follows from the
-                  method being defined as an optimisation of one thing and used
-                  for another, and it means the two can move in opposite
-                  directions without anything being wrong.
+                  {"The optimizer is trained on the neighbor objective. The retained vectors may later be used for another purpose, so evaluate that use directly. Training loss remains a diagnostic of the specified objective, even when it is not a complete measure of embedding quality."}
                 </p>
                 <Word2vecLongerTraining />
                 <>
@@ -995,9 +770,10 @@ export default function Word2vecPage() {
                 </p>
 </>
                 <KeepInMind>
+
                   Choosing how long to train, or how wide to make the vectors, or
                   what to draw negatives from, cannot be settled from inside the
-                  fit. It needs a judgement made outside the method, on a task
+                  fit. It needs a judgment made outside the method, on a task
                   someone actually cares about, and where that task does not
                   exist there is no defined notion of a better set of vectors.
                 </KeepInMind>
@@ -1005,39 +781,24 @@ export default function Word2vecPage() {
 
               <SubSection title="23. Two runs are both right and not comparable">
                 <p>
-                  The objective is not convex, and the walk that lowers it is a
-                  stochastic one that visits pairs in an order the draws decide.
-                  So a fit arrives at a local answer, and a different start
-                  arrives at a different local answer, and neither is more correct
-                  than the other. There is nothing in the method that would
-                  distinguish them.
+                  {"The objective is nonconvex, and finite stochastic training can reach different parameter settings from different starts. They need not be equally good: compare objective estimates under a shared protocol and evaluate the intended downstream behavior."}
                 </p>
                 <>
 <p>
                   Worse for anyone hoping to compare two fits, the objective is invariant to a whole family of transformations of the answer. Rotate every vector in the kept table and every row in the discarded table by the same rotation and every dot product is unchanged, so the cost is unchanged, so the rotated answer is exactly as good.
                 </p>
                 <p>
-                  The coordinates therefore have no meaning individually, and the fifth coordinate of one run has no relation whatever to the fifth coordinate of another. Measured on the two starts of Part 5, the mean gap coordinate by coordinate is 0.7816 while the pairwise cosines agree to 0.0073.
+                  {"A shared orthogonal rotation changes the coordinate system while preserving all input–output dot products. That makes raw coordinates basis-dependent. They can still be used by a model that shares or aligns that basis."}
                 </p>
 </>
                 <KeepInMind>
-                  Anything read off a set of these vectors has to survive a
-                  rotation, which a cosine or a distance does and a single
-                  coordinate does not. Averaging two runs&rsquo; tables together,
-                  or feeding one run&rsquo;s vectors to something trained on
-                  another&rsquo;s, is undefined rather than approximate, since
-                  the two answers were never written in the same coordinates.
+                  {"Averaging independently fitted tables or swapping one into a downstream model is numerically defined. Without alignment, however, the operation may mix incompatible axes and damage useful relationships. Align and evaluate before combining representations."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. A word seen twice">
                 <p>
-                  A word&rsquo;s vector is the accumulation of the corrections
-                  its occurrences produced. A word that occurs twice produces
-                  corrections from two windows, and everything else about where it
-                  ends up is where it started, which was a draw. There is no
-                  amount of further training that repairs this, since further
-                  training visits the same two windows again.
+                  {"A word seen twice has context evidence from only those occurrences, across repeated passes. Further optimization can change its vector, but cannot supply new observed contexts. Its reliability also depends on how informative the shared surrounding patterns are, not only its count."}
                 </p>
                 <Word2vecRareWord />
                 <p>
@@ -1050,51 +811,31 @@ export default function Word2vecPage() {
                   run, naming played first once, saying twice and say once.
                 </p>
                 <p>
+
                   Nothing in the answer marks the difference. The rare word gets a
                   vector of the same twelve numbers, and a cosine against it comes
                   back to four decimal places like any other. The usual response
                   is a minimum count, which declines to answer for a rare word
                   rather than answering it better, and where the threshold goes
-                  is a judgement rather than a fact. Below it a word has no
+                  is a judgment rather than a fact. Below it a word has no
                   vector, and it is also removed from the sentences before the
                   windows are formed, so the words on either side of it become
-                  neighbours.
+                  neighbors.
                 </p>
                 <KeepInMind>
-                  How much of a vector came from the corpus and how much from the
-                  starting draw is a continuous thing that the method does not
-                  report. The count of occurrences is the only guide available,
-                  and it is available before any fitting, which is why the
-                  threshold is applied first.
+                  {"Occurrence count is one warning sign for weak evidence. Variation across seeds, context diversity and held-out behavior provide other checks. A minimum count is a preprocessing choice that trades coverage against the evidence available for each retained word."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="25. Words Without Context and Comparisons Without Evidence" id="25-where-the-method-stops-being-defined">
-                <p>A word with no usable context supplies no context-based training evidence. A zero vector also has no cosine direction. These failures need different explanations even if both prevent a useful neighbour list.</p>
+                <p>A word with no usable context supplies no context-based training evidence. A zero vector also has no cosine direction. These failures need different explanations even if both prevent a useful neighbor list.</p>
                 <DerivationTable
                   expressionHeading="Word or context evidence"
                   reasonHeading="What the training pairs can teach"
-                  rows={[
-                    { expression: "a vocabulary of one word", reason: "there is no pair to train on. A window round the only word contains only itself, and a wrong answer has to be drawn from the words that are not the right one, of which there are none." },
-                    { expression: "a word that occurs once", reason: "defined, and determined mostly by where it started. Its vector accumulates the corrections of one window and nothing else, which is why a minimum count exists; the threshold is a judgement, not a fact about the data." },
-                    { expression: "a corpus of one-word sentences", reason: "no window ever contains a neighbour, so no pair is ever formed and no correction is ever made. Every vector is exactly where it started, and nothing in the fit distinguishes that from a fit that converged." },
-                    { expression: "a reach wider than the sentence", reason: "defined, and the same as a reach of the sentence’s length, since the window stops at the boundary. Wider reaches therefore stop changing the answer, which is not a failure but does make a swept parameter flat for a reason unrelated to the data." },
-                    { expression: "the individual coordinates of a vector", reason: "undefined as quantities. Rotating every vector and every scoring row by one rotation leaves every score, and so the whole objective, unchanged, so the coordinates are one arbitrary choice among infinitely many that fit equally well. Only rotation-invariant readings, cosines and distances, mean anything." },
-                    { expression: "comparing two runs coordinate by coordinate", reason: "undefined for the same reason. Measured on two starts here the coordinates differ by 0.7816 on average while the cosines they imply agree to 0.0073, so the disagreement is entirely in the part that carries no meaning." },
-                    { expression: "the recorded cost, read as quality", reason: "it is not that quantity. It is the mean cost of predicting a neighbour, which under drawn wrong answers also depends on which words were drawn, so it is not even comparable between two runs. Measured here it falls from 2.0872 to 2.0267 across a range over which the separation of the two lists falls from 0.8266 to 0.7397." },
-                    { expression: "how long to train, decided from inside the fit", reason: "there is no such decision available. The objective has no stopping point of its own and improves with more passes, so the length has to be set by something outside the method, and where no external task exists there is no defined notion of a better length." },
-                    { expression: "the width of the vectors", reason: "a real choice with no principle behind it. Too few numbers and words that should differ are forced together; too many and each word can be described independently of every other, which is what the method was avoiding. There is no quantity inside the fit that turns over as the width passes the right value." },
-                    { expression: "a word absent from the corpus", reason: "there is no vector to return. The method learns one row per word it saw, so a word it did not see has no position, and the honest answer is a refusal rather than a default vector, which would be a position the corpus never implied." },
-                    { expression: "asking which sense of a word is meant", reason: "outside what the method represents. Every occurrence of a spelling corrects one row, so a word used two ways receives corrections from both and settles somewhere between, and there is no second vector for the second sense to occupy." },
-                  ]}
+                  rows={[{"expression":"a vocabulary of one word","reason":"Repeated copies of one token can form self-context pairs, but negative sampling cannot draw a distinct alternative and a one-leaf hierarchical tree supplies no branch decisions. This implementation needs the required vocabulary and objective conditions to be checked."},{"expression":"a word that occurs once","reason":"defined, and determined mostly by where it started. Its vector accumulates the corrections of one window and nothing else, which is why a minimum count exists; the threshold is a judgment, not a fact about the data."},{"expression":"a corpus of one-word sentences","reason":"no window ever contains a neighbor, so no pair is ever formed and no correction is ever made. Every vector is exactly where it started, and nothing in the fit distinguishes that from a fit that converged."},{"expression":"a reach wider than the sentence","reason":"defined, and the same as a reach of the sentence’s length, since the window stops at the boundary. Wider reaches therefore stop changing the answer, which is not a failure but does make a swept parameter flat for a reason unrelated to the data."},{"expression":"the individual coordinates of a vector","reason":"Coordinates are defined in a chosen basis. A shared orthogonal rotation preserves training dot products; coordinate-specific interpretation requires retaining that basis."},{"expression":"comparing two runs coordinate by coordinate","reason":"A raw comparison is numerically defined but can mix unaligned axes. Align the spaces or compare invariant relationships; observed differences may include changed geometry as well as orientation."},{"expression":"the recorded cost, read as quality","reason":"Training loss measures the stated objective. Samples introduce variation, but comparisons can estimate the same expected loss under a common protocol. Lower training loss need not mean better retrieval or analogy results."},{"expression":"how long to train, decided from inside the fit","reason":"A stopping rule can use convergence diagnostics or a training budget. To choose for generalization or downstream usefulness, use suitable held-out evaluation rather than assuming every additional pass helps."},{"expression":"the width of the vectors","reason":"Width controls capacity, memory and computation. Compare candidate sizes against the intended task; additional coordinates need not always help or force independent word behavior."},{"expression":"a word absent from the corpus","reason":"there is no vector to return. The method learns one row per word it saw, so a word it did not see has no position, and the honest answer is a refusal rather than a default vector, which would be a position the corpus never implied."},{"expression":"asking which sense of a word is meant","reason":"A static row combines updates from every use of a spelling. It does not choose an occurrence-specific sense and need not settle at a geometric midpoint."}]}
                 />
                 <KeepInMind>
-                  Two of these lines carry most of the weight in practice. The
-                  coordinates carry no meaning individually, which rules out
-                  comparing or combining runs and rules in cosines and distances;
-                  and the recorded cost is not a measure of quality, which rules
-                  out every decision a reader would like to make by watching it
-                  fall.
+                  {"Retain the training setup with the vectors and evaluate the comparisons they will support. Account for coordinate alignment when combining runs, and use downstream evidence alongside the objective curve when choosing settings."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1106,12 +847,12 @@ export default function Word2vecPage() {
             trueFalse(
               "A word that occurs twice gets a trustworthy vector if the fit is given enough extra passes.",
               false,
-              "Further training visits the same two windows again, so everything else about where the word ends up is where it started, which was a draw. Across four starts the made-up word came out 0.8790, 0.9591, 0.9448 and 0.9532 alike to walked, a spread of 0.0801, where walk, seen 42 times, spread by 0.0025. Nothing in the answer marks the difference, which is why a minimum count is applied before any fitting.",
+              "Extra passes reuse the same two observed contexts; they do not supply new examples of the rare word's usage. Across the four starts, its cosine to walked ranges from 0.8790 to 0.9591. Walk, observed 42 times, has a much smaller reported spread of 0.0025. This illustrates sensitivity to initialization in this experiment. A minimum-count threshold can exclude poorly supported words, but it also removes their vocabulary entries.",
             ),
             choice(
               "The two tree fits report cosines of −0.5570 and −0.9618 across the lists where the two negative sampling fits report 0.1696 and 0.7116. What does that show?",
               [
-                "A different geometry, since every branch point pushes the words on its two sides to opposite ends of one direction",
+                "The fitted geometries differ under the two objectives; these cross-list cosines alone do not establish a universal quality ranking",
                 "The tree separating the lists about four times better",
                 "That the tree fits had not finished converging",
                 "That a cosine is not defined for vectors fitted through a tree",
@@ -1120,9 +861,9 @@ export default function Word2vecPage() {
               "The objectives constrain different dot products, so the cross-list cosines do not share a universal quality scale. Negative sampling does not require unrelated stored vectors to become perpendicular. We can compare whether each fit recovers the known list separation on this corpus, alongside its cost and stability across starts.",
             ),
             trueFalse(
-              "On this corpus, comparing rows of the counting table separates the two lists more cleanly than the best of the four word2vec arrangements.",
+              "On this corpus, raw count rows have a larger within-minus-across cosine gap than the skip-gram negative-sampling run at initial learning rate 0.05.",
               true,
-              "Counting gives 0.8558 within a list and exactly 0.0000 across the two, in one pass with nothing to tune and no seed. Skip-gram with drawn wrong answers at the doubled step gives 0.9962 and 0.1696, which separates the lists without separating them cleanly. The method’s argument is about forty thousand words and a billion occurrences, so losing at thirty one words says nothing about it at the size it was built for.",
+              "The count representation has a within-minus-across cosine gap of 0.8558. The reported skip-gram run has a gap of 0.8266. By that particular measure, counting separates these deliberately constructed groups slightly more clearly. It also stores more context coordinates per word. This small comparison cannot decide which representation will work better on a large corpus or another task.",
             ),
             choice(
               "Going from five passes to ten to twenty, the mean cost per pair falls at every step. What happened to the vectors?",
@@ -1133,12 +874,12 @@ export default function Word2vecPage() {
                 "They separated the lists further at twenty passes, but became harder to read",
               ],
               0,
-              "The method is defined as an optimisation of one thing and used for another, so the two can move in opposite directions without anything being wrong. A reader watching only the cost curve would have concluded that twenty passes was better than ten.",
+              "The training objective scores word-context predictions, while this comparison scores the separation between two known word lists. Improving the first does not guarantee improving the second. Choose a model using a measure related to its intended use, rather than assuming that the lowest training cost must give the most useful vectors.",
             ),
             several(
               "Rotating every vector in both tables by the same rotation leaves every dot product, and so the cost, unchanged. Which of these follow?",
               [
-                "A single coordinate carries no meaning, and the fifth coordinate of one run has no relation to the fifth of another",
+                "The objective does not assign a unique interpretation to an individual coordinate, and independent runs need not align their coordinate axes",
                 "Coordinate-wise averaging of unaligned runs has no guarantee of preserving either learned representation",
                 "A cosine or a distance survives the rotation and can be read off",
                 "Two runs from different starts disagree about which words are alike"
@@ -1303,13 +1044,13 @@ step 0.05: within 0.9929  across 0.7116  apart by 0.2813
               { hints: [
   "Keep the objective and corpus fixed when changing initial rate.",
   "Read the cross-group similarity as well as the attractive-looking nearest-word list."
-], check: numberCheck("At a first step of 0.025, by how much does the within-list cosine exceed the across-list one, to four places?", 0.0034, 5e-05, "The gap is only 0.0034 at the smaller rate after this fixed training budget. Nearly equal within/cross similarity reveals that the two groups remain poorly distinguished."), question: "Can a low learning rate leave two groups nearly indistinguishable after the fixed budget?" },
+], check: numberCheck("With initial learning rate 0.025, how much does the within-list mean cosine exceed the across-list mean cosine, to four decimal places?", 0.0034, 5e-05, "The gap is only 0.0034 at the smaller rate after this fixed training budget. Nearly equal within/cross similarity reveals that the two groups remain poorly distinguished."), question: "Can a low learning rate leave two groups nearly indistinguishable after the fixed budget?" },
             ),
             exercise(
               "Count how long the tree’s paths are",
               [
   "Build the supplied Huffman tree from the corpus’s word-occurrence counts.",
-  "Print largest/smallest word counts, average branch decisions per word occurrence and the number of distinct words at every represented depth. The average is occurrence-weighted, while depth counts count vocabulary entries."
+  "Print the largest and smallest word counts. Then print the average number of branch decisions per word occurrence and the number of vocabulary words at each depth. For the average, weight each path by how often its word appears; for the depth counts, count each vocabulary word once."
 ],
               `import random
 from collections import Counter
@@ -1376,7 +1117,7 @@ depth 6: 6 words`,
               { hints: [
   "A common word contributes its path length once per occurrence to the weighted average.",
   "Use each word’s code length for its depth, then group distinct words by that length."
-], check: numberCheck("How many of the 31 words sit five branch points down?", 21, 0, "Twenty-one vocabulary words have depth five. Those are distinct word counts by depth; the average path instead weights each word by its corpus occurrence count."), question: "How much path length does this frequency-weighted tree actually save?" },
+], check: numberCheck("How many of the 31 words sit five branch points down?", 21, 0, "Twenty-one vocabulary words have depth five. Those are distinct word counts by depth; the average path instead weights each word by its corpus occurrence count."), question: "How many branch decisions does this Huffman tree require per word occurrence?" },
             ),
           ],
         },

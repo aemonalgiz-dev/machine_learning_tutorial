@@ -33,12 +33,12 @@ function statusText(sample: SampleDraw | null): string {
     return "Measuring the first people now.";
   }
   if (sample.count < 10) {
-    return "A handful of people. The mean is still at the mercy of whoever happened to be drawn.";
+    return "With this small sample, each person contributes a large share of the average. Draw more people and watch how much the sample mean changes.";
   }
   if (sample.count < 100) {
-    return "The pile is taking shape, and the sample mean has stopped swinging so widely.";
+    return "Compare the sample's bars with the population curve. As you add observations, check whether the sample mean is getting closer to the population mean.";
   }
-  return "With this many people the bell is unmistakable, and the sample mean sits close by the true one.";
+  return "A larger independent sample usually gives a more precise mean estimate. Compare the two mean lines here; their actual gap depends on which people were drawn.";
 }
 
 export function SamplingPlayground() {

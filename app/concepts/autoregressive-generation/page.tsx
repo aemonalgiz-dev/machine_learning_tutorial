@@ -9,15 +9,15 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Autoregressive Generation · oop_ml",
-  description: "A next-token model predicts one step ahead. To produce a response, we choose a token, append it to the existing text, and ask the model to predict again with that new context.",
+  title: "Autoregressive Generation · Perceptron Lab",
+  description: "Autoregressive generation produces a sequence one token at a time. Each selected token becomes part of the context for the next prediction, so early choices influence the continuations that follow.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="autoregressive-generation"
     title="Autoregressive Generation"
-    tagline={"A next-token model predicts one step ahead. To produce a response, we choose a token, append it to the existing text, and ask the model to predict again with that new context."}
+    tagline={"Autoregressive generation produces a sequence one token at a time. Each selected token becomes part of the context for the next prediction, so early choices influence the continuations that follow."}
     openingTitle="How Does One Predicted Token Become a Paragraph?"
     intuition={lessonIntuitions["autoregressive-generation"]}
     technicalStart="Part 2. The Probability of a Sequence"
@@ -30,10 +30,14 @@ export default function Page() {
 <SubSection title="1. Read the prefix and select the next token">
 <p>{"We know how to predict a distribution for the next token. How does that become a whole response? After choosing one token, we append it to the prefix and make another prediction. Let's follow the changing prefix and the scores used at each step, including the decision to stop."}</p>
 <p>{"Start by turning the prompt into token IDs. Run those IDs through the model once, calculating each layer's output in order. That calculation is a forward pass. The last position supplies scores for what may follow the whole prefix. Convert those scores to probabilities, then use the chosen selection rule."}</p>
-<p>{"The live example uses the seven-entry vocabulary from the previous lesson and the prompt <start> the cat. A forward pass returns a row of seven scores at each of the three positions. The first two rows are predictions about tokens the prompt already contains, so generation has no use for them. Only the last row, the one read after the whole prefix, is turned into a distribution."}</p>
-<NumberTable headings={["candidate", "probability after <start> the cat"]} rows={[["<start>", "0.1756"], ["the", "0.1208"], ["cat", "0.1815"], ["dog", "0.2334"], ["sat", "0.0395"], ["slept", "0.1728"], ["<end>", "0.0763"]]} caption="The decoder is untrained, so these shares say nothing about language. They are the distribution the loop has to choose from." />
+<p>
+                  {"The live example uses the seven-entry vocabulary from the previous lesson and the prompt <start> the cat. A forward pass returns seven scores at each of those three positions. The first two rows predict tokens already present in the prompt. This generation loop selects from only the last row, which predicts what may follow the whole prefix."}
+                </p>
+<NumberTable headings={["candidate", "probability after <start> the cat"]} rows={[["<start>", "0.1756"], ["the", "0.1208"], ["cat", "0.1815"], ["dog", "0.2334"], ["sat", "0.0395"], ["slept", "0.1728"], ["<end>", "0.0763"]]} caption="These shares come from fixed random parameters, rather than training on language. We use them to follow the selection loop." />
 <p>{"Greedy decoding selects a highest-probability token. Sampling draws according to the selection distribution. Both operate on a model prediction; neither modifies the learned parameters."}</p>
-<p>{"On this row greedy decoding takes dog, the largest share at 0.2334. Sampling draws one token with the seven shares as its odds. Dog is the likeliest single outcome, and it is still more likely than not that the draw lands somewhere else. With the default seed the draw happens to be dog as well."}</p>
+<p>
+                  {"On this row, greedy decoding takes dog, the largest share at 0.2334. Sampling draws using the seven given probabilities. Dog is the likeliest single outcome, but a draw is still more likely to land on one of the other entries. With the default seed, the selected token happens to be dog as well."}
+                </p>
 
 </SubSection>
 <SubSection title="2. Append, then predict with the new context">
@@ -56,18 +60,22 @@ export default function Page() {
 <Equation>{"p(x₁, …, x_T) = ∏ₜ p(xₜ | x₁, …, xₜ₋₁)\n\nFor an illustrative two-token continuation:\np(sat | the cat) = 0.5\np(<end> | the cat sat) = 0.4\n\np(sat, <end> | the cat) = 0.5 × 0.4 = 0.2"}</Equation>
 <p>{"These are assigned probabilities to expose the multiplication. If a sampler changes probabilities through temperature or filtering, the sampling policy's sequence probability uses those changed distributions."}</p>
 <WorkedExample title="The probability of each default run">
-<p>{"The table in step 2 supplies real factors. Each selection probability there is the probability of that token given the prefix beside it, which is exactly the term the chain rule asks for. Multiply the five from the sampled run, and separately the five from the greedy run."}</p>
+<p>
+                  {"Here we score both generated sequences under the model’s unmodified next-token distributions. Each factor is the model probability of the selected token given its prefix. Multiply the five factors from each run separately. These model probabilities differ from the probability of choosing the sequence under deterministic greedy decoding: with a fixed tie rule, the greedy policy chooses its own sequence with probability one."}
+                </p>
 <Equation>{"Sampled run:  0.2334 × 0.1179 × 0.2015 × 0.0938 × 0.2696 ≈ 0.000140\nGreedy run:   0.2334 × 0.2388 × 0.2450 × 0.2495 × 0.3438 ≈ 0.001171"}</Equation>
-<p>{"The factors shown are rounded and the products were calculated from the unrounded ones. Both products are small because each additional factor is below one. Raw prefix probability therefore tends to favour shorter prefixes. Here both continuations have five tokens, and the greedy run is roughly eight times as probable as the sampled one. Comparing complete responses of different lengths needs a stated scoring goal, including how the end token and any length normalization are handled."}</p>
+<p>{"The factors shown are rounded and the products were calculated from the unrounded ones. Both products are small because each additional factor is below one. Raw prefix probability therefore tends to favor shorter prefixes. Here both continuations have five tokens, and the greedy run is roughly eight times as probable as the sampled one. Comparing complete responses of different lengths needs a stated scoring goal, including how the end token and any length normalization are handled."}</p>
 <p>{"The caution about changed distributions applies as soon as a control moves. At a temperature of 0.5 the first distribution gives dog a share of 0.3202 in place of 0.2334. A run sampled at that temperature was drawn from the 0.3202 row, so that is the factor its probability under the sampling policy uses."}</p>
 </WorkedExample>
 </SubSection>
 <SubSection title="4. Understand why greedy choices are local">
-<p>{"Choosing the largest probability at one step does not guarantee the highest-probability complete sequence. That choice also selects which future distributions become available. A locally less likely first token can lead to much more probable later tokens."}</p>
+<p>{"Greedy decoding chooses the most probable next token under the current prefix. That choice also determines the prefix used for every later prediction, so it need not produce the highest-probability complete sequence. A less likely first token can lead to much more probable continuations. The local selection rule does not compare all those future routes."}</p>
 <WorkedExample title="Where the greedy run is overtaken">
 <p>{"Compare two continuations of four tokens from the same prompt. They share their first two selections and part at the third, where the distribution after <start> the cat dog dog gives dog a share of 0.2450 and <start> a share of 0.1921. Greedy decoding takes dog."}</p>
 <Equation>{"Greedy:       dog      dog      dog      slept\n              0.2334 × 0.2388 × 0.2450 × 0.2495 ≈ 0.003405\n\nAlternative:  dog      dog      <start>  slept\n              0.2334 × 0.2388 × 0.1921 × 0.3835 ≈ 0.004104"}</Equation>
-<p>{"Taking <start> at the third step gives up some probability there. The fourth step repays it. After the alternative prefix, slept has a share of 0.3835, and after the greedy prefix the best share on offer is 0.2495. The greedy rule never sees that trade, because at the third step it compares 0.2450 with 0.1921 and looks no further."}</p>
+<p>
+                  {"Choosing <start> at the third step has a lower probability there, but changes the distribution for the fourth token. After that alternative prefix, slept has probability 0.3835; after the greedy prefix, the largest share is 0.2495. The products above show why the alternative wins overall. At the third step, the greedy rule compares only 0.2450 with 0.1921, without evaluating those later distributions."}
+                </p>
 <p>{"Seven candidates at each of four steps make 2,401 possible continuations. Scoring every one of them on this decoder puts the alternative first and the greedy continuation fourth. At two and at three tokens the greedy continuation is the most probable of all, so the gap opens only at the fourth step. A greedy choice can be the best one for a while and then stop being so."}</p>
 </WorkedExample>
 <p>{"Beam search keeps several partial sequences to explore this issue, but search and open-ended writing are different objectives. A more probable sequence is not necessarily a more useful response. The lesson's controls focus on greedy selection and sampling."}</p>
@@ -91,7 +99,7 @@ choice(
   [
     "Sampling noise accumulates across the steps",
     "Each choice also selects which future distributions become available",
-    "The distribution stops totalling one once a token has been appended",
+    "The distribution stops totaling one once a token has been appended",
     "The end token carries a fixed probability the model cannot change",
   ],
   1,
@@ -128,9 +136,13 @@ trueFalse(
 <p>{"This reference implementation recomputes the prefix on each step. A key/value cache can reuse attention keys and values from earlier positions, avoiding repeated work. It preserves information from earlier computation; it does not train the model or retrieve facts from an external database."}</p>
 <p>{"The table in step 2 shows how much is repeated. Its five passes read prefixes of three, four, five, six and seven tokens, and every pass starts again from the first token."}</p>
 <Equation>{"Positions read without a cache = 3 + 4 + 5 + 6 + 7 = 25\nDistinct positions in the longest prefix read = 7"}</Equation>
-<p>{"The reuse is safe because of the causal mask. A position reads only the tokens at or before it, so appending a token leaves the keys and values of every earlier position exactly as they were. Only the new position has to be computed. The selected tokens and their probabilities come out the same with or without a cache, and the gap between the two counts widens as the sequence grows."}</p>
+<p>
+                  {"Under this model’s causal mask, appending a token cannot change what an earlier position was allowed to read. We can reuse its saved keys and values while calculating the new position. In exact arithmetic, this gives the same next-token distribution as recomputing the unchanged prefix. Real runtimes can introduce small numerical differences, so compare cached execution with an uncached reference under the chosen settings."}
+                </p>
 <p>{"Generation can continue an early mistake because that mistake becomes context. Inspect output for the task that matters rather than treating fluent continuation or a high selection probability as evidence of truth."}</p>
-<p>{"The default run shows the mechanism with no notion of truth involved. One unlikely draw at step 2, the at a share of 0.1179, changed every prefix after it, and no later step had a way to go back. A trained model is in the same position when an early token is wrong. It continues from what is there."}</p>
+<p>
+                  {"In the default sampled run, the second step chooses the with probability 0.1179 rather than the most likely token, dog. Every later prediction then uses that different prefix. This append-only loop cannot replace the earlier selection. A trained model may later write a correction, but the original tokens remain in its context unless the application changes it."}
+                </p>
 
 </SubSection>
 <p>{"The paper describes an autoregressive model used through text prompts without parameter updates at inference time."}{" "}<a href="https://arxiv.org/abs/2005.14165">Language Models are Few-Shot Learners</a>.</p>
@@ -162,7 +174,7 @@ choice(
     "It changes which token is selected at each step",
   ],
   2,
-  "The reference implementation recomputes the whole prefix on each step, so the five passes of the default run read 25 positions where the longest prefix holds 7. The cache is what removes that repeated work. It preserves information from earlier computation and nothing else, so the sequence it produces is the same one.",
+  "This reference decoder recomputes the prefix at every step. Across the five default passes it reads 25 token positions, even though the longest prefix has seven positions. A key/value cache reuses earlier attention keys and values instead of recomputing them. An equivalent cached implementation represents the same causal computation, though floating-point details and sampling settings can affect exact reproducibility. It does not make future tokens available before they are selected.",
 ),
 trueFalse(
   "An early mistake can carry through the rest of a generated sequence.",
@@ -215,7 +227,7 @@ probability of the run 0.000140`,
             ),
             exercise(
               "Overrule the greedy third step",
-              ["Part 2 found a four-token continuation more probable than the greedy one, by taking <start> at the third step. Extend the comparison to five tokens. Get the greedy continuation from generate, copy it with the third token replaced by <start>, and score both by asking the model for one distribution at a time. Print each running product after the fourth and the fifth token.", "The four-token products are on the page. The five-token product of the alternative is not. See whether the alternative is still ahead once both runs have taken a fifth token."],
+              ["Generate the five-token greedy continuation for <start> the cat. Make a second fixed continuation by replacing only its third token with <start>. Score both sequences by requesting the distribution after each growing prefix, then multiplying the probability assigned to the specified next token. Print each running product after tokens four and five.", "The four-token products are on the page. The five-token product of the alternative is not. See whether the alternative is still ahead once both runs have taken a fifth token."],
               `import numpy as np
 from oop_ml.numpy.modern import CausalLanguageModel
 
@@ -262,7 +274,7 @@ greedy after 5 tokens 0.001171
 alternative is dog dog <start> slept slept
 alternative after 4 tokens 0.004104
 alternative after 5 tokens 0.001395`,
-              { hints: ["generate with max_new_tokens=1 returns a list of one step, and that step’s distribution is the model’s prediction after the prefix you handed it. Which token it selected does not matter here.", "The probability of the token you want is distribution[token], whether or not it was the one selected.", "Append the token to the prefix before the next pass, so the next distribution is conditioned on it."], check: numberCheck("What is the five-token probability of the alternative continuation, to six places?", 0.001395, 1e-06, "Choosing the alternative third token changes the context for the remaining steps. Its later conditional probabilities can repay the probability given up at that step. The printed products compare two fixed continuations of the same length; this is a counterexample to greedy sequence optimisation, not a search for the best possible continuation.") , question: "Can a less likely token now make the whole continuation more likely?" },
+              { hints: ["generate with max_new_tokens=1 returns a list of one step, and that step’s distribution is the model’s prediction after the prefix you handed it. Which token it selected does not matter here.", "The probability of the token you want is distribution[token], whether or not it was the one selected.", "Append the token to the prefix before the next pass, so the next distribution is conditioned on it."], check: numberCheck("What is the five-token probability of the alternative continuation, to six places?", 0.001395, 1e-06, "Choosing the alternative third token changes the context for the remaining steps. Its later conditional probabilities can repay the probability given up at that step. The printed products compare two fixed continuations of the same length; this is a counterexample to greedy sequence optimization, not a search for the best possible continuation.") , question: "Can a less likely token now make the whole continuation more likely?" },
             ),
             exercise(
               "Count how the seeds end",
@@ -311,7 +323,7 @@ ended at the first step: 9`,
             ),
             exercise(
               "Fill the context bound, then exceed it",
-              ["A decoder cannot keep extending a prefix beyond the context width it was built to read. Build this decoder with max_context=5. From the three-token prompt <start> the cat, ask for twelve new tokens with seed 0 and print the returned count and token names. Then pass a six-token prompt to the same model and print the class name and message of the exception.","Part 3 names the context bound as the third thing that stops the loop. There is no number to check here. Notice that running into the bound during generation ends the loop quietly, while starting beyond it is refused."],
+              ["Build the supplied decoder with max_context=5. Ask for twelve new tokens from the three-token prompt <start> the cat, with seed 0 and end_id 6. Print the number and names returned. Then pass the supplied six-token prompt to the same model and print the exception's class name and message.","Part 3 names the context bound as the third thing that stops the loop. There is no number to check here. Notice that running into the bound during generation ends the loop quietly, while starting beyond it is refused."],
               `import numpy as np
 from oop_ml import MLLibError
 from oop_ml.numpy.modern import CausalLanguageModel

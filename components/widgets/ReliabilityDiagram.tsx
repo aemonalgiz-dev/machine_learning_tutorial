@@ -105,7 +105,7 @@ export function ReliabilityDiagram() {
           ),
         )}
         <text x={PAD.left + PLOT.width / 2} y={VIEW.height - 6} textAnchor="middle" className="fill-slate-500 text-xs font-medium dark:fill-slate-400">
-          Mean chance in the bin across, share who were adults up, each dot labelled with how many people it holds
+          Mean chance in the bin across, share who were adults up, each dot labeled with how many people it holds
         </text>
       </svg>
 

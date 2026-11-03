@@ -93,12 +93,11 @@ export function OrderBlindPair() {
 
       <Legend>
         Four words can be written in {order.n_orderings} orders and every one of
-        them lands on the same position. Under the two counting rules the two
-        lists of numbers agree in every bit; under the averaging rules the
-        largest disagreement between them first shows in the seventeenth decimal
-        place, which is the order the additions happened in rather than a
-        difference in the answer, and the angle is one to twelve decimal places
-        either way.
+        them has the same representation in exact arithmetic. The counting
+        methods return identical values. The averaging methods differ only
+        through floating-point rounding when the order of addition changes;
+        their cosine similarity rounds to 1 at twelve decimal places.
+        These representations do not retain the words&apos; order.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">

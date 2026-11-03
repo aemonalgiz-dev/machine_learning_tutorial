@@ -166,8 +166,9 @@ export function ParagraphAgainstAveraging() {
         pair inside one subject and the <span style={{ color: SAILING }}>blue</span>{" "}
         dot the most alike pair across the two, so the bar is green where indigo
         lies to the right of blue and red where the two have crossed. Both learned
-        rules are red here and the average of the words is green, which is the
-        page&rsquo;s least comfortable measurement.
+        methods have overlapping groups under this criterion, while the word
+        average separates them in this example. Learning document vectors has
+        not improved this particular comparison.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>

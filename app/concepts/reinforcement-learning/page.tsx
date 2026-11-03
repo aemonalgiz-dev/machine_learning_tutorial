@@ -9,8 +9,8 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Reinforcement Learning · oop_ml",
-  description: "We cannot always provide the correct answer before an action is taken. Reinforcement learning uses the rewards that follow actions to improve a policy, including decisions whose consequences appear several steps later.",
+  title: "Reinforcement Learning · Perceptron Lab",
+  description: "Reinforcement learning improves a policy from the rewards associated with its actions. Delayed consequences make it necessary to consider how an action affects later states as well as its immediate result.",
 };
 
 export default function Page() {
@@ -18,7 +18,7 @@ export default function Page() {
     <ConceptPage
       lessonId="reinforcement-learning"
       title="Reinforcement Learning"
-      tagline={"We cannot always provide the correct answer before an action is taken. Reinforcement learning uses the rewards that follow actions to improve a policy, including decisions whose consequences appear several steps later."}
+      tagline={"Reinforcement learning improves a policy from the rewards associated with its actions. Delayed consequences make it necessary to consider how an action affects later states as well as its immediate result."}
       openingTitle="How Can a Model Learn When We Can Judge the Result?"
       intuition={lessonIntuitions["reinforcement-learning"]}
       technicalStart="Part 3. Calculate One Policy Update"
@@ -68,7 +68,10 @@ export default function Page() {
               <p>The first move had an immediate cost but a positive return. It helped begin a sequence that reached the destination. This is why a learner may reinforce an action even when its immediate reward is negative.</p>
               <p>Whether it does so depends on the discount. The same three rewards give the first move a different return at each value of gamma, and only the weights change. Work the undiscounted case and a heavier discount the same way, backward from the final reward:</p>
               <Equation>{"γ = 1:    G₁ = -1 + (1 × 5) = 4\n          G₀ = -1 + (1 × 4) = 3\n\nγ = 0.5:  G₁ = -1 + (0.5 × 5) = 1.5\n          G₀ = -1 + (0.5 × 1.5) = -0.25"}</Equation>
-              <p>With no discount the delivery counts in full and the first move is worth three. At 0.5 the delivery two steps away is worth a quarter of its five by the time it reaches the first decision, and 1.25 does not cover the immediate cost of one plus the second cost discounted to a half. The return turns negative, and the same successful episode would now discourage the move that began it. So the discount is not a detail of the arithmetic. It decides how far ahead a cost can be repaid, and with that whether this first move is reinforced or discouraged.</p>
+              <p>
+                  {"With no discount, the return from the first decision is positive. The heavier discount makes it negative: the delayed delivery reward no longer covers the weighted movement costs. Under the zero-baseline update used below, that changes the direction of the feedback for the first move. With another baseline, compare the return with that baseline before deciding whether the sampled action is reinforced."}
+                </p>
+                <Equation>{"At γ = 0.5, from the first decision:\nDiscounted delivery reward = 0.5² × 5 = 1.25\nDiscounted movement costs = 1 + (0.5 × 1) = 1.5\nReturn = 1.25 − 1.5 = −0.25"}</Equation>
             </SubSection>
             <SubSection title="4. Recognize the credit-assignment problem">
               <p>A good final result does not reveal exactly which earlier choices made it happen. A useful turn and an unnecessary detour can occur in the same successful episode. Working out which decisions deserve credit is the <strong>credit-assignment problem</strong>.</p>
@@ -120,7 +123,7 @@ export default function Page() {
                 "It becomes negative one, since only the immediate reward is left",
               ],
               0,
-              "At 0.5 the delivery two steps away is worth a quarter of its five by the time it reaches the first decision, and 1.25 does not cover the immediate cost of one plus the second cost discounted to a half, so the return is negative 0.25. The return of 3 belongs to no discount at all, where the delivery counts in full. The discount decides how far ahead a cost can be repaid, which is why it is part of what the task asks for rather than a detail of the arithmetic.",
+              "Stronger discounting reduces how much the delivery reward contributes to the first action's return.\n\n```math\nG_0 = -1 + 0.5(-1) + 0.5^2(5) = -0.25\n```\n\nAt discount 0.9 the same realized episode gives return 2.15; with no discount it gives 3. The action and observed rewards have not changed. The objective has changed how it values the delay.",
             ),
         ],
         },
@@ -134,7 +137,10 @@ export default function Page() {
               <p>Suppose we sample Straight and receive a reward of one. Because the episode has only one step, its return is also one. We want an update that increases the probability of this sampled action.</p>
             </SubSection>
             <SubSection title="6. Weight the update by the feedback">
-              <p>A policy-gradient method changes the policy parameters in a direction estimated to improve expected return. The REINFORCE rule weights the gradient of a sampled action&apos;s log probability by its return. This allows learning without differentiating through the environment or its reward function.</p>
+              <p>
+                  {"A policy-gradient method estimates how changing the policy’s parameters affects expected return. Ronald Williams described the REINFORCE family in 1992: sampled outcomes can guide parameter updates even when the environment supplies no derivative of its reward. We use the return from a sampled action to weight the gradient of that action’s log probability."}
+                </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://doi.org/10.1007/BF00992696">{"Williams: Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning (1992)"}</Link></p>
               <p>We can subtract a <strong>baseline</strong> from the return. It provides a reference for judging the outcome. When the baseline estimates the usual return from this state, the difference tells us how much better or worse this attempt was than expected. That difference is an estimate of the <strong>advantage</strong>.</p>
               <p>Our example uses a fixed zero baseline to keep the calculation visible. Positive rewards therefore reinforce the chosen action and negative rewards discourage it. A suitable baseline can reduce noise in the gradient estimate; it must not depend on which action was sampled for this update. See the <a href="https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html">policy-gradient derivation and baseline explanation</a>.</p>
               <Equation>{"A = G - b\n\nFor action a and logit j:\n∂ log(pₐ) / ∂ zⱼ = 1[j = a] - pⱼ\n\ngⱼ = A × (1[j = a] - pⱼ)\nz_new = z_old + η g\n\nG: observed return\nb: baseline\nA: return relative to the baseline\nη: learning rate\n1[j = a]: one for the selected action, zero otherwise"}</Equation>
@@ -183,9 +189,9 @@ export default function Page() {
               "A baseline gives a reference for judging the outcome and a suitable one can reduce noise in the gradient estimate, but it must not depend on the sampled action. This example uses a fixed zero baseline to keep the calculation visible, so positive rewards reinforce the chosen action and negative rewards discourage it.",
             ),
             trueFalse(
-              "In one update the three gradient entries add up to zero, so the step moves probability toward the sampled action and away from the others rather than raising all three scores.",
+              "In the rewarded Straight update shown here, the three gradient entries sum to zero. The ascent step raises Straight's logit and lowers the others.",
               true,
-              "The derivative of the sampled action’s log probability is the indicator less the probability, and the indicator and the probabilities each sum to one. In the worked update the entries are minus one third, two thirds and minus one third. The step is gradient ascent, so the scaled gradient is added, and Straight’s logit rises by a fifteenth while the other two fall by a thirtieth each.",
+              "For a sampled action, the log-probability gradient is its indicator vector minus the policy probabilities. Both vectors sum to one, so their difference sums to zero. Here Straight has positive return and a zero baseline, so ascent adds the gradient: its logit rises while Left and Right fall. A negative return would reverse that update direction.",
             ),
         ],
         },
@@ -220,7 +226,7 @@ export default function Page() {
             </SubSection>
             <SubSection title="11. Keep the demonstration in proportion">
               <p>The example performs real policy updates in a deliberately small environment. It has one observation, deterministic rewards, and one action per episode. It does not train a navigation network, solve delayed credit assignment, or fine-tune a language model. The discounted-return helper illustrates the longer-episode calculation separately.</p>
-              <p>Policy gradients are one family of reinforcement-learning methods. Value-based methods, such as Q-learning, instead estimate the return associated with an action in a state and use those estimates to choose. Actor-critic methods combine a policy with a learned value estimate. Each adds machinery to address problems that our single-junction example removes.</p>
+              <p>{"Policy-gradient methods update the rule used to choose actions. Q-learning takes another approach, estimating the return associated with an action in a state and choosing from those values. Actor-critic methods maintain both a policy and a learned value estimate. These approaches address additional learning problems that the single-junction example deliberately leaves out."}</p>
               <p>For a larger task, inspect reward design, exploration, the cost of collecting experience, and performance on situations outside the training runs. A higher reward on this fixed junction measures progress on this fixed junction.</p>
             </SubSection>
             <p>Continue with <Link href="/concepts/retrieval-augmented-generation">Retrieval-Augmented Generation</Link>.</p>
@@ -356,7 +362,7 @@ for gamma in [1.0, 0.9, 0.5]:
               `discount 1.0  returns 3.00, 4.00, 5.00
 discount 0.9  returns 2.15, 3.50, 5.00
 discount 0.5  returns -0.25, 1.50, 5.00`,
-              { hints: ["discounted_returns takes the reward array and gamma as a keyword, and answers one return per step, worked backward from the final reward.", "The final reward is terminal, so its return is itself at every discount. Only the earlier steps change."], check: numberCheck("What return does the first move receive at a discount of 0.5?", -0.25, 0.005, "The first move incurs costs before the delivery reward arrives. Stronger discounting reduces the later reward’s influence, so that same realised episode can give the first move a negative return. The terminal reward is unchanged because no future delay remains after it.") , question: "Can discounting change whether the same first move deserves reinforcement?" },
+              { hints: ["discounted_returns takes the reward array and gamma as a keyword, and answers one return per step, worked backward from the final reward.", "The final reward is terminal, so its return is itself at every discount. Only the earlier steps change."], check: numberCheck("What return does the first move receive at a discount of 0.5?", -0.25, 0.005, "The first move incurs costs before the delivery reward arrives. Stronger discounting reduces the later reward’s influence, so that same realized episode can give the first move a negative return. The terminal reward is unchanged because no future delay remains after it.") , question: "Can discounting change whether the same first move deserves reinforcement?" },
             ),
             exercise(
               "Hand the policy a reward table of the wrong size",

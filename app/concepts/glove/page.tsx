@@ -24,9 +24,9 @@ import { GloveWeightingCurve } from "@/components/widgets/GloveWeightingCurve";
 import { GloveWindowSweep } from "@/components/widgets/GloveWindowSweep";
 
 export const metadata: Metadata = {
-  title: "GloVe · oop_ml",
+  title: "GloVe · Perceptron Lab",
   description:
-    "A table of word co-occurrences contains information about how words are used together. GloVe learns vectors whose comparisons account for patterns in those counts, rather than keeping the full table as the representation.",
+    "GloVe learns vectors from word co-occurrence counts. Their comparisons are fitted to patterns in the counts, providing a compact representation of information drawn from the wider text collection.",
 };
 
 const link =
@@ -38,11 +38,11 @@ export default function GlovePage() {
       lessonId="glove"
       intuition={lessonIntuitions["glove"]}
       technicalStart="Part 3. What The Vectors Are Asked To Reproduce"
-      openingTitle="Count the Neighbours Once, Then Fit Their Relationships"
+      openingTitle="Count the Neighbors Once, Then Fit Their Relationships" openingId="count-the-neighbours-once-then-fit-their-relationships"
       playgroundTitle="What do repeated word pairs tell the model?"
       playgroundIntro="Compare an observed pair count with the value reconstructed by the vectors and biases. Inspect how the weighting changes the contribution of rare and frequent pairs."
       title="GloVe"
-      tagline={"A table of word co-occurrences contains information about how words are used together. GloVe learns vectors whose comparisons account for patterns in those counts, rather than keeping the full table as the representation."}
+      tagline={"GloVe learns vectors from word co-occurrence counts. Their comparisons are fitted to patterns in the counts, providing a compact representation of information drawn from the wider text collection."}
       prerequisites={
         <>
           Every word here ends up as a short list of numbers, and two words are
@@ -50,8 +50,7 @@ export default function GlovePage() {
           <Link href="/concepts/a-vector-for-a-word" className={link}>
             cosine
           </Link>{" "}
-          between their lists, which is an angle rather than a distance. The fit
-          itself is{" "}
+          {" similarity of their directions. The fit uses "}{" "}
           <Link href="/concepts/gradient-descent-regression" className={link}>
             gradient descent
           </Link>{" "}
@@ -81,68 +80,27 @@ export default function GlovePage() {
                   The content words are separate, while both topics use the, and, with, in, of, into and for. In this corpus, those shared words occur across subjects. We will compare their context statistics with words that help distinguish cooking from astronomy.
                 </p>
 </>
-                <p>
-                  That comes to 216 word occurrences over 37 distinct words. The
-                  sentences are ordinary English rather than the nonsense a page
-                  about sliding a window can afford, and the reason is that this
-                  method reads a table rather than a stream of positions, so a
-                  corpus small enough to print is also small enough to check by
-                  hand, which is what Part 2 does.
-                </p>
+                <p>The collection contains 216 word occurrences over 37 distinct words. Its small size lets us inspect the context-count table and check particular equations by hand. Those checks connect the fitted vectors to the observations used to learn them.</p>
                 <KeepInMind>
-                  The one fact hidden from every fit on this page is that the
-                  corpus has two halves. Nobody tells a fit which half a word came
-                  from, so the two numbers this page keeps reporting, how alike two
-                  words of one half are and how alike a word of each are, are the
-                  whole score.
+                  {"The fit receives no topic labels. We use the known chef and astronomy groups to inspect its learned relationships, alongside neighbor lists and reconstruction error. Two mean cosines are useful diagnostics, rather than the whole score."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. What counting a corpus keeps">
-                <p>
-                  The older way of using a corpus is to count it. Walk along every
-                  sentence once, and for each word write down which words turned
-                  up within a couple of positions of it. What comes out is a square
-                  table with a row and a column for every word, and a word&rsquo;s
-                  row is a description of that word made entirely of company.
-                </p>
+                <p>Counting nearby words gives each vocabulary word a row describing its observed contexts. A context window defines which positions contribute and how much. The resulting co-occurrence table supplies the evidence that GloVe tries to represent with shorter vectors.</p>
                 <Equation>{"row(w)[v] = how often v occurred within reach of w, discounted by how far"}</Equation>
                 <p>
-                  The description is complete in a strong sense. Everything the
-                  corpus has to say about which words go with which is now in the
-                  table, and the corpus can be put away. What has gone is the
-                  order and the sentence boundaries, so nothing afterwards can tell
-                  which sentence a count came from or which of two words stood
-                  first, and the two halves of our corpus are now two shaded blocks
-                  with nothing between them.
+                  {"The table aggregates the chosen window events. It retains weighted pair frequencies while discarding which sentence supplied them and which side of the center each context occupied. Other contextual information, such as joint multiword patterns, is not recoverable from these pair totals."}
                 </p>
                 <KeepInMind>
-                  The table is the corpus, for every purpose that follows. A method
-                  that reads it has seen everything the text had to say about
-                  company, and has seen it once, which for these twenty-four
-                  sentences means 281 entries standing in for 216 word occurrences.
+                  {"After counting, GloVe trains on the 281 observed pair entries rather than rereading each individual context occurrence. Those entries summarize the selected pair statistics, not every property of the original text."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="3. What walking a corpus keeps">
+                <p>Prediction-based methods can update selected vectors while scanning the text, without first materializing a dense vocabulary-by-vocabulary count table. GloVe instead fits observed co-occurrence statistics. The distinction concerns the training information and objective; sparse storage can also avoid allocating every possible count cell.</p>
                 <p>
-                  The newer family never builds that table. It slides a window
-                  along the text and, at each position, corrects a few vectors so
-                  that a word predicts the words beside it, then starts again from
-                  the beginning and does it once more. What it buys is that nothing
-                  ever exists which is as wide as the vocabulary squared, so a
-                  corpus of billions of words can be walked where it could not be
-                  tabulated.
-                </p>
-                <p>
-                  What it never sees is the whole. A correction at one position
-                  knows about that position and nothing else, and no step in the
-                  procedure asks how often two words co-occurred in all. On our
-                  corpus one walk of the text makes 720 readings of a neighbour
-                  against a table that has 281 entries; repeat the corpus eight
-                  times over and the first number reaches 5,760 while the second
-                  stays exactly where it was, since the words and the pairs they
-                  form have not changed.
+                  {"A window-based update uses the current pair, but its parameters accumulate evidence across many such updates. GloVe makes the aggregate counts explicit instead. Repeating the corpus increases those counts and the number of scanned occurrences, while the set of distinct observed pairs can remain unchanged."}
                 </p>
                 <KeepInMind>
                   A window-based training pass revisits individual context occurrences. GloVe first aggregates co-occurrence counts and fits those statistics. Repeating our corpus changes the total counts, but leaves 281 distinct observed pairs to represent, while the number of context occurrences grows from 720 to 5,760. This gives us a concrete way to compare the work performed by the two training arrangements.
@@ -151,13 +109,9 @@ export default function GlovePage() {
 
               <SubSection title="4. Fitting the table itself">
                 <p>
-                  GloVe is what happens when we keep the table and fit it directly.
-                  Give every word a short vector. Then ask that the vectors of two
-                  words, multiplied together coordinate by coordinate and added up,
-                  come out at the logarithm of how often those two words occurred
-                  near each other, with a spare number for each word to absorb how
-                  common that word is on its own.
+                  {"Pennington, Socher and Manning introduced GloVe, Global Vectors, in 2014. They combined corpus-wide co-occurrence statistics with a compact vector model. Give each word an input vector and a context vector, plus one bias for each role. Fit their dot product and biases to the log observed count, using the weighting described below."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://aclanthology.org/D14-1162/">{"Pennington, Socher and Manning: GloVe: Global Vectors for Word Representation (2014)"}</Link></p>
                 <Equation>{"w(i) · w̃(j) + b(i) + b̃(j)   should equal   log X(ij)"}</Equation>
                 <>
 <p>
@@ -186,13 +140,14 @@ export default function GlovePage() {
           title: "Part 2. The Table, Built Once",
           content: (
             <>
-              <SubSection title="5. How far near reaches, and what a neighbour is worth">
+              <SubSection title="5. How far near reaches, and what a neighbor is worth" id="5-how-far-near-reaches-and-what-a-neighbour-is-worth">
                 <p>
+
                   Two decisions turn a corpus into a table and neither of them has
                   a right answer. The first is how far near reaches. Count only the
                   word next door and hardly anything co-occurs with anything;
                   count twenty positions away and every word in a sentence
-                  co-occurs with every other. The second is whether a neighbour
+                  co-occurs with every other. The second is whether a neighbor
                   five positions away should count for as much as one standing
                   immediately alongside.
                 </p>
@@ -207,9 +162,7 @@ export default function GlovePage() {
                   Part 5 measures what that does.
                 </p>
                 <KeepInMind>
-                  Both decisions are taken before a single equation exists, and
-                  nothing in the fit can revisit them. Changing either one means
-                  counting the corpus again from the start.
+                  {"The window and distance weighting determine the table before this fit begins. To change them, recount the text or retain positional summaries rich enough to recombine. The final aggregated table alone cannot reconstruct every alternative context rule."}
                 </KeepInMind>
               </SubSection>
 
@@ -242,7 +195,8 @@ export default function GlovePage() {
                   again, thirty-seven words wide.
                 </p>
                 <KeepInMind>
-                  A word can be its own neighbour. In this corpus and stands two
+
+                  A word can be its own neighbor. In this corpus and stands two
                   positions from another and in two sentences, so the cell where
                   the row and the column are both and holds 2.0, and it is the only
                   cell of that kind in the table.
@@ -258,13 +212,7 @@ export default function GlovePage() {
                   filled cells, 86 are below one, which is 30.6%, and the mean
                   logarithm of a count is +0.2617.
                 </p>
-                <p>
-                  The largest count in the whole table is the beside and, at 16.5.
-                  Those two words tell nothing apart, they simply stand beside each
-                  other more often than any other pair does, and the equation for
-                  that pair would carry more of the objective than any other unless
-                  the weighting of Part 4 held it back.
-                </p>
+                <p>The pair of words &quot;the&quot; and &quot;and&quot; has this table&apos;s largest count, at 16.5. A frequent pair need not be the most useful one for distinguishing subjects. GloVe fits the logarithm of each observed count, with a separate weighting function controlling its contribution to the objective. Part 4 shows how that weight reduces the influence of small, poorly supported counts and stops growing after its cutoff. Count size alone does not determine the error a pair contributes.</p>
                 <KeepInMind>
                   The blank 79.5% is the two halves of the corpus never meeting, plus
                   every other pair of words that happened not to stand near each
@@ -286,7 +234,7 @@ export default function GlovePage() {
                   Suppose we want to know what separates chef from astronomer. The obvious move is to ask how often each of them is found beside some probe word, and the raw figures do not answer it. A probe that stands beside both of them, like the, comes out common beside both and tells them apart in no way; a probe that stands beside neither comes out rare beside both and tells them apart in no way either.
                 </p>
                 <p>
-                  What does tell them apart is the ratio of the two figures, since a probe belonging to one word and not the other gives a ratio far from one while a probe belonging to both, or to neither, gives a ratio near one.
+                  {"A context occurring at similar conditional rates for both words has a ratio near one. A context much more common beside one can distinguish them. Being rare beside both does not itself imply a ratio near one, and two zero counts make the ratio undefined."}
                 </p>
 </>
                 <Equation>{"P(k | i) / P(k | j)     far from one where k belongs to one word alone"}</Equation>
@@ -295,78 +243,26 @@ export default function GlovePage() {
                 </p>
                 <GloveRatios />
                 <p>
-                  Of the 37 words in the vocabulary, exactly one, the, was seen
-                  beside both chef and astronomer. Its ratio is 0.7319, near one,
-                  which is the ratio correctly reporting that the separates nothing.
-                  Eight words were seen beside chef alone, so their ratios would
-                  divide by zero and do not exist; three were seen beside astronomer
-                  alone, so their ratios are zero; and twenty-five were seen beside
-                  neither word, so there is nothing to divide either way.
+                  {"The is the only probe with positive observed counts beside both chef and astronomer, giving ratio 0.7319. Eight probes have a positive chef count but a zero astronomer count; three have the reverse. Twenty-five are unobserved beside either. Only the first case gives a finite positive ratio suitable for taking its logarithm without further smoothing."}
                 </p>
                 <KeepInMind>
-                  The ratio is the quantity the method was designed around, and it
-                  exists only where both counts do. On a corpus of billions of words
-                  the pairs anyone cares about have both counts comfortably; on
-                  twenty-four sentences almost none of them do, which is why the
-                  widget above finds one usable ratio out of thirty-seven words.
+                  {"This small corpus supplies few finite positive ratios for that pair of words. A larger corpus can improve coverage, but cannot guarantee positive counts for every relevant context. Smoothing and the observed-pair objective are separate choices for dealing with sparse evidence."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="9. From a ratio to a dot product">
                 <p>
-                  Asking that some function of the vectors reproduce that ratio, and
-                  asking that it depend on the two words only through the difference
-                  between their vectors, pins the form down almost completely.
-                  Nothing is chosen along the way except the two requirements
-                  themselves.
+                  {"The paper motivates its model through ratios of context probabilities and differences between word vectors. Choosing a dot-product interaction and a positive exponential map gives a convenient log-bilinear form. These are modeling assumptions, not the only mathematical way to represent such ratios."}
                 </p>
                 <DerivationTable
                   expressionHeading="Expression"
                   reasonHeading="What changed"
-                  rows={[
-                    {
-                      expression: "F(w(i) − w(j), w̃(k)) = P(k|i) / P(k|j)",
-                      reason:
-                        "What we are asking for. Two words are compared through a probe word, and only their difference is allowed to matter, since it is the difference between two words that a ratio describes.",
-                    },
-                    {
-                      expression: "F((w(i) − w(j)) · w̃(k))",
-                      reason:
-                        "A ratio is a single number, so the two vector arguments have to be reduced to one. The dot product is the reduction that keeps the linear structure of the space, which is what makes the difference of two vectors meaningful in the first place.",
-                    },
-                    {
-                      expression: "F(a − b) = F(a) / F(b)",
-                      reason:
-                        "Reading the requirement off directly. Differences on the inside have to become ratios on the outside, and the exponential is the only continuous function with that property.",
-                    },
-                    {
-                      expression: "exp(w(i) · w̃(k)) ∝ X(ik) / X(i)",
-                      reason:
-                        "So take F to be the exponential. The ratio then comes out right for every pair whenever each side alone is proportional to the probability of the probe beside the word.",
-                    },
-                    {
-                      expression: "w(i) · w̃(k) = log X(ik) − log X(i)",
-                      reason:
-                        "Take logarithms of that proportionality. The second term is the total of the whole row, which depends on the word i and not at all on the probe k.",
-                    },
-                    {
-                      expression: "w(i) · w̃(k) + b(i) + b̃(k) = log X(ik)",
-                      reason:
-                        "A term that does not depend on the probe can be carried by the word as a spare number. A second spare number is added for the probe, because the table is symmetric and the two roles should not be told apart.",
-                    },
-                  ]}
+                  rows={[{"expression":"F(w(i) − w(j), w̃(k)) = P(k|i) / P(k|j)","reason":"What we are asking for. Two words are compared through a probe word, and only their difference is allowed to matter, since it is the difference between two words that a ratio describes."},{"expression":"F((w(i) − w(j)) · w̃(k))","reason":"Choose a dot product to turn the paired vector arguments into one scalar interaction. This is a bilinear modeling choice; being a scalar ratio does not mathematically require this particular reduction."},{"expression":"F(a − b) = F(a) / F(b)","reason":"An exponential map turns differences into ratios. With positive continuity and a nontrivial scale convention, this functional relation motivates an exponential family; the scale can be absorbed into the vectors."},{"expression":"exp(w(i) · w̃(k)) ∝ X(ik) / X(i)","reason":"So take F to be the exponential. The ratio then comes out right for every pair whenever each side alone is proportional to the probability of the probe beside the word."},{"expression":"w(i) · w̃(k) = log X(ik) − log X(i)","reason":"Taking logs of an equality gives the shown relation. A proportional form can also carry an additive context-dependent constant; the following bias terms allow that adjustment."},{"expression":"w(i) · w̃(k) + b(i) + b̃(k) = log X(ik)","reason":"A term that does not depend on the probe can be carried by the word as a spare number. A second spare number is added for the probe, because the table is symmetric and the two roles should not be told apart."}]}
                 />
                 <WhyThisWorks title="Why the logarithm is what makes a dot product possible">
                   <p>
-                    A dot product adds. Counting multiplies, in the sense that the
-                    number of times two words co-occur scales with how often each of
-                    them occurs. A logarithm is exactly the operation that turns
-                    multiplication into addition, so it is what lets a sum of
-                    products stand in for a quantity built out of ratios. Take
-                    logarithms out of the derivation and there is no arrangement of
-                    dot products that reproduces a ratio, which is why the objective
-                    fits the logarithms of the counts rather than the counts.
-                  </p>
+                  {"The logarithm converts a probability ratio into a difference. A bilinear dot product can then model that relation with additive biases. This motivates the GloVe objective; it does not prove that no other model could represent ratios or fit counts directly."}
+                </p>
                 </WhyThisWorks>
               </SubSection>
 
@@ -376,7 +272,7 @@ export default function GlovePage() {
                   The two bias terms can account for broad frequency effects. A frequent word such as the has large counts across much of its row. Without those biases, the dot products would have to account for that baseline as well as the particular associations. Separating the terms gives the fit another way to represent the counts.
                 </p>
                 <p>
-                  The spare number absorbs the part of a count that is explained by how common the two words are on their own, and leaves the dot product carrying only what is particular to the pair.
+                  {"The biases give the model a way to represent broad row and column effects. They are learned jointly with the vectors, so the objective does not force a unique split between frequency effects and pair-specific dot products."}
                 </p>
 </>
                 <p>
@@ -389,11 +285,7 @@ export default function GlovePage() {
                 </p>
                 <Equation>{"the vector reported for word i is w(i) + w̃(i)"}</Equation>
                 <KeepInMind>
-                  Adding the two tables is a choice rather than a consequence.
-                  Nothing in the derivation prefers the sum to either table on its
-                  own; the argument for it is that two estimates of one quantity
-                  added together carry less of the noise than either does, which is
-                  a claim about variance and not about the objective.
+                  {"Adding the input and context vectors is an output convention used in the paper. It can combine information from both roles, but a variance reduction or better task score is an empirical question. The objective fits the two tables jointly; it does not prove that their sum is always best."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -403,7 +295,7 @@ export default function GlovePage() {
           title: "Questions on Parts 1 to 3",
           quiz: [
             choice(
-              "One walk of the corpus makes 720 readings of a neighbour against a table holding 281 entries. Repeat the corpus eight times over. What happens to those two numbers?",
+              "One walk of the corpus makes 720 readings of a neighbor against a table holding 281 entries. Repeat the corpus eight times over. What happens to those two numbers?",
               [
                 "The readings reach 5,760 and the table stays at 281",
                 "Both grow eightfold, to 5,760 and 2,248",
@@ -411,12 +303,12 @@ export default function GlovePage() {
                 "Both stay exactly where they were",
               ],
               0,
-              "Repeating the corpus adds no new words and no new pairs, so the summary is finished and stays finished, while a window-sliding method pays again on every copy. That gap is the observation GloVe begins from, and it is why the method keeps the table instead of re-deriving it one position at a time.",
+              "The number of neighbor readings grows from 720 to 5,760. The table still has 281 nonzero cells because the repeated sentences introduce no new word pairs, but every stored count is multiplied by eight. GloVe can train on those aggregated cells rather than revisiting every original occurrence during each training pass. Constructing the counts still requires processing the input.",
             ),
             trueFalse(
               "Every count in the table is a whole number.",
               false,
-              "A neighbour d positions away adds 1 ÷ d, so the word next door counts once and the word two away counts a half. Of the 281 filled cells, 86 are below one, and a count below one has a negative logarithm, which is the thing Part 5 measures the consequences of.",
+              "A neighbor d positions away adds 1 ÷ d, so the word next door counts once and the word two away counts a half. Of the 281 filled cells, 86 are below one, and a count below one has a negative logarithm, which is the thing Part 5 measures the consequences of.",
             ),
             several(
               "Which of these hold for the table built from the twenty-four sentences?",
@@ -427,7 +319,7 @@ export default function GlovePage() {
                               "The largest count is the beside and, at 16.5",
                             ],
               [0, 1, 3],
-              "The table is counted from both ends and so comes out symmetric, 79.5% of it is blank, and the beside and tops it at 16.5. A word can be its own neighbour, and here it happens exactly once, since and stands two positions from another and in two sentences, which puts 2.0 in the cell whose row and column are both and.",
+              "Counting both directions makes this table symmetric. It has 281 nonzero cells and 79.5% of its cells are zero. The largest count is 16.5 for the beside and. A self-pair is possible when two occurrences of the same word are nearby. Here and is two positions from another and in two sentences, producing a total self-pair count of 2.0.",
               {
                 "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
                 "data": "Twenty-four sentences, reach 2, distance-weighted counts.\nEvery context pair is counted from both ends.\nVocabulary: 37 words; table: 37 × 37 = 1,369 cells.\nNonzero cells: 281.\nLargest count: the beside and, 16.5.\nSelf-pair and beside and: 2.0."
@@ -436,18 +328,18 @@ export default function GlovePage() {
             choice(
               "Why does the objective compare the dot product against the logarithm of a count rather than against the count?",
               [
-                "Because counting multiplies and a dot product adds, and a logarithm is what turns the one into the other",
+                "Because logarithms turn the probability ratios motivating GloVe into differences that its vector model can represent",
                 "Because the logarithm keeps every target positive, which the fit requires",
                 "Because it shrinks the largest counts enough that no weighting is needed",
                 "Because only a logarithm makes the table symmetric",
               ],
               0,
-              "The method is built backwards from a ratio of two conditional probabilities, and a sum of products can only stand in for a quantity built out of ratios once logarithms have turned the multiplication into addition. That a logarithm keeps every target positive is false on this very corpus, where 86 counts are below one and so have negative logarithms.",
+              "GloVe's motivation uses ratios of context probabilities to compare words. Taking logarithms converts multiplicative ratios into differences, which can be modeled with vector dot products and bias terms. This motivates the log-count objective; it does not make that objective the only possible use of a dot product. Counts below one have negative logarithms, including 86 positive cells in this table.",
             ),
             trueFalse(
               "Of the 37 words in the vocabulary, exactly one was seen beside both chef and astronomer.",
               true,
-              "The is the only one, and its ratio of 0.7319 correctly reports that it separates nothing. Eight words were seen beside chef alone, so their ratios divide by zero, three beside astronomer alone, so their ratios are zero, and twenty-five beside neither, which is the quantity the method was designed around running into its own limit at this size.",
+              "Only the has positive counts beside both chef and astronomer in this small table. Its reported conditional-probability ratio is 0.7319. Eight context words occur beside chef alone, three beside astronomer alone, and twenty-five beside neither. Ratios for these sparse observations can have a zero denominator or be undefined, so the motivating ratio argument cannot be read as a reliable measured ratio for every pair here.",
             ),
         ],
         },
@@ -455,13 +347,9 @@ export default function GlovePage() {
           title: "Part 4. Not Every Pair Is Worth The Same",
           content: (
             <>
-              <SubSection title="11. A pair seen half a time is not evidence">
+              <SubSection title="11. Weighting Observed Counts" id="11-a-pair-seen-half-a-time-is-not-evidence">
                 <p>
-                  If every equation counted the same, the fit would work as hard at
-                  reproducing a pair seen once as a pair seen a thousand times, and
-                  the pair seen once is mostly an accident of which sentences were
-                  collected. So each equation carries a weight, and the weight rises
-                  with the count until it stops.
+                  {"The weighting function reduces the relative influence of low-count pairs and caps how much their weights can grow. A pair observed once still supplies evidence; the issue is how much trust and objective weight to give that evidence. Each term also depends on its squared prediction error."}
                 </p>
                 <Equation>{"weight(x) = (x ÷ the cap) ^ alpha   below the cap,   and exactly 1 at or above it"}</Equation>
                 <p>
@@ -485,27 +373,14 @@ export default function GlovePage() {
 
               <SubSection title="12. The cap, and what it holds back">
                 <p>
-                  The weight stops rising at a cap, and above it seeing a pair more
-                  often makes its equation no more important than it already was.
-                  The reason is the pair at the top of our own table. The commonest
-                  pair of words in a corpus is a pair of function words, which is the
-                  pair that separates the least, and without a cap it would carry the
-                  largest single share of the objective.
+                  {"Beyond the cap, the weight remains one even as the count grows. The log-count target and residual can still change. The cap limits the weighting multiplier, rather than fixing the pair’s loss or proving that the most frequent pair is always uninformative."}
                 </p>
                 <GloveWeightingCurve />
                 <p>
-                  Slide the cap down and watch the tallest ticks pass under the flat
-                  part of the curve. At 7.5, ten pairs reach the cap, every one of
-                  them a pair involving the, and the share of the whole objective
-                  carried by the single commonest pair falls from 1.90% to 1.08%
-                  while the ten commonest fall from 12.65% to 10.77%.
+                  {"At cap 7.5, ten pairs reach the flat part of the weight curve. The commonest pair’s share of summed weights falls from 1.90% to 1.08%, and the ten commonest pairs’ share from 12.65% to 10.77%. Their actual share of the loss also depends on their residuals."}
                 </p>
                 <KeepInMind>
-                  Putting the cap exactly at the largest count in the table changes
-                  nothing at all. At a cap of 16.5 two pairs sit precisely on it and
-                  every share is identical to the shares at 100, because the curve
-                  only ever flattens what lies beyond the cap and there is nothing
-                  beyond it.
+                  {"If every count is below the cap, changing the cap multiplies every weight by the same factor. Their relative shares stay fixed, but the objective value and update scales can change. Putting the cap at the largest count therefore preserves the shares shown here, not every aspect of the fit."}
                 </KeepInMind>
               </SubSection>
 
@@ -518,26 +393,17 @@ export default function GlovePage() {
                   cap is 100, so nothing is common enough to be held back.
                 </p>
                 <NumberTable
-                  headings={[
-                    "how the equations are weighted",
-                    "the ten commonest pairs’ share of the objective",
-                  ]}
+                  headings={["how the equations are weighted","the ten commonest pairs’ share of total weight"]}
                   rows={[
                     ["every pair alike", "3.56%"],
                     ["in proportion to the count", "17.57%"],
                     ["the published rule, cap at 100", "12.65%"],
                     ["the published rule, cap at 7.5", "10.77%"],
                   ]}
-                  caption="Measured on the twenty-four sentences at a reach of two. The first row is what ten pairs out of 281 come to when nothing is weighted, and the last is the only row where the cap does anything."
+                  caption="Shares of the summed weighting coefficients for the observed pairs. These percentages do not include squared residuals and are not percentages of the fitted loss."
                 />
                 <p>
-                  Read the middle two rows together. Moving from a weight
-                  proportional to the count to the published three-quarter power
-                  takes the ten commonest pairs from 17.57% of the objective down to
-                  12.65%, so the flattening is real and it is the whole of what the
-                  weighting achieves here. The cap contributes nothing until it is
-                  moved below the largest count, which is a setting the paper would
-                  never use.
+                  {"The three-quarter exponent gives the ten commonest pairs a smaller share of total weight than count-proportional weighting. Lowering the cap below the largest observed count changes those relative shares further. Choosing another cap above all counts still rescales the weights uniformly and can affect optimization."}
                 </p>
                 <KeepInMind>
                   At this corpus size, we exercise only one part of the weighting function. None of these observations demonstrates how its cap affects much larger counts. Keep that limitation in mind when comparing this small run with training on a larger corpus.
@@ -552,24 +418,14 @@ export default function GlovePage() {
             <>
               <SubSection title="14. The objective falling, pass by pass">
                 <p>
-                  A fit is a number of passes over the pairs. Each pass visits all
-                  281 of them in an order shuffled afresh, and for each one computes
-                  how far the current vectors and spare numbers are from the
-                  logarithm of that pair&rsquo;s count, squares it, weights it, and
-                  moves the four parameters involved a little way towards agreement.
+                  {"Each pass visits all 281 observed pairs in a freshly shuffled order. For one pair, calculate its log-count residual, multiply its squared value by the weight, and update the two vectors and two biases. Those vectors contain multiple parameters, so this is not just four scalar values."}
                 </p>
                 <p>
-                  At the settings this page uses, a width of eight and a reach of
-                  two, the summed pair terms fall from 18.9335 in the first pass to
-                  0.5550 in the twenty-fifth. The playground at the top of the page
-                  draws that curve for whatever settings are chosen, and the useful
-                  habit is to watch the shape rather than the value, since a curve
-                  that flattens early usually means the corpus has run out of things
-                  to say rather than that the fit has finished.
+                  {"The recorded pass total falls from 18.9335 to 0.5550 over 25 passes at these settings. A plateau can arise from optimization, limited capacity or the selected data and objective. It does not establish that the corpus has run out of useful information."}
                 </p>
               </SubSection>
 
-              <SubSection title="15. The number recorded is not the number minimised">
+              <SubSection title="15. The number recorded is not the number minimized" id="15-the-number-recorded-is-not-the-number-minimised">
                 <p>
                   There is a trap in that curve. Each pass&rsquo;s total was
                   accumulated while the parameters were moving, since a pair visited
@@ -589,35 +445,17 @@ export default function GlovePage() {
                   the gap in an ordinary fit is entirely the movement.
                 </p>
                 <KeepInMind>
-                  The number to quote for a finished fit is the one recomputed at
-                  rest, and it is the readout the playground shows. The per-pass
-                  totals are worth watching for their shape and are not comparable
-                  with an objective, or with each other across two different step
-                  rules, which is exactly what the next step has to be careful about.
+                  {"For a finished parameter set, recompute the objective without updating it. The online pass totals remain useful diagnostics, but they score pairs under changing parameters. Compare training schemes with the same frozen evaluation procedure when deciding which fits the objective better."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. A published step rule that is not adaptive here">
                 <p>
-                  How large a step should a parameter take? Word counts are so
-                  unevenly spread that no single answer suits both a word like the,
-                  which occurs sixty-one times here, and a word like oven, which
-                  occurs twice, so the published rule gives each parameter its own.
-                  Every parameter
-                  keeps a running sum of the squares of the slopes it has been
-                  handed, and its step is divided by the square root of that sum, so
-                  a parameter that has already moved a great deal moves less than one
-                  that has barely moved at all.
+                  {"Adagrad accumulates squared gradients for each parameter and uses that history to adjust its step. Frequently large gradients lead to a larger denominator. This is a statement about gradient history, not a direct count of how far the parameter has traveled."}
                 </p>
                 <Equation>{"step = base rate × slope ÷ √(sum of that parameter’s squared slopes so far)"}</Equation>
                 <p>
-                  The program the authors released does it slightly differently. It
-                  starts every running sum at one rather than at zero, and it adds
-                  each new square after taking the step rather than before. On a
-                  corpus of billions of words that difference disappears within the
-                  first few thousand pairs, because the sums grow far past one and
-                  the starting value stops mattering. On a corpus of twenty-four
-                  sentences it never disappears at all.
+                  {"The compared released-style rule initializes its accumulator at one and adds the new squared gradient after taking a step. The other rule starts at zero and includes the current square. Initial scale matters when accumulated gradients stay small; corpus size alone does not guarantee that the difference disappears."}
                 </p>
                 <GloveStepRules />
                 <>
@@ -638,21 +476,13 @@ export default function GlovePage() {
                   and the released rule by 0.0306.
                 </p>
                 <KeepInMind>
-                  The released rule is one whose starting value stops mattering after
-                  the first moments of a real training run, and there the two rules
-                  are indistinguishable. What it is not, at this size, is adaptive,
-                  and a reader who knew only the name of the step rule would have
-                  assumed otherwise and never checked the objective it stopped at.
+                  {"The released-style denominators stay close to one in this experiment, so their adaptive scaling is modest. They remain adaptive. A different dataset or gradient history can change the comparison, and the two update rules are not guaranteed to become identical in larger training."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="17. Where the reach decides the answer">
                 <p>
-                  A count below one has a negative logarithm, and the objective asks
-                  the dot product and the two spare numbers to reproduce it. How many
-                  counts come out below one is decided entirely by the reach, because
-                  a neighbour further away contributes a smaller fraction and a pair
-                  needs several occurrences before its fractions add past one.
+                  {"Inverse-distance weighting permits counts below one. Their frequency depends on the window, document content and how often pairs recur. A larger window changes all these observed contributions; it does not determine the signs of log counts independently of the corpus."}
                 </p>
                 <GloveWindowSweep />
                 <NumberTable
@@ -673,31 +503,20 @@ export default function GlovePage() {
                 />
                 <>
 <p>
-                  At a reach of one nothing is below one, because every neighbour is next door and contributes a whole count, and the fit still fails, since 158 pairs is too little of the corpus to see anything by. At a reach of five more than half the counts are below one and the mean logarithm has gone negative.
+                  {"At reach one, every selected event contributes an integer count, so no positive count is below one. This setting yields weak topic separation in the shown fits. That does not identify 158 observed pairs as universally insufficient to learn anything."}
                 </p>
                 <p>
-                  The spare numbers ought to absorb that mean and after twenty-five passes they have not. The mean spare number is −0.0169, an order of magnitude too small, and the mean dot product over the pairs that co-occurred is −0.1359, so the negative has ended up in the dot products, which is where the meaning was supposed to be.
+                  {"At reach five, negative log-count targets are represented jointly by biases and dot products. Their division is not uniquely identified: a transformation can shift contributions between the terms. A small mean bias alone therefore does not demonstrate that a correct amount of frequency information failed to be absorbed."}
                 </p>
                 <p>
                   At a reach of two the same mean dot product is +0.0510.
                 </p>
 </>
                 <p>
-                  The last column is what that does to the answer. At a reach of two
-                  all three starts put words of one half nearer to each other than to
-                  words of the other, and by a wide margin. At three and at five one
-                  start in three comes out negative, which is a fit that has placed
-                  cooking words nearer to astronomy words than to each other. The
-                  reach that works on this corpus is the one where the fractions have
-                  had a chance to add past one and the logarithms are mostly positive.
+                  {"All three shown reach-two starts give positive topic separation, while one of three starts is negative at reaches three and five. That is an observed association with these settings. The experiment changes the context evidence as well as the log-count distribution, so it does not isolate target sign as the cause."}
                 </p>
                 <KeepInMind>
-                  The reach decides more than how much context a word is given. It
-                  decides the sign of most of the logarithms the fit is trying to
-                  reproduce, and on sentences this short that is what settles whether
-                  an answer comes out at all. On a corpus where every count runs into
-                  the hundreds the question does not arise, which is why the published
-                  defaults are wider than anything that works here.
+                  {"Window width changes which associations the model fits and their weights. Inspect both the fitted loss and the intended retrieval behavior. Larger corpora can still contain many rare weighted pairs, so negative log counts are not a concern restricted to this small example."}
                 </KeepInMind>
               </SubSection>
 
@@ -719,11 +538,7 @@ export default function GlovePage() {
                   the, of and and turn up in most of the lists.
                 </p>
                 <KeepInMind>
-                  A nearest-word list is the only reading of these vectors that most
-                  people ever look at, and it is a weaker measurement than the two
-                  mean cosines, since it reports an order among words rather than a
-                  quantity. Every comparison this page makes between two fits is made
-                  on the two mean cosines for that reason.
+                  {"Nearest-neighbor accuracy and average topic separation evaluate different properties. A ranking is still a measurable result, and can be the more relevant criterion when the application actually returns neighbors. Use both where they inform the intended task."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -735,26 +550,26 @@ export default function GlovePage() {
             trueFalse(
               "On this corpus the cap is what holds the commonest pair back.",
               false,
-              "The largest count in the table is 16.5 and the published cap is 100, so nothing is common enough to reach it. All of the flattening here comes from the three-quarter power, which takes the ten commonest pairs from 17.57% of the objective down to 12.65%, and the cap contributes nothing until it is moved below the largest count.",
+              "The largest count is 16.5, below the cap of 100, so no pair reaches the constant-weight region. The three-quarter power changes their relative weights: the ten most common pairs' share of the total weight falls from 17.57% under count-proportional weighting to 12.65% under this power. These are weight shares, not measured shares of the final loss, which also depends on each pair's error.",
             ),
             choice(
-              "Setting the cap exactly at 16.5, the largest count in the table, does what to the shares of the objective?",
+              "Changing the cap from 100 to 16.5, the largest count in this table, does what to each pair's share of the total weight?",
               [
-                "Nothing at all, since the curve only ever flattens what lies beyond the cap",
+                "It leaves the shares unchanged: every weight is rescaled by the same factor, and no count exceeds the new cap",
                 "It halves the share carried by the single commonest pair",
                 "It raises the share carried by the rarest pairs",
                 "It makes every pair count the same",
               ],
               0,
-              "Two pairs then sit precisely on the cap and every share is identical to the shares at a cap of 100. Slide it to 7.5 instead and ten pairs reach it, every one of them involving the, and the share carried by the commonest pair falls from 1.90% to 1.08%.",
+              "At a cap of 16.5, two pairs reach weight one. All other weights are rescaled by the same factor relative to a cap of 100, so their shares of total weight stay the same. At 7.5, ten pairs reach the cap. They all involve the, and the most common pair's share of total weight falls from 1.90% to 1.08%. A pair's contribution to the loss also depends on its prediction error.",
             ),
             trueFalse(
               "Recomputed where the walk stopped, the objective of the finished fit comes out below the total the last pass recorded.",
               true,
-              "Each pass accumulates its total while the parameters are still moving, so a pair visited early is scored against different vectors from a pair visited late, and the parameters improve during the pass being measured. The objective at rest is 0.5148 against the 0.5550 the twenty-fifth pass recorded. Running one pass at a base step of a millionth of a millionth brings the two within a billionth of each other, which shows the gap is entirely the movement and not the arithmetic.",
+              "The recorded pass total scores pairs one at a time while updates change the parameters. objective_value() instead scores every pair using the same final parameters. Here the final objective is 0.5148 and the last recorded total is 0.5550. With an extremely small learning rate the two measurements nearly agree, which supports the explanation that changing parameters cause the observed gap. The recomputed value need not be lower for every possible training run.",
             ),
             choice(
-              "Which statement describes this optimiser comparison after 25 passes?",
+              "Which statement describes this optimizer comparison after 25 passes?",
               [
                               "The objective stopped at 4.9571 rather than 0.5148, and the halves separated by 0.0306 rather than 0.1966",
                               "Nothing measurable, since the two rules are indistinguishable at every corpus size",
@@ -777,9 +592,9 @@ export default function GlovePage() {
                 "The reach is chosen before fitting; to use a different reach, its co-occurrence counts must be constructed"
               ],
               [0, 1, 2, 3],
-              "A larger reach includes more distant neighbours, each with a smaller contribution. Here that changes both the fraction of fractional counts and the mean of their logarithms. Reach one avoids negative logarithms, yet its three separation gaps remain small and have mixed signs. The count table is an input to fitting, so a new reach needs the corresponding counts; an implementation may recompute or cache them.",
+              "A larger reach includes more distant neighbors, each with a smaller contribution. Here that changes both the fraction of fractional counts and the mean of their logarithms. Reach one avoids negative logarithms, yet its three separation gaps remain small and have mixed signs. The count table is an input to fitting, so a new reach needs the corresponding counts; an implementation may recompute or cache them.",
               {
-                "description": "A neighbour d positions away contributes 1/d to its pair count. Changing the maximum reach changes which neighbours enter the count table. The final column reports within-half mean cosine minus across-half mean cosine for three training starts.",
+                "description": "A neighbor d positions away contributes 1/d to its pair count. Changing the maximum reach changes which neighbors enter the count table. The final column reports within-half mean cosine minus across-half mean cosine for three training starts.",
                 "data": "reach | pairs | counts below one | mean logarithm | how far the halves came apart, three starts\n1 | 158 | 0 (0%) | +0.6623 | −0.0171, +0.0483, +0.0001\n2 | 281 | 86 (30.6%) | +0.2617 | +0.1966, +0.1314, +0.2284\n3 | 390 | 178 (45.6%) | +0.0101 | +0.0043, +0.0541, −0.0039\n5 | 474 | 246 (51.9%) | −0.1523 | +0.0156, +0.0123, −0.0076"
               },
             ),
@@ -813,37 +628,24 @@ export default function GlovePage() {
                     ["4", "864", "37", "281", "2,880"],
                     ["8", "1,728", "37", "281", "5,760"],
                   ]}
-                  caption="Repeating the corpus is deliberately artificial. It is the only way to hold the vocabulary fixed while the amount of text grows, and it isolates the claim that a pass over the table costs the number of distinct pairs and nothing else."
+                  caption="Repeating the corpus holds both the vocabulary and observed-pair set fixed for this comparison. New text drawn from a fixed vocabulary could also keep the vocabulary unchanged while adding different pair evidence."
                 />
                 <>
 <p>
-                  What the repetition hides is that on real text the number of distinct pairs does keep growing, only far more slowly than the text does, and that the table itself grows as the square of the vocabulary whether or not the cells are filled. Here it is 1,369 numbers, of which 1,088 are zero, against the 296 numbers of the fitted vectors.
+                  {"With new text, the number of distinct observed pairs may also grow. Dense storage allocates all 1,369 possible cells here; sparse storage can allocate only the nonzero entries. The retained eight-coordinate output has 296 values, while fitting requires additional vectors, biases and working arrays."}
                 </p>
                 <p>
                   Thirty-seven words is small enough that holding a square array is the obvious thing to do; four hundred thousand words is not, and every implementation at that size holds the filled cells alone.
                 </p>
 </>
                 <KeepInMind>
-                  Two costs are being traded here and they grow differently. Counting
-                  is paid once, and what it costs grows as the square of the
-                  vocabulary; walking is paid on every pass, and what it costs grows
-                  with the amount of text. At thirty-seven words the whole table is
-                  1,369 numbers and the two readouts above show the counting taking a
-                  small fraction of the time the fit takes; at four hundred thousand
-                  words, which is the size of vocabulary the published vectors cover,
-                  the same square array would hold a hundred and sixty billion cells,
-                  so the answer to which cost is bearable changes with the corpus.
+                  {"Counting requires reading the text and selected windows. Fitting then revisits the distinct observed pair entries. Dense count storage grows quadratically with vocabulary, while sparse storage follows observed pairs. These are separate costs; no single vocabulary-squared formula describes every stage."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="20. Where comparing the raw counts still wins">
                 <p>
-                  There is an obvious alternative to fitting the table, which is
-                  reading it. Two words can be compared by taking their whole rows of
-                  counts and measuring the cosine between them, which needs no fit, no
-                  starting draw, no step rule and no seed. On this corpus that
-                  alternative wins one of the two questions the page has been asking,
-                  and it would be dishonest to leave that out.
+                  {"Compare the learned vectors with cosine on the raw context rows. The count baseline needs no iterative vector fit or initialization, but it still uses the chosen window, tokenization and distance weighting."}
                 </p>
                 <GloveRowsAgainstVectors />
                 <p>
@@ -867,51 +669,40 @@ export default function GlovePage() {
                   at 0.4756 rather than near zero.
                 </p>
                 <KeepInMind>
-                  A method whose whole argument is about vocabularies of hundreds of
-                  thousands and corpora of billions should be expected to lose at
-                  thirty-seven words to the table it is compressing, and on one of the
-                  two questions it does. The measurement is evidence about this
-                  demonstration rather than about the method at the size it was built
-                  for.
+                  {"The raw rows score better on the reported top-five grouping check, while the learned vectors score better on the mean topic-gap check. This small example illustrates a tradeoff between criteria, not a reason to expect every small-corpus GloVe fit to lose."}
                 </KeepInMind>
               </SubSection>
             </>
           ),
         },
         {
-          title: "Part 7. Missing Co-occurrences and Unreliable Neighbours", id: "part-7-where-glove-stops-being-defined",
+          title: "Part 7. Missing Co-occurrences and Unreliable Neighbors", id: "part-7-where-glove-stops-being-defined",
           content: (
             <>
               <SubSection title="21. A pair that never co-occurred has no logarithm">
                 <p>
-                  The objective is a sum over pairs, and the quantity each term
-                  compares against is the logarithm of a count. The logarithm of zero
-                  is not a number. So a pair that never co-occurred has no term at
-                  all, the sum runs over the pairs that were seen, and it says nothing
-                  whatever about the rest.
+                  {"GloVe fits positive observed counts, because their logarithms are finite. An unobserved pair has no direct residual term in this objective. Shared parameters can still constrain its eventual comparison indirectly through the observed pairs."}
                 </p>
                 <>
 <p>
-                  That is a different kind of silence from a term whose target is zero. A term with a target of zero would be a statement, namely that those two words should have a dot product cancelling their two spare numbers; a missing term is no statement, and the fit is free to place those two words anywhere the other terms leave room for.
+
+                  That is a different kind of silence from a term whose target is zero. A term with a target of zero would be a statement, namely that those two words should have a dot product canceling their two spare numbers; a missing term is no statement, and the fit is free to place those two words anywhere the other terms leave room for.
                 </p>
                 <p>
-                  On this corpus 1,088 of the 1,369 cells are empty, so 79.5% of the pairs the vocabulary can form are pairs the objective never mentions, and every judgement a fitted table makes about one of them is a side effect of the pairs it did mention.
+
+                  On this corpus 1,088 of the 1,369 cells are empty, so 79.5% of the pairs the vocabulary can form are pairs the objective never mentions, and every judgment a fitted table makes about one of them is a side effect of the pairs it did mention.
                 </p>
 </>
                 <p>
-                  The weight is what makes the omission consistent rather than ad hoc.
-                  The weight of a count of zero is zero, so writing the sum over all
-                  pairs of words and writing it over the filled cells give the same
-                  number, and the missing logarithms are never evaluated. That is a
-                  tidy way of stating the omission rather than a way of repairing it,
-                  since the objective still has 281 terms however it is written down.
+                  {"A zero-count term is omitted. Equivalently, define its limiting contribution as zero under this weighting, rather than evaluate 0×log(0). In implementation, skip the absent pair so the undefined logarithm is never computed."}
                 </p>
               </SubSection>
 
               <SubSection title="22. The table is built once, so its choices are frozen">
                 <p>
+
                   Two decisions are made before the first equation exists, how far
-                  near reaches and what a neighbour at a distance is worth, and after
+                  near reaches and what a neighbor at a distance is worth, and after
                   that the fit reads their consequences rather than the corpus.
                   Nothing computed during the fit can revisit either one, and no
                   quantity the fit produces turns over as the reach passes a good
@@ -936,12 +727,7 @@ export default function GlovePage() {
 
               <SubSection title="23. A walk to a local answer over a fixed table">
                 <p>
-                  The objective is a sum of squares in quantities that multiply each
-                  other, so it is not convex, and the walk visits the pairs in a
-                  shuffled order and arrives at a local answer. A fit therefore
-                  inherits two kinds of arbitrariness at once, the draw it started
-                  from and the table it was handed, and neither is visible in the
-                  answer it returns.
+                  {"The bilinear vector interactions make the objective nonconvex. A finite shuffled training run reaches a parameter state that depends on initialization, updates and the supplied counts; it is not guaranteed to reach a local optimum. Retain those settings so the result can be investigated."}
                 </p>
                 <p>
                   Worse for anyone hoping to compare two fits, the objective cannot
@@ -967,86 +753,10 @@ export default function GlovePage() {
                 <DerivationTable
                   expressionHeading="Count or vocabulary condition"
                   reasonHeading="Effect on fitting and comparing vectors"
-                  rows={[
-                    {
-                      expression: "a pair that never co-occurred",
-                      reason:
-                        "undefined, and therefore absent. The logarithm of zero is not a number, so the pair has no equation, and the objective makes no claim about where those two words go. This is not a target of zero, which would be a claim; it is the absence of one. Here it is 1,088 of 1,369 cells.",
-                    },
-                    {
-                      expression: "a count below one",
-                      reason:
-                        "defined, and its logarithm is negative, which the two spare numbers must absorb or the dot products will carry. Whether a count can be below one is decided by the distance rule, and how often it is is decided by the reach: 0% of counts at a reach of one against 51.9% at a reach of five.",
-                    },
-                    {
-                      expression: "a vocabulary of one word",
-                      reason:
-                        "there is no pair. A single word co-occurs with nothing, the table is one cell holding zero, the sum has no terms, and there is no quantity to minimise.",
-                    },
-                    {
-                      expression: "a corpus in which no two words fall within reach",
-                      reason:
-                        "the same, for a different reason. Every cell of the table is zero, so every term is missing, and a fit would leave every vector exactly where its starting draw put it while reporting an objective of zero.",
-                    },
-                    {
-                      expression: "a word that occurs once",
-                      reason:
-                        "defined, and its whole row is one sentence’s worth of company. Nothing in the answer marks it as such, since it gets a vector of the same width and a cosine against it comes back to four decimal places like any other. A minimum count declines to answer for such a word rather than answering better, and where the threshold goes is a judgement.",
-                    },
-                    {
-                      expression: "a word absent from the corpus",
-                      reason:
-                        "there is no row in the table, so no equation, so no vector. The honest answer is a refusal rather than a default position the corpus never implied.",
-                    },
-                    {
-                      expression: "the individual coordinates of a vector",
-                      reason:
-                        "numerically defined in the axes of this fit. Rotating both tables together leaves every dot product and the objective unchanged, so the objective does not assign a fixed interpretation to an individual coordinate. Within-fit cosine comparisons survive such a rotation.",
-                    },
-                    {
-                      expression: "comparing two fits coordinate by coordinate",
-                      reason:
-                        "numerically computable, but generally not meaningful before alignment. Averaging two fits or reusing a model trained on another fit’s vectors assumes matching coordinate systems, which separate training runs do not guarantee.",
-                    },
-                    {
-                      expression: "more unknowns than equations",
-                      reason:
-                        "permitted, and usual. At this page’s width the fit chooses 666 numbers against 281 equations, so the objective alone does not determine the answer even before the walk’s arbitrariness is counted; what settles it is where the draw started and which local answer the walk reached.",
-                    },
-                    {
-                      expression: "where to put the cap on the weights",
-                      reason:
-                        "a real choice about which pairs are allowed to decide the answer, with nothing inside the fit to settle it. Below the largest count it holds the commonest pairs back, measured here as the commonest pair’s share falling from 1.90% to 1.08%; at or above the largest count it does nothing whatever.",
-                    },
-                    {
-                      expression: "how wide to make the vectors",
-                      reason:
-                        "a real choice with no principle behind it. Too few numbers and words that should differ are forced together; too many and each word can be described independently of every other, which is what the compression was for. No quantity computed during the fit turns over as the width passes a good value.",
-                    },
-                    {
-                      expression: "the sum of the two tables, read as the answer",
-                      reason:
-                        "a choice rather than a consequence. The two tables are asked the same question by a symmetric table and the objective is indifferent between reporting their sum, one of them, or any other combination; the published argument for the sum is about averaging away noise.",
-                    },
-                    {
-                      expression: "which of two words stood first",
-                      reason:
-                        "outside what the table represents. Every pair is counted from both ends, so the table is symmetric by construction and cannot tell the chef stirs from stirs the chef. Order is discarded when the corpus is counted, not when the vectors are fitted.",
-                    },
-                    {
-                      expression: "which sense of a word is meant",
-                      reason:
-                        "outside what the method represents. One row per spelling, so a word used two ways contributes both sets of company to one row and settles somewhere between, and there is no second vector for the second sense to occupy.",
-                    },
-                  ]}
+                  rows={[{"expression":"a pair that never co-occurred","reason":"undefined, and therefore absent. The logarithm of zero is not a number, so the pair has no equation, and the objective makes no claim about where those two words go. This is not a target of zero, which would be a claim; it is the absence of one. Here it is 1,088 of 1,369 cells."},{"expression":"a count below one","reason":"defined, and its logarithm is negative, which the two spare numbers must absorb or the dot products will carry. Whether a count can be below one is decided by the distance rule, and how often it is is decided by the reach: 0% of counts at a reach of one against 51.9% at a reach of five."},{"expression":"a vocabulary of one word","reason":"Repeated occurrences of the same token can supply a self-co-occurrence count. A one-word vocabulary therefore does not necessarily have an empty objective; the sentence layout and window decide."},{"expression":"a corpus in which no two words fall within reach","reason":"the same, for a different reason. Every cell of the table is zero, so every term is missing, and a fit would leave every vector exactly where its starting draw put it while reporting an objective of zero."},{"expression":"a word that occurs once","reason":"defined, and its whole row is one sentence’s worth of company. Nothing in the answer marks it as such, since it gets a vector of the same width and a cosine against it comes back to four decimal places like any other. A minimum count declines to answer for such a word rather than answering better, and where the threshold goes is a judgment."},{"expression":"a word absent from the corpus","reason":"there is no row in the table, so no equation, so no vector. The honest answer is a refusal rather than a default position the corpus never implied."},{"expression":"the individual coordinates of a vector","reason":"numerically defined in the axes of this fit. Rotating both tables together leaves every dot product and the objective unchanged, so the objective does not assign a fixed interpretation to an individual coordinate. Within-fit cosine comparisons survive such a rotation."},{"expression":"comparing two fits coordinate by coordinate","reason":"numerically computable, but generally not meaningful before alignment. Averaging two fits or reusing a model trained on another fit’s vectors assumes matching coordinate systems, which separate training runs do not guarantee."},{"expression":"more unknowns than equations","reason":"permitted, and usual. At this page’s width the fit chooses 666 numbers against 281 equations, so the objective alone does not determine the answer even before the walk’s arbitrariness is counted; what settles it is where the draw started and which local answer the walk reached."},{"expression":"where to put the cap on the weights","reason":"The cap changes relative multipliers when it crosses observed counts. Above all counts it changes their common scale, which can still affect objective values and updates. The displayed percentages are shares of weights, not residual-weighted losses."},{"expression":"how wide to make the vectors","reason":"Width controls capacity, storage and computation. Choose it using appropriate development evidence; the training objective alone does not supply a universal semantic optimum."},{"expression":"the sum of the two tables, read as the answer","reason":"a choice rather than a consequence. The two tables are asked the same question by a symmetric table and the objective is indifferent between reporting their sum, one of them, or any other combination; the published argument for the sum is about averaging away noise."},{"expression":"which of two words stood first","reason":"outside what the table represents. Every pair is counted from both ends, so the table is symmetric by construction and cannot tell the chef stirs from stirs the chef. Order is discarded when the corpus is counted, not when the vectors are fitted."},{"expression":"which sense of a word is meant","reason":"A static row combines the spelling’s uses. It does not select a sense per occurrence and need not occupy a midpoint between sense groups."}]}
                 />
                 <KeepInMind>
-                  Two of those lines carry most of the weight in practice. The
-                  objective is silent about four fifths of the pairs a vocabulary can
-                  form, which is a much larger silence than it looks and is not
-                  repaired by the weight of a zero count being zero; and the
-                  coordinates carry no meaning individually, which rules out comparing
-                  or combining two fits and rules in cosines.
+                  {"The objective fits observed pairs through shared parameters. Evaluate the resulting vectors on the comparisons the application needs, and align separate fits before combining their coordinates. Missing direct pair evidence and coordinate ambiguity are limitations to handle, rather than reasons that all such comparisons are impossible."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1067,18 +777,18 @@ export default function GlovePage() {
             choice(
               "Why do the raw rows separate the two halves by only 0.1404?",
               [
-                "Every row is dominated by the seven shared words, so all thirty-seven rows already point broadly the same way",
+                "Shared function-word context coordinates contribute to cross-topic similarity, reducing the reported within-minus-across cosine gap",
                 "The rows are too short to carry the distinction",
                 "The rows were counted at a reach too small to reach across a sentence",
                 "The rows were never passed through the three-quarter weighting",
               ],
               0,
-              "The seven function words stand beside everything, so they fill every row and the mean cosine across the halves comes out at 0.4756 rather than near zero. That leaves little room above it for a difference between the halves to show in.",
+              "The two topics share function words such as the and and. Those shared context coordinates can contribute to dot products between rows from different topics. The reported cross-topic mean cosine is 0.4756, which reduces the within-minus-across gap. A shared context word need not occur beside every content word for this effect to appear.",
             ),
             trueFalse(
               "A pair of words that never co-occurred contributes no term to the objective at all.",
               true,
-              "The logarithm of zero is not a number, so the sum runs over the 281 pairs that were seen and says nothing whatever about the other 1,088. A term whose target was zero would be a statement about those two words, namely that their dot product should cancel their spare numbers; a missing term is no statement, and the fit may place them anywhere the other terms leave room for.",
+              "The implementation evaluates the log-count objective for the 281 positive cells and omits the 1,088 zero cells. It does not evaluate the real logarithm of zero. A missing pair therefore has no direct loss term, although the parameters it would use are constrained by other observed pairs. Assigning a zero target would be a different model: it would ask that pair's dot product and biases to sum to zero.",
             ),
             choice(
               "The weight of a count of zero is zero. What does that buy?",
@@ -1089,7 +799,7 @@ export default function GlovePage() {
                 "A guarantee that the fit is pinned down by its own objective",
               ],
               0,
-              "It makes the omission consistent rather than ad hoc, since the missing logarithms are never evaluated either way. It is a tidy way of stating the silence rather than a way of repairing it, because the objective still has 281 terms however it is written down, against 666 numbers to choose.",
+              "Defining the weight as zero at count zero is consistent with omitting unobserved pairs. The implementation skips those cells so it never multiplies zero by an undefined logarithm. This does not turn a missing observation into evidence of dissimilarity. The fit still has 281 observed pair terms and 666 scalar parameters in this configuration.",
             ),
             several(
               "Turn every vector in both tables by the same rotation. Which of these hold?",
@@ -1288,13 +998,13 @@ objective at rest 0.5148`,
               { hints: [
   "Recorded pass losses were measured while parameters changed between pairs.",
   "objective_value recomputes every term at the same final parameter state. It is not a stored last-pass number."
-], check: numberCheck("What objective does the model report, recomputed where the walk stopped?", 0.5148, 0.0005, "The final recomputed objective is 0.5148. It uses one final parameter state, whereas recorded pass terms were evaluated during successive updates."), question: "Why can the recomputed objective differ from the last recorded pass?" },
+], check: numberCheck("What objective_value() does the model report at its final parameter values, to four decimal places?", 0.5148, 0.0005, "The final recomputed objective is 0.5148. It uses one final parameter state, whereas recorded pass terms were evaluated during successive updates."), question: "Why can the recomputed objective differ from the last recorded pass?" },
             ),
             exercise(
               "Ask the vectors the two questions",
               [
   "Use the supplied fifteen cooking and fifteen astronomy content words; exclude the shared function words from the pair means.",
-  "Print mean within-topic cosine, mean cross-topic cosine and their difference. Then print moon’s five nearest words, allowing the full vocabulary in that neighbour search."
+  "Print mean within-topic cosine, mean cross-topic cosine and their difference. Then print moon’s five nearest words, allowing the full vocabulary in that neighbor search."
 ],
               `from itertools import combinations
 from statistics import mean
@@ -1388,8 +1098,8 @@ astronomer 0.9336
 orbit 0.8815`,
               { hints: [
   "Use each within-topic pair once and every cooking/astronomy pair.",
-  "The neighbour list answers a different question from a content-only mean; shared function words remain eligible there."
-], check: numberCheck("What is the mean cosine between two content words of the same half?", 0.1188, 0.0005, "The same-topic content mean is 0.1188. Read it beside the cross-topic mean and individual neighbours before judging the representation."), question: "Do the learned vectors separate topics while keeping useful neighbours?" },
+  "The neighbor list answers a different question from a content-only mean; shared function words remain eligible there."
+], check: numberCheck("What is the mean cosine over all distinct pairs within the supplied cooking and astronomy lists, to four decimal places?", 0.1188, 0.0005, "The same-topic content mean is 0.1188. Read it beside the cross-topic mean and individual neighbors before judging the representation."), question: "Do the learned vectors separate topics while keeping useful neighbors?" },
             ),
             exercise(
               "Widen the reach to the published five",

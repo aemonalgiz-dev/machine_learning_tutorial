@@ -195,10 +195,10 @@ export function NGramOrderCurve() {
         />
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The unsmoothed model is missing from the two held-out lines because it
-        has no score there at any width. It gives at least one run of the
-        held-out text no chance at all, which makes the whole text impossible
-        and its perplexity infinite.
+        The unsmoothed model assigns probability zero to at least one token
+        continuation in each held-out text at every tested width. Its perplexity
+        is therefore infinite and cannot appear on this finite scale. Smoothing
+        gives these unseen continuations some probability so they can be scored.
       </p>
     </div>
   );

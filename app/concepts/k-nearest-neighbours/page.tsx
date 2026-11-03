@@ -8,9 +8,9 @@ import { Equation } from "@/components/concept/PrimerPage";
 import { KnnPlayground } from "@/components/widgets/KnnPlayground";
 
 export const metadata: Metadata = {
-  title: "k-Nearest Neighbours · oop_ml",
+  title: "k-Nearest Neighbors · Perceptron Lab",
   description:
-    "If similar examples tend to have similar answers, nearby labelled examples may help us predict a new one. We still need to decide how to measure distance and how many neighbours to ask.",
+    "Nearby labeled examples can provide evidence about an unfamiliar observation. The distance measure and number of neighbors determine which examples contribute and how local the resulting prediction is.",
 };
 
 export default function KNearestNeighboursPage() {
@@ -22,8 +22,8 @@ export default function KNearestNeighboursPage() {
       openingTitle="Ask the Examples That Look Most Alike"
       playgroundTitle="Let nearby people vote on a new observation"
       playgroundIntro="Move the ringed query point, then change k. Watch which stored points are selected and how their votes produce the label."
-      title="k-Nearest Neighbours"
-      tagline={"If similar examples tend to have similar answers, nearby labelled examples may help us predict a new one. We still need to decide how to measure distance and how many neighbours to ask."}
+      title="k-Nearest Neighbors"
+      tagline={"Nearby labeled examples can provide evidence about an unfamiliar observation. The distance measure and number of neighbors determine which examples contribute and how local the resulting prediction is."}
       prerequisites={
         <>
           The distance between two points, the length of their difference, is
@@ -52,18 +52,20 @@ export default function KNearestNeighboursPage() {
           defaultOpen: true,
           content: (<>
 <>
-              <p>Imagine a chart of people we have already measured and labelled, using height and weight as coordinates. The interactive example colours children amber and adults indigo. A ring marks someone new: we have their measurements but have not supplied their label.</p>
-              <p>Can the nearby labelled examples give us a useful prediction? We must decide both what nearby means and how many neighbours should contribute before we can turn resemblance into a rule.</p>
+              <p>Imagine a chart of people we have already measured and labeled, using height and weight as coordinates. The interactive example colors children amber and adults indigo. A ring marks someone new: we have their measurements but have not supplied their label.</p>
+              <p>Can the nearby labeled examples give us a useful prediction? We must decide both what nearby means and how many neighbors should contribute before we can turn resemblance into a rule.</p>
               <p>
-                We will use resemblance as our starting rule. The dashed lines connect the new person to the k nearest stored people. Each neighbour votes for its own label, and the majority decides the prediction. Move the ringed point and watch which neighbours it reaches. Where does the prediction change?
+
+                We will use resemblance as our starting rule. The dashed lines connect the new person to the k nearest stored people. Each neighbor votes for its own label, and the majority decides the prediction. Move the ringed point and watch which neighbors it reaches. Where does the prediction change?
               </p>
               <>
                 <p>
+
                   This model stores the examples and their labels instead of solving for
                   regression coefficients. Fitting may also build an index that makes
-                  neighbour searches faster. Most of the prediction work happens when a
+                  neighbor searches faster. Most of the prediction work happens when a
                   new query arrives: find nearby examples, then combine their answers.
-                  The choice of distance and the number of neighbours still need to be
+                  The choice of distance and the number of neighbors still need to be
                   selected and evaluated.
                 </p>
               </>
@@ -74,29 +76,18 @@ export default function KNearestNeighboursPage() {
           title: "The Mechanism",
           content: (
             <>
-              <p>
-                The whole method is three steps, and the first is the linear
-                algebra primer&rsquo;s distance. Each person is a vector of
-                measurements, and the distance between two people is the
-                length of their difference.
-              </p>
+              <p>We need a way to compare two people using their measurements. Write each person as a vector, with height and weight in a fixed order. Subtract the matching measurements to find their differences, then use the length of that difference vector as the distance.</p>
               <Equation>{"distance = √((height₁ − height₂)² + (weight₁ − weight₂)²)"}</Equation>
               <p>
-                To make a prediction, calculate the distance to each stored person and keep the k smallest distances. Those neighbours supply the votes. We therefore need to keep the training examples available for later predictions. A fitted regression line can predict from its coefficients alone; this method still needs the observations.
+
+                To make a prediction, calculate the distance to each stored person and keep the k smallest distances. Those neighbors supply the votes. We therefore need to keep the training examples available for later predictions. A fitted regression line can predict from its coefficients alone; this method still needs the observations.
               </p>
-              <p>
-                The number k is the one dial, and it is kept odd here so a
-                two-class vote cannot tie. What it trades is the subject of a
-                later section, though the short version is that k sets how
-                local the decision is, one neighbour listens to a single
-                nearby voice, fifteen neighbours poll the whole
-                neighbourhood.
-              </p>
+              <p>The number k tells us how many neighbors contribute. A small value makes the answer depend on a few nearby examples; a larger value includes people farther away. We keep k odd here to avoid a tied vote between the two classes. Other choices, including the distance rule, still affect the result.</p>
             </>
           ),
         },
         {
-          title: "Which neighbours vote for this new person?" , id: "a-worked-example",
+          title: "Which neighbors vote for this new person?" , id: "a-worked-example",
           content: (
             <>
               <p>
@@ -116,13 +107,7 @@ export default function KNearestNeighboursPage() {
                 adults at distances 15 and 20 join, the vote is three adults
                 to two children, and the answer flips to adult.
               </p>
-              <p>
-                Slide k from 3 to 5 above and watch that flip happen. Not one
-                point moved and not one label changed, yet the answer
-                reversed, because k decides how wide a circle of opinion is
-                consulted, and this query sits close to a few children inside
-                a neighbourhood that leans adult.
-              </p>
+              <p>Slide k from 3 to 5 and watch the prediction change. The measurements and labels stay the same. Including more neighbors changes the evidence: the closest group favors child, while the wider group favors adult.</p>
             </>
           ),
         },
@@ -130,23 +115,10 @@ export default function KNearestNeighboursPage() {
           title: "What k Trades",
           content: (
             <>
-              <p>
-                The shaded regions show the model&rsquo;s answer at every spot
-                on the plane, and sliding k redraws them in a way worth
-                staring at. At k of 1 the map is jagged. Every stored person
-                commands their own island of territory, including any point
-                that sits oddly among the other class, so one mislabelled or
-                unusual person creates a local prediction region around that example. That is memorising,
-                the same failure the polynomial page met at degree 9, wearing
-                a different costume.
-              </p>
+              <p>The shaded regions show which class the model predicts at each position. At k of 1, every position takes the label of its nearest stored person. One unusual or mislabeled observation can therefore create a small region with the opposite prediction to its surroundings. Like the polynomial fit at degree 9, the model can follow individual training observations too closely.</p>
               <>
-<p>
-                Raise k and the islands dissolve. Each decision now polls a wider circle, stray voices are outvoted by their surroundings, and the frontier between amber and indigo smooths out. Push k toward the size of the whole dataset, though, and the poll stops being local at all, every query consults nearly everyone, and the answer drifts toward whichever class simply has more members.
-              </p>
-              <p>
-                Small k trusts each example too much, large k trusts the crowd too much, and the honest choice again needs data held out from the decision, the same open thread the penalty page left hanging.
-              </p>
+<p>Increasing k lets several examples contribute to each prediction. A single unusual label may be outvoted, and the boundaries often become smoother. If k approaches the size of the dataset, nearly every prediction uses nearly everyone. The answer then depends mainly on which class is more common, with little attention to the query.</p>
+              <p>The useful neighborhood size depends on the data. Too few neighbors can make predictions sensitive to individual observations; too many can hide meaningful local differences. Compare candidate values using observations that were held out from fitting.</p>
 </>
             </>
           ),
@@ -155,12 +127,12 @@ export default function KNearestNeighboursPage() {
           title: "Questions on the Mechanism and k",
           quiz: [
             trueFalse(
-              "Where regression compresses the data into a few fitted numbers and then discards it, this method keeps every example and compresses nothing.",
+              "This nearest-neighbor implementation stores the labeled training examples and consults them at prediction time, rather than representing predictions only through a few regression coefficients.",
               true,
-              "Fitting stores the examples and their labels, and may build an index that makes neighbour searches faster, but it solves for nothing. Most of the work happens when a query arrives, since finding the nearby examples and combining their answers is what a prediction costs here.",
+              "Fitting stores the feature rows and labels needed for later neighbor searches. At prediction time, the model calculates query-to-training distances and combines the selected labels. An implementation may also build a search index, but it still needs information representing the reference examples.",
             ),
             choice(
-              "At the borderline query of 150 centimetres and 45 kilograms the five nearest people sit at distances 5, 10, 13, 15 and 20. What happens as k goes from 3 to 5?",
+              "At the borderline query of 150 centimeters and 45 kilograms the five nearest people sit at distances 5, 10, 13, 15 and 20. What happens as k goes from 3 to 5?",
               [
                 "The answer flips to adult, because the two adults at 15 and 20 join a vote that was two children to one adult",
                 "The answer stays child, because the nearest person is still a child",
@@ -168,29 +140,29 @@ export default function KNearestNeighboursPage() {
                 "The vote ties, which is why k is kept odd",
               ],
               0,
-              "At k of 3 the voters are the child at distance 5, the adult at 10 and the child at 13, two to one for child. Widening to 5 admits the adults at 15 and 20, and the vote is three to two for adult. Not one point moved and not one label changed, since k decides how wide a circle of opinion is consulted, and this query sits close to a few children inside a neighbourhood that leans adult.",
+              "The nearest three are two children and one adult. Adding the adults at distances 15 and 20 gives three adults among five neighbors, so the prediction changes to adult. The measurements and labels stay fixed; k changes which observations contribute to the vote.",
             ),
             trueFalse(
-              "At k of 1 a single mislabelled or unusual person creates a prediction region of their own around that example.",
+              "At k of 1 a single mislabeled or unusual person creates a prediction region of their own around that example.",
               true,
-              "At k of 1 the only voter is the nearest stored person, so every spot closer to one person than to anyone else takes that person’s label, and a mislabelled or unusual person gets an island like everybody else. That is what makes the map jagged, and it is memorising, the same failure the polynomial page met at degree 9 wearing a different costume.",
+              "With one neighbor, each query takes the label of the closest stored observation. A mislabeled example can therefore determine predictions throughout the region where it is nearest. This sensitivity is a reason to evaluate larger neighborhoods or other protections against noise. It does not mean every one-neighbor model necessarily generalizes poorly.",
             ),
             several(
               "Which of these hold as k is pushed towards the size of the whole dataset?",
               [
                 "The poll stops being local at all, since every query consults nearly everyone",
                 "The answer drifts towards whichever class simply has more members",
-                "The frontier between the two colours grows more jagged",
+                "The frontier between the two colors grows more jagged",
                 "Stray voices are outvoted by their surroundings",
               ],
               [0, 1, 3],
-              "Raising k dissolves the islands and smooths the frontier, which is the gain, and pushed far enough the same move empties the decision of locality. Small k trusts each example too much and large k trusts the crowd too much, so the honest choice needs data held out from the decision.",
+              "With unweighted voting, increasing k generally reduces sensitivity to individual nearby labels while including more distant observations. At k equal to the training count, every query receives the overall majority class. Select k using held-out evidence so the neighborhood remains useful for the prediction problem.",
             ),
             choice(
               "The borderline query sits at (150, 45) and an adult at (156, 53). What distance does the mechanism’s formula give between them?",
               ["10", "14", "100", "8"],
               0,
-              "The differences are 6 in height and 8 in weight. Squared they are 36 and 64, which sum to 100, and the root of that is 10, the primer’s 3-4-5 triangle doubled. Adding the two differences without squaring gives 14, and stopping before the root gives 100, and neither is the length of the difference, which is what the formula measures.",
+              "Euclidean distance uses the height and weight differences as coordinate gaps:\n\n```math\ndistance = √((156 − 150)² + (53 − 45)²)\n         = √(36 + 64)\n         = 10\n```\n\nAdding the absolute gaps gives Manhattan distance instead. This raw numerical Euclidean calculation also assumes the recorded units provide the intended relative weighting.",
             ),
         ],
         },
@@ -198,45 +170,13 @@ export default function KNearestNeighboursPage() {
           title: "The Scaling Trap",
           content: (
             <>
-              <p>
-                One quiet assumption is doing load-bearing work in every
-                distance above, and it is the method&rsquo;s best-known trap.
-                The distance formula adds the two squared differences as
-                though a centimetre of height and a kilogram of weight were
-                the same size of thing. Here that happens to be roughly fair,
-                since the heights span about 65 units and the weights about
-                60, so both measurements get a real say.
-              </p>
+              <p>The formula combines squared height differences with squared weight differences, even though their units differ. Here the heights span about 65 units and the weights about 60, so neither column dominates simply because its numerical range is much larger. Similar ranges still do not prove that the measurements deserve equal influence.</p>
               <>
-                <p>
-                  Now imagine that height is recorded in millimetres. Height differences
-                  become numerically larger, so they contribute much more to the squared
-                  distance and can change which people count as nearest. This may help
-                  or hurt predictions depending on the dataset. The unit conversion
-                  alone gives us no reason to prefer the new weighting.
-                </p>
-                <p>
-                  Here it does. Redo the worked example with every height
-                  multiplied by ten. The weight differences are
-                  what they were, the height differences are ten times
-                  larger and their squares a hundred times larger, so weight
-                  has almost no say left.
-                </p>
+
+                <p>Changing the units also changes the distances in this example. Multiply every height by ten, leaving the weights unchanged. Height differences become ten times larger and their squares become a hundred times larger. The distance now depends much more strongly on height.</p>
                 <Equation>{"child at (1470, 41)   difference (30, 4)     distance ≈  30.27\nchild at (1450, 57)   difference (50, 12)    distance ≈  51.42\nadult at (1560, 53)   difference (60, 8)     distance ≈  60.53\nadult at (1590, 57)   difference (90, 12)    distance ≈  90.80\nadult at (1620, 61)   difference (120, 16)   distance ≈ 121.06"}</Equation>
-                <p>
-                  The child at (145, 57) has overtaken the adult at (156, 53)
-                  for second nearest. In centimetres the adult was closer,
-                  since the child is twelve kilograms from the query in
-                  weight and the adult only eight, and that outweighed the
-                  child being one centimetre nearer in height. In
-                  millimetres the height differences are fifty and sixty,
-                  their squares dwarf anything the kilograms add, and the
-                  child&rsquo;s one-centimetre edge decides it. The vote
-                  happens to survive, two children to one adult at k of 3
-                  and three adults to two children at k of 5, but the
-                  ranking it rests on was reshuffled by a choice of unit
-                  that said nothing about anybody.
-                </p>
+                <p>The child at (145, 57) becomes the second-nearest person after converting height to millimeters. In centimeters, the adult at (156, 53) is closer because its smaller weight gap more than compensates for its slightly larger height gap.</p>
+<p>After conversion, those height gaps are fifty and sixty millimeters while the weight gaps stay twelve and eight kilograms. The raw distance now gives height much more numerical weight. The class votes happen to stay unchanged at k=3 and k=5, but their neighbor rankings change. Unit conversion alone provides no evidence that this new weighting is better.</p>
               </>
               <>
                 <p>
@@ -246,20 +186,15 @@ export default function KNearestNeighboursPage() {
                   the scaling and distance with the task in mind, then evaluate them on
                   held-out data.
                 </p>
-                <p>
-                  On these eleven people that spread is about 22.8 cm for
-                  height and about 20.8 kg for weight, so dividing each
-                  difference by its own spread hands the two measurements a
-                  roughly equal say. The five neighbours then sit at these
-                  distances, measured in spreads rather than in any unit.
-                </p>
+                <p>The training standard deviations are about 22.8 cm for height and 20.8 kg for weight. Dividing each coordinate difference by its corresponding standard deviation expresses both in standard-deviation units. It gives the columns comparable training variation, without requiring equal contributions to each pairwise distance. The five neighbors then have the following distances.</p>
                 <Equation>{"child at (147, 41)   ≈ 0.23\nadult at (156, 53)   ≈ 0.47\nchild at (145, 57)   ≈ 0.62\nadult at (159, 57)   ≈ 0.70\nadult at (162, 61)   ≈ 0.93"}</Equation>
                 <p>
-                  That is the centimetre order back again, and the same five
-                  numbers come out whether the fit started from centimetres
-                  or from millimetres, because a difference ten times larger
+
+                  That is the centimeter order back again, and the same five
+                  numbers come out whether the fit started from centimeters
+                  or from millimeters, because a difference ten times larger
                   is divided by a spread ten times larger. The unit has been
-                  cancelled, which is all that standardising promises.
+                  canceled, which is all that standardizing promises.
                 </p>
               </>
             </>
@@ -269,19 +204,14 @@ export default function KNearestNeighboursPage() {
           title: "How to Derive",
           content: (
             <>
+              <p>Why should the majority decide the answer? Storing the examples does not explain the vote by itself. We can justify that choice by treating nearby labels as an estimate of the class probabilities, then asking which prediction has the smaller expected error.</p>
               <p>
-                A method with no objective would seem to leave nothing to
-                derive, though one piece of it can be earned rather than
-                assumed, the vote itself. Why should the majority of the
-                neighbours decide, rather than the single nearest one, or
-                some fancier weighting?
-              </p>
-              <p>
-                Treat the k neighbours as a small poll of the query&rsquo;s
-                neighbourhood. If a fraction p̂ of them are adults, that
+
+                Treat the k neighbors as a small poll of the query&rsquo;s
+                neighborhood. If a fraction p̂ of them are adults, that
                 fraction is our estimate of the chance that a person standing
                 at the query&rsquo;s spot is an adult, the statistics
-                primer&rsquo;s sampling idea pointed at a neighbourhood
+                primer&rsquo;s sampling idea pointed at a neighborhood
                 instead of a population. Now weigh the two possible answers
                 against that estimate. Guess adult and the expected chance of
                 being wrong is 1 − p̂. Guess child and it is p̂.
@@ -289,8 +219,9 @@ export default function KNearestNeighboursPage() {
               <Equation>{"guess adult   when  1 − p̂ < p̂,   that is, when  p̂ > ½"}</Equation>
               <>
                 <p>
+
                   If both kinds of mistake have the same cost, choose the class with the
-                  larger estimated local probability. With equally weighted neighbours,
+                  larger estimated local probability. With equally weighted neighbors,
                   that gives a majority vote. This is optimal for the local estimate we
                   just made; it does not prove the estimate matches the true population
                   probability.
@@ -303,10 +234,11 @@ export default function KNearestNeighboursPage() {
                 </p>
                 <Equation>{"k = 3   p̂ = 1/3 < ½   guess child\nk = 5   p̂ = 3/5 > ½   guess adult"}</Equation>
                 <p>
-                  An even number of neighbours can produce a tied two-class vote, which
+
+                  An even number of neighbors can produce a tied two-class vote, which
                   needs a stated tie rule. An odd count avoids that particular tie. It
                   does not resolve equally distant candidates at the edge of the
-                  neighbourhood, and multiclass votes can tie even with an odd count.
+                  neighborhood, and multiclass votes can tie even with an odd count.
                 </p>
               </>
             </>
@@ -316,54 +248,54 @@ export default function KNearestNeighboursPage() {
           title: "Questions on Scaling and the Vote",
           quiz: [
             trueFalse(
-              "Recording height in millimetres rather than centimetres makes the method’s predictions worse.",
+              "Recording height in millimeters rather than centimeters makes the method’s predictions worse.",
               false,
               "Height differences become numerically larger, so they contribute much more to the squared distance and can change which people count as nearest. On the page’s own people the child at (145, 57) overtakes the adult at (156, 53) for second nearest, while the answers at k of 3 and k of 5 survive. Whether such a reshuffle helps or hurts depends on the dataset, and the unit conversion gives no reason to prefer the new weighting.",
             ),
             trueFalse(
               "Scaling each feature by its training standard deviation shows that the features deserve equal predictive importance.",
               false,
-              "It puts the differences on a comparable numerical scale, which is a useful starting point and no more than that. On these eleven people it gives the same five distances whether height arrived in centimetres or millimetres, so what it does is cancel the unit, and cancelling a unit says nothing about which measurement matters more. The scaling and the distance are chosen with the task in mind and then evaluated on held-out data.",
+              "It puts the differences on a comparable numerical scale, which is a useful starting point and no more than that. On these eleven people it gives the same five distances whether height arrived in centimeters or millimeters, so what it does is cancel the unit, and canceling a unit says nothing about which measurement matters more. The scaling and the distance are chosen with the task in mind and then evaluated on held-out data.",
             ),
             choice(
               "Where does the majority vote come from, rather than being assumed?",
               [
-                "The k neighbours are a poll of the local neighbourhood, and with equal costs the class with the larger estimated local chance is the better guess",
-                "The majority is whichever class minimises the total distance to the query",
+                "The k neighbors are a poll of the local neighborhood, and with equal costs the class with the larger estimated local chance is the better guess",
+                "The majority is whichever class minimizes the total distance to the query",
                 "A majority is the only rule that cannot produce a tie",
                 "It follows from the distance being the length of a difference",
               ],
               0,
-              "Guess adult and the expected chance of being wrong is one minus the local share of adults, guess child and it is that share, so with equally weighted neighbours the larger share wins. That is optimal for the local estimate just made, and it does not prove the estimate matches the true population probability.",
+              "Guess adult and the expected chance of being wrong is one minus the local share of adults, guess child and it is that share, so with equally weighted neighbors the larger share wins. That is optimal for the local estimate just made, and it does not prove the estimate matches the true population probability.",
             ),
             several(
               "Which of these hold for keeping k odd?",
               [
                 "It rules out a tied two-class vote",
-                "It rules out a tie between two candidates equally distant at the edge of the neighbourhood",
+                "It rules out a tie between two candidates equally distant at the edge of the neighborhood",
                 "It rules out a tied vote among three or more classes",
                 "An even count would need a stated tie rule instead",
               ],
               [0, 3],
-              "An odd count avoids that one particular tie and no others. Two equally distant candidates at the edge of the neighbourhood still have to be separated somehow, and a multiclass vote can tie however many neighbours are polled.",
+              "An odd count avoids that one particular tie and no others. Two equally distant candidates at the edge of the neighborhood still have to be separated somehow, and a multiclass vote can tie however many neighbors are polled.",
             ),
             choice(
-              "At the borderline query with k of 5, three of the five neighbours are adults. In the derivation’s terms, what is p̂ and what does it decide?",
+              "At the borderline query with k of 5, three of the five neighbors are adults. In the derivation’s terms, what is p̂ and what does it decide?",
               [
                 "p̂ is 3/5, above one half, so the guess is adult",
                 "p̂ is 2/5, below one half, so the guess is child",
-                "p̂ is 3/5, but the guess is child because the nearest neighbour is a child",
+                "p̂ is 3/5, but the guess is child because the nearest neighbor is a child",
                 "p̂ cannot be estimated from a poll of only five",
               ],
               0,
-              "p̂ is the share of the k neighbours who are adults, and three in five is 3/5. Guessing adult then risks being wrong with chance 1 − 3/5, which is 2/5, and guessing child risks 3/5, so adult is the smaller risk. At k of 3 the share is 1/3 and the same rule says child, which is the worked example’s flip seen as the estimate crossing one half. The nearest neighbour carries no extra weight in this vote, which is what equally weighted means.",
+              "For this unweighted neighborhood, the estimated adult probability is the adult fraction. Under equal error costs, choose the class with the smaller estimated error risk:\n\n```math\np̂(adult) = 3 / 5\nrisk of predicting adult = 1 − 3/5 = 2/5\nrisk of predicting child = 3/5\n```\n\nAt k=3 the adult fraction is one third, so the same rule chooses child. Every selected neighbor has equal weight; the nearest does not receive an extra vote. These are risks under the local estimate, not a guarantee about the population.",
             ),
         ],
         },
         {
           title: "Practice. Polling the Eleven People With the Library",
           practice: [
-            exercise("Put the borderline query to its neighbours",["Fit the library’s classifier on the eleven people of the widget’s borderline case, with the query at a height of 150 and a weight of 45, and let it find the neighbours the worked example found by hand. Do it once at k of 3 and once at k of 5.", "The worked example arrived at distances of 5, 10, 13, 15 and 20 and an answer that flips from child to adult between the two. The library takes the same route, so the distances should come out exactly, and the share of adults among the neighbours is the p̂ of the derivation, one third at k of 3 and three fifths at k of 5."],`from oop_ml import Feature, KNearestNeighboursClassifier
+            exercise("Put the borderline query to its neighbours",["Fit KNearestNeighboursClassifier to the eleven labeled height-weight pairs below. Predict the class of the query at 150 cm and 45 kg with three neighbors, then repeat with five. Child is class 0 and adult is class 1.", "Print the predicted class, the fraction of selected neighbors labeled adult, and each selected neighbor's label and distance. Compare which additional people change the vote when k increases."],`from oop_ml import Feature, KNearestNeighboursClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -402,8 +334,8 @@ k 5  answer adult  adult share 0.6000
   adult at distance 10
   child at distance 13
   adult at distance 15
-  adult at distance 20`,{...{ hints: ["Construction configures and fitting learns, so n_neighbours goes to the constructor and the people go to fit. The target is the label column, 0 for a child and 1 for an adult.", "predict answers one class per query row, 0.0 or 1.0, and predict_probabilities answers one row per query with one column per class, so the adult share of the single query is row 0, column 1.", "neighbour_search answers one entry per query. Iterate it, and each entry carries chosen_distances and chosen_targets, both nearest first."], check: numberCheck("What share of the five neighbours are adults at k of 5?", 0.6, 0.001, "A majority of the five selected neighbours are adults, whereas the nearest three have a child majority. The class changes because the neighbourhood changed, not because the training labels were refitted.") },question:"Which neighbours decide the borderline person's class at each neighbour count?"}),
-            exercise("Walk k all the way up to everyone",["The lesson slides k from 3 to 5 and stops. Keep going, at every odd k from 1 up to 11, which is everybody, and print at each the number of adults among the voters, their share, how far away the farthest voter is, and the answer.", "What k Trades says that pushed toward the size of the whole dataset the answer drifts toward whichever class simply has more members. Six of the eleven people are adults, so at k of 11 the query’s own position has stopped mattering. Watch what happens in between, where the lesson does not look."],`from oop_ml import Feature, KNearestNeighboursClassifier
+  adult at distance 20`,{...{ hints: ["Pass n_neighbours to the constructor and the feature and label columns to fit. This configures the neighborhood size and stores the reference people used for predictions.", "predict answers one class per query row, 0.0 or 1.0, and predict_probabilities answers one row per query with one column per class, so the adult share of the single query is row 0, column 1.", "neighbour_search answers one entry per query. Iterate it, and each entry carries chosen_distances and chosen_targets, both nearest first."], check: numberCheck("What share of the five neighbors are adults at k of 5?", 0.6, 0.001, "A majority of the five selected neighbors are adults, whereas the nearest three have a child majority. The class changes because the neighborhood changed, not because the training labels were refitted.") },question:"Which neighbors decide the borderline person's class at each neighbor count?"}),
+            exercise("Walk k all the way up to everyone",["Repeat the same query for every odd k from 1 through 11. Print the number and share of adult neighbors, the farthest selected distance and the predicted class.", "At k=11, all stored people contribute equally, regardless of the query's position. Compare the intermediate results to see how including more distant people can reverse the majority more than once."],`from oop_ml import Feature, KNearestNeighboursClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -436,8 +368,8 @@ k  3  adults 1 of 3  share 0.3333  farthest voter 13.00  answer child
 k  5  adults 3 of 5  share 0.6000  farthest voter 20.00  answer adult
 k  7  adults 3 of 7  share 0.4286  farthest voter 36.06  answer child
 k  9  adults 4 of 9  share 0.4444  farthest voter 43.28  answer child
-k 11  adults 6 of 11  share 0.5455  farthest voter 50.33  answer adult`,{...{ hints: ["The same constructor and fit each time round, with only k changing. k of 11 is allowed, since eleven rows were supplied, and it polls everyone.", "neighbour_search gives each query its chosen_targets, which sum to the number of adults, and its chosen_distances, whose last entry is the farthest voter."], check: numberCheck("At k of 11, when every stored person votes, what share of the votes are for adult?", 0.5455, 0.0001, "At the full training count every reference votes, so the local query position no longer affects this unweighted class share. Intermediate counts can reverse the majority as different groups enter the neighbourhood.") },question:"How does the vote change as increasingly distant people join it?"}),
-            exercise("Record the heights in millimetres, then standardise",["The Scaling Trap multiplies every height by ten and watches the ranking change. Do that to the eleven people and the query, fit at k of 3, and print each neighbour with their original height and weight and their distance in the new units. Then standardise the millimetre features with the library, refit, and print the neighbours again.", "In millimetres the child at (145, 57) should overtake the adult at (156, 53) for second nearest. After standardising, the distances are in spreads rather than units, the centimetre order should be back, and the two spreads the standardiser learned are the ones the lesson quotes, in millimetres and kilograms."],`from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
+k 11  adults 6 of 11  share 0.5455  farthest voter 50.33  answer adult`,{...{ hints: ["The same constructor and fit each time round, with only k changing. k of 11 is allowed, since eleven rows were supplied, and it polls everyone.", "neighbour_search gives each query its chosen_targets, which sum to the number of adults, and its chosen_distances, whose last entry is the farthest voter."], check: numberCheck("At k of 11, when every stored person votes, what share of the votes are for adult?", 0.5455, 0.0001, "At the full training count every reference votes, so the local query position no longer affects this unweighted class share. Intermediate counts can reverse the majority as different groups enter the neighborhood.") },question:"How does the vote change as increasingly distant people join it?"}),
+            exercise("Record the heights in millimetres, then standardise",["Convert the eleven training heights and the query height to millimeters, leaving weights in kilograms. Fit a three-neighbor classifier. Print the selected row indices with their original height and weight and their distances in the new coordinates. Then standardize both millimeter-based input columns, refit and print the selected neighbors again.", "Print both standard deviations learned from the training people. Apply the same fitted scaler to the query. Compare the raw millimeter ranking with the standardized ranking; standardizing removes the unit conversion but need not reproduce every raw-centimeter ranking in other datasets."],`from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -489,8 +421,8 @@ weight spread 20.76
 standardised
   child at (147, 41)  distance 0.2332
   adult at (156, 53)  distance 0.4663
-  child at (145, 57)  distance 0.6180`,{...{ hints: ["A Feature takes a name and a list, so the millimetre column is the heights each multiplied by ten under the same name, and the query’s height is 1500.", "Each entry of neighbour_search has chosen_indices, positions into the people in the order they were supplied, which is how to print the original height and weight beside each distance.", "Standardizer learns on fit_transform and is applied to the query with transform, so the people and the query pass through the same scaling. Its scalings can be iterated, and each one has a name and a standard_deviation."], check: numberCheck("In millimetres, how far is the second nearest person from the query?", 51.42, 0.01, "The millimetre conversion changes the relative height and weight contributions to raw distance. Standardisation then uses training spreads to put both columns on a declared common numerical scale.") },question:"How do millimetres and standardisation change the neighbour order?"}),
-            exercise("Ask for more neighbours than there are people",["The widget’s slider goes up to 15 and the borderline case has eleven people. Ask the library for fifteen neighbours on the eleven and see what it does.", "A vote cannot have more voters than people. Catch what the library raises, and print its name and its message."],`from oop_ml import Feature, KNearestNeighboursClassifier, MLLibError
+  child at (145, 57)  distance 0.6180`,{...{ hints: ["A Feature takes a name and a list, so the millimeter column is the heights each multiplied by ten under the same name, and the query’s height is 1500.", "Each entry of neighbour_search has chosen_indices, positions into the people in the order they were supplied, which is how to print the original height and weight beside each distance.", "Standardizer learns on fit_transform and is applied to the query with transform, so the people and the query pass through the same scaling. Its scalings can be iterated, and each one has a name and a standard_deviation."], check: numberCheck("In millimeters, how far is the second nearest person from the query?", 51.42, 0.01, "The millimeter conversion changes the relative height and weight contributions to raw distance. Standardization then uses training spreads to put both columns on a declared common numerical scale.") },question:"How do millimeters and standardization change the neighbor order?"}),
+            exercise("Ask for more neighbours than there are people",["The widget’s slider goes up to 15 and the borderline case has eleven people. Ask the library for fifteen neighbors on the eleven and see what it does.", "A vote cannot have more voters than people. Catch what the library raises, and print its name and its message."],`from oop_ml import Feature, KNearestNeighboursClassifier, MLLibError
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -514,7 +446,7 @@ try:
 except MLLibError as refusal:
     print(type(refusal).__name__)
     print(refusal)`,`TooFewValuesError
-15 neighbours were asked for and only 11 rows were supplied`,{...{ hints: ["The refusal happens at fit rather than at construction, because fitting is the first moment the model knows how many rows there are."] },question:"What happens when we ask for more neighbours than the training table contains?"}),
+15 neighbours were asked for and only 11 rows were supplied`,{...{ hints: ["The refusal happens at fit rather than at construction, because fitting is the first moment the model knows how many rows there are."] },question:"What happens when we ask for more neighbors than the training table contains?"}),
           ],
         },
       ]}

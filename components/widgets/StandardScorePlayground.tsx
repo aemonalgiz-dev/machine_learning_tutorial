@@ -167,7 +167,7 @@ export function StandardScorePlayground() {
         onPointerUp={onPointerUp}
       >
         <text x={PAD.left} y={20} className="fill-slate-500 text-[11px] dark:fill-slate-400">
-          trunk girth as recorded, millimetres
+          trunk girth as recorded, millimeters
         </text>
         <line
           x1={PAD.left}
@@ -294,9 +294,9 @@ function invarianceNote(reading: ColumnReading): string {
   const shifted = reading.shifted_largest_gap;
   const stretched = reading.stretched_largest_gap;
   if (shifted === null || stretched === null) {
-    return "These trunks differ by so little that adding a thousand millimetres to every one of them lands them all on the same number, so one of the two checks has nothing left to compare against.";
+    return "These trunks differ by so little that adding a thousand millimeters to every one of them lands them all on the same number, so one of the two checks has nothing left to compare against.";
   }
-  return `Add 1000 mm to every trunk and the largest score moves by ${shifted.toExponential(1)}; write the same trunks in centimetres and it moves by ${stretched.toExponential(1)}. The lower line is the same picture either way, which is what it means for the unit to have gone.`;
+  return `Add 1000 mm to every trunk and the largest score moves by ${shifted.toExponential(1)}; write the same trunks in centimeters and it moves by ${stretched.toExponential(1)}. The lower line is the same picture either way, which is what it means for the unit to have gone.`;
 }
 
 function Stat({ label, value }: { label: string; value: string }) {

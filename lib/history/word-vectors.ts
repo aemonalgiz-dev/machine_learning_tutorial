@@ -13,7 +13,7 @@ export const wordVectors = {
   ],
   "A query and a document rarely contain exactly the same text. A search system therefore needs a graded comparison rather than an exact match. Once terms are represented as coordinates, the problem becomes deciding which geometric relationship reflects relevance.",
   "Salton, Wong and Yang's 1975 vector-space work examined representations for automatic document indexing. Representing documents and requests in a common space made comparisons between them explicit numerical operations, helping establish the vector view used throughout information retrieval.",
-  "Distance measures separation between points. Cosine similarity compares direction, which can be useful when vector length reflects document size more than subject matter. A dot product retains sensitivity to length unless vectors are normalised. None of these comparisons creates meaning by itself; each interprets the representation we supplied. We therefore need to understand both the vectors and the comparison rule."),
+  "Distance measures separation between points. Cosine similarity compares direction, which can be useful when vector length reflects document size more than subject matter. A dot product retains sensitivity to length unless vectors are normalized. None of these comparisons creates meaning by itself; each interprets the representation we supplied. We therefore need to understand both the vectors and the comparison rule."),
 
   "word2vec": history("Could a Small Prediction Task Learn Useful Word Relationships?", [
     source("Mikolov and colleagues (2013), Efficient Estimation of Word Representations in Vector Space", "https://arxiv.org/abs/1301.3781"),
@@ -35,13 +35,13 @@ export const wordVectors = {
   ],
   "A corpus tells us which words appear near one another, but a full table of those counts can be enormous. We want compact vectors that preserve informative relationships in that table without merely giving the most frequent words the largest influence.",
   "Pennington, Socher and Manning introduced GloVe in 2014, connecting global co-occurrence statistics with learned word vectors. Their motivation included the information in ratios of co-occurrence probabilities: a context can help distinguish two words when it is associated much more strongly with one than the other.",
-  "GloVe fits vector interactions and bias terms to log co-occurrence counts, with a weighting function controlling how count sizes contribute. The result is a compressed representation of observed context relationships. The fitting objective explains why corpus preparation and the context window matter. It also reminds us that the vectors model usage statistics rather than a complete account of language."),
+  "GloVe assigns a short vector to each word and each context. Their dot product, together with adjustable offsets called biases, tries to reproduce the logarithm of an observed co-occurrence count. A weighting rule controls each count's influence on the fit. Training therefore compresses the count relationships into fewer coordinates. Changing which nearby words we count changes what the vectors learn; the result describes that usage evidence, rather than every possible meaning of a word."),
 
   "latent-semantic-analysis": history("Could a Search Find the Topic Without Finding the Exact Word?", [
     source("Deerwester and colleagues (1990), Indexing by Latent Semantic Analysis", "https://www.cs.csustan.edu/~mmartin/LDS/Deerwester-et-al.pdf"),
   ],
   "A document can discuss the subject of a query without using the same vocabulary. Conversely, a matching word may have a different meaning in the document. Exact term overlap therefore misses some relationships and invents others.",
-  "Deerwester and colleagues' 1990 latent semantic indexing work addressed this problem by modelling underlying structure in a term-document table. They used a reduced singular value decomposition to capture major patterns of association while suppressing some of the table's finer variation.",
+  "Deerwester and colleagues' 1990 latent semantic indexing work addressed this problem by modeling underlying structure in a term-document table. They used a reduced singular value decomposition to capture major patterns of association while suppressing some of the table's finer variation.",
   "Think of documents that repeatedly use overlapping sets of words. A smaller collection of shared directions can describe those patterns, placing related documents and terms closer even without exact overlap. The dimensions are mathematical components, not guaranteed human-readable topics. Reducing the table can reveal useful structure while also discarding distinctions we may need."),
 
   "pointwise-mutual-information": history("Are Those Words Associated, or Just Common?", [

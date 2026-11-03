@@ -177,14 +177,12 @@ export function SeparationLadder({ corpus: fixed }: { corpus?: CorpusName }) {
       </svg>
 
       <Legend>
-        The indigo dot is the average similarity between two documents of the
-        same half and its bar reaches out to the least alike such pair; the amber
-        dot is the average between two documents of different halves and its bar
-        reaches out to the most alike such pair. The figure on the right is the
-        least alike same-half pair minus the most alike different-half pair, so
-        it is green only when every same-half pair is nearer than every
-        different-half pair, and on the twenty-four documents the two counting
-        rules never manage it.
+        Indigo compares documents within a topic. Its dot is the mean similarity
+        and its bar reaches the least similar pair. Amber compares documents
+        across topics, with a bar reaching their most similar pair.
+        A green gap on the right means even the least similar within-topic pair
+        scores above every across-topic pair. Neither counting representation
+        meets that condition for these twenty-four documents.
       </Legend>
       {message && (
         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">

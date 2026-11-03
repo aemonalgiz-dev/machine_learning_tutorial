@@ -70,7 +70,7 @@ export function AttentionExplorer() {
   const state = useCalculation(() => attend(tokens, heads, causal, positions), [tokens, heads, causal, positions]);
   const view = state.view;
   return <div>
-    <p className="mb-3 text-sm text-slate-600 dark:text-slate-400">These colour names have assigned vectors. The four projection matrices are identities, so the example exposes the arithmetic without claiming to have learned language.</p>
+    <p className="mb-3 text-sm text-slate-600 dark:text-slate-400">These color names have assigned vectors. The four projection matrices are identities, so the example exposes the arithmetic without claiming to have learned language.</p>
     <div className="flex flex-wrap gap-3">{tokens.map((token, index) => <label key={index} className="text-sm">Token {index + 1}{" "}<select className={selectClass} value={token} onChange={(event) => setTokens(tokens.map((item, position) => position === index ? event.target.value as Colour : item))}>{["red", "blue", "green"].map((colour) => <option key={colour}>{colour}</option>)}</select></label>)}</div>
     <div className="mt-4 flex flex-wrap gap-4 text-sm">
       <label>Heads <select className={selectClass} value={heads} onChange={(event) => setHeads(Number(event.target.value))}><option value={1}>1</option><option value={2}>2</option></select></label>
@@ -146,14 +146,14 @@ export function RadialExplorer() {
   return <div>
     <div className="grid gap-4 sm:grid-cols-2"><Slider label="Input" value={probe} min={-3} max={3} step={0.1} change={setProbe} /><Slider label="Width of each unit" value={width} min={0.2} max={3} step={0.1} change={setWidth} /></div>
     <Result state={state}>{view && <>
-      <svg viewBox="0 0 600 235" className="w-full" role="img" aria-label="Three radial basis responses, peaking at their centres of minus one, zero, and one">
+      <svg viewBox="0 0 600 235" className="w-full" role="img" aria-label="Three radial basis responses, peaking at their centers of minus one, zero, and one">
         <path d="M40 20V200H570" fill="none" stroke="currentColor" opacity="0.4" />
         {view.centres.map((centre, unit) => <path key={centre} fill="none" stroke={colours[unit]} strokeWidth="2.5" d={view.curve_inputs.map((input, index) => `${index === 0 ? "M" : "L"}${40 + (input + 3) / 6 * 530},${200 - view.curve_outputs[index][unit] * 180}`).join(" ")} />)}
         <line x1={40 + (probe + 3) / 6 * 530} x2={40 + (probe + 3) / 6 * 530} y1="20" y2="200" stroke="currentColor" strokeDasharray="4 4" />
         <text x="18" y="25" fill="currentColor" fontSize="12">1</text><text x="18" y="200" fill="currentColor" fontSize="12">0</text><text x="36" y="220" fill="currentColor" fontSize="12">−3</text><text x="300" y="220" fill="currentColor" fontSize="12">0</text><text x="565" y="220" fill="currentColor" fontSize="12">3</text>
       </svg>
-      <Table caption="Response at the selected input" columns={["Centre", "Squared distance", "Output"]} rows={view.centres.map((centre, index) => [<span key={centre} style={{ color: colours[index] }}>{centre}</span>, number(view.distances_squared[index]), number(view.outputs[index])])} />
-      <details className="text-sm"><summary className="cursor-pointer font-medium">Inspect parameter derivatives</summary><Table caption="Derivative of the sum of the three outputs" columns={["Centre", "Centre derivative", "Width derivative"]} rows={view.centres.map((centre, index) => [centre, number(view.centre_slopes[index]), number(view.width_slopes[index])])} /></details>
+      <Table caption="Response at the selected input" columns={["Center", "Squared distance", "Output"]} rows={view.centres.map((centre, index) => [<span key={centre} style={{ color: colours[index] }}>{centre}</span>, number(view.distances_squared[index]), number(view.outputs[index])])} />
+      <details className="text-sm"><summary className="cursor-pointer font-medium">Inspect parameter derivatives</summary><Table caption="Derivative of the sum of the three outputs" columns={["Center", "Center derivative", "Width derivative"]} rows={view.centres.map((centre, index) => [centre, number(view.centre_slopes[index]), number(view.width_slopes[index])])} /></details>
     </>}</Result>
   </div>;
 }

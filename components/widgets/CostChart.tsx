@@ -105,7 +105,7 @@ function Panel({ title, points, axis }: { title: string; points: CostPoint[]; ax
             <text x={plotX(axis(point))} y={FRAME.height - 20} textAnchor="middle" className="fill-slate-500 text-[9px] dark:fill-slate-400">{axis(point)}</text>
           </g>
         ))}
-        <text x={FRAME.left + innerWidth / 2} y={FRAME.height - 6} textAnchor="middle" className="fill-slate-500 text-[9px] dark:fill-slate-400">indigo, the kernel fit · grey, ridge</text>
+        <text x={FRAME.left + innerWidth / 2} y={FRAME.height - 6} textAnchor="middle" className="fill-slate-500 text-[9px] dark:fill-slate-400">indigo, the kernel fit · gray, ridge</text>
       </svg>
     </div>
   );

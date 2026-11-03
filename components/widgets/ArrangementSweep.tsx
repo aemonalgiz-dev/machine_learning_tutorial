@@ -1,4 +1,6 @@
 "use client";
+import { americanEnglish } from "@/lib/american-english";
+
 
 // The tangled crowd under five arrangements, held out fold by fold.
 //
@@ -154,7 +156,7 @@ export function ArrangementSweep() {
         {experiment.sweep.map((reading) => (
           <Stat
             key={reading.arrangement}
-            label={ARRANGEMENT_TITLES[reading.arrangement]}
+            label={americanEnglish(ARRANGEMENT_TITLES[reading.arrangement])}
             value={`${reading.training_accuracy_mean.toFixed(3)} trained, ${reading.held_out_accuracy_mean.toFixed(3)} held out`}
             detail={`held out across seeds ${reading.held_out_accuracy_low.toFixed(2)} to ${reading.held_out_accuracy_high.toFixed(2)}`}
           />

@@ -15,7 +15,7 @@ function solve(L:number[][],b:number[]) {
   return x;
 }
 export function greenhousePrediction(positions:number[],readings:number[],query:number[],length:number,noise:number) {
-  if(positions.length!==readings.length||length<=0||noise<=0||![...positions,...readings,...query,length,noise].every(Number.isFinite))throw Error("Use matching finite readings and positive length and noise.");
+  if(positions.length!==readings.length||length<=0||noise<=0||![...positions,...readings,...query,length,noise].every(Number.isFinite))throw Error("Provide one reading per position and use finite numbers. The length scale and noise variance must be positive.");
   const K=positions.map((a,i)=>positions.map((b,j)=>rbf(a,b,length)+(i===j?noise:0)));
   const L=cholesky(K),alpha=solve(L,readings.map(t=>t-20));
   const cross=query.map(q=>positions.map(x=>rbf(q,x,length)));

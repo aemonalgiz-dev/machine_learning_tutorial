@@ -169,9 +169,11 @@ export function PowersAndUnits() {
           </tbody>
         </table>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          At that degree the fit has one number to set for every person it is
-          fitting, so the right answer in the last column is 1. Neither reading
-          reaches it, and the one taken in centimetres does not come close.
+          With these distinct input heights, a polynomial of this degree
+          can pass through every observation in exact arithmetic, giving a
+          training R² of 1. The lower scores here show numerical difficulty in
+          solving for its coefficients. Expressing the heights in centimeters
+          makes that difficulty more apparent.
         </p>
       </div>
 

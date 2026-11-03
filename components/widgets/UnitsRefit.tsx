@@ -28,7 +28,7 @@ import {
 } from "./distanceMetricsFixtures";
 
 const FACTORS: { label: string; value: number }[] = [
-  { label: "tonnes", value: 0.001 },
+  { label: "metric tons", value: 0.001 },
   { label: "kilograms", value: 1 },
   { label: "grams", value: 1000 },
 ];
@@ -36,7 +36,7 @@ const FACTORS: { label: string; value: number }[] = [
 const TREATMENT_TITLES: Record<Treatment["name"], string> = {
   raw: "as measured",
   weight_rescaled: "weight rescaled",
-  standardised: "standardised",
+  standardised: "standardized",
 };
 
 export function UnitsRefit() {

@@ -12,8 +12,8 @@ export function JourneyResume({ introWhenNew = false }: { introWhenNew?: boolean
   // its first account sync before its recent workshop becomes available.
   if (account.status === "checking" || (account.user && !recent && !account.learnerStateReady)) return null;
   if (!recent) return introWhenNew ? <aside aria-labelledby="start-workshop" className="mb-8 rounded-2xl border border-accent-fill/40 bg-accent-soft p-5 sm:p-6">
-    <h2 id="start-workshop" className="text-xl font-semibold">Start by connecting something</h2>
-    <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">The tutorial opens with a machine you can try straight away. Botie explains each control as you use it, then gives you room to build your own solution.</p>
+    <h2 id="start-workshop" className="text-xl font-semibold">Botie&apos;s workshop tutorial</h2>
+    <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">Learn how to use his workshops and the basics of how concepts are taught.</p>
     <Link href="/lab/workshop-guide" className="mt-4 inline-block rounded-lg bg-accent-fill px-4 py-3 text-sm font-semibold text-accent-ink">Build your first machine →</Link>
   </aside> : null;
   const status = journeyStatus(recent.record);

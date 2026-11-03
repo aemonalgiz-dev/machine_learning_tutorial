@@ -53,7 +53,11 @@ export function FiniteDifferenceCheck() {
         </div>
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Two forward passes per parameter, so checking every one of this network&rsquo;s {parameters} parameters would cost {2 * parameters} forward passes to learn what one backward walk learns for about the price of one. On a million weights it is two million.
+        Finite differences need two forward passes for each parameter. Checking
+        this network&apos;s {parameters} parameters would therefore require {2 * parameters} forward
+        passes. Backpropagation calculates all of their derivatives together
+        in one reverse pass. Finite differences are useful for checking those
+        derivatives, but become expensive as the number of parameters grows.
       </p>
     </div>
   );

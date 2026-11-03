@@ -37,7 +37,7 @@ print(readings[order].tolist())`,
     "[3, 2, 1, 0]\n['annex', 'south', 'middle', 'north']\n[40, 30, 20, 10]",
     "The same order moves names and temperatures together. A saved permutation can define a repeatable split, but random splitting is not appropriate when time or related groups require a different evaluation design."));
   sampling.parts[3].examples = [worked("Generate a small simulated sensor report",
-    "A distribution describes the rule for drawing values. normal draws from a normal distribution with a supplied centre, loc, and standard deviation, scale. The size determines the output shape. The standard deviation is not a hard bound on possible deviations.\n\nThese are simulated values under a chosen assumption, not recorded thermometer measurements. Uniform draws over an interval would express a different assumption; a seed only fixes the sequence within the chosen rule.",
+    "A distribution describes the rule for drawing values. normal draws from a normal distribution with a supplied center, loc, and standard deviation, scale. The size determines the output shape. The standard deviation is not a hard bound on possible deviations.\n\nThese are simulated values under a chosen assumption, not recorded thermometer measurements. Uniform draws over an interval would express a different assumption; a seed only fixes the sequence within the chosen rule.",
     `rng = np.random.default_rng(42)
 simulated = rng.normal(loc=20, scale=2, size=(2,3))
 print(simulated.shape)
@@ -46,19 +46,19 @@ print(np.round(simulated,1).tolist())`,
     "The layout represents two mornings and three greenhouses. It does not claim to reproduce real temperature patterns. Changing the distribution, its parameters, the request order, or the environment can change a simulated experiment.")];
   sampling.quiz.push(
     question("How should we preserve the name-to-reading relationship when shuffling?", 'names = np.array(["north","middle","south","annex"])\nreadings = np.array([10,20,30,40])\nrng = np.random.default_rng(42)', ["Shuffle each array independently", "Apply one permutation of positions to both arrays", "Sort the names and keep the readings unchanged"], 1, "One permutation moves each name together with its corresponding observation."),
-    question("What does scale specify in this simulation?", "rng = np.random.default_rng(42)\nsimulated = rng.normal(loc=20, scale=2, size=(2,3))", ["A strict maximum deviation of two", "The number of greenhouse columns", "The distribution's standard deviation"], 2, "Normal draws can fall more than one standard deviation from their centre. Scale is not a clipping boundary.")
+    question("What does scale specify in this simulation?", "rng = np.random.default_rng(42)\nsimulated = rng.normal(loc=20, scale=2, size=(2,3))", ["A strict maximum deviation of two", "The number of greenhouse columns", "The distribution's standard deviation"], 2, "Normal draws can fall more than one standard deviation from their center. Scale is not a clipping boundary.")
   );
 }
 
 export const numpyApplications = {
   "numpy-arrays": [["Direct statistics calculations", "/primers/statistics"]],
   "numpy-axes": [["Pooling measurements", "/concepts/pooling"]],
-  "numpy-creation": [["Initialising and training a network", "/concepts/training-a-network"]],
+  "numpy-creation": [["Initializing and training a network", "/concepts/training-a-network"]],
   "numpy-indexing": [["Selecting held-out observations", "/concepts/held-out-evaluation"], ["Looking up embedding rows", "/concepts/embedding-layers"]],
   "numpy-reshaping": [["Shapes and flattening", "/concepts/shapes-and-flattening"], ["Dense layers", "/concepts/dense-layers"]],
-  "numpy-broadcasting": [["Centring measurements", "/concepts/centring-on-the-mean"], ["Attention", "/concepts/attention"]],
+  "numpy-broadcasting": [["Centering measurements", "/concepts/centring-on-the-mean"], ["Attention", "/concepts/attention"]],
   "numpy-masks": [["Missing measurements", "/concepts/missing-measurements"]],
-  "numpy-reductions": [["Standard scores", "/concepts/the-standard-score"], ["Nearest-neighbour comparisons", "/concepts/k-nearest-neighbours"]],
+  "numpy-reductions": [["Standard scores", "/concepts/the-standard-score"], ["Nearest-neighbor comparisons", "/concepts/k-nearest-neighbours"]],
   "numpy-vectorisation": [["Loss functions", "/concepts/loss-functions"], ["Gradient calculations", "/concepts/gradient-descent-regression"]],
   "numpy-linear-algebra": [["Multiple feature predictions", "/concepts/multiple-polynomial-regression"], ["Principal component analysis", "/concepts/pca"]],
   "numpy-numerical-checks": [["Preparing incomplete reports", "/concepts/missing-measurements"], ["Evaluating held-out predictions", "/concepts/held-out-evaluation"]],

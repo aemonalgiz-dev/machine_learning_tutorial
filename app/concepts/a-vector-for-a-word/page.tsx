@@ -26,9 +26,9 @@ import { WordSphere } from "@/components/widgets/WordSphere";
 import { WordSpaceScatter } from "@/components/widgets/WordSpaceScatter";
 
 export const metadata: Metadata = {
-  title: "A Vector for a Word · oop_ml",
+  title: "A Vector for a Word · Perceptron Lab",
   description:
-    "A token's ID tells us which word it identifies, but not how that word relates to another. A vector gives us several numerical coordinates whose learned relationships can support useful comparisons.",
+    "A token ID identifies an entry but does not describe its relationships to other entries. Learned vectors supply numerical coordinates whose comparisons can capture patterns in how words are used.",
 };
 
 export default function WordVectorPage() {
@@ -41,7 +41,7 @@ export default function WordVectorPage() {
       playgroundTitle="What makes two word vectors close?"
       playgroundIntro="Compare the nearest vectors for a selected word. Inspect both the similarity values and the source text that gave those relationships meaning."
       title="A Vector for a Word"
-      tagline={"A token's ID tells us which word it identifies, but not how that word relates to another. A vector gives us several numerical coordinates whose learned relationships can support useful comparisons."}
+      tagline={"A token ID identifies an entry but does not describe its relationships to other entries. Learned vectors supply numerical coordinates whose comparisons can capture patterns in how words are used."}
       prerequisites={
         <>
           The tokenizing pages end with a lookup table from a piece of text to a
@@ -67,53 +67,23 @@ export default function WordVectorPage() {
                   The corpus this page works on is twenty-four short documents, twelve of them about cooking and twelve about sailing, and they hold twenty-three distinct words between them. The numbers are dealt out commonest first, so a number does carry exactly one fact about a word, which is roughly how common it was. What it does not carry is anything about what the word means.
                 </p>
                 <p>
-                  Over all 253 pairs of words, the correlation between how far apart two words&rsquo; numbers are and how alike they later turn out to be is &minus;0.0852, which is small enough that the scatter of those pairs shows no slope at all.
+                  {"Across the 253 word pairs, the correlation between ID separation and cosine similarity is −0.0852. That weak linear relationship is a measurement of this numbering scheme. It does not give the IDs an inherent meaning, and it is not exactly zero."}
                 </p>
                 <WordSphere />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Every word of the table is a direction, drawn on the sphere
-                  those directions live on. Coloured by subject the words fall
-                  into two caps on opposite sides. Coloured by token number,
-                  which is the same twenty-three dots in the same places, the
-                  colours are scattered over the whole sphere, because the
-                  number a word was dealt says nothing about where it ended up.
+                  {"The display draws word directions on a sphere. Topic colors form two groups; ID colors do not follow the same arrangement. The plot helps compare the fitted directions, while the underlying vectors retain four coordinates."}
                 </p>
                 <KeepInMind>
-                  A token number answers one question, whether two pieces of
-                  text are the same. Every other question we might want to ask
-                  about a word, and in particular whether it resembles another
-                  one, is unanswerable from the number alone.
+                  {"An ID lets us retrieve an entry and test whether two entries are the same. Its numerical size is not a similarity measure. Any relationship implied by a particular numbering convention must be supplied separately."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. Twenty-four documents, and twenty-three words">
                 <p>
-                  The corpus is a design and not a piece of prose, and
-                  saying so early saves confusion later. Each document is six
-                  words long, each topic is spelled from ten words of its own,
-                  and the two topics share only the words <em>and</em>,{" "}
-                  <em>the</em> and <em>we</em>, one per document. Within a topic
-                  the documents step through the ten words in a cycle, so that
-                  every topic word keeps the same kind of company as every other
-                  one. A cooking document reads{" "}
-                  <span className="font-mono">
-                    oven bake stir the whisk dough
-                  </span>{" "}
-                  and a sailing document reads{" "}
-                  <span className="font-mono">
-                    harbour anchor and tide mast rope
-                  </span>
-                  .
+                  {"These documents are constructed examples. Each contains six words. Cooking and sailing each use ten topic words, with and, the and we shared between them. Topic words move through a repeating cycle, giving us known patterns to compare with the fitted vectors. One example is oven bake stir the whisk dough; another is harbour anchor and tide mast rope."}
                 </p>
                 <p>
-                  The reason to use something so plain is that we have to be
-                  able to judge the answers. When the page reports that{" "}
-                  <em>sail</em> came out near <em>rope</em> and far from{" "}
-                  <em>oven</em>, that is checkable against the texts in a way
-                  that a result on a corpus of a billion words is not, and where
-                  the design produces an answer a reader would not have
-                  predicted the page says so instead of quietly choosing a
-                  different example.
+                  {"Because the documents are short, we can check a neighbor result against the actual contexts. If sail is close to rope but far from oven, inspect which words surround each one. We will also examine results that disagree with ordinary English usage."}
                 </p>
                 <NumberTable
                   headings={["word", "its number", "times used", "topic"]}
@@ -127,7 +97,7 @@ export default function WordVectorPage() {
                     ["rope", "20", "5", "sailing"],
                     ["whisk", "22", "5", "cooking"],
                   ]}
-                  caption="Eight of the twenty-three, in the order the numbers were dealt out. Neighbouring numbers land in different topics as readily as in the same one."
+                  caption="Eight of the twenty-three, in the order the numbers were dealt out. Neighboring numbers land in different topics as readily as in the same one."
                 />
                 <KeepInMind>
                   Twenty-four documents, twenty-three words, and a vocabulary
@@ -141,15 +111,9 @@ export default function WordVectorPage() {
                   We can assign each word a vector and treat its entries as coordinates. Now we can measure distances or compare directions. But putting words at points does not make those comparisons useful by itself. We need a way of choosing the coordinates so that the relationships reflect something we care about in the text.
                 </p>
                 <p>
-                  How the coordinates are worked out is a separate subject with
-                  pages of its own. For the record, the ones used here come from
-                  counting how often each pair of words falls within two
-                  positions of each other, scoring each pair by how much more
-                  often that happened than chance would explain, and squeezing
-                  the resulting table down to four numbers per word. Nothing
-                  else on this page leans on that choice, and Part 5 turns the
-                  whole table to prove it.
+                  {"The coordinates here come from counting word pairs within a two-position window, scoring their association, then reducing that table to four coordinates per word. The broader idea has a long history: Harris’s 1954 work examined language through the environments in which its elements occur. Context gives us evidence about relationships without requiring someone to label every pair of words as similar."}
                 </p>
+                <p className="text-sm"><a className="underline underline-offset-4" href="https://doi.org/10.1080/00437956.1954.11659520">{"Harris: Distributional Structure (1954)"}</a></p>
                 <WorkedExample title="Where sail ended up">
                   <p>
                     The word <em>sail</em> has number 13, and it was used six
@@ -159,11 +123,9 @@ export default function WordVectorPage() {
                     {"sail = (0.5369, 0.5223, 0.2690, −0.2075)"}
                   </Equation>
                   <p>
-                    Twenty-three words at four numbers each is 92 numbers, where
-                    the numbering scheme needed 23. The table has to be held for
-                    as long as the model is used, so every question the rest of
-                    this page asks is asked of four times the storage.
-                  </p>
+                  {"The vector table stores four values per word rather than one ID. It also needs the vocabulary mapping, just as the ID representation does. The exact byte cost depends on the numeric types; counting stored values is only the first comparison."}
+                </p>
+                <Equation>{"23 words × 4 coordinates = 92 vector values\n23 words × 1 ID = 23 ID values"}</Equation>
                 </WorkedExample>
                 <KeepInMind>
                   A position is several numbers read together as a point.
@@ -174,29 +136,13 @@ export default function WordVectorPage() {
 
               <SubSection title="4. What one of the four numbers is, and is not">
                 <p>
-                  It is tempting to look at the first coordinate of{" "}
-                  <em>sail</em>, which is 0.5369, and ask what it measures. The
-                  answer is that it measures nothing on its own. It is not a
-                  score for how nautical a word is, and it does not become one
-                  if we line up the words with a large first coordinate and hunt
-                  for what they have in common. The coordinates exist so pairs
-                  of them
-                  can be multiplied together, and what the fit determined was
-                  the collection of those products and not the individual
-                  numbers.
+                  {"Sail’s first coordinate is 0.5369. In this fitted space, that axis was not defined as a nautical score or another named property. It may correlate with an interpretable feature, but the similarity calculation uses the whole vector. Rotating the space can change that coordinate while preserving the comparisons."}
                 </p>
                 <p>
-                  This is not a philosophical caution, it is a checkable fact
-                  about the table, and Part 5 checks it by turning the whole
-                  space and watching every coordinate move while every
-                  comparison between words stays exactly where it was. Until
-                  then it is enough to read a coordinate as a bookkeeping entry
-                  and to treat only the comparisons as meaningful.
+                  {"Part 5 rotates all the vectors together. Their coordinates change while their lengths and pairwise angles remain the same. That shows why this representation does not give an individual axis a unique interpretation."}
                 </p>
                 <KeepInMind>
-                  A single coordinate names no property of a word. Only
-                  relationships between whole positions carry anything, which is
-                  why the next Part is about how to measure one.
+                  {"Read a coordinate as part of this fitted representation. A named interpretation needs separate evidence; it does not follow from the coordinate’s position in the row."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -207,25 +153,8 @@ export default function WordVectorPage() {
           content: (
             <>
               <SubSection title="5. Two ways to call two positions close">
-                <p>
-                  Given two points there are two obvious readings of close. One
-                  is the ordinary distance between them, the length of the line
-                  joining the two points, which is what a ruler would say. The
-                  other is the angle between the two arrows drawn from the
-                  origin out to each point, which asks whether they lie in the
-                  same direction and ignores how far along that direction each
-                  one has got.
-                </p>
-                <p>
-                  The two readings genuinely disagree, and the disagreement is
-                  not rare or delicate. A word placed far out along a direction
-                  and a word placed just a little way along the same direction
-                  point identically and sit a long way apart, so the ruler calls
-                  them distant and the angle calls them identical. Which of the
-                  two we should use depends on which quantity, the direction or
-                  the distance from the origin, was the one the fit was
-                  determining, and that question has an answer.
-                </p>
+                <p>There are two useful ways to compare these vectors. Endpoint distance measures the gap between their positions. An angular comparison measures the alignment of arrows drawn from the origin, treating arrows on the same line differently from arrows with nearby endpoints.</p>
+                <p>The comparison rules can disagree because they measure different things. Two vectors can point in the same direction while ending far apart. Cosine treats their directions as identical; Euclidean distance still records the gap between their endpoints. We need to know whether length carries useful information before deciding which comparison suits the task.</p>
                 <Equation>
                   {"ordinary distance between a and b = √( Σᵢ (aᵢ − bᵢ)² )"}
                 </Equation>
@@ -238,15 +167,7 @@ export default function WordVectorPage() {
               </SubSection>
 
               <SubSection title="6. The cosine of the angle between them">
-                <p>
-                  The angle between two arrows is got from their dot product,
-                  which is the sum of the products of matching coordinates,
-                  divided by the two lengths. Dividing by the lengths is what
-                  removes them from the answer, and what is left is the cosine
-                  of the angle, a number between &minus;1 and 1. One means the
-                  two arrows point the same way, zero means they are at right
-                  angles, and &minus;1 means they point in opposite directions.
-                </p>
+                <p>For nonzero vectors, divide their dot product by the product of their lengths. The result is cosine similarity: it retains angular alignment while removing the effect of vector length. Its value is one for the same direction, zero for a right angle and minus one for opposite directions. A zero vector needs a separate policy because it has no defined direction.</p>
                 <Equation>
                   {"cosine(a, b) = (a · b) / (‖a‖ ‖b‖),   where a · b = Σᵢ aᵢ bᵢ"}
                 </Equation>
@@ -261,17 +182,7 @@ export default function WordVectorPage() {
                   {"‖a‖ = √( Σᵢ aᵢ² )\n" +
                     "‖sail‖ = √( 0.5369² + 0.5223² + 0.2690² + (−0.2075)² ) ≈ √0.6765 ≈ 0.8225"}
                 </Equation>
-                <p>
-                  Three things about that formula are worth stating before we
-                  use it. It is symmetric, so the order of the two words does
-                  not matter. It is entirely blind to length, so doubling every
-                  coordinate of one word changes nothing. And it is undefined
-                  when either arrow has no length at all, since a point sitting
-                  exactly at the origin has no direction to compare, and the
-                  correct behaviour there is to refuse, and never to answer
-                  zero, which would falsely report the word as being at right
-                  angles to everything.
-                </p>
+                <p>Cosine similarity is symmetric, so swapping the two vectors does not change the result. Multiplying either nonzero vector by a positive constant also leaves the score unchanged because its direction stays the same. A zero vector has no direction, so the formula is undefined there. We must either reject it or state a fallback convention. A returned zero would be that convention, rather than a measured right angle.</p>
                 <WhyThisWorks title="Deriving cosine similarity from the dot product">
                   The dot product of two arrows equals the product of their
                   lengths times the cosine of the angle between them, which is
@@ -345,10 +256,11 @@ export default function WordVectorPage() {
                   </Equation>
                 </WorkedExample>
                 <KeepInMind>
+
                   On a table small enough to draw, the angle and the ruler
                   disagree about which pair is closer, and they disagree because
                   one word sits three times as far from the origin as its
-                  neighbour.
+                  neighbor.
                 </KeepInMind>
               </SubSection>
 
@@ -388,39 +300,23 @@ export default function WordVectorPage() {
                       "cosine ≈ 0.8657 / (0.8225 × 1.0713) ≈ 0.9825"}
                   </Equation>
                   <p>
-                    All four products are positive, which is what pointing the
-                    same way looks like in coordinates. Every coordinate of{" "}
-                    <em>rope</em> sits further from zero than the one it is
-                    paired with, and the ruler measures exactly those four
-                    differences, which is where its 0.3046 comes from. The
-                    cosine divides by 1.0713 and so never charges for them.
-                  </p>
+                  {"The products are positive because the matching coordinates have the same signs. That contributes to the positive dot product, but does not by itself establish equal directions. Euclidean distance records coordinate differences; cosine normalizes both vectors before comparing their alignment."}
+                </p>
                 </WorkedExample>
                 <AngleAgainstGap word="sail" choices={["sail", "oven", "the", "crew"]} />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  The same word&rsquo;s neighbours ranked twice. Rows in pink
+
+                  The same word&rsquo;s neighbors ranked twice. Rows in pink
                   changed place between the two columns, and the length column
                   is where the explanation lives.
                 </p>
                 <KeepInMind>
-                  Standing at <em>sail</em>, the two readings of near disagree
-                  about first place, 0.9825 against 0.9445 by angle and 0.2750
-                  against 0.3046 by the ruler, and the whole of the difference
-                  is that one neighbour is longer than the other.
-                </KeepInMind>
+                  Standing at <em>sail</em>{", cosine ranks rope first while Euclidean distance ranks mast first. Their lengths help explain the different rankings."}</KeepInMind>
               </SubSection>
 
               <SubSection title="9. What a vector’s length carries instead">
                 <p>
-                  So what is a vector&rsquo;s length a fact about? The usual
-                  answer, and the one I expected to be able to report, is that
-                  it tracks how often the word was seen, because a common word
-                  is adjusted more times during a fit and so drifts further from
-                  wherever it started. On this table the relationship is real
-                  and runs the other way. The correlation between how often a
-                  word was used and how long its vector came out is{" "}
-                  &minus;0.6284, which is to say the commoner a word is here,
-                  the shorter its position.
+                  {"Vector length depends on how the representation was fitted. In this table, frequency and length have correlation −0.6284: the more frequent words tend to have shorter vectors. Another objective or preprocessing choice can produce a different relationship. Inspect it rather than assuming a universal frequency rule."}
                 </p>
                 <p>
                   The three commonest words are <em>and</em>, <em>the</em> and{" "}
@@ -441,20 +337,10 @@ export default function WordVectorPage() {
                   low down, are the words both topics share.
                 </p>
                 <p>
-                  The direction of that correlation is not the point, and it
-                  would be a mistake to carry away the number rather than the
-                  argument. What matters is that the length is answering a
-                  question about the word&rsquo;s frequency and distinctiveness,
-                  which is a different question from the one we are asking when
-                  we ask whether two words resemble each other, and dividing it
-                  out is how we stop it from contributing to an answer it has no
-                  business in.
+                  {"These lengths vary with frequency and context patterns in this corpus. If we want a comparison that ignores magnitude, cosine provides it. That is a modeling choice; it does not prove that length is irrelevant to every language task."}
                 </p>
                 <KeepInMind>
-                  Length carries something, and here what it carries is how
-                  ordinary a word is, at a correlation of &minus;0.6284 with its
-                  use count. Cosine similarity divides it out, which is the
-                  argument for using the angle rather than the ruler.
+                  {"Cosine removes magnitude from this comparison. Euclidean distance retains it. Choose based on what the representation and task need, rather than treating one as the default definition of meaning."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -464,9 +350,9 @@ export default function WordVectorPage() {
           title: "Questions on Parts 1 and 2",
           quiz: [
             trueFalse(
-              "A token number here carries exactly one fact about a word, roughly how common it was.",
+              "This fitted vocabulary orders token IDs by observed frequency rather than semantic similarity.",
               true,
-              "The numbers are dealt out commonest first, so the number does record that much. What it does not record is anything about meaning. Over all 253 pairs of words the correlation between how far apart two numbers are and how alike the words turn out to be is −0.0852, which is small enough that the scatter shows no slope at all.",
+              "This vocabulary assigns IDs by frequency order, so the ID provides a frequency rank. It does not provide a numerical measure of meaning. The observed correlation between ID gaps and the later similarity scores is −0.0852 across 253 pairs, showing little relationship in this constructed table. Renumbering the same entries would not change which words they identify.",
             ),
             several(
               "Which of these hold of cosine similarity?",
@@ -477,10 +363,10 @@ export default function WordVectorPage() {
                 "A word at the origin scores zero against every other word",
               ],
               [0, 1, 2],
-              "The measure is symmetric, and dividing by both lengths is what removes length from the answer. A point at the origin has no direction to compare, so the comparison is undefined. Answering zero there would be a claim that the word stands at right angles to everything, which is a much stronger statement than the truth, and the correct behaviour is to refuse.",
+              "Cosine similarity is symmetric and removes positive changes of vector length through its normalization. A zero vector has no direction, so the mathematical quotient is undefined. This SDK rejects that comparison. Another interface could document a convention, but its returned value would not be a measured angle for the zero vector.",
             ),
             choice(
-              "Standing at sail, the two readings of near disagree about first place. Which neighbour wins under each?",
+              "Standing at sail, the two readings of near disagree about first place. Which neighbor wins under each?",
               [
                 "rope by angle and mast by the ruler",
                 "mast by angle and rope by the ruler",
@@ -488,23 +374,23 @@ export default function WordVectorPage() {
                 "mast under both readings",
               ],
               0,
-              "By angle rope leads at 0.9825 against 0.9445 for mast, and by the ruler the order reverses, mast at a gap of 0.2750 against 0.3046 for rope. The whole of the difference is length. sail is 0.8225 long and mast 0.8281, so mast sits at almost the same distance from the origin, while rope at 1.0713 is well beyond it and the ruler charges it for the extra reach.",
+              "Cosine selects rope: its score is 0.9825, compared with 0.9445 for mast. Euclidean distance selects mast at 0.2750, compared with 0.3046 for rope. Rope has the closer direction but a larger length difference from sail; mast has a slightly less aligned direction and almost the same length. Euclidean distance combines both differences, which reverses the ranking.",
             ),
             trueFalse(
               "On this table the more often a word was used, the longer its position came out.",
               false,
-              "That is the usual expectation and the measurement runs the other way here, at a correlation of −0.6284 between use count and length. The three commonest words, used eight times each, have the three shortest positions at 0.3708, 0.3667 and 0.5770. A word that turns up beside everything is not surprising beside anything, and these coordinates were scored on surprise.",
+              "In this fitted table, use count and vector length have correlation −0.6284. The three most frequent words have the shortest lengths: 0.3708, 0.3667 and 0.5770. These vectors come from context-association scores and a reduction, so a word common in many contexts need not get a long vector. The result describes this fitting procedure and corpus, rather than a general law relating frequency to length.",
             ),
             choice(
               "What is the argument for comparing two words by the angle rather than by the ruler?",
               [
                 "The angle is cheaper to compute than the distance",
-                "Length is answering a question about how ordinary a word is, which is not the question being asked",
+                "Cosine can suit a comparison where direction matters and overall magnitude should be ignored",
                 "The ruler cannot be computed when a word sits at the origin",
                 "The ruler is blind to how often a word was used, and the angle is not",
               ],
               1,
-              "Length carries something real, and on this table what it carries is frequency and distinctiveness rather than meaning. Dividing it out is how it is stopped from contributing to an answer it has no business in. It is the angle, not the ruler, that fails at the origin, and it is the length the ruler reads that tracks use count, at −0.6284 here, so blindness to frequency is the angle’s property and not the ruler’s.",
+              "Cosine is useful when the direction should matter and overall magnitude should not. In this example, length is associated with frequency and how distinctive a word's contexts are. Ignoring it can suit the comparison, but that is a task choice rather than proof that magnitude contains no useful information. Euclidean distance retains both directional and length differences, while cosine also requires nonzero vectors.",
             ),
         ],
         },
@@ -514,7 +400,8 @@ export default function WordVectorPage() {
             <>
               <SubSection title="10. Which words are nearest this one">
                 <p>
-                  Now we can search for a word&apos;s neighbours. Compare its vector with each other vocabulary vector, sort the scores, and inspect the closest entries. The fitting objective did not directly specify this list, so the neighbours give us a way to investigate the relationships the representation learned.
+
+                  Now we can search for a word&apos;s neighbors. Compare its vector with each other vocabulary vector, sort the scores, and inspect the closest entries. The fitting objective did not directly specify this list, so the neighbors give us a way to investigate the relationships the representation learned.
                 </p>
                 <InAModel title="The five words nearest sail">
                   <p>
@@ -532,7 +419,8 @@ export default function WordVectorPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  A nearest-neighbour list is the first question a number could
+
+                  A nearest-neighbor list is the first question a number could
                   not be asked. It is produced by scoring the whole table and
                   sorting, and the word asked about is struck out of its own
                   answer.
@@ -541,7 +429,8 @@ export default function WordVectorPage() {
 
               <SubSection title="11. Whether the answer is any good">
                 <p>
-                  A neighbour list can look plausible even when its relationships are weak. Let&apos;s inspect examples where it agrees with the known topic groups and where it does not. In the first case, <em>sail</em> and <em>rope</em> score 0.9825 while{" "}
+
+                  A neighbor list can look plausible even when its relationships are weak. Let&apos;s inspect examples where it agrees with the known topic groups and where it does not. In the first case, <em>sail</em> and <em>rope</em> score 0.9825 while{" "}
                   <em>sail</em> and <em>flour</em> score 0.0661 and{" "}
                   <em>sail</em> and <em>oven</em> score &minus;0.0518. Words
                   from the same topic are near one, words from different topics
@@ -549,12 +438,7 @@ export default function WordVectorPage() {
                   belonged to.
                 </p>
                 <p>
-                  In the direction that does not work, <em>sail</em> and{" "}
-                  <em>boat</em> score only 0.3638, which is far lower than a
-                  reader who knows English would predict for two words that name
-                  parts of the same activity. That is a fact about the corpus and not
-                  about the method, and tracing it turns up something more
-                  interesting than the miss itself.
+                  {"Sail and boat score only 0.3638, despite their familiar relationship in English. The score reflects this corpus, preprocessing and fitted representation. We can inspect their contexts to investigate the result."}
                 </p>
                 <NumberTable
                   headings={["pair", "cosine", "what a reader would expect"]}
@@ -565,7 +449,7 @@ export default function WordVectorPage() {
                     ["sail and oven", "−0.0518", "unrelated, and it is"],
                     ["sail and boat", "0.3638", "close, and it is not"],
                   ]}
-                  caption="Four of the five agree with a reader’s judgement. The fifth is reported because hiding it would misrepresent what a small corpus can support."
+                  caption="Four of the five agree with a reader’s judgment. The fifth is reported because hiding it would misrepresent what a small corpus can support."
                 />
                 <p>
                   Counting the company each word keeps, with the same window of
@@ -583,27 +467,15 @@ export default function WordVectorPage() {
                 </p>
                 <SharedCompany />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
+
                   The company each word of the pair keeps, with the words both
-                  of them were seen beside picked out in colour. Switch to{" "}
+                  of them were seen beside picked out in color. Switch to{" "}
                   <span className="font-mono">sail and boat</span> and watch the
                   direct count go up while the cosine goes down.
                 </p>
-                <p>
-                  That is worth pausing on, since it is easy to read a cosine as
-                  a count of how often two words appeared together and it is
-                  not. Two words are placed together when they are used in the
-                  same kind of position, whether or not they were ever used in
-                  the same breath, and it is the second-hand evidence that
-                  carries most of the work here. It also sets the honest limit
-                  on what a high cosine claims, which is similar company and not
-                  similar meaning.
-                </p>
+                <p>A high cosine does not necessarily mean that two words occurred next to one another. Similar contexts can place their vectors in similar directions even if the words never co-occurred. In this example, the evidence concerns patterns of usage. Whether those patterns represent the kind of meaning needed for a later task still requires evaluation.</p>
                 <KeepInMind>
-                  The measure separates the two topics cleanly, at 0.9825 within
-                  and 0.0661 across for one pair each. It reads the company two
-                  words each keep and never whether they keep each other&rsquo;s,
-                  which is why a pair that never once met scores 0.9825 and a
-                  pair that met twice scores 0.3638.
+                  {"In these examples, similar context patterns can produce a high cosine even without direct co-occurrence. The selected pairs illustrate that mechanism; two comparisons alone do not establish clean separation across every word in both topics."}
                 </KeepInMind>
               </SubSection>
 
@@ -612,40 +484,19 @@ export default function WordVectorPage() {
                   We can also compare a particular pair of words without searching the whole vocabulary. The similarity is calculated from their two vectors. With the same scoring rule and fixed scale, we can compare that value with scores for other pairs. This smaller calculation is useful inside systems that already know which candidates they need to evaluate.
                 </p>
                 <p>
-                  Being able to compare across pairs is the part that a number
-                  could never give us. Saying that <em>oven</em> and{" "}
-                  <em>bake</em> score 0.9267 while <em>sail</em> and{" "}
-                  <em>flour</em> score 0.0661 puts the two pairs on one scale,
-                  and a system downstream can set a threshold on that scale and
-                  have it mean roughly the same thing everywhere in the
-                  vocabulary.
+                  {"Oven and bake score 0.9267, while sail and flour score 0.0661. Both use the same formula and vector table. A threshold may help a downstream task, but it needs evaluation: the same cosine value need not have the same relevance for every kind of word or query."}
                 </p>
                 <KeepInMind>
-                  Scoring a named pair costs one dot product and two lengths,
-                  and the answers are comparable across pairs because the scale
-                  runs from &minus;1 to 1 regardless of the words.
+                  {"For a known pair, calculate the dot product and both lengths. This is cheaper than ranking the whole vocabulary. Compare the resulting scores under a common protocol, then check whether they distinguish the relationships needed by the task."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="13. Questions the table cannot answer">
                 <p>
-                  Some questions we can put to a table of positions have no
-                  answer, and the reasons are arithmetic ones and not
-                  matters of policy. A word the texts never contained has no row to read,
-                  and there is nothing to return, since the whole content of a
-                  position is what the fit learned about that word and it
-                  learned nothing. Asking for the position of <em>kettle</em>{" "}
-                  here is that case.
+                  {"Kettle has no row in this vocabulary, so this lookup cannot return a fitted vector for it. A system may reject the word, use an unknown-word row, or construct a representation from smaller pieces. Each option changes what the returned result means."}
                 </p>
                 <p>
-                  The other case is a point sitting exactly at the origin. It
-                  has no direction, so the angle between it and anything else
-                  does not exist, and returning zero would be a claim that it
-                  stands at right angles to every word, which is a much stronger
-                  statement than the truth. The consistent treatment is to
-                  refuse the comparison and to leave such a word out of every
-                  neighbour list, which is why the fifth word of the sketch
-                  never appears in an answer.
+                  {"A zero vector has no direction, so its cosine is undefined. This implementation rejects that comparison and omits zero vectors from neighbor candidates. A different system could return a documented fallback, but that value would not be a measured right angle."}
                 </p>
                 <UnanswerableQuestions />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -654,10 +505,7 @@ export default function WordVectorPage() {
                   undefined rather than merely awkward.
                 </p>
                 <KeepInMind>
-                  A word outside the vocabulary has no position, and a position
-                  at the origin has no direction. Both are gaps in the
-                  definition rather than gaps in an implementation, and the
-                  honest response to each is to say so.
+                  {"A missing vocabulary row and an undefined cosine need different handling. State whether the system rejects them or substitutes a fallback so callers can interpret the result."}
                 </KeepInMind>
               </SubSection>
 
@@ -674,17 +522,7 @@ export default function WordVectorPage() {
                     not reduce that multiplier.
                   </p>
                 </>
-                <p>
-                  Answering a question costs the whole table as well. A
-                  nearest-neighbour query here scores the word against all 22
-                  others before it can sort, and in general it scans every row,
-                  because a cosine gives no way to rule a word out without
-                  computing it. That is the honest place where the older
-                  approach wins. Checking whether two pieces of text are the same
-                  word is one integer comparison and it is exact, where the
-                  nearest-neighbour question is a scan and its answer is a
-                  ranking that can be argued with.
-                </p>
+                <p>This nearest-neighbor query compares the word with all 22 other entries before ranking them. The implementation performs a full scan. Indexing methods can reduce the later search work for larger collections, but the present result comes from those explicit comparisons. Checking whether two IDs name the same entry is a different task: it needs one equality comparison and supplies no ranking of similar words.</p>
                 <NumberTable
                   headings={["question", "what it costs here"]}
                   rows={[
@@ -720,13 +558,7 @@ export default function WordVectorPage() {
                   between two words.
                 </p>
                 <p>
-                  Nothing in fitting a table asks for this. A fit is told to
-                  place words so that words keeping the same company end up
-                  together, and whether the resulting arrangement also lines up
-                  parallel differences is something to be checked afterwards
-                  and is not guaranteed. It holds well on large
-                  tables and it holds patchily on small ones, and this page
-                  reports both.
+                  {"This fitting procedure does not directly train on analogy questions. Parallel differences sometimes emerge from learned context patterns, but their accuracy depends on the representation and the relation being tested. We will try the same arithmetic on a designed drawing and on the fitted corpus."}
                 </p>
                 <Equation>
                   {"answer ≈ nearest word to  (first + third − second)"}
@@ -741,22 +573,11 @@ export default function WordVectorPage() {
 
               <SubSection title="16. Unit vectors, and why they are used">
                 <p>
-                  The arithmetic is done on unit vectors rather than on the
-                  positions themselves. Each of the three words is first divided
-                  by its own length, so that it becomes an arrow of length one
-                  pointing the same way, and only then are the three added and
-                  subtracted. The standard form is called 3CosAdd, after Levy
-                  and Goldberg, and the reason for the normalising is the
-                  measurement of Part 2.
+                  {"Here the three input vectors are normalized to unit length before addition and subtraction. Levy and Goldberg call the cosine-based analogy criterion 3CosAdd in their 2014 analysis of the earlier word-vector arithmetic. Normalization lets each term contribute a direction without its original magnitude setting the weight."}
                 </p>
+                <p className="text-sm"><a className="underline underline-offset-4" href="https://aclanthology.org/W14-1618/">{"Levy and Goldberg: Linguistic Regularities in Sparse and Explicit Word Representations (2014)"}</a></p>
                 <p>
-                  If the raw positions were added, a word that happens to be
-                  long would dominate the sum, and we have already established
-                  that length here records how ordinary a word is rather than
-                  what it means. The result would be an answer driven by which
-                  of the three words was the rarest. Dividing each one by its
-                  length gives all three an equal say, so the sum is a statement
-                  about directions alone.
+                  {"Adding raw vectors would retain their different magnitudes. Since the analogy here is defined in terms of cosine directions, normalize the three inputs before combining them. This removes one source of unequal weighting; it does not guarantee a useful answer."}
                 </p>
                 <Equation>
                   {"q = first/‖first‖ − second/‖second‖ + third/‖third‖"}
@@ -790,7 +611,7 @@ export default function WordVectorPage() {
                     },
                     {
                       expression: "woman / 3 = (0, 1)",
-                      reason: "here the division matters. woman sits three times as far out as man, and after normalising the two are the same arrow, which is the sketch saying they differ only in how far along one direction they lie.",
+                      reason: "here the division matters. woman sits three times as far out as man, and after normalizing the two are the same arrow, which is the sketch saying they differ only in how far along one direction they lie.",
                     },
                     {
                       expression: "(1, 0) − (0, 1) + (0, 1) = (1, 0)",
@@ -816,16 +637,9 @@ export default function WordVectorPage() {
 
               <SubSection title="18. Why the question words are kept out of the running">
                 <p>
-                  Notice what would happen if we did not strike out the three
-                  words of the question. The sum came to (1, 0), which is
-                  exactly <em>king</em>&rsquo;s own direction, so <em>king</em>{" "}
-                  scores a cosine of 1.0000 against it and takes first place,
-                  with <em>queen</em> tying behind. The analogy appears to
-                  answer itself, and the answer carries no information at all.
+                  {"Without excluding the question words, king ties with queen at cosine 1 in this drawing. The implementation’s tie ordering returns king first. That candidate is one of the supplied words, so it does not answer the intended analogy question."}
                 </p>
-                <p>
-                  This happens because the word that was added first is a whole unit of the sum, and the other two frequently cancel a good part of each other. The published accounts of the analogy result usually say that the question words are excluded and leave it at that, so I measured how often it actually matters.
-                </p>
+                <p>The first positive word contributes its full unit vector to the analogy sum, while the added and subtracted vectors can partly cancel. That can place a query word itself near the resulting direction. Excluding the question words changes the candidate set, so the comparison below measures how often that exclusion changes the selected answer.</p>
                 <p>
                   Among the 10,626 ordered triples of these twenty-three words, the top answer without exclusion is one of the question&apos;s own words in 4,118 cases, a share of 0.3875. That happens often in this experiment, but it does not happen for every triple.
                 </p>
@@ -865,15 +679,7 @@ export default function WordVectorPage() {
                   which is <em>wind</em>.
                 </p>
                 <p>
-                  It does not come out. The sum lands nearest <em>rope</em> at
-                  0.7847, then <em>deck</em> at 0.7323 and <em>mast</em> at
-                  0.7210, and <em>wind</em> is nowhere in the first three. All
-                  three answers are sailing words, so the arithmetic did carry
-                  the topic across correctly, and what it did not carry is the
-                  position within the cycle. On a table of twenty-three words
-                  fitted to a hundred and forty-four word occurrences, the
-                  differences between positions are simply not determined finely
-                  enough to encode which step of a cycle a word sits at.
+                  {"The nearest result is rope, followed by deck and mast; wind is absent from the first three. These are sailing words, but the intended correspondence within the constructed cycle is not recovered. This test demonstrates a failed analogy, without identifying corpus size alone as its cause."}
                 </p>
                 <AnalogyWorkbench
                   space="documents"
@@ -884,10 +690,7 @@ export default function WordVectorPage() {
                   and the position within the topic does not.
                 </p>
                 <KeepInMind>
-                  The analogy is a property some tables have and this one has
-                  only partly. It moved the answer into the right topic and
-                  missed the intended word, which is the honest report and is
-                  more useful than a demonstration arranged to succeed.
+                  {"The corpus-based analogy reaches the intended topic but misses the intended word. Keep both observations when judging what this representation supports."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -910,7 +713,7 @@ export default function WordVectorPage() {
                 "boat belongs to neither topic, so it sits between the two caps",
               ],
               2,
-              "The score reads the company each word keeps and never whether they keep each other’s. boat is placed by harbour and anchor, and sail never once appears near either, so the two end up pointing in different directions. Length is divided out by the cosine, so it cannot be the explanation.",
+              "The two direct co-occurrences are only part of the context evidence. Boat is associated with harbour and anchor, while sail has different nearby-word patterns in this constructed corpus. Their full vectors therefore need not point in the same direction. Direct co-occurrence can affect a fitted representation without being the same quantity as cosine similarity.",
             ),
             several(
               "Which of these questions has no answer on this table?",
@@ -921,7 +724,7 @@ export default function WordVectorPage() {
                               "The cosine between a cooking word and a sailing word",
                             ],
               [0, 1],
-              "A word the texts never contained has no row to read, since the whole content of a position is what the fit learned about that word. A point at the origin has no direction, so the angle does not exist and the honest response is to refuse. The other two have perfectly ordinary answers, 0.9825 for one pair that never met and −0.0518 for sail against oven.",
+              "An absent vocabulary word has no stored row to retrieve. A zero vector also has no defined cosine direction, which this SDK reports as an invalid comparison. The other examples have defined values: 0.9825 for a pair that never directly co-occurred and −0.0518 for sail against oven. A low or negative similarity is different from a missing representation or an undefined comparison.",
               {
                 "description": "This is a fixed word lookup table without an unknown-word row. Every listed cooking and sailing word has a nonzero vector. Kettle is absent. Pairs need not have occurred together to have separately learned vectors."
               },
@@ -935,12 +738,12 @@ export default function WordVectorPage() {
                 "They are the three longest words in the table, and length would decide the answer",
               ],
               1,
-              "That is a share of 0.3875, so leaving the question words in changes 39% of the answers, which is often rather than always. The word added first is a whole unit of the sum and the other two frequently cancel a good part of each other, which is why 4,048 of the 4,118 return a word that was added and only 70 the word that was subtracted. The exclusion belongs to how the analogy is evaluated and not to the arithmetic, and length was already taken out when each word was reduced to a unit vector.",
+              "In the measured query sweep, leaving question words eligible changes about 39 percent of selected answers. Of the 4,118 affected results,4,048 choose a positive term and 70 a negative term. The vector sum contains those query terms, so one can remain closest when the other contributions partly cancel. Excluding them is a candidate-selection policy for this evaluation, not part of vector addition itself.",
             ),
             trueFalse(
               "The analogy what is to sugar as sail is to flour carries the topic across and misses the designed answer, which is wind.",
               true,
-              "The sum lands nearest rope at 0.7847, then deck at 0.7323 and mast at 0.7210, all of them sailing words, so the arithmetic moved the answer into the right topic and did not carry the position within the cycle. Twenty-three words fitted to a hundred and forty-four word occurrences do not determine the differences between positions finely enough for that, and the page reports the miss rather than arranging a demonstration to succeed.",
+              "The result ranks rope, deck and mast first, with similarities 0.7847,0.7323 and 0.7210. Those are sailing words, but the intended wind is eleventh. The trained representation therefore supports the broad topic shift without reproducing this proposed within-topic analogy. The construction of the corpus does not force the fitting objective to preserve every intended relation.",
             ),
         ],
         },
@@ -950,26 +753,16 @@ export default function WordVectorPage() {
             <>
               <SubSection title="20. Turning the whole table">
                 <p>
-                  Part 1 claimed that a single coordinate names nothing, and
-                  here is the demonstration. Take the fitted table and turn every
-                  word by the same angle in the plane of its first two
-                  coordinates, in the way a sheet of graph paper can be rotated
-                  under a set of fixed points. Every word moves in the same way,
-                  and every coordinate of every word changes.
+                  {"Rotate every word vector in the plane of its first two coordinates. Those two coordinates generally change; the remaining two stay fixed. We can then compare the lengths, cosines and neighbor lists before and after the rotation."}
                 </p>
                 <p>
-                  At a quarter turn, <em>sail</em>&rsquo;s first coordinate goes
-                  from 0.5369 to &minus;0.5223, which is a swing across most of
-                  the range the table uses and includes a change of sign. Its
-                  length does not move at all, and neither does any pair&rsquo;s
-                  cosine, the largest change over all 253 pairs being smaller
-                  than 1e-15, which is rounding and not a change. All 23
-                  words keep the same nearest word.
+                  {"At a quarter turn, sail’s first coordinate changes from 0.5369 to −0.5223. In exact arithmetic, the rotation preserves lengths and pairwise cosines. Here the largest measured cosine difference is below 1e−15, consistent with floating-point rounding. All 23 words retain the same top neighbor."}
                 </p>
                 <SpaceRotation word="sail" />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
+
                   Drag the slider and watch the top row of dots become the
-                  bottom row. The two panels at the bottom hold the neighbour
+                  bottom row. The two panels at the bottom hold the neighbor
                   lists before and after, and they do not change.
                 </p>
                 <WhyThisWorks title="Why rotating every vector preserves their comparisons">
@@ -989,31 +782,17 @@ export default function WordVectorPage() {
 
               <SubSection title="21. What that rules out">
                 <p>
-                  The turned table is not a damaged copy of the original. It is
-                  a table that gives the same answer to every question we know
-                  how to ask, which means that whatever the fit determined, it
-                  did not determine the coordinates. It determined the dot
-                  products, and the coordinates are one of infinitely many ways
-                  of writing those down.
+                  {"The rotated table preserves the dot-product geometry used by these queries. Coordinates are therefore not uniquely determined by those comparisons: multiple coordinate systems can describe them. That does not mean a fitting algorithm cannot choose a particular basis."}
                 </p>
                 <p>
-                  Reading a coordinate as a named feature is ruled out by that,
-                  since a turn destroys the reading without changing anything a
-                  reader could measure. So is any arithmetic that puts two
-                  tables&rsquo; coordinates side by side, whether that is
-                  comparing a word&rsquo;s third coordinate here against its
-                  third coordinate there or adding one table&rsquo;s position for
-                  a word to another table&rsquo;s, since the two are written
-                  along axes that have nothing to do with each other.
+                  {"A coordinate’s interpretation depends on the basis. Before comparing independently fitted vectors coordinate by coordinate, establish a common basis or align the spaces. Without that step, an apparent coordinate change can come from orientation as well as a changed relationship."}
                 </p>
                 <p>
-                  The full neighbour ordering survives the rotation for 21 of the 23 words. In the other two lists, a pair swaps places even though its cosines agree to sixteen digits. This is sensitivity in the ordering of effectively tied results, rather than a meaningful change in the underlying geometry.
+
+                  The full neighbor ordering survives the rotation for 21 of the 23 words. In the other two lists, a pair swaps places even though its cosines agree to sixteen digits. This is sensitivity in the ordering of effectively tied results, rather than a meaningful change in the underlying geometry.
                 </p>
                 <KeepInMind>
-                  A fit determines the comparisons between positions and not the
-                  positions. Any statement about a single coordinate, or about
-                  one coordinate against another table&rsquo;s, is a statement
-                  about an arbitrary choice.
+                  {"Pairwise comparisons survive a shared orthogonal rotation. Interpret raw coordinates within their fitted basis, and account for alignment before comparing them across fits."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1025,71 +804,28 @@ export default function WordVectorPage() {
             <>
               <SubSection title="22. A word that means two things">
                 <p>
-                  The definition gives each word in the vocabulary exactly one
-                  position, and a vocabulary is a list of spellings. Where one
-                  spelling is used for two unrelated things, the fit has one
-                  point to describe both, and the arithmetic that places it is
-                  driven by every context it appeared in at once. There is no
-                  choice available, since a single point that has to be near two
-                  separated groups ends up between them, at a middling distance
-                  from each and inside neither.
+                  {"One stored vector per spelling cannot choose a different representation for each occurrence. If a word appears in unrelated contexts, all of those uses influence the same fitted row. It may favor one sense or combine patterns from several; it is not forced to lie exactly between two sense groups."}
                 </p>
-                <p>
-                  I built the case rather than waiting for it, since the
-                  documents have no ambiguous word of their own. Every use of{" "}
-                  <em>pan</em> in the cooking texts and of <em>rope</em> in the
-                  sailing texts was respelled <em>sheet</em>, which is a real
-                  ambiguity in English, since a sheet is a baking tray in one
-                  trade and a rope that controls a sail in the other. The texts
-                  are otherwise untouched and the fit is the same one.
-                </p>
+                <p>The constructed documents originally contain no shared ambiguous content word. For this comparison, every cooking use of pan and every sailing use of rope is replaced with sheet. A sheet can name a baking tray or a rope controlling a sail. The rest of the documents and the fitting procedure stay fixed, so we can inspect what one stored vector does when the same spelling occurs in both topic contexts.</p>
                 <SenseCollision />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   What the merged spelling is now nearest, against what the two
                   words it replaced were nearest when they were separate.
                 </p>
                 <p>
-                  The result is what the geometry forces. Where <em>pan</em>{" "}
-                  scored 0.9981 against its nearest word and <em>rope</em>{" "}
-                  scored 0.9825 against its own, <em>sheet</em> reaches only
-                  0.8635, and its list of neighbours alternates between the two
-                  topics. Its mean cosine to the cooking words is 0.3504 and to
-                  the sailing words 0.4318, which are nearly the same number,
-                  where an ordinary cooking word like <em>dough</em> scores
-                  0.4015 to its own topic and 0.1481 to the other. The merged
-                  word can no longer say which topic it belongs to, and nothing
-                  in the fit reported that anything had gone wrong.
+                  {"In the merged corpus, sheet’s best neighbor scores 0.8635. Its mean cosine is 0.3504 to cooking words and 0.4318 to sailing words. The neighbor list contains both topics. These measurements show how merging the spellings changes this representation, while the static row still cannot select a sense for an individual occurrence."}
                 </p>
                 <KeepInMind>
-                  One position per spelling means a word with two senses gets a
-                  point between them. Measured here, the merged word&rsquo;s
-                  best neighbour falls from about 0.99 to 0.8635 and its pull
-                  towards the two topics becomes almost equal at 0.3504 and
-                  0.4318.
+                  {"Merging two uses into one vocabulary entry changes its context evidence. A static vector represents that shared entry; selecting a sense from the surrounding sentence requires additional context-dependent processing."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="23. Two fits of one corpus cannot be compared number by number">
                 <p>
-                  Part 5 showed that a table has no fixed axes, and this is the
-                  practical consequence. Two fits of the same texts that both
-                  work will not agree about coordinates, so no quantity built
-                  out of coordinates directly can be carried from one to the
-                  other, and any comparison between two tables has to be made
-                  out of quantities a turn leaves alone.
+                  {"Independent fits need not use aligned axes, even when they encode similar relationships. Compare rotation-invariant quantities or align the spaces before using coordinates directly. A deterministic fit may reproduce its coordinates; disagreement is a possibility rather than a requirement."}
                 </p>
                 <p>
-                  To measure that rather than assert it, the same twenty-four
-                  documents were fitted twice by a different technique, one that
-                  begins from random positions, changing nothing but the seed.
-                  Both fits found the shape that is there, putting two words of
-                  one topic nearer each other than two words of different
-                  topics, at 0.8333 against 0.7313 in the first fit and 0.8676
-                  against 0.5593 in the second. On the coordinates they agree
-                  about nothing. The word <em>sail</em> in one fit has a cosine
-                  of 0.4954 to the same word in the other, and the two fits put a
-                  word&rsquo;s first coordinate 0.3292 apart on average and
-                  0.8760 apart at worst.
+                  {"For a separate experiment, fit the same documents twice with a randomly initialized method and change only the seed. Both runs give higher mean within-topic similarity than across-topic similarity. Their raw coordinates also differ. Those coordinate differences combine possible changes in orientation with changes in the learned geometry."}
                 </p>
                 <TwoFitsCompared />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -1097,91 +833,28 @@ export default function WordVectorPage() {
                   the topics; neither agrees with the other about where anything
                   is.
                 </p>
-                <p>
-                  On this corpus the two fits do not even agree about the
-                  neighbour lists, sharing 28 of the 69 nearest-word places, and
-                  the second fit separated the topics more sharply than the
-                  first. That is an honest complication rather than the claim I
-                  set out to make, and its cause is that twenty-four documents
-                  do not pin down a table well enough for a random start to be
-                  washed out. The narrower point survives it, since even two
-                  fits that agreed perfectly about every neighbour would still
-                  be written in unrelated axes.
-                </p>
+                <p>The two fits share 28 of the 69 nearest-word positions, and the second separates the constructed topics more strongly. Their learned relationships differ as well as their coordinate axes. With only twenty-four documents, initialization can affect the fitted result. Even if the neighbor rankings had agreed, however, that would not make individual coordinates comparable without accounting for transformations of the representation.</p>
                 <KeepInMind>
-                  Coordinates are not portable between fits, so a comparison of
-                  two tables has to be phrased in cosines rather than in
-                  coordinates. On a corpus this small, even the cosines only
-                  partly agree.
+                  {"Cosines provide one way to compare relationships across these fits without assuming aligned axes. Alignment methods offer another route when the coordinates themselves need to be compared. Neither removes genuine differences in what the runs learned."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. A corpus’s habits become the model’s opinions">
                 <p>
-                  The last limit is the one that follows from the definition
-                  most directly and gets discussed least clearly. Nearness in
-                  one of these tables is defined by what kept company with what
-                  in the texts that were read. It is a summary of usage, and it
-                  is a summary of the usage in that particular collection, so
-                  every regularity of those texts, including the ones nobody
-                  intended, is in the answers.
+                  {"Context-based vectors summarize patterns in the training text. Those patterns can include deliberate topic structure, uneven coverage or stereotypes. A vector comparison reports an association under that representation; it does not independently verify a claim about the world."}
                 </p>
                 <p>
-                  The corpus here shows the mechanism at a size we can check.{" "}
-                  <em>sail</em> and <em>boat</em> score 0.3638, which is wrong
-                  about English and right about these twenty-four documents,
-                  where the heaviest company <em>boat</em> keeps is{" "}
-                  <em>harbour</em> at 6.0 and <em>anchor</em> at 3.0, and{" "}
-                  <em>sail</em> never once appears near either of them. Nothing
-                  in the fit was
-                  mistaken. The texts placed the two words in different company,
-                  the fit reported it, and a system reading the answer downstream
-                  has no way of knowing that the difference came from how these
-                  particular documents were composed.
+                  {"The low sail–boat similarity follows the context patterns in these constructed documents. It differs from a broad English-language judgment of relatedness. Inspecting the source contexts helps explain the discrepancy; a downstream application should not interpret the score as a verified statement about English."}
                 </p>
-                <p>A larger corpus can replace the patterns we deliberately put into this small example with patterns in its authors&apos; writing. Some of those patterns may reflect stereotypes or imbalanced coverage. A model can reproduce them in similarity results even when nobody gave it a rule about the affected groups. We therefore need to inspect the behaviour of the representation on the task where we intend to use it.</p>
+                <p>A larger corpus can replace the patterns we deliberately put into this small example with patterns in its authors&apos; writing. Some of those patterns may reflect stereotypes or imbalanced coverage. A model can reproduce them in similarity results even when nobody gave it a rule about the affected groups. We therefore need to inspect the behavior of the representation on the task where we intend to use it.</p>
                 <p>The association is represented through relationships among vectors. Editing one coordinate is not a general repair: we can rotate the whole space without changing its similarities, so that coordinate has no fixed meaning. Proposed repairs need checks on the affected comparisons and on the useful relationships they might also change.</p>
                 <DerivationTable
                   expressionHeading="Word or vector condition"
                   reasonHeading="What can be compared"
-                  rows={[
-                    {
-                      expression: "a word the texts never contained",
-                      reason: "it has no position, because a position is what the fit inferred from that word’s contexts and there were none. There is a real choice attached, since a table may reserve one row for everything it has not seen, and the cost of doing so is that every unseen word is then declared identical to every other unseen word.",
-                    },
-                    {
-                      expression: "a position sitting exactly at the origin",
-                      reason: "it has no direction, so the angle between it and anything else does not exist. Answering zero would claim it stands at right angles to every word in the vocabulary, which is a much stronger statement than the truth, so the comparison is undefined rather than merely awkward.",
-                    },
-                    {
-                      expression: "an analogy whose words cancel exactly",
-                      reason: "the sum is the origin, and nothing is near the origin in the sense the measure uses, so the question has no answer. On the sketch, asking about king with queen subtracted reaches this, since the two lie in exactly the same direction.",
-                    },
-                    {
-                      expression: "one spelling used for two unrelated things",
-                      reason: "there is one point available and two places it would need to be, so it lands between them and is near neither. Measured on these documents, the merged word’s best neighbour falls to 0.8635 where the two words it replaced reached 0.9981 and 0.9825.",
-                    },
-                    {
-                      expression: "asking which coordinate means what",
-                      reason: "the question has no answer, because a fit determines the comparisons between positions and not the positions. A quarter turn of the whole table moves one word’s first coordinate from 0.5369 to −0.5223 and moves no cosine by as much as 1e-15.",
-                    },
-                    {
-                      expression: "comparing two tables coordinate by coordinate",
-                      reason: "the same fact again, now between fits rather than within one. Two fits of these documents put a word’s first coordinate 0.3292 apart on average, and any comparison that is going to mean anything has to be built from angles, which a turn leaves alone.",
-                    },
-                    {
-                      expression: "asking whether an answer is true rather than usual",
-                      reason: "the method has no notion of true. It reports what kept company with what in the texts it read, so a regularity of those texts is indistinguishable from a fact about the language, and the only way to change an answer is to change the texts and fit again.",
-                    },
-                  ]}
+                  rows={[{"expression":"a word the texts never contained","reason":"it has no position, because a position is what the fit inferred from that word’s contexts and there were none. There is a real choice attached, since a table may reserve one row for everything it has not seen, and the cost of doing so is that every unseen word is then declared identical to every other unseen word."},{"expression":"a position sitting exactly at the origin","reason":"it has no direction, so the angle between it and anything else does not exist. Answering zero would claim it stands at right angles to every word in the vocabulary, which is a much stronger statement than the truth, so the comparison is undefined rather than merely awkward."},{"expression":"an analogy whose words cancel exactly","reason":"If the normalized terms sum to zero, cosine has no query direction. In the drawing, king minus queen cancels after normalization. Reject it or use a documented alternative rather than rank an undefined cosine."},{"expression":"one spelling used for two unrelated things","reason":"A static row combines context evidence from the spelling’s uses. It may reflect a dominant sense or several senses; no theorem forces it to a midpoint. In this experiment, sheet’s best neighbor scores0.8635."},{"expression":"asking which coordinate means what","reason":"A coordinate may correlate with a named feature, but that interpretation depends on the chosen basis. Rotating this space changes coordinates while preserving the dot-product comparisons."},{"expression":"comparing two tables coordinate by coordinate","reason":"Independent fits may have different orientations and different learned relationships. Align the spaces or compare suitable invariant quantities before interpreting raw coordinate changes."},{"expression":"asking whether an answer is true rather than usual","reason":"Context association does not independently verify truth. Improve the data or objective, adapt the representation, or change how the application uses it, then evaluate the affected behavior."}]}
                 />
                 <KeepInMind>
-                  A table of positions is a summary of one collection&rsquo;s
-                  usage, and it cannot distinguish a fact about the language
-                  from a habit of the writers. Since the summary is spread
-                  across every coordinate of every word, and coordinates are not
-                  individually meaningful anyway, there is no entry to edit
-                  afterwards.
+                  {"An embedding records associations under its data and objective. It can be updated or adapted, but editing one coordinate is not a general repair for an unwanted association. Evaluate the resulting behavior and any useful relationships the change also affects."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1193,23 +866,23 @@ export default function WordVectorPage() {
             trueFalse(
               "Editing one arbitrarily chosen coordinate is a guaranteed way to repair an unwanted learned association without changing useful word relationships.",
               false,
-              "The coordinates have no fixed dictionary meanings: rotating the whole space preserves the comparisons. An arbitrary coordinate edit can change several relationships and does not guarantee the intended repair. A proposed change needs checks on the affected comparisons and on useful behaviour elsewhere. This does not mean that changing or retraining representations is impossible.",
+              "The coordinates have no fixed dictionary meanings: rotating the whole space preserves the comparisons. An arbitrary coordinate edit can change several relationships and does not guarantee the intended repair. A proposed change needs checks on the affected comparisons and on useful behavior elsewhere. This does not mean that changing or retraining representations is impossible.",
             ),
             choice(
               "One thing does change under the turn. What is it, and why is it not a contradiction?",
               [
                 "The lengths of the longest words move slightly, because rotation is only approximate in floating point",
-                "The full neighbour ranking survives for 21 of the 23 words, and the two exceptions swap words whose cosines are equal to sixteen digits",
+                "The full neighbor ranking survives for 21 of the 23 words, and the two exceptions swap words whose cosines are equal to sixteen digits",
                 "Two words change their nearest word, because their positions crossed during the turn",
                 "The cosines between words of different topics move, because those are the smallest and so the least stable",
               ],
               1,
-              "A rotation preserves dot products and therefore lengths and cosine similarities. The largest measured change across the 253 pairs is below 1e-15, even as sail's first coordinate moves from 0.5369 to −0.5223. All 23 words keep their nearest word. Only the ordering within effectively tied scores changes, showing why a coordinate can change substantially without changing the comparison we care about.",
+              "The shared rotation changes coordinate values while preserving dot products and vector lengths. Across 253 pairs, the largest measured cosine change is below 1e−15, even though sail's first coordinate moves from 0.5369 to −0.5223. All 23 nearest-word identities remain unchanged. Tiny numerical differences can still affect effectively tied rankings, which is why a tie policy should be explicit.",
             ),
             several(
               "Which readings are unjustified when separate word tables have not been aligned?",
               [
-                              "Reading a coordinate as a named feature of a word",
+                              "Automatically treating an arbitrary coordinate as a named feature without additional evidence",
                               "Comparing a word’s third coordinate in one table against its third coordinate in another",
                               "Adding one table’s position for a word to another table’s position for it",
                               "Comparing two words by cosine within a single table",
@@ -1224,17 +897,17 @@ export default function WordVectorPage() {
               "Every use of pan in the cooking texts and of rope in the sailing texts was respelled sheet. What did the fit then report?",
               [
                 "sheet took two positions, one per sense",
-                "sheet reached only 0.8635 against its best neighbour, and its pull towards the two topics became nearly equal",
+                "sheet reached only 0.8635 against its best neighbor, and its pull towards the two topics became nearly equal",
                 "sheet was left out of the table, since its company was contradictory",
                 "sheet kept pan’s position, since cooking words are commoner in the corpus",
               ],
               1,
-              "pan scored 0.9981 against its nearest word and rope 0.9825, and the merged spelling reaches 0.8635 with a neighbour list alternating between the two topics. Its mean cosine is 0.3504 to the cooking words and 0.4318 to the sailing ones, where an ordinary cooking word like dough scores 0.4015 to its own topic and 0.1481 to the other. Nothing in the fit reported that anything had gone wrong.",
+              "The replacement gives sheet one row for contexts previously assigned to pan and rope. Its nearest score is 0.8635, and its neighbors mix the two constructed topics. Its mean similarities to cooking and sailing words are 0.3504 and 0.4318; dough has 0.4015 to cooking and 0.1481 to sailing. One stored vector summarizes both uses. That ambiguity does not make the fitting calculation invalid or automatically trigger an error.",
             ),
             trueFalse(
-              "Two fits of the same twenty-four documents from different random starts disagreed about the coordinates but agreed about the neighbour lists.",
+              "Two fits of the same twenty-four documents from different random starts disagreed about the coordinates but agreed about the neighbor lists.",
               false,
-              "They share only 28 of the 69 nearest-word places, and the second fit separated the topics more sharply than the first. Both did find the shape that is there, putting two words of one topic nearer each other than two of different topics. The cause is that twenty-four documents do not pin down a table well enough for a random start to be washed out.",
+              "The two fitted tables share 28 of 69 nearest-word positions, and the second separates these topics more strongly. Their relationships differ as well as their coordinate axes. This finite fitting experiment is sensitive to initialization; the observed difference is not explained away merely by rotating one coordinate system. Evaluate stability as well as whether either fit recovers the intended topic pattern.",
             ),
         ],
         },
@@ -1361,13 +1034,13 @@ oven and bake: 0.9267
 boat and harbour: 0.9919`,
               { hints: [
   "Fit the provided documents, then use the model’s embeddings table for word lookups and comparisons.",
-  "most_similar returns neighbours with word and similarity. similarity compares the two named words."
-], check: numberCheck("What is the cosine between boat and harbour, to four places?", 0.9919, 5e-05, "Boat and harbour score 0.9919. Their similar neighbours in this deliberately cyclic training corpus make their fitted directions similar."), question: "Which words acquire similar vectors from their surrounding words?" },
+  "most_similar returns neighbors with word and similarity. similarity compares the two named words."
+], check: numberCheck("What is the cosine between boat and harbour, to four places?", 0.9919, 5e-05, "Boat and harbour score 0.9919. Their similar neighbors in this deliberately cyclic training corpus make their fitted directions similar."), question: "Which words acquire similar vectors from their surrounding words?" },
             ),
             exercise(
               "Rank by the angle and by the ruler",
               [
-  "Using the same fitted table, compare sail with rope, mast, deck and crew. Print cosine similarity, Euclidean distance and neighbour-vector length to four decimal places.",
+  "Using the same fitted table, compare sail with rope, mast, deck and crew. Print cosine similarity, Euclidean distance and neighbor-vector length to four decimal places.",
   "Then double rope’s coordinates and print its cosine and Euclidean distance to the unchanged sail vector. This changes magnitude while retaining direction."
 ],
               `import numpy as np
@@ -1475,7 +1148,7 @@ rope doubled: gap 1.3433`,
               { hints: [
   "Compute each norm separately from the distance between vectors.",
   "Cosine divides out vector lengths. Euclidean distance retains the effect of doubling one vector."
-], check: numberCheck("How far is sail from rope with its coordinates doubled, to four places?", 1.3433, 5e-05, "The doubled rope vector is 1.3433 from sail. Its direction is unchanged, so cosine stays fixed while Euclidean distance responds to its greater magnitude."), question: "Why can cosine and ordinary distance choose different neighbours?" },
+], check: numberCheck("How far is sail from rope with its coordinates doubled, to four places?", 1.3433, 5e-05, "The doubled rope vector is 1.3433 from sail. Its direction is unchanged, so cosine stays fixed while Euclidean distance responds to its greater magnitude."), question: "Why can cosine and ordinary distance choose different neighbors?" },
             ),
             exercise(
               "Put the designed analogy to the table",
@@ -1584,7 +1257,7 @@ wind scored 0.4474`,
               "Turn the whole table and ask again",
               [
   "Use the starter’s rotation matrix to rotate the first two coordinates of every word vector by ninety degrees, then thirty degrees. Wrap each rotated table in WordEmbeddings with the unchanged vocabulary.",
-  "Print sail’s new first coordinate, maximum change in any distinct word-pair cosine and the number of words retaining their nearest neighbour. Use the same original table for both rotations."
+  "Print sail’s new first coordinate, maximum change in any distinct word-pair cosine and the number of words retaining their nearest neighbor. Use the same original table for both rotations."
 ],
               `import numpy as np
 from oop_ml.core.natural_language_processing.embeddings import (

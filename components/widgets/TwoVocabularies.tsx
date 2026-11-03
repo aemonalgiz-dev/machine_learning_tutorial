@@ -131,7 +131,7 @@ export function TwoVocabularies() {
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         Both were asked for {compared.size} tokens on the same corpus, and both
         learned {compared.coverage_pieces.length} rows above the same alphabet. A
-        coloured row is one the other vocabulary also holds. Each pair of
+        colored row is one the other vocabulary also holds. Each pair of
         readouts gives the coverage figure first.
       </p>
     </div>

@@ -133,7 +133,7 @@ export function SharedCompany() {
       </div>
 
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Bars in colour are the words both members of the pair were seen beside.
+        Bars in color are the words both members of the pair were seen beside.
         A word one position away counts one and a word two positions away counts
         a half, which is the weighting the fit itself used.
       </p>

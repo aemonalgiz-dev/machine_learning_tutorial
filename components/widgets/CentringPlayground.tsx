@@ -203,7 +203,7 @@ export function CentringPlayground({
         {has("direction") && (
           <>
             <Swatch colour={RAW} label="longest direction measured from zero" />
-            <Swatch colour={CENTRED} label="first principal component, centred" />
+            <Swatch colour={CENTRED} label="first principal component, centered" />
             <Swatch colour={MEAN} label="arrow from zero to the average person" dashed />
           </>
         )}
@@ -218,11 +218,11 @@ export function CentringPlayground({
       {has("direction") && (
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat label="longest direction from zero" value={`${view.uncentred.arrow.angle_degrees.toFixed(2)}°`} />
-          <Stat label="first component, centred" value={`${view.centred.arrow.angle_degrees.toFixed(2)}°`} />
+          <Stat label="first component, centered" value={`${view.centred.arrow.angle_degrees.toFixed(2)}°`} />
           <Stat label="cosine between the two" value={view.uncentred_against_centred.toFixed(4)} />
           <Stat label="cosine with the arrow to the average" value={view.uncentred_against_mean === null ? "no arrow" : view.uncentred_against_mean.toFixed(5)} />
           <Stat label="share claimed, from zero" value={view.uncentred.share.toFixed(4)} />
-          <Stat label="share of the variance, centred" value={view.centred.share.toFixed(4)} />
+          <Stat label="share of the variance, centered" value={view.centred.share.toFixed(4)} />
           <Stat label="squared length from zero" value={view.second_moment_total.toFixed(1)} />
           <Stat label="part of it that is location" value={locationShare.toFixed(4)} />
         </div>
@@ -231,7 +231,7 @@ export function CentringPlayground({
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
           <Stat label="slope through zero" value={view.through_origin.slope.toFixed(4)} />
           <Stat label="explained, through zero" value={view.through_origin.r_squared.toFixed(4)} />
-          <Stat label="slope, centred and through zero" value={view.centred_through_origin.slope.toFixed(4)} />
+          <Stat label="slope, centered and through zero" value={view.centred_through_origin.slope.toFixed(4)} />
           <Stat label="slope with an intercept" value={view.with_intercept.slope.toFixed(4)} />
           <Stat label="explained, with an intercept" value={view.with_intercept.r_squared.toFixed(4)} />
           <Stat label="weight at the zero height" value={view.with_intercept.intercept.toFixed(2)} />

@@ -91,7 +91,7 @@ export function Word2vecTwoTables() {
         )}
         {column(
           "the table that is thrown away",
-          `how likely each word is to be a neighbour of ${word}`,
+          `how likely each word is to be a neighbor of ${word}`,
           fit.predicted,
           (value) => value.toFixed(4),
           MONEY,
@@ -112,11 +112,11 @@ export function Word2vecTwoTables() {
       </div>
 
       <Legend>
-        Exactly half of what the fit learned is in each column, and the answer
-        keeps the left one. The right column is the model doing its stated job,
-        and its numbers are probabilities rather than angles, which is why it
-        can be read as a sentence, so that given {word} it says how ready the
-        fit is to have each word appear beside it.
+        Training learns two vector tables. The left column compares the input
+        vectors retained for similarity queries. The right column uses both
+        tables to score possible context words for {word}, as the training task
+        requires. Similarity between input vectors and a predicted context-word
+        score answer different questions.
       </Legend>
       {message && <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>}
     </div>

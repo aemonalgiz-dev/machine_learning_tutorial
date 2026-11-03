@@ -9,15 +9,15 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
-  title: "Retrieval-Augmented Generation · oop_ml",
-  description: "A model may need information that was absent or out of date when it was trained. Retrieval supplies relevant source material as context, giving the model evidence it can use when answering a question.",
+  title: "Retrieval-Augmented Generation · Perceptron Lab",
+  description: "Retrieval-augmented generation supplies source material as context for a model's answer. It can provide information absent from training, while the usefulness of the answer still depends on what was retrieved and how the model uses it.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="retrieval-augmented-generation"
     title="Retrieval-Augmented Generation"
-    tagline={"A model may need information that was absent or out of date when it was trained. Retrieval supplies relevant source material as context, giving the model evidence it can use when answering a question."}
+    tagline={"Retrieval-augmented generation supplies source material as context for a model's answer. It can provide information absent from training, while the usefulness of the answer still depends on what was retrieved and how the model uses it."}
     openingTitle="What If the Answer Lives in a Document the Model Needs to Read?"
     intuition={lessonIntuitions["retrieval-augmented-generation"]}
     technicalStart="Part 2. Calculate a Small Retrieval Baseline"
@@ -33,7 +33,9 @@ export default function Page() {
 <p>{"The collection on this page is three invented passages, each with a source number."}</p>
 <NumberTable headings={["Source", "Passage"]} rows={[["1", "The library opens at nine on weekdays. It closes at six."], ["2", "The library opens at ten on Saturday. It closes at four."], ["3", "Borrowed books may be renewed online using your library account."]]} caption="The whole collection behind the live example." />
 <p>{"A collection needs passages that are small enough to retrieve and include in a prompt, but large enough to preserve the information an answer needs. A sentence split away from its heading or qualifying paragraph can become misleading."}</p>
-<p>{"Source 2 shows what is at stake. Its second sentence says that it closes at four. Kept beside the first sentence, that is the Saturday closing time. Stored as a passage of its own, it no longer says what closes or on which day. It also shares no word with a question such as “When does the library close on Saturday?”, so a retriever that matches words would never return it. The last practice problem makes that split and runs the question."}</p>
+<p>
+                  {"Source 2’s second sentence says that it closes at four. Beside the first sentence, that is the Saturday closing time. Stored alone, it no longer says what closes or on which day. This exact word matcher would not return it for “When does the library close on Saturday?” because the isolated sentence shares none of the query’s words. The last practice problem tests that split."}
+                </p>
 <p>{"Keep the original source and location alongside each passage. A generated citation is useful only if it points to the material actually used and that material supports the claim. Updating the collection changes available evidence without necessarily changing model parameters."}</p>
 <p>{"The source number is what makes an answer checkable. An answer that says ten and cites Source 2 can be held against the sentence in Source 2. And because the schedule lives in the collection, a change of hours is an edit to one passage. No parameter of the model has to change."}</p>
 
@@ -51,16 +53,22 @@ export default function Page() {
 { title: "Part 2. Calculate a Small Retrieval Baseline", content: <>
 <SubSection title="3. Represent text with word counts">
 <p>{"Begin with the question library Saturday and the three passages above. Which words do they share? Give every distinct word a column and record how often it appears in each text. We can then compare the question's row of counts with each passage's row, keeping the words aligned."}</p>
-<p>{"Each of those terms is a small idea. Case-folding treats capital and small letters as the same, so Saturday and saturday are one word. The vocabulary is the list of every different word in the passages, which comes to 22 words for this collection. A count vector has one entry for each vocabulary word, holding how many times that word occurs in the text. Cosine similarity measures how nearly two such vectors point the same way. It multiplies matching entries and adds them up, then divides by the lengths of the two vectors, so that a passage is not favored merely for holding more words."}</p>
+<p>
+                  {"First treat capital and lowercase forms as the same word; this is case-folding. The vocabulary lists the 22 different words in these three passages. A count vector stores one count for each vocabulary entry, so matching positions refer to the same word."}
+                </p>
+                <p>{"Cosine similarity compares the directions of those count vectors. Multiply matching coordinates and add the results, then divide by both vector lengths. Repeating an entire passage would scale all its counts equally and leave the cosine unchanged. Adding different words can change its direction and therefore its score."}</p>
 <p>{"For an illustrative two-word vocabulary, a query can exactly match one direction while partially matching another."}</p>
 <Equation>{"Vocabulary = [library, Saturday]\nQuery q = [1, 1]\nPassage A = [1, 1]\nPassage B = [1, 0]\n\ncos(q, A) = (1 × 1 + 1 × 1) / (√2 × √2) = 1\ncos(q, B) = (1 × 1 + 1 × 0) / (√2 × 1) = 1 / √2"}</Equation>
 <p>{"The live collection contains more words, so its scores differ from these two-coordinate illustrations. Only positive matches are returned. If the query has no words in the indexed vocabulary, its vector has no length and the retriever returns no passages."}</p>
-<p>{"Here is the same calculation on the live collection, for the query the example opens with, library Saturday. The query vector has a one at library and a one at saturday, so its length is √2. Sources 1 and 2 each hold eleven words with the word at appearing twice, which gives each a squared length of 13. Source 3 holds ten different words, for a squared length of 10. The numerator of each score counts the shared words."}</p>
+<p>
+                  {"For the default query, compare its counts with the complete live collection. The shared-word counts supply the score numerators; the vector lengths below supply the denominators."}
+                </p>
+                <Equation>{"Query: library = 1, saturday = 1\nquery squared length = 1² + 1² = 2\n\nSources 1 and 2: at = 2, nine other words = 1 each\nsquared length = 2² + (9 × 1²) = 13\n\nSource 3: ten words = 1 each\nsquared length = 10 × 1² = 10"}</Equation>
 <Equation>{"Source 2 shares library and saturday:  2 / (√2 × √13) ≈ 0.392\nSource 3 shares library:               1 / (√2 × √10) ≈ 0.224\nSource 1 shares library:               1 / (√2 × √13) ≈ 0.196"}</Equation>
 <p>{"The Saturday passage is first, as hoped. Second place is the surprise. The passage about renewing books outranks the passage about weekday hours, although neither mentions Saturday and each shares only the word library with the query. It ranks higher because it is shorter, and cosine divides by length. At the example’s default of two passages, the context handed on would be the Saturday hours and the renewal instructions. Nothing in that second passage bears on the question, and its score had no way to say so."}</p>
 <p>{"Exact matching has a second limit, and the other searches the example suggests run into it."}</p>
 <NumberTable headings={["Query", "What comes back"]} rows={[["library Saturday", "Source 2 at 0.392, then Source 3 at 0.224"], ["renewed", "Source 3 at 0.316"], ["renew", "nothing"], ["elephant", "nothing"]]} caption="Four searches of the live collection, each asking for up to two passages." />
-<p>{"Elephant returns nothing because no passage contains it. Renew returns nothing even though Source 3 is about renewing books: the stored word is renewed, and this exact matcher treats them differently. Learned embeddings can place related expressions near one another in a numerical representation, so they can help with this mismatch. They can also return plausible but irrelevant neighbours. This baseline leaves the word-matching failure visible before we try a more flexible retriever."}</p>
+<p>{"Elephant returns nothing because no passage contains it. Renew returns nothing even though Source 3 is about renewing books: the stored word is renewed, and this exact matcher treats them differently. Learned embeddings can place related expressions near one another in a numerical representation, so they can help with this mismatch. They can also return plausible but irrelevant neighbors. This baseline leaves the word-matching failure visible before we try a more flexible retriever."}</p>
 </SubSection>
 <SubSection title="4. Put evidence into the answer context">
 <p>{"A complete RAG application combines the question with selected passages and instructions about using them. The language model then performs normal conditional generation on that prompt. A simple prompt structure is:"}</p>
@@ -103,7 +111,7 @@ export default function Page() {
             trueFalse(
               "A search for renew returns no passage from the live collection, although Source 3 is about renewing books.",
               true,
-              "The word in Source 3 is renewed, and to an exact matcher renew and renewed are two different words. A query with no word in the indexed vocabulary has a vector of no length, and only positive matches are returned, so nothing comes back. Elephant also returns nothing, and there that is the honest result, since no passage is about it.",
+              "The collection contains renewed, not renew. This tokenizer keeps those as different terms, so renew has no matching indexed coordinate and returns no positive-overlap passage. That is a retrieval miss despite relevant source material being present. Elephant also returns no match, but in that case the collection contains no relevant passage. The same empty result can have different causes.",
             ),
             choice(
               "For the query library Saturday, the passage about renewing books scores 0.224 and the passage about weekday hours scores 0.196, although each shares only the word library with the query. Why is the renewals passage ahead?",
@@ -126,17 +134,19 @@ export default function Page() {
 <p>{"Those scores are higher than the 0.392 and 0.196 the live collection gave the same query and the same two opening sentences. The words shared are the same. The passages are shorter. Each holds seven different words, so the passage length in the denominator is √7 where the live passages had √13."}</p>
 <Equation>{"Saturday sentence:  2 / (√2 × √7) ≈ 0.535\nWeekday sentence:   1 / (√2 × √7) ≈ 0.267"}</Equation>
 <KeepInMind>
-<p>{"A score can be compared with other scores for the same query on the same collection, and with nothing else. Trimming a sentence from each passage raised the right passage’s score from 0.392 to 0.535 without making it any more relevant. No fixed score means that a passage answers the question."}</p>
+<p>
+                  {"These scores rank passages for the current query and representation. Their values depend on how we tokenize and form the passages: trimming each passage raised the relevant score from 0.392 to 0.535 without changing the answer. A useful threshold needs evaluation on relevant queries and sources; cosine similarity alone does not establish that a passage answers the question."}
+                </p>
 </KeepInMind>
 
 </SubSection>
 <SubSection title="6. Evaluate evidence and generation independently">
 <p>{"If the needed passage was not retrieved, changing the answer model may not fix the failure. Check source coverage, chunk boundaries, retrieval ranking, and the context limit. If the right passage was supplied but the answer was wrong, inspect the generation step and its instructions."}</p>
 <NumberTable headings={["What you find", "Where the failure is", "What to inspect"]} rows={[["The needed passage is not among those retrieved", "retrieval", "source coverage, chunk boundaries, ranking, the context limit"], ["The needed passage was retrieved and the answer is still wrong", "generation", "the instructions and how the model read the passage"]]} caption="Look at what was retrieved before looking at what was written." />
-<p>{"The live collection supplies two different retrieval failures. A search for renew retrieves nothing although the collection covers renewals, which is the retriever’s failure. A question about Sunday opening cannot be answered from any of the three passages, which is a gap in source coverage. No change to the retriever or to the model will supply a fact the collection does not hold. In both cases a more capable answer model would be working from the wrong context, or from none."}</p>
+<p>{"A search for renew misses the passages about renewals even though the answer is present, identifying a retrieval failure. A question about Sunday opening is different: none of the three passages supplies the fact. Improving retrieval can address the first case, but cannot create missing source evidence for the second. The answer stage needs to recognize either kind of insufficient context."}</p>
 <p>{"Source text is evidence to read, not permission to follow arbitrary instructions embedded in a document. An application should preserve that distinction when constructing prompts and handling external material."}</p>
 <p>{"RAG does not automatically make facts current. The collection must be maintained, and the answer must use the relevant version. It also does not remove the need to say when evidence is missing or contradictory."}</p>
-<p>{"The library makes the point about currency concrete. Suppose the Saturday hours change and Source 2 is not edited. The retriever will go on returning the old sentence with the same score, and a faithful model will go on citing it. Every step will have worked, and the answer will be wrong."}</p>
+<p>{"Suppose the library changes its Saturday hours while Source 2 retains the old schedule. The retriever still finds the same words with the same score, and a model that follows that source can still cite the obsolete hours. Correct retrieval and faithful use of a document cannot establish that the document itself is current."}</p>
 
 </SubSection>
 <p>{"This paper combines retrieval with generation. The lesson’s word-count retriever is a small baseline, not a reproduction of its learned retrieval architecture."}{" "}<a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</a>.</p>
@@ -175,7 +185,7 @@ export default function Page() {
             trueFalse(
               "The snippet in step 5 scores the Saturday sentence near 0.535, higher than the 0.392 the live collection gives the same query, because its passages are shorter.",
               true,
-              "The shared words are the same in both cases, library and saturday. The snippet’s passages hold seven different words each, so the length in the denominator is √7 where the live passages had √13. The passage became no more relevant, which is why a score can only be compared with other scores for the same query on the same collection.",
+              "Both versions share the terms library and saturday with the query. The shorter passage has fewer nonzero count coordinates, reducing its norm and raising cosine from about 0.392 to 0.535. Its relevance has not improved merely because its score rose. Changing chunking or the indexed representation changes the score's context, so evaluate retrieval quality rather than treating that increase as evidence of a better answer.",
             ),
             several(
               "Which of these are retrieval failures, to be fixed in the collection or the retriever and not in the answer model?",

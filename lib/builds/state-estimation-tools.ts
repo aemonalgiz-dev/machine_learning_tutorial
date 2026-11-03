@@ -27,7 +27,7 @@ const numbers = (value: Data): number[] => {
 export const stateEstimationTools: Record<string, Tool> = {
   stateEstimate: {
     title: 'Keep an estimate and its spread', inputs: ['Position mean', 'Position variance'],
-    why: "Keep the position estimate together with its declared variance. The estimate uses metres, and the variance uses squared metres. The variance comes from our model; compare it with observed errors before treating it as reliable.",
+    why: "Keep the position estimate together with its declared variance. The estimate uses meters, and the variance uses squared meters. The variance comes from our model; compare it with observed errors before treating it as reliable.",
     run: ([mean, variance]) => ({ mean: finite(mean, 'Mean'), variance: nonnegative(variance, 'Variance') }),
   },
   stateAdvance: {

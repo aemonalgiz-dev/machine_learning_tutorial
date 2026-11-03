@@ -191,7 +191,7 @@ export function LightingProbe() {
               value={lighting.mean_brightness_move.toFixed(4)}
             />
             <Stat
-              label="Pixels relabelled at 0.60"
+              label="Pixels relabeled at 0.60"
               value={`${lighting.n_disagreeing} of ${lighting.n_pixels}`}
             />
             <Stat
@@ -206,7 +206,7 @@ export function LightingProbe() {
 
           <p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-500">
             The lamp multiplied every pixel by {lighting.scale} and added{" "}
-            {lighting.shift}. The brightness window that labelled the scene
+            {lighting.shift}. The brightness window that labeled the scene
             perfectly does not overlap the one that labels the relit scene, so
             no single number serves both, while the {lighting.n_sharp_pixels}{" "}
             pixels where the change is sharp report the same angle to within{" "}

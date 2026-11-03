@@ -23,9 +23,9 @@ import { ShiftTolerance } from "@/components/widgets/ShiftTolerance";
 import { WindowSummaries } from "@/components/widgets/WindowSummaries";
 
 export const metadata: Metadata = {
-  title: "Pooling · oop_ml",
+  title: "Pooling · Perceptron Lab",
   description:
-    "After detecting local patterns, we may not need every response at its original resolution. Pooling summarises nearby values, reducing the amount of data while giving up some information about exact positions.",
+    "Pooling combines nearby values into a smaller representation. It reduces spatial resolution, so the choice of operation determines which responses are retained and which positional details are lost.",
 };
 
 const link =
@@ -37,32 +37,12 @@ export default function PoolingPage() {
       lessonId="pooling"
       intuition={lessonIntuitions["pooling"]}
       technicalStart="Part 2. What Each Kind Keeps"
-      openingTitle="Keep a Summary of the Neighbourhood"
-      playgroundTitle="Keep a summary from each image neighbourhood"
+      openingTitle="Keep a Summary of the Neighborhood" openingId="keep-a-summary-of-the-neighbourhood"
+      playgroundTitle="Keep a summary from each image neighborhood"
       playgroundIntro="Compare maximum and average summaries for the same window. Then look at which input values receive a gradient on the backward pass."
       title="Pooling"
-      tagline={"After detecting local patterns, we may not need every response at its original resolution. Pooling summarises nearby values, reducing the amount of data while giving up some information about exact positions."}
-      prerequisites={
-        <>
-          The picture being pooled is the bank of maps a convolution answers
-          with, so the{" "}
-          <Link href="/concepts/convolution" className={link}>
-            convolution page
-          </Link>{" "}
-          comes first, and this page pools the map that one ends on. The second
-          half leans on{" "}
-          <Link href="/concepts/backpropagation" className={link}>
-            backpropagation
-          </Link>
-          , where a slope arriving from the layer above was first explained, and
-          on{" "}
-          <Link href="/concepts/shapes-and-flattening" className={link}>
-            shapes and flattening
-          </Link>{" "}
-          for what an arrangement of extents is and why the count alone will not
-          do.
-        </>
-      }
+      tagline={"Pooling combines nearby values into a smaller representation. It reduces spatial resolution, so the choice of operation determines which responses are retained and which positional details are lost."}
+      prerequisites={<>The <Link href="/concepts/convolution" className={link}>convolution page</Link> explains the feature maps summarized here. <Link href="/concepts/backpropagation" className={link}>Backpropagation</Link> introduces the loss derivatives used in the second half. <Link href="/concepts/shapes-and-flattening" className={link}>Shapes and flattening</Link> explains why spatial axes matter even when two arrays contain the same number of values.</>}
 
       playground={<PoolingPlayground />}
       sections={[
@@ -71,39 +51,23 @@ export default function PoolingPage() {
           defaultOpen: true,
           content: (<>
 <>
-              <SubSection title="1. The map a convolution hands over is mostly repetition">
+              <SubSection title="1. Summarizing nearby feature responses" id="1-the-map-a-convolution-hands-over-is-mostly-repetition">
                 <>
-<p>
-                  A convolution reads a picture and answers with a map nearly as large as the picture it read, one map per detector. Most of what those maps hold says the same thing twice. A detector that responds to a short vertical edge responds again when the window slides one cell along, since almost the same cells are under it, so a single edge in the picture shows up as a small bright patch in the map rather than as one bright cell.
-                </p>
-                <p>
-                  Carrying every position of that patch forward means carrying the same finding several times.
-                </p>
+<p>{"A convolution produces a response map for each detector. Nearby responses can carry closely related information because neighboring windows contain many of the same pixels. In this example, a short vertical edge can therefore produce a bright patch across several nearby positions. Pooling summarizes a local region of that map, reducing the number of values passed to the next layer."}</p>
+                <p>Nearby responses can be similar without being identical. A summary reduces their number while giving up some of the differences between them.</p>
 </>
                 <p>
-                  Later layers must process those large maps. They may also need to treat nearby detections as similar, even when an edge shifts slightly. Pooling summarizes a small neighbourhood so they receive fewer values and less precise location information. We will check when that loss of detail helps and when it removes information we need.
+
+                  Later layers must process those large maps. They may also need to treat nearby detections as similar, even when an edge shifts slightly. Pooling summarizes a small neighborhood so they receive fewer values and less precise location information. We will check when that loss of detail helps and when it removes information we need.
                 </p>
                 <KeepInMind>
-                  Shrinking a map is worth doing because the map is redundant,
-                  and the redundancy is a consequence of the way a convolution
-                  sweeps rather than a fault in the picture.
-                </KeepInMind>
+                  Pooling can reduce computation in later layers when a coarser summary is enough for the task. Overlapping convolution windows often produce related responses, but their differences can still contain useful location or shape information.</KeepInMind>
               </SubSection>
 
               <SubSection title="2. Keeping one number per window">
-                <p>
-                  Look at the two grids in the box at the top of the page. The
-                  left one is a patch of a feature map, four numbers by four, and
-                  the right one is what came back after the patch went through a
-                  pooling layer. A window two cells wide sat over the top left
-                  corner, the four numbers under it became one, the window moved
-                  two cells across and did it again, and four windows gave four
-                  answers. Nothing was multiplied and nothing was learned.
-                </p>
+                <p>The top activity shows a four-by-four feature-map patch and its pooled result. A two-by-two window summarizes the top-left four values. It then moves two cells at a time across and down the patch. Four windows produce four outputs. The summary follows a fixed rule rather than learned weights.</p>
                 <>
-<p>
-                  What is thrown away is the point of the exercise. The answer for a window says something was found in this neighbourhood and deliberately does not say where inside it, which is the complex cell&rsquo;s property written as arithmetic. Press the vertical stroke button and then nudge right once. The picture has moved a whole column and the pooled map has not changed by a single number, because the stroke stayed inside the same windows.
-                </p>
+<p>A summary discards some information about the values and their positions within a window. In this example, load the vertical stroke and nudge it right once. The stroke moves within the same nonoverlapping windows, leaving each window’s multiset of values unchanged. Both maximum and average pooling therefore return the same map.</p>
                 <p>
                   Nudge again and the bright column of the pooled map moves one cell along, because this time the stroke crossed a boundary.
                 </p>
@@ -116,16 +80,7 @@ export default function PoolingPage() {
               </SubSection>
 
               <SubSection title="3. Only the two spatial extents shrink">
-                <p>
-                  A bank of eight detectors over a picture answers with eight
-                  maps, and pooling leaves that eight alone. Each map is pooled
-                  by itself and the answers are never combined across maps,
-                  because two detectors are two different questions and the
-                  largest response of one says nothing whatever about the other.
-                  So an arrangement of eight maps of twenty-six by twenty-six
-                  comes out as eight maps of thirteen by thirteen, and the
-                  leading eight is carried through untouched.
-                </p>
+                <p>The spatial pooling operations here process each channel independently. Eight input feature maps remain eight output maps; only their spatial dimensions change. A two-by-two window at stride two turns each twenty-six-by-twenty-six map into a thirteen-by-thirteen map. Different channels can still be related, but these pooling layers do not combine them.</p>
                 <Equation>
                   {"(8, 26, 26)   →   (8, 13, 13)"}
                 </Equation>
@@ -160,15 +115,7 @@ export default function PoolingPage() {
                   and 0, 1, 2, 1 and 3, 1, 7, 5.
                 </p>
                 <Equation>{"max      [[5, 4],\n          [2, 7]]"}</Equation>
-                <p>
-                  Reading that map as a report, it says the strongest response in
-                  this neighbourhood was 5, and it says nothing about how many
-                  cells were nearly as strong. Section 6 has two windows in it
-                  that make the omission plain, one holding a single 8 among three
-                  zeros and one holding four 2s, and a maximum answers 8 and 2,
-                  which is the difference between them stated as loudly as it can
-                  be.
-                </p>
+                <p>The top-left output reports a maximum of 5. It does not tell us how many other cells were close to 5. Section 6 compares a window containing one 8 and three zeros with a window of four 2s. Max pooling distinguishes their peaks, while average pooling gives the same result for both.</p>
                 <KeepInMind>
                   A maximum reports the strongest evidence in the window and
                   discards how much other evidence there was.
@@ -185,16 +132,7 @@ export default function PoolingPage() {
                     "12 / 4 = 3,   8 / 4 = 2,   4 / 4 = 1,   16 / 4 = 4\n\naverage  [[3, 2],\n          [1, 4]]"
                   }
                 </Equation>
-                <p>
-                  Now go back to the two windows of the previous section and the
-                  reading reverses. The one holding a single 8 and the one holding
-                  four 2s both average 2, so a mean cannot tell them apart at all
-                  where a maximum could. In exchange, a mean is pulled down by the
-                  quiet cells around a strong one, which a maximum ignores. Which
-                  of those two behaviours is wanted is a question about the data
-                  rather than about the layer, and the layer itself has no
-                  opinion.
-                </p>
+                <p>Both comparison windows average to 2, so the mean cannot distinguish one isolated large value from several equal moderate values in this case. Max pooling can distinguish them, but omits their total response. The useful summary depends on which differences the next layers need for the task.</p>
                 <KeepInMind>
                   A mean reports how much response there was on average, so a
                   strong reading among quiet ones and several moderate readings
@@ -203,42 +141,20 @@ export default function PoolingPage() {
               </SubSection>
 
               <SubSection title="6. Both on one window">
-                <p>
-                  The two kinds differ by one function, and one window is enough
-                  to see the whole of it. The grid on the left below is a window
-                  and the two on the right are what each kind owes each position
-                  in it, which is the derivative of the answer with respect to
-                  that position. The next part is about why those grids matter;
-                  they are here because they are what the two layers actually
-                  differ by.
-                </p>
+                <p>The widget compares both summaries on one window. It also shows how a small change to each input would affect the output. These local sensitivities determine how the backward pass distributes an arriving loss derivative. Part 4 follows that calculation through a full map.</p>
                 <WindowSummaries />
                 <WorkedExample title="The patch’s top left window">
                   <>
-<p>
-                    The four cells 1, 5, 4 and 2 sum to 12. A maximum keeps 5 and owes all of it to the single cell in row 0, column 1, so its grid of shares is 0, 1, 0, 0 and exactly one of the four cells receives anything. An average keeps 3 and owes a quarter to each, so its grid is four quarters and all four receive something.
-                  </p>
-                  <p>
-                    Both grids add up to 1. On a window of three by three the average hands out ninths, each 0.1111111111111111, and the nine of them still come to exactly 1.
-                  </p>
+<p>For the top-left window, max pooling returns 5. While that value remains the unique maximum, changing it slightly changes the output by the same amount. Small changes to the other values leave the maximum unchanged. Its local derivative grid is therefore 0, 1, 0, 0. Average pooling returns 3, with a local derivative of one quarter for each input.</p>
+                  <p>In exact arithmetic, the four derivative shares sum to one for either operation. A three-by-three average-pooling window assigns one ninth to each input. Floating-point calculations approximate those fractions; section 18 checks the resulting rounding differences.</p>
 </>
                 </WorkedExample>
                 <KeepInMind>
-                  A kind of pooling amounts to two functions of one window, the
-                  number it keeps and the shares it owes. The sweep, the extents
-                  and every refusal are common to both kinds.
-                </KeepInMind>
+                  Both operations use the same window geometry in this SDK. Their forward summaries and local derivative rules differ. The remaining sweep and shape checks can be shared.</KeepInMind>
               </SubSection>
 
               <SubSection title="7. Pooling has no learned weights">
-                <p>
-                  A dense layer forms a weighted sum and then applies an activation function, and a
-                  convolution multiplies a kernel at every position. This layer
-                  does neither. There is no weight anywhere in it, so there is
-                  nothing for a training step to move and nothing for a saved
-                  model to store, and asking such a layer to take a step gives
-                  back the same layer object it was asked of.
-                </p>
+                <p>Pooling has no trainable weight matrix or bias. A training step therefore has no parameters to update, and this SDK returns the same layer object. A saved network still needs the pooling configuration, including its window, stride and summary rule, to reproduce the operation.</p>
                 <p>
                   Pooling applies its summary directly, without a separate
                   activation stage. Max pooling is itself a nonlinear operation;
@@ -249,10 +165,7 @@ export default function PoolingPage() {
                   so earlier layers can learn.
                 </p>
                 <KeepInMind>
-                  A pooling layer has no parameters at all. It still takes part in
-                  the backward pass, because it has to pass a correction down to
-                  the layer beneath it.
-                </KeepInMind>
+                  These pooling layers have no trainable parameters. They still calculate input gradients, allowing loss information to reach earlier layers.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -262,14 +175,7 @@ export default function PoolingPage() {
           content: (
             <>
               <SubSection title="8. The window, the stride, and the sweep">
-                <p>
-                  A pooling layer is three settings and no more. How wide the
-                  square window is, how far it moves between positions, and which
-                  summary it keeps. The window starts at the top left corner, the
-                  summary is taken, the window moves across by the stride, and at
-                  the end of a row it drops down by the stride and starts again
-                  from the left.
-                </p>
+                <p>For these SDK layers, choose the square window width, stride and summary rule. The configured input shape supplies the channel count and spatial dimensions. The window starts at the top left, moves across by the stride, then moves down by the stride and starts a new row. Other libraries may also offer padding or per-axis settings.</p>
                 <p>
                   Every one of those is a choice made when the layer is built,
                   and none of them depends on what the numbers turn out to be. So
@@ -316,9 +222,7 @@ export default function PoolingPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The floor is the whole of the arithmetic that can surprise you.
-                  It silently discards whatever is left over at the far edge.
-                </KeepInMind>
+                  Only complete windows are included. The floor in the formula accounts for the final starting position that still fits, so an uncovered margin may remain at the far edge.</KeepInMind>
               </SubSection>
 
               <SubSection title="10. What a stride that does not divide the side leaves out">
@@ -360,25 +264,11 @@ export default function PoolingPage() {
                   caption="Read off six layers built over an eight by eight patch, none of which pooled anything; the arrangement is known as soon as the layer exists."
                 />
                 <KeepInMind>
-                  A stride that does not divide the side leaves a margin at the
-                  far edge that is never read. Nothing warns about it, so the
-                  count of unreached cells is worth working out when the numbers
-                  are chosen.
-                </KeepInMind>
+                  A far-edge margin remains when the last sampled window stops before the end of the input. This depends on the window as well as the stride and extent. Separately, a stride larger than the window can leave gaps between windows. The coverage table makes both effects visible.</KeepInMind>
               </SubSection>
 
               <SubSection title="11. Overlap, and a stride larger than the window">
-                <p>
-                  A stride smaller than the window makes consecutive windows
-                  share cells, which is legal and is what the 2012 ImageNet
-                  network chose. A stride larger than the window makes
-                  consecutive windows skip cells, which is also legal and is
-                  almost never wanted. Both are accepted here, and the second
-                  produces the gaps of the previous section at their worst. A
-                  window of two at a stride of three over a four by four patch
-                  answers with a single number and leaves fifteen of the sixteen
-                  cells outside every window.
-                </p>
+                <p>When stride is smaller than the window, adjacent windows overlap, as in the 2012 ImageNet network’s pooling layers. When stride is larger, gaps can appear between windows. Both configurations are accepted here, but omitted pixels may matter to the task. On a four-by-four patch, a two-by-two window at stride three has only one valid position: it reads four pixels and leaves twelve unread.</p>
                 <DerivationTable
                   expressionHeading="stride against window"
                   reasonHeading="what the sweep does"
@@ -391,7 +281,7 @@ export default function PoolingPage() {
                     {
                       expression: "stride = window",
                       reason:
-                        "the windows tile, each cell belongs to exactly one, and any leftover margin at the far edge is dropped.",
+                        "the complete windows tile without overlap; covered cells belong to one window, while a leftover far-edge margin may be omitted.",
                     },
                     {
                       expression: "stride > window",
@@ -401,10 +291,7 @@ export default function PoolingPage() {
                   ]}
                 />
                 <KeepInMind>
-                  Overlapping is a deliberate choice with a cost in size.
-                  Skipping is legal and is usually an error in the settings
-                  rather than a decision.
-                </KeepInMind>
+                  Overlap retains more output positions and combines several gradient contributions at shared inputs. A larger stride can omit input regions. Either may be deliberate, so compare coverage and output size with the task’s needs.</KeepInMind>
               </SubSection>
 
               <SubSection title="12. How many numbers are carried forward">
@@ -418,30 +305,11 @@ export default function PoolingPage() {
                 </p>
                 <PoolingReduction />
                 <InAModel title="The shrink on that bank of maps">
-                  <p>
-                    Five thousand four hundred and eight numbers arrive. Under a
-                    window of two at a stride of two, 1352 leave, a share of
-                    0.25, so four thousand and fifty-six of them are dropped
-                    before the next layer ever sees them. Under a window of three
-                    at the same stride, 1152 leave and one row and one column of
-                    each map, fifty-one cells of the 676, belong to no window.
-                    Under a window of two at a stride of one the map barely
-                    shrinks at all, 5000 of the 5408 numbers going on.
-                  </p>
+                  <p>The eight maps contain 5,408 input values. A two-by-two window at stride two produces 1,352 summaries, one quarter as many output values, while still covering every input. With a three-by-three window at stride two, there are 1,152 outputs and fifty-one of each map’s 676 input positions fall outside every window. A two-by-two window at stride one produces 5,000 overlapping summaries. Output reduction and unread input positions are different quantities.</p>
                 </InAModel>
-                <p>
-                  A quarter is the usual figure because a window of two at a
-                  stride of two halves each spatial side, and halving two sides
-                  quarters their product. Repeat it and the effect compounds, so
-                  three such layers leave a sixty-fourth of the spatial extent,
-                  which is how a network gets from a picture to a few hundred
-                  numbers a dense layer can read.
-                </p>
+                <p>When a two-by-two, stride-two operation divides both spatial dimensions evenly, it halves each side and quarters the map area. Three such operations leave one eighth of each original side, or one sixty-fourth of the area, if the dimensions support all three divisions. This can make a later dense layer much smaller.</p>
                 <KeepInMind>
-                  The shrink is in the spatial extents, so it goes as the square
-                  of the stride when window and stride agree. The channel count
-                  is a constant factor throughout.
-                </KeepInMind>
+                  With matching window and stride and evenly divisible dimensions, the number of spatial output positions is reduced by the square of the stride. Otherwise the floor and omitted margins also affect the count. These operations preserve the channel count.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -458,7 +326,7 @@ export default function PoolingPage() {
                               "The channel count shrinks along with the two spatial extents",
                             ],
               [0, 1, 2],
-              "Two detectors are two different questions, and the largest response of one says nothing whatever about the other, so the leading extent is carried through untouched. That is why an arrangement has to be written as extents per side rather than as one count, since the stack of maps is something a pooling layer can read and the single row is not.",
+              "This pooling layer summarizes spatial windows separately within each input channel. It reduces height and width while preserving the eight-channel axis. Combining responses across channels would be a different operation. The shape tuple keeps that distinction visible.",
               {
                 "description": "This is spatial pooling applied independently to each channel, with no padding. The input shape is (channels, height, width) = (8, 26, 26). The proposed window and stride are both 2 in each spatial direction."
               },
@@ -472,7 +340,7 @@ export default function PoolingPage() {
                 "Neither summary tells the two windows apart",
               ],
               0,
-              "A maximum reports the strongest evidence and discards how much other evidence there was, which is the difference between those two windows stated as loudly as it can be. A mean reports how much response there was on average, so a strong reading among quiet ones and several moderate readings come out alike. Which behaviour is wanted is a question about the data rather than about the layer.",
+              "A maximum reports the strongest evidence and discards how much other evidence there was, which is the difference between those two windows stated as loudly as it can be. A mean reports how much response there was on average, so a strong reading among quiet ones and several moderate readings come out alike. Which behavior is wanted is a question about the data rather than about the layer.",
             ),
             trueFalse(
               "A pooling layer applies an activation function after taking its summary.",
@@ -486,7 +354,7 @@ export default function PoolingPage() {
               "The windows sit at columns zero, three and six, so columns two and five are covered by nothing, and twenty-eight of the sixty-four cells are never read. The layer never reads them, the answers do not depend on them, and no correction ever reaches them. Nothing warns about it, which is why the count is worth working out when the numbers are chosen.",
             ),
             trueFalse(
-              "Three pooling layers at a window of two and a stride of two leave a sixty-fourth of the spatial extent.",
+              "For input sides divisible by eight, three pooling layers with window two and stride two leave one sixty-fourth of the original spatial area.",
               true,
               "A window of two at a stride of two halves each spatial side, and halving two sides quarters their product, so the effect compounds across layers. That is how a network gets from a picture to a few hundred numbers a dense layer can read, and the channel count is a constant factor throughout.",
             ),
@@ -507,46 +375,23 @@ export default function PoolingPage() {
                   arriving at that answer.
                 </p>
                 <Equation>
-                  {"blame on cell i  =  arriving slope  ×  ∂answer / ∂cell i"}
+                  {"input gradient at cell i  =  arriving slope  ×  ∂answer / ∂cell i"}
                 </Equation>
-                <p>
-                  Turn the overlay on in the box at the top of the page, with max
-                  chosen. A slope of one is being sent to each of the four
-                  answers, which makes the arithmetic easy to read, since the
-                  blame on a cell is then just its share.
-                </p>
+                <p>{"Select max and enable the overlay in the top activity. Each of the four outputs receives a derivative of one. Under that setup, the highlighted input derivatives show directly how each output's contribution is distributed within its window."}</p>
                 <KeepInMind>
-                  The backward pass of a pooling layer is a distribution rule.
-                  There is no arithmetic in it beyond multiplying by a share.
-                </KeepInMind>
+                  For one window, multiply the arriving derivative by each local derivative share. If windows overlap, add all contributions that reach the same input.</KeepInMind>
               </SubSection>
 
               <SubSection title="14. The derivative of a maximum">
-                <p>
-                  A maximum is a selection rather than a calculation. Over the
-                  range where the winning cell keeps winning, the answer simply is
-                  that cell, so moving the winner by a little moves the answer by
-                  exactly as much, and moving any other cell in the window by a
-                  little does not move the answer at all.
-                </p>
+                <p>While one input is the unique maximum, sufficiently small changes preserve that winner. The output changes one for one with the winning input and does not change with a small adjustment to another input. These are local derivatives. At a tied maximum, the function has no unique derivative, so Part 6 explains the convention used by the SDK.</p>
                 <Equation>
                   {
                     "y = max(x₁, …, xₙ)\n\n∂y/∂xᵢ = 1 if i won the window, and 0 otherwise"
                   }
                 </Equation>
-                <p>
-                  So the whole arriving slope goes to one cell and the rest of the
-                  window receives nothing. In the top left window the answer 5 was
-                  5 because of the cell holding 5, and the cells holding 1, 4 and
-                  2 could each have been anything smaller without changing the
-                  answer, so a correction reaching them would be a correction for
-                  something they did not cause.
-                </p>
+                <p>In the top-left example, the unique maximum is 5. Its derivative share is one and the shares for 1, 4 and 2 are zero. Small changes to those lower values do not change the output while they remain below 5. The backward pass multiplies these shares by the arriving loss derivative.</p>
                 <KeepInMind>
-                  A maximum trains only its winners. A cell that never wins a
-                  window never receives a correction from this layer, however
-                  large it is.
-                </KeepInMind>
+                  Max pooling routes each window’s arriving derivative to its selected maximum. A cell selected by no window receives no contribution from this pooling operation on that pass. It may still receive gradients through other routes in a larger network.</KeepInMind>
               </SubSection>
 
               <SubSection title="15. The derivative of an average">
@@ -558,19 +403,9 @@ export default function PoolingPage() {
                 <Equation>
                   {"y = (x₁ + … + xₙ) / n\n\n∂y/∂xᵢ = 1 / n  for every i"}
                 </Equation>
-                <p>
-                  A two by two window therefore hands each of its four cells a
-                  quarter of whatever arrives, at every step, whatever the cell
-                  holds. Nothing is ever starved, which is what makes an average
-                  the gentler of the two on a deep stack, and the cost is that a
-                  cell which contributed almost nothing to the answer is corrected
-                  as much as the cell that carried it.
-                </p>
+                <p>{"For a two by two average-pooling window, each of its four cells receives a quarter of the derivative arriving at that output. The distribution does not depend on which cell held the largest value. This gives every input a route for that window's gradient, while also sending the same fraction to a weak contributor as to a strong one. A zero arriving derivative still gives zero contributions."}</p>
                 <KeepInMind>
-                  An average trains everything in the window a little. Its shares
-                  do not depend on the values in the window at all, so they are
-                  the same grid every time.
-                </KeepInMind>
+                  Average pooling assigns equal local derivative shares to all positions in a window. Those shares do not depend on the input values. The actual contributions also depend on the arriving derivative, which may be zero.</KeepInMind>
               </SubSection>
 
               <SubSection title="16. Who gets trained, counted on the patch">
@@ -596,15 +431,7 @@ export default function PoolingPage() {
                   ]}
                   caption="Both kinds hand down four in total, one per window, and they disagree entirely about who receives it."
                 />
-                <p>
-                  Twelve of the sixteen cells beneath a maximum receive nothing
-                  on this step, so whatever layer sits below learns through four
-                  cells only. On the next step a different four may win, since the
-                  numbers will have moved, and that is the argument that the
-                  starvation is temporary rather than structural. It is an
-                  argument about the data and not a guarantee, and a region that
-                  is uniformly quiet can sit unwinning for a long time.
-                </p>
+                <p>Only four input positions receive nonzero derivatives in this max-pooling example. Earlier layers receive the loss signal through those positions on this pass. Other inputs may become winners after the parameters or data change, but there is no guarantee that every position will eventually be selected. Shared earlier weights can still be updated from whichever positions do receive derivatives.</p>
                 <KeepInMind>
                   Which cells receive correction is decided by the kind of
                   pooling, and under a maximum it is decided afresh by the values
@@ -613,29 +440,11 @@ export default function PoolingPage() {
               </SubSection>
 
               <SubSection title="17. Why the shares in a window sum to one">
-                <p>
-                  Both grids of shares in section 6 added up to one, and that is
-                  a property of the family rather than a coincidence of those two
-                  members. Each answer here is a weighted mean of its window with
-                  weights adding to one, a maximum putting all the weight on one
-                  cell and an average spreading it evenly, and the shares are
-                  those same weights.
-                </p>
+                <p>For the two operations here, the local derivative shares sum to one. Average pooling assigns equal shares whose sum is one. Max pooling assigns one to the unique winner and zero elsewhere; the SDK uses the same one-selected-position pattern under its tie convention. This identity is a useful consistency check for these rules.</p>
                 <Equation>{"Σᵢ ∂y/∂xᵢ = 1"}</Equation>
-                <p>
-                  A layer whose shares came to something other than one would be
-                  scaling every gradient that passed through it, quietly, by a
-                  factor nobody chose. Shares adding to 1.5 would inflate the
-                  correction reaching every layer below by half as much again at
-                  every pooling layer in the stack, which compounds. So the sum is
-                  worth checking rather than assuming, and it is checked for both
-                  kinds at a range of window sides.
-                </p>
+                <p>The sum describes signed derivative contributions, not every measure of gradient size. If every input in one window increases by the same amount, max and average pooling increase by that amount too. Their derivative shares therefore sum to one. A different operation, such as summing the window, has a different scale and would need a different expected check.</p>
                 <KeepInMind>
-                  Shares summing to one is what makes a pooling layer transparent
-                  to the size of a gradient. It is a claim about the family, so it
-                  is the right thing to test for every member.
-                </KeepInMind>
+                  For max and average pooling, the sum of input derivatives equals the sum of arriving derivatives when all window contributions are included. Their distribution and norms can still change. Test the rule the operation is intended to implement.</KeepInMind>
               </SubSection>
 
               <SubSection title="18. And why they only nearly do">
@@ -657,10 +466,7 @@ export default function PoolingPage() {
                 </p>
 </>
                 <KeepInMind>
-                  The shares sum to one to within float64. Any check on them needs
-                  a tolerance and needs to include a side whose reciprocal is
-                  inexact, or it is checking nothing.
-                </KeepInMind>
+                  Use a floating-point tolerance when checking average-pooling shares, and include windows whose fractions are not exactly representable. Exact binary-fraction cases remain useful tests, but they do not exercise the same rounding behavior.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -680,17 +486,10 @@ export default function PoolingPage() {
                 </p>
                 <Equation>
                   {
-                    "blame on cell i  =  Σ over the windows holding i of   arriving slope × ∂answer / ∂cell i"
+                    "input gradient at cell i  =  Σ over the windows holding i of   arriving slope × ∂answer / ∂cell i"
                   }
                 </Equation>
-                <p>
-                  So the backward pass adds into the block it is building rather
-                  than writing into it. Writing instead of adding keeps only
-                  whichever window was visited last, which produces a gradient of
-                  exactly the right arrangement, full of plausible finite numbers,
-                  on a layer that carries on training. Nothing about the shapes
-                  would catch it and no answer would look wrong.
-                </p>
+                <p>The backward pass adds contributions into each input-gradient cell. Overwriting a cell at each window would retain only the final contribution, producing the wrong gradient even if its shape and entries looked plausible. Shape validation would not detect that error; a numerical gradient comparison can.</p>
                 <KeepInMind>
                   With overlapping windows a cell&rsquo;s correction is a sum over
                   every window it belongs to. The disjoint case hides this
@@ -699,12 +498,7 @@ export default function PoolingPage() {
               </SubSection>
 
               <SubSection title="20. The total handed down is one per window">
-                <p>
-                  Since the shares inside a window add up to one, whatever arrives
-                  at a window is handed down in full. Sum over the windows and the
-                  total blame handed down equals the total slope that arrived,
-                  whatever the stride and whichever kind.
-                </p>
+                <p>{"The derivative shares within one pooling window sum to one, so that window distributes its full arriving derivative to the inputs. Adding across windows preserves the sum of those signed derivatives for either pooling operation and any supported stride. An input in overlapping windows receives each applicable contribution."}</p>
                 <NumberTable
                   headings={[
                     "on the patch, window 2, a slope of one per answer",
@@ -718,18 +512,9 @@ export default function PoolingPage() {
                   ]}
                   caption="Nine windows send down nine, and four send down four, under both kinds. Overlap does not create or destroy any of it."
                 />
-                <p>
-                  It is tempting to say that overlapping windows send more blame
-                  down, and that is only true in the sense that there are more
-                  windows sending it. Ask the same question with the totals
-                  matched and the answer is that overlap changes nothing about the
-                  amount.
-                </p>
+                <p>{"Overlap can increase the number of output windows, giving us more arriving derivatives to distribute. To isolate overlap itself, compare cases with the same total arriving derivative. Under that comparison the total passed to the inputs is unchanged; its distribution among input positions can still differ."}</p>
                 <KeepInMind>
-                  Total blame equals total arriving at every stride. That is a
-                  consequence of the shares summing to one, and it is a cheap
-                  check to run on any pooling implementation.
-                </KeepInMind>
+                  For these rules, the sum of signed input gradients equals the sum of arriving gradients at every supported stride, within numerical tolerance. That is a useful implementation check alongside checks of individual entries.</KeepInMind>
               </SubSection>
 
               <SubSection title="21. What overlap changes is the concentration">
@@ -756,20 +541,10 @@ export default function PoolingPage() {
                   ]}
                   caption="Overlap under a maximum spreads the correction over one more cell and concentrates three times as much on the busiest of them."
                 />
-                <p>
-                  Under a maximum the effect is uneven in a way worth knowing
-                  about. A cell that is large relative to a whole neighbourhood
-                  wins every window that contains it, so it collects the blame
-                  from all of them, and its neighbours collect none. Under an
-                  average the same overlap is smooth, and the interior of the
-                  patch is corrected four times as much as the corners simply
-                  because it takes part in four times as many windows.
-                </p>
+                <p>{"Max pooling can concentrate the derivatives on one locally large cell that wins several overlapping windows, while nearby cells receive none from those windows. Average pooling spreads each contribution evenly. In the displayed arrangement, an interior cell belongs to four times as many windows as a corner and therefore receives four times its contribution when the output derivatives are equal."}</p>
                 <KeepInMind>
-                  Overlap redistributes correction rather than adding any. Under a
-                  maximum it concentrates it on cells that win repeatedly, and
-                  under an average it favours the interior over the edges.
-                </KeepInMind>
+
+                  With total arriving derivative held fixed, overlap changes how contributions are distributed. Max pooling can concentrate them at repeated winners. Average pooling can give interior positions more contributions because they belong to more windows.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -796,7 +571,7 @@ export default function PoolingPage() {
             trueFalse(
               "An average over a window of seven hands out forty-nine shares that add up to 0.9999999999999999 rather than to exactly one.",
               true,
-              "One forty-ninth has no exact representation in float64, so the forty-nine copies of it add up a rounding step short. Sides 2, 4 and 8 are exact because their reciprocals are, sixteen of the first thirty-two sides miss, and the furthest is side 31 at 1.0000000000000004. That is far below the rounding already present in any gradient reaching the layer, and it matters only because a test asserting exact equality passes at side 2 and fails at side 7, so a check on the shares needs a tolerance and a side whose reciprocal is inexact.",
+              "The mathematical share is the reciprocal of 49, which float64 cannot represent exactly. Summing its floating-point approximations gives the reported tiny residual on this run. Other window sizes and summation implementations can round differently. Test the total with a suitable tolerance, including windows whose shares are not exactly representable.",
             ),
             choice(
               "The stride drops from two to one with the window left at two. What happens to the blame handed down?",
@@ -835,9 +610,7 @@ export default function PoolingPage() {
 <p>
                   This one chooses the first cell in row-major order, the top row before the bottom and the left before the right. Load the flat patch in the box at the top, where every window is a four-way tie, and each window sends its whole slope to its own top left cell, four of the sixteen in total.
                 </p>
-                <p>
-                  The alternative, splitting the slope evenly among the tied cells, is a perfectly legitimate reading of the corner and is what a symmetric argument suggests. It is not what established implementations do, and on data where exact ties in float64 are essentially confined to constant regions there is nothing to choose between them.
-                </p>
+                <p>Splitting a tied maximum’s arriving derivative among the tied positions is another valid convention. More generally, nonnegative shares across tied maxima that sum to one form valid subgradients, possible backward directions at this nondifferentiable point. Different choices can produce different updates. Ties are common in some data, including regions made zero by ReLU, so check the convention when comparing implementations.</p>
 </>
                 <KeepInMind>
                   On a tie the backward pass follows a stated convention rather
@@ -848,50 +621,15 @@ export default function PoolingPage() {
               </SubSection>
 
               <SubSection title="23. Why the winner is recomputed rather than remembered">
-                <p>
-                  The forward pass knows which cell won each window, and could
-                  hand a record of that to the backward pass. This implementation
-                  does not. What the forward pass hands on already includes the
-                  block it read, and the winner is a function of those frozen
-                  numbers, so the backward pass asks the same question of the same
-                  numbers with the same tie rule and cannot arrive at a different
-                  answer.
-                </p>
-                <p>
-                  The cost is a second scan of every window, and it is real rather
-                  than negligible, since the backward pass does the same scan the
-                  forward pass did plus an accumulation on top. Recording the
-                  winners on the way up would move that work rather than remove it,
-                  and it would widen the type every layer shares for the benefit of
-                  this one.
-                </p>
-                <p>
-                  A dropout layer reaches the opposite conclusion about the same
-                  question, and the two are worth reading together. Its mask was
-                  drawn at random, so it cannot be recomputed at all and has to be
-                  carried. Recovering it later from which outputs are zero fails
-                  quietly on any input that was genuinely zero and genuinely kept,
-                  which the{" "}
-                  <Link href="/concepts/dropout" className={link}>
-                    dropout page
-                  </Link>{" "}
-                  measures.
-                </p>
+                <p>{"The backward pass needs to identify the same winning positions used by the forward calculation. This implementation retains the input block rather than storing a separate winner table. It recomputes the maxima from those saved values using the same tie rule, which preserves the routing for that forward pass."}</p>
+                <p>Recomputing winners requires another scan of each window. Storing winner indices during the forward pass would consume additional response memory but avoid that backward scan. This implementation chooses recomputation from the saved input; other implementations can make a different memory-versus-computation tradeoff.</p>
+                <p>Dropout needs different information for its backward pass. Its mask is random, so the input values alone do not determine it. The SDK saves that mask. A system could instead reproduce the same draw from saved random-generator state and the same draw sequence, but inferring the mask from zero outputs is ambiguous when inputs themselves contain zeros. The <Link href="/concepts/dropout" className={link}>dropout page</Link> demonstrates that ambiguity.</p>
                 <KeepInMind>
-                  A winner is derivable from what the forward pass already kept, so
-                  carrying it would store a fact that can be recovered. A random
-                  draw is not derivable, and has to be carried.
-                </KeepInMind>
+                  A max-pooling winner can be recovered from the saved input and tie rule. A dropout mask needs information about the random draw as well. Backward calculations must use the choices from their own forward pass.</KeepInMind>
               </SubSection>
 
               <SubSection title="24. Tolerance to a small shift, measured">
-                <p>
-                  The property the whole layer is for can be measured rather than
-                  described. Take an eight by eight patch lit along its third
-                  column and dark elsewhere, pool it at a window of two and a
-                  stride of two, then move the whole picture one column to the
-                  right and pool it again.
-                </p>
+                <p>We can measure shift sensitivity on a particular pattern. Use an eight-by-eight patch with its third column lit and all other values zero. Pool with a two-by-two window and stride two, then move the pattern one column right and compare the result.</p>
                 <ShiftTolerance />
                 <InAModel title="One column, moved">
                   <>
@@ -903,33 +641,18 @@ export default function PoolingPage() {
                   </p>
 </>
                 </InAModel>
-                <p>
-                  That is the complex cell&rsquo;s property in four numbers. The
-                  layer beneath saw a large change and the layer above saw none,
-                  and the layers above that never have to learn that the two
-                  pictures were the same digit.
-                </p>
+                <p>Both shifted strokes give the next layer the same pooled representation in this example. A later classifier therefore cannot distinguish them from these pooled values alone. This demonstrates one specific position tolerance; it does not establish that two arbitrary shifted pictures of a digit will have equal representations.</p>
                 <KeepInMind>
-                  The tolerance is exactly as wide as a window and no wider. A
-                  shift within a window is invisible above the layer, and a shift
-                  across a boundary is fully visible.
-                </KeepInMind>
+                  The summaries stay unchanged when a movement only permutes values within each of these disjoint windows. A general image shift can move values across boundaries or change several windows at once, so window width is not a guaranteed shift-tolerance radius.</KeepInMind>
               </SubSection>
 
               <SubSection title="25. What that tolerance is not">
                 <>
-<p>
-                  Four things are easy to read into the previous section that are not there. The layer is not invariant to shift in general, only to shift that stays inside a window, and the measurement above shows exactly where the second column crosses the line. It is not invariant to rotation or to scale, which nothing in a window summary addresses.
-                </p>
-                <p>
-                  Stacking several such layers widens the window in the original picture rather than removing the boundary, so the same knife edge is there at a coarser spacing. And a network can be tolerant to shift without this layer at all, by learning from examples at many positions, which is more expensive and is what the argument for replacing the layer with a strided convolution turns on.
-                </p>
+<p>The result is specific to this stroke and window alignment. Pooling is not generally invariant to translations, including shifts smaller than the window. It also does not enforce general rotation or scale invariance. Comparing several patterns and alignments is necessary before claiming tolerance for a particular network.</p>
+                <p>Stacking pooling layers enlarges the input region summarized by later outputs, while retaining sampling boundaries. It does not remove shift sensitivity in general. Other designs, including learned strided convolutions and training on translated examples, can also build useful tolerance. Their computation and behavior need to be compared for the task.</p>
 </>
                 <KeepInMind>
-                  Pooling buys tolerance to small shifts within a window, cheaply
-                  and with no parameters. It does not buy general invariance, and
-                  it is not the only way to get what it does buy.
-                </KeepInMind>
+                  Fixed pooling can reduce sensitivity to some position changes without learned pooling parameters. The amount depends on the pattern, window alignment and summary. It is one design choice rather than a guarantee of general invariance.</KeepInMind>
               </SubSection>
             </>
           ),
@@ -939,19 +662,9 @@ export default function PoolingPage() {
           content: (
             <>
               <SubSection title="26. Stride, padding and how the layer handles a tied maximum" id="26-what-a-complete-implementation-must-specify">
-                <p>
-                  A pooling layer looks like the simplest thing in a network and
-                  has a surprising number of decisions in it, most of which are
-                  invisible until two implementations disagree. A complete one
-                  states the arrangement it reads, the window and the stride and
-                  whether they may differ per axis, whether any padding is applied
-                  and with what value, which summary it keeps, how a tie in a
-                  maximum breaks, whether the leftover margin at the far edge is
-                  dropped or covered by a partial window, whether the backward
-                  pass accumulates over overlapping windows, what it reports when
-                  asked for a gradient it does not have, and what it does when
-                  asked to take a training step.
-                </p>
+                <p>A pooling layer needs an explicit input arrangement, window and stride. Its contract also states whether settings can differ by spatial axis, whether padding is used, and whether incomplete windows at the edge are omitted.</p>
+<p>The summary determines the backward rule. Maximum pooling needs a tie convention; average pooling distributes the incoming derivative across its window. Overlapping windows must accumulate contributions at shared input cells.</p>
+<p>Pooling has no trainable parameters, so its API must distinguish the absence of a parameter gradient from a parameter whose gradient is zero. The layer still passes input derivatives backward.</p>
                 <DerivationTable
                   expressionHeading="the decision"
                   reasonHeading="what is decided here"
@@ -974,7 +687,7 @@ export default function PoolingPage() {
                     {
                       expression: "the tie in a maximum",
                       reason:
-                        "the first cell in row-major order, which is what a flat scan of the window returns, so the two passes ask one function one question.",
+                        "the first maximum in row-major order, matching the argmax rule used by the backward calculation.",
                     },
                     {
                       expression: "overlapping windows",
@@ -989,21 +702,17 @@ export default function PoolingPage() {
                     {
                       expression: "a training step",
                       reason:
-                        "answered with the same layer object. Nothing is copied, because nothing changed and nothing can.",
+                        "returns the same layer object because this operation has no trainable parameters to update.",
                     },
                     {
                       expression: "the score and the answer",
                       reason:
-                        "the same block of numbers, since there is no activation and so no pre-activation value distinct from the answer.",
+                        "the same block of numbers; the pooling summary has no separate activation stage in this interface.",
                     },
                   ]}
                 />
                 <KeepInMind>
-                  Two implementations that agree on the summary can disagree on
-                  padding, on the leftover margin and on ties, and produce
-                  different maps from the same picture. Those three are the ones
-                  to check first when numbers do not match.
-                </KeepInMind>
+                  When results differ, compare input shape, window, stride, padding, edge-window handling and the summary rule. Tie handling affects max-pooling backward routing even when forward maps agree.</KeepInMind>
               </SubSection>
 
               <SubSection title="27. Partial windows, repeated maxima and incompatible shapes" id="27-the-edges-probed">
@@ -1018,12 +727,8 @@ export default function PoolingPage() {
                 </p>
                 <PoolingEdgeCases />
                 <>
-<p>
-                  Three are accepted, and each of the three is a decision rather than an oversight. A stride larger than the window is legal, and a window of two at a stride of three over a four by four patch answers with a single number and leaves fifteen of the sixteen cells outside every window, which is section 11 as a refusal that never comes.
-                </p>
-                <p>
-                  A window of one at a stride of one is the identity, answering with the arrangement it read and handing every one of the sixteen cells exactly 1. And a step asked of a layer with nothing to learn gives back the same layer object.
-                </p>
+<p>The widget also includes three accepted cases. With a two-by-two window and stride three on a four-by-four patch, one valid window reads four cells and leaves twelve outside every window. This is sparse sampling, not a rejected configuration. Its usefulness depends on whether those omitted positions matter.</p>
+                <p>A one-by-one window at stride one returns every value unchanged. With an arriving derivative of one at each output, each input also receives one. A training step returns the same pooling layer because there are no trainable parameters to update.</p>
 </>
                 <p>
                   Two things a reader might expect are missing from that table, and
@@ -1035,23 +740,11 @@ export default function PoolingPage() {
                   window.
                 </p>
                 <KeepInMind>
-                  A refusal that names the arrangement is worth more than one that
-                  names a Python type, because the arrangement is what the caller
-                  got wrong. A bare integer where extents are wanted is the natural
-                  mistake, since it is exactly what a dense layer&rsquo;s width
-                  looks like.
-                </KeepInMind>
+                  The shape error reports the expected channel, height and width axes. A bare integer is insufficient here even though it is accepted as a width by a dense layer. Check the expected input arrangement when moving between layer types.</KeepInMind>
               </SubSection>
 
-              <SubSection title="28. The pairing nothing refuses">
-                <p>
-                  One case is neither refused nor right, and the block at the
-                  bottom of the widget above is it. The backward pass checks that
-                  the response it was handed came from a layer of this shape and
-                  that the arriving block has this layer&rsquo;s own arrangement,
-                  which catches every mistake about extents. It cannot catch a
-                  mistake between two layers whose extents agree.
-                </p>
+              <SubSection title="28. Pairing a layer with its forward response" id="28-the-pairing-nothing-refuses">
+                <p>The backward method checks response and arriving-gradient shapes. Those checks do not verify which layer instance produced the response. Different pooling configurations can have matching input and output shapes, so a manually paired response can pass validation while using the wrong window geometry.</p>
                 <WorkedExample title="Two layers of one shape">
                   <>
 <p>
@@ -1062,16 +755,7 @@ export default function PoolingPage() {
                   </p>
 </>
                 </WorkedExample>
-                <p>
-                  Closing it would mean every response carrying a record of which
-                  layer produced it, which is a field on the type every layer
-                  shares, added for a case that a network assembled as a stack
-                  cannot reach, since a stack pairs layer k with response k by
-                  construction. The exposure is to a caller pairing the two by
-                  hand, which is what a step-by-step walk through a single layer
-                  does. So it is written down rather than defended, and this
-                  section is where it is written down.
-                </p>
+                <p>Use the layer that produced a response when calculating its backward result. LayerStack keeps the matching layer and response at each position automatically. A caller using individual layers must retain that pairing explicitly. The example shows why matching shapes and matching derivative totals are insufficient to establish correct routing.</p>
                 <KeepInMind>
                   Matching arrangements is not the same as matching layers. Where a
                   check reads shapes alone, two layers of one shape are
@@ -1091,15 +775,15 @@ export default function PoolingPage() {
                 "It gives the whole slope to the first cell in row-major order, as a stated convention",
                 "It splits the slope evenly between the tied cells, which the symmetry requires",
                 "It refuses the window, since the derivative does not exist there",
-                "It picks one of the tied cells at random so that no cell is favoured over many steps",
+                "It picks one of the tied cells at random so that no cell is favored over many steps",
               ],
               0,
-              "The maximum of two crossing lines has a corner at the crossing, and the one-sided slopes give the whole of it to different cells, so there is no single right answer to compute. Splitting evenly is a legitimate reading and is not what established implementations do. A gradient check cannot arbitrate it, because the one-sided differences genuinely disagree, so the convention has to be tested directly.",
+              "At a tied maximum, the function is not differentiable in one unique way. This implementation selects the first maximum under its traversal order and sends that entry the upstream derivative. Splitting a derivative among tied entries is another possible subgradient convention. A central finite difference at the tie does not establish which convention the API promises, so test that promise directly.",
             ),
             trueFalse(
               "The forward pass records which cell won each window and hands that record to the backward pass.",
               false,
-              "It does not. What the forward pass hands on already includes the block it read, and the winner is a function of those frozen numbers, so the backward pass asks the same question of the same numbers with the same tie rule and cannot arrive at a different answer. The cost is a second scan of every window, which is real rather than negligible, and the dropout layer reaches the opposite conclusion because a random draw cannot be recomputed at all.",
+              "The forward response retains the input values. The backward pass finds each winner again from those values using the same traversal and tie rule. That trades stored winner indices for another window scan. A dropout mask is not determined by input values alone; reproducing its draw would also require the same random-generator state.",
             ),
             choice(
               "An eight by eight patch lit along its third column is pooled at a window of two and a stride of two, then the stroke moves one column right and it is pooled again. What changed?",
@@ -1110,7 +794,7 @@ export default function PoolingPage() {
                 "Nothing in either, since the layer is invariant to shift",
               ],
               0,
-              "Eight cells go dark and eight light up, and the third and fourth columns share a window, so the stroke moved within it and the summaries did not notice. Move it a second column and it crosses into the next window, 8 of the 16 pooled cells change, and the bright column of the map moves one cell along. The tolerance is exactly as wide as a window and no wider.",
+              "The third and fourth input columns belong to the same pooling windows here, so moving this stroke between them leaves both summaries unchanged. The next move crosses a boundary and changes eight pooled cells. There is no universal one-pixel or window-width tolerance: even a small shift can cross a boundary, depending on the starting position and other values.",
             ),
             several(
               "Which of these are named as things pooling does not buy?",
@@ -1121,7 +805,7 @@ export default function PoolingPage() {
                 "Removal of the window boundary, once several such layers are stacked"
               ],
               [0, 1, 2, 3],
-              "Pooling summarises values within fixed windows. Some local changes leave a particular summary unchanged, but moving values across a window boundary can change it. Stacking pooling layers gives coarser windows rather than eliminating boundaries. Rotation and scale tolerance need further architectural choices or training evidence.",
+              "Pooling summarizes values within fixed windows. Some local changes leave a particular summary unchanged, but moving values across a window boundary can change it. Stacking pooling layers gives coarser windows rather than eliminating boundaries. Rotation and scale tolerance need further architectural choices or training evidence.",
             ),
             choice(
               "A window of three at a stride of one and a window of two at a stride of two both answer two by two from a four by four patch. What happens if a response from the first is handed to the second?",
@@ -1132,7 +816,7 @@ export default function PoolingPage() {
                 "The second layer silently reproduces the first layer’s answer",
               ],
               0,
-              "The backward pass checks that the arriving block has this layer’s own arrangement, which catches every mistake about extents and cannot separate two layers whose extents agree. The totals agree to the last bit because the shares sum to one either way, and the second layer routes three of the four arriving values to cells that never won the windows they came from. A stack pairs layer k with response k by construction, so the exposure is to a caller pairing them by hand.",
+              "The incoming derivative shape matches both layers, so that check cannot identify which forward operation produced the response. Their different windows select different input locations, giving an incorrect derivative route when the response is paired with the wrong layer. An ordinary stack keeps each layer beside its own response. Direct API callers must preserve that pairing too.",
             ),
         ],
         },
@@ -1226,7 +910,7 @@ AveragePool2d at stride 1: 9 windows, total blame 9, cells receiving anything 16
             exercise(
               "Ask one window for its summary and its shares, then test the sum",
               [
-  "Use the supplied top-left two-by-two window to inspect summarise and shares_of for both pooling rules. Print its summary, share map and share sum.",
+  "Use the supplied top-left two-by-two window to inspect summarize and shares_of for both pooling rules. Print its summary, share map and share sum.",
   "For average-pooling square windows of sides one through eight, print the exact floating-point sum of all shares. Do not round the total before inspecting it."
 ],
               `import numpy as np
@@ -1322,7 +1006,7 @@ AveragePool2d shift 2: 16 of 64 picture cells changed, 8 of 16 pooled cells chan
               { hints: [
   "Use the same original response as the reference for both shifts.",
   "A shift within the same nonoverlapping window can preserve its summary; crossing into the next window can move that summary."
-], check: numberCheck("How many of the sixteen pooled cells change when the stroke has moved two columns?", 8, 0.5, "Eight pooled cells change after the two-column move. The stroke crosses into neighbouring pooling windows rather than staying inside its original ones."), question: "Does moving a stroke within a pooling window differ from crossing its boundary?" },
+], check: numberCheck("How many of the sixteen pooled cells change when the stroke has moved two columns?", 8, 0.5, "Eight pooled cells change after the two-column move. The stroke crosses into neighboring pooling windows rather than staying inside its original ones."), question: "Does moving a stroke within a pooling window differ from crossing its boundary?" },
             ),
           ],
         },

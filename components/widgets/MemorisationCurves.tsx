@@ -194,8 +194,10 @@ export function MemorisationCurves({ showLoss = true }: { showLoss?: boolean }) 
         </text>
       </svg>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Solid is the training rows, dashed is the people held out. The gap
-        between a colour&rsquo;s two lines is what that network memorised.
+        Solid lines show training accuracy; dashed lines show held-out accuracy.
+        A growing gap means a network is improving more on its training examples
+        than on the excluded people. The gap is evidence to investigate
+        overfitting, rather than a direct count of memorized examples.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-2">

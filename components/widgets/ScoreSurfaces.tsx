@@ -161,7 +161,7 @@ export function ScoreSurfaces() {
             <text x={MAP / 2} y={MAP - 8} textAnchor="middle" className="fill-slate-500 text-[11px] font-medium dark:fill-slate-400">height (cm)</text>
             <text x={10} y={MAP / 2} textAnchor="middle" transform={`rotate(-90 10 ${MAP / 2})`} className="fill-slate-500 text-[11px] font-medium dark:fill-slate-400">weight (kg)</text>
           </svg>
-          <p className="mt-1 text-center text-xs text-slate-500 dark:text-slate-500">The same lattice from above, coloured by the highest plane.</p>
+          <p className="mt-1 text-center text-xs text-slate-500 dark:text-slate-500">The same lattice from above, colored by the highest plane.</p>
         </div>
       </div>
 

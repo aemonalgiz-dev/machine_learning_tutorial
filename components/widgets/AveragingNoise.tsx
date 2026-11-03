@@ -54,7 +54,7 @@ export function AveragingNoise() {
         {averages.length > 1 && (
           <path d={averages.map((value, index) => `${index === 0 ? "M" : "L"} ${toX(index).toFixed(1)} ${toY(value).toFixed(1)}`).join(" ")} fill="none" stroke="#6366f1" strokeWidth={2.5} />
         )}
-        <text x={PAD.left + PLOT.width / 2} y={VIEW.height - 6} textAnchor="middle" className="fill-slate-500 text-[11px] font-medium dark:fill-slate-400">estimates in the order drawn, grey each on its own, indigo the running average</text>
+        <text x={PAD.left + PLOT.width / 2} y={VIEW.height - 6} textAnchor="middle" className="fill-slate-500 text-[11px] font-medium dark:fill-slate-400">estimates in the order drawn, gray each on its own, indigo the running average</text>
       </svg>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="estimates so far, B" value={String(estimates.length)} />

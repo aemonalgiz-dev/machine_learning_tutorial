@@ -1,3 +1,4 @@
+import { americanEnglish } from "@/lib/american-english";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -25,7 +26,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const part = findCourseSection((await params).section);
   if (!part) notFound();
-  return { title: `${part.title} · Perceptron Lab`, description: part.intro };
+  return { title: `${americanEnglish(part.title)} · Perceptron Lab`, description: part.intro };
 }
 
 export default async function CourseSectionPage({ params }: Props) {
@@ -53,7 +54,7 @@ export default async function CourseSectionPage({ params }: Props) {
       </nav>
       <header id={courseSectionId(part)} className="mb-10 scroll-mt-8">
         <PathProgress lessons={lessons} variant="header" />
-        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{part.title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{americanEnglish(part.title)}</h1>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">{part.intro}</p>
       </header>
 
@@ -70,7 +71,7 @@ export default async function CourseSectionPage({ params }: Props) {
                   href={`#${courseTopicId(topic)}`}
                   className="block text-sm text-accent underline-offset-4 hover:underline"
                 >
-                  {topic.heading}
+                  {americanEnglish(topic.heading)}
                 </a>
               </li>
             ))}
@@ -87,7 +88,7 @@ export default async function CourseSectionPage({ params }: Props) {
           >
             {showTopics && (
               <header className="mb-5">
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground">{topic.heading}</h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground">{americanEnglish(topic.heading)}</h2>
                 {topic.blurb && <p className="mt-2 max-w-2xl text-muted">{topic.blurb}</p>}
               </header>
             )}
@@ -98,7 +99,7 @@ export default async function CourseSectionPage({ params }: Props) {
                     <li key={concept.title}>
                       <div className="rounded-xl border border-dashed border-line p-5">
                         <h3 className="font-semibold text-muted">
-                          {concept.title}{" "}
+                          {americanEnglish(concept.title)}{" "}
                           <span className="ml-2 font-mono text-xs font-normal">coming soon</span>
                         </h3>
                         <p className="mt-2 text-sm text-muted">{concept.blurb}</p>
@@ -124,7 +125,7 @@ export default async function CourseSectionPage({ params }: Props) {
       >
         {previous ? (
           <Link href={courseSectionHref(previous)} className="text-sm text-accent hover:underline">
-            <span className="mb-1 block font-mono text-xs text-muted">Previous section</span>← {previous.title}
+            <span className="mb-1 block font-mono text-xs text-muted">Previous section</span>← {americanEnglish(previous.title)}
           </Link>
         ) : (
           <span />
@@ -135,7 +136,7 @@ export default async function CourseSectionPage({ params }: Props) {
             className="text-sm text-accent hover:underline sm:text-right"
           >
             <span className="mb-1 block font-mono text-xs text-muted">Next section</span>
-            {next.title} →
+            {americanEnglish(next.title)} →
           </Link>
         )}
       </nav>

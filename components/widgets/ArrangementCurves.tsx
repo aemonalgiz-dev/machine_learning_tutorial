@@ -1,4 +1,6 @@
 "use client";
+import { americanEnglish } from "@/lib/american-english";
+
 
 // The loss the training loop sees, epoch by epoch, under five arrangements.
 //
@@ -105,7 +107,7 @@ export function ArrangementCurves({ showPurposes = true }: { showPurposes?: bool
               }
               style={on ? { backgroundColor: colour, borderColor: colour } : undefined}
             >
-              {ARRANGEMENT_TITLES[curve.arrangement]}
+              {americanEnglish(ARRANGEMENT_TITLES[curve.arrangement])}
             </button>
           );
         })}
@@ -143,7 +145,7 @@ export function ArrangementCurves({ showPurposes = true }: { showPurposes?: bool
         {experiment.curves.map((curve) => (
           <Stat
             key={curve.arrangement}
-            label={ARRANGEMENT_TITLES[curve.arrangement]}
+            label={americanEnglish(ARRANGEMENT_TITLES[curve.arrangement])}
             value={`under ${experiment.loss_threshold} at epoch ${curve.first_epoch_below_threshold ?? "never"}`}
             detail={`ends at ${curve.final_loss.toFixed(4)}, accuracy ${curve.final_accuracy.toFixed(2)}`}
             colour={ARRANGEMENT_COLOURS[curve.arrangement]}

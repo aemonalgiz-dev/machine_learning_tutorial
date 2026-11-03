@@ -23,9 +23,9 @@ import { SeparationLadder } from "@/components/widgets/SeparationLadder";
 import { SharedDirectionProbe } from "@/components/widgets/SharedDirectionProbe";
 
 export const metadata: Metadata = {
-  title: "Pooling a Text · oop_ml",
+  title: "Pooling a Text · Perceptron Lab",
   description:
-    "Comparing whole sentences often requires one vector per sentence. Pooling combines their token vectors into a fixed-size representation, but the choice of combination determines which details we can still recover.",
+    "Pooling combines a sequence of token vectors into a single representation. The combination rule determines which information remains useful for comparing whole sentences and which details are lost.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function PoolingATextPage() {
       playgroundTitle="What survives when word vectors become one text vector?"
       playgroundIntro="Compare sentence vectors under different weighting rules. Try sentences with the same words in a different order and inspect what each representation can distinguish."
       title="Pooling a Text"
-      tagline={"Comparing whole sentences often requires one vector per sentence. Pooling combines their token vectors into a fixed-size representation, but the choice of combination determines which details we can still recover."}
+      tagline={"Pooling combines a sequence of token vectors into a single representation. The combination rule determines which information remains useful for comparing whole sentences and which details are lost."}
       prerequisites={
         <>
           Everything here starts from a table that has already given every word a
@@ -77,18 +77,14 @@ export default function PoolingATextPage() {
 <>
               <SubSection title="1. Why a model needs one position and not a list of them">
                 <>
-<p>
-                  Suppose every word already has a position, so that a text of eight words is eight positions, and suppose we want to ask whether two texts are about the same thing. Nothing about eight positions answers that. We could compare them word against word, but the two texts will not be the same length, and even where they are, the third word of one has no reason to line up with the third word of the other.
-                </p>
+<p>Suppose each word has a vector and we want to compare two complete texts. One text may contain eight words and another twelve. Comparing vectors by their positions in the sentences would assume that corresponding positions have corresponding roles, which they usually do not. We need to decide how a set of token vectors should contribute to one text representation.</p>
                 <p>
                   Suppose the next model expects a fixed-width input vector, such as a classifier with one weight per input. A variable number of token vectors will not fit that interface directly. Pooling gives us one vector of the required width, though other architectures can process the sequence without pooling it this way.
                 </p>
 </>
                 <>
 <p>We could lay the word vectors end to end. The result grows with the number of words, so texts of different lengths would have different input widths. Padding and a maximum length can make those widths match, and position-aware models can use that arrangement. Here we want a simple document comparison that does not require the third word of one text to correspond to the third word of another. Pooling is one way to build that summary, at the cost of losing word order.</p>
-                <p>
-                  Pooling is the other answer. Combine the positions into one position of the same width, so that a text of three words and a text of thirty both come back as four numbers, and let the combining rule decide what survives.
-                </p>
+                <p>Pooling combines several token vectors into one vector with a fixed number of entries. A short text and a long text can then be compared in the same coordinate space. The combination rule determines which information is preserved.</p>
 </>
                 <Equation>
                   {"one text  ↦  one position of a fixed width"}
@@ -100,9 +96,7 @@ export default function PoolingATextPage() {
 
               <SubSection title="2. The collection everything here is pooled from">
                 <>
-<p>
-                  A word&rsquo;s position is learned from usage, so nothing here can be shown on a single sentence, and every number on this page comes from one of two collections. The larger is twenty-four documents of six words each, twelve about cooking and twelve about sailing, written from ten cooking words and ten sailing words with no content word appearing in both halves.
-                </p>
+<p>We use two collections so that the learned word vectors have context behind them and the small calculations remain checkable. The larger collection contains twenty-four six-word documents, split between ten cooking words and ten sailing words. No content word appears in both topic lists.</p>
                 <p>
                   Every document also carries exactly one of three words that carry no subject at all, and, the and we. Twenty-three words in all, and each of them has a position of four numbers, found by counting which words keep company with which inside a short window.
                 </p>
@@ -116,21 +110,13 @@ export default function PoolingATextPage() {
                 </p>
 </>
                 <KeepInMind>
-                  Nobody tells any rule below which half a document belongs to.
-                  The two numbers this page keeps reporting, how alike two
-                  documents of one half come out and how alike a document of each
-                  come out, are the whole score.
+                  {"The pooling rules receive no topic labels. We use the constructed groups to inspect their comparisons, including both average separation and difficult individual pairs. Those measures evaluate selected properties of this example."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="3. Three texts that share nothing but the words carrying no subject">
                 <p>
-                  Three texts run through the page from here on. Two of them are
-                  about sailing and one is about cooking, and they were written so
-                  that no two of them share a word that carries a subject. What
-                  all three do share is and, the and we, in the same numbers, and
-                  that is deliberate, because it is the case where a rule that
-                  reads only which words a text used has nothing at all to go on.
+                  {"Use two sailing texts and one cooking text, with no shared content word between any pair. All three repeat the same function words. That makes raw word overlap unhelpful for distinguishing the subjects, while the fitted content-word vectors can supply additional context relationships."}
                 </p>
                 <NumberTable
                   headings={["text", "about", "words carrying a subject"]}
@@ -161,10 +147,7 @@ export default function PoolingATextPage() {
                   second, since that is the one fact about them nothing was told.
                 </p>
                 <KeepInMind>
-                  These three texts are the hardest case for counting and an easy
-                  one for averaging, which is exactly why they are the running
-                  example. A pair of texts that happened to share vocabulary would
-                  let counting off.
+                  {"These texts isolate one limitation of direct word overlap. They are selected examples, so we will also compare pairs across the full constructed collection."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -188,21 +171,9 @@ export default function PoolingATextPage() {
                 <Equation>
                   {"count(text)₁ , count(text)₂ , … , count(text)ₘ"}
                 </Equation>
-                <p>
-                  Two texts are then compared by the angle between their count
-                  vectors. The length of a count vector grows with every word
-                  counted, so a long text is a long vector whatever it is about,
-                  and dividing each vector by its own length puts every text on
-                  the same sphere before any comparison happens. After that the
-                  angle and the distance agree, and length has stopped carrying
-                  anything.
-                </p>
+                <p>For nonzero count vectors, normalizing by their lengths removes magnitude from the comparison. Cosine similarity and Euclidean distance between those unit vectors then give equivalent rankings, though they report different numerical values. Empty or zero vectors require a separate rule because normalization would divide by zero.</p>
                 <KeepInMind>
-                  A counted text is as wide as the vocabulary and almost all zero,
-                  which is the shape of the answer rather than an accident. Two
-                  texts are near each other exactly when they used the same words
-                  in the same proportions, and no other kind of nearness is
-                  available to this rule.
+                  {"A count vector keeps the vocabulary proportions and discards order. Under cosine, proportional nonzero count vectors have similarity 1, while partial overlap can still give intermediate similarity. The exact sparsity depends on vocabulary and text length."}
                 </KeepInMind>
               </SubSection>
 
@@ -244,19 +215,9 @@ export default function PoolingATextPage() {
                     </p>
                   </>
                 </WorkedExample>
-                <p>
-                  The last thing this small collection shows is what happens to a
-                  word it has never seen. The text the zebra sat comes back as (0,
-                  1.2877, 1.2877, 0, 0), with zebra contributing nothing at all,
-                  because a word with no slot has nowhere to put anything. That is
-                  not a refusal and it is not an approximation. It is the rule
-                  being honest that it has never met the word.
-                </p>
+                <p>The text the zebra sat returns (0, 1.2877, 1.2877, 0, 0). Zebra is absent from this fitted vocabulary and contributes no vector under the stated unknown-word policy. The returned text vector therefore summarizes only the recognized contributions. We should retain that missing-coverage fact when interpreting its similarity to other texts.</p>
                 <KeepInMind>
-                  The weights are learned from the collection and then applied
-                  unchanged. A text handed to a fitted rule is never allowed to
-                  re-estimate how rare its own words are, which would let a
-                  held-out text leak into its own description.
+                  {"Fit document-frequency weights on the chosen reference collection and reuse them for later comparisons. Updating those estimates is possible, but changes the representation and evaluation protocol. Fitting on held-out evaluation text would no longer test the same fixed preparation."}
                 </KeepInMind>
               </SubSection>
 
@@ -279,10 +240,7 @@ export default function PoolingATextPage() {
                   margin of 0.0040, which is not nothing and is not much.
                 </p>
                 <KeepInMind>
-                  A weighting is only as useful as the spread of what it is
-                  weighting. On an evenly used vocabulary every word ends up
-                  counting about the same however the weight is defined, and the
-                  repair has to come from somewhere else.
+                  {"Inverse-document frequency depends on how widely each word occurs across documents. If those document frequencies are similar, the weights will be similar too. Differences in total token frequency are a separate statistic."}
                 </KeepInMind>
               </SubSection>
 
@@ -353,25 +311,13 @@ export default function PoolingATextPage() {
             <>
               <SubSection title="8. The mean of a text’s word positions">
                 <p>
-                  If the words already have positions, the cheapest thing to do
-                  with a text is to stand at the middle of them. Add the positions
-                  of the words the text used, divide by how many there were, and
-                  the result is a position of the same width as any word&rsquo;s.
-                  A text of three words and a text of thirty both come back as
-                  four numbers, and a word the table has never seen is skipped
-                  rather than guessed at.
+                  {"Add the available word vectors and divide by the number included. This mean has the same width as one word vector. Here an unknown word is skipped, so n in the formula counts recognized tokens; record that policy and report low vocabulary coverage."}
                 </p>
                 <Equation>
                   {"v(text)  =  (1 / n) · ∑ v(w)   over the n words of the text"}
                 </Equation>
                 <p>
-                  It sounds too crude to work and it is not. What a short text is
-                  about is mostly which words it holds, the positions of words
-                  about one subject are near each other, and the middle of several
-                  nearby positions is near all of them. The mean carries that,
-                  which is enough for a great many questions, and the sections
-                  after this are about the specific ways it falls short rather
-                  than about it failing.
+                  {"When content words from a topic have related vectors, their average can provide a useful topic summary. That is a property to test, not a guarantee about every short text: order, negation and particular word roles can still matter."}
                 </p>
                 <KeepInMind>
                   The mean is a composition, not a fit. Nothing about a
@@ -427,22 +373,13 @@ export default function PoolingATextPage() {
                 </p>
 </>
                 <p>
-                  None of those lengths says anything about the text. They say
-                  which rule produced the vector and how big its weights happened
-                  to be, so comparing two texts by the distance between them would
-                  mostly be comparing the arithmetic that made them. The direction
-                  is where the subject was put, and the cosine of the angle
-                  between two directions is what every number on this page
-                  measures.
+                  {"Length depends on the word vectors, weights and their agreement or cancellation. It can contain information as well as effects of the preparation rule. We use cosine here to compare directions consistently; that is a task choice, not proof that every pooled norm is meaningless."}
                 </p>
                 <Equation>
                   {"cos θ  =  (a · b) / ( ‖a‖ · ‖b‖ )"}
                 </Equation>
                 <KeepInMind>
-                  A pooled vector&rsquo;s length is an artefact of the weights and
-                  the number of words, so the angle is the comparison throughout.
-                  A vector of length zero has no direction and cannot be compared
-                  at all, which Part 6 comes back to.
+                  {"Cosine removes magnitude from the comparison. A zero pooled vector needs a separate policy because it has no direction; its Euclidean distance to another vector remains defined."}
                 </KeepInMind>
               </SubSection>
 
@@ -458,13 +395,8 @@ export default function PoolingATextPage() {
                 </p>
                 <WorkedExample title="Why the repeated word dominates this document average">
                   <p>
-                    The document is the cat the dog. The position of cat is (1, 0,
-                    0, 0.1) and of dog is (1, 0, 0, &minus;0.1), and the position
-                    of the is (0, 0, 2, 0), which is twice as long as either. Four
-                    words, two of them the, so the mean adds two copies of (0, 0,
-                    2, 0) to one each of the other two and divides by four,
-                    landing at (0.5, 0, 1, 0).
-                  </p>
+                  {"For the hand-built document the cat the dog, cat and dog agree along the first axis and have opposite small fourth coordinates. The two the vectors point along the third axis. Their repeated contribution dominates the resulting average, as the calculation below shows."}
+                </p>
                   <p>
                     Read that answer as the third coordinate being twice the
                     first. Two words in four supplied the whole of one coordinate
@@ -475,36 +407,23 @@ export default function PoolingATextPage() {
                     every document of the collection.
                   </p>
                   <p>
-                    A share is worked out in two steps. First take what the
-                    word added to the mean, which is its position times the
-                    number of times it was used, divided by the four words of
-                    the document. Then measure that along the answer and divide
-                    by the answer&rsquo;s own squared length, so that the
-                    shares of all the words add to one.
-                  </p>
+                  {"To attribute this nonzero answer, project each word’s weighted contribution onto it and divide by its squared length. These signed shares sum to one. They are not probabilities: with other vector arrangements, a contribution can be negative or exceed one because terms can oppose each other."}
+                </p>
                   <Equation>{"answer = (0.5, 0, 1, 0)          answer · answer = 0.5² + 1² = 1.25\nshare(word) = (what the word added) · answer / (answer · answer)\nthe:  (0, 0, 1, 0) · (0.5, 0, 1, 0) / 1.25 = 1 / 1.25 = 0.8000\ncat:  (0.25, 0, 0, 0.025) · (0.5, 0, 1, 0) / 1.25 = 0.125 / 1.25 = 0.1000\ndog:  (0.25, 0, 0, −0.025) · (0.5, 0, 1, 0) / 1.25 = 0.125 / 1.25 = 0.1000"}</Equation>
                   <p>
+
                     The two uses of the added (0, 0, 1, 0) between them, which
                     is the whole of the answer&rsquo;s largest coordinate. Cat
                     and dog added a quarter each to the first coordinate, and
-                    their small fourth coordinates cancelled.
+                    their small fourth coordinates canceled.
                   </p>
                 </WorkedExample>
                 <ContributionBars corpus="sketch" text="the cat the dog" />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  The shares of one document&rsquo;s answer, by word. Switch the
-                  rule to see the same three words divide the same answer
-                  differently, which is what a weighting does and all it does.
+                  {"Each bar reports a word’s contribution under the selected rule. Changing weights can change the pooled vector as well as these shares; it does not merely redistribute an otherwise identical answer."}
                 </p>
                 <p>
-                  The consequence across the six documents is that they all end up
-                  pointing at nearly the same place. The three about animals score
-                  at least 0.9990 against each other, which is what we want, but
-                  the animal documents and the finance documents score up to
-                  0.8349 against each other, which we do not, so the margin is
-                  only 0.1640. Two texts with no word in common and nothing to do
-                  with each other are eighty-three per cent alike because they
-                  both said the twice.
+                  {"In the hand-built collection, repeated the vectors increase cross-topic similarity. One animal–finance pair scores 0.8349 under the plain average despite having no content words in common. That is a cosine score, not a statement that the texts are 83% alike in meaning."}
                 </p>
                 <KeepInMind>
                   The complaint is not that common words are meaningless. It is
@@ -517,7 +436,7 @@ export default function PoolingATextPage() {
               <SubSection title="12. On this collection it does not, and the reason is worth having">
                 <>
 <p>
-                  I expected the same ranking on the twenty-four documents and did not get it. Taking the first of the three texts and asking which of its words supplied most of its average, the answer is crew at 0.2069, then sail at 0.1839, then and at 0.1736 across its two uses, then the at 0.1532 across its two.
+                  {"The larger collection behaves differently. In the first example text, crew contributes most under the stated projection attribution, followed by sail. The two occurrences of and together contribute less than either of those single content words."}
                 </p>
                 <p>
                   Two tokens of and together supply less than one token of crew. Across all twenty-four documents, the one word in six that carries no subject supplies 0.0649 of its document&rsquo;s average, where an equal share would be 0.1667.
@@ -528,24 +447,21 @@ export default function PoolingATextPage() {
                   text="the crew and the boat and we sail"
                 />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
+
                   The same division of one answer, on the larger collection. The
-                  grey bars are the words carrying no subject, and here they are
+                  gray bars are the words carrying no subject, and here they are
                   at the bottom rather than the top.
                 </p>
                 <>
 <p>
-                  The reason is in the table of positions rather than in the averaging. The three words carrying no subject own the three shortest positions in it, and at 0.3708, the at 0.3667 and we at 0.5770, against content words running from 0.7327 up to 1.1628, because the table was fitted by measuring how much more often two words occur together than chance would explain, and a word that occurs with everything has no company worth reporting.
+                  {"In this fitted table, the shared words have shorter vectors than the content words. The association-based preparation contributes to that pattern, but a word occurring broadly can still have useful context associations. Frequency alone does not determine its vector length."}
                 </p>
                 <p>
                   The rule that made the positions had already done part of the work the weighting was invented to do.
                 </p>
 </>
                 <KeepInMind>
-                  How much a common word distorts a plain average depends on how
-                  the word positions were made, not on the averaging. The textbook
-                  complaint holds on a table where common words are long and does
-                  not hold here, and Part 5 shows that the damage those words do
-                  is real anyway and takes a different form.
+                  {"A common word’s contribution depends on its vector, its repetitions and the pooling rule. Its norm alone does not tell us how much it changes document comparisons. The following projection experiment examines a shared direction, which is a different effect."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -563,7 +479,7 @@ export default function PoolingATextPage() {
                               "Because the collection is too small for a count to separate anything",
                             ],
               0,
-              "Each text uses the twice, and twice, we once, and three content words no other text shares, so the shared part of any pair is the same and the angle has to be the same angle. The content words contribute nothing to the comparison, since no pair shares one, and the whole of the 9 in 9/12 comes from the repeated words carrying no subject. Length alone does not fix the angle, since two six-word documents of the collection score 0.0000 or 0.1667 against each other depending on what they share.",
+              "Each probe repeats the and and twice, includes we once, and has three content words that the other probes do not share. Those repeated shared words give every pair the same dot product, and the count vectors also have equal norms.\n\n```math\ncos(θ) = 9 / 12 = 0.75\n```\n\nThe unshared content words affect the norms even though they contribute nothing to the cross-text dot product. Equal text length alone would not force equal cosine.",
               {
                 "description": "Split on spaces and use raw token-count vectors with cosine similarity. The texts are:\n\ntext | about | words carrying a subject\nthe crew and the boat and we sail | sailing | crew, boat, sail\nthe flour and the dough and we bake | cooking | flour, dough, bake\nthe wind and the tide and we anchor | sailing | wind, tide, anchor"
               },
@@ -582,12 +498,12 @@ export default function PoolingATextPage() {
                 "It puts them at 0.7500, the same as counting, since the same words went in",
               ],
               0,
-              "Nothing told the average which texts were about sailing. It reached that because crew, boat and sail sit near wind, tide and anchor in the table it was handed, which is the whole argument for pooling in one number. Across the full collection the plain average puts same-half pairs at 0.7947 and different-half pairs at 0.1346, and its margin is positive for the first time, at 0.0622.",
+              "The word-vector table places crew, boat and sail near wind, tide and anchor because of their contexts in the training collection. Averaging can use those relationships even when the probes share no content word. Across the full collection the same-topic mean is 0.7947 and the cross-topic mean is 0.1346. The stricter worst-pair margin is positive at 0.0622. These are two different ways to evaluate topic separation.",
             ),
             trueFalse(
               "On the twenty-four documents the three words carrying no subject supply most of a plain average, as the usual complaint predicts.",
               false,
-              "They supply least. Taking the first of the three texts, crew supplies 0.2069, sail 0.1839, and 0.1736 across its two uses and the 0.1532 across its two, and across the whole collection a word carrying no subject supplies 0.0649 where an equal share would be 0.1667. Those three own the shortest positions in the table, at 0.3708, 0.3667 and 0.5770 against content words running from 0.7327 to 1.1628, because a word that occurs with everything has no company worth reporting.",
+              "In this collection the common function words have relatively short vectors. Their average reported projection contribution is 0.0649, below an equal six-word share of 0.1667. Their norms are 0.3708, 0.3667 and 0.5770, while content-word norms range from 0.7327 to 1.1628. The supplied representation therefore does not support assuming that common words dominate every pooled vector. Frequency, vector direction and vector norm all affect the contribution.",
             ),
             choice(
               "For this lesson’s comparison of subject similarity, why do we use cosine rather than raw Euclidean distance?",
@@ -595,7 +511,7 @@ export default function PoolingATextPage() {
                 "The pooling rules change vector scale, so cosine lets us compare direction without treating that scale as subject similarity",
                 "Because distances cannot be computed between vectors of four numbers",
                 "Because the angle is cheaper to compute than the distance",
-                "Because the word positions were normalised before pooling"
+                "Because the word positions were normalized before pooling"
               ],
               0,
               "Cosine removes the overall vector scale. That is useful for this subject-similarity comparison, where the pooling rules themselves change the norm substantially. It is a choice for this evaluation, not a claim that vector length can never carry useful information or that distance is impossible.",
@@ -658,10 +574,7 @@ export default function PoolingATextPage() {
                     "weighted by rarity",
                     "change",
                   ]}
-                  rows={[
-                    ["twenty-four documents", "0.0622", "0.0819", "+0.0197"],
-                    ["six two-word documents", "0.1640", "0.3871", "+0.2231"],
-                  ]}
+                  rows={[["twenty-four documents","0.0622","0.0819","+0.0197"],["six four-word documents","0.1640","0.3871","+0.2231"]]}
                   caption="The margin between the least alike same-subject pair and the most alike different-subject pair, before and after the weighting. The weighting is worth eleven times as much where the common word is genuinely dominant."
                 />
                 <KeepInMind>
@@ -674,27 +587,16 @@ export default function PoolingATextPage() {
 
               <SubSection title="15. The smoother weight the 2017 baseline uses">
                 <p>
-                  Arora, Liang and Ma weight by a different quantity. Instead of
-                  how many documents hold a word, they use how probable the word
-                  is across the collection, and instead of a logarithm they use a
-                  small constant divided by that constant plus the probability. It
-                  is near one for a word that almost never occurs and near zero for
-                  a word that is everywhere, and it falls smoothly between.
+                  {"Arora, Liang and Ma’s 2017 sentence-embedding baseline uses token frequency rather than document frequency. It downweights frequent words when averaging their vectors, then removes a leading shared component across sentence vectors. This was proposed as a simple alternative to training a more elaborate sentence model. We will inspect the two operations separately."}
                 </p>
+                <p className="text-sm"><Link className="underline underline-offset-4" href="https://github.com/PrincetonML/SIF">{"Arora, Liang and Ma: A Simple but Tough-to-Beat Baseline for Sentence Embeddings (2017)"}</Link></p>
                 <Equation>
                   {"weight(w)  =  a / ( a + p(w) )     with a = 0.001"}
                 </Equation>
                 <p>
-                  At the paper&rsquo;s constant, a word filling half of every text
-                  weighs 0.001996, and a word appearing about once in a million
-                  weighs 0.999001. The common word is held down five hundred times
-                  against the rare one, and the sharpness of that is the point of
-                  the choice. The paper also divides by the number of words rather
-                  than by the total weight, so a text made entirely of common
-                  words comes out short rather than rescaled back up, which is a
-                  deliberate difference from the previous section and one reason
-                  the lengths in section 10 were so small.
+                  {"The parameter a controls how quickly the weight falls with frequency. At a=0.001, the two illustrative probabilities below produce very different weights. Dividing the weighted sum by token count, rather than total weight, preserves those magnitude differences; a cosine comparison still removes a positive common rescaling of an individual vector."}
                 </p>
+                <Equation>{"For a = 0.001:\np = 0.5: weight = 0.001 / 0.501 ≈ 0.001996\np = 0.000001: weight = 0.001 / 0.001001 ≈ 0.999001"}</Equation>
                 <p>
                   On the twenty-four documents that sharpness has nothing to bite
                   on. No word is commoner than an eighteenth of the collection, so
@@ -705,40 +607,19 @@ export default function PoolingATextPage() {
                   and is still not the thing that makes the method work.
                 </p>
                 <KeepInMind>
-                  The weight is a function of a word&rsquo;s probability in one
-                  collection, so a small collection of evenly used words gives it
-                  almost nothing to do. On the hand-built collection, where the is
-                  genuinely half of every document, the same weight takes the
-                  margin from 0.1640 to 0.7886.
+                  {"The effect depends on the frequency distribution. On the hand-built collection, where the accounts for half the tokens, these weights improve the reported topic margin substantially. That result evaluates the supplied example, not a universal need to suppress every common word."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. Why the weights alone do not finish the job">
                 <p>
-                  Look at what is left after the best weighting so far. On the
-                  twenty-four documents the average similarity between two
-                  documents of different halves is still 0.1070 and the most alike
-                  such pair is at 0.2045, so two documents with nothing in common
-                  still point substantially the same way. Turning the weights down
-                  further would not fix it, because the problem is no longer how
-                  much each word counts.
+                  {"After frequency weighting, some cross-topic pairs still have positive cosine. That alone is not a failure: related vectors can share useful background properties. To investigate whether a dominant shared component interferes with topic separation here, compare a projection-removal variant."}
                 </p>
                 <p>
-                  The remaining problem is that every text of the collection is
-                  leaning in one shared direction, whatever it is about, and a
-                  weighting can only shrink a word&rsquo;s contribution towards
-                  zero. It cannot subtract. Measured, the plain average of a
-                  document of this collection lies at a cosine of 0.6797 from one
-                  particular direction, never below 0.5820 and never above 0.7774,
-                  so roughly two thirds of every document&rsquo;s answer is the
-                  same answer, and it is the same answer for all twenty-four.
+                  {"The document vectors all have a substantial positive projection along one leading direction. Their cosines to it range from 0.5820 to 0.7774. The scalar projection differs by document; a mean cosine near 0.68 does not mean that two-thirds of every representation is an identical answer."}
                 </p>
                 <KeepInMind>
-                  Turning a word&rsquo;s weight down can take its contribution
-                  to zero and no further, so a quantity that every document has
-                  some of survives every weighting that leaves the words in.
-                  Getting rid of it means subtracting it, which is what Part 5
-                  does.
+                  {"Nonnegative word weights cannot directly subtract an arbitrary component from each finished document vector. They can still change that component through different contributions and cancellations. Projection removal offers a separate operation whose effect we can measure."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -750,22 +631,17 @@ export default function PoolingATextPage() {
             <>
               <SubSection title="17. One direction through a whole collection">
                 <p>
-                  Put every training document&rsquo;s weighted average into a
-                  table, one row per document, and ask which single direction the
-                  rows lean along most. That is the leading direction of the
-                  table, and once it is known it can be taken out of every vector,
-                  leaving each document with only what distinguishes it from the
-                  rest.
+                  {"Find the leading right singular vector of the training document-vector matrix, then subtract each document’s projection onto that unit direction. This removes the component with the largest uncentered squared magnitude. It can discard useful information as well as background variation."}
                 </p>
                 <Equation>
                   {"v  ←  v − u · (u · v)     where u is the leading direction"}
                 </Equation>
                 <>
 <p>
-                  Two details of how the direction is found are decisions rather than consequences. It is found from the table exactly as it stands, without first subtracting each coordinate&rsquo;s mean across the documents, which is what makes this different from the decomposition on the principal components page. Centring would take the mean direction away before the search began, and the mean direction is precisely what is meant to be removed.
+                  {"This SVD uses the document vectors without subtracting their mean first. Centering would instead describe deviations from that mean. The leading uncentered direction often reflects a shared component, but is not generally equal to the mean direction."}
                 </p>
                 <p>
-                  And a direction found this way is determined only up to its sign, since a direction and its opposite span the same line, so a convention is needed if the answer is to be a function of the collection alone. The projection is the same either way.
+                  {"The unit direction and its negative give the same projection-removal transform. A sign convention can make a displayed direction reproducible, but the document transform does not require one."}
                 </p>
 </>
                 <KeepInMind>
@@ -776,35 +652,19 @@ export default function PoolingATextPage() {
               </SubSection>
 
               <SubSection title="18. What lies along it, probed rather than described">
-                <p>
-                  Nothing so far has said what that direction contains, and the
-                  honest way to find out is to ask every word in the collection how
-                  far it leans along it. On the twenty-four documents the answer is
-                  not subtle. And leans along it at 0.9897, we at 0.9848 and the at
-                  0.9032, and the furthest any word carrying a subject reaches is
-                  0.7087. The three words that mean nothing about cooking or
-                  sailing are the first three in the list, separated from
-                  everything else by nearly two tenths.
-                </p>
+                <p>To interpret the removed direction, compare each word vector with it. In these twenty-four documents, and has cosine 0.9897, we has 0.9848 and the has 0.9032. No topic word exceeds 0.7087. The direction therefore aligns most strongly with the common words shared by both constructed topics. That observation explains its role here; another corpus could produce a different direction.</p>
                 <SharedDirectionProbe />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
+
                   Every word of the collection, ranked by how far it leans along
-                  the direction that is about to be removed. The three grey bars
+                  the direction that is about to be removed. The three gray bars
                   at the top are the words carrying no subject, and the dashed
                   line is where the furthest content word reaches. Switching to
                   the smaller collection reorders the list entirely, which the
                   note below is about.
                 </p>
                 <p>
-                  Section 12 found those same three words to be the three shortest
-                  positions in the table, supplying less of a plain average than
-                  their share of the tokens, so this is not the textbook story
-                  about common words being loud. They are quiet and they are
-                  aligned. Every text of the collection contains them, they all
-                  point the same way, and a small quantity added to every text
-                  alike is exactly as useless for telling texts apart as a large
-                  one, which is what makes removing the direction worth more here
-                  than any weighting was.
+                  {"The shared words are short but strongly aligned with the removed direction in this fitted example. That helps explain why projection removal changes the topic comparisons even after frequency weighting. It does not establish that their contribution was uniformly useless in every document."}
                 </p>
                 <InAModel>
                   The same probe on the hand-built collection returns something
@@ -819,11 +679,7 @@ export default function PoolingATextPage() {
                   that a set of words a person would have named in advance.
                 </InAModel>
                 <KeepInMind>
-                  The words along the shared direction are a finding about a
-                  collection, not a definition. On one collection here they are the
-                  three words carrying no subject and on the other they are not,
-                  and both times what was removed is the same thing, which is
-                  whatever every document already agreed on.
+                  {"The leading direction differs across the two constructed collections. Interpret its contributions empirically: it is the largest uncentered component, not a guaranteed list of function words or a component with identical magnitude in every document."}
                 </KeepInMind>
               </SubSection>
 
@@ -869,13 +725,7 @@ export default function PoolingATextPage() {
 
               <SubSection title="20. Where taking it out makes things worse">
                 <p>
-                  There is a case on this collection where the sharpest method is
-                  beaten by the plainest one. The least alike pair of documents
-                  from the same half scores 0.3202 under the plain average and
-                  &minus;0.0767 after the direction is removed, so two documents
-                  genuinely about the same subject have been pushed past
-                  perpendicular and now read as unrelated. The plain average kept
-                  them together and the repair separated them.
+                  {"The least-similar within-topic pair falls from 0.3202 to −0.0767 after removal. Its vectors point slightly beyond a right angle. That is a loss of angular cohesion under this representation, not proof that the two documents have become semantically unrelated."}
                 </p>
                 <p>
                   It is the same mechanism as the improvement, seen from the other
@@ -896,24 +746,13 @@ export default function PoolingATextPage() {
                   caption="The worst case inside one half, which is the quantity the removal makes worse rather than better. On this measure alone the plain average is the best rule on the page."
                 />
                 <KeepInMind>
-                  The removal buys separation between subjects and pays for it in
-                  cohesion inside one. On a task where the question is whether two
-                  texts are about the same broad subject that is a good trade, and
-                  on a task where the question is how alike two texts of one
-                  subject are it may not be.
+                  {"This example improves cross-topic separation while weakening one within-topic comparison. Whether that tradeoff helps depends on the actual task and decision rule. Broad-topic retrieval can still care about that difficult within-topic pair."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="21. What all this costs">
                 <p>
-                  Three costs, in the order they bite. The first is a constraint
-                  rather than a quantity, which is that the last two rules cannot
-                  score a single text at all until they have seen a collection.
-                  Counting needs a collection to fix the vocabulary, the rarity
-                  weight needs one to count documents, the smooth weight needs one
-                  to estimate probabilities, and the removal needs one to find a
-                  direction, so a text arriving on its own can be given a position
-                  only by the plain average.
+                  {"Some preparation must be learned or supplied before each rule can transform a new text. Count vectors need a vocabulary; IDF and smooth-frequency pooling need frequency estimates; component removal needs a fitted direction. Once those are fixed, all of these transforms can process a single arriving text. Plain averaging also depends on its existing word-vector table."}
                 </p>
                 <p>
                   The second is width, and it runs the other way. A counted text is
@@ -924,14 +763,7 @@ export default function PoolingATextPage() {
                   a fixed width was bought with.
                 </p>
                 <p>
-                  The third is what cannot be got back. A counted vector is the
-                  words, so the text&rsquo;s vocabulary can be read straight off
-                  it. A pooled vector is not, and asking which six words of the
-                  table lie nearest a document&rsquo;s pooled position recovers
-                  4.3333 of that document&rsquo;s six words on average under the
-                  plain average, and 4.1667 under the sharpest rule, so a little
-                  under three quarters of a document is still readable off its
-                  position and the rest of it has gone.
+                  {"Count vectors retain known-word counts but not order. A pooled vector generally loses information about its individual tokens. The reported nearest-word experiment recovers an average number of source words; it does not prove that every word it misses is mathematically unrecoverable or quantify a fraction of the original document’s information."}
                 </p>
                 <NumberTable
                   headings={[
@@ -948,14 +780,10 @@ export default function PoolingATextPage() {
                     ["the smooth weights alone", "4", "yes", "4.2500"],
                     ["smooth inverse frequency", "4", "yes", "4.1667"],
                   ]}
-                  caption="Width, what has to be seen before a single text can be scored, and how much of a document is still readable from its position."
+                  caption="Stored width, fitted preparation, and source words recovered by the stated nearest-word heuristic. All fitted rules can transform one new text once their preparation is available."
                 />
                 <KeepInMind>
-                  Counting keeps every word and gets the ordering of the two
-                  halves wrong; pooling gets the ordering right and gives about
-                  4.33 words of six back. Which of those is the cost worth paying
-                  depends on whether anything downstream needed to know which
-                  words the text used.
+                  {"Count and pooled representations retain different information and give different rankings in this example. If a later operation needs exact word counts, retain them or the source text rather than rely on approximate recovery from a pooled vector."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -970,25 +798,25 @@ export default function PoolingATextPage() {
               "It bought 0.2231 in one place and 0.0197 in the other, and nothing about the method changed between those two numbers. On the hand-built collection the margin goes from 0.1640 to 0.3871 and the share of the answer supplied by the falls from 0.8000 to 0.5396. On the twenty-four documents the margin moves only from 0.0622 to 0.0819, because the weights themselves barely differ where every content word is used about equally often.",
             ),
             choice(
-              "After the best weighting, two documents of different halves still point substantially the same way. Why can no weighting fix that?",
+              "The tested positive weighting rules leave a shared direction in both topics. How does subtracting that direction differ from changing word weights?",
               [
-                "Because a weight can shrink a word’s contribution towards zero and no further, and it cannot subtract",
+                "Positive weighting rescales the word vectors being added; component removal explicitly subtracts each document’s projection onto a fitted direction",
                 "Because the weights are estimated from the same collection they are applied to",
                 "Because the word positions were fitted on too little text",
                 "Because the angle is insensitive to how long each vector is",
               ],
               0,
-              "The plain average of a document of this collection lies at a cosine of 0.6797 from one particular direction, never below 0.5820 and never above 0.7774, so roughly two thirds of every document’s answer is the same answer for all twenty-four. A quantity every document has some of survives every weighting that leaves the words in, and getting rid of it means subtracting it.",
+              "A positive weight changes how much of a word vector is added. Component removal instead subtracts each document's projection onto a direction fitted from the collection. The plain document vectors have cosines from 0.5820 to 0.7774 with that direction, so it is shared substantially across these documents. Those cosines describe angles; they do not mean that two thirds of every vector's contents are identical.",
             ),
             trueFalse(
               "On both collections the words leaning furthest along the removed direction are the ones carrying no subject.",
               false,
-              "On the twenty-four documents they are, with and at 0.9897, we at 0.9848 and the at 0.9032 against a furthest content word of 0.7087. On the hand-built collection the leading direction is (0.6384, 0.6384, 0.4299, 0) and the words furthest along it are pet and market at 0.7050, with the at only 0.4299, because two perfectly symmetric halves and one shared word make the average of everything the thing the documents most agree on. What is removed is whatever the collection has in common, and only sometimes is that a set of words a person would have named in advance.",
+              "In the twenty-four-document collection, the function words align most strongly with the leading direction: and at 0.9897, we at 0.9848 and the at 0.9032. In the hand-built collection, pet and market instead lead at 0.7050, while the is at 0.4299. The direction is fitted from the pooled vectors, not from a list of words designated as unimportant. It can include information we would prefer to keep.",
             ),
             trueFalse(
               "The least alike pair of documents from one half reads as less alike after the shared direction is removed than it did under the plain average.",
               true,
-              "It scores 0.3202 under the plain average and −0.0767 after the removal, so two documents about the same subject have been pushed past perpendicular. What every document had in common was also part of what two documents of one half had in common, so removing it takes some genuine agreement along with the spurious kind, and a pair sharing no content word was relying on it most. On this one measure the plain average is the best rule on the page.",
+              "The least-similar same-topic pair changes from cosine 0.3202 under plain averaging to −0.0767 under the weighted, component-removed representation. Removing a shared component can remove agreement between documents of the same topic as well as across topics. This comparison also changes the word weights, so it does not isolate component removal alone. By this worst-same-topic-pair measure, the plain average performs best among the reported rules.",
             ),
             several(
               "Which statements agree with this representation comparison?",
@@ -1038,30 +866,16 @@ export default function PoolingATextPage() {
                   and it does not move.
                 </p>
                 <p>
-                  Four words admit twenty-four orderings and all twenty-four
-                  land on the same position, and the count of orderings grows
-                  faster than any other quantity here as the text lengthens.
-                  Whether that matters depends entirely on the question being
-                  asked, since it costs nothing when the question is what a text
-                  is about and costs everything when the question is who did what
-                  to whom.
+                  {"These four distinct words have 24 permutations, which share a pooled result in exact arithmetic. Repeated words reduce the number of distinct permutations. Order can affect topic and sentiment as well as who did what, so evaluate whether discarding it is acceptable for the task."}
                 </p>
                 <KeepInMind>
-                  Order blindness is a property of the shape of the calculation
-                  rather than of any choice inside it. Keeping order means reading
-                  the words in sequence and carrying something forward as they go,
-                  which is a different kind of model rather than a further repair
-                  to this one.
+                  {"These rules pool static word vectors symmetrically, so rearranging them does not change the exact result. Sequence models or contextual word vectors can supply order-sensitive features before pooling. Processing tokens recurrently is one option, not the only way to retain order."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="23. A shared direction is a fact about the company">
                 <p>
-                  A weight learned from a collection is a statement about that
-                  collection, and so is a direction. Change the company a text is
-                  scored in and both change, which means the same text with the
-                  same words and the same word positions has no single answer under
-                  the last rule. It has one answer per collection.
+                  {"Changing the fitted frequency estimates or removed direction changes the transform. Once those are fixed, a given text has a fixed representation under that preparation. Merely placing it beside other query texts does not require refitting."}
                 </p>
                 <p>
                   Scoring the crew and the boat and we sail against all
@@ -1088,21 +902,13 @@ export default function PoolingATextPage() {
                   agree only to 0.7812.
                 </p>
                 <KeepInMind>
-                  Under any rule that removes what a collection shares, a
-                  text&rsquo;s position is a statement about that text relative to
-                  that collection. Two such positions may only be compared when
-                  they were produced against the same one.
+                  {"Use a consistent fitted transform when comparing text vectors. If the reference data or projection changes, re-encode the candidates or establish another compatible comparison protocol. The coordinates remain numerically defined, but their preparation differs."}
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="24. One position cannot say two things">
                 <p>
-                  Take a text with two sailing words and two cooking words in it,
-                  and ask where one position could possibly put it. It has to
-                  answer with a single direction, so it can lean towards one
-                  subject, or lean towards the other, or lean towards something in
-                  between that is neither. What it cannot say is both, since being
-                  about two things is not a direction.
+                  {"One vector can contain evidence for multiple subjects through different coordinates or directions. A plain average may be close to both a cooking and a sailing reference. The question is whether that representation and comparison preserve enough detail for the task, not whether a vector is mathematically forbidden from representing both."}
                 </p>
                 <BothSubjectsAtOnce />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -1112,17 +918,14 @@ export default function PoolingATextPage() {
                 </p>
                 <>
 <p>
-                  Both failures are on display. Under the plain average the mixed text scores 0.8862 against the sailing text and 0.9202 against the cooking one, both of which are higher than the 0.6631 those two score against each other, so the text reads as more like each of them than they are like each other, which is the answer of something that is vaguely like everything.
+                  {"The mixed text scores 0.8862 to the sailing reference and 0.9202 to the cooking reference, higher than those two references score to each other. That can be an appropriate result for a text containing both subjects. Test against the intended relevance criteria before calling it a failure."}
                 </p>
                 <p>
                   Under the last rule it scores &minus;0.1187 against sailing and 0.5057 against cooking, and all four of the documents it comes out nearest are cooking documents, so a text holding crew and boat has been placed in the kitchen.
                 </p>
 </>
                 <KeepInMind>
-                  This is a limit of the shape of the answer rather than of the
-                  rule producing it. Representing a text that is about two things
-                  needs more than one position, which is a different design and not
-                  a better weighting.
+                  {"Multiple vectors can retain separate aspects more explicitly, but one vector is not inherently limited to one topic. Compare the representational choices on tasks that require either broad relevance or fine distinctions among the text’s parts."}
                 </KeepInMind>
               </SubSection>
 
@@ -1133,49 +936,13 @@ export default function PoolingATextPage() {
                 <DerivationTable
                   expressionHeading="Text, vocabulary or shared direction"
                   reasonHeading="What remains after pooling"
-                  rows={[
-                    {
-                      expression: "a text none of whose words has a position",
-                      reason:
-                        "The sum is over an empty set, so the answer is the zero vector. That is a legitimate position and the comparison is what fails, since the cosine divides by the length and the length is zero. Answering zero similarity would be a claim the calculation never made; answering nothing is the honest reading.",
-                    },
-                    {
-                      expression: "a collection of one document",
-                      reason:
-                        "One row spans one direction, so the leading direction is that document's own direction and removing it leaves exactly the zero vector, measured here at a length of 4.3 in ten billion billion. Every text scored in that company that leans the same way loses everything, and the residue that remains is rounding rather than content.",
-                    },
-                    {
-                      expression:
-                        "a text whose weighted average lies exactly along the shared direction",
-                      reason:
-                        "The removal takes the whole vector, for the same reason and without needing a degenerate collection. A text is more likely to meet this the more of it consists of words the whole collection agrees on, so it is the texts carrying least that vanish, which is the intended behaviour taken to its limit.",
-                    },
-                    {
-                      expression: "a collection whose documents all pool to zero",
-                      reason:
-                        "There is no direction to be leading, since every row of the table is the origin and no direction leans more than any other. The quantity does not exist, and choosing one arbitrarily would put a fabricated direction into every vector the fit later produced.",
-                    },
-                    {
-                      expression:
-                        "a word the collection used, whose probability is therefore not zero",
-                      reason:
-                        "The smooth weight is a small constant over that constant plus the probability, which is defined for every probability in the interval and never divides by zero, since the constant is positive. A word the collection never used has probability zero and weight one, which is the largest weight there is, and is a sensible answer only because such a word cannot appear in a document being pooled from that collection.",
-                    },
-                  ]}
+                  rows={[{"expression":"a text none of whose words has a position","reason":"This SDK returns zero when no recognized vectors contribute. A mean over an empty set needs that explicit convention, and cosine is then undefined because the returned vector has zero length."},{"expression":"a collection of one document","reason":"One row spans one direction, so the leading direction is that document's own direction and removing it leaves exactly the zero vector, measured here at a length of 4.3 in ten billion billion. Every text scored in that company that leans the same way loses everything, and the residue that remains is rounding rather than content."},{"expression":"a text whose weighted average lies exactly along the shared direction","reason":"Projection removal sends any vector exactly parallel to the removed unit direction to zero. That can include useful task information; it is not proof that the document carried little content."},{"expression":"a collection whose documents all pool to zero","reason":"An all-zero reference matrix has no uniquely leading direction. A documented policy can skip the removal, reject fitting, or choose a convention; its effect on later nonzero queries must be made explicit."},{"expression":"a word the collection used, whose probability is therefore not zero","reason":"For positive a, a/(a+p) is defined at every probability from0 to1. A zero estimated frequency gives weight1. A new text can contain such a word if its embedding vocabulary is broader than the frequency-estimation corpus, so state the policy."}]}
                 />
                 <p>
-                  The first of those is the one that arises in ordinary use rather
-                  than in a constructed example. A text of words a collection has
-                  never met is not rare, and every rule on this page answers it the
-                  same way, which is with a position at the origin and no
-                  similarity to anything at all.
+                  {"A text containing no recognized vocabulary entries returns zero under the policies used here. Report the missing coverage and avoid interpreting a cosine fallback as evidence that it resembles nothing."}
                 </p>
                 <KeepInMind>
-                  Three of these five come back to one fact, which is that a
-                  direction is undefined at the origin. A position of length zero
-                  is not a small answer that can be compared carefully, since the
-                  cosine has a zero in its denominator there and there is nothing
-                  to compare.
+                  {"Check the pooled norm before applying cosine. Zero gives no defined direction; a tiny residual from projection may reflect rounding and also needs careful handling. Other comparisons can still be mathematically defined for the zero vector."}
                 </KeepInMind>
               </SubSection>
             </>
@@ -1190,7 +957,7 @@ export default function PoolingATextPage() {
               "Under both counting rules they agree in every bit, and under the four averaging rules the largest disagreement first appears in the seventeenth decimal place, which is the order the additions ran in. Every rule here is a sum over the words divided by something that depends on the multiset and not on the arrangement, so this follows from the shape of the calculation and cannot be repaired by choosing better weights.",
             ),
             choice(
-              "The same text is scored against all twenty-four documents and then against the twelve sailing ones. The two positions sit at a cosine of −0.6124. What changed?",
+              "Fit the pooling statistics first on all twenty-four documents, then on the twelve sailing documents. The same query’s transformed vectors have cosine −0.6124. What changed?",
               [
                 "What the collection agrees on, since in the sailing half sail leads the direction at 0.9031 where across all twenty-four it reached only 0.6551",
                 "The word positions, which are refitted for each collection",
@@ -1198,7 +965,7 @@ export default function PoolingATextPage() {
                 "Nothing real, since the two directions differ only by their sign",
               ],
               0,
-              "A weight learned from a collection is a statement about that collection, and so is a direction. In the whole collection the three words carrying no subject lead, because that is what all twenty-four documents agree on; in the sailing half every document is about sailing, so sail is now shared too. The two directions themselves agree only to 0.7812, and two such positions may only be compared when they were produced against the same collection.",
+              "The word vectors stay fixed, but the fitted pooling statistics change. The sailing-only collection has a different leading direction because its documents share sailing content as well as function words. The two learned directions have cosine 0.7812, and removing their projections gives different representations of the same text. Use the same fitted pooling transform for query and reference vectors when comparing them.",
             ),
             choice(
               "A text holds two sailing words and two cooking words. What do the rules do with it?",
@@ -1209,12 +976,12 @@ export default function PoolingATextPage() {
                 "The plain average picks a side and the last rule keeps it between the two",
               ],
               0,
-              "Under the plain average it scores 0.8862 against the sailing text and 0.9202 against the cooking one, both above the 0.6631 those two score against each other, which is the answer of something vaguely like everything. Under the last rule it scores −0.1187 and 0.5057, and all four documents it comes out nearest are cooking ones. Being about two things is not a direction, so this is a limit of the shape of the answer rather than of the rule producing it.",
+              "The mixed-topic probe has cosine 0.8862 to the sailing probe and 0.9202 to the cooking probe under plain averaging. After the last transformation, those values become −0.1187 and 0.5057, and its four nearest documents are cooking examples. A single pooled vector can represent a mixture, but this particular representation and comparison do not preserve both topics equally. If both topics matter, evaluate mixed-topic probes explicitly or retain separate representations for parts of the text.",
             ),
             trueFalse(
-              "A text made entirely of words the collection has never met comes back as a position at the origin, with no similarity to anything.",
+              "Under the rules shown here, a text made entirely of unknown words produces a zero vector, for which cosine similarity is undefined.",
               true,
-              "Every rule on the page answers it the same way, and it is the undefined case that arises in ordinary use rather than in a constructed example. The same honesty appears in the small collection, where the zebra sat comes back as (0, 1.2877, 1.2877, 0, 0) with zebra contributing nothing, because a word with no slot has nowhere to put anything.",
+              "None of the unknown words contributes a vector under these fitted rules, so the pooled result is the origin. A zero vector has no direction, and the cosine helper rejects it rather than reporting similarity zero. A partially known text can still return a nonzero vector while silently omitting unknown words, so callers should check how much of the input was represented.",
             ),
         ],
         },
@@ -1224,8 +991,8 @@ export default function PoolingATextPage() {
             exercise(
               "Score the three texts by counting and by averaging",
               [
-  "Fit the supplied four-dimensional PMI word table at window two on the twenty-four documents. Fit normalised BagOfWords and MeanPooling from the same collection.",
-  "Transform the three supplied probes and print their three pairwise cosines under each representation. Keep the first/third sailing probes and the middle cooking probe labelled in the report."
+  "Fit the supplied four-dimensional PMI word table at window two on the twenty-four documents. Fit normalized BagOfWords and MeanPooling from the same collection.",
+  "Transform the three supplied probes and print their three pairwise cosines under each representation. Keep the first/third sailing probes and the middle cooking probe labeled in the report."
 ],
               `from oop_ml import BagOfWords, MeanPooling, PointwiseMutualInformationEmbeddings
 
@@ -1374,7 +1141,7 @@ direction removed
               "Weight the cat the dog by rarity",
               [
   "Use the supplied seven-word vector table and six-document collection. Fit MeanPooling with inverse-document-frequency weighting.",
-  "For the cat the dog print the and cat weights, the pooled vector and the normalised contribution share of the two the occurrences, all to four decimals."
+  "For the text the cat the dog, print the fitted weights for the and cat, then its pooled vector. Compute the vector contribution from the two occurrences of the. Project that contribution onto the pooled vector and divide by the pooled vector's squared norm. Print this projection fraction to four decimal places; it measures a directional contribution, not the fraction of token weights."
 ],
               `import numpy as np
 from oop_ml import MeanPooling, PoolingWeighting, Vocabulary, WordEmbeddings
@@ -1443,8 +1210,8 @@ pooled position: 0.6488, 0.0000, 0.7024, 0.0000
 share supplied by the: 0.5396`,
               { hints: [
   "Weights apply per occurrence, so the contributes twice.",
-  "Normalise weighted contributions by the complete occurrence-weight total, using the exact fitted weights rather than rounded displays."
-], check: numberCheck("What share of the weighted answer do the two uses of the supply, to four places?", 0.5396, 5e-05, "The two the occurrences supply normalised weight share 0.5396. Rarity weighting reduces their dominance but still counts both occurrences."), question: "How much influence do repeated common words retain after rarity weighting?" },
+  "First divide each weighted vector contribution by the sum of all four occurrence weights. Then compute the dot product of added_by_the with answer and divide by answer's squared norm, as requested. Keep full-precision fitted weights during both calculations."
+], check: numberCheck("What fraction of the pooled vector's squared norm is accounted for by the projection of the two the contributions, to four decimal places?", 0.5396, 5e-05, "The projection fraction is 0.5396. The two occurrences of the both contribute their weighted vectors. This fraction describes their contribution along the final pooled direction; it is different from their share of the total scalar pooling weight."), question: "How much influence do repeated common words retain after rarity weighting?" },
             ),
           ],
         },

@@ -1,5 +1,5 @@
 import { LEARNING_AREAS, learningAreaSections } from "./learning-areas";
-import { courseSectionHref } from "./course-navigation";
+import { courseSectionHref, courseSectionId, courseTopicId } from "./course-navigation";
 import type { SearchEntry } from "./lesson-search";
 
 const additionalTerms: Record<string, string> = {
@@ -19,7 +19,7 @@ const additionalTerms: Record<string, string> = {
   "/concepts/model-nested-validation": "nested cross validation model selection search overfitting leakage hyperparameters pipeline inner outer",
   "/concepts/model-data-audits": "data centric ML label noise confident learning out of fold annotation audit deduplication leakage",
   "/concepts/model-selective-prediction": "selective classification abstention reject option coverage risk confidence human review",
-  "/concepts/model-behaviour-tests": "model behavioural behavioral testing robustness metamorphic invariance unit conversion batching feature schema",
+  "/concepts/model-behaviour-tests": "model behavioral behavioral testing robustness metamorphic invariance unit conversion batching feature schema",
   "/concepts/model-iteration-project": "model iteration evaluation project fitting least squares NumPy baseline candidate experiment tracking release regression",
   "/concepts/agent-introduction": "agents introduction LLM model controller tools state workflow ReAct",
   "/concepts/agent-prompt-examples": "prompt engineering few shot demonstrations in context learning example selection held out",
@@ -118,6 +118,6 @@ const additionalTerms: Record<string, string> = {
 
 // Only the search page sends this index to the browser.
 export const searchEntries: SearchEntry[] = LEARNING_AREAS.flatMap(area => learningAreaSections(area).flatMap(section => [
-  { title: section.title, description: section.intro, href: courseSectionHref(section), areaId: area.id, areaTitle: area.title, sectionTitle: section.title, kind: "Section" as const, terms: section.topics.map(topic => topic.heading).join(" ") },
-  ...section.topics.flatMap(topic => topic.concepts.flatMap(lesson => lesson.href ? [{ title: lesson.title, description: lesson.blurb, href: lesson.href, areaId: area.id, areaTitle: area.title, sectionTitle: section.title, kind: "Lesson" as const, terms: `${topic.heading} ${lesson.href.split("/").pop()?.replaceAll("-", " ")} ${additionalTerms[lesson.href] ?? ""}` }] : [])),
+  { title: section.title, description: section.intro, href: courseSectionHref(section), areaId: area.id, areaTitle: area.title, sectionTitle: section.title, kind: "Section" as const, terms: `${courseSectionId(section).replaceAll("-", " ")} ${section.topics.map(topic => `${topic.heading} ${courseTopicId(topic).replaceAll("-", " ")}`).join(" ")}` },
+  ...section.topics.flatMap(topic => topic.concepts.flatMap(lesson => lesson.href ? [{ title: lesson.title, description: lesson.blurb, href: lesson.href, areaId: area.id, areaTitle: area.title, sectionTitle: section.title, kind: "Lesson" as const, terms: `${topic.heading} ${courseTopicId(topic).replaceAll("-", " ")} ${lesson.href.split("/").pop()?.replaceAll("-", " ")} ${additionalTerms[lesson.href] ?? ""}` }] : [])),
 ]));

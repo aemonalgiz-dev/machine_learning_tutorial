@@ -16,7 +16,7 @@ export function ProgressPill() {
 
   return (
     <span
-      title={`${done} of ${lessons.length} lessons finished${account.user ? " in your account" : " in this browser"}`}
+      title={`${done} of ${lessons.length} lessons finished${account.user ? " in your account" : " during this visit"}`}
       className="hidden items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 font-mono text-xs text-muted sm:inline-flex"
     >
       <span className="h-1.5 w-16 overflow-hidden rounded-full bg-raised" aria-hidden="true">

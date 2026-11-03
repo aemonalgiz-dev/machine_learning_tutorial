@@ -137,7 +137,7 @@ export function OptimismChart() {
           );
         })}
 
-        {/* Zero is the ceiling on honest performance on noise, so it is drawn. */}
+        {/* Population reference for independent noise; finite-sample scores vary. */}
         {showing && target === "noise" && high >= 0 && low <= 0 && (
           <>
             <line
@@ -154,7 +154,7 @@ export function OptimismChart() {
               textAnchor="end"
               className="fill-slate-500 text-[11px] dark:fill-slate-400"
             >
-              nothing can honestly beat this
+              population baseline for independent noise
             </text>
           </>
         )}
