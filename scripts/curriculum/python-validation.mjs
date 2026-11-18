@@ -1,15 +1,12 @@
 import {
   lesson, p, example, history, source, before, table, challenge, construction,
-  sample, s, op, q, tf, journey, diagnose, connection, fresh,
+  sample, s, op, configured, q, tf, journey, diagnose, connection, fresh,
 } from './applied-authoring.mjs';
 
 const section = 'Python Validation and Error Handling';
 const topic = 'Validation and Failure Handling';
 const py = lines => lines.join('\n');
-const build = (...args) => ({ ...construction(...args), extras: [], draftVersion: 1 });
-const accepted = record => ({ accepted: true, record });
-const rejected = { accepted: false, record: null };
-const writePlan = (values, badPositions = []) => ({ status: badPositions.length ? 'rejected' : 'accepted', writes: badPositions.length ? [] : values, badPositions });
+const build = (...args) => ({ ...construction(...args), extras: [], draftVersion: 2 });
 const parseReport = (values, rejectedPositions = []) => ({ values, rejected: rejectedPositions });
 const basicSources = [
   source('Python errors and exceptions', 'https://docs.python.org/3.14/tutorial/errors.html'),
@@ -80,7 +77,7 @@ export const pythonFailFast = lesson({
   ],
   prerequisites: [before('Functions and their inputs', 'python-function-design'), before('Type hints', 'python-type-hints')],
   appliedIn: [before('Pydantic Models and Optional Fields', 'python-pydantic-models')],
-  outputLabel: 'A planned write or the rejected input positions',
+  outputLabel: 'The saved readings after the request',
   checkpointTitle: 'Questions on Parts 1 and 2',
   history: history('Early Failure and Partial Updates', [
     source('The Pragmatic Programmer: contracts and early failure', 'https://pragprog.com/tips/'), ...basicSources,
@@ -161,25 +158,25 @@ export const pythonFailFast = lesson({
       ['Aliased containers are rejected before mutation', 'shared = [3, 4]\ntry: append_batch(shared, shared)\nexcept ValueError: pass\nelse: raise AssertionError("Aliased input/output containers were accepted")\nassert shared == [3, 4]'],
     ]),
   ],
-  build: build('Check the Whole Batch Before Writing',
-    'Botie receives measurements for one all-or-nothing save. A late invalid item must prevent every planned write.',
-    'Check each representation and positive value, combine the aligned flags, and connect the complete decision before the planned write. Return status, writes and badPositions. Positions start at zero.',
-    { values: 'Incoming measurements' },
-    [sample('A valid batch', { values: [5, 8, 2] }, writePlan([5, 8, 2])), sample('The final item is invalid', { values: [5, 8, 'two'] }, writePlan([], [2])), sample('A nonpositive measurement', { values: [4, 0, 6] }, writePlan([], [1]))],
-    op('pyValidationGateWrite', op('pyValidationMaskAnd', op('pyValidationNumberFlags', s('values')), op('pyValidationPositiveFlags', s('values'))), s('values')),
-    'Each input reaches its checks before the write decision. A rejected late item leaves the planned write list empty.',
-    'This workshop plans an in-memory write. It does not save data, implement a transaction, run Python, or distinguish JSON numeric spellings such as 3 and 3.0.'),
-  journey: journey('The saved batch must remain unchanged when any incoming measurement violates its contract.',
-    'Place the Decision Before the Write', 'Try the valid batch, then build the checks before connecting a planned write.', 'A late invalid item returns a rejected status and no planned writes.',
-    diagnose('The Last Item Fails', 'A construction saves the first values before checking the final item. What needs to change?',
-      ['Validate the complete batch before the write', 'The all-or-nothing promise concerns the whole incoming list. Earlier valid items cannot be saved yet.'],
-      ['Catch the later error and keep the earlier writes', 'That would leave a partial update despite the stated contract.'],
-      'Inspect the complete flag list at the write gate, including the final position.'),
-    [connection('python-function-design', 'Separate inputs from effects', 'The validation decision belongs before the operation that changes state.')],
-    'What state must a test inspect after a rejected batch?', 'Keep failure checks beside the effect they must prevent.',
-    { path: [0], title: 'Inspect the Item Decisions', challenge: 'Return one combined true-or-false decision for each measurement.', why: 'A combined batch decision is easier to diagnose when each item’s check is visible.' },
-    ['The numeric and positive checks each return one flag per measurement.', 'Require both checks per item, then send that complete list and the measurements to the planned write.']),
-  fresh: fresh('Two Different Invalid Representations', 'The batch now contains a boolean and a negative measurement. Return the rejected write plan and both zero-based bad positions.', { values: [7, true, 3, -4] }, writePlan([], [1, 3]), 'A plan copied from the earlier batch misses the new positions. Inspect every current item.'),
+  build: build('Save a Batch without Leaving Half an Update',
+    'The saved readings are [2]. Adding [4, 8] should produce [2, 4, 8]. A request containing zero, a negative number or text must leave the saved readings unchanged.',
+    'Use Check each reading to mark incoming values ready or reject. This save accepts positive numbers. Send those checks, the incoming batch and the saved readings to Append a complete batch. Return the final saved list.',
+    { saved: 'Saved readings', incoming: 'Incoming batch' },
+    [sample('Add two readings', { saved: [2], incoming: [4, 8] }, [2, 4, 8]), sample('Zero arrives after a valid reading', { saved: [2], incoming: [4, 0] }, [2]), sample('The last reading is text', { saved: [2, 5], incoming: [7, 'eight'] }, [2, 5]), sample('An empty incoming batch', { saved: [3], incoming: [] }, [3])],
+    op('pyValidationAppendCheckedBatch', s('saved'), s('incoming'), configured('pyValidationCheckBatch', { rule: 'positive numbers' }, s('incoming'))),
+    'The whole incoming batch is checked before anything is appended. When its last value fails, the earlier valid values stay out too.',
+    'This shows the resulting list without changing the source. It does not save a file or provide a database transaction.'),
+  journey: journey('The earlier import helper skipped unusable readings. This save has a different agreement: accept the complete batch or leave the saved list alone.',
+    'Check before Appending', 'Start with [2] and [4, 8]. Follow the two ready checks into the append operation, then try the request containing zero.', 'The first request returns [2, 4, 8]. The request containing zero returns [2].',
+    diagnose('A Number Is Still an Invalid Reading', 'A construction checks only whether each value is a number. It saves [4, 0]. Which setting needs to change?',
+      ['Accept positive numbers in Check each reading', 'Zero is a number, but this saving operation requires readings above zero.'],
+      ['Remove zero and save the remaining reading', 'The request must leave the saved list unchanged if any incoming reading fails.'],
+      'Inspect the ready-or-reject list before the append operation.'),
+    [connection('python-type-hints', 'Keep filtering separate from rejection', 'The earlier import could skip a value. A rejected save must preserve the complete earlier list.')],
+    'What should remain in the saved list if only the final incoming value fails?', 'Check the whole request before changing the saved data.',
+    { path: [2], title: 'Check the Incoming Readings', challenge: 'Return one ready-or-reject word per incoming reading. For [4, 8], return ["ready", "ready"].', why: 'Inspect each decision before it controls the saved list.' },
+    ['Choose positive numbers in Check each reading.', 'Append a complete batch needs the saved list, the incoming list and its matching checks.']),
+  fresh: fresh('A Later Request Contains Two Bad Readings', 'The saved list is [9, 10]. The incoming request is [7, true, 3, -4]. Return the saved list after rejecting that complete request.', { saved: [9, 10], incoming: [7, true, 3, -4] }, [9, 10], 'A valid first reading must not cause a partial save.'),
 });
 
 const requestExample = py([
@@ -265,7 +262,7 @@ export const pythonPydanticModels = lesson({
   ],
   prerequisites: [before('Type hints', 'python-type-hints'), before('Optional values', 'python-optional-values'), before('Dataclasses', 'python-dataclasses'), before('Fail Fast, Fail Early', 'python-fail-fast')],
   appliedIn: [before('Pydantic Constraints and Validators', 'python-pydantic-constraints')],
-  outputLabel: 'An accepted record with an omission default, or a rejected request',
+  outputLabel: 'The completed request or its error message',
   checkpointTitle: 'Questions on Parts 1 and 2',
   history: history('Required and Nullable Fields in Pydantic v2', [
     source('Pydantic v2 design discussion, 2022', 'https://pydantic.dev/articles/pydantic-v2'),
@@ -364,29 +361,25 @@ export const pythonPydanticModels = lesson({
       ['No producer data is changed', 'data = {"owner":"Dee"}\nsummarize_ticket(data)\nassert data == {"owner":"Dee"}'],
     ]),
   ],
-  build: build('Separate Omission from a Nullable Value',
-    'Botie receives a report record. The title and note keys are required; note may contain text or null. The unit field defaults to celsius only when its key is absent.',
-    'Check required-key presence and the nullable note independently. Add the unit omission default, then return accepted and record. A rejected request has record:null. This small workshop checks only the stated presence and note rules.',
-    { request: 'Report record', required: 'Required keys', noteKey: 'Nullable note key', defaultKey: 'Field with an omission default', defaultValue: 'Omission default' },
-    [
-      sample('A supplied null note', { request: { title: 'North report', note: null }, required: ['title', 'note'], noteKey: 'note', defaultKey: 'unit', defaultValue: 'celsius' }, accepted({ title: 'North report', note: null, unit: 'celsius' })),
-      sample('A note key is absent', { request: { title: 'North report' }, required: ['title', 'note'], noteKey: 'note', defaultKey: 'unit', defaultValue: 'celsius' }, rejected),
-      sample('An explicit unit is retained', { request: { title: 'South report', note: 'Check later', unit: 'kelvin' }, required: ['title', 'note'], noteKey: 'note', defaultKey: 'unit', defaultValue: 'celsius' }, accepted({ title: 'South report', note: 'Check later', unit: 'kelvin' })),
-    ],
-    op('pyValidationReport', op('pyValidationDefaultField', s('request'), s('defaultKey'), s('defaultValue')), op('pyValidationAll', op('pyValidationPresence', s('request'), s('required')), op('pyValidationNullableText', s('request'), s('noteKey')))),
-    'Presence is checked on the incoming record. The nullable-value check does not turn a missing key into a supplied null.',
-    'These components expose presence, nullability and omission defaults. They do not execute Pydantic, reproduce all its type rules, or verify the title’s business meaning. JSON null represents Python None here.'),
-  journey: journey('A report can explicitly have no note while still being required to include the note field.',
-    'Build the Presence and Value Checks', 'Try the report with note:null, then construct the separate checks and omission default.', 'The first report is accepted while the record without note is rejected.',
-    diagnose('The Note Key Disappears', 'A later request contains a title but no note. Which repair keeps the stated required-note contract?',
-      ['Keep required-key presence separate from the nullable-value check', 'Allowing null concerns a present value. It does not authorize omitting the required key.'],
-      ['Default every absent nullable key to null', 'That changes this interface from required-and-nullable to omittable.'],
-      'Inspect the original request’s key list before following the default branch.'),
-    [connection('python-optional-values', 'Distinguish None from a missing value', 'The same distinction matters at an input boundary.'), connection('python-fail-fast', 'Check before processing', 'The record is returned only after the declared checks pass.')],
-    'Which declaration would you change if the product actually allowed the note key to be omitted?', 'Write default behavior separately from allowed values.',
-    { path: [1], title: 'Inspect Requiredness First', challenge: 'Return the combined decision for required presence and the nullable note value.', why: 'This exposes why a present null passes and an absent key fails.' },
-    ['Presence checks the original record and required-key list.', 'Apply the unit default to the record, and connect the combined decision to Return the accepted record.']),
-  fresh: fresh('A Present but Wrong Note Representation', 'The next record supplies note as a number. Keep the supplied unit, but reject the request because the present note is neither text nor null.', { request: { title: 'Evening report', note: 17, unit: 'celsius' }, required: ['title', 'note'], noteKey: 'note', defaultKey: 'unit', defaultValue: 'celsius' }, rejected, 'Presence alone is insufficient. The current value also needs its own declared check.'),
+  build: build('Check a Note and Default the Copy Count',
+    'A report request must include note, even when the sender chooses null, meaning no note. If copies is absent, use 1. The supplied titles are already valid text.',
+    'In Check one request field, choose note, required, and text or null. Then use Default missing copies. The first request should become {"title":"Inspection notes","note":null,"copies":1}. A missing note must instead return "note is missing".',
+    { request: 'Report request' },
+    [sample('An explicit no-note choice', { request: { title: 'Inspection notes', note: null } }, { title: 'Inspection notes', note: null, copies: 1 }), sample('The note key is missing', { request: { title: 'Inspection notes' } }, 'note is missing'), sample('An explicit copy count', { request: { title: 'Morning report', note: 'Check page two', copies: 3 } }, { title: 'Morning report', note: 'Check page two', copies: 3 }), sample('Zero is not an omitted count', { request: { title: 'Draft report', note: '', copies: 0 } }, { title: 'Draft report', note: '', copies: 0 })],
+    configured('pyValidationDefaultCopies', { copies: 1 }, configured('pyValidationCheckRequestField', { field: 'note', presence: 'required', value: 'text or null' }, s('request'))),
+    'Allowing null does not supply a missing key. The copies default applies only when copies is absent; it does not replace an explicit zero.',
+    'These pieces demonstrate selected field rules. They do not run Pydantic. JSON null represents Python None; the Python challenges check the full model.'),
+  journey: journey('The earlier optional-value helper could supply a default. Here the note is required, while only the copy count has an omission default.',
+    'Keep Missing and Null Different', 'Start with the supplied note:null request. Check the note, then add the missing copies value. Next try the request with no note key.', 'The explicit null continues into a completed request. A missing note produces an error message.',
+    diagnose('An Absent Note Slips Through', 'A construction permits note to be absent and then adds copies. What must change for this report interface?',
+      ['Set the note field to required while allowing text or null', 'Requiredness controls whether the key must exist. The value rule separately permits an explicit null.'],
+      ['Supply null whenever note is absent', 'That would make note optional, changing the report request agreement.'],
+      'Read the Presence and Allowed value controls on the note checker.'),
+    [connection('python-optional-values', 'Separate absence from a supplied value', 'A default and an allowed None value answer different questions.')],
+    'Which setting allows a supplied null without permitting an absent note?', 'Declare requiredness separately from the allowed values.',
+    { path: [0], title: 'Check Only the Note First', challenge: 'Return the original request when its note is text or null. Return "note is missing" when the key is absent.', why: 'See the presence decision before adding any default.' },
+    ['The note checker needs one request input. Its field name and rules are controls on the component.', 'Connect the checked request to Default missing copies and use 1 for omission.']),
+  fresh: fresh('The Note Contains a Number', 'The next sender supplies note:17. Return "note must be text or null" rather than accepting the request or replacing that value.', { request: { title: 'Evening report', note: 17, copies: 2 } }, 'note must be text or null', 'A present key can still hold an unacceptable value.'),
 });
 
 const captureModel = py([
@@ -492,13 +485,6 @@ const captureBatchSolution = captureModel + '\n\n' + py([
   "print(len(result['accepted']))",
   "print(result['errors'])",
 ]);
-const rangeRecipe = () => op('pyValidationReport', s('request'),
-  op('pyValidationAll',
-    op('pyValidationAll',
-      op('pyValidationOrdered', op('pyValidationGetField', s('request'), s('lowerKey')), op('pyValidationGetField', s('request'), s('upperKey'))),
-      op('pyValidationBoundedInteger', op('pyValidationGetField', s('request'), s('countKey')), s('maximumCount'))),
-    op('pyValidationKnownFields', s('request'), s('allowed'))));
-const rangeData = request => ({ request, lowerKey: 'lower', upperKey: 'upper', countKey: 'count', maximumCount: 20, allowed: ['lower', 'upper', 'count'] });
 
 export const pythonPydanticConstraints = lesson({
   id: 'python-pydantic-constraints', title: 'Pydantic Constraints and Validators', section, topic,
@@ -510,7 +496,7 @@ export const pythonPydanticConstraints = lesson({
   ],
   prerequisites: [before('Pydantic Models and Optional Fields', 'python-pydantic-models')],
   appliedIn: [before('Python Exceptions', 'python-exceptions')],
-  outputLabel: 'A request accepted only after every declared range check',
+  outputLabel: 'The checked interval and count, or an error message',
   checkpointTitle: 'Questions on Parts 1 and 2',
   history: history('Field and Model Validation in Pydantic v2', [
     source('Pydantic v2 design: validator structure', 'https://pydantic.dev/articles/pydantic-v2'),
@@ -611,29 +597,25 @@ export const pythonPydanticConstraints = lesson({
       ['Wrong container type remains a caller error', 'try: read_capture_batch(())\nexcept TypeError: pass\nelse: raise AssertionError("The non-list argument was hidden")'],
     ]),
   ],
-  build: build('Check a Capture Range before Accepting It',
-    'Botie receives endpoints and a requested count. Every local rule must pass: finite endpoints in increasing order, a positive integer count at most the supplied maximum, and no unknown keys.',
-    'Read the named fields, check their range and count rules, and combine those checks with the allowed-key check. Return accepted and record, using record:null on rejection. All sample records contain the named endpoint and count fields.',
-    { request: 'Capture request', lowerKey: 'Lower endpoint key', upperKey: 'Upper endpoint key', countKey: 'Requested-count key', maximumCount: 'Maximum count', allowed: 'Allowed field names' },
-    [
-      sample('An ordinary capture', rangeData({ lower: 2, upper: 9, count: 4 }), accepted({ lower: 2, upper: 9, count: 4 })),
-      sample('The endpoints reverse', rangeData({ lower: 9, upper: 2, count: 4 }), rejected),
-      sample('An unknown field arrives', rangeData({ lower: -2, upper: 5, count: 8, counts: 3 }), rejected),
-      sample('The inclusive count limit', rangeData({ lower: 0, upper: 1, count: 20 }), accepted({ lower: 0, upper: 1, count: 20 })),
-    ], rangeRecipe(),
-    'The ordering check needs both endpoints. The count check and the allowed-key check are separate requirements; passing one cannot substitute for the others.',
-    'This is a local contract-checking construction, not Pydantic. JSON numbers cannot distinguish Python 3 from 3.0. The real strict-integer representation tests run in the Python exercises.'),
-  journey: journey('A request with numeric endpoints can still describe an unusable range.',
-    'Build the Complete Capture Decision', 'Inspect a valid request, then connect each declared rule before accepting the record.', 'A reversed interval fails even when its count and field names are acceptable.',
-    diagnose('A New Key Appears', 'The original range checks pass, but a later producer adds counts beside count. What would the declared extra-forbid policy require?',
-      ['Check the supplied keys against the allowed names', 'An otherwise valid count does not make an unknown key part of the contract.'],
-      ['Ignore the key because the range is usable', 'That silently changes the promised policy for unknown fields.'],
-      'Keep the allowed-key check connected to the final combined decision.'),
-    [connection('python-pydantic-models', 'Make the record contract explicit', 'Presence, values, and extra keys remain separate choices.'), connection('python-fail-fast', 'Make the decision before effects', 'A failed local rule prevents the capture request from being accepted.')],
-    'Which rules need one field, and which need several fields together?', 'Keep each validator near the information that gives its check meaning.',
-    { path: [1, 0], title: 'Inspect Range and Count', challenge: 'Return the combined ordering and count decision before adding the allowed-key check.', why: 'The intermediate result shows why independently valid field representations can still fail a relationship.' },
-    ['Read the endpoint fields and connect lower before upper.', 'Require the bounded count and known-key checks as well as the range check before returning the accepted record.']),
-  fresh: fresh('A Boolean Is Not a Requested Count', 'The range is now negative to positive, and count is true. Reject the request under the declared integer-count policy.', rangeData({ lower: -5, upper: 5, count: true }), rejected, 'A usable interval does not repair an unsuitable count representation.'),
+  build: build('Check the Interval and Number of Readings',
+    'A capture asks for 4 readings between 2 and 9. The lower endpoint must be below the upper endpoint, and the count must be a whole number from 1 through 20.',
+    'Use Check the capture interval with increasing order, and Check the capture count with a maximum of 20. Prepare the capture combines their results. The first result should be {"lower":2,"upper":9,"count":4}. If either check fails, return its error message.',
+    { bounds: 'Capture interval', count: 'Requested number of readings' },
+    [sample('Four readings in a valid interval', { bounds: { lower: 2, upper: 9 }, count: 4 }, { lower: 2, upper: 9, count: 4 }), sample('The endpoints arrive in reverse', { bounds: { lower: 9, upper: 2 }, count: 4 }, 'Lower must be below upper'), sample('The count exceeds the limit', { bounds: { lower: -2, upper: 5 }, count: 21 }, 'Count must be from 1 through 20'), sample('The maximum is included', { bounds: { lower: 0, upper: 1 }, count: 20 }, { lower: 0, upper: 1, count: 20 })],
+    op('pyValidationPrepareCapture', configured('pyValidationCheckBounds', { order: 'increasing' }, s('bounds')), configured('pyValidationCheckCaptureCount', { maximum: 20 }, s('count'))),
+    'Both endpoints can be numbers and still form an unusable interval. The count has its own limit, independent of the interval width.',
+    'This workshop checks the interval and count only. Real Pydantic, nested fields and strict Python numeric types are tested in the coding challenges.'),
+  journey: journey('The earlier request checker established field representations. This capture also needs value limits and a relationship between its endpoints.',
+    'Check the Two Requirements', 'Start with the interval from 2 to 9 and count 4. Inspect each check separately, then combine them. Try the reversed interval next.', 'A valid request returns its interval and count. A reversed interval returns "Lower must be below upper".',
+    diagnose('Both Endpoints Are Numbers', 'The first construction permits either endpoint order. It also accepts lower:9 and upper:2. What rule is missing?',
+      ['Require increasing order in the interval checker', 'Checking each endpoint alone cannot establish that lower is below upper.'],
+      ['Increase the maximum number of readings', 'The count limit cannot repair a reversed interval.'],
+      'Follow the interval branch before it reaches Prepare the capture.'),
+    [connection('python-pydantic-models', 'Add value rules to a field contract', 'Knowing that a count is numerical does not establish its allowed range.')],
+    'Why can the count pass while the complete capture still fails?', 'A request must meet every requirement that applies to it.',
+    { path: [0], title: 'Check the Interval First', challenge: 'Return the lower and upper endpoints when they are in increasing order. Return "Lower must be below upper" when they are reversed or equal.', why: 'Inspect the relationship before adding the count branch.' },
+    ['Set Endpoint order to increasing, rather than either order.', 'Check the count separately, then connect both checked results to Prepare the capture.']),
+  fresh: fresh('A Boolean Arrives as the Count', 'The interval now runs from -5 to 5, but count is true. Return "Count must be from 1 through 20". A boolean is not a requested numerical count.', { bounds: { lower: -5, upper: 5 }, count: true }, 'Count must be from 1 through 20', 'A usable interval cannot compensate for a bad count.'),
 });
 
 const narrowHandlerExample = py([
@@ -808,24 +790,24 @@ export const pythonExceptions = lesson({
       ['Caller contract failures keep their category', 'for value, maximum in ((3, 10), ("3", True), ("3", "10")):\n    try: parse_limit(value, maximum)\n    except TypeError: pass\n    else: raise AssertionError("The representation failure was hidden")\ntry: parse_limit("1", 0)\nexcept ValueError: pass\nelse: raise AssertionError("A nonpositive maximum was accepted")'],
     ]),
   ],
-  build: build('Keep Parsed Counts beside Their Rejections',
-    'Botie imports count fields as text. The declared local parser accepts small signed decimal strings and keeps an outcome for every original position.',
-    'Parse the text fields, reject negative parsed counts, then collect successful values on one branch and rejected positions on another. Return {"values":[...],"rejected":[...]}. Keep the original order in both lists. Zero is an allowed count.',
-    { fields: 'Incoming text count fields' },
-    [sample('All fields parse', { fields: ['8', '3', '5'] }, parseReport([8, 3, 5])), sample('A middle field needs correction', { fields: ['8', 'unknown', '5'] }, parseReport([8, 5], [1])), sample('More than one rejected position', { fields: ['bad', ' 2 ', 'later', '4'] }, parseReport([2, 4], [0, 2])), sample('A parsed negative count is rejected', { fields: ['4', '-1', '7'] }, parseReport([4, 7], [1]))],
-    op('pyValidationParseReport', op('pyValidationSuccessfulValues', op('pyValidationNonnegativeOutcomes', op('pyValidationParseIntegers', s('fields')))), op('pyValidationFailurePositions', op('pyValidationNonnegativeOutcomes', op('pyValidationParseIntegers', s('fields'))))),
-    'Both branches come from the same checked outcomes. Conversion failures and negative counts retain their original positions.',
-    'These are real local decimal-parsing outcomes, not Python exceptions. The workshop grammar is deliberately narrower than int(), uses safe-sized JS numbers, and does not model exception inheritance or tracebacks.'),
-  journey: journey('One text field cannot be read as a count, but the importer has an explicit policy for reporting that field and retaining valid ones.',
-    'Build the Import Report', 'Inspect the parse outcomes, apply the nonnegative-count rule, then wire separate successful-value and rejected-position branches.', 'A bad field remains visible as a rejected position instead of becoming a fabricated zero.',
-    diagnose('The First Field Is Rejected', 'A later batch starts with invalid text. The report marks the first accepted value as rejected instead. What correspondence was lost?',
-      ['Keep failure positions from the original parse outcomes', 'Accepted values form a shorter list. Its positions do not identify the original input fields.'],
-      ['Count only the accepted values and reuse those positions', 'That reports locations in the wrong collection.'],
-      'Inspect the original position retained beside each parse outcome.'),
-    [connection('python-fail-fast', 'Choose a failure policy deliberately', 'This report allows declared partial acceptance; an all-or-nothing save would make a different decision.'), connection('python-pydantic-constraints', 'Separate input failures from defects', 'Recovery handles a named failure category, not every possible failure.')],
-    'Why would returning zero for an invalid count make the report less useful?', 'Preserve evidence of a failure instead of disguising it as a valid result.',
-    { path: [0], title: 'Inspect the Accepted Branch', challenge: 'Return the successful values from the parse outcomes, preserving input order.', why: 'Then add the rejected-position branch without changing what the successful branch means.' },
-    ['The parser returns outcomes with their original positions. Reject negative parsed counts before collecting either branch.', 'Collect values and rejected positions from those same checked outcomes before combining the final report.']),
+  build: build('Read Counts and Point Out the Bad Fields',
+    'The import contains ["8", "3", "5"]. Read them as [8, 3, 5] and report no rejected fields. A later import can contain unreadable text or a negative count. Keep usable counts and identify the original positions needing correction.',
+    'Read whole numbers converts the text it understands and leaves other text in place. Reject negative counts marks unsuitable numbers. Separate values from errors returns {"values":[8,3,5],"rejected":[]} for the first import. Positions start at zero, so the middle field of a three-field import is position 1.',
+    { fields: 'Count fields as text' },
+    [sample('Read three counts', { fields: ['8', '3', '5'] }, parseReport([8, 3, 5])), sample('A negative count is still readable text', { fields: ['4', '-1', '7'] }, parseReport([4, 7], [1])), sample('The middle field cannot be read', { fields: ['8', 'unknown', '5'] }, parseReport([8, 5], [1])), sample('Zero is a valid count', { fields: ['bad', '0', 'later', '4'] }, parseReport([0, 4], [0, 2]))],
+    op('pyValidationSummarizeCounts', op('pyValidationRejectNegativeCounts', op('pyValidationReadCountText', s('fields')))),
+    'Converting text and deciding whether the number is an allowed count are separate steps. Keeping every position until the final separation lets the report identify the source field correctly.',
+    'The local parser accepts small decimal whole-number text. The Python exercises use int() and actual exceptions; this workshop makes their accepted and rejected paths visible.'),
+  journey: journey('The saving exercise rejected a whole batch. This importer deliberately keeps valid fields and returns the positions that need correction.',
+    'Keep the Fields in Order', 'Convert the first list, then separate its values from errors. Try the import containing -1 before deciding the repair.', 'The negative count is rejected at position 1, while the surrounding counts remain [4, 7].',
+    diagnose('Conversion Succeeded, but the Count Is Negative', 'Read whole numbers turns "-1" into -1. The construction accepts it. What operation belongs before the final separation?',
+      ['Reject negative counts', 'Integer conversion permits a sign. The count rule separately excludes negative values while retaining zero.'],
+      ['Replace every bad field with zero', 'Zero is a real count. That replacement hides which source field failed.'],
+      'Inspect the list after conversion and before separating its values and errors.'),
+    [connection('python-fail-fast', 'Choose whether a failure rejects one item or the whole batch', 'Partial acceptance is useful here because the returned rejected positions remain visible.')],
+    'Why must positions refer to the original fields rather than the shorter accepted list?', 'Keep an error attached to the data that caused it.',
+    { path: [0, 0], title: 'Read the Text First', challenge: 'Return one item per field: numbers for readable decimal text, unchanged text for fields that cannot be read.', why: 'The next operation can inspect negative numbers before anything loses its original position.' },
+    ['Read whole numbers preserves the list length and order.', 'Reject negative counts before Separate values from errors.']),
   fresh: fresh('The Invalid Fields Move', 'A fresh import has invalid fields at different positions and a zero that is valid decimal text. Return values and original rejected positions.', { fields: ['later', '0', '9', 'missing'] }, parseReport([0, 9], [0, 3]), 'A fixed rejected-position list or an invented zero for an invalid field will not describe this import.'),
 });
 
@@ -902,9 +884,6 @@ const noticeSolution = py([
   'print(second)',
   'print(third)',
 ]);
-const copyResult = (original, tag) => ({ original, edited: { ...original, tags: [...original.tags, tag] } });
-const copyRecipe = () => op('pyValidationCopiesReport', s('record'),
-  op('pyValidationPutField', s('record'), s('tagKey'), op('pyValidationAppend', op('pyValidationGetField', s('record'), s('tagKey')), s('newTag'))));
 
 export const pythonMutation = lesson({
   id: 'python-mutation', title: 'Mutation and Copies', section, topic,
@@ -916,7 +895,7 @@ export const pythonMutation = lesson({
   ],
   prerequisites: [before('Dataclasses and record ownership', 'python-dataclasses')],
   appliedIn: [before('Context Managers and Resource Cleanup', 'python-context-managers')],
-  outputLabel: 'The unchanged source record beside its edited copy',
+  outputLabel: 'Original tags beside draft tags',
   checkpointTitle: 'Questions on Parts 1 and 2',
   history: history('Shared State and Default Factories', [
     source('Python names and objects', 'https://docs.python.org/3.14/tutorial/classes.html#a-word-about-names-and-objects'),
@@ -966,7 +945,7 @@ export const pythonMutation = lesson({
       null,
       'The important distinction is whether the actual change matches what the caller was promised.'),
     p('Test More than Equal Printed Values',
-      'Two records can print equal values while still sharing mutable children. A useful independence test edits the returned child and checks the original afterward. That exercise reveals a shallow copy even when the original output looked correct.\n\nCall defaulted functions more than once. A test that runs only a single call cannot reveal state leaking into the next omitted-argument call. Include the case where a caller supplies its own list, because that has a separate mutation policy.\n\nThe workshop returns original and edited records together to make preservation visible. Its JSON data model does not expose Python object identity. The programming exercises test actual Python mutation and nested copies.',
+      'Two records can print equal values while still sharing mutable children. A useful independence test edits the returned child and checks the original afterward. That exercise reveals a shallow copy even when the original output looked correct.\n\nCall defaulted functions more than once. A test that runs only a single call cannot reveal state leaking into the next omitted-argument call. Include the case where a caller supplies its own list, because that has a separate mutation policy.\n\nThe workshop shows original and draft tag lists after a private edit. Its copy control makes sharing visible without changing the actual example input. The programming exercises test real Python mutation and nested copies.',
       null,
       'Inspect the relationship after a change, not only the values before the change.'),
   ],
@@ -1008,28 +987,25 @@ export const pythonMutation = lesson({
       ['Empty cleaned notices are rejected', 'try: collect_notice("   ")\nexcept ValueError: pass\nelse: raise AssertionError("An empty notice was accepted")'],
     ]),
   ],
-  build: build('Edit the Draft while Preserving Its Source',
-    'Botie needs a new tagged draft while keeping the original record available for comparison.',
-    'Read the tag list, append into a new list, and replace tags in a new record. Return {"original":...,"edited":...}. Preserve the original and every other nested field.',
-    { record: 'Original record', tagKey: 'Tag-list field name', newTag: 'Tag to add' },
-    [
-      sample('Add one draft tag', { record: { tags: ['raw'], settings: { reviewed: false } }, tagKey: 'tags', newTag: 'checked' }, copyResult({ tags: ['raw'], settings: { reviewed: false } }, 'checked')),
-      sample('The next draft has different tags', { record: { tags: ['daily', 'north'], settings: { reviewed: true } }, tagKey: 'tags', newTag: 'archived' }, copyResult({ tags: ['daily', 'north'], settings: { reviewed: true } }, 'archived')),
-      sample('Start from no tags', { record: { tags: [], settings: { owner: 'Ari' } }, tagKey: 'tags', newTag: 'new' }, copyResult({ tags: [], settings: { owner: 'Ari' } }, 'new')),
-    ], copyRecipe(),
-    'The edited tag list is constructed from the current source. Both records remain visible in the final result.',
-    'The components implement explicit copies of JSON-compatible data. They do not expose Python object identity, aliasing or arbitrary deepcopy behavior; the Python exercises test those actual semantics.'),
-  journey: journey('The draft needs a new tag without changing the record another caller still owns.',
-    'Construct the New Draft', 'Follow the source record into a new tag list and a new outer record, retaining the original branch.', 'The comparison shows one added tag in the draft and no change to the original.',
-    diagnose('Another Record Arrives', 'The next record has different existing tags. The construction returns only the new tag. What did it lose?',
-      ['Read the current record’s tags before appending', 'A copied earlier list or a new empty list discards the current source’s existing data.'],
-      ['Always start from the first example’s tags', 'That substitutes a previous record for the current caller’s record.'],
-      'Inspect the list entering Append into a new list.'),
-    [connection('python-dataclasses', 'Give records named fields', 'A field can contain mutable data whose ownership still needs a policy.'), connection('python-fail-fast', 'State the effect contract', 'This transformation promises preservation instead of a caller-visible mutation.')],
-    'What extra test would establish nested independence in actual Python?', 'Test ownership through a later edit, not only an initial printed value.',
-    { path: [1, 2], title: 'Inspect the New Tag List', challenge: 'Return the source tags followed by the current new tag.', why: 'Then use that list to replace only the intended field in the new draft.' },
-    ['Read the tags field from the current source before appending.', 'Send the unchanged source and the edited copy to the comparison output on separate branches.']),
-  fresh: fresh('A Different Nested Record', 'The source now has three existing tags and nested reviewer details. Add the current new tag while preserving those details in both displayed records.', { record: { tags: ['raw', 'north', 'night'], settings: { reviewers: ['Ari', 'Bo'] } }, tagKey: 'tags', newTag: 'ready' }, copyResult({ tags: ['raw', 'north', 'night'], settings: { reviewers: ['Ari', 'Bo'] } }, 'ready'), 'The draft must derive from the current record, with its existing tags and nested settings intact.'),
+  build: build('Add a Draft Tag without Changing the Original',
+    'The north report has tags ["raw"]. A reviewed draft needs ["raw", "checked"], while the original must still have ["raw"]. Copying the outer record alone can leave both reports sharing one tag list.',
+    'Copy the report, add the supplied tag to the draft, then compare the two tag lists. Return {"original":["raw"],"draft":["raw","checked"]} for the first example. Choose a copy that includes nested values so editing the draft does not change the displayed original.',
+    { record: 'Original report', newTag: 'Tag for the draft' },
+    [sample('Review the north report', { record: { house: 'north', tags: ['raw'] }, newTag: 'checked' }, { original: ['raw'], draft: ['raw', 'checked'] }), sample('A new report has different tags', { record: { house: 'south', tags: ['daily', 'urgent'] }, newTag: 'reviewed' }, { original: ['daily', 'urgent'], draft: ['daily', 'urgent', 'reviewed'] }), sample('The original has no tags', { record: { house: 'west', tags: [] }, newTag: 'new' }, { original: [], draft: ['new'] })],
+    op('pyValidationCompareDraftTags', op('pyValidationEditDraftTags', configured('pyValidationDraftRecord', { depth: 'nested values too' }, s('record')), s('newTag'))),
+    'A new outer record can still contain the same list. Copying that list gives the draft its own later edits.',
+    'Sharing is demonstrated inside a private copy of the example. The actual input stays unchanged. Python exercises check real object ownership and deep copies.'),
+  journey: journey('The earlier Report helper deliberately changed an owned tag list. A new draft now needs an independent list before that edit.',
+    'Make the Draft Independent', 'Inspect the original and draft immediately after copying. Add the current tag, then compare the lists. Try the report with different existing tags next.', 'Only the draft receives the new tag; the original retains all its earlier tags.',
+    diagnose('The Original Acquires the Draft Tag', 'Copy the report is set to outer record only. Adding a draft tag changes both displayed lists. What needs its own copy?',
+      ['Copy nested values too', 'The tags list is inside the record. An outer-only copy keeps that shared list.'],
+      ['Discard the original report after editing', 'The original is still needed and was promised to remain unchanged.'],
+      'Switch the Copy control, then repeat the same edit and compare both lists.'),
+    [connection('python-dataclasses', 'Give each record its own mutable fields', 'An independent outer object does not automatically give each nested list an independent owner.')],
+    'Why can two separate records still show the same unexpected edit?', 'Check what a copy shares before changing a nested value.',
+    { path: [0, 0], title: 'Create the Draft First', challenge: 'Return the original and draft records before editing either one. Both should still contain the current original tags.', why: 'The following edit will reveal whether the nested tag list was shared.' },
+    ['Copy the report has an outer-only option and an option that copies nested values.', 'Add the tag to the draft, then compare the two tag lists.']),
+  fresh: fresh('Review a Report with More Existing Tags', 'The east report already has ["raw", "night", "urgent"]. Add "ready" to its draft and return both tag lists. Keep every original tag unchanged.', { record: { house: 'east', tags: ['raw', 'night', 'urgent'] }, newTag: 'ready' }, { original: ['raw', 'night', 'urgent'], draft: ['raw', 'night', 'urgent', 'ready'] }, 'The independent draft must begin with the current report, not a saved list from an earlier example.'),
 });
 
 const withExample = py([
@@ -1113,10 +1089,6 @@ const bufferSolution = py([
   'print(stream.closed)',
   'print(events)',
 ]);
-const lifetime = (values, error = null) => ({ events: ['open', 'read', 'close'], closed: true, values, error });
-const resourceRecipe = () => op('pyValidationResourceReport',
-  op('pyValidationCloseResource',
-    op('pyValidationReadResource', op('pyValidationOpenResource', s('name')), s('fields'))));
 
 export const pythonContextManagers = lesson({
   id: 'python-context-managers', title: 'Context Managers and Resource Cleanup', section, topic,
@@ -1178,7 +1150,7 @@ export const pythonContextManagers = lesson({
       null,
       'The syntax makes a lifetime boundary visible. Read the manager’s contract to know what happens at that boundary.'),
     p('Test the Body That Does Not Finish',
-      'A success-only test can miss the exact cleanup bug this lesson began with. Raise an exception deliberately inside the managed body, catch it outside, and inspect the resource and event log. The original exception must still reach that outer handler.\n\nAlso check an empty buffer and repeated uses. A new managed_buffer call should produce a fresh stream rather than reuse one that was already closed. Validate arguments before recording an acquisition event if the interface promises that invalid arguments do not start a resource lifetime.\n\nThe workshop’s open, read and close components describe this lifecycle as inspectable data. You must connect cleanup after both a successful and a failed read outcome. The Python exercises then verify the actual with and contextmanager behavior.',
+      'A success-only test can miss the exact cleanup bug this lesson began with. Raise an exception deliberately inside the managed body, catch it outside, and inspect the resource and event log. The original exception must still reach that outer handler.\n\nAlso check an empty buffer and repeated uses. A new managed_buffer call should produce a fresh stream rather than reuse one that was already closed. Validate arguments before recording an acquisition event if the interface promises that invalid arguments do not start a resource lifetime.\n\nThe workshop opens an in-memory buffer, reads its number lines and closes it. A bad line changes the read result, but the closed flag must still be true. The Python exercises then verify the actual with and contextmanager behavior.',
       null,
       'The failure path is part of the interface, not a secondary case to leave unexamined.'),
   ],
@@ -1219,25 +1191,25 @@ export const pythonContextManagers = lesson({
       ['Invalid arguments do not acquire or log a resource', 'events = []\ntry:\n    with managed_buffer(None, events): pass\nexcept TypeError: pass\nelse: raise AssertionError("Non-text content was accepted")\nassert events == []\ntry:\n    with managed_buffer("text", ()): pass\nexcept TypeError: pass\nelse: raise AssertionError("A non-list event sink was accepted")'],
     ]),
   ],
-  build: build('Close after Either Read Outcome',
-    'Botie opens a teaching resource and reads its decimal fields. A later field can fail, but the resource must still reach cleanup.',
-    'Open the resource, attempt the read, close it, and return events, closed, values and error. A failed read returns values:[] and error:"invalid_reading"; it must still include the close event and closed:true.',
-    { name: 'Resource name', fields: 'Text fields to read' },
-    [sample('A successful read', { name: 'north.txt', fields: ['2', '5'] }, lifetime([2, 5])), sample('A field cannot be read', { name: 'south.txt', fields: ['2', 'bad', '5'] }, lifetime([], 'invalid_reading')), sample('An empty resource', { name: 'empty.txt', fields: [] }, lifetime([]))],
-    resourceRecipe(),
-    'The read outcome passes through the same cleanup component on both paths. An error remains visible after the resource is marked closed.',
-    'This is an explicit local lifetime record, not a filesystem or a simulation of Python exception unwinding. The decimal grammar and JS numbers are limited; real with/contextmanager behavior is exercised in Python.'),
-  journey: journey('A resource must be released even when the data read from it cannot be processed.',
-    'Build the Complete Resource Lifetime', 'Inspect a successful read, then keep cleanup connected when the read outcome changes.', 'The failed read still produces open, read and close events while retaining its error.',
-    diagnose('The Read Does Not Finish', 'The original construction closes only after successful parsing. A bad field leaves the resource open. What is missing?',
-      ['Put cleanup after the read outcome, including its error path', 'The cleanup obligation does not disappear when parsing fails.'],
-      ['Replace the bad field with a number so cleanup is never tested', 'That hides the failure path instead of handling the resource lifetime.'],
-      'Inspect the state after reading and before the closing operation.'),
-    [connection('python-exceptions', 'Preserve a failure while acting on it', 'Cleanup and error propagation are separate responsibilities.'), connection('python-mutation', 'Give state an explicit owner', 'The function contract must identify who owns releasing the resource.')],
-    'What should a failure-path test inspect besides the exception?', 'Check the resource’s final state as well as the original failure.',
-    { path: [0, 0], title: 'Inspect the Read Outcome', challenge: 'Return the resource state immediately after reading, before cleanup.', why: 'The intermediate state shows that an error still needs to pass through closing.' },
-    ['The read needs the open resource state and the current text fields.', 'Connect its outcome to Close after the read outcome, then inspect the resource lifetime.']),
-  fresh: fresh('A New Resource Fails Later', 'The next resource has more fields, with a later invalid value. Return the complete closed lifetime while preserving the failed-read outcome.', { name: 'evening.txt', fields: ['4', '7', '9', 'unknown'] }, lifetime([], 'invalid_reading'), 'A successful first read does not establish that cleanup works after a later parsing failure.'),
+  build: build('Close the Buffer Even When a Line Is Bad',
+    'The text contains 4, a blank line, 7 and 3. Reading its whole-number lines gives a total of 14. The buffer must close afterward, including when a later example contains unreadable text.',
+    'Connect Open the text buffer, Read the number lines and Close the buffer in that order. Ignore blank lines and allow signed readings. Return {"total":14,"closed":true} for the first example. After a bad line, return its error message with closed:true instead of a total. Line numbers start at 1.',
+    { contents: 'Buffer contents' },
+    [sample('Read numbers and a blank line', { contents: '4\n\n7\n3\n' }, { total: 14, closed: true }), sample('The second line cannot be read', { contents: '3\nbad\n9\n' }, { error: 'Line 2 is not a whole number', closed: true }), sample('Signed readings remain valid', { contents: '10\n-2\n5\n' }, { total: 13, closed: true }), sample('An empty buffer', { contents: '' }, { total: 0, closed: true })],
+    configured('pyValidationCloseBuffer', { when: 'after every read' }, op('pyValidationReadBuffer', op('pyValidationOpenBuffer', s('contents')))),
+    'Reading and closing are separate responsibilities. An invalid line prevents a total, but it does not remove the obligation to close the buffer.',
+    'This local buffer model carries an error outcome to the closing piece. Python challenges exercise actual exceptions and with statements. No file is opened by this workshop.'),
+  journey: journey('The previous parser made failed fields visible. Reading from a resource adds a separate obligation: release it even when parsing fails.',
+    'Read, then Close on Either Result', 'Start with the readable lines and confirm total:14 and closed:true. Then try the example containing bad on its second line.', 'A read error remains visible and the buffer still ends closed.',
+    diagnose('The Failed Read Leaves the Buffer Open', 'Close the buffer is set to only after success. The second example returns an error and closed:false. Which setting repairs its lifetime?',
+      ['Close after every read', 'The buffer must close after either result, while preserving the read error.'],
+      ['Replace the bad line with zero', 'That invents a reading and avoids testing the actual failure path.'],
+      'Inspect the read outcome, then change when the closing piece runs.'),
+    [connection('python-exceptions', 'Keep cleanup separate from error recovery', 'An error may continue to the caller after the resource has been released.')],
+    'Why does a correct total on the first example tell us little about closing after failure?', 'Check the resource state on both paths.',
+    { path: [0], title: 'Inspect the Read before Closing', challenge: 'Open the buffer and read its lines. Inspect the values or error while closed is still false.', why: 'This separates the read result from the later cleanup obligation.' },
+    ['Read the number lines needs the opened buffer, not the raw text source.', 'Set Close to after every read, then connect the read outcome.']),
+  fresh: fresh('The Failure Happens Later', 'The new buffer contains 4, 7, 9 and unknown on separate lines. Return {"error":"Line 4 is not a whole number","closed":true}. Earlier readable lines must not bypass closing.', { contents: '4\n7\n9\nunknown\n' }, { error: 'Line 4 is not a whole number', closed: true }, 'A buffer that closes after success can still leak when a later line fails.'),
 });
 
 const lessons = [
@@ -1667,6 +1639,27 @@ const editTargets = {
   'python-mutation': ['def with_tag(', 'def collect_notice('],
   'python-context-managers': ['def read_total(', 'def managed_buffer('],
 };
+const freshPredictions = {
+  'python-fail-fast': { question: 'How many incoming readings should be added to the saved list?', expected: 0 },
+  'python-pydantic-models': { question: 'Does note:17 satisfy the required text-or-null rule?', expected: false },
+  'python-pydantic-constraints': { question: 'Does count:true satisfy the requested-count rule?', expected: false },
+  'python-exceptions': { question: 'How many original field positions need correction?', expected: 2 },
+  'python-mutation': { question: 'How many tags should remain on the original report after the draft receives ready?', expected: 3 },
+  'python-context-managers': { question: 'Should the buffer be closed after the fourth line fails?', expected: true },
+};
+const freshContexts = {
+  'python-fail-fast': 'The saved list is [9, 10]. The incoming request is [7, true, 3, -4]. The saving operation still requires every incoming reading to be a positive number.',
+  'python-pydantic-models': 'The next sender supplies note:17 and copies:2. Keep the same required text-or-null note rule.',
+  'python-pydantic-constraints': 'The interval now runs from -5 to 5, but count is true. Keep the same whole-number count rule from 1 through 20.',
+  'python-exceptions': 'The next import is ["later", "0", "9", "missing"]. Read the current fields, keeping zero as a valid count and preserving original positions.',
+  'python-mutation': 'The east report already has ["raw", "night", "urgent"]. Its draft receives the new tag "ready". Keep the original report available for comparison.',
+  'python-context-managers': 'The new buffer contains 4, 7, 9 and unknown on separate lines. The read fails on its fourth line. Apply the same resource-lifetime rule.',
+};
+for (const record of lessons) {
+  record.journey.order = 'build-first';
+  record.fresh.prediction = freshPredictions[record.id];
+  record.fresh.prompt = freshContexts[record.id];
+}
 for (const record of lessons) for (const [index, exercise] of record.practice.entries()) {
   exercise.editTarget = editTargets[record.id][index];
   if (exercise.starter.split(exercise.editTarget).length !== 2) {

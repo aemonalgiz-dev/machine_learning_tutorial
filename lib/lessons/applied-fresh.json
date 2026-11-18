@@ -1,7 +1,7 @@
 {
   "python-readable-code": {
-    "name": "A cold reference and a fractional reading",
-    "prompt": "Convert the two supplied records while retaining the attic-then-lab order and explicit output field.",
+    "name": "Below Freezing and Between Whole Degrees",
+    "prompt": "The current report lists attic at -40 degrees Celsius and lab at 37.5. Each converted reading still belongs to its named greenhouse.",
     "data": {
       "records": [
         {
@@ -26,11 +26,15 @@
         "temperature_f": 99.5
       }
     ],
-    "why": "Readable names must describe the result even when an input is negative or fractional."
+    "why": "The rows identify attic at -40 degrees Fahrenheit and lab at 99.5. Negative and fractional readings still need their names and units.",
+    "prediction": {
+      "question": "What Fahrenheit temperature should the lab reading of 37.5 degrees Celsius become?",
+      "expected": 99.5
+    }
   },
   "python-function-design": {
-    "name": "A different scale and an empty alert group",
-    "prompt": "The new readings are [-5,0,8] with inclusive limit 0. Predict both fields before running the same summary construction.",
+    "name": "Zero Is a Real Alert Limit",
+    "prompt": "The readings are [-5, 0, 8] degrees Celsius and the limit is 0. A reading exactly at the limit counts as an alert even though it adds no excess temperature.",
     "data": {
       "readings": [
         -5,
@@ -43,11 +47,15 @@
       "count": 2,
       "excess_c": 8
     },
-    "why": "A zero reading remains a valid observation and can satisfy an inclusive boundary."
+    "why": "The zero reading counts as an alert while contributing no excess. The reading of 8 contributes eight degrees.",
+    "prediction": {
+      "question": "How many readings reach the alert limit of zero, including an exact match?",
+      "expected": 2
+    }
   },
   "python-dry": {
-    "name": "A limit below zero",
-    "prompt": "The shared inclusive limit is -2. Predict both named counts for the new morning and evening reports.",
+    "name": "A Shared Limit Below Zero",
+    "prompt": "Both reports now use a limit of -2 degrees Celsius. The morning readings are [-3, -2, 1], while the evening readings are [-5, -4].",
     "data": {
       "morning": [
         -3,
@@ -64,220 +72,184 @@
       "morning": 2,
       "evening": 0
     },
-    "why": "Neither branch should assume that the safety limit is positive or that every report has an alert."
+    "why": "The morning readings -2 and 1 reach the limit. Neither evening reading does, so the counts are 2 and 0.",
+    "prediction": {
+      "question": "How many evening readings reach the shared limit of -2 degrees Celsius?",
+      "expected": 0
+    }
   },
   "python-type-hints": {
-    "name": "Different names and repeated valid values",
-    "prompt": "Separate the new records according to the same runtime measurement policy.",
+    "name": "Repeated and Fractional Readings",
+    "prompt": "The new file contains [4.5, false, 4.5, -40]. The numerical-only rule still applies, and repeated measurements are separate readings.",
     "data": {
-      "records": [
-        {
-          "house": "east",
-          "temperature_c": 4.5
-        },
-        {
-          "house": "west",
-          "temperature_c": false
-        },
-        {
-          "house": "lab",
-          "temperature_c": 4.5
-        }
-      ]
-    },
-    "expected": {
-      "accepted": [
-        {
-          "house": "east",
-          "temperature_c": 4.5
-        },
-        {
-          "house": "lab",
-          "temperature_c": 4.5
-        }
+      "readings": [
+        4.5,
+        false,
+        4.5,
+        -40
       ],
-      "rejected": [
-        {
-          "house": "west",
-          "temperature_c": false
-        }
-      ]
+      "scale": 1.8,
+      "offset": 32
     },
-    "why": "Validity is about each value, not its greenhouse name or whether that numerical reading appeared before."
+    "expected": [
+      40.1,
+      40.1,
+      -40
+    ],
+    "why": "Both readings of 4.5 survive. Repeating a measured value does not make it invalid.",
+    "prediction": {
+      "question": "How many readings should remain after the numerical check, keeping repeated numbers?",
+      "expected": 3
+    }
   },
   "python-optional-values": {
-    "name": "A negative explicit boundary",
-    "prompt": "Apply the default only to the missing setting, preserve the explicit negative boundary and keep the disabled record off.",
+    "name": "An Exact Match Below Zero",
+    "prompt": "East uses the shared default of 6 degrees Celsius, west supplies its own limit of -2, and lab disables its alert. West also reads -2 degrees Celsius.",
     "data": {
       "records": [
         {
+          "house": "east",
           "temperature_c": 5
         },
         {
+          "house": "west",
           "temperature_c": -2,
           "limit": -2
         },
         {
+          "house": "lab",
           "temperature_c": 100,
           "limit": null
         }
       ],
       "default_limit": 6
     },
-    "expected": {
-      "limits": [
-        6,
-        -2,
-        null
-      ],
-      "alerts": [
-        0,
-        1,
-        0
-      ]
-    },
-    "why": "Equality still counts for an active numerical limit, whatever its sign."
+    "expected": [
+      "below limit",
+      "alert",
+      "disabled"
+    ],
+    "why": "West reaches its explicit negative limit exactly. Lab stays disabled regardless of its temperature.",
+    "prediction": {
+      "question": "Should west trigger an alert when its reading and its explicit limit are both -2 degrees Celsius? Answer true or false.",
+      "expected": true
+    }
   },
   "python-dataclasses": {
-    "name": "The last report receives a note",
-    "prompt": "Build three independent reports and tag only the last one. Predict the complete record list.",
+    "name": "The Middle Report Receives the Note",
+    "prompt": "There are now east, west and roof reports. The recalibrated note belongs to west only; east and roof have no notes.",
     "data": {
       "houses": [
-        "a",
-        "b",
-        "c"
+        "east",
+        "west",
+        "roof"
       ],
-      "readings": [
-        0,
-        10,
-        -5
-      ],
-      "record_index": 2,
-      "note": "review",
-      "shared_empty": []
+      "target_house": "west",
+      "note": "recalibrated"
     },
     "expected": [
       {
-        "house": "a",
-        "temperature_c": 0,
+        "house": "east",
         "tags": []
       },
       {
-        "house": "b",
-        "temperature_c": 10,
-        "tags": []
-      },
-      {
-        "house": "c",
-        "temperature_c": -5,
+        "house": "west",
         "tags": [
-          "review"
+          "recalibrated"
         ]
+      },
+      {
+        "house": "roof",
+        "tags": []
       }
     ],
-    "why": "The selected owner changes, while all unrelated default lists remain empty."
+    "why": "The note follows the named target rather than always changing the first report. Separate lists keep both neighboring reports untouched.",
+    "prediction": {
+      "question": "Should adding the note to west also add it to east? Answer true or false.",
+      "expected": false
+    }
   },
   "python-composition": {
-    "name": "A calibration reverses the raw ordering",
-    "prompt": "The supplied calibration has a negative scale. Predict the named alerts and count without changing the comparison rule.",
+    "name": "The Correction Reverses the Reading Order",
+    "prompt": "A different thermometer supplies [-3, 4], with a multiplier of -2 and an offset of 10. The alert limit is still expressed in corrected Celsius, at 10 degrees.",
     "data": {
-      "houses": [
-        "cold",
-        "lab"
-      ],
       "readings": [
         -3,
         4
       ],
-      "policy": {
-        "scale": -2,
-        "offset": 10
-      },
+      "scale": -2,
+      "offset": 10,
       "limit": 10
     },
-    "expected": {
-      "alerts": [
-        {
-          "house": "cold",
-          "temperature_c": 16
-        }
-      ],
-      "count": 1
-    },
-    "why": "Selection must use calibrated values; the larger raw reading is not necessarily the larger calibrated temperature."
+    "expected": 1,
+    "why": "The corrected readings are [16, 2]. Only the first reaches the limit. Comparing the raw readings instead would miss it.",
+    "prediction": {
+      "question": "How many corrected readings reach the alert limit of 10 degrees Celsius?",
+      "expected": 1
+    }
   },
   "python-fail-fast": {
-    "name": "Two Different Invalid Representations",
-    "prompt": "The batch now contains a boolean and a negative measurement. Return the rejected write plan and both zero-based bad positions.",
+    "name": "A Later Request Contains Two Bad Readings",
+    "prompt": "The saved list is [9, 10]. The incoming request is [7, true, 3, -4]. The saving operation still requires every incoming reading to be a positive number.",
     "data": {
-      "values": [
+      "saved": [
+        9,
+        10
+      ],
+      "incoming": [
         7,
         true,
         3,
         -4
       ]
     },
-    "expected": {
-      "status": "rejected",
-      "writes": [],
-      "badPositions": [
-        1,
-        3
-      ]
-    },
-    "why": "A plan copied from the earlier batch misses the new positions. Inspect every current item."
+    "expected": [
+      9,
+      10
+    ],
+    "why": "A valid first reading must not cause a partial save.",
+    "prediction": {
+      "question": "How many incoming readings should be added to the saved list?",
+      "expected": 0
+    }
   },
   "python-pydantic-models": {
-    "name": "A Present but Wrong Note Representation",
-    "prompt": "The next record supplies note as a number. Keep the supplied unit, but reject the request because the present note is neither text nor null.",
+    "name": "The Note Contains a Number",
+    "prompt": "The next sender supplies note:17 and copies:2. Keep the same required text-or-null note rule.",
     "data": {
       "request": {
         "title": "Evening report",
         "note": 17,
-        "unit": "celsius"
-      },
-      "required": [
-        "title",
-        "note"
-      ],
-      "noteKey": "note",
-      "defaultKey": "unit",
-      "defaultValue": "celsius"
+        "copies": 2
+      }
     },
-    "expected": {
-      "accepted": false,
-      "record": null
-    },
-    "why": "Presence alone is insufficient. The current value also needs its own declared check."
+    "expected": "note must be text or null",
+    "why": "A present key can still hold an unacceptable value.",
+    "prediction": {
+      "question": "Does note:17 satisfy the required text-or-null rule?",
+      "expected": false
+    }
   },
   "python-pydantic-constraints": {
-    "name": "A Boolean Is Not a Requested Count",
-    "prompt": "The range is now negative to positive, and count is true. Reject the request under the declared integer-count policy.",
+    "name": "A Boolean Arrives as the Count",
+    "prompt": "The interval now runs from -5 to 5, but count is true. Keep the same whole-number count rule from 1 through 20.",
     "data": {
-      "request": {
+      "bounds": {
         "lower": -5,
-        "upper": 5,
-        "count": true
+        "upper": 5
       },
-      "lowerKey": "lower",
-      "upperKey": "upper",
-      "countKey": "count",
-      "maximumCount": 20,
-      "allowed": [
-        "lower",
-        "upper",
-        "count"
-      ]
+      "count": true
     },
-    "expected": {
-      "accepted": false,
-      "record": null
-    },
-    "why": "A usable interval does not repair an unsuitable count representation."
+    "expected": "Count must be from 1 through 20",
+    "why": "A usable interval cannot compensate for a bad count.",
+    "prediction": {
+      "question": "Does count:true satisfy the requested-count rule?",
+      "expected": false
+    }
   },
   "python-exceptions": {
     "name": "The Invalid Fields Move",
-    "prompt": "A fresh import has invalid fields at different positions and a zero that is valid decimal text. Return values and original rejected positions.",
+    "prompt": "The next import is [\"later\", \"0\", \"9\", \"missing\"]. Read the current fields, keeping zero as a valid count and preserving original positions.",
     "data": {
       "fields": [
         "later",
@@ -296,263 +268,353 @@
         3
       ]
     },
-    "why": "A fixed rejected-position list or an invented zero for an invalid field will not describe this import."
+    "why": "A fixed rejected-position list or an invented zero for an invalid field will not describe this import.",
+    "prediction": {
+      "question": "How many original field positions need correction?",
+      "expected": 2
+    }
   },
   "python-mutation": {
-    "name": "A Different Nested Record",
-    "prompt": "The source now has three existing tags and nested reviewer details. Add the current new tag while preserving those details in both displayed records.",
+    "name": "Review a Report with More Existing Tags",
+    "prompt": "The east report already has [\"raw\", \"night\", \"urgent\"]. Its draft receives the new tag \"ready\". Keep the original report available for comparison.",
     "data": {
       "record": {
+        "house": "east",
         "tags": [
           "raw",
-          "north",
-          "night"
-        ],
-        "settings": {
-          "reviewers": [
-            "Ari",
-            "Bo"
-          ]
-        }
+          "night",
+          "urgent"
+        ]
       },
-      "tagKey": "tags",
       "newTag": "ready"
     },
     "expected": {
-      "original": {
-        "tags": [
-          "raw",
-          "north",
-          "night"
-        ],
-        "settings": {
-          "reviewers": [
-            "Ari",
-            "Bo"
-          ]
-        }
-      },
-      "edited": {
-        "tags": [
-          "raw",
-          "north",
-          "night",
-          "ready"
-        ],
-        "settings": {
-          "reviewers": [
-            "Ari",
-            "Bo"
-          ]
-        }
-      }
+      "original": [
+        "raw",
+        "night",
+        "urgent"
+      ],
+      "draft": [
+        "raw",
+        "night",
+        "urgent",
+        "ready"
+      ]
     },
-    "why": "The draft must derive from the current record, with its existing tags and nested settings intact."
+    "why": "The independent draft must begin with the current report, not a saved list from an earlier example.",
+    "prediction": {
+      "question": "How many tags should remain on the original report after the draft receives ready?",
+      "expected": 3
+    }
   },
   "python-context-managers": {
-    "name": "A New Resource Fails Later",
-    "prompt": "The next resource has more fields, with a later invalid value. Return the complete closed lifetime while preserving the failed-read outcome.",
+    "name": "The Failure Happens Later",
+    "prompt": "The new buffer contains 4, 7, 9 and unknown on separate lines. The read fails on its fourth line. Apply the same resource-lifetime rule.",
     "data": {
-      "name": "evening.txt",
-      "fields": [
-        "4",
-        "7",
-        "9",
-        "unknown"
-      ]
+      "contents": "4\n7\n9\nunknown\n"
     },
     "expected": {
-      "events": [
-        "open",
-        "read",
-        "close"
-      ],
-      "closed": true,
-      "values": [],
-      "error": "invalid_reading"
+      "error": "Line 4 is not a whole number",
+      "closed": true
     },
-    "why": "A successful first read does not establish that cleanup works after a later parsing failure."
+    "why": "A buffer that closes after success can still leak when a later line fails.",
+    "prediction": {
+      "question": "Should the buffer be closed after the fourth line fails?",
+      "expected": true
+    }
   },
   "python-testing": {
-    "name": "An ordered result changes",
-    "prompt": "Find the case whose returned ID order differs from its expectation.",
+    "name": "One alert is counted instead of three",
+    "prompt": "The report returns one alert for [25,26,30], although all three readings reach the 25 C limit. The below-limit test still returns the expected zero.",
     "data": {
-      "names": [
-        "stable tie",
-        "empty"
-      ],
-      "actual": [
-        [
-          "B",
-          "A"
-        ],
-        []
-      ],
-      "expected": [
-        [
-          "A",
-          "B"
-        ],
-        []
-      ]
-    },
-    "expected": [
-      "stable tie"
-    ],
-    "why": "Comparison must preserve the meaning of ordered results."
-  },
-  "python-test-doubles": {
-    "name": "A named-record source is requested twice",
-    "prompt": "Collect north, north and south in that order. Keep the repeated named north record, including its explicit disabled limit, instead of reducing it to an unnamed temperature.",
-    "data": {
-      "houses": [
-        "north",
-        "north",
-        "south"
-      ],
-      "batches": {
-        "north": [
-          {
-            "house": "north",
-            "temperature_c": 24,
-            "limit": null
-          }
-        ],
-        "south": []
-      }
-    },
-    "expected": [
-      {
-        "house": "north",
-        "temperature_c": 24,
-        "limit": null
-      },
-      {
-        "house": "north",
-        "temperature_c": 24,
-        "limit": null
-      }
-    ],
-    "why": "Repeated requests remain separate record positions. A later cache may reduce source calls while preserving those records and their optional settings."
-  },
-  "python-modules": {
-    "name": "No external helper is needed",
-    "prompt": "Two new modules both have empty import lists. Predict the dependency inventory.",
-    "data": {
-      "modules": [
+      "tests": [
         {
-          "name": "conversion",
-          "imports": []
+          "case": "Several alerts",
+          "readings_c": [
+            25,
+            26,
+            30
+          ],
+          "expected": 3,
+          "actual": 1
         },
         {
-          "name": "thresholds",
-          "imports": []
+          "case": "Below the limit",
+          "readings_c": [
+            18
+          ],
+          "expected": 0,
+          "actual": 0
         }
       ]
     },
-    "expected": [],
-    "why": "An empty dependency inventory is a valid result."
+    "expected": [
+      {
+        "case": "Several alerts",
+        "readings_c": [
+          25,
+          26,
+          30
+        ],
+        "expected": 3,
+        "actual": 1
+      }
+    ],
+    "why": "Checking whether there is any alert would pass a one-alert case but fail the promised count when several readings reach the limit.",
+    "prediction": {
+      "question": "How many test cases should your comparison mark as failed?",
+      "expected": 1
+    }
   },
-  "python-dependencies": {
-    "name": "Versions are not decimals",
-    "prompt": "Compare the required version labels with the supplied installed labels. Return the package names whose exact text differs, without treating versions as decimal numbers.",
+  "python-test-doubles": {
+    "name": "A replacement source has no alerts",
+    "prompt": "The selected recording contains north at 20 C and south at 24 C. The unused device still contains a north reading at 40 C. The shared alert limit stays at 25 C.",
     "data": {
-      "names": [
-        "adapter",
-        "writer"
-      ],
-      "actual": [
-        "1.1",
-        "3.0"
-      ],
-      "expected": [
-        "1.10",
-        "3.0"
+      "sources": {
+        "recording": [
+          {
+            "house": "north",
+            "temperature_c": 20
+          },
+          {
+            "house": "south",
+            "temperature_c": 24
+          }
+        ],
+        "device": [
+          {
+            "house": "north",
+            "temperature_c": 40
+          }
+        ]
+      },
+      "limit_c": 25,
+      "source_name": "recording"
+    },
+    "expected": [],
+    "why": "The unused device still has an alerting reading. Only the selected recording supplies this run, and neither of its readings reaches 25 C.",
+    "prediction": {
+      "question": "Should the unused device reading at 40 C appear in this result?",
+      "expected": false
+    }
+  },
+  "python-modules": {
+    "name": "A new delivery step runs too early",
+    "prompt": "The module now reads a new batch and sends a completed report during import. Its ordinary convert_report definition also remains at module scope.",
+    "data": {
+      "steps": [
+        {
+          "step": "Define convert_report",
+          "kind": "definition",
+          "when": "import"
+        },
+        {
+          "step": "Read the new batch",
+          "kind": "report run",
+          "when": "import"
+        },
+        {
+          "step": "Send the completed report",
+          "kind": "report run",
+          "when": "import"
+        }
       ]
     },
     "expected": [
-      "adapter"
+      {
+        "step": "Read the new batch",
+        "kind": "report run",
+        "when": "import"
+      },
+      {
+        "step": "Send the completed report",
+        "kind": "report run",
+        "when": "import"
+      }
     ],
-    "why": "Converting version labels to decimal numbers would erase a distinction in this exact comparison."
+    "why": "The same condition catches a newly added effect. Fixing a file read alone does not protect an import from a later send.",
+    "prediction": {
+      "question": "How many report-run steps need moving out of import and into the entry point?",
+      "expected": 2
+    }
+  },
+  "python-dependencies": {
+    "name": "Version labels are not decimal numbers",
+    "prompt": "The recorded sensor-reader version is 1.10, while the installed label is 1.1. The report-writer labels both remain 3.0. Compare the labels as text.",
+    "data": {
+      "packages": [
+        {
+          "package": "sensor-reader",
+          "reviewed": "1.10",
+          "installed": "1.1"
+        },
+        {
+          "package": "report-writer",
+          "reviewed": "3.0",
+          "installed": "3.0"
+        }
+      ]
+    },
+    "expected": [
+      {
+        "package": "sensor-reader",
+        "reviewed": "1.10",
+        "installed": "1.1"
+      }
+    ],
+    "why": "This is an exact recorded-label comparison. Converting labels to decimal numbers would hide a change the comparison is meant to expose.",
+    "prediction": {
+      "question": "Do the reviewed and installed sensor-reader labels match exactly?",
+      "expected": false
+    }
   },
   "python-configuration": {
-    "name": "A narrower deployment limit",
-    "prompt": "The raw value remains \"12\", but the range becomes 2 through 8. Predict acceptance.",
+    "name": "A smaller deployment limit",
+    "prompt": "The allowed timeout range changes to 2 through 8 seconds. Local is configured as \"4\" and production as \"12\". Both are readable whole-number text.",
     "data": {
-      "raw": "12",
+      "settings": [
+        {
+          "environment": "local",
+          "timeout_seconds": "4"
+        },
+        {
+          "environment": "production",
+          "timeout_seconds": "12"
+        }
+      ],
       "minimum": 2,
       "maximum": 8
     },
-    "expected": false,
-    "why": "The same construction must follow supplied limits rather than remembering the first range."
+    "expected": [
+      {
+        "environment": "production",
+        "timeout_seconds": "12"
+      }
+    ],
+    "why": "The same text can become invalid when the documented limits change. The construction must use the limits supplied for this run.",
+    "prediction": {
+      "question": "How many environment settings now fall outside the allowed range?",
+      "expected": 1
+    }
   },
   "python-code-checks": {
-    "name": "A later job is skipped",
-    "prompt": "The first check failed and the second never ran. Predict readiness.",
+    "name": "Later checks never ran",
+    "prompt": "Formatting fails, so lint, type checking and tests do not run. Each required check still has its own row explaining whether it failed or never ran.",
     "data": {
       "checks": [
         {
-          "name": "lint",
-          "ran": true,
-          "passed": false
+          "check": "Formatting",
+          "status": "failed",
+          "detail": "A formatting change is required"
         },
         {
-          "name": "tests",
-          "ran": false,
-          "passed": false
+          "check": "Lint",
+          "status": "not run",
+          "detail": "Stopped after the earlier failure"
+        },
+        {
+          "check": "Type checking",
+          "status": "not run",
+          "detail": "Stopped after the earlier failure"
+        },
+        {
+          "check": "Tests",
+          "status": "not run",
+          "detail": "Stopped after the earlier failure"
         }
       ]
     },
-    "expected": false,
-    "why": "A skipped job is missing evidence, while an earlier failure remains a failure."
+    "expected": [
+      {
+        "check": "Formatting",
+        "status": "failed",
+        "detail": "A formatting change is required"
+      },
+      {
+        "check": "Lint",
+        "status": "not run",
+        "detail": "Stopped after the earlier failure"
+      },
+      {
+        "check": "Type checking",
+        "status": "not run",
+        "detail": "Stopped after the earlier failure"
+      },
+      {
+        "check": "Tests",
+        "status": "not run",
+        "detail": "Stopped after the earlier failure"
+      }
+    ],
+    "why": "The first row describes an actual failure. Later rows describe work that has not run, so none provides a passing result.",
+    "prediction": {
+      "question": "How many required checks have status not run?",
+      "expected": 3
+    }
   },
   "python-logging": {
-    "name": "More detail without token disclosure",
-    "prompt": "Use the INFO threshold to select the recorded events, then return only each selected event’s batch_id in its original order, excluding the attached token fields.",
+    "name": "Routine progress without private fields",
+    "prompt": "The minimum log level changes to INFO. Displayed fields are restricted to report_id and message, while each input event still has its private-token placeholder.",
     "data": {
       "events": [
         {
           "level": "DEBUG",
-          "batch_id": "X",
-          "token": "placeholder"
+          "report_id": "R20",
+          "message": "Source selected",
+          "private_token": "placeholder only"
         },
         {
           "level": "INFO",
-          "batch_id": "Y",
-          "token": "placeholder"
+          "report_id": "R20",
+          "message": "Report completed",
+          "private_token": "placeholder only"
         }
       ],
-      "minimum": "INFO",
-      "fields": [
-        "batch_id"
+      "minimum_level": "INFO",
+      "public_fields": [
+        "report_id",
+        "message"
       ]
     },
     "expected": [
       {
-        "batch_id": "Y"
+        "report_id": "R20",
+        "message": "Report completed"
       }
     ],
-    "why": "A changed event threshold still preserves the output field policy."
+    "why": "Changing the severity threshold does not change the field policy. The debug event stays out and no token field is copied.",
+    "prediction": {
+      "question": "Should private_token appear in the displayed log?",
+      "expected": false
+    }
   },
   "python-profiling": {
-    "name": "Fewer calls dominate",
-    "prompt": "The remote operation runs twice at 40 ms. The local operation runs 1000 times at 0.01 ms. Predict which dominates.",
+    "name": "Few expensive calls outweigh many quick ones",
+    "prompt": "Formatting runs 1000 times at 0.01 ms per call. Reading runs twice at 40 ms per call. Compare the total self time before choosing the larger-cost operation.",
     "data": {
-      "names": [
-        "local",
-        "remote"
-      ],
-      "calls": [
-        1000,
-        2
-      ],
-      "per_call": [
-        0.01,
-        40
+      "profile": [
+        {
+          "operation": "Format report",
+          "calls": 1000,
+          "self_ms_per_call": 0.01
+        },
+        {
+          "operation": "Read source",
+          "calls": 2,
+          "self_ms_per_call": 40
+        }
       ]
     },
-    "expected": "remote",
-    "why": "Choosing by call count alone would identify the wrong operation."
+    "expected": {
+      "operation": "Read source",
+      "calls": 2,
+      "self_ms_per_call": 40
+    },
+    "why": "The totals are 10 ms and 80 ms. Choosing by call count or by the earlier operation order would select the wrong row.",
+    "prediction": {
+      "question": "What is the larger total self time, in milliseconds?",
+      "expected": 80
+    }
   },
   "software-feature-contracts": {
     "name": "Three model features arrive out of order",

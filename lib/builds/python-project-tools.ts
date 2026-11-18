@@ -47,9 +47,18 @@ export const pythonProjectTools: Record<string, Tool> = {
     why: 'Retrieve one value for each key from a named lookup record. The lookup is supplied as an input, rather than hidden inside the calculation.',
     run: ([keys, values]) => { const lookup = record(values); return entries(keys).map(key => { if (typeof key !== 'string' || !Object.hasOwn(lookup, key)) throw Error('Every requested key needs a supplied lookup entry.'); return lookup[key]; }); },
   },
+  pyProjectReadKey: {
+    title: 'Look up one name', inputs: ['Name', 'Lookup record'],
+    why: 'Retrieve the value stored under the supplied name. For example, the name recording retrieves its list of saved readings.',
+    run: ([key, values]) => {
+      const lookup = record(values);
+      if (typeof key !== 'string' || !Object.hasOwn(lookup, key)) throw Error('The supplied name needs a lookup entry.');
+      return lookup[key];
+    },
+  },
   pyProjectFlatten: {
-    title: 'Combine dependency lists', inputs: ['Lists'],
-    why: 'Join lists in their original order without changing or interpreting their entries.',
+    title: 'Combine lists', inputs: ['Lists'],
+    why: 'Join the supplied lists in order. Keep every entry, including repeated readings.',
     run: ([value]) => entries(value).flatMap(entries),
   },
   pyProjectUnique: {
@@ -58,14 +67,48 @@ export const pythonProjectTools: Record<string, Tool> = {
     run: ([value]) => { const names = entries(value); if (!names.every(item => typeof item === 'string')) throw Error('Connect text names.'); return [...new Set(names)]; },
   },
   pyProjectParseInteger: {
-    title: 'Parse an integer setting', inputs: ['Setting text'],
-    why: 'Accept a whole-number value or decimal integer text. Return null for anything else so a later range check can reject it. This is a small teaching parser, not Python or Pydantic.',
-    run: ([value]) => { if (typeof value === 'number') return Number.isSafeInteger(value) ? value : null; if (typeof value !== 'string' || !/^[+-]?\d+$/.test(value)) return null; const result = Number(value); return Number.isSafeInteger(result) ? result : null; },
+    title: 'Read whole-number settings', inputs: ['Setting text or list'],
+    why: 'Turn whole-number text such as "12" into a number. Use null when a value cannot be read. With a list, check each entry in order. This small parser is separate from Python and Pydantic.',
+    run: ([value]) => {
+      const parse = (item: Data) => {
+        if (typeof item === 'number') return Number.isSafeInteger(item) ? item : null;
+        if (typeof item !== 'string' || !/^[+-]?\d+$/.test(item)) return null;
+        const result = Number(item);
+        return Number.isSafeInteger(result) ? result : null;
+      };
+      return Array.isArray(value) ? value.map(parse) : parse(value);
+    },
   },
   pyProjectInRange: {
-    title: 'Require an inclusive range', inputs: ['Parsed value', 'Minimum', 'Maximum'],
-    why: 'Return true only for a numerical value inside both limits. A missing or unparsed value returns false.',
-    run: ([value, low, high]) => { if (typeof low !== 'number' || typeof high !== 'number' || low > high) throw Error('Supply an ordered numerical range.'); return typeof value === 'number' && Number.isFinite(value) && value >= low && value <= high; },
+    title: 'Check the allowed range', inputs: ['Numbers', 'Minimum', 'Maximum'],
+    why: 'Mark numbers inside the allowed range, including both ends. Check list entries in order. An unreadable value, shown as null, fails this check.',
+    run: ([value, low, high]) => {
+      if (typeof low !== 'number' || typeof high !== 'number' || !Number.isFinite(low) || !Number.isFinite(high) || low > high) throw Error('Supply a finite, ordered numerical range.');
+      const inside = (item: Data) => typeof item === 'number' && Number.isFinite(item) && item >= low && item <= high;
+      return Array.isArray(value) ? value.map(inside) : inside(value);
+    },
+  },
+  pyProjectNot: {
+    title: 'Reverse the keep decisions', inputs: ['Decisions'],
+    why: 'Change true to false and false to true at each position. Use this after an acceptance check to find the rejected entries.',
+    run: ([value]) => flags(value).map(item => !item),
+  },
+  pyProjectTextMatch: {
+    title: 'Match a text value', inputs: ['Text values'],
+    settings: [{ key: 'value', label: 'Text to match', initial: 'passed' }],
+    why: 'Mark each entry whose text exactly matches the configured value. Other entries receive false, keeping the same order.',
+    run: ([value], settings) => entries(value).map(item => item === String(settings.value)),
+  },
+  pyProjectAtLeast: {
+    title: 'Check the alert limit', inputs: ['Readings', 'Limit'],
+    why: 'Mark each reading at or above the supplied limit. Keep the decisions in reading order so they can select the corresponding records.',
+    run: ([value, limit]) => {
+      if (typeof limit !== 'number' || !Number.isFinite(limit)) throw Error('Supply a finite numerical limit.');
+      return entries(value).map(item => {
+        if (typeof item !== 'number' || !Number.isFinite(item)) throw Error('Every reading needs a finite number.');
+        return item >= limit;
+      });
+    },
   },
   pyProjectSeverityMask: {
     title: 'Choose event severity', inputs: ['Events', 'Minimum level'],

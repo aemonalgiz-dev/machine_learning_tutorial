@@ -1,262 +1,320 @@
 {
   "python-readable-code": {
-    "premise": "The display returned plausible numbers without telling Botie their units.",
-    "order": "investigate-first",
+    "premise": "The conversion already works. Botie now needs a report that identifies the greenhouse and the temperature unit.",
+    "order": "build-first",
     "construction": {
-      "title": "Keep each converted value attached to its greenhouse",
-      "start": "Read named columns before calculating. Keep the house branch unchanged while temperature_c passes through scale and offset, then name the result temperature_f.",
-      "outcome": "Another program receives both the greenhouse identity and the output convention.",
+      "title": "Attach the Greenhouse Names",
+      "start": "Your temperature converter produces [32, 68] for the first report. Read greenhouse names supplies [north, south]. Attach names to Fahrenheit readings joins those two lists into report rows; it does not change the temperatures.",
+      "outcome": "A reader can identify the greenhouse and unit without guessing what each number means.",
       "hints": [
-        "Give the two column readers different field names.",
-        "Scale and offset act only on the temperature branch. Keep house names attached in the final record builder."
+        "Your tested temperature converter can stay in place. The new branch reads greenhouse names from the same records.",
+        "Attach names to Fahrenheit readings needs the names on its first input and the converted temperatures on its second."
       ]
     },
     "investigation": {
-      "title": "The records arrive in a different order",
-      "question": "The roof record arrives first. Which house should the first converted result name?",
-      "outcome": "Try the changed record order and inspect the named result.",
+      "title": "The Greenhouses Arrive in a Different Order",
+      "question": "The new report starts with roof at 30 degrees Celsius, followed by west at 5. A machine still using yesterday's names would label these readings north and south. Which names should the converted rows keep?",
+      "outcome": "The rows should identify roof at 86 degrees Fahrenheit and west at 41. Check the names as well as the numbers.",
       "caseIndex": 1,
       "kind": "diagnose",
       "options": [
         {
-          "label": "roof",
-          "feedback": "The name and reading travel together through the same row position.",
+          "label": "roof, then west, taken from the current report",
+          "feedback": "The names describe the current measurements, so they must come from the same report as those measurements.",
           "correct": true
         },
         {
-          "label": "north, because it appeared first yesterday",
-          "feedback": "That would attach a current measurement to an earlier report position."
+          "label": "north, then south, kept as constants from the first example",
+          "feedback": "Those labels belonged to different measurements. Correct arithmetic would still produce a misleading report."
         }
       ]
     },
     "connections": [
       {
         "lessonId": "numpy-functions",
-        "skill": "Preserve input and output meaning",
-        "why": "The reusable conversion now has a record interface whose names make its unit agreement visible."
+        "skill": "Reuse the Celsius-to-Fahrenheit conversion",
+        "why": "Keep the same multiplication and addition. The new work keeps the identity and unit of each result visible."
       }
     ],
     "reflection": {
-      "prompt": "Which facts belong in a name, and which behavior still needs documentation?",
-      "carryForward": "Keep units and record identity visible when the next lesson separates calculations from reporting."
+      "prompt": "If the report returned a field called value instead of temperature_f, what would another reader have to guess?",
+      "carryForward": "Keep names and units explicit as the report gains more calculations."
+    },
+    "preparation": {
+      "path": [
+        1
+      ],
+      "title": "Convert the Temperatures",
+      "challenge": "Read temperatures in Celsius takes temperature_c from each row. For [0, 20], multiply by 1.8 and then add 32 to obtain [32, 68]. Use Multiply and Add, as in the earlier conversion workshop.",
+      "why": "This first stage calculates temperatures only. The full report will attach each result to its greenhouse.",
+      "hints": [
+        "A temperature of 0 degrees Celsius should become 32 degrees Fahrenheit. That checks where the addition belongs.",
+        "Connect Read temperatures in Celsius to Multiply with the scale, then connect that result to Add with the offset."
+      ]
     }
   },
   "python-function-design": {
-    "premise": "Botie cannot reuse an alert count without triggering the report writer.",
+    "premise": "The daily report and web page need the same alert numbers. Botie should be able to calculate them without also printing a message.",
     "order": "build-first",
     "construction": {
-      "title": "Build the calculation both callers need",
-      "start": "Use one selection of alerting readings for both branches. Return the count and total excess under separate names, leaving message formatting outside the construction.",
-      "outcome": "The same summary can serve a web page or a text report.",
+      "title": "Add the Total Above the Limit",
+      "start": "The selected readings are [25, 30]. Branch that same list into Count items and Subtract. Subtract the limit from each selected reading, then Add a list to obtain the total excess. Collect the alert summary keeps the two answers under count and excess_c.",
+      "outcome": "The calculation returns two numbers that either display can use.",
       "hints": [
-        "Keep the count and excess branches attached to the same selected list.",
-        "Subtract the limit before totaling excess. A reading exactly at the limit still belongs in the selected list."
+        "Reuse the selection from the first stage for both results.",
+        "For [25, 30] at a limit of 25, Subtract should produce [0, 5]. Add that list before collecting the summary."
       ]
     },
     "investigation": {
-      "title": "The limit drops to 20",
-      "question": "Readings are [20,25,30] and the inclusive limit is now 20. Predict the complete record with count and excess_c.",
-      "outcome": "Equality contributes to the count even when it contributes no excess.",
+      "title": "The Alert Limit Drops to 20",
+      "question": "The readings stay [20, 25, 30], but the limit drops from 25 to 20. What should the same summary now report?",
+      "outcome": "The selected list must now contain all three readings. Its count and total excess must both follow that change.",
       "caseIndex": 1,
-      "kind": "predict",
-      "predictionLabel": "Your prediction before running"
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "3 alerts, with 15 degrees Celsius of total excess",
+          "feedback": "All three readings reach 20. Their excesses are 0, 5 and 10, which total 15.",
+          "correct": true
+        },
+        {
+          "label": "2 alerts, with 5 degrees Celsius of total excess",
+          "feedback": "That is the old result at a limit of 25. A fixed selection or a copied answer would miss the changed requirement."
+        }
+      ]
     },
     "connections": [
       {
         "lessonId": "python-readable-code",
-        "skill": "Keep units attached to returned data",
-        "why": "The summary field excess_c identifies a temperature difference in Celsius."
+        "skill": "Name the returned quantities",
+        "why": "count identifies a number of observations; excess_c identifies a temperature difference in Celsius."
       }
     ],
     "reflection": {
-      "prompt": "Which part of a report can change without changing the alert calculation?",
-      "carryForward": "Make the rule reusable before deciding how another caller will present it."
+      "prompt": "Why can the text report change its wording without changing this calculation?",
+      "carryForward": "Keep the calculation separate from the code that displays or sends its result."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Count the Alerting Readings",
+      "challenge": "Keep readings at or above the limit returns [25, 30] from [20, 25, 30] when the limit is 25. Connect its output to Count items. A reading exactly at the limit still counts as an alert.",
+      "why": "This selected list will also be used to calculate how far the alerting temperatures exceed the limit.",
+      "hints": [
+        "Use the supplied alert limit rather than typing 25 into the filter.",
+        "Count the kept readings, not every reading in the original report."
+      ]
     }
   },
   "python-dry": {
-    "premise": "The morning report and evening report disagree after a policy update.",
-    "order": "investigate-first",
+    "premise": "Two reports follow one alert policy. Keeping a separately typed limit on each branch makes it easy to update one and forget the other.",
+    "order": "build-first",
     "construction": {
-      "title": "Connect both reports to the same safety decision",
-      "start": "Build a comparison and count for each report. Route the one supplied limit into both comparisons instead of placing a separate fixed number on each branch.",
-      "outcome": "Changing one authoritative limit updates both counts.",
+      "title": "Connect the Evening Report to the Same Limit",
+      "start": "The morning branch already filters and counts readings. Make the same calculation for evening readings, using the same limit source. Collect morning and evening counts keeps the two answers separate.",
+      "outcome": "There is one place to change the shared alert limit.",
       "hints": [
-        "Use the supplied limit on both branches.",
-        "The comparison produces a 0-or-1 list. Add those entries to count the alerts for that report."
+        "Keep separate morning and evening reading sources. The limit source is the part they share.",
+        "Send the morning count to the first input of Collect morning and evening counts, and the evening count to its second input."
       ]
     },
     "investigation": {
-      "title": "Only one branch receives the updated limit",
-      "question": "Both reports are governed by the same policy. Is it safe to keep an independently configured old limit on the evening branch?",
-      "outcome": "Run the changed-limit case after reconnecting both branches.",
+      "title": "The Shared Limit Rises to 27",
+      "question": "At a limit of 24, both reports returned two alerts. The new limit is 27, so each should now return one. A branch that still uses a typed constant of 24 will keep returning two. What needs to change?",
+      "outcome": "Run the updated construction against the old and new limits. Both report counts must follow the supplied policy.",
       "caseIndex": 1,
       "kind": "diagnose",
       "options": [
         {
-          "label": "No; both callers must receive the current shared decision",
-          "feedback": "The two values are copies of one policy and can drift.",
+          "label": "Connect the current shared limit to both comparisons",
+          "feedback": "The reports follow the same policy. One limit source can supply both comparisons whenever that policy changes.",
           "correct": true
         },
         {
-          "label": "Yes; similar code is always independent",
-          "feedback": "These particular branches were explicitly required to follow the same policy."
+          "label": "Update the morning comparison and leave the evening constant at 24",
+          "feedback": "The evening report would still be following yesterday's policy. Its different observations do not give it a different alert limit."
         }
       ]
     },
     "connections": [
       {
         "lessonId": "python-function-design",
-        "skill": "Separate the calculation from its callers",
-        "why": "The callers have different reports but share the same alert responsibility."
+        "skill": "Reuse the alert-count calculation",
+        "why": "Each report needs the same filter followed by Count items. Their observations differ; their rule does not."
       }
     ],
     "reflection": {
-      "prompt": "Which other comparisons should remain separate because they have different owners?",
-      "carryForward": "Share decisions that must change together and keep unrelated policies independent."
+      "prompt": "If the morning report later gets a genuinely different policy, why would sharing that limit become the wrong design?",
+      "carryForward": "Share a rule because it must stay consistent, rather than because two current numbers happen to be equal."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Count the Morning Alerts",
+      "challenge": "Use Keep readings at or above the limit followed by Count items, as in the previous workshop. With morning readings [18, 24, 27] and a limit of 24, the result is 2.",
+      "why": "The evening report will reuse this calculation with different readings but the same policy input.",
+      "hints": [
+        "Keep the alert limit as an input so it can change.",
+        "The filter returns readings. Count items returns how many survived."
+      ]
     }
   },
   "python-type-hints": {
-    "premise": "The numerical function received text despite its documented expectation.",
-    "order": "investigate-first",
+    "premise": "The Celsius-to-Fahrenheit converter works on numbers. Botie needs to decide what enters it when a file supplies other kinds of values.",
+    "order": "build-first",
     "construction": {
-      "title": "Inspect the value before admitting its record",
-      "start": "Read the temperature field, produce numerical-validity decisions, and use those decisions to separate whole records into accepted and rejected lists.",
-      "outcome": "The numerical boundary has evidence about the records it accepts.",
+      "title": "Check Readings before Converting Them",
+      "start": "Keep numerical readings passes actual numbers through unchanged and leaves other values out. Put it before the familiar Multiply and Add conversion. In the first example all readings are numerical, so the check should leave [0, 20] intact.",
+      "outcome": "Only the accepted numbers reach the conversion, including a measured zero.",
       "hints": [
-        "The validity decisions belong to temperature_c, but the final lists must contain complete records.",
-        "Reverse the numerical decisions for the rejected branch. Do not discard a measured zero."
+        "The filter should run on incoming Celsius values before either conversion operation.",
+        "Zero is a numerical reading. A test based only on whether a value is truthy would discard it."
       ]
     },
     "investigation": {
-      "title": "A boolean arrives in the temperature field",
-      "question": "The measurement policy excludes booleans. Does an annotation alone reject true?",
-      "outcome": "Keep the boolean with the rejected records and verify that zero remains accepted.",
+      "title": "Text and Missing Values Arrive",
+      "question": "The next file contains [0, \"20\", true, null, -10]. The function still has the same type hint. Which behavior follows the stated numerical-only rule?",
+      "outcome": "If the old converter fails on the mixed file, inspect its first arithmetic input. The value check must happen before multiplication.",
       "caseIndex": 1,
       "kind": "diagnose",
       "options": [
         {
-          "label": "No; an explicit runtime check must apply that policy",
-          "feedback": "A type hint does not install validation code.",
+          "label": "Keep 0 and -10, then return [32, 14] in Fahrenheit",
+          "feedback": "The running check accepts the two actual numbers. It leaves out the text, boolean and missing value.",
           "correct": true
         },
         {
-          "label": "Yes; float in a signature automatically converts or rejects every value",
-          "feedback": "Python does not enforce that annotation at runtime."
+          "label": "The type hint alone makes every incoming value safe to convert",
+          "feedback": "Python does not enforce this type hint when the function runs. The unchanged converter would still receive the unusable values."
         }
       ]
     },
     "connections": [
       {
-        "lessonId": "python-function-design",
-        "skill": "Give a boundary a stated input agreement",
-        "why": "Type hints describe that agreement while validation checks actual incoming values."
+        "lessonId": "python-readable-code",
+        "skill": "Reuse the unit conversion",
+        "why": "The multiplication and addition stay the same. A new check protects their input rather than rewriting the conversion."
       }
     ],
     "reflection": {
-      "prompt": "What does the hint communicate that the runtime check cannot replace, and what does the runtime check establish?",
-      "carryForward": "Use declarations and value checks for their separate jobs."
+      "prompt": "What information does a type hint give another programmer, and what extra work does the running value check perform?",
+      "carryForward": "State the expected values in the interface and choose an explicit response when incoming data does not match."
     }
   },
   "python-optional-values": {
-    "premise": "Botie’s defaulting helper turned a disabled alert back on.",
-    "order": "investigate-first",
+    "premise": "Botie needs a default for missing settings without erasing settings that a greenhouse deliberately supplied.",
+    "order": "build-first",
     "construction": {
-      "title": "Keep absent, disabled and numerical settings distinct",
-      "start": "Resolve the optional limit from each record before comparing it with that record’s temperature. The shared default belongs only to records without the key.",
-      "outcome": "Changing the default leaves explicit zero and null settings unchanged.",
+      "title": "Check Each Greenhouse with Its Own Limit",
+      "start": "The resolved limits are [25, 28] for north and south. Read temperatures in Celsius supplies their matching temperatures, [21, 30]. Check each greenhouse's alert compares those lists in order and returns below limit for north and alert for south.",
+      "outcome": "Each result describes the greenhouse in the same input position.",
       "hints": [
-        "Use Default only an absent field, not a truthiness rule.",
-        "The resolved limit list feeds both the named result and the per-record comparison."
+        "Keep the resolved limits from the first stage and read the Celsius temperatures from the same records.",
+        "Connect both lists to Check each greenhouse's alert. The first input is temperatures; the second is their matching limits."
       ]
     },
     "investigation": {
-      "title": "The shared default changes",
-      "question": "The default is now 20, but one record explicitly supplies limit:0. Which limit should that record use?",
-      "outcome": "Check that the missing-key record changes while the explicit settings remain intact.",
+      "title": "Zero and a Disabled Alert Arrive",
+      "question": "The shared default is now 20. North still has no limit field. South explicitly sets zero, and a new roof record disables its alert with null, the workshop's display of Python's None. Which limits should the comparison use?",
+      "outcome": "North and south should report alert. Roof should still report disabled, even though its temperature is high.",
       "caseIndex": 1,
       "kind": "diagnose",
       "options": [
         {
-          "label": "0, because it was explicitly supplied",
-          "feedback": "The default applies only when the key is absent.",
+          "label": "North uses 20; south keeps 0; roof stays disabled",
+          "feedback": "Only north asked to use the default. Its alert changes because 21 now reaches its limit.",
           "correct": true
         },
         {
-          "label": "20, because zero is false-like",
-          "feedback": "Truthiness would erase a valid numerical setting."
+          "label": "Replace the supplied zero and null with 20 along with the missing limit",
+          "feedback": "That would erase south's explicit limit and turn roof's alert back on. Missing information and supplied values have different meanings."
         }
       ]
     },
     "connections": [
       {
         "lessonId": "python-type-hints",
-        "skill": "Separate declared possibilities from runtime policy",
-        "why": "A nullable value needs an explicit meaning before a calculation can use it."
+        "skill": "Choose what each kind of incoming value means",
+        "why": "The earlier check left unusable measurements out. Here null is an intentional setting with a meaning the program must preserve."
       }
     ],
     "reflection": {
-      "prompt": "When would an explicit None need to differ from omitting a function argument?",
-      "carryForward": "Preserve caller intent before choosing a fallback."
+      "prompt": "Why would replacing null with the default change a request to disable an alert?",
+      "carryForward": "Use a fallback only for the condition it is meant to handle."
+    },
+    "preparation": {
+      "path": [
+        1
+      ],
+      "title": "Fill Only the Missing Limits",
+      "challenge": "Fill only missing alert limits reads each limit field. North has no field, so use the supplied default of 25. South supplies 28, so keep it. Return [25, 28], in greenhouse order.",
+      "why": "These are the limits the comparison will actually use. Resolve them before deciding whether a temperature triggers an alert.",
+      "hints": [
+        "Look for whether the field is present, rather than whether its value is truthy.",
+        "The supplied default belongs only to rows without a limit field."
+      ]
     }
   },
   "python-dataclasses": {
-    "premise": "Botie tagged one greenhouse but both reports displayed the note.",
-    "order": "investigate-first",
+    "premise": "Botie is adding notes to greenhouse reports. An empty notes list can be a new object for each report or the same object reused by several reports.",
+    "order": "build-first",
     "construction": {
-      "title": "Give each report the container it owns",
-      "start": "Pair house names with readings, count the reports, and create one independent list per report before attaching the lists. Then apply the note to the selected index.",
-      "outcome": "A tag changes only its intended report.",
+      "title": "Create Reports and Add One Note",
+      "start": "Create the notes lists has a choice between reusing one list and creating a new list for each report. Attach notes to their reports pairs those lists with greenhouse names. Add a note to one greenhouse then updates the named report. With only north in the first example, try either list choice and inspect the result.",
+      "outcome": "The note appears on the requested greenhouse report.",
       "hints": [
-        "Count the houses before creating the default containers.",
-        "Create a separate list per item differs from Reuse one list at every position. The later note makes that difference visible."
+        "Connect greenhouse names to both Create the notes lists and Attach notes to their reports.",
+        "After attaching the lists, send the reports, target greenhouse name and note into Add a note to one greenhouse."
       ]
     },
     "investigation": {
-      "title": "The middle report receives a different note",
-      "question": "Three reports begin with empty tags. The note targets index 1. Which reports should change?",
-      "outcome": "Compare separate lists with the shared-list alternative and inspect the actual returned records.",
+      "title": "A Second Greenhouse Exposes the Shared List",
+      "question": "South now has its own report, and the note still belongs only to north. If Create the notes lists reuses one list, both reports show checked. Which change keeps the note on north alone?",
+      "outcome": "Change the notes-list choice, then rerun both the one-report and two-report examples. In Python, default_factory is how a dataclass requests a newly created list for each instance.",
       "caseIndex": 1,
       "kind": "diagnose",
       "options": [
         {
-          "label": "Only the report at index 1",
-          "feedback": "Separate containers keep the update local to its intended owner.",
+          "label": "Create a new notes list for each report",
+          "feedback": "The lists can start with equal empty contents while remaining separate objects. A note added to one then leaves the other unchanged.",
           "correct": true
         },
         {
-          "label": "Every report, because the defaults looked alike",
-          "feedback": "Equal initial contents do not require shared identity."
+          "label": "Keep reusing one list and change the order of the greenhouse names",
+          "feedback": "Changing the names' order does not change which lists are shared. The note would still appear through both references."
         }
       ]
     },
     "connections": [
       {
         "lessonId": "python-optional-values",
-        "skill": "Give an omitted value a deliberate default",
-        "why": "A mutable default also needs a decision about which object owns it."
+        "skill": "Choose the meaning of a default",
+        "why": "Here the issue is which report owns a default list, rather than which numerical value a missing setting should use."
       }
     ],
     "reflection": {
-      "prompt": "Why does an empty-looking field still need an ownership decision?",
-      "carryForward": "Keep record structure, initial validation and mutation policy explicit."
+      "prompt": "Why did the one-report example fail to expose the shared-list mistake?",
+      "carryForward": "Test changes to one object while another object exists. Equal initial values do not establish independent ownership."
     }
   },
   "python-composition": {
-    "premise": "Replacing the thermometer forced Botie to edit code that only needed calibrated readings.",
+    "premise": "The alert counter already works on Celsius readings. Botie needs to connect a replacement thermometer without making the counter responsible for that device's correction.",
     "order": "build-first",
     "construction": {
-      "title": "Keep the calibration boundary separate from alert selection",
-      "start": "Extract the calibration settings, apply them before the comparison, and preserve house identity while selecting alerts. Count the selected records instead of counting raw readings.",
-      "outcome": "The changed policy can alter the result without changing the alert or reporting responsibilities.",
+      "title": "Connect the Corrected Readings to the Counter",
+      "start": "Keep the corrected-readings component from the first stage. Connect it to Keep readings at or above the limit, then Count items, as in the alert-summary workshop. The alert counter should receive corrected Celsius readings rather than raw thermometer values.",
+      "outcome": "The same filter and count can work with readings from either thermometer.",
       "hints": [
-        "Read the policy fields by name and calibrate before comparing.",
-        "The names, calibrated values and selection decisions must stay in the same order. Count the selected records on a separate branch."
+        "Reuse the earlier filter followed by Count items. Connect the correction output where the raw readings used to enter.",
+        "The supplied alert limit feeds the filter directly. It is already in corrected Celsius and must not receive the thermometer correction."
       ]
     },
     "investigation": {
-      "title": "The new calibration scales and shifts the readings",
-      "question": "Raw readings [10,14,18] use scale 2 and offset -5, with inclusive limit 15. Predict the complete alerts-and-count record, preserving north, south and roof order.",
-      "outcome": "The comparison receives calibrated Celsius values, so every supplied record now reaches the limit.",
+      "title": "The Replacement Thermometer Needs a Correction",
+      "question": "The raw readings are [10, 14, 18]. The replacement uses a multiplier of 2 and an offset of -5, so first calculate twice each reading minus five. How many corrected readings reach the unchanged limit of 15 degrees Celsius?",
+      "outcome": "The corrected readings are [15, 23, 31], so the count is 3. If an old direct wire bypasses the correction, it still reports only one alert. Repair that connection while keeping the filter and count.",
       "caseIndex": 1,
       "kind": "predict",
       "predictionLabel": "Your prediction before running"
@@ -264,707 +322,709 @@
     "connections": [
       {
         "lessonId": "python-function-design",
-        "skill": "Separate calculations from their callers",
-        "why": "The policy can change without moving the comparison into a device implementation."
+        "skill": "Reuse the filter and alert count",
+        "why": "This calculation still expects Celsius readings. A correction component supplies those values without changing what the counter does."
       },
       {
-        "lessonId": "python-dataclasses",
-        "skill": "Keep named records and their ownership clear",
-        "why": "A selected value must retain the greenhouse identity it describes."
+        "lessonId": "python-readable-code",
+        "skill": "Keep the units at a connection clear",
+        "why": "The correction output and alert-limit input both describe Celsius. Raw thermometer readings need not use that same scale."
       }
     ],
     "reflection": {
-      "prompt": "Which component should change when a source uses a different representation?",
-      "carryForward": "Give each boundary a small agreement that another implementation can satisfy."
-    }
-  },
-  "python-fail-fast": {
-    "premise": "The saved batch must remain unchanged when any incoming measurement violates its contract.",
-    "order": "investigate-first",
-    "construction": {
-      "title": "Place the Decision Before the Write",
-      "start": "Try the valid batch, then build the checks before connecting a planned write.",
-      "outcome": "A late invalid item returns a rejected status and no planned writes.",
-      "hints": [
-        "The numeric and positive checks each return one flag per measurement.",
-        "Require both checks per item, then send that complete list and the measurements to the planned write."
-      ]
-    },
-    "investigation": {
-      "title": "The Last Item Fails",
-      "question": "A construction saves the first values before checking the final item. What needs to change?",
-      "outcome": "Inspect the complete flag list at the write gate, including the final position.",
-      "caseIndex": 1,
-      "kind": "diagnose",
-      "options": [
-        {
-          "label": "Validate the complete batch before the write",
-          "feedback": "The all-or-nothing promise concerns the whole incoming list. Earlier valid items cannot be saved yet.",
-          "correct": true
-        },
-        {
-          "label": "Catch the later error and keep the earlier writes",
-          "feedback": "That would leave a partial update despite the stated contract."
-        }
-      ]
-    },
-    "connections": [
-      {
-        "lessonId": "python-function-design",
-        "skill": "Separate inputs from effects",
-        "why": "The validation decision belongs before the operation that changes state."
-      }
-    ],
-    "reflection": {
-      "prompt": "What state must a test inspect after a rejected batch?",
-      "carryForward": "Keep failure checks beside the effect they must prevent."
-    },
-    "preparation": {
-      "path": [
-        0
-      ],
-      "title": "Inspect the Item Decisions",
-      "challenge": "Return one combined true-or-false decision for each measurement.",
-      "why": "A combined batch decision is easier to diagnose when each item’s check is visible."
-    }
-  },
-  "python-pydantic-models": {
-    "premise": "A report can explicitly have no note while still being required to include the note field.",
-    "order": "investigate-first",
-    "construction": {
-      "title": "Build the Presence and Value Checks",
-      "start": "Try the report with note:null, then construct the separate checks and omission default.",
-      "outcome": "The first report is accepted while the record without note is rejected.",
-      "hints": [
-        "Presence checks the original record and required-key list.",
-        "Apply the unit default to the record, and connect the combined decision to Return the accepted record."
-      ]
-    },
-    "investigation": {
-      "title": "The Note Key Disappears",
-      "question": "A later request contains a title but no note. Which repair keeps the stated required-note contract?",
-      "outcome": "Inspect the original request’s key list before following the default branch.",
-      "caseIndex": 1,
-      "kind": "diagnose",
-      "options": [
-        {
-          "label": "Keep required-key presence separate from the nullable-value check",
-          "feedback": "Allowing null concerns a present value. It does not authorize omitting the required key.",
-          "correct": true
-        },
-        {
-          "label": "Default every absent nullable key to null",
-          "feedback": "That changes this interface from required-and-nullable to omittable."
-        }
-      ]
-    },
-    "connections": [
-      {
-        "lessonId": "python-optional-values",
-        "skill": "Distinguish None from a missing value",
-        "why": "The same distinction matters at an input boundary."
-      },
-      {
-        "lessonId": "python-fail-fast",
-        "skill": "Check before processing",
-        "why": "The record is returned only after the declared checks pass."
-      }
-    ],
-    "reflection": {
-      "prompt": "Which declaration would you change if the product actually allowed the note key to be omitted?",
-      "carryForward": "Write default behavior separately from allowed values."
-    },
-    "preparation": {
-      "path": [
-        1
-      ],
-      "title": "Inspect Requiredness First",
-      "challenge": "Return the combined decision for required presence and the nullable note value.",
-      "why": "This exposes why a present null passes and an absent key fails."
-    }
-  },
-  "python-pydantic-constraints": {
-    "premise": "A request with numeric endpoints can still describe an unusable range.",
-    "order": "investigate-first",
-    "construction": {
-      "title": "Build the Complete Capture Decision",
-      "start": "Inspect a valid request, then connect each declared rule before accepting the record.",
-      "outcome": "A reversed interval fails even when its count and field names are acceptable.",
-      "hints": [
-        "Read the endpoint fields and connect lower before upper.",
-        "Require the bounded count and known-key checks as well as the range check before returning the accepted record."
-      ]
-    },
-    "investigation": {
-      "title": "A New Key Appears",
-      "question": "The original range checks pass, but a later producer adds counts beside count. What would the declared extra-forbid policy require?",
-      "outcome": "Keep the allowed-key check connected to the final combined decision.",
-      "caseIndex": 1,
-      "kind": "diagnose",
-      "options": [
-        {
-          "label": "Check the supplied keys against the allowed names",
-          "feedback": "An otherwise valid count does not make an unknown key part of the contract.",
-          "correct": true
-        },
-        {
-          "label": "Ignore the key because the range is usable",
-          "feedback": "That silently changes the promised policy for unknown fields."
-        }
-      ]
-    },
-    "connections": [
-      {
-        "lessonId": "python-pydantic-models",
-        "skill": "Make the record contract explicit",
-        "why": "Presence, values, and extra keys remain separate choices."
-      },
-      {
-        "lessonId": "python-fail-fast",
-        "skill": "Make the decision before effects",
-        "why": "A failed local rule prevents the capture request from being accepted."
-      }
-    ],
-    "reflection": {
-      "prompt": "Which rules need one field, and which need several fields together?",
-      "carryForward": "Keep each validator near the information that gives its check meaning."
-    },
-    "preparation": {
-      "path": [
-        1,
-        0
-      ],
-      "title": "Inspect Range and Count",
-      "challenge": "Return the combined ordering and count decision before adding the allowed-key check.",
-      "why": "The intermediate result shows why independently valid field representations can still fail a relationship."
-    }
-  },
-  "python-exceptions": {
-    "premise": "One text field cannot be read as a count, but the importer has an explicit policy for reporting that field and retaining valid ones.",
-    "order": "investigate-first",
-    "construction": {
-      "title": "Build the Import Report",
-      "start": "Inspect the parse outcomes, apply the nonnegative-count rule, then wire separate successful-value and rejected-position branches.",
-      "outcome": "A bad field remains visible as a rejected position instead of becoming a fabricated zero.",
-      "hints": [
-        "The parser returns outcomes with their original positions. Reject negative parsed counts before collecting either branch.",
-        "Collect values and rejected positions from those same checked outcomes before combining the final report."
-      ]
-    },
-    "investigation": {
-      "title": "The First Field Is Rejected",
-      "question": "A later batch starts with invalid text. The report marks the first accepted value as rejected instead. What correspondence was lost?",
-      "outcome": "Inspect the original position retained beside each parse outcome.",
-      "caseIndex": 1,
-      "kind": "diagnose",
-      "options": [
-        {
-          "label": "Keep failure positions from the original parse outcomes",
-          "feedback": "Accepted values form a shorter list. Its positions do not identify the original input fields.",
-          "correct": true
-        },
-        {
-          "label": "Count only the accepted values and reuse those positions",
-          "feedback": "That reports locations in the wrong collection."
-        }
-      ]
-    },
-    "connections": [
-      {
-        "lessonId": "python-fail-fast",
-        "skill": "Choose a failure policy deliberately",
-        "why": "This report allows declared partial acceptance; an all-or-nothing save would make a different decision."
-      },
-      {
-        "lessonId": "python-pydantic-constraints",
-        "skill": "Separate input failures from defects",
-        "why": "Recovery handles a named failure category, not every possible failure."
-      }
-    ],
-    "reflection": {
-      "prompt": "Why would returning zero for an invalid count make the report less useful?",
-      "carryForward": "Preserve evidence of a failure instead of disguising it as a valid result."
-    },
-    "preparation": {
-      "path": [
-        0
-      ],
-      "title": "Inspect the Accepted Branch",
-      "challenge": "Return the successful values from the parse outcomes, preserving input order.",
-      "why": "Then add the rejected-position branch without changing what the successful branch means."
-    }
-  },
-  "python-mutation": {
-    "premise": "The draft needs a new tag without changing the record another caller still owns.",
-    "order": "investigate-first",
-    "construction": {
-      "title": "Construct the New Draft",
-      "start": "Follow the source record into a new tag list and a new outer record, retaining the original branch.",
-      "outcome": "The comparison shows one added tag in the draft and no change to the original.",
-      "hints": [
-        "Read the tags field from the current source before appending.",
-        "Send the unchanged source and the edited copy to the comparison output on separate branches."
-      ]
-    },
-    "investigation": {
-      "title": "Another Record Arrives",
-      "question": "The next record has different existing tags. The construction returns only the new tag. What did it lose?",
-      "outcome": "Inspect the list entering Append into a new list.",
-      "caseIndex": 1,
-      "kind": "diagnose",
-      "options": [
-        {
-          "label": "Read the current record’s tags before appending",
-          "feedback": "A copied earlier list or a new empty list discards the current source’s existing data.",
-          "correct": true
-        },
-        {
-          "label": "Always start from the first example’s tags",
-          "feedback": "That substitutes a previous record for the current caller’s record."
-        }
-      ]
-    },
-    "connections": [
-      {
-        "lessonId": "python-dataclasses",
-        "skill": "Give records named fields",
-        "why": "A field can contain mutable data whose ownership still needs a policy."
-      },
-      {
-        "lessonId": "python-fail-fast",
-        "skill": "State the effect contract",
-        "why": "This transformation promises preservation instead of a caller-visible mutation."
-      }
-    ],
-    "reflection": {
-      "prompt": "What extra test would establish nested independence in actual Python?",
-      "carryForward": "Test ownership through a later edit, not only an initial printed value."
-    },
-    "preparation": {
-      "path": [
-        1,
-        2
-      ],
-      "title": "Inspect the New Tag List",
-      "challenge": "Return the source tags followed by the current new tag.",
-      "why": "Then use that list to replace only the intended field in the new draft."
-    }
-  },
-  "python-context-managers": {
-    "premise": "A resource must be released even when the data read from it cannot be processed.",
-    "order": "investigate-first",
-    "construction": {
-      "title": "Build the Complete Resource Lifetime",
-      "start": "Inspect a successful read, then keep cleanup connected when the read outcome changes.",
-      "outcome": "The failed read still produces open, read and close events while retaining its error.",
-      "hints": [
-        "The read needs the open resource state and the current text fields.",
-        "Connect its outcome to Close after the read outcome, then inspect the resource lifetime."
-      ]
-    },
-    "investigation": {
-      "title": "The Read Does Not Finish",
-      "question": "The original construction closes only after successful parsing. A bad field leaves the resource open. What is missing?",
-      "outcome": "Inspect the state after reading and before the closing operation.",
-      "caseIndex": 1,
-      "kind": "diagnose",
-      "options": [
-        {
-          "label": "Put cleanup after the read outcome, including its error path",
-          "feedback": "The cleanup obligation does not disappear when parsing fails.",
-          "correct": true
-        },
-        {
-          "label": "Replace the bad field with a number so cleanup is never tested",
-          "feedback": "That hides the failure path instead of handling the resource lifetime."
-        }
-      ]
-    },
-    "connections": [
-      {
-        "lessonId": "python-exceptions",
-        "skill": "Preserve a failure while acting on it",
-        "why": "Cleanup and error propagation are separate responsibilities."
-      },
-      {
-        "lessonId": "python-mutation",
-        "skill": "Give state an explicit owner",
-        "why": "The function contract must identify who owns releasing the resource."
-      }
-    ],
-    "reflection": {
-      "prompt": "What should a failure-path test inspect besides the exception?",
-      "carryForward": "Check the resource’s final state as well as the original failure."
+      "prompt": "Where would you make a change if a third thermometer needed a different correction, and which components could remain?",
+      "carryForward": "Keep the device-specific work outside the calculation that uses its results."
     },
     "preparation": {
       "path": [
         0,
         0
       ],
-      "title": "Inspect the Read Outcome",
-      "challenge": "Return the resource state immediately after reading, before cleanup.",
-      "why": "The intermediate state shows that an error still needs to pass through closing."
+      "title": "Correct the Thermometer Readings",
+      "challenge": "Multiply each incoming reading by the supplied calibration multiplier, then add the offset. The first thermometer uses 1 and 0, leaving [10, 14, 18] unchanged. Keep these inputs as wires so a replacement can supply a different correction.",
+      "why": "This component has one job: supply Celsius readings to the existing alert counter.",
+      "hints": [
+        "The multiplier changes each reading first. The offset is added afterward.",
+        "Keep the alert limit out of this component; it belongs to the later comparison."
+      ]
     }
   },
-  "python-testing": {
-    "premise": "The program runs but excludes a boundary reading.",
-    "order": "investigate-first",
+  "python-fail-fast": {
+    "premise": "The earlier import helper skipped unusable readings. This save has a different agreement: accept the complete batch or leave the saved list alone.",
+    "order": "build-first",
     "construction": {
-      "title": "Identify the cases that expose the change",
-      "start": "Compare the results first, then keep names at those same differing positions.",
-      "outcome": "Each output name identifies a specific failed expectation.",
+      "title": "Check before Appending",
+      "start": "Start with [2] and [4, 8]. Follow the two ready checks into the append operation, then try the request containing zero.",
+      "outcome": "The first request returns [2, 4, 8]. The request containing zero returns [2].",
       "hints": [
-        "Compare aligned actual and expected entries.",
-        "Use the mismatch decisions to select the names."
+        "Choose positive numbers in Check each reading.",
+        "Append a complete batch needs the saved list, the incoming list and its matching checks."
       ]
     },
     "investigation": {
-      "title": "The empty result is 1 instead of 0, and the above-limit result is 0 instead of 1. Which names remain?",
+      "title": "A Number Is Still an Invalid Reading",
+      "question": "A construction checks only whether each value is a number. It saves [4, 0]. Which setting needs to change?",
+      "outcome": "Inspect the ready-or-reject list before the append operation.",
       "caseIndex": 1,
       "kind": "diagnose",
-      "question": "The empty result is 1 instead of 0, and the above-limit result is 0 instead of 1. Which names remain?",
       "options": [
         {
-          "label": "empty and above",
-          "feedback": "Both results differ from their own expectations.",
+          "label": "Accept positive numbers in Check each reading",
+          "feedback": "Zero is a number, but this saving operation requires readings above zero.",
           "correct": true
         },
         {
-          "label": "Only boundary",
-          "feedback": "Use the current results rather than the earlier diagnosis."
+          "label": "Remove zero and save the remaining reading",
+          "feedback": "The request must leave the saved list unchanged if any incoming reading fails."
         }
-      ],
-      "outcome": "The unchanged boundary case passes in this variation."
+      ]
     },
     "connections": [
       {
-        "lessonId": "python-fail-fast",
-        "skill": "Distinguish expected rejection from a defect",
-        "why": "A test must check the promised failure as well as valid results."
+        "lessonId": "python-type-hints",
+        "skill": "Keep filtering separate from rejection",
+        "why": "The earlier import could skip a value. A rejected save must preserve the complete earlier list."
       }
     ],
     "reflection": {
-      "prompt": "Which untested input might still distinguish two implementations?",
-      "carryForward": "Keep boundary and regression cases without inferring complete coverage."
+      "prompt": "What should remain in the saved list if only the final incoming value fails?",
+      "carryForward": "Check the whole request before changing the saved data."
+    },
+    "preparation": {
+      "path": [
+        2
+      ],
+      "title": "Check the Incoming Readings",
+      "challenge": "Return one ready-or-reject word per incoming reading. For [4, 8], return [\"ready\", \"ready\"].",
+      "why": "Inspect each decision before it controls the saved list."
     }
   },
-  "python-test-doubles": {
-    "premise": "The complete report program needs stable named-record inputs during a test.",
-    "order": "investigate-first",
+  "python-pydantic-models": {
+    "premise": "The earlier optional-value helper could supply a default. Here the note is required, while only the copy count has an omission default.",
+    "order": "build-first",
     "construction": {
-      "title": "Keep the source contract while changing fixtures",
-      "start": "Retrieve each recorded batch by source name, then combine its named records without removing fields.",
-      "outcome": "The prepared input still carries house identity, Celsius values and optional limits.",
+      "title": "Keep Missing and Null Different",
+      "start": "Start with the supplied note:null request. Check the note, then add the missing copies value. Next try the request with no note key.",
+      "outcome": "The explicit null continues into a completed request. A missing note produces an error message.",
       "hints": [
-        "Look up whole record lists instead of extracting bare temperatures.",
-        "Combine the selected batches in request order without deduplicating records."
+        "The note checker needs one request input. Its field name and rules are controls on the component.",
+        "Connect the checked request to Default missing copies and use 1 for omission."
       ]
     },
     "investigation": {
-      "title": "South is requested before north. Which source's records should appear first?",
+      "title": "An Absent Note Slips Through",
+      "question": "A construction permits note to be absent and then adds copies. What must change for this report interface?",
+      "outcome": "Read the Presence and Allowed value controls on the note checker.",
       "caseIndex": 1,
       "kind": "diagnose",
-      "question": "South is requested before north. Which source's records should appear first?",
       "options": [
         {
-          "label": "south",
-          "feedback": "The records follow the current source request order.",
+          "label": "Set the note field to required while allowing text or null",
+          "feedback": "Requiredness controls whether the key must exist. The value rule separately permits an explicit null.",
           "correct": true
         },
         {
-          "label": "north because it came first previously",
-          "feedback": "That retains an old order rather than using the current input."
+          "label": "Supply null whenever note is absent",
+          "feedback": "That would make note optional, changing the report request agreement."
         }
-      ],
-      "outcome": "Repeated measurements and per-record limit fields remain attached to their records."
+      ]
     },
     "connections": [
       {
-        "lessonId": "python-composition",
-        "skill": "Retain the actual ReadingSource contract",
-        "why": "The collector expects named Celsius records and builds its complete report from them."
-      },
-      {
-        "lessonId": "python-testing",
-        "skill": "Control test input independently",
-        "why": "A fixed source fixture makes the expected preparation repeatable."
+        "lessonId": "python-optional-values",
+        "skill": "Separate absence from a supplied value",
+        "why": "A default and an allowed None value answer different questions."
       }
     ],
     "reflection": {
-      "prompt": "What must a real integration check establish beyond this controlled fixture?",
-      "carryForward": "Change the test source without changing the report program's data agreement."
+      "prompt": "Which setting allows a supplied null without permitting an absent note?",
+      "carryForward": "Declare requiredness separately from the allowed values."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Check Only the Note First",
+      "challenge": "Return the original request when its note is text or null. Return \"note is missing\" when the key is absent.",
+      "why": "See the presence decision before adding any default."
     }
   },
-  "python-modules": {
-    "premise": "Importing a helper unexpectedly launched a report.",
-    "order": "investigate-first",
+  "python-pydantic-constraints": {
+    "premise": "The earlier request checker established field representations. This capture also needs value limits and a relationship between its endpoints.",
+    "order": "build-first",
     "construction": {
-      "title": "Inspect the responsibilities behind imports",
-      "start": "Read each direct-import list, combine its names and remove repeated dependency names.",
-      "outcome": "The output is a dependency inventory, not an execution plan.",
+      "title": "Check the Two Requirements",
+      "start": "Start with the interval from 2 to 9 and count 4. Inspect each check separately, then combine them. Try the reversed interval next.",
+      "outcome": "A valid request returns its interval and count. A reversed interval returns \"Lower must be below upper\".",
       "hints": [
-        "Read the imports field from every record.",
-        "Combine the lists before keeping distinct names."
+        "Set Endpoint order to increasing, rather than either order.",
+        "Check the count separately, then connect both checked results to Prepare the capture."
       ]
     },
     "investigation": {
-      "title": "Both a and b import shared. Should the inventory contain shared twice?",
+      "title": "Both Endpoints Are Numbers",
+      "question": "The first construction permits either endpoint order. It also accepts lower:9 and upper:2. What rule is missing?",
+      "outcome": "Follow the interval branch before it reaches Prepare the capture.",
       "caseIndex": 1,
       "kind": "diagnose",
-      "question": "Both a and b import shared. Should the inventory contain shared twice?",
       "options": [
         {
-          "label": "No; keep one dependency name",
-          "feedback": "The inventory names distinct dependencies.",
+          "label": "Require increasing order in the interval checker",
+          "feedback": "Checking each endpoint alone cannot establish that lower is below upper.",
           "correct": true
         },
         {
-          "label": "Yes; each import creates another package",
-          "feedback": "An import statement does not create another dependency identity."
+          "label": "Increase the maximum number of readings",
+          "feedback": "The count limit cannot repair a reversed interval."
         }
-      ],
-      "outcome": "The original module records still retain their separate relationships."
-    },
-    "connections": [
-      {
-        "lessonId": "python-dry",
-        "skill": "Assign shared behavior an owner",
-        "why": "A common module can serve callers without copied rules."
-      },
-      {
-        "lessonId": "python-test-doubles",
-        "skill": "Keep external effects explicit",
-        "why": "Reusable calculations need not launch their dependencies during import."
-      }
-    ],
-    "reflection": {
-      "prompt": "Which work should happen only at the entry point?",
-      "carryForward": "Keep importing a calculation separate from running the application."
-    }
-  },
-  "python-dependencies": {
-    "premise": "The installed setup changed while the source stayed fixed.",
-    "order": "investigate-first",
-    "construction": {
-      "title": "Identify recorded setup differences",
-      "start": "Reuse the comparison and retain the names of differing packages.",
-      "outcome": "A missing installation is a difference too.",
-      "hints": [
-        "Keep version labels as text.",
-        "Select package names using the mismatch positions."
       ]
-    },
-    "investigation": {
-      "title": "Writer is absent and parser matches. Which name should remain?",
-      "caseIndex": 1,
-      "kind": "diagnose",
-      "question": "Writer is absent and parser matches. Which name should remain?",
-      "options": [
-        {
-          "label": "writer",
-          "feedback": "Absence differs from its reviewed version.",
-          "correct": true
-        },
-        {
-          "label": "No names because the source is unchanged",
-          "feedback": "Installed dependencies also affect execution."
-        }
-      ],
-      "outcome": "The result identifies a setup difference without claiming to repair it."
-    },
-    "connections": [
-      {
-        "lessonId": "python-testing",
-        "skill": "Compare an independent expectation",
-        "why": "Version snapshots are expectations with different limits from behavior tests."
-      }
-    ],
-    "reflection": {
-      "prompt": "What does a matching snapshot leave untested?",
-      "carryForward": "Record setup and execute imports and tests on the actual target platform."
-    }
-  },
-  "python-configuration": {
-    "premise": "A setting changed representation when it moved outside source code.",
-    "order": "investigate-first",
-    "construction": {
-      "title": "Separate parsing from the allowed range",
-      "start": "Connect raw text to the parser, then give its result and both limits to the range check.",
-      "outcome": "Invalid representation and range both prevent acceptance.",
-      "hints": [
-        "Parsing can produce null for an invalid representation.",
-        "The range check must reject null as well as out-of-range numbers."
-      ]
-    },
-    "investigation": {
-      "title": "The value is \"0\" and the range is 1 through 60. Is parsing enough?",
-      "caseIndex": 1,
-      "kind": "diagnose",
-      "question": "The value is \"0\" and the range is 1 through 60. Is parsing enough?",
-      "options": [
-        {
-          "label": "No; zero fails the range",
-          "feedback": "Application meaning adds a requirement beyond representation.",
-          "correct": true
-        },
-        {
-          "label": "Yes; every integer is an acceptable timeout",
-          "feedback": "The minimum remains part of the contract."
-        }
-      ],
-      "outcome": "Try malformed text and the exact upper boundary."
     },
     "connections": [
       {
         "lessonId": "python-pydantic-models",
-        "skill": "Separate structural validation from constraints",
-        "why": "The consuming operation still determines which values are acceptable."
+        "skill": "Add value rules to a field contract",
+        "why": "Knowing that a count is numerical does not establish its allowed range."
       }
     ],
     "reflection": {
-      "prompt": "Which values may safely appear in a settings diagnostic?",
-      "carryForward": "Validate before dependent work and choose public output explicitly."
+      "prompt": "Why can the count pass while the complete capture still fails?",
+      "carryForward": "A request must meet every requirement that applies to it."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Check the Interval First",
+      "challenge": "Return the lower and upper endpoints when they are in increasing order. Return \"Lower must be below upper\" when they are reversed or equal.",
+      "why": "Inspect the relationship before adding the count branch."
     }
   },
-  "python-code-checks": {
-    "premise": "A formatting pass was mistaken for a correct calculation.",
-    "order": "investigate-first",
+  "python-exceptions": {
+    "premise": "The saving exercise rejected a whole batch. This importer deliberately keeps valid fields and returns the positions that need correction.",
+    "order": "build-first",
     "construction": {
-      "title": "Combine different evidence carefully",
-      "start": "Branch check records into ran and passed lists, then require both before combining all decisions.",
-      "outcome": "A skipped check cannot authorize the release.",
+      "title": "Keep the Fields in Order",
+      "start": "Convert the first list, then separate its values from errors. Try the import containing -1 before deciding the repair.",
+      "outcome": "The negative count is rejected at position 1, while the surrounding counts remain [4, 7].",
       "hints": [
-        "Read ran and passed separately.",
-        "Require both per position, then a nonempty all-true set."
+        "Read whole numbers preserves the list length and order.",
+        "Reject negative counts before Separate values from errors."
       ]
     },
     "investigation": {
-      "title": "Formatting passes but tests run and fail. Should the release gate accept?",
+      "title": "Conversion Succeeded, but the Count Is Negative",
+      "question": "Read whole numbers turns \"-1\" into -1. The construction accepts it. What operation belongs before the final separation?",
+      "outcome": "Inspect the list after conversion and before separating its values and errors.",
       "caseIndex": 1,
       "kind": "diagnose",
-      "question": "Formatting passes but tests run and fail. Should the release gate accept?",
       "options": [
         {
-          "label": "No; a mandatory behavior check failed",
-          "feedback": "The formatter cannot replace that missing passing evidence.",
+          "label": "Reject negative counts",
+          "feedback": "Integer conversion permits a sign. The count rule separately excludes negative values while retaining zero.",
           "correct": true
         },
         {
-          "label": "Yes; one successful tool is enough",
-          "feedback": "Every mandatory check needs its own pass."
+          "label": "Replace every bad field with zero",
+          "feedback": "Zero is a real count. That replacement hides which source field failed."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "python-fail-fast",
+        "skill": "Choose whether a failure rejects one item or the whole batch",
+        "why": "Partial acceptance is useful here because the returned rejected positions remain visible."
+      }
+    ],
+    "reflection": {
+      "prompt": "Why must positions refer to the original fields rather than the shorter accepted list?",
+      "carryForward": "Keep an error attached to the data that caused it."
+    },
+    "preparation": {
+      "path": [
+        0,
+        0
+      ],
+      "title": "Read the Text First",
+      "challenge": "Return one item per field: numbers for readable decimal text, unchanged text for fields that cannot be read.",
+      "why": "The next operation can inspect negative numbers before anything loses its original position."
+    }
+  },
+  "python-mutation": {
+    "premise": "The earlier Report helper deliberately changed an owned tag list. A new draft now needs an independent list before that edit.",
+    "order": "build-first",
+    "construction": {
+      "title": "Make the Draft Independent",
+      "start": "Inspect the original and draft immediately after copying. Add the current tag, then compare the lists. Try the report with different existing tags next.",
+      "outcome": "Only the draft receives the new tag; the original retains all its earlier tags.",
+      "hints": [
+        "Copy the report has an outer-only option and an option that copies nested values.",
+        "Add the tag to the draft, then compare the two tag lists."
+      ]
+    },
+    "investigation": {
+      "title": "The Original Acquires the Draft Tag",
+      "question": "Copy the report is set to outer record only. Adding a draft tag changes both displayed lists. What needs its own copy?",
+      "outcome": "Switch the Copy control, then repeat the same edit and compare both lists.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Copy nested values too",
+          "feedback": "The tags list is inside the record. An outer-only copy keeps that shared list.",
+          "correct": true
+        },
+        {
+          "label": "Discard the original report after editing",
+          "feedback": "The original is still needed and was promised to remain unchanged."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "python-dataclasses",
+        "skill": "Give each record its own mutable fields",
+        "why": "An independent outer object does not automatically give each nested list an independent owner."
+      }
+    ],
+    "reflection": {
+      "prompt": "Why can two separate records still show the same unexpected edit?",
+      "carryForward": "Check what a copy shares before changing a nested value."
+    },
+    "preparation": {
+      "path": [
+        0,
+        0
+      ],
+      "title": "Create the Draft First",
+      "challenge": "Return the original and draft records before editing either one. Both should still contain the current original tags.",
+      "why": "The following edit will reveal whether the nested tag list was shared."
+    }
+  },
+  "python-context-managers": {
+    "premise": "The previous parser made failed fields visible. Reading from a resource adds a separate obligation: release it even when parsing fails.",
+    "order": "build-first",
+    "construction": {
+      "title": "Read, then Close on Either Result",
+      "start": "Start with the readable lines and confirm total:14 and closed:true. Then try the example containing bad on its second line.",
+      "outcome": "A read error remains visible and the buffer still ends closed.",
+      "hints": [
+        "Read the number lines needs the opened buffer, not the raw text source.",
+        "Set Close to after every read, then connect the read outcome."
+      ]
+    },
+    "investigation": {
+      "title": "The Failed Read Leaves the Buffer Open",
+      "question": "Close the buffer is set to only after success. The second example returns an error and closed:false. Which setting repairs its lifetime?",
+      "outcome": "Inspect the read outcome, then change when the closing piece runs.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Close after every read",
+          "feedback": "The buffer must close after either result, while preserving the read error.",
+          "correct": true
+        },
+        {
+          "label": "Replace the bad line with zero",
+          "feedback": "That invents a reading and avoids testing the actual failure path."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "python-exceptions",
+        "skill": "Keep cleanup separate from error recovery",
+        "why": "An error may continue to the caller after the resource has been released."
+      }
+    ],
+    "reflection": {
+      "prompt": "Why does a correct total on the first example tell us little about closing after failure?",
+      "carryForward": "Check the resource state on both paths."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Inspect the Read before Closing",
+      "challenge": "Open the buffer and read its lines. Inspect the values or error while closed is still false.",
+      "why": "This separates the read result from the later cleanup obligation."
+    }
+  },
+  "python-testing": {
+    "premise": "The alert report runs, but one of its answers changed.",
+    "order": "build-first",
+    "construction": {
+      "title": "Find the failed tests",
+      "start": "Start with the test rows. A field reader extracts one column; the comparison marks different counts; Keep flagged entries returns the corresponding complete rows.",
+      "outcome": "The failed row shows the exact readings, expected count and actual count.",
+      "hints": [
+        "Read actual and expected from the same test list on separate branches.",
+        "Compare those lists. Feed the mismatch decisions and the original rows into Keep flagged entries."
+      ]
+    },
+    "investigation": {
+      "title": "Check the repaired report",
+      "kind": "diagnose",
+      "caseIndex": 1,
+      "question": "The boundary now passes. The above-limit test returns 0, and the empty batch returns 1. Which complete rows should your machine return?",
+      "options": [
+        {
+          "label": "Above the limit and No readings",
+          "feedback": "Both actual counts disagree with their own expected counts.",
+          "correct": true
+        },
+        {
+          "label": "At the limit",
+          "feedback": "That was the earlier failure. Its actual count is now correct."
         }
       ],
-      "outcome": "Try the fully passing set and the empty set."
+      "outcome": "Run the same comparison against every case after a repair."
+    },
+    "connections": [
+      {
+        "lessonId": "python-function-design",
+        "skill": "Reuse the inclusive alert rule",
+        "why": "A reading equal to the limit belongs in the alert count."
+      },
+      {
+        "lessonId": "python-fail-fast",
+        "skill": "Keep empty and invalid input behavior explicit",
+        "why": "The report must still meet its other promises after a boundary repair."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which additional input would help expose a mistake in the count?",
+      "carryForward": "Keep the input and both counts beside each failure."
+    }
+  },
+  "python-test-doubles": {
+    "premise": "The sensor is unavailable, but the report still needs a repeatable input.",
+    "order": "build-first",
+    "construction": {
+      "title": "Build with the recorded input",
+      "start": "Look up one name retrieves the records under source_name. Read temperature_c, check the alert limit, and keep the matching original records.",
+      "outcome": "The saved recording produces the south reading at 25 C.",
+      "hints": [
+        "Look up source_name in sources to retrieve the chosen list of named readings.",
+        "Branch those records: read their temperatures for the limit check, and keep the original records using its decisions."
+      ]
+    },
+    "investigation": {
+      "title": "Replace the source",
+      "kind": "compare",
+      "caseIndex": 1,
+      "question": "The source changes from recording to device. The device readings are south at 29 C and north at 31 C, with a shared limit of 25 C. Which readings should the unchanged alert rule keep?",
+      "options": [
+        {
+          "label": "Both device readings: south at 29 C and north at 31 C",
+          "feedback": "The chosen source now supplies the device records, and both readings reach the limit.",
+          "correct": true
+        },
+        {
+          "label": "Only the saved south reading at 25 C",
+          "feedback": "That reading belongs to the earlier recording. The selected source has changed."
+        }
+      ],
+      "outcome": "Replace the source without replacing the alert calculation. Test the same construction against the earlier recording too."
+    },
+    "connections": [
+      {
+        "lessonId": "python-composition",
+        "skill": "Supply the reading source",
+        "why": "The report receives named Celsius records through an explicit source."
+      },
+      {
+        "lessonId": "python-testing",
+        "skill": "Keep a repeatable test input",
+        "why": "A saved input lets the expected result stay known while the source is unavailable."
+      }
+    ],
+    "reflection": {
+      "prompt": "What would still need checking against the actual sensor?",
+      "carryForward": "Replace the input source without copying the report calculation."
+    }
+  },
+  "python-modules": {
+    "premise": "A caller wants the calculation, but importing it also starts the report.",
+    "order": "build-first",
+    "construction": {
+      "title": "Find report work that runs during import",
+      "start": "Read kind and when from the same rows. Configure one text matcher for report run and another for import. Require both, then keep the original steps.",
+      "outcome": "The output names the work that needs moving to the entry point.",
+      "hints": [
+        "An ordinary function definition at import is not the defect being investigated.",
+        "Keep only report-run steps whose when field is import. Both conditions must hold."
+      ]
+    },
+    "investigation": {
+      "title": "Check another import side effect",
+      "kind": "diagnose",
+      "caseIndex": 1,
+      "question": "Reading the file now happens in main, but printing still happens during import. Which complete row should your machine return?",
+      "options": [
+        {
+          "label": "Print the report, kind report run, when import",
+          "feedback": "Printing still starts application work when a helper is imported.",
+          "correct": true
+        },
+        {
+          "label": "Read readings.csv, kind report run, when main",
+          "feedback": "The file read has moved to the intended entry point."
+        }
+      ],
+      "outcome": "Inspect every application action after moving the first one."
+    },
+    "connections": [
+      {
+        "lessonId": "python-composition",
+        "skill": "Keep effects outside the calculation",
+        "why": "Reading and sending belong to explicit application operations."
+      },
+      {
+        "lessonId": "python-test-doubles",
+        "skill": "Make source use deliberate",
+        "why": "Importing a function should not unexpectedly read its source."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which actions belong in the entry point of your own report program?",
+      "carryForward": "Keep reusable definitions available without starting the application."
+    }
+  },
+  "python-dependencies": {
+    "premise": "The report source stayed the same, but its installed environment changed.",
+    "order": "build-first",
+    "construction": {
+      "title": "Find the changed package",
+      "start": "Reuse the field readers and comparison from the alert tests. This time the two columns hold version labels. Keep the full package rows where they disagree.",
+      "outcome": "The output gives each changed package beside its reviewed and installed labels.",
+      "hints": [
+        "Version labels are text. Read installed and reviewed without turning them into decimal numbers.",
+        "Keep the complete package rows using the mismatch decisions."
+      ]
+    },
+    "investigation": {
+      "title": "Find a missing installation",
+      "kind": "diagnose",
+      "caseIndex": 1,
+      "question": "sensor-reader now matches 2.1, but report-writer is not installed. Which complete package row belongs in the result?",
+      "options": [
+        {
+          "label": "report-writer: reviewed 1.0, not installed",
+          "feedback": "The missing installation differs from the reviewed environment.",
+          "correct": true
+        },
+        {
+          "label": "sensor-reader: reviewed and installed 2.1",
+          "feedback": "Those two supplied labels now agree."
+        }
+      ],
+      "outcome": "A repaired version does not make another missing package available."
     },
     "connections": [
       {
         "lessonId": "python-testing",
-        "skill": "Keep evidence scoped to behavior",
-        "why": "Tests answer requirements that formatting does not."
+        "skill": "Compare an observed result with its expectation",
+        "why": "The same comparison can identify changes in recorded versions."
       },
       {
-        "lessonId": "python-type-hints",
-        "skill": "Use annotations with appropriate tools",
-        "why": "Declarations need analysis and runtime boundaries."
+        "lessonId": "python-modules",
+        "skill": "Separate application code from its dependencies",
+        "why": "The code can stay fixed while an installed package changes."
       }
     ],
     "reflection": {
-      "prompt": "Which tool would expose the defect you want to prevent?",
-      "carryForward": "Automate complementary checks without confusing their scopes."
+      "prompt": "What should you run on the target machine after these labels agree?",
+      "carryForward": "Keep the reviewed environment beside the report and rerun its tests."
     }
   },
-  "python-logging": {
-    "premise": "A vague diagnostic was useless, while dumping the whole request would disclose too much.",
-    "order": "investigate-first",
+  "python-configuration": {
+    "premise": "Moving a setting outside the source code introduces new ways to enter an invalid value.",
+    "order": "build-first",
     "construction": {
-      "title": "Choose events before their output fields",
-      "start": "Select events using the minimum severity, then apply the allowed field list.",
-      "outcome": "The output has useful selected context without the attached token.",
+      "title": "Check each environment setting",
+      "start": "Read timeout_seconds from each row. The number reader produces null for unreadable text. The range check marks accepted values; reverse its decisions to keep the rejected rows.",
+      "outcome": "Valid settings produce no rejected rows. Invalid ones retain their environment names.",
       "hints": [
-        "Severity decisions align with the original event list.",
-        "Select those records, then apply allowed output fields."
+        "Read the timeout text before checking its numerical range.",
+        "The range check accepts valid values. Reverse those decisions before keeping the rows that need attention."
       ]
     },
     "investigation": {
-      "title": "The threshold becomes ERROR. Which batch ID remains?",
-      "caseIndex": 1,
+      "title": "A readable number is still invalid",
       "kind": "diagnose",
-      "question": "The threshold becomes ERROR. Which batch ID remains?",
+      "caseIndex": 1,
+      "question": "Production changes from \"30\" to \"0\" while the allowed range stays 1 through 60. Which complete environment row should be returned?",
       "options": [
         {
-          "label": "C",
-          "feedback": "Only the error event reaches this threshold.",
+          "label": "production with timeout_seconds \"0\"",
+          "feedback": "Zero is readable but below the documented minimum.",
           "correct": true
         },
         {
-          "label": "B and C",
-          "feedback": "WARNING was selected earlier but not under the new threshold."
+          "label": "No rows, because zero is a whole number",
+          "feedback": "A whole number must also satisfy the allowed range."
         }
       ],
-      "outcome": "Inspect which fields remain as well as which event passed."
+      "outcome": "Keep both the representation check and the range check."
+    },
+    "connections": [
+      {
+        "lessonId": "python-dependencies",
+        "skill": "Inspect the actual environment",
+        "why": "Configuration can differ even when package versions match."
+      },
+      {
+        "lessonId": "python-pydantic-models",
+        "skill": "Check meaning after reading a value",
+        "why": "A valid representation can still violate an application constraint."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which setting values belong in a public diagnostic, and which should stay private?",
+      "carryForward": "Reject invalid configuration before starting the work that depends on it."
+    }
+  },
+  "python-code-checks": {
+    "premise": "One successful tool result was mistaken for a passing project.",
+    "order": "build-first",
+    "construction": {
+      "title": "List the checks that still need work",
+      "start": "Read the status column. Match passed, reverse that selection, and keep the original check rows so their details remain visible.",
+      "outcome": "The output identifies the failed test and explains its observed boundary error.",
+      "hints": [
+        "Match the exact status passed. A check named Formatting has no authority over the Tests result.",
+        "Reverse the match decisions to include both failed and not run rows."
+      ]
+    },
+    "investigation": {
+      "title": "A skipped check remains",
+      "kind": "diagnose",
+      "caseIndex": 1,
+      "question": "The alert tests now pass, but Type checking has status not run. Which complete row should remain?",
+      "options": [
+        {
+          "label": "Type checking, not run, job skipped",
+          "feedback": "It has no passing result for this run.",
+          "correct": true
+        },
+        {
+          "label": "No rows, because the tests pass",
+          "feedback": "The other required checks still need their own results."
+        }
+      ],
+      "outcome": "Different tools check different requirements."
+    },
+    "connections": [
+      {
+        "lessonId": "python-testing",
+        "skill": "Retain a behavior failure",
+        "why": "A formatting pass does not repair a wrong alert count."
+      },
+      {
+        "lessonId": "python-type-hints",
+        "skill": "Use a tool to inspect annotations",
+        "why": "An annotation does not run a type checker by itself."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which tool would report a wrong result that still has valid types?",
+      "carryForward": "Read each required check result instead of treating one pass as the whole project."
+    }
+  },
+  "python-logging": {
+    "premise": "A useful diagnostic needs enough context to find the failure without copying the whole request.",
+    "order": "build-first",
+    "construction": {
+      "title": "Select the events and their public fields",
+      "start": "Choose event severity marks entries at the selected level or higher. Keep those events, then select the allowed fields for each retained record.",
+      "outcome": "Warnings and errors retain their messages and report IDs without private_token.",
+      "hints": [
+        "Use the severity decisions to keep the original events first.",
+        "Pass the selected events and public_fields into Select fields for a record."
+      ]
+    },
+    "investigation": {
+      "title": "Narrow the log to errors",
+      "kind": "diagnose",
+      "caseIndex": 1,
+      "question": "The minimum level changes from WARNING to ERROR. Which event should remain, and which details may it display?",
+      "options": [
+        {
+          "label": "R12 only, with its level, report ID and message",
+          "feedback": "The error reaches the new threshold. The allowed fields retain its useful context and leave private_token out.",
+          "correct": true
+        },
+        {
+          "label": "R11 and R12, with every attached field",
+          "feedback": "R11 is a warning below the new threshold, and private_token is outside the allowed field list."
+        }
+      ],
+      "outcome": "Keep only the error event and the approved fields. Test the earlier WARNING view with the same pieces."
     },
     "connections": [
       {
         "lessonId": "python-configuration",
-        "skill": "Use explicit disclosure allowlists",
-        "why": "A diagnostic needs the same content review as a settings report."
+        "skill": "Choose public output fields",
+        "why": "Settings and logs both need an explicit decision about what may be displayed."
       },
       {
-        "lessonId": "python-exceptions",
-        "skill": "Preserve a failure's meaning",
-        "why": "The error category and appropriate context can explain a problem without swallowing it."
+        "lessonId": "python-code-checks",
+        "skill": "Retain useful failure details",
+        "why": "An event category and report ID help locate the failed run."
       }
     ],
     "reflection": {
-      "prompt": "Which fields are necessary to investigate this failure?",
-      "carryForward": "Choose event content deliberately, regardless of severity."
+      "prompt": "Could a message expose private input even after the token field is removed?",
+      "carryForward": "Review message content as well as which fields are included."
     }
   },
   "python-profiling": {
-    "premise": "A loop rewrite did not reduce the dominant work.",
-    "order": "investigate-first",
+    "premise": "The first suspect is the function with the most calls, but call count alone does not show total cost.",
+    "order": "build-first",
     "construction": {
-      "title": "Locate the cost before choosing a repair",
-      "start": "Calculate totals while preserving operation positions, then retrieve the largest-cost name.",
-      "outcome": "The result follows supplied costs rather than which code looked awkward.",
+      "title": "Calculate the cost of each operation",
+      "start": "Read the calls and self_ms_per_call columns. Multiply them to obtain total self milliseconds. Find the largest cost position, then retrieve that row from the original profile.",
+      "outcome": "The selected row identifies Read source even though Format report has more calls.",
       "hints": [
-        "Multiply each count by its corresponding mean self cost.",
-        "Use the maximum product's position to retrieve its name."
+        "Multiply the two numerical columns position by position. Inspect that tool output to see every estimated total.",
+        "Find the position of the largest total and use it to retrieve the corresponding complete profile row."
       ]
     },
     "investigation": {
-      "title": "Counts stay at 100, 1000 and 1; costs become 0.1, 0.002 and 15 ms. Which operation dominates?",
+      "title": "Measure again after reducing source reads",
+      "kind": "compare",
       "caseIndex": 1,
-      "kind": "diagnose",
-      "question": "Counts stay at 100, 1000 and 1; costs become 0.1, 0.002 and 15 ms. Which operation dominates?",
+      "question": "Reading now runs twice at 5 ms per call. Formatting still runs 1000 times at 0.1 ms per call. Which operation has the larger total self time?",
       "options": [
         {
-          "label": "format",
-          "feedback": "Its estimated self cost is now largest.",
+          "label": "Format report: 100 ms in total",
+          "feedback": "Reading now costs 10 ms. Formatting remains at 100 ms and is the larger recorded cost.",
           "correct": true
         },
         {
-          "label": "lookup because it runs most often",
-          "feedback": "The per-call cost changes the total."
+          "label": "Read source: each call still takes 5 ms",
+          "feedback": "Per-call time is only one part of the total. Two 5 ms calls cost less than the formatting work."
         }
       ],
-      "outcome": "The target changes with the workload."
+      "outcome": "Run the calculation again after a repair. The largest remaining cost can change even though the program still performs the same tasks."
     },
     "connections": [
       {
-        "lessonId": "python-testing",
-        "skill": "Preserve independently checked behavior",
-        "why": "The faster report must still produce the intended results."
+        "lessonId": "python-test-doubles",
+        "skill": "Observe source calls",
+        "why": "A controlled source can show how often the report requests its input."
       },
       {
-        "lessonId": "python-mutation",
-        "skill": "Choose a state lifetime",
-        "why": "A cache is useful only while its values match the source."
+        "lessonId": "python-testing",
+        "skill": "Keep behavior tests after a change",
+        "why": "Reducing work is useful only while the report still produces the intended result."
       }
     ],
     "reflection": {
-      "prompt": "What measurement would establish an improvement for this workload?",
-      "carryForward": "Measure the relevant constraint and keep correctness tests."
+      "prompt": "Which measurement would show that a proposed repair helped the workload you care about?",
+      "carryForward": "Measure the changed program again before choosing the next optimization."
     }
   },
   "software-feature-contracts": {

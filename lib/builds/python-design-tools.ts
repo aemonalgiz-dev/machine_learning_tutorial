@@ -54,6 +54,68 @@ function cloneAliases(value: Data, seen = new Map<object, Data>()): Data {
 }
 
 export const pythonDesignTools: Record<string, Tool> = {
+  pyDesignReadHouses: tool("Read greenhouse names", "Read house from each row. The names stay in the same order as the temperature readings.", ["Greenhouse records"], ([input]) => values(input).map(item => {
+    const name = record(item).house;
+    if (typeof name !== "string" || !name.trim()) throw Error("Each record needs a greenhouse name in house.");
+    return name;
+  })),
+  pyDesignReadCelsius: tool("Read temperatures in Celsius", "Read temperature_c from each row without changing its value. The _c ending identifies Celsius; this reader does not convert units.", ["Greenhouse records"], ([input]) => values(input).map(item => {
+    const row = record(item);
+    if (!Object.hasOwn(row, "temperature_c")) throw Error("A greenhouse record is missing temperature_c.");
+    return row.temperature_c;
+  })),
+  pyDesignFahrenheitRows: tool("Attach names to Fahrenheit readings", "Pair each greenhouse name with its converted reading. Return house and temperature_f so the report identifies both the greenhouse and its unit.", ["Greenhouse names", "Fahrenheit readings"], ([labels, input]) => {
+    const names = values(labels), readings = vector(input);
+    aligned(names, readings);
+    return names.map((house, index) => {
+      if (typeof house !== "string" || !house.trim()) throw Error("Each reading needs a greenhouse name.");
+      return { house, temperature_f: readings[index] };
+    });
+  }),
+  pyDesignAtOrAbove: tool("Keep readings at or above the limit", "Keep every reading that reaches the limit, including an exact match. The output contains the readings themselves, in their original order.", ["Temperature readings", "Alert limit"], ([input, limit]) => {
+    const threshold = number(limit);
+    return vector(input).filter(value => value >= threshold);
+  }),
+  pyDesignAlertSummary: tool("Collect the alert summary", "Keep the alert count and total temperature above the limit together. count is a number of readings; excess_c is a temperature difference in Celsius.", ["Alert count", "Total excess in Celsius"], ([count, excess]) => ({ count: number(count), excess_c: number(excess) })),
+  pyDesignDailyCounts: tool("Collect morning and evening counts", "Keep the two report counts separate and label which time each count describes.", ["Morning alert count", "Evening alert count"], ([morning, evening]) => ({ morning: number(morning), evening: number(evening) })),
+  pyDesignKeepNumbers: tool("Keep numerical readings", "Keep actual finite numbers, including zero and repeated readings. Text such as \"20\", true, false and null are left out. This is a check that runs; a Python type hint does not perform it.", ["Incoming values"], ([input]) => values(input).filter(value => typeof value === "number" && Number.isFinite(value))),
+  pyDesignMissingLimits: tool("Fill only missing alert limits", "Use the shared default when a row has no limit field. Keep a supplied zero. Keep null, which means the alert is disabled and corresponds to None in Python.", ["Greenhouse settings", "Default limit in Celsius"], ([input, fallback]) => {
+    const defaultLimit = number(fallback);
+    return values(input).map(item => {
+      const row = record(item);
+      const limit = Object.hasOwn(row, "limit") ? row.limit : defaultLimit;
+      return limit === null ? null : number(limit);
+    });
+  }),
+  pyDesignAlertStatuses: tool("Check each greenhouse's alert", "Compare each temperature with its matching limit. Return alert when it reaches the limit, below limit otherwise, and disabled for a null limit.", ["Celsius readings", "Resolved limits"], ([input, limits]) => {
+    const readings = vector(input), thresholds = values(limits);
+    aligned(readings, thresholds);
+    return readings.map((value, index) => thresholds[index] === null ? "disabled" : value >= number(thresholds[index]) ? "alert" : "below limit");
+  }),
+  pyDesignNoteLists: tool("Create the notes lists", "A new list for each report keeps their notes independent. Reusing one list lets a note added through one report appear in the others too. Choose how the lists are created before attaching them to reports.", ["Greenhouse names"], ([input], settings) => {
+    const houses = values(input);
+    if (settings.ownership === "A new list for each report") return houses.map(() => []);
+    if (settings.ownership === "Reuse one list") {
+      const shared: Data[] = [];
+      return houses.map(() => shared);
+    }
+    throw Error("Choose whether reports receive new notes lists or reuse one list.");
+  }, [{ key: "ownership", label: "Notes lists", initial: "Reuse one list", options: ["Reuse one list", "A new list for each report"] }]),
+  pyDesignNoteReports: tool("Attach notes to their reports", "Give each greenhouse its corresponding notes list. A report has a house name and tags, the list of its notes. Any sharing between supplied lists is retained so you can test its effect.", ["Greenhouse names", "Notes lists"], ([input, notes]) => {
+    const houses = values(input), lists = values(notes);
+    aligned(houses, lists);
+    if (houses.some(house => typeof house !== "string" || !house.trim()) || new Set(houses).size !== houses.length) throw Error("Use a different nonempty name for each greenhouse report.");
+    return houses.map((house, index) => ({ house, tags: values(lists[index]) }));
+  }),
+  pyDesignAddHouseNote: tool("Add a note to one greenhouse", "Find the named greenhouse and append its note. Shared notes lists expose the same update in other reports. The workshop makes a private copy first so testing does not change any source data.", ["Reports", "Greenhouse to update", "Note"], ([input, house, note]) => {
+    if (typeof house !== "string" || !house.trim()) throw Error("Name the greenhouse that should receive the note.");
+    if (typeof note !== "string" || !note.trim()) throw Error("Supply a nonempty note.");
+    const rows = values(cloneAliases(input)).map(record);
+    const matches = rows.filter(row => row.house === house);
+    if (matches.length !== 1) throw Error("The greenhouse name must identify exactly one report.");
+    values(matches[0].tags).push(note);
+    return rows;
+  }),
   pyDesignColumn: tool("Read a named column", "Read the same explicitly named field from each record, preserving row order. Missing fields stop this operation.", ["Records"], ([input], settings) => {
     const key = field(settings);
     return values(input).map(item => {

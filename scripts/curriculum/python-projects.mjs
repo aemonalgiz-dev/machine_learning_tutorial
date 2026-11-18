@@ -23,7 +23,7 @@ const records = [
         "href": "/concepts/python-fail-fast"
       }
     ],
-    "outputLabel": "Names of cases whose actual result differs",
+    "outputLabel": "Failed test rows, including inputs and both counts",
     "checkpointTitle": "Questions on Parts 1 and 2",
     "history": {
       "title": "Python unittest and xUnit Testing",
@@ -308,76 +308,123 @@ const records = [
       }
     ],
     "build": {
-      "title": "Find the failing alert cases",
-      "problem": "Botie has case names, observed results and independent expectations in matching order.",
-      "challenge": "Compare actual and expected results, then use mismatch decisions to retain failing names.",
+      "title": "Find the failed alert tests",
+      "problem": "The greenhouse report should count every reading at or above 25 C. A code change stopped counting the boundary reading. Each row below keeps a test input, its expected count and the count the program returned together.",
+      "challenge": "Return the complete rows for tests whose actual count differs from expected. The first result should contain only \"At the limit\". Read the actual and expected fields, compare their values, then use those decisions to keep the failed rows.",
       "sources": {
-        "names": "Case names",
-        "actual": "Observed results",
-        "expected": "Independent expectations"
+        "tests": "Alert tests: inputs and returned counts"
       },
       "cases": [
         {
-          "name": "Boundary regression",
+          "name": "The boundary test fails",
           "data": {
-            "names": [
-              "below",
-              "boundary",
-              "above"
-            ],
-            "actual": [
-              0,
-              0,
-              1
-            ],
-            "expected": [
-              0,
-              1,
-              1
+            "tests": [
+              {
+                "case": "At the limit",
+                "readings_c": [
+                  25
+                ],
+                "expected": 1,
+                "actual": 0
+              },
+              {
+                "case": "Above the limit",
+                "readings_c": [
+                  28
+                ],
+                "expected": 1,
+                "actual": 1
+              },
+              {
+                "case": "No readings",
+                "readings_c": [],
+                "expected": 0,
+                "actual": 0
+              }
             ]
           },
           "expected": [
-            "boundary"
+            {
+              "case": "At the limit",
+              "readings_c": [
+                25
+              ],
+              "expected": 1,
+              "actual": 0
+            }
           ]
         },
         {
-          "name": "Two behaviors break",
+          "name": "The boundary is repaired, two other cases fail",
           "data": {
-            "names": [
-              "empty",
-              "boundary",
-              "above"
-            ],
-            "actual": [
-              1,
-              1,
-              0
-            ],
-            "expected": [
-              0,
-              1,
-              1
+            "tests": [
+              {
+                "case": "At the limit",
+                "readings_c": [
+                  25
+                ],
+                "expected": 1,
+                "actual": 1
+              },
+              {
+                "case": "Above the limit",
+                "readings_c": [
+                  28
+                ],
+                "expected": 1,
+                "actual": 0
+              },
+              {
+                "case": "No readings",
+                "readings_c": [],
+                "expected": 0,
+                "actual": 1
+              }
             ]
           },
           "expected": [
-            "empty",
-            "above"
+            {
+              "case": "Above the limit",
+              "readings_c": [
+                28
+              ],
+              "expected": 1,
+              "actual": 0
+            },
+            {
+              "case": "No readings",
+              "readings_c": [],
+              "expected": 0,
+              "actual": 1
+            }
           ]
         },
         {
-          "name": "All agree",
+          "name": "All tests agree",
           "data": {
-            "names": [
-              "below",
-              "boundary"
-            ],
-            "actual": [
-              0,
-              1
-            ],
-            "expected": [
-              0,
-              1
+            "tests": [
+              {
+                "case": "At the limit",
+                "readings_c": [
+                  25
+                ],
+                "expected": 1,
+                "actual": 1
+              },
+              {
+                "case": "Above the limit",
+                "readings_c": [
+                  28
+                ],
+                "expected": 1,
+                "actual": 1
+              },
+              {
+                "case": "No readings",
+                "readings_c": [],
+                "expected": 0,
+                "actual": 0
+              }
             ]
           },
           "expected": []
@@ -387,101 +434,131 @@ const records = [
         "op": "pyProjectKeep",
         "inputs": [
           {
-            "source": "names"
+            "source": "tests"
           },
           {
             "op": "pyProjectMismatch",
             "inputs": [
               {
-                "source": "actual"
+                "op": "pyProjectField",
+                "inputs": [
+                  {
+                    "source": "tests"
+                  }
+                ],
+                "settings": {
+                  "field": "actual"
+                }
               },
               {
-                "source": "expected"
+                "op": "pyProjectField",
+                "inputs": [
+                  {
+                    "source": "tests"
+                  }
+                ],
+                "settings": {
+                  "field": "expected"
+                }
               }
             ]
           }
         ]
       },
-      "why": "Failed names come from observed differences rather than whether execution completed.",
-      "limitation": "The workshop compares supplied results. It does not execute Python or prove that the cases are sufficient.",
-      "extras": [
-        "constant",
-        "add",
-        "multiply",
-        "total",
-        "count"
-      ],
-      "draftVersion": 1
+      "why": "A passing boundary case does not clear a failing empty batch or above-limit case. Comparing each row keeps the failure beside the input that exposed it.",
+      "limitation": "These are recorded Python test results. The blocks compare their counts; the coding challenge runs the actual report and its tests.",
+      "extras": [],
+      "draftVersion": 2
     },
     "journey": {
-      "premise": "The program runs but excludes a boundary reading.",
-      "order": "investigate-first",
+      "premise": "The alert report runs, but one of its answers changed.",
+      "order": "build-first",
       "construction": {
-        "title": "Identify the cases that expose the change",
-        "start": "Compare the results first, then keep names at those same differing positions.",
-        "outcome": "Each output name identifies a specific failed expectation.",
+        "title": "Find the failed tests",
+        "start": "Start with the test rows. A field reader extracts one column; the comparison marks different counts; Keep flagged entries returns the corresponding complete rows.",
+        "outcome": "The failed row shows the exact readings, expected count and actual count.",
         "hints": [
-          "Compare aligned actual and expected entries.",
-          "Use the mismatch decisions to select the names."
+          "Read actual and expected from the same test list on separate branches.",
+          "Compare those lists. Feed the mismatch decisions and the original rows into Keep flagged entries."
         ]
       },
       "investigation": {
-        "title": "The empty result is 1 instead of 0, and the above-limit result is 0 instead of 1. Which names remain?",
-        "caseIndex": 1,
+        "title": "Check the repaired report",
         "kind": "diagnose",
-        "question": "The empty result is 1 instead of 0, and the above-limit result is 0 instead of 1. Which names remain?",
+        "caseIndex": 1,
+        "question": "The boundary now passes. The above-limit test returns 0, and the empty batch returns 1. Which complete rows should your machine return?",
         "options": [
           {
-            "label": "empty and above",
-            "feedback": "Both results differ from their own expectations.",
+            "label": "Above the limit and No readings",
+            "feedback": "Both actual counts disagree with their own expected counts.",
             "correct": true
           },
           {
-            "label": "Only boundary",
-            "feedback": "Use the current results rather than the earlier diagnosis."
+            "label": "At the limit",
+            "feedback": "That was the earlier failure. Its actual count is now correct."
           }
         ],
-        "outcome": "The unchanged boundary case passes in this variation."
+        "outcome": "Run the same comparison against every case after a repair."
       },
       "connections": [
         {
+          "lessonId": "python-function-design",
+          "skill": "Reuse the inclusive alert rule",
+          "why": "A reading equal to the limit belongs in the alert count."
+        },
+        {
           "lessonId": "python-fail-fast",
-          "skill": "Distinguish expected rejection from a defect",
-          "why": "A test must check the promised failure as well as valid results."
+          "skill": "Keep empty and invalid input behavior explicit",
+          "why": "The report must still meet its other promises after a boundary repair."
         }
       ],
       "reflection": {
-        "prompt": "Which untested input might still distinguish two implementations?",
-        "carryForward": "Keep boundary and regression cases without inferring complete coverage."
+        "prompt": "Which additional input would help expose a mistake in the count?",
+        "carryForward": "Keep the input and both counts beside each failure."
       }
     },
     "fresh": {
-      "name": "An ordered result changes",
-      "prompt": "Find the case whose returned ID order differs from its expectation.",
+      "name": "One alert is counted instead of three",
+      "prompt": "The report returns one alert for [25,26,30], although all three readings reach the 25 C limit. The below-limit test still returns the expected zero.",
       "data": {
-        "names": [
-          "stable tie",
-          "empty"
-        ],
-        "actual": [
-          [
-            "B",
-            "A"
-          ],
-          []
-        ],
-        "expected": [
-          [
-            "A",
-            "B"
-          ],
-          []
+        "tests": [
+          {
+            "case": "Several alerts",
+            "readings_c": [
+              25,
+              26,
+              30
+            ],
+            "expected": 3,
+            "actual": 1
+          },
+          {
+            "case": "Below the limit",
+            "readings_c": [
+              18
+            ],
+            "expected": 0,
+            "actual": 0
+          }
         ]
       },
       "expected": [
-        "stable tie"
+        {
+          "case": "Several alerts",
+          "readings_c": [
+            25,
+            26,
+            30
+          ],
+          "expected": 3,
+          "actual": 1
+        }
       ],
-      "why": "Comparison must preserve the meaning of ordered results."
+      "why": "Checking whether there is any alert would pass a one-alert case but fail the promised count when several readings reach the limit.",
+      "prediction": {
+        "question": "How many test cases should your comparison mark as failed?",
+        "expected": 1
+      }
     }
   },
   {
@@ -505,7 +582,7 @@ const records = [
         "href": "/concepts/python-testing"
       }
     ],
-    "outputLabel": "Readings collected from the supplied source fixtures",
+    "outputLabel": "Selected source records that reach the alert limit",
     "checkpointTitle": "Questions on Parts 1 and 2",
     "history": {
       "title": "unittest.mock and Controlled Dependencies",
@@ -784,206 +861,251 @@ const records = [
       }
     ],
     "build": {
-      "title": "Collect the requested named-record batches",
-      "problem": "Botie's supplied source fixtures return named Celsius records, including any per-record limit field.",
-      "challenge": "Look up each requested source batch and combine them in request order. Keep every record field and repeated request intact.",
+      "title": "Replace the sensor input",
+      "problem": "The report should work with a saved recording while the physical sensor is unavailable. The two source names below contain small lists of named readings. Select one source, then keep its readings at or above the shared limit.",
+      "challenge": "Look up source_name in sources, then filter those records using temperature_c and limit_c. With recording selected and a limit of 25, return the complete south record. Changing the source must change the result without changing the alert rule.",
       "sources": {
-        "houses": "Requested source names",
-        "batches": "Controlled named-record batches"
+        "source_name": "Source name to use",
+        "sources": "Recorded and device readings",
+        "limit_c": "Alert limit in C"
       },
       "cases": [
         {
-          "name": "Two recorded sources",
+          "name": "Use the saved recording",
           "data": {
-            "houses": [
-              "north",
-              "south"
-            ],
-            "batches": {
-              "north": [
+            "sources": {
+              "recording": [
                 {
                   "house": "north",
                   "temperature_c": 18
-                }
-              ],
-              "south": [
-                {
-                  "house": "south",
-                  "temperature_c": 25,
-                  "limit": null
-                }
-              ]
-            }
-          },
-          "expected": [
-            {
-              "house": "north",
-              "temperature_c": 18
-            },
-            {
-              "house": "south",
-              "temperature_c": 25,
-              "limit": null
-            }
-          ]
-        },
-        {
-          "name": "Request order changes",
-          "data": {
-            "houses": [
-              "south",
-              "north"
-            ],
-            "batches": {
-              "north": [
-                {
-                  "house": "north",
-                  "temperature_c": 0
-                }
-              ],
-              "south": [
-                {
-                  "house": "south",
-                  "temperature_c": 5
                 },
                 {
                   "house": "south",
-                  "temperature_c": 5
+                  "temperature_c": 25
+                }
+              ],
+              "device": [
+                {
+                  "house": "north",
+                  "temperature_c": 30
+                },
+                {
+                  "house": "south",
+                  "temperature_c": 19
                 }
               ]
-            }
+            },
+            "limit_c": 25,
+            "source_name": "recording"
           },
           "expected": [
             {
               "house": "south",
-              "temperature_c": 5
-            },
-            {
-              "house": "south",
-              "temperature_c": 5
-            },
-            {
-              "house": "north",
-              "temperature_c": 0
+              "temperature_c": 25
             }
           ]
         },
         {
-          "name": "No requested source",
+          "name": "Replace it with the device input",
           "data": {
-            "houses": [],
-            "batches": {}
+            "sources": {
+              "recording": [
+                {
+                  "house": "north",
+                  "temperature_c": 18
+                },
+                {
+                  "house": "south",
+                  "temperature_c": 25
+                }
+              ],
+              "device": [
+                {
+                  "house": "south",
+                  "temperature_c": 29
+                },
+                {
+                  "house": "north",
+                  "temperature_c": 31
+                }
+              ]
+            },
+            "limit_c": 25,
+            "source_name": "device"
           },
-          "expected": []
+          "expected": [
+            {
+              "house": "south",
+              "temperature_c": 29
+            },
+            {
+              "house": "north",
+              "temperature_c": 31
+            }
+          ]
+        },
+        {
+          "name": "Raise the shared limit",
+          "data": {
+            "sources": {
+              "recording": [
+                {
+                  "house": "north",
+                  "temperature_c": 18
+                },
+                {
+                  "house": "south",
+                  "temperature_c": 25
+                }
+              ],
+              "device": [
+                {
+                  "house": "south",
+                  "temperature_c": 29
+                },
+                {
+                  "house": "north",
+                  "temperature_c": 31
+                }
+              ]
+            },
+            "limit_c": 30,
+            "source_name": "device"
+          },
+          "expected": [
+            {
+              "house": "north",
+              "temperature_c": 31
+            }
+          ]
         }
       ],
       "recipe": {
-        "op": "pyProjectFlatten",
+        "op": "pyProjectKeep",
         "inputs": [
           {
-            "op": "pyProjectLookup",
+            "op": "pyProjectReadKey",
             "inputs": [
               {
-                "source": "houses"
+                "source": "source_name"
               },
               {
-                "source": "batches"
+                "source": "sources"
+              }
+            ]
+          },
+          {
+            "op": "pyProjectAtLeast",
+            "inputs": [
+              {
+                "op": "pyProjectField",
+                "inputs": [
+                  {
+                    "op": "pyProjectReadKey",
+                    "inputs": [
+                      {
+                        "source": "source_name"
+                      },
+                      {
+                        "source": "sources"
+                      }
+                    ]
+                  }
+                ],
+                "settings": {
+                  "field": "temperature_c"
+                }
+              },
+              {
+                "source": "limit_c"
               }
             ]
           }
         ]
       },
-      "why": "The source preparation preserves the records the actual collector expects, rather than stripping names or optional settings.",
-      "limitation": "The lookup is a controlled input fixture. The floor does not execute collect_report, contact a device or promise complete-report delivery.",
-      "extras": [
-        "constant",
-        "add",
-        "multiply",
-        "total",
-        "count"
-      ],
-      "draftVersion": 1
+      "why": "The input source changes, while the alert calculation stays the same. Returning the original records keeps the house name attached to each reading.",
+      "limitation": "Both sources are supplied local records. The blocks do not contact a sensor. The Python collector also handles calibration, per-record limits and a complete report payload.",
+      "extras": [],
+      "draftVersion": 2
     },
     "journey": {
-      "premise": "The complete report program needs stable named-record inputs during a test.",
-      "order": "investigate-first",
+      "premise": "The sensor is unavailable, but the report still needs a repeatable input.",
+      "order": "build-first",
       "construction": {
-        "title": "Keep the source contract while changing fixtures",
-        "start": "Retrieve each recorded batch by source name, then combine its named records without removing fields.",
-        "outcome": "The prepared input still carries house identity, Celsius values and optional limits.",
+        "title": "Build with the recorded input",
+        "start": "Look up one name retrieves the records under source_name. Read temperature_c, check the alert limit, and keep the matching original records.",
+        "outcome": "The saved recording produces the south reading at 25 C.",
         "hints": [
-          "Look up whole record lists instead of extracting bare temperatures.",
-          "Combine the selected batches in request order without deduplicating records."
+          "Look up source_name in sources to retrieve the chosen list of named readings.",
+          "Branch those records: read their temperatures for the limit check, and keep the original records using its decisions."
         ]
       },
       "investigation": {
-        "title": "South is requested before north. Which source's records should appear first?",
+        "title": "Replace the source",
+        "kind": "compare",
         "caseIndex": 1,
-        "kind": "diagnose",
-        "question": "South is requested before north. Which source's records should appear first?",
+        "question": "The source changes from recording to device. The device readings are south at 29 C and north at 31 C, with a shared limit of 25 C. Which readings should the unchanged alert rule keep?",
         "options": [
           {
-            "label": "south",
-            "feedback": "The records follow the current source request order.",
+            "label": "Both device readings: south at 29 C and north at 31 C",
+            "feedback": "The chosen source now supplies the device records, and both readings reach the limit.",
             "correct": true
           },
           {
-            "label": "north because it came first previously",
-            "feedback": "That retains an old order rather than using the current input."
+            "label": "Only the saved south reading at 25 C",
+            "feedback": "That reading belongs to the earlier recording. The selected source has changed."
           }
         ],
-        "outcome": "Repeated measurements and per-record limit fields remain attached to their records."
+        "outcome": "Replace the source without replacing the alert calculation. Test the same construction against the earlier recording too."
       },
       "connections": [
         {
           "lessonId": "python-composition",
-          "skill": "Retain the actual ReadingSource contract",
-          "why": "The collector expects named Celsius records and builds its complete report from them."
+          "skill": "Supply the reading source",
+          "why": "The report receives named Celsius records through an explicit source."
         },
         {
           "lessonId": "python-testing",
-          "skill": "Control test input independently",
-          "why": "A fixed source fixture makes the expected preparation repeatable."
+          "skill": "Keep a repeatable test input",
+          "why": "A saved input lets the expected result stay known while the source is unavailable."
         }
       ],
       "reflection": {
-        "prompt": "What must a real integration check establish beyond this controlled fixture?",
-        "carryForward": "Change the test source without changing the report program's data agreement."
+        "prompt": "What would still need checking against the actual sensor?",
+        "carryForward": "Replace the input source without copying the report calculation."
       }
     },
     "fresh": {
-      "name": "A named-record source is requested twice",
-      "prompt": "Collect north, north and south in that order. Keep the repeated named north record, including its explicit disabled limit, instead of reducing it to an unnamed temperature.",
+      "name": "A replacement source has no alerts",
+      "prompt": "The selected recording contains north at 20 C and south at 24 C. The unused device still contains a north reading at 40 C. The shared alert limit stays at 25 C.",
       "data": {
-        "houses": [
-          "north",
-          "north",
-          "south"
-        ],
-        "batches": {
-          "north": [
+        "sources": {
+          "recording": [
             {
               "house": "north",
-              "temperature_c": 24,
-              "limit": null
+              "temperature_c": 20
+            },
+            {
+              "house": "south",
+              "temperature_c": 24
             }
           ],
-          "south": []
-        }
-      },
-      "expected": [
-        {
-          "house": "north",
-          "temperature_c": 24,
-          "limit": null
+          "device": [
+            {
+              "house": "north",
+              "temperature_c": 40
+            }
+          ]
         },
-        {
-          "house": "north",
-          "temperature_c": 24,
-          "limit": null
-        }
-      ],
-      "why": "Repeated requests remain separate record positions. A later cache may reduce source calls while preserving those records and their optional settings."
+        "limit_c": 25,
+        "source_name": "recording"
+      },
+      "expected": [],
+      "why": "The unused device still has an alerting reading. Only the selected recording supplies this run, and neither of its readings reaches 25 C.",
+      "prediction": {
+        "question": "Should the unused device reading at 40 C appear in this result?",
+        "expected": false
+      }
     }
   },
   {
@@ -1007,7 +1129,7 @@ const records = [
         "href": "/concepts/python-test-doubles"
       }
     ],
-    "outputLabel": "Distinct direct dependencies in first-use order",
+    "outputLabel": "Report-run steps currently performed during import",
     "checkpointTitle": "Questions on Parts 1 and 2",
     "history": {
       "title": "Python Module Namespaces and PEP 328",
@@ -1290,76 +1412,89 @@ const records = [
       }
     ],
     "build": {
-      "title": "List dependencies for a package",
-      "problem": "Botie has direct-import lists for a group of related modules.",
-      "challenge": "Read each imports field, combine those lists and retain each dependency's first occurrence.",
+      "title": "Stop an import from running the report",
+      "problem": "Importing the report helper unexpectedly opens readings.csv. Ordinary function definitions belong at module scope, but reading a file and printing a report should wait until the application is run. Each row describes one step and when it currently happens.",
+      "challenge": "Return the rows that need moving behind the main entry point: kind must be \"report run\" and when must be \"import\". Match each field separately, require both decisions, then keep those rows. The first result should identify Read readings.csv.",
       "sources": {
-        "modules": "Module records and direct imports"
+        "steps": "Steps currently performed by the report module"
       },
       "cases": [
         {
-          "name": "Report modules",
+          "name": "A file is read during import",
           "data": {
-            "modules": [
+            "steps": [
               {
-                "name": "cli",
-                "imports": [
-                  "io",
-                  "summary"
-                ]
+                "step": "Define summarize_alerts",
+                "kind": "definition",
+                "when": "import"
               },
               {
-                "name": "io",
-                "imports": [
-                  "csv"
-                ]
+                "step": "Read readings.csv",
+                "kind": "report run",
+                "when": "import"
               },
               {
-                "name": "summary",
-                "imports": [
-                  "statistics"
-                ]
+                "step": "Print the report",
+                "kind": "report run",
+                "when": "main"
               }
             ]
           },
           "expected": [
-            "io",
-            "summary",
-            "csv",
-            "statistics"
+            {
+              "step": "Read readings.csv",
+              "kind": "report run",
+              "when": "import"
+            }
           ]
         },
         {
-          "name": "Shared helper",
+          "name": "The file read is repaired, printing moves too early",
           "data": {
-            "modules": [
+            "steps": [
               {
-                "name": "a",
-                "imports": [
-                  "shared",
-                  "json"
-                ]
+                "step": "Define summarize_alerts",
+                "kind": "definition",
+                "when": "import"
               },
               {
-                "name": "b",
-                "imports": [
-                  "shared"
-                ]
+                "step": "Read readings.csv",
+                "kind": "report run",
+                "when": "main"
+              },
+              {
+                "step": "Print the report",
+                "kind": "report run",
+                "when": "import"
               }
             ]
           },
           "expected": [
-            "shared",
-            "json"
+            {
+              "step": "Print the report",
+              "kind": "report run",
+              "when": "import"
+            }
           ]
         },
         {
-          "name": "No imports",
+          "name": "The entry point owns all report work",
           "data": {
-            "modules": [
+            "steps": [
               {
-                "name": "core",
-                "imports": []
+                "step": "Define summarize_alerts",
+                "kind": "definition",
+                "when": "import"
+              },
+              {
+                "step": "Read readings.csv",
+                "kind": "report run",
+                "when": "main"
+              },
+              {
+                "step": "Print the report",
+                "kind": "report run",
+                "when": "main"
               }
             ]
           },
@@ -1367,101 +1502,147 @@ const records = [
         }
       ],
       "recipe": {
-        "op": "pyProjectUnique",
+        "op": "pyProjectKeep",
         "inputs": [
           {
-            "op": "pyProjectFlatten",
+            "source": "steps"
+          },
+          {
+            "op": "pyProjectAnd",
             "inputs": [
               {
-                "op": "pyProjectField",
+                "op": "pyProjectTextMatch",
                 "inputs": [
                   {
-                    "source": "modules"
+                    "op": "pyProjectField",
+                    "inputs": [
+                      {
+                        "source": "steps"
+                      }
+                    ],
+                    "settings": {
+                      "field": "kind"
+                    }
                   }
                 ],
                 "settings": {
-                  "field": "imports"
+                  "value": "report run"
+                }
+              },
+              {
+                "op": "pyProjectTextMatch",
+                "inputs": [
+                  {
+                    "op": "pyProjectField",
+                    "inputs": [
+                      {
+                        "source": "steps"
+                      }
+                    ],
+                    "settings": {
+                      "field": "when"
+                    }
+                  }
+                ],
+                "settings": {
+                  "value": "import"
                 }
               }
             ]
           }
         ]
       },
-      "why": "Repeated use does not create another dependency identity.",
-      "limitation": "This inspects an authored description. It neither parses Python nor detects every circular import.",
-      "extras": [
-        "constant",
-        "add",
-        "multiply",
-        "total",
-        "count"
-      ],
-      "draftVersion": 1
+      "why": "Moving the file read does not help if another report action still runs during import. Both the kind of work and its current location matter.",
+      "limitation": "The rows describe a small Python module. These blocks inspect that description; the Python challenge separates reusable helpers from the application entry point.",
+      "extras": [],
+      "draftVersion": 2
     },
     "journey": {
-      "premise": "Importing a helper unexpectedly launched a report.",
-      "order": "investigate-first",
+      "premise": "A caller wants the calculation, but importing it also starts the report.",
+      "order": "build-first",
       "construction": {
-        "title": "Inspect the responsibilities behind imports",
-        "start": "Read each direct-import list, combine its names and remove repeated dependency names.",
-        "outcome": "The output is a dependency inventory, not an execution plan.",
+        "title": "Find report work that runs during import",
+        "start": "Read kind and when from the same rows. Configure one text matcher for report run and another for import. Require both, then keep the original steps.",
+        "outcome": "The output names the work that needs moving to the entry point.",
         "hints": [
-          "Read the imports field from every record.",
-          "Combine the lists before keeping distinct names."
+          "An ordinary function definition at import is not the defect being investigated.",
+          "Keep only report-run steps whose when field is import. Both conditions must hold."
         ]
       },
       "investigation": {
-        "title": "Both a and b import shared. Should the inventory contain shared twice?",
-        "caseIndex": 1,
+        "title": "Check another import side effect",
         "kind": "diagnose",
-        "question": "Both a and b import shared. Should the inventory contain shared twice?",
+        "caseIndex": 1,
+        "question": "Reading the file now happens in main, but printing still happens during import. Which complete row should your machine return?",
         "options": [
           {
-            "label": "No; keep one dependency name",
-            "feedback": "The inventory names distinct dependencies.",
+            "label": "Print the report, kind report run, when import",
+            "feedback": "Printing still starts application work when a helper is imported.",
             "correct": true
           },
           {
-            "label": "Yes; each import creates another package",
-            "feedback": "An import statement does not create another dependency identity."
+            "label": "Read readings.csv, kind report run, when main",
+            "feedback": "The file read has moved to the intended entry point."
           }
         ],
-        "outcome": "The original module records still retain their separate relationships."
+        "outcome": "Inspect every application action after moving the first one."
       },
       "connections": [
         {
-          "lessonId": "python-dry",
-          "skill": "Assign shared behavior an owner",
-          "why": "A common module can serve callers without copied rules."
+          "lessonId": "python-composition",
+          "skill": "Keep effects outside the calculation",
+          "why": "Reading and sending belong to explicit application operations."
         },
         {
           "lessonId": "python-test-doubles",
-          "skill": "Keep external effects explicit",
-          "why": "Reusable calculations need not launch their dependencies during import."
+          "skill": "Make source use deliberate",
+          "why": "Importing a function should not unexpectedly read its source."
         }
       ],
       "reflection": {
-        "prompt": "Which work should happen only at the entry point?",
-        "carryForward": "Keep importing a calculation separate from running the application."
+        "prompt": "Which actions belong in the entry point of your own report program?",
+        "carryForward": "Keep reusable definitions available without starting the application."
       }
     },
     "fresh": {
-      "name": "No external helper is needed",
-      "prompt": "Two new modules both have empty import lists. Predict the dependency inventory.",
+      "name": "A new delivery step runs too early",
+      "prompt": "The module now reads a new batch and sends a completed report during import. Its ordinary convert_report definition also remains at module scope.",
       "data": {
-        "modules": [
+        "steps": [
           {
-            "name": "conversion",
-            "imports": []
+            "step": "Define convert_report",
+            "kind": "definition",
+            "when": "import"
           },
           {
-            "name": "thresholds",
-            "imports": []
+            "step": "Read the new batch",
+            "kind": "report run",
+            "when": "import"
+          },
+          {
+            "step": "Send the completed report",
+            "kind": "report run",
+            "when": "import"
           }
         ]
       },
-      "expected": [],
-      "why": "An empty dependency inventory is a valid result."
+      "expected": [
+        {
+          "step": "Read the new batch",
+          "kind": "report run",
+          "when": "import"
+        },
+        {
+          "step": "Send the completed report",
+          "kind": "report run",
+          "when": "import"
+        }
+      ],
+      "why": "The same condition catches a newly added effect. Fixing a file read alone does not protect an import from a later send.",
+      "prediction": {
+        "question": "How many report-run steps need moving out of import and into the entry point?",
+        "expected": 2
+      }
     }
   },
   {
@@ -1481,7 +1662,7 @@ const records = [
         "href": "/concepts/python-modules"
       }
     ],
-    "outputLabel": "Packages that differ from the reviewed version snapshot",
+    "outputLabel": "Package rows with different reviewed and installed labels",
     "checkpointTitle": "Questions on Parts 1 and 2",
     "history": {
       "title": "Virtual Environments and pyproject.toml",
@@ -1749,66 +1930,75 @@ const records = [
       }
     ],
     "build": {
-      "title": "Compare a reviewed dependency snapshot",
-      "problem": "Botie has package names, reviewed versions and installed versions in matching order.",
-      "challenge": "Compare the version entries, then keep package names at differing positions.",
+      "title": "Check the report environment",
+      "problem": "The report passed in the reviewed environment but behaves differently on another machine. Compare the installed packages with the saved version list. Each row keeps the package name and both version labels together; the package names here are invented.",
+      "challenge": "Return complete package rows whose installed label differs from reviewed. Read the two version columns, compare them as text, and keep the changed rows. A missing installation is shown as \"not installed\" and also needs attention.",
       "sources": {
-        "names": "Requested packages",
-        "actual": "Installed snapshot",
-        "expected": "Reviewed versions"
+        "packages": "Reviewed and installed package versions"
       },
       "cases": [
         {
-          "name": "One package changed",
+          "name": "A package version changed",
           "data": {
-            "names": [
-              "parser",
-              "writer"
-            ],
-            "actual": [
-              "2.2",
-              "1.0"
-            ],
-            "expected": [
-              "2.1",
-              "1.0"
+            "packages": [
+              {
+                "package": "sensor-reader",
+                "reviewed": "2.1",
+                "installed": "2.2"
+              },
+              {
+                "package": "report-writer",
+                "reviewed": "1.0",
+                "installed": "1.0"
+              }
             ]
           },
           "expected": [
-            "parser"
+            {
+              "package": "sensor-reader",
+              "reviewed": "2.1",
+              "installed": "2.2"
+            }
           ]
         },
         {
-          "name": "A package is absent",
+          "name": "The version is repaired, another package is missing",
           "data": {
-            "names": [
-              "writer",
-              "parser"
-            ],
-            "actual": [
-              null,
-              "2.1"
-            ],
-            "expected": [
-              "1.0",
-              "2.1"
+            "packages": [
+              {
+                "package": "sensor-reader",
+                "reviewed": "2.1",
+                "installed": "2.1"
+              },
+              {
+                "package": "report-writer",
+                "reviewed": "1.0",
+                "installed": "not installed"
+              }
             ]
           },
           "expected": [
-            "writer"
+            {
+              "package": "report-writer",
+              "reviewed": "1.0",
+              "installed": "not installed"
+            }
           ]
         },
         {
-          "name": "The snapshot agrees",
+          "name": "The recorded environment matches",
           "data": {
-            "names": [
-              "parser"
-            ],
-            "actual": [
-              "2.1"
-            ],
-            "expected": [
-              "2.1"
+            "packages": [
+              {
+                "package": "sensor-reader",
+                "reviewed": "2.1",
+                "installed": "2.1"
+              },
+              {
+                "package": "report-writer",
+                "reviewed": "1.0",
+                "installed": "1.0"
+              }
             ]
           },
           "expected": []
@@ -1818,95 +2008,118 @@ const records = [
         "op": "pyProjectKeep",
         "inputs": [
           {
-            "source": "names"
+            "source": "packages"
           },
           {
             "op": "pyProjectMismatch",
             "inputs": [
               {
-                "source": "actual"
+                "op": "pyProjectField",
+                "inputs": [
+                  {
+                    "source": "packages"
+                  }
+                ],
+                "settings": {
+                  "field": "installed"
+                }
               },
               {
-                "source": "expected"
+                "op": "pyProjectField",
+                "inputs": [
+                  {
+                    "source": "packages"
+                  }
+                ],
+                "settings": {
+                  "field": "reviewed"
+                }
               }
             ]
           }
         ]
       },
-      "why": "The inventory identifies exact drift before behavior is retested.",
-      "limitation": "Snapshot equality does not establish compatibility, trustworthiness or target-platform execution.",
-      "extras": [
-        "constant",
-        "add",
-        "multiply",
-        "total",
-        "count"
-      ],
-      "draftVersion": 1
+      "why": "Checking each package catches a missing installation as well as a changed version. The returned row shows what was expected and what was found.",
+      "limitation": "This compares supplied version labels exactly. It does not install packages, resolve version ranges, or establish that matching versions work on the target machine.",
+      "extras": [],
+      "draftVersion": 2
     },
     "journey": {
-      "premise": "The installed setup changed while the source stayed fixed.",
-      "order": "investigate-first",
+      "premise": "The report source stayed the same, but its installed environment changed.",
+      "order": "build-first",
       "construction": {
-        "title": "Identify recorded setup differences",
-        "start": "Reuse the comparison and retain the names of differing packages.",
-        "outcome": "A missing installation is a difference too.",
+        "title": "Find the changed package",
+        "start": "Reuse the field readers and comparison from the alert tests. This time the two columns hold version labels. Keep the full package rows where they disagree.",
+        "outcome": "The output gives each changed package beside its reviewed and installed labels.",
         "hints": [
-          "Keep version labels as text.",
-          "Select package names using the mismatch positions."
+          "Version labels are text. Read installed and reviewed without turning them into decimal numbers.",
+          "Keep the complete package rows using the mismatch decisions."
         ]
       },
       "investigation": {
-        "title": "Writer is absent and parser matches. Which name should remain?",
-        "caseIndex": 1,
+        "title": "Find a missing installation",
         "kind": "diagnose",
-        "question": "Writer is absent and parser matches. Which name should remain?",
+        "caseIndex": 1,
+        "question": "sensor-reader now matches 2.1, but report-writer is not installed. Which complete package row belongs in the result?",
         "options": [
           {
-            "label": "writer",
-            "feedback": "Absence differs from its reviewed version.",
+            "label": "report-writer: reviewed 1.0, not installed",
+            "feedback": "The missing installation differs from the reviewed environment.",
             "correct": true
           },
           {
-            "label": "No names because the source is unchanged",
-            "feedback": "Installed dependencies also affect execution."
+            "label": "sensor-reader: reviewed and installed 2.1",
+            "feedback": "Those two supplied labels now agree."
           }
         ],
-        "outcome": "The result identifies a setup difference without claiming to repair it."
+        "outcome": "A repaired version does not make another missing package available."
       },
       "connections": [
         {
           "lessonId": "python-testing",
-          "skill": "Compare an independent expectation",
-          "why": "Version snapshots are expectations with different limits from behavior tests."
+          "skill": "Compare an observed result with its expectation",
+          "why": "The same comparison can identify changes in recorded versions."
+        },
+        {
+          "lessonId": "python-modules",
+          "skill": "Separate application code from its dependencies",
+          "why": "The code can stay fixed while an installed package changes."
         }
       ],
       "reflection": {
-        "prompt": "What does a matching snapshot leave untested?",
-        "carryForward": "Record setup and execute imports and tests on the actual target platform."
+        "prompt": "What should you run on the target machine after these labels agree?",
+        "carryForward": "Keep the reviewed environment beside the report and rerun its tests."
       }
     },
     "fresh": {
-      "name": "Versions are not decimals",
-      "prompt": "Compare the required version labels with the supplied installed labels. Return the package names whose exact text differs, without treating versions as decimal numbers.",
+      "name": "Version labels are not decimal numbers",
+      "prompt": "The recorded sensor-reader version is 1.10, while the installed label is 1.1. The report-writer labels both remain 3.0. Compare the labels as text.",
       "data": {
-        "names": [
-          "adapter",
-          "writer"
-        ],
-        "actual": [
-          "1.1",
-          "3.0"
-        ],
-        "expected": [
-          "1.10",
-          "3.0"
+        "packages": [
+          {
+            "package": "sensor-reader",
+            "reviewed": "1.10",
+            "installed": "1.1"
+          },
+          {
+            "package": "report-writer",
+            "reviewed": "3.0",
+            "installed": "3.0"
+          }
         ]
       },
       "expected": [
-        "adapter"
+        {
+          "package": "sensor-reader",
+          "reviewed": "1.10",
+          "installed": "1.1"
+        }
       ],
-      "why": "Converting version labels to decimal numbers would erase a distinction in this exact comparison."
+      "why": "This is an exact recorded-label comparison. Converting labels to decimal numbers would hide a change the comparison is meant to expose.",
+      "prediction": {
+        "question": "Do the reviewed and installed sensor-reader labels match exactly?",
+        "expected": false
+      }
     }
   },
   {
@@ -1934,7 +2147,7 @@ const records = [
         "href": "/concepts/python-dependencies"
       }
     ],
-    "outputLabel": "Whether the parsed timeout fits the permitted range",
+    "outputLabel": "Environment rows with invalid timeout settings",
     "checkpointTitle": "Questions on Parts 1 and 2",
     "history": {
       "title": "Deployment Configuration and Twelve-Factor Config",
@@ -2230,134 +2443,222 @@ const records = [
       }
     ],
     "build": {
-      "title": "Check a timeout before use",
-      "problem": "Botie receives raw timeout text and explicit allowed limits.",
-      "challenge": "Parse the integer, then require it to lie within the supplied inclusive range. An unparsed value must fail.",
+      "title": "Find invalid report settings",
+      "problem": "The report receives its timeout as text in each environment. The documented setting must be a whole number within the supplied range. Reading \"0\" as a number succeeds, but zero is not an allowed timeout when the minimum is 1.",
+      "challenge": "Return complete environment rows with invalid timeout_seconds. Read that column, turn whole-number text into numbers, and check the range. Reverse the acceptance decisions so Keep flagged entries returns rejected rows. The first example should return an empty list.",
       "sources": {
-        "raw": "Raw timeout",
-        "minimum": "Minimum seconds",
-        "maximum": "Maximum seconds"
+        "settings": "Timeout settings by environment",
+        "minimum": "Smallest allowed timeout in seconds",
+        "maximum": "Largest allowed timeout in seconds"
       },
       "cases": [
         {
-          "name": "Valid text",
+          "name": "Both settings are valid",
           "data": {
-            "raw": "12",
+            "settings": [
+              {
+                "environment": "local",
+                "timeout_seconds": "12"
+              },
+              {
+                "environment": "production",
+                "timeout_seconds": "30"
+              }
+            ],
             "minimum": 1,
             "maximum": 60
           },
-          "expected": true
+          "expected": []
         },
         {
-          "name": "Too small",
+          "name": "Production changes to zero",
           "data": {
-            "raw": "0",
+            "settings": [
+              {
+                "environment": "local",
+                "timeout_seconds": "12"
+              },
+              {
+                "environment": "production",
+                "timeout_seconds": "0"
+              }
+            ],
             "minimum": 1,
             "maximum": 60
           },
-          "expected": false
+          "expected": [
+            {
+              "environment": "production",
+              "timeout_seconds": "0"
+            }
+          ]
         },
         {
-          "name": "Not integer text",
+          "name": "The text is not a whole number",
           "data": {
-            "raw": "fast",
+            "settings": [
+              {
+                "environment": "local",
+                "timeout_seconds": "fast"
+              },
+              {
+                "environment": "production",
+                "timeout_seconds": "12.5"
+              }
+            ],
             "minimum": 1,
             "maximum": 60
           },
-          "expected": false
+          "expected": [
+            {
+              "environment": "local",
+              "timeout_seconds": "fast"
+            },
+            {
+              "environment": "production",
+              "timeout_seconds": "12.5"
+            }
+          ]
         },
         {
-          "name": "Upper boundary",
+          "name": "Both ends of the range are allowed",
           "data": {
-            "raw": "60",
+            "settings": [
+              {
+                "environment": "local",
+                "timeout_seconds": "1"
+              },
+              {
+                "environment": "production",
+                "timeout_seconds": "60"
+              }
+            ],
             "minimum": 1,
             "maximum": 60
           },
-          "expected": true
+          "expected": []
         }
       ],
       "recipe": {
-        "op": "pyProjectInRange",
+        "op": "pyProjectKeep",
         "inputs": [
           {
-            "op": "pyProjectParseInteger",
+            "source": "settings"
+          },
+          {
+            "op": "pyProjectNot",
             "inputs": [
               {
-                "source": "raw"
+                "op": "pyProjectInRange",
+                "inputs": [
+                  {
+                    "op": "pyProjectParseInteger",
+                    "inputs": [
+                      {
+                        "op": "pyProjectField",
+                        "inputs": [
+                          {
+                            "source": "settings"
+                          }
+                        ],
+                        "settings": {
+                          "field": "timeout_seconds"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "source": "minimum"
+                  },
+                  {
+                    "source": "maximum"
+                  }
+                ]
               }
             ]
-          },
-          {
-            "source": "minimum"
-          },
-          {
-            "source": "maximum"
           }
         ]
       },
-      "why": "Parsing and the permitted range answer separate questions.",
-      "limitation": "The workshop parser is a small decimal-integer teaching model and returns null on failure. It is not Python's full parser or Pydantic. The coding task has a narrower ASCII-digit contract.",
-      "extras": [
-        "constant",
-        "add",
-        "multiply",
-        "total",
-        "count"
-      ],
-      "draftVersion": 1
+      "why": "Checking the text and checking the allowed range catch different mistakes. Returning rejected rows identifies the environment and value that need repair.",
+      "limitation": "The blocks use supplied settings and a small whole-number parser. They do not read environment variables or secrets. The Python task implements its stated configuration rules.",
+      "extras": [],
+      "draftVersion": 2
     },
     "journey": {
-      "premise": "A setting changed representation when it moved outside source code.",
-      "order": "investigate-first",
+      "premise": "Moving a setting outside the source code introduces new ways to enter an invalid value.",
+      "order": "build-first",
       "construction": {
-        "title": "Separate parsing from the allowed range",
-        "start": "Connect raw text to the parser, then give its result and both limits to the range check.",
-        "outcome": "Invalid representation and range both prevent acceptance.",
+        "title": "Check each environment setting",
+        "start": "Read timeout_seconds from each row. The number reader produces null for unreadable text. The range check marks accepted values; reverse its decisions to keep the rejected rows.",
+        "outcome": "Valid settings produce no rejected rows. Invalid ones retain their environment names.",
         "hints": [
-          "Parsing can produce null for an invalid representation.",
-          "The range check must reject null as well as out-of-range numbers."
+          "Read the timeout text before checking its numerical range.",
+          "The range check accepts valid values. Reverse those decisions before keeping the rows that need attention."
         ]
       },
       "investigation": {
-        "title": "The value is \"0\" and the range is 1 through 60. Is parsing enough?",
-        "caseIndex": 1,
+        "title": "A readable number is still invalid",
         "kind": "diagnose",
-        "question": "The value is \"0\" and the range is 1 through 60. Is parsing enough?",
+        "caseIndex": 1,
+        "question": "Production changes from \"30\" to \"0\" while the allowed range stays 1 through 60. Which complete environment row should be returned?",
         "options": [
           {
-            "label": "No; zero fails the range",
-            "feedback": "Application meaning adds a requirement beyond representation.",
+            "label": "production with timeout_seconds \"0\"",
+            "feedback": "Zero is readable but below the documented minimum.",
             "correct": true
           },
           {
-            "label": "Yes; every integer is an acceptable timeout",
-            "feedback": "The minimum remains part of the contract."
+            "label": "No rows, because zero is a whole number",
+            "feedback": "A whole number must also satisfy the allowed range."
           }
         ],
-        "outcome": "Try malformed text and the exact upper boundary."
+        "outcome": "Keep both the representation check and the range check."
       },
       "connections": [
         {
+          "lessonId": "python-dependencies",
+          "skill": "Inspect the actual environment",
+          "why": "Configuration can differ even when package versions match."
+        },
+        {
           "lessonId": "python-pydantic-models",
-          "skill": "Separate structural validation from constraints",
-          "why": "The consuming operation still determines which values are acceptable."
+          "skill": "Check meaning after reading a value",
+          "why": "A valid representation can still violate an application constraint."
         }
       ],
       "reflection": {
-        "prompt": "Which values may safely appear in a settings diagnostic?",
-        "carryForward": "Validate before dependent work and choose public output explicitly."
+        "prompt": "Which setting values belong in a public diagnostic, and which should stay private?",
+        "carryForward": "Reject invalid configuration before starting the work that depends on it."
       }
     },
     "fresh": {
-      "name": "A narrower deployment limit",
-      "prompt": "The raw value remains \"12\", but the range becomes 2 through 8. Predict acceptance.",
+      "name": "A smaller deployment limit",
+      "prompt": "The allowed timeout range changes to 2 through 8 seconds. Local is configured as \"4\" and production as \"12\". Both are readable whole-number text.",
       "data": {
-        "raw": "12",
+        "settings": [
+          {
+            "environment": "local",
+            "timeout_seconds": "4"
+          },
+          {
+            "environment": "production",
+            "timeout_seconds": "12"
+          }
+        ],
         "minimum": 2,
         "maximum": 8
       },
-      "expected": false,
-      "why": "The same construction must follow supplied limits rather than remembering the first range."
+      "expected": [
+        {
+          "environment": "production",
+          "timeout_seconds": "12"
+        }
+      ],
+      "why": "The same text can become invalid when the documented limits change. The construction must use the limits supplied for this run.",
+      "prediction": {
+        "question": "How many environment settings now fall outside the allowed range?",
+        "expected": 1
+      }
     }
   },
   {
@@ -2389,7 +2690,7 @@ const records = [
         "href": "/concepts/python-configuration"
       }
     ],
-    "outputLabel": "Whether every required check ran and passed",
+    "outputLabel": "Required checks that failed or did not run",
     "checkpointTitle": "Questions on Parts 1 and 2",
     "history": {
       "title": "Python Style Checks and Static Analysis",
@@ -2706,184 +3007,297 @@ const records = [
       }
     ],
     "build": {
-      "title": "Keep execution and success separate",
-      "problem": "Botie receives every mandatory check record for one source revision.",
-      "challenge": "Read ran and passed on separate branches. Require both per position, then accept only a nonempty set of passing decisions.",
+      "title": "Find the project checks that need attention",
+      "problem": "Formatting passes, but the alert-count test fails. Formatting checks how code is written; tests check the behavior promised by the program. The table contains one result for every required project check, with passed, failed or not run as its status.",
+      "challenge": "Return complete check rows whose status is not \"passed\". Read status, match the text \"passed\", reverse those decisions and keep the remaining rows. The initial result should show Tests and its boundary-count failure.",
       "sources": {
-        "checks": "Mandatory check records"
+        "checks": "Results for every required project check"
       },
       "cases": [
         {
-          "name": "One check skipped",
+          "name": "Formatting passes, the alert test fails",
           "data": {
             "checks": [
               {
-                "name": "format",
-                "ran": true,
-                "passed": true
+                "check": "Formatting",
+                "status": "passed",
+                "detail": "Source formatting agrees"
               },
               {
-                "name": "tests",
-                "ran": false,
-                "passed": true
+                "check": "Lint",
+                "status": "passed",
+                "detail": "No selected lint errors"
+              },
+              {
+                "check": "Type checking",
+                "status": "passed",
+                "detail": "No reported type mismatches"
+              },
+              {
+                "check": "Tests",
+                "status": "failed",
+                "detail": "A reading equal to 25 C was not counted"
               }
             ]
           },
-          "expected": false
+          "expected": [
+            {
+              "check": "Tests",
+              "status": "failed",
+              "detail": "A reading equal to 25 C was not counted"
+            }
+          ]
         },
         {
-          "name": "A check failed",
+          "name": "Tests are repaired, type checking is skipped",
           "data": {
             "checks": [
               {
-                "name": "format",
-                "ran": true,
-                "passed": true
+                "check": "Formatting",
+                "status": "passed",
+                "detail": "Source formatting agrees"
               },
               {
-                "name": "tests",
-                "ran": true,
-                "passed": false
+                "check": "Lint",
+                "status": "passed",
+                "detail": "No selected lint errors"
+              },
+              {
+                "check": "Type checking",
+                "status": "not run",
+                "detail": "The type-checking job was skipped"
+              },
+              {
+                "check": "Tests",
+                "status": "passed",
+                "detail": "Alert tests pass"
               }
             ]
           },
-          "expected": false
+          "expected": [
+            {
+              "check": "Type checking",
+              "status": "not run",
+              "detail": "The type-checking job was skipped"
+            }
+          ]
         },
         {
-          "name": "All required checks passed",
+          "name": "Every required check passes",
           "data": {
             "checks": [
               {
-                "name": "typing",
-                "ran": true,
-                "passed": true
+                "check": "Formatting",
+                "status": "passed",
+                "detail": "Check completed successfully"
               },
               {
-                "name": "tests",
-                "ran": true,
-                "passed": true
+                "check": "Lint",
+                "status": "passed",
+                "detail": "Check completed successfully"
+              },
+              {
+                "check": "Type checking",
+                "status": "passed",
+                "detail": "Check completed successfully"
+              },
+              {
+                "check": "Tests",
+                "status": "passed",
+                "detail": "Check completed successfully"
               }
             ]
           },
-          "expected": true
+          "expected": []
         },
         {
-          "name": "No evidence",
+          "name": "No check ran",
           "data": {
-            "checks": []
+            "checks": [
+              {
+                "check": "Formatting",
+                "status": "not run",
+                "detail": "No result for this run"
+              },
+              {
+                "check": "Lint",
+                "status": "not run",
+                "detail": "No result for this run"
+              },
+              {
+                "check": "Type checking",
+                "status": "not run",
+                "detail": "No result for this run"
+              },
+              {
+                "check": "Tests",
+                "status": "not run",
+                "detail": "No result for this run"
+              }
+            ]
           },
-          "expected": false
+          "expected": [
+            {
+              "check": "Formatting",
+              "status": "not run",
+              "detail": "No result for this run"
+            },
+            {
+              "check": "Lint",
+              "status": "not run",
+              "detail": "No result for this run"
+            },
+            {
+              "check": "Type checking",
+              "status": "not run",
+              "detail": "No result for this run"
+            },
+            {
+              "check": "Tests",
+              "status": "not run",
+              "detail": "No result for this run"
+            }
+          ]
         }
       ],
       "recipe": {
-        "op": "pyProjectAll",
+        "op": "pyProjectKeep",
         "inputs": [
           {
-            "op": "pyProjectAnd",
+            "source": "checks"
+          },
+          {
+            "op": "pyProjectNot",
             "inputs": [
               {
-                "op": "pyProjectField",
+                "op": "pyProjectTextMatch",
                 "inputs": [
                   {
-                    "source": "checks"
+                    "op": "pyProjectField",
+                    "inputs": [
+                      {
+                        "source": "checks"
+                      }
+                    ],
+                    "settings": {
+                      "field": "status"
+                    }
                   }
                 ],
                 "settings": {
-                  "field": "ran"
-                }
-              },
-              {
-                "op": "pyProjectField",
-                "inputs": [
-                  {
-                    "source": "checks"
-                  }
-                ],
-                "settings": {
-                  "field": "passed"
+                  "value": "passed"
                 }
               }
             ]
           }
         ]
       },
-      "why": "Running and passing are separate conditions before checks are combined.",
-      "limitation": "The fixture is the complete required set for one revision. A real build system must establish required names and revision identity.",
-      "extras": [
-        "constant",
-        "add",
-        "multiply",
-        "total",
-        "count"
-      ],
-      "draftVersion": 1
+      "why": "A failed test needs repair; a skipped check still needs to run. Keeping their status and detail shows which problem needs action.",
+      "limitation": "These are supplied check results, not executions of a formatter, linter or type checker. The table is assumed to include every required check for the same code revision.",
+      "extras": [],
+      "draftVersion": 2
     },
     "journey": {
-      "premise": "A formatting pass was mistaken for a correct calculation.",
-      "order": "investigate-first",
+      "premise": "One successful tool result was mistaken for a passing project.",
+      "order": "build-first",
       "construction": {
-        "title": "Combine different evidence carefully",
-        "start": "Branch check records into ran and passed lists, then require both before combining all decisions.",
-        "outcome": "A skipped check cannot authorize the release.",
+        "title": "List the checks that still need work",
+        "start": "Read the status column. Match passed, reverse that selection, and keep the original check rows so their details remain visible.",
+        "outcome": "The output identifies the failed test and explains its observed boundary error.",
         "hints": [
-          "Read ran and passed separately.",
-          "Require both per position, then a nonempty all-true set."
+          "Match the exact status passed. A check named Formatting has no authority over the Tests result.",
+          "Reverse the match decisions to include both failed and not run rows."
         ]
       },
       "investigation": {
-        "title": "Formatting passes but tests run and fail. Should the release gate accept?",
-        "caseIndex": 1,
+        "title": "A skipped check remains",
         "kind": "diagnose",
-        "question": "Formatting passes but tests run and fail. Should the release gate accept?",
+        "caseIndex": 1,
+        "question": "The alert tests now pass, but Type checking has status not run. Which complete row should remain?",
         "options": [
           {
-            "label": "No; a mandatory behavior check failed",
-            "feedback": "The formatter cannot replace that missing passing evidence.",
+            "label": "Type checking, not run, job skipped",
+            "feedback": "It has no passing result for this run.",
             "correct": true
           },
           {
-            "label": "Yes; one successful tool is enough",
-            "feedback": "Every mandatory check needs its own pass."
+            "label": "No rows, because the tests pass",
+            "feedback": "The other required checks still need their own results."
           }
         ],
-        "outcome": "Try the fully passing set and the empty set."
+        "outcome": "Different tools check different requirements."
       },
       "connections": [
         {
           "lessonId": "python-testing",
-          "skill": "Keep evidence scoped to behavior",
-          "why": "Tests answer requirements that formatting does not."
+          "skill": "Retain a behavior failure",
+          "why": "A formatting pass does not repair a wrong alert count."
         },
         {
           "lessonId": "python-type-hints",
-          "skill": "Use annotations with appropriate tools",
-          "why": "Declarations need analysis and runtime boundaries."
+          "skill": "Use a tool to inspect annotations",
+          "why": "An annotation does not run a type checker by itself."
         }
       ],
       "reflection": {
-        "prompt": "Which tool would expose the defect you want to prevent?",
-        "carryForward": "Automate complementary checks without confusing their scopes."
+        "prompt": "Which tool would report a wrong result that still has valid types?",
+        "carryForward": "Read each required check result instead of treating one pass as the whole project."
       }
     },
     "fresh": {
-      "name": "A later job is skipped",
-      "prompt": "The first check failed and the second never ran. Predict readiness.",
+      "name": "Later checks never ran",
+      "prompt": "Formatting fails, so lint, type checking and tests do not run. Each required check still has its own row explaining whether it failed or never ran.",
       "data": {
         "checks": [
           {
-            "name": "lint",
-            "ran": true,
-            "passed": false
+            "check": "Formatting",
+            "status": "failed",
+            "detail": "A formatting change is required"
           },
           {
-            "name": "tests",
-            "ran": false,
-            "passed": false
+            "check": "Lint",
+            "status": "not run",
+            "detail": "Stopped after the earlier failure"
+          },
+          {
+            "check": "Type checking",
+            "status": "not run",
+            "detail": "Stopped after the earlier failure"
+          },
+          {
+            "check": "Tests",
+            "status": "not run",
+            "detail": "Stopped after the earlier failure"
           }
         ]
       },
-      "expected": false,
-      "why": "A skipped job is missing evidence, while an earlier failure remains a failure."
+      "expected": [
+        {
+          "check": "Formatting",
+          "status": "failed",
+          "detail": "A formatting change is required"
+        },
+        {
+          "check": "Lint",
+          "status": "not run",
+          "detail": "Stopped after the earlier failure"
+        },
+        {
+          "check": "Type checking",
+          "status": "not run",
+          "detail": "Stopped after the earlier failure"
+        },
+        {
+          "check": "Tests",
+          "status": "not run",
+          "detail": "Stopped after the earlier failure"
+        }
+      ],
+      "why": "The first row describes an actual failure. Later rows describe work that has not run, so none provides a passing result.",
+      "prediction": {
+        "question": "How many required checks have status not run?",
+        "expected": 3
+      }
     }
   },
   {
@@ -2911,7 +3325,7 @@ const records = [
         "href": "/concepts/python-code-checks"
       }
     ],
-    "outputLabel": "Selected events with only allowed fields",
+    "outputLabel": "Selected log events containing only public fields",
     "checkpointTitle": "Questions on Parts 1 and 2",
     "history": {
       "title": "Python Logging and PEP 282",
@@ -3190,91 +3604,160 @@ const records = [
       }
     ],
     "build": {
-      "title": "Choose diagnostic events and fields",
-      "problem": "Botie receives event records with severity, batch IDs and private placeholder fields.",
-      "challenge": "Apply severity decisions to keep events, then produce records with only the supplied allowed fields.",
+      "title": "Keep useful report logs",
+      "problem": "A report failed, but a message saying \"error\" gives little help. Keep its report ID and a short description so the failure can be found. The supplied events also contain a private-token placeholder that should stay out of the public output.",
+      "challenge": "Keep events at or above minimum_level, then return only the fields named in public_fields. Severity runs from DEBUG through INFO, WARNING, ERROR and CRITICAL. At WARNING, the first result should contain the warning and error, with their report IDs and messages but no private_token.",
       "sources": {
-        "events": "Operational events",
-        "minimum": "Minimum level",
-        "fields": "Allowed field names"
+        "events": "Report events with private placeholders",
+        "minimum_level": "Least severe event to keep",
+        "public_fields": "Fields allowed in the displayed log"
       },
       "cases": [
         {
-          "name": "Warnings and errors",
+          "name": "Investigate warnings and errors",
           "data": {
             "events": [
               {
                 "level": "INFO",
-                "batch_id": "A",
-                "token": "placeholder"
+                "report_id": "R10",
+                "message": "Report completed",
+                "private_token": "placeholder only"
               },
               {
                 "level": "WARNING",
-                "batch_id": "B",
-                "token": "placeholder"
+                "report_id": "R11",
+                "message": "No readings for south",
+                "private_token": "placeholder only"
               },
               {
                 "level": "ERROR",
-                "batch_id": "C",
-                "token": "placeholder"
+                "report_id": "R12",
+                "message": "Temperature field rejected",
+                "private_token": "placeholder only"
               }
             ],
-            "minimum": "WARNING",
-            "fields": [
+            "minimum_level": "WARNING",
+            "public_fields": [
               "level",
-              "batch_id"
+              "report_id",
+              "message"
             ]
           },
           "expected": [
             {
               "level": "WARNING",
-              "batch_id": "B"
+              "report_id": "R11",
+              "message": "No readings for south"
             },
             {
               "level": "ERROR",
-              "batch_id": "C"
+              "report_id": "R12",
+              "message": "Temperature field rejected"
             }
           ]
         },
         {
-          "name": "Only errors",
+          "name": "Only errors are requested",
           "data": {
             "events": [
               {
+                "level": "INFO",
+                "report_id": "R10",
+                "message": "Report completed",
+                "private_token": "placeholder only"
+              },
+              {
                 "level": "WARNING",
-                "batch_id": "B",
-                "token": "placeholder"
+                "report_id": "R11",
+                "message": "No readings for south",
+                "private_token": "placeholder only"
               },
               {
                 "level": "ERROR",
-                "batch_id": "C",
-                "token": "placeholder"
+                "report_id": "R12",
+                "message": "Temperature field rejected",
+                "private_token": "placeholder only"
               }
             ],
-            "minimum": "ERROR",
-            "fields": [
-              "batch_id"
+            "minimum_level": "ERROR",
+            "public_fields": [
+              "level",
+              "report_id",
+              "message"
             ]
           },
           "expected": [
             {
-              "batch_id": "C"
+              "level": "ERROR",
+              "report_id": "R12",
+              "message": "Temperature field rejected"
             }
           ]
         },
         {
-          "name": "No matching event",
+          "name": "Include routine completion messages",
           "data": {
             "events": [
               {
-                "level": "DEBUG",
-                "batch_id": "D",
-                "token": "placeholder"
+                "level": "INFO",
+                "report_id": "R10",
+                "message": "Report completed",
+                "private_token": "placeholder only"
+              },
+              {
+                "level": "WARNING",
+                "report_id": "R11",
+                "message": "No readings for south",
+                "private_token": "placeholder only"
+              },
+              {
+                "level": "ERROR",
+                "report_id": "R12",
+                "message": "Temperature field rejected",
+                "private_token": "placeholder only"
               }
             ],
-            "minimum": "CRITICAL",
-            "fields": [
-              "level"
+            "minimum_level": "INFO",
+            "public_fields": [
+              "level",
+              "report_id",
+              "message"
+            ]
+          },
+          "expected": [
+            {
+              "level": "INFO",
+              "report_id": "R10",
+              "message": "Report completed"
+            },
+            {
+              "level": "WARNING",
+              "report_id": "R11",
+              "message": "No readings for south"
+            },
+            {
+              "level": "ERROR",
+              "report_id": "R12",
+              "message": "Temperature field rejected"
+            }
+          ]
+        },
+        {
+          "name": "No event reaches the selected level",
+          "data": {
+            "events": [
+              {
+                "level": "INFO",
+                "report_id": "R10",
+                "message": "Report completed",
+                "private_token": "placeholder only"
+              }
+            ],
+            "minimum_level": "CRITICAL",
+            "public_fields": [
+              "level",
+              "report_id",
+              "message"
             ]
           },
           "expected": []
@@ -3296,102 +3779,104 @@ const records = [
                     "source": "events"
                   },
                   {
-                    "source": "minimum"
+                    "source": "minimum_level"
                   }
                 ]
               }
             ]
           },
           {
-            "source": "fields"
+            "source": "public_fields"
           }
         ]
       },
-      "why": "A selected event need not copy its attached private fields.",
-      "limitation": "These operations inspect invented records locally. They do not send logs or reproduce the full logger and handler hierarchy.",
-      "extras": [
-        "constant",
-        "add",
-        "multiply",
-        "total",
-        "count"
-      ],
-      "draftVersion": 1
+      "why": "Severity selects which events matter for this view. Field selection keeps useful context while leaving the attached private placeholder out.",
+      "limitation": "The blocks filter local example records and do not send logs. Messages here contain approved event text; real exception messages can include private input and need separate review.",
+      "extras": [],
+      "draftVersion": 2
     },
     "journey": {
-      "premise": "A vague diagnostic was useless, while dumping the whole request would disclose too much.",
-      "order": "investigate-first",
+      "premise": "A useful diagnostic needs enough context to find the failure without copying the whole request.",
+      "order": "build-first",
       "construction": {
-        "title": "Choose events before their output fields",
-        "start": "Select events using the minimum severity, then apply the allowed field list.",
-        "outcome": "The output has useful selected context without the attached token.",
+        "title": "Select the events and their public fields",
+        "start": "Choose event severity marks entries at the selected level or higher. Keep those events, then select the allowed fields for each retained record.",
+        "outcome": "Warnings and errors retain their messages and report IDs without private_token.",
         "hints": [
-          "Severity decisions align with the original event list.",
-          "Select those records, then apply allowed output fields."
+          "Use the severity decisions to keep the original events first.",
+          "Pass the selected events and public_fields into Select fields for a record."
         ]
       },
       "investigation": {
-        "title": "The threshold becomes ERROR. Which batch ID remains?",
-        "caseIndex": 1,
+        "title": "Narrow the log to errors",
         "kind": "diagnose",
-        "question": "The threshold becomes ERROR. Which batch ID remains?",
+        "caseIndex": 1,
+        "question": "The minimum level changes from WARNING to ERROR. Which event should remain, and which details may it display?",
         "options": [
           {
-            "label": "C",
-            "feedback": "Only the error event reaches this threshold.",
+            "label": "R12 only, with its level, report ID and message",
+            "feedback": "The error reaches the new threshold. The allowed fields retain its useful context and leave private_token out.",
             "correct": true
           },
           {
-            "label": "B and C",
-            "feedback": "WARNING was selected earlier but not under the new threshold."
+            "label": "R11 and R12, with every attached field",
+            "feedback": "R11 is a warning below the new threshold, and private_token is outside the allowed field list."
           }
         ],
-        "outcome": "Inspect which fields remain as well as which event passed."
+        "outcome": "Keep only the error event and the approved fields. Test the earlier WARNING view with the same pieces."
       },
       "connections": [
         {
           "lessonId": "python-configuration",
-          "skill": "Use explicit disclosure allowlists",
-          "why": "A diagnostic needs the same content review as a settings report."
+          "skill": "Choose public output fields",
+          "why": "Settings and logs both need an explicit decision about what may be displayed."
         },
         {
-          "lessonId": "python-exceptions",
-          "skill": "Preserve a failure's meaning",
-          "why": "The error category and appropriate context can explain a problem without swallowing it."
+          "lessonId": "python-code-checks",
+          "skill": "Retain useful failure details",
+          "why": "An event category and report ID help locate the failed run."
         }
       ],
       "reflection": {
-        "prompt": "Which fields are necessary to investigate this failure?",
-        "carryForward": "Choose event content deliberately, regardless of severity."
+        "prompt": "Could a message expose private input even after the token field is removed?",
+        "carryForward": "Review message content as well as which fields are included."
       }
     },
     "fresh": {
-      "name": "More detail without token disclosure",
-      "prompt": "Use the INFO threshold to select the recorded events, then return only each selected event’s batch_id in its original order, excluding the attached token fields.",
+      "name": "Routine progress without private fields",
+      "prompt": "The minimum log level changes to INFO. Displayed fields are restricted to report_id and message, while each input event still has its private-token placeholder.",
       "data": {
         "events": [
           {
             "level": "DEBUG",
-            "batch_id": "X",
-            "token": "placeholder"
+            "report_id": "R20",
+            "message": "Source selected",
+            "private_token": "placeholder only"
           },
           {
             "level": "INFO",
-            "batch_id": "Y",
-            "token": "placeholder"
+            "report_id": "R20",
+            "message": "Report completed",
+            "private_token": "placeholder only"
           }
         ],
-        "minimum": "INFO",
-        "fields": [
-          "batch_id"
+        "minimum_level": "INFO",
+        "public_fields": [
+          "report_id",
+          "message"
         ]
       },
       "expected": [
         {
-          "batch_id": "Y"
+          "report_id": "R20",
+          "message": "Report completed"
         }
       ],
-      "why": "A changed event threshold still preserves the output field policy."
+      "why": "Changing the severity threshold does not change the field policy. The debug event stays out and no token field is copied.",
+      "prediction": {
+        "question": "Should private_token appear in the displayed log?",
+        "expected": false
+      }
     }
   },
   {
@@ -3419,7 +3904,7 @@ const records = [
         "href": "/concepts/python-mutation"
       }
     ],
-    "outputLabel": "Operation with the largest estimated self cost",
+    "outputLabel": "Complete profile row with the largest estimated total self time",
     "checkpointTitle": "Questions on Parts 1 and 2",
     "history": {
       "title": "Python Profilers and timeit",
@@ -3728,81 +4213,95 @@ const records = [
       }
     ],
     "build": {
-      "title": "Find expensive repeated work",
-      "problem": "Botie has operation names, counts and mean self milliseconds per call from an invented profile.",
-      "challenge": "Multiply aligned counts and mean self costs. Find the largest product's position, then retrieve its operation name.",
+      "title": "Find where the report spends its time",
+      "problem": "The report feels slow. The supplied profile records how often each operation ran and its mean time per call, excluding time in functions it called. That is self time. Many quick calls can cost less than a few slow ones.",
+      "challenge": "Multiply calls by self_ms_per_call for each row, find the largest total, and return that complete profile row. For the first example, reading costs 200 ms, formatting 100 ms and validation 8 ms. If totals tie, keep the first tied row.",
       "sources": {
-        "names": "Operation names",
-        "calls": "Calls per operation",
-        "per_call": "Mean self milliseconds per call"
+        "profile": "Recorded report operations and their costs"
       },
       "cases": [
         {
-          "name": "Repeated lookup dominates",
+          "name": "Reading the source dominates",
           "data": {
-            "names": [
-              "parse",
-              "lookup",
-              "format"
-            ],
-            "calls": [
-              100,
-              1000,
-              1
-            ],
-            "per_call": [
-              0.1,
-              0.02,
-              5
+            "profile": [
+              {
+                "operation": "Read source",
+                "calls": 40,
+                "self_ms_per_call": 5
+              },
+              {
+                "operation": "Format report",
+                "calls": 1000,
+                "self_ms_per_call": 0.1
+              },
+              {
+                "operation": "Validate records",
+                "calls": 40,
+                "self_ms_per_call": 0.2
+              }
             ]
           },
-          "expected": "lookup"
+          "expected": {
+            "operation": "Read source",
+            "calls": 40,
+            "self_ms_per_call": 5
+          }
         },
         {
-          "name": "One call becomes expensive",
+          "name": "Fewer source reads expose another cost",
           "data": {
-            "names": [
-              "parse",
-              "lookup",
-              "format"
-            ],
-            "calls": [
-              100,
-              1000,
-              1
-            ],
-            "per_call": [
-              0.1,
-              0.002,
-              15
+            "profile": [
+              {
+                "operation": "Read source",
+                "calls": 2,
+                "self_ms_per_call": 5
+              },
+              {
+                "operation": "Format report",
+                "calls": 1000,
+                "self_ms_per_call": 0.1
+              },
+              {
+                "operation": "Validate records",
+                "calls": 40,
+                "self_ms_per_call": 0.2
+              }
             ]
           },
-          "expected": "format"
+          "expected": {
+            "operation": "Format report",
+            "calls": 1000,
+            "self_ms_per_call": 0.1
+          }
         },
         {
-          "name": "Ties preserve order",
+          "name": "Equal totals retain the first row",
           "data": {
-            "names": [
-              "first",
-              "second"
-            ],
-            "calls": [
-              2,
-              1
-            ],
-            "per_call": [
-              1,
-              2
+            "profile": [
+              {
+                "operation": "Read source",
+                "calls": 4,
+                "self_ms_per_call": 5
+              },
+              {
+                "operation": "Format report",
+                "calls": 200,
+                "self_ms_per_call": 0.1
+              }
             ]
           },
-          "expected": "first"
+          "expected": {
+            "operation": "Read source",
+            "calls": 4,
+            "self_ms_per_call": 5
+          }
         }
       ],
       "recipe": {
         "op": "pyProjectAt",
         "inputs": [
           {
-            "source": "names"
+            "source": "profile"
           },
           {
             "op": "pyProjectArgMax",
@@ -3811,10 +4310,26 @@ const records = [
                 "op": "multiply",
                 "inputs": [
                   {
-                    "source": "calls"
+                    "op": "pyProjectField",
+                    "inputs": [
+                      {
+                        "source": "profile"
+                      }
+                    ],
+                    "settings": {
+                      "field": "calls"
+                    }
                   },
                   {
-                    "source": "per_call"
+                    "op": "pyProjectField",
+                    "inputs": [
+                      {
+                        "source": "profile"
+                      }
+                    ],
+                    "settings": {
+                      "field": "self_ms_per_call"
+                    }
                   }
                 ]
               }
@@ -3822,83 +4337,85 @@ const records = [
           }
         ]
       },
-      "why": "The name follows total estimated cost rather than call count alone.",
-      "limitation": "Supplied self-cost fixtures do not measure a real execution or establish that the selected operation can be improved.",
-      "extras": [
-        "constant",
-        "add",
-        "multiply",
-        "total",
-        "count"
-      ],
-      "draftVersion": 1
+      "why": "The multiplication makes total cost visible. After source reads are reduced, the earlier slowest operation may no longer be the next useful target.",
+      "limitation": "These measurements are invented and supplied. The blocks calculate estimates from them; they do not time Python. A real optimization also needs fresh measurements and unchanged behavior tests.",
+      "extras": [],
+      "draftVersion": 2
     },
     "journey": {
-      "premise": "A loop rewrite did not reduce the dominant work.",
-      "order": "investigate-first",
+      "premise": "The first suspect is the function with the most calls, but call count alone does not show total cost.",
+      "order": "build-first",
       "construction": {
-        "title": "Locate the cost before choosing a repair",
-        "start": "Calculate totals while preserving operation positions, then retrieve the largest-cost name.",
-        "outcome": "The result follows supplied costs rather than which code looked awkward.",
+        "title": "Calculate the cost of each operation",
+        "start": "Read the calls and self_ms_per_call columns. Multiply them to obtain total self milliseconds. Find the largest cost position, then retrieve that row from the original profile.",
+        "outcome": "The selected row identifies Read source even though Format report has more calls.",
         "hints": [
-          "Multiply each count by its corresponding mean self cost.",
-          "Use the maximum product's position to retrieve its name."
+          "Multiply the two numerical columns position by position. Inspect that tool output to see every estimated total.",
+          "Find the position of the largest total and use it to retrieve the corresponding complete profile row."
         ]
       },
       "investigation": {
-        "title": "Counts stay at 100, 1000 and 1; costs become 0.1, 0.002 and 15 ms. Which operation dominates?",
+        "title": "Measure again after reducing source reads",
+        "kind": "compare",
         "caseIndex": 1,
-        "kind": "diagnose",
-        "question": "Counts stay at 100, 1000 and 1; costs become 0.1, 0.002 and 15 ms. Which operation dominates?",
+        "question": "Reading now runs twice at 5 ms per call. Formatting still runs 1000 times at 0.1 ms per call. Which operation has the larger total self time?",
         "options": [
           {
-            "label": "format",
-            "feedback": "Its estimated self cost is now largest.",
+            "label": "Format report: 100 ms in total",
+            "feedback": "Reading now costs 10 ms. Formatting remains at 100 ms and is the larger recorded cost.",
             "correct": true
           },
           {
-            "label": "lookup because it runs most often",
-            "feedback": "The per-call cost changes the total."
+            "label": "Read source: each call still takes 5 ms",
+            "feedback": "Per-call time is only one part of the total. Two 5 ms calls cost less than the formatting work."
           }
         ],
-        "outcome": "The target changes with the workload."
+        "outcome": "Run the calculation again after a repair. The largest remaining cost can change even though the program still performs the same tasks."
       },
       "connections": [
         {
-          "lessonId": "python-testing",
-          "skill": "Preserve independently checked behavior",
-          "why": "The faster report must still produce the intended results."
+          "lessonId": "python-test-doubles",
+          "skill": "Observe source calls",
+          "why": "A controlled source can show how often the report requests its input."
         },
         {
-          "lessonId": "python-mutation",
-          "skill": "Choose a state lifetime",
-          "why": "A cache is useful only while its values match the source."
+          "lessonId": "python-testing",
+          "skill": "Keep behavior tests after a change",
+          "why": "Reducing work is useful only while the report still produces the intended result."
         }
       ],
       "reflection": {
-        "prompt": "What measurement would establish an improvement for this workload?",
-        "carryForward": "Measure the relevant constraint and keep correctness tests."
+        "prompt": "Which measurement would show that a proposed repair helped the workload you care about?",
+        "carryForward": "Measure the changed program again before choosing the next optimization."
       }
     },
     "fresh": {
-      "name": "Fewer calls dominate",
-      "prompt": "The remote operation runs twice at 40 ms. The local operation runs 1000 times at 0.01 ms. Predict which dominates.",
+      "name": "Few expensive calls outweigh many quick ones",
+      "prompt": "Formatting runs 1000 times at 0.01 ms per call. Reading runs twice at 40 ms per call. Compare the total self time before choosing the larger-cost operation.",
       "data": {
-        "names": [
-          "local",
-          "remote"
-        ],
-        "calls": [
-          1000,
-          2
-        ],
-        "per_call": [
-          0.01,
-          40
+        "profile": [
+          {
+            "operation": "Format report",
+            "calls": 1000,
+            "self_ms_per_call": 0.01
+          },
+          {
+            "operation": "Read source",
+            "calls": 2,
+            "self_ms_per_call": 40
+          }
         ]
       },
-      "expected": "remote",
-      "why": "Choosing by call count alone would identify the wrong operation."
+      "expected": {
+        "operation": "Read source",
+        "calls": 2,
+        "self_ms_per_call": 40
+      },
+      "why": "The totals are 10 ms and 80 ms. Choosing by call count or by the earlier operation order would select the wrong row.",
+      "prediction": {
+        "question": "What is the larger total self time, in milliseconds?",
+        "expected": 80
+      }
     }
   }
 ];

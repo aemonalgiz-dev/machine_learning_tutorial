@@ -1,4 +1,4 @@
-import type { Data, Tool } from "./engine";
+import type { Data, Settings, Tool } from "./engine";
 
 type Row = Record<string, Data>;
 const clone = <T extends Data>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -24,12 +24,135 @@ const field = (value: Data, name: Data): Data => {
   if (!Object.hasOwn(record, key)) throw Error("That field is absent. Check presence or supply the declared default first.");
   return record[key];
 };
-const tool = (title: string, why: string, inputs: string[], run: Tool["run"]): Tool => ({ title, why, inputs, run });
+const tool = (title: string, why: string, inputs: string[], run: Tool["run"], settings?: Tool["settings"]): Tool => ({ title, why, inputs, run, ...(settings ? { settings } : {}) });
 const validIntegerText = (value: Data): value is string =>
   typeof value === "string" && /^[+-]?\d+$/.test(value.trim()) && Number.isSafeInteger(Number(value.trim()));
+const option = (key: string, label: string, initial: string, options?: string[]) => ({ key, label, initial, ...(options ? { options } : {}) });
+const settingText = (settings: Settings, key: string): string => text(settings[key]);
+
+function privateCopy(value: Data, seen = new Map<object, Data>()): Data {
+  if (value === null || typeof value !== "object") return value;
+  const existing = seen.get(value);
+  if (existing !== undefined) return existing;
+  if (Array.isArray(value)) {
+    const copy: Data[] = [];
+    seen.set(value, copy);
+    for (const item of value) copy.push(privateCopy(item, seen));
+    return copy;
+  }
+  const copy: Row = {};
+  seen.set(value, copy);
+  for (const [key, item] of Object.entries(value)) Object.defineProperty(copy, key, {
+    value: privateCopy(item, seen), enumerable: true, writable: true, configurable: true,
+  });
+  return copy;
+}
 
 /** Inspectable local operations. These do not execute Python, Pydantic, files or a static checker. */
 export const pythonValidationTools: Record<string, Tool> = {
+  pyValidationCheckBatch: tool("Check each reading",
+    "Return ready or reject beside each incoming value. Choose whether this save accepts any finite number or only numbers above zero.",
+    ["Incoming readings"], ([input], settings) => list(input).map(value =>
+      typeof value === "number" && Number.isFinite(value) && (settings.rule !== "positive numbers" || value > 0) ? "ready" : "reject"),
+    [option("rule", "Accept", "numbers", ["numbers", "positive numbers"])]),
+  pyValidationAppendCheckedBatch: tool("Append a complete batch",
+    "Append the incoming list only when every reading is ready. If any reading is rejected, return the saved list unchanged.",
+    ["Saved readings", "Incoming readings", "Checks for incoming readings"], ([saved, incoming, checks]) => {
+      const previous = list(saved), batch = list(incoming), decisions = list(checks);
+      if (batch.length !== decisions.length || decisions.some(value => value !== "ready" && value !== "reject")) throw Error("Connect one ready-or-reject result for each incoming reading.");
+      return decisions.every(value => value === "ready") ? [...clone(previous), ...clone(batch)] : clone(previous);
+    }),
+  pyValidationCheckRequestField: tool("Check one request field",
+    "Choose the field, whether it must be supplied, and the values it allows. A valid request continues; a rejected request becomes a short error message.",
+    ["Request"], ([input], settings) => {
+      if (typeof input === "string") return input;
+      const request = row(input), key = settingText(settings, "field"), rule = settingText(settings, "value");
+      if (!Object.hasOwn(request, key)) return settings.presence === "required" ? `${key} is missing` : clone(request);
+      const value = request[key];
+      const valid = rule === "text or null" ? value === null || typeof value === "string"
+        : rule === "text" ? typeof value === "string" : typeof value === "number" && Number.isSafeInteger(value);
+      return valid ? clone(request) : `${key} must be ${rule}`;
+    }, [option("field", "Field", "note"), option("presence", "Presence", "required", ["required", "may be absent"]), option("value", "Allowed value", "text or null", ["text or null", "text", "a whole number"])]),
+  pyValidationDefaultCopies: tool("Default missing copies",
+    "Add the chosen copies value only when the request has no copies key. Keep an explicit zero or null exactly as supplied. An earlier rejection continues unchanged.",
+    ["Checked request"], ([input], settings) => {
+      if (typeof input === "string") return input;
+      const request = row(input);
+      return Object.hasOwn(request, "copies") ? clone(request) : { ...clone(request), copies: settings.copies };
+    }, [{ key: "copies", label: "Copies when absent", initial: 1, min: 0, max: 20, step: 1 }]),
+  pyValidationCheckBounds: tool("Check the capture interval",
+    "Both endpoints must be finite numbers. Choose increasing order to reject a lower endpoint that equals or exceeds the upper endpoint.",
+    ["Lower and upper endpoints"], ([input], settings) => {
+      const bounds = row(input), { lower, upper } = bounds;
+      if (typeof lower !== "number" || !Number.isFinite(lower) || typeof upper !== "number" || !Number.isFinite(upper)) return "Endpoints must be numbers";
+      if (settings.order === "increasing" && lower >= upper) return "Lower must be below upper";
+      return { lower, upper };
+    }, [option("order", "Endpoint order", "either order", ["either order", "increasing"])]),
+  pyValidationCheckCaptureCount: tool("Check the capture count",
+    "Accept a whole-number count from 1 through the selected maximum. Text and booleans do not count as numerical inputs.",
+    ["Requested count"], ([input], settings) => {
+      const maximum = settings.maximum;
+      if (typeof maximum !== "number" || !Number.isSafeInteger(maximum) || maximum < 1) throw Error("Choose a positive whole-number maximum.");
+      return typeof input === "number" && Number.isSafeInteger(input) && input >= 1 && input <= maximum ? input : `Count must be from 1 through ${maximum}`;
+    }, [{ key: "maximum", label: "Largest count", initial: 20, min: 1, max: 100, step: 1 }]),
+  pyValidationPrepareCapture: tool("Prepare the capture",
+    "Combine a checked interval and checked count. Return a rejection message if either check failed.",
+    ["Checked interval", "Checked count"], ([bounds, count]) => typeof bounds === "string" ? bounds
+      : typeof count === "string" ? count : { ...clone(row(bounds)), count: clone(count) }),
+  pyValidationReadCountText: tool("Read whole numbers",
+    "Convert each decimal text field to a number. Leave unreadable text in its original position so the next operation can report it.",
+    ["Count fields as text"], ([input]) => list(input).map(value => {
+      text(value);
+      return validIntegerText(value) ? Number(value.trim()) : value;
+    })),
+  pyValidationRejectNegativeCounts: tool("Reject negative counts",
+    "Keep zero and positive parsed counts. Mark a negative count as rejected without changing the positions of later fields.",
+    ["Parsed fields"], ([input]) => list(input).map(value => typeof value === "number" && value < 0 ? "negative count" : clone(value))),
+  pyValidationSummarizeCounts: tool("Separate values from errors",
+    "Collect numerical counts in values. Put the original zero-based position of each remaining text field in rejected.",
+    ["Checked fields"], ([input]) => {
+      const fields = list(input);
+      return { values: fields.filter(value => typeof value === "number"), rejected: fields.flatMap((value, index) => typeof value === "number" ? [] : [index]) };
+    }),
+  pyValidationDraftRecord: tool("Copy the report",
+    "An outer-only copy still shares its tag list. Copy nested values as well when the draft must own its later edits.",
+    ["Original report"], ([input], settings) => {
+      const original = row(privateCopy(row(input)));
+      return { original, draft: settings.depth === "nested values too" ? privateCopy(original) : { ...original } };
+    }, [option("depth", "Copy", "outer record only", ["outer record only", "nested values too"])]),
+  pyValidationEditDraftTags: tool("Add a tag to the draft",
+    "Append the cleaned tag to the draft's list. A shared list also changes the displayed original, revealing an outer-only copy. The workshop's actual source stays untouched.",
+    ["Original and draft", "New tag"], ([input, tag]) => {
+      const state = row(privateCopy(row(input))), cleaned = text(tag).trim();
+      if (!cleaned) throw Error("Use a nonempty tag.");
+      list(row(state.draft).tags).push(cleaned);
+      return state;
+    }),
+  pyValidationCompareDraftTags: tool("Compare the two tag lists",
+    "Show the original tags beside the draft tags after the edit.",
+    ["Edited draft and original"], ([input]) => {
+      const state = row(input);
+      return { original: clone(list(row(state.original).tags)), draft: clone(list(row(state.draft).tags)) };
+    }),
+  pyValidationOpenBuffer: tool("Open the text buffer",
+    "Keep the supplied lines in an open in-memory teaching buffer. No file is opened.",
+    ["Lines as text"], ([input]) => ({ lines: text(input).split("\n"), values: [], closed: false, error: null })),
+  pyValidationReadBuffer: tool("Read the number lines",
+    "Read signed whole numbers, ignoring blank lines. A bad line becomes an error outcome that can still reach the closing operation.",
+    ["Open buffer"], ([input]) => {
+      const state = row(input);
+      if (state.closed !== false) throw Error("Open the buffer before reading.");
+      const lines = list(state.lines), bad = lines.findIndex(value => text(value).trim() !== "" && !validIntegerText(value));
+      return { ...clone(state), values: bad < 0 ? lines.filter(value => text(value).trim() !== "").map(value => Number(text(value).trim())) : [], error: bad < 0 ? null : `Line ${bad + 1} is not a whole number` };
+    }),
+  pyValidationCloseBuffer: tool("Close the buffer",
+    "Choose whether closing happens after every read or only after success. Keep a read error visible instead of inventing a total.",
+    ["Read outcome"], ([input], settings): Data => {
+      const state = row(input), closed = settings.when === "after every read" || state.error === null;
+      return state.error === null
+        ? { total: list(state.values).reduce<number>((total, value) => total + Number(value), 0), closed }
+        : { error: clone(state.error), closed };
+    }, [option("when", "Close", "only after success", ["only after success", "after every read"])]),
   pyValidationNumberFlags: tool("Check numeric representations",
     "Return one flag per input. Actual finite numbers pass; strings, booleans and null do not.",
     ["Values"], ([values]) => list(values).map(value => typeof value === "number" && Number.isFinite(value))),

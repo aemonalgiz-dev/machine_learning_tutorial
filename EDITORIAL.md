@@ -465,6 +465,13 @@ existing fragment IDs when changing section titles.
 - Match instructions to actual controls, fixtures and defaults. Do not ask a
   reader to move a slider that is absent, or describe one dataset while the
   widget loads another without explaining how to select it.
+- Explain a workshop's inputs and requested result before naming its operations.
+  Introduce each tool through its job in that problem. Keep field names and
+  validation rules in labeled component controls when wiring those names as
+  separate data would add an unrelated puzzle. Present small records as tables
+  or labeled values. Use a concrete diagnosis question when typing a complete
+  JSON result would test serialization instead of the lesson's idea. Keep the
+  coding challenges visible from the workshop without opening reflection notes.
 - Define jargon when it first becomes necessary. Break long explanations at
   changes of idea. Preserve technical detail without compressing several
   unfamiliar operations into one sentence.
