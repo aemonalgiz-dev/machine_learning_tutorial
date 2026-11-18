@@ -29,7 +29,7 @@ export function LearningDashboard() {
     <div className="dashboard-content">
       <h1 id="workshop-heading" className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">{waiting ? "Opening your workbench…" : recent ? "Continue with Botie" : "Build and Learn with Botie"}</h1>
       {!waiting && <>
-        <p className="mt-4 max-w-xl leading-7 text-muted">{recent ? americanEnglish(recent.title) : "Teach yourself Machine Learning with Botie's workshops, no coding, just building blocks to visualize the mechanics of the concepts."}</p>
+        <p className="mt-4 max-w-xl leading-7 text-muted">{recent ? americanEnglish(recent.title) : "Teach yourself machine learning with Botie's building-block workshops. Write and test your code in the Python and SQL challenges."}</p>
         {recent?.stage && recent.stage !== recent.title && <p className="mt-2 text-sm text-foreground">{americanEnglish(recent.stage)}</p>}
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <Link className="game-button game-button-primary" href={next ? workshopHref(next.href) : recent?.href ?? "/lab/workshop-guide"}>{next ? "Next workshop" : recent ? "Return to your workshop" : "Build your first machine"} <span aria-hidden="true">→</span></Link>

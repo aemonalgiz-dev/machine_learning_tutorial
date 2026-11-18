@@ -201,6 +201,11 @@ and column meanings. Do not ask for one count while checking an entire record.
 Describe account saving and membership access according to their actual scope.
 Avoid decorative slogans and repeated introductions around those controls.
 
+Public descriptions should distinguish building-block workshops from programming
+challenges. The courses include Python and SQL challenges alongside Botie's
+workshops. Keep claims about working without code specific to the workshop
+interface, rather than describing the entire site that way.
+
 Write as someone who enjoys working out how these methods work and wants the
 reader to be able to work them out too. Let that interest show through a useful
 question, an observation about the example, or a patient explanation. Do not
