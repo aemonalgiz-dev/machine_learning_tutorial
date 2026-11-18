@@ -29,6 +29,7 @@ export default async function LearningAreaPage({ params }: Props) {
         <p className="mt-4 max-w-2xl text-base leading-7 text-muted">{area.description}</p>
       </header>
 
+      <div className="mb-8"><LessonSearchForm /></div>
       {!sections.length ? <section className="rounded-xl border border-line bg-surface p-6" aria-labelledby="preparation">
         <h2 id="preparation" className="text-xl font-semibold">Lessons in preparation</h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">This area will have its own sections and lessons as they are added. There are no published lessons here yet.</p>
@@ -57,7 +58,6 @@ export default async function LearningAreaPage({ params }: Props) {
           </section>;
           })}
         </div>
-        <div className="mt-10 border-t border-line pt-6"><LessonSearchForm /></div>
       </>}
     </article>
   );

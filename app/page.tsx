@@ -24,8 +24,8 @@ export default function Home() {
         <h2 id="learning-areas" className="text-2xl font-semibold">Available Courses</h2>
         <Link href="/lab" className="text-sm text-accent hover:underline">All workshops →</Link>
       </div>
+      <div className="mb-6"><LessonSearchForm /></div>
       <LearningAreas />
-      <div className="mt-8"><LessonSearchForm /></div>
     </section>
   </div>;
 }
