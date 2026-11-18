@@ -7,7 +7,7 @@ import { useJourneyProgress } from "@/lib/journey-progress";
 import { BotieSays } from "@/components/site/Botie";
 import { BuildWorkshop, type WorkshopOutcome } from "./BuildWorkshop";
 import { WorkshopValue } from "./WorkshopValue";
-import { same, type Construction } from "@/lib/builds/engine";
+import { same, type Construction, type Data } from "@/lib/builds/engine";
 import { readPrediction } from "@/lib/builds/challenges";
 import type { JourneyData } from "@/lib/builds/journey";
 import { JourneyHistory, JourneyTools } from "./JourneyReference";
@@ -23,6 +23,18 @@ import { caseLabel } from "@/lib/builds/case-labels";
 
 const button = "inline-flex min-h-11 items-center justify-center rounded-lg border border-line bg-raised px-4 py-2 text-sm font-semibold hover:border-accent-fill disabled:opacity-50";
 const primary = `${button} !border-accent-fill !bg-accent-fill text-accent-ink`;
+function predictionHelp(expected: Data): string {
+  if (typeof expected === "string") return "Write the text you expect the construction to return.";
+  if (typeof expected === "number") return "Enter the number you expect the construction to return.";
+  if (typeof expected === "boolean") return "Enter true or false.";
+  if (expected === null) return "Enter the value you expect, or null for an explicit None value.";
+  if (Array.isArray(expected)) {
+    if (expected.some(value => value !== null && typeof value === "object" && !Array.isArray(value))) return 'Keep one named result per item, such as [{"name": "north", "count": 2}]. Use the fields named in the question.';
+    if (expected.some(Array.isArray)) return "Put each row inside brackets, such as [[1, 2], [3, 4]].";
+    return "Keep the values in order inside brackets, such as [2, 4].";
+  }
+  return 'Write each field beside its predicted value, such as {"count": 2}. Use the fields named in the question.';
+}
 type Stage = "preparation" | "construction" | "investigation";
 interface JourneyState extends JourneyAssistance {
   stage: Stage;
@@ -134,13 +146,16 @@ export function LessonJourney({ data }: { data: JourneyData }) {
           return <button key={stage} className="journey-stage" data-complete={completed} aria-current={state.stage === stage ? "step" : undefined} onClick={() => go(stage)}><span className="stage-number" aria-hidden="true">{completed ? "✓" : index + 1}</span><span>{titles[stage]}{completed && <span className="sr-only">, checks passed</span>}</span></button>;
         })}
       </nav>
-      <button className="min-h-11 py-2 text-sm text-muted hover:text-foreground" aria-expanded={notesOpen} onClick={() => setNotesOpen(!notesOpen)}>Lesson notes and saved work {notesOpen ? "−" : "+"}</button>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        <Link href={`${data.lesson.href}#practice`} className="min-h-11 content-center text-accent underline underline-offset-4">Coding challenges</Link>
+        <button className="min-h-11 py-2 text-muted hover:text-foreground" aria-expanded={notesOpen} onClick={() => setNotesOpen(!notesOpen)}>Lesson notes and saved work {notesOpen ? "−" : "+"}</button>
+      </div>
     </div>
     <aside hidden={!notesOpen} aria-label="Lesson notes and saved work" className="mb-5 rounded-xl border border-line bg-surface p-4">
     <div className="mb-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
       <button className="min-h-11 text-accent underline underline-offset-4" aria-expanded={reference === "history"} onClick={() => { setReference(reference === "history" ? null : "history"); progress.markExplored(); }}>{data.history.title}</button>
       <button className="min-h-11 text-accent underline underline-offset-4" aria-expanded={reference === "tools"} onClick={() => { setReference(reference === "tools" ? null : "tools"); progress.markExplored(); }}>Look inside the tools</button>
-      <a href={data.lesson.href} className="min-h-11 content-center text-muted underline underline-offset-4">Full lesson and mathematics</a>
+      <a href={data.lesson.href} className="min-h-11 content-center text-muted underline underline-offset-4">Read the lesson</a>
       <Link href="/lab/workshop-guide" className="min-h-11 content-center text-muted underline underline-offset-4">Learn the workshop controls</Link>
     </div>
     {reference === "history" && <JourneyHistory data={data} />}
@@ -173,7 +188,7 @@ export function LessonJourney({ data }: { data: JourneyData }) {
         {plan.investigation.kind === "predict" ? <>
           <label className="block text-sm font-semibold" htmlFor={`prediction-${build.id}`}>{plan.investigation.predictionLabel ?? plan.investigation.question}</label>
           <textarea id={`prediction-${build.id}`} className="mt-3 min-h-24 w-full rounded-lg border border-line bg-background p-3 font-mono text-sm" value={answer.prediction} onChange={event => decision.set(previous => ({ ...previous, prediction: event.target.value }))} />
-          <p className="mt-2 text-xs leading-6 text-muted">For a list use brackets, such as [2, 4]. For a matrix put each row in brackets. Text answers can stay as text.</p>
+          <p className="mt-2 text-xs leading-6 text-muted">{predictionHelp(variation.build.cases[0].expected)}</p>
         </> : <fieldset><legend className="mb-3 text-sm font-semibold">Choose an explanation to test</legend><div className="space-y-3">{orderedOptions.map(({ option, index }) => <label key={option.label} className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm leading-7 ${answer.choice === index ? "border-accent-fill bg-accent-soft" : "border-line bg-surface"}`}><input className="mt-2 shrink-0" type="radio" name={`investigation-${build.id}`} checked={answer.choice === index} onChange={() => decision.set(previous => ({ ...previous, choice: index }))} />{option.label}</label>)}</div></fieldset>}
         {predictionError && <p role="alert" className="mt-2 text-sm text-accent">{predictionError}</p>}
         <div className="mt-3 flex flex-wrap gap-3"><button className={primary} onClick={() => reveal()}>{plan.investigation.kind === "predict" ? "Save my prediction and try it" : "Investigate my choice"}</button><button className={button} onClick={() => reveal(true)}>Explore with Botie</button></div>
@@ -203,7 +218,6 @@ export function LessonJourney({ data }: { data: JourneyData }) {
       <textarea id={`explanation-${build.id}`} className="mt-3 min-h-32 w-full rounded-lg border border-line bg-background p-4 text-sm leading-7" value={state.explanation} onChange={event => saved.set(previous => ({ ...previous, explanation: event.target.value }))} />
       <p className="mt-4 text-sm leading-7">{plan.reflection.carryForward}</p>
       <p className="mt-3 text-sm leading-7 text-muted">{build.limitation}</p>
-      <a href={`${data.lesson.href}#practice`} className={`${primary} mt-5`}>Work through the {data.lesson.section === "SQL" ? "SQL" : "Python"} challenges →</a>
     </details>
     {data.next && <a href={data.next.href} className="mt-6 block rounded-xl border border-line bg-surface p-5 hover:border-accent-fill"><span className="text-xs text-muted">Continue the course</span><span className="mt-2 block font-semibold text-accent">{data.next.title} →</span></a>}
     </>}

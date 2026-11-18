@@ -203,6 +203,15 @@ for (const [position, lesson] of lessons.entries()) for (const [index, exercise]
   continuation.title = sourceLesson.practice[continuation.exercise].title;
 }
 
+for (const [id, fresh] of Object.entries(appliedFreshCases)) {
+  if (!fresh.prediction) continue;
+  const { question, expected } = fresh.prediction;
+  if (!question?.trim() || !['string', 'number', 'boolean'].includes(typeof expected) ||
+      typeof expected === 'number' && !Number.isFinite(expected)) {
+    throw Error(`${id}: a focused fresh-case prediction needs a question and one finite scalar answer.`);
+  }
+}
+
 // Navigation and workshop data are separate artifacts so client navigation
 // never imports every lesson's prose, Python solutions, and quiz explanations.
 const json = value => JSON.stringify(value, null, 2) + "\n";

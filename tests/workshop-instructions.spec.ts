@@ -5,6 +5,7 @@ import { constructionHints } from "../lib/builds/coaching";
 import { buildById } from "../lib/builds/catalog";
 import { caseLabel } from "../lib/builds/case-labels";
 import { freshJourneyBuild } from "../lib/builds/journey-fresh";
+import { mockAccountBackend, waitForAccountReady } from "./helpers/account-backend";
 
 test("authored workshop hints reach the construction, changed case and original workspace", () => {
   for (const [id, plan] of Object.entries(journeyPlans)) {
@@ -33,7 +34,9 @@ test("a corrected case caption leaves the stored case identity intact", () => {
 
 test("the exam workshop introduces its supplied score and shows Botie's problem-specific hints", async ({ page }) => {
   const data = journeyFor("logistic-regression");
+  await mockAccountBackend(page);
   await page.goto("/lab/logistic-regression");
+  await waitForAccountReady(page);
   await page.getByRole("navigation", { name: "Journey stages", exact: true })
     .getByRole("button", { name: data.plan!.construction.title, exact: true }).click();
   const workshop = page.getByTestId("construction-workshop").filter({ visible: true });
@@ -50,6 +53,7 @@ test("the exam workshop introduces its supplied score and shows Botie's problem-
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.goto("/lab/class-imbalance");
+  await waitForAccountReady(page);
   const classPlan = journeyFor("class-imbalance").plan!;
   await page.getByRole("navigation", { name: "Journey stages", exact: true })
     .getByRole("button", { name: classPlan.construction.title, exact: true }).click();

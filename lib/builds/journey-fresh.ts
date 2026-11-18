@@ -7,6 +7,8 @@ export interface FreshJourneyCase {
   data: Record<string, Data>;
   expected: Data;
   why: string;
+  /** Predict one meaningful consequence, without transcribing the full machine result. */
+  prediction?: { question: string; expected: string | number | boolean };
 }
 
 export function freshJourneyBuild(build: Build, fresh: FreshJourneyCase): Build {
