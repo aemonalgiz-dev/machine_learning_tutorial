@@ -24,6 +24,9 @@ const python = await loadPyodide({
   packageCacheDir: cache,
 });
 await python.loadPackage("numpy");
+if ([...examples, ...quizSetups].some(example => /(?:from|import)\s+pydantic\b/.test(example.code))) {
+  await python.loadPackage("pydantic");
+}
 python.runPython(`
 import contextlib
 import io

@@ -4,10 +4,11 @@ import { americanEnglish } from "@/lib/american-english";
 
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { challengeQuestion, displayExerciseTitle, type Exercise, NUMPY_SETUP_COMMANDS, SETUP_COMMANDS } from "@/lib/exercises";
+import { challengeQuestion, displayExerciseTitle, type Exercise, localPythonSetup } from "@/lib/exercises";
 import { draftKey, readLegacyAccountDraft, type PracticeDraft } from "@/lib/practice-drafts";
-import { useLearnerField, fingerprint, migrateLearnerRecord, useLearnerRecord } from "@/lib/learner-state";
+import { useLearnerField, fingerprint, migrateLearnerRecord, useLearnerRecord, useLearnerHydrated } from "@/lib/learner-state";
 import { getProgressAccount, useProgressAccount } from "@/lib/progress";
 import { useAccount } from "@/lib/accounts";
 import { usePython } from "@/lib/use-python";
@@ -54,6 +55,16 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
   });
   const [card, setCard] = useLearnerField(work, "card");
   const [attempts, setAttempts] = useLearnerField(work, "attempts");
+  const hydrated = useLearnerHydrated();
+  const openedChallengeLink = useRef(false);
+  useEffect(() => {
+    if (!hydrated || openedChallengeLink.current) return;
+    openedChallengeLink.current = true;
+    const requested = new URLSearchParams(window.location.search).get("challenge");
+    if (!requested || !/^[1-9]\d*$/.test(requested)) return;
+    const index = Number(requested) - 1;
+    if (index < exercises.length) setCard(index);
+  }, [hydrated, exercises.length, setCard]);
   const latest = useRef(attempts);
   useEffect(() => { latest.current = attempts; }, [attempts]);
   useEffect(() => {
@@ -70,6 +81,12 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
   const { run, stop, busy, status } = usePython(true);
   const current = exercises[card];
   const isSql = current.language === "sql";
+  const usesSdk = /(?:from|import)\s+oop_ml\b/.test(current.solution);
+  const usesNumpy = /(?:from|import)\s+numpy\b/.test(current.solution);
+  const usesPydantic = /(?:from|import)\s+pydantic\b/.test(current.solution);
+  const runtimeLabel = usesSdk ? "NumPy + oop_ml" : usesNumpy || usesPydantic
+    ? ["Python", ...(usesNumpy ? ["NumPy"] : []), ...(usesPydantic ? ["Pydantic"] : [])].join(" + ")
+    : "Python · standard library";
   const attempt = attempts[card];
   const completed = attempts.filter((entry) => entry.solved).length;
   const allFinished = completed === exercises.length;
@@ -114,6 +131,11 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
     if (busy) stop();
     setCard(index);
     setExpectedShown(false);
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("challenge")) {
+      url.searchParams.set("challenge", String(index + 1));
+      window.history.replaceState(window.history.state, "", url);
+    }
   };
   const result = attempt.result;
   const stale = result && result.source !== attempt.code;
@@ -144,6 +166,17 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
           <div className="rounded-xl border border-line bg-surface p-5 sm:p-6">
             <p className="mb-2 font-mono text-xs uppercase tracking-wider text-accent">Your challenge · {card + 1} of {exercises.length}</p>
             <h3 className="text-xl font-semibold leading-snug text-foreground">{current.question && current.question !== current.title ? challengeQuestion(current) : americanEnglish(challengeQuestion(current))}</h3>
+            {current.continuation && <p className="mt-3 text-sm leading-6 text-muted">
+              Continues <Link href={`${current.continuation.lesson}?challenge=${current.continuation.exercise + 1}#practice`}
+                onClick={event => {
+                  if (current.continuation?.lesson !== lesson) return;
+                  event.preventDefault();
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("challenge", String(current.continuation.exercise + 1));
+                  window.history.replaceState(window.history.state, "", url);
+                  changeCard(current.continuation.exercise);
+                }} className="text-accent underline underline-offset-4">{current.continuation.title}</Link>. <InlineCodeText text={current.continuation.summary} />
+            </p>}
             <div className="mt-4 space-y-3 leading-7 text-foreground">
               {current.task.map((paragraph) => <p key={paragraph}><InlineCodeText text={paragraph} /></p>)}
             </div>
@@ -196,9 +229,9 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
           <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-raised px-4 py-2.5">
               <span className="font-mono text-xs text-foreground">{isSql ? "solution.sql" : "solution.py"}</span>
-              <span className="font-mono text-xs text-muted">{isSql ? "SQLite · fresh database each run" : /(?:from|import)\s+oop_ml\b/.test(current.solution) ? "NumPy + oop_ml" : /(?:from|import)\s+numpy\b/.test(current.solution) ? "Python + NumPy" : "Python · standard library"}</span>
+              <span className="font-mono text-xs text-muted">{isSql ? "SQLite · fresh database each run" : runtimeLabel}</span>
             </div>
-            <PythonEditor key={current.title} language={current.language} label={`${isSql ? 'SQL' : 'Python'} solution for ${americanEnglish(displayExerciseTitle(current))}`} value={attempt.code}
+            <PythonEditor key={current.title} language={current.language} initialTarget={current.editTarget} label={`${isSql ? 'SQL' : 'Python'} solution for ${americanEnglish(displayExerciseTitle(current))}`} value={attempt.code}
               onChange={(code) => update(card, { code })} onRun={() => void execute(false)} onCheck={() => void execute(true)} />
             <div className="flex flex-wrap items-center gap-3 border-t border-line bg-raised p-3">
               <Solid disabled={busy || !attempt.code.trim()} onClick={() => void execute(false)}>Run code</Solid>
@@ -264,18 +297,19 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
           : <p className="text-sm text-muted">{allFinished ? "The tests have passed for each exercise in this set." : "You can revisit any exercise using the numbers above."}</p>}
       </div>
       <p className="mt-5 text-xs leading-5 text-muted">{isSql ? "SQL runs against SQLite in your browser. Each run rebuilds the lesson database, so experiments cannot change later attempts. Stop ends a running query." : "Python runs in your browser. Its first run downloads the libraries it needs. Each run starts with fresh variables; Stop ends a running program."}</p>
-      <div className="mt-4">{isSql ? <details className="rounded-lg border border-line bg-surface px-4 py-3"><summary className="cursor-pointer text-sm font-semibold">Database setup and using your own editor</summary><p className="mt-3 text-sm leading-6 text-muted">Create a temporary SQLite database with this setup, then run your query. The browser uses SQLite 3.39. SQL written for PostgreSQL or another database may need changes.</p><PythonCode source={current.sql?.setup ?? ''} language="sql" /></details> : <PracticeSetup usesSdk={/(?:from|import)\s+oop_ml\b/.test(current.solution)} usesNumpy={/(?:from|import)\s+numpy\b/.test(current.solution)} />}</div>
+      <div className="mt-4">{isSql ? <details className="rounded-lg border border-line bg-surface px-4 py-3"><summary className="cursor-pointer text-sm font-semibold">Database setup and using your own editor</summary><p className="mt-3 text-sm leading-6 text-muted">Create a temporary SQLite database with this setup, then run your query. The browser uses SQLite 3.39. SQL written for PostgreSQL or another database may need changes.</p><PythonCode source={current.sql?.setup ?? ''} language="sql" /></details> : <PracticeSetup usesSdk={usesSdk} usesNumpy={usesNumpy} usesPydantic={usesPydantic} />}</div>
     </div>
   );
 }
 
-export function PracticeSetup({ usesSdk, usesNumpy = true }: { usesSdk: boolean; usesNumpy?: boolean }) {
+export function PracticeSetup({ usesSdk, usesNumpy = true, usesPydantic = false }: { usesSdk: boolean; usesNumpy?: boolean; usesPydantic?: boolean }) {
+  const packages = usesSdk ? "oop_ml" : [usesNumpy ? "NumPy" : "", usesPydantic ? "Pydantic" : ""].filter(Boolean).join(" and ");
   return (
     <details className="rounded-lg border border-line bg-surface px-4 py-3">
       <summary className="cursor-pointer text-sm font-semibold text-foreground">Prefer your own editor?</summary>
       <div className="mt-3 space-y-3 border-t border-line pt-3 text-sm text-foreground">
-        <p>{usesSdk || usesNumpy ? <>The same script runs on your machine. Install {usesSdk ? "oop_ml" : "NumPy"}, then save your code as a Python file and run it.</> : "This exercise uses Python's standard library. Save your code as solution.py and run it with Python."}</p>
-        <PythonCode source={usesSdk ? SETUP_COMMANDS : usesNumpy ? NUMPY_SETUP_COMMANDS : "python solution.py"} label="Terminal" />
+        <p>{packages ? <>The same script runs on your machine. Install {packages}, then save your code as a Python file and run it.</> : "This exercise uses Python's standard library. Save your code as solution.py and run it with Python."}</p>
+        <PythonCode source={localPythonSetup({ usesSdk, usesNumpy, usesPydantic })} label="Terminal" />
         <p className="text-muted">Use Python 3.11 or later.{usesSdk && " The optional PyTorch and scikit-learn backends are not needed for this challenge."}</p>
       </div>
     </details>

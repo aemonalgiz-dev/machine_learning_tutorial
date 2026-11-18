@@ -43,6 +43,6 @@ export function ExpandedLessonPage({ id }: { id: string }) {
         </aside>}
       </> }, ...(lesson.checkpoints ?? []).filter(checkpoint=>checkpoint.after===part.title).map(checkpoint=>({title:checkpoint.title,id:checkpoint.id,quiz:checkpoint.questions}))]),
       { title: `Questions on Parts 1 to ${lesson.parts.length}`, id: lesson.quizId, quiz: lesson.quiz },
-      { title: lesson.reading.practiceTitle, id: lesson.section === "SQL" ? "practice-write-the-query" : ["NoSQL", "Graph Databases"].includes(lesson.section) ? "practice" : "practice-work-through-the-problem-with-numpy", practice: lesson.practice },
+      { title: lesson.reading.practiceTitle, id: lesson.practiceId ?? (lesson.section === "SQL" ? "practice-write-the-query" : ["NoSQL", "Graph Databases"].includes(lesson.section) ? "practice" : "practice-work-through-the-problem-with-numpy"), practice: lesson.practice },
     ]} />;
 }

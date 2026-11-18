@@ -162,7 +162,12 @@ for (const lesson of lessons) {
   if (lesson.technicalStart && !lesson.parts.some(part => part.title === lesson.technicalStart)) throw Error(`${lesson.id}: technicalStart must name an existing explanation.`);
   for (const checkpoint of lesson.checkpoints ?? []) if (!lesson.parts.some(part=>part.title===checkpoint.after) || !checkpoint.questions.length) throw Error(`${lesson.id}: put each checkpoint after an existing explanation.`);
   for (const entry of lesson.history.sources) if (new URL(entry.url).protocol !== "https:") throw Error(`${lesson.id}: use a primary HTTPS source.`);
-  for (const exercise of lesson.practice) if (!exercise.solution || !exercise.output || !exercise.hints.length) throw Error(`${lesson.id}: incomplete programming challenge.`);
+  for (const exercise of lesson.practice) {
+    if (!exercise.solution || !exercise.output || !exercise.hints.length) throw Error(`${lesson.id}: incomplete programming challenge.`);
+    if (exercise.editTarget && (exercise.starter.indexOf(exercise.editTarget) < 0 || exercise.starter.indexOf(exercise.editTarget) !== exercise.starter.lastIndexOf(exercise.editTarget))) {
+      throw Error(`${lesson.id}: the editor target must identify one part of the starting program.`);
+    }
+  }
   for (const part of lesson.parts) for (const reference of part.references ?? []) {
     if (!reference.title || !reference.code || !reference.description?.length || !reference.setup?.length || !reference.interpretation?.length) throw Error(`${lesson.id}: explain how to run and interpret the framework reference.`);
     if (!["python", "yaml", "json", "bash", "sql", "cypher", "sparql"].includes(reference.language) || !/^\d{4}-\d{2}-\d{2}$/.test(reference.checkedOn) || new URL(reference.source.url).protocol !== "https:") throw Error(`${lesson.id}: framework reference needs a language, checked date and HTTPS documentation.`);
@@ -179,6 +184,23 @@ for (const lesson of lessons) {
 const navigationIds = new Set(navigation.map(lesson => lesson.id));
 if (navigationIds.size !== navigation.length || navigationIds.size !== ids.size || [...ids].some(id => !navigationIds.has(id))) {
   throw Error('Published lessons and navigation must contain the same unique lesson IDs.');
+}
+
+// A continuation names an actual earlier exercise. Resolve its visible title
+// here so a title edit cannot leave a stale label in another lesson.
+const lessonPositions = new Map(lessons.map((lesson, index) => [lesson.id, index]));
+for (const [position, lesson] of lessons.entries()) for (const [index, exercise] of lesson.practice.entries()) {
+  const continuation = exercise.continuation;
+  if (!continuation) continue;
+  const sourceId = /^\/concepts\/([a-z0-9-]+)$/.exec(continuation.lesson)?.[1];
+  const sourcePosition = lessonPositions.get(sourceId);
+  const sourceLesson = sourcePosition === undefined ? undefined : lessons[sourcePosition];
+  if (!sourceLesson || !Number.isInteger(continuation.exercise) || continuation.exercise < 0 ||
+      continuation.exercise >= sourceLesson.practice.length || !continuation.summary?.trim() ||
+      sourcePosition > position || sourcePosition === position && continuation.exercise >= index) {
+    throw Error(`${lesson.id}: a coding continuation must identify an earlier exercise and explain the new requirement.`);
+  }
+  continuation.title = sourceLesson.practice[continuation.exercise].title;
 }
 
 // Navigation and workshop data are separate artifacts so client navigation

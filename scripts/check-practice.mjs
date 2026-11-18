@@ -19,8 +19,11 @@ const run = python.globals.get("run_course_code");
 const runSql = python.globals.get("run_course_sql");
 const report = [];
 const record = process.argv.includes("--record");
+const rejectOutputOnly = process.argv.includes("--reject-output-only");
+const rejectStarters = process.argv.includes("--reject-starters");
 const filter = process.argv.slice(2).find((argument) => !argument.startsWith("--"));
 if (record && (filter || process.argv.includes("--expanded"))) throw Error("Record the complete course so no old fixture survives by mistake.");
+if (record && (rejectOutputOnly || rejectStarters)) throw Error("Check exercise behavior separately from recording browser outputs.");
 const fixtures = JSON.parse(await readFile(path.join(websiteRoot, "lib/practice-fixtures.json"), "utf8"));
 const outputs = {};
 for (const lesson of await collectExercises()) {
@@ -32,6 +35,20 @@ for (const lesson of await collectExercises()) {
       ? runSql(exercise.solution, exercise.sql.setup, expected, JSON.stringify(exercise.tests ?? []))
       : run(exercise.solution, expected, JSON.stringify(exercise.tests ?? []), JSON.stringify(exercise.exports ?? [])));
     const comparison = { passed: result.tests.every((test) => test.status === "passed") };
+    if (rejectOutputOnly && exercise.language !== "sql") {
+      // Matching the displayed transcript must not replace the reusable
+      // procedure that the challenge asks the learner to write.
+      const outputOnly = JSON.parse(run(`print(${JSON.stringify(expected)})`, expected, JSON.stringify(exercise.tests ?? []), "[]"));
+      comparison.outputOnlyRejected = Boolean(outputOnly.error) || outputOnly.tests.some(test => test.status === "failed");
+      comparison.passed &&= comparison.outputOnlyRejected;
+      if (!comparison.outputOnlyRejected) console.error(`FAIL ${lesson.path}: ${exercise.title} accepts printed answers without the required procedure.`);
+    }
+    if (rejectStarters && exercise.language !== "sql") {
+      const initial = JSON.parse(run(exercise.starter, expected, JSON.stringify(exercise.tests ?? []), "[]"));
+      comparison.starterNeedsWork = Boolean(initial.error) || initial.tests.some(test => test.status === "failed");
+      comparison.passed &&= comparison.starterNeedsWork;
+      if (!comparison.starterNeedsWork) console.error(`FAIL ${lesson.path}: ${exercise.title} is already solved by its starting program.`);
+    }
     if (record && !result.error && result.stdout.trimEnd() !== exercise.output.trimEnd()) {
       outputs[exercise.title] = { signature: exerciseSignature(exercise), output: result.stdout.trimEnd() };
     }

@@ -139,8 +139,8 @@ export function expandedRewardSections(lesson) {
   const quizTitle = `Questions on Parts 1 to ${lesson.parts.length}`;
   sections.push({ title: quizTitle, id: lesson.quizId ?? rewardSectionId(quizTitle),
     quizCount: lesson.quiz.length, practiceCount: 0, hasPractice: false });
-  const practiceId = lesson.section === "SQL" ? "practice-write-the-query"
-    : ["NoSQL", "Graph Databases"].includes(lesson.section) ? "practice" : "practice-work-through-the-problem-with-numpy";
+  const practiceId = lesson.practiceId ?? (lesson.section === "SQL" ? "practice-write-the-query"
+    : ["NoSQL", "Graph Databases"].includes(lesson.section) ? "practice" : "practice-work-through-the-problem-with-numpy");
   sections.push({ title: lesson.reading.practiceTitle, id: practiceId,
     quizCount: 0, practiceCount: lesson.practice.length, hasPractice: true });
   return sections;

@@ -3,6 +3,7 @@ import { loadPyodide } from "./runtime/pyodide.mjs";
 let runtime;
 let sdkLoaded = false;
 let numpyLoaded = false;
+let pydanticLoaded = false;
 let sqlLoaded = false;
 let occupied = false;
 const packageBaseUrl = "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
@@ -31,9 +32,16 @@ async function prepare(id, source, sql) {
     runtime.runPython(await (await resource("/python/sql_runner.py")).text());
     sqlLoaded = true;
   }
+  if (!sql && !pydanticLoaded && /(?:from|import)\s+pydantic\b/.test(source)) {
+    status("Loading Pydantic for this challenge.");
+    await runtime.loadPackage("pydantic");
+    runtime.runPython("import pydantic");
+    pydanticLoaded = true;
+  }
   if (!sql && !sdkLoaded && /(?:from|import)\s+oop_ml\b/.test(source)) {
     status("Loading oop_ml and its dependencies for this challenge.");
     await runtime.loadPackage(["scipy", "pydantic"]);
+    pydanticLoaded = true;
     const manifest = await (await resource("/python/sdk-manifest.json")).json();
     const bytes = await (await resource(`/python/oop-ml.zip?v=${manifest.sha256}`)).arrayBuffer();
     const digest = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map((value) => value.toString(16).padStart(2, "0")).join("");

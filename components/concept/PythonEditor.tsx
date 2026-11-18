@@ -33,7 +33,7 @@ const courseTheme = EditorView.theme({
 });
 
 export default function PythonEditor({
-  value, onChange, onRun, onCheck, label, language = "python",
+  value, onChange, onRun, onCheck, label, language = "python", initialTarget,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -41,21 +41,25 @@ export default function PythonEditor({
   onCheck: () => void;
   label: string;
   language?: "python" | "sql";
+  initialTarget?: string;
 }) {
   const parent = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const actions = useRef({ onChange, onRun, onCheck });
   const startingValue = useRef(value);
+  const startingTarget = useRef(initialTarget);
   const helpId = useId();
 
   useEffect(() => { actions.current = { onChange, onRun, onCheck }; }, [onChange, onRun, onCheck]);
 
   useEffect(() => {
     if (!parent.current) return;
+    const targetPosition = startingTarget.current ? Math.max(0, startingValue.current.indexOf(startingTarget.current)) : 0;
     const editor = new EditorView({
       parent: parent.current,
       state: EditorState.create({
         doc: startingValue.current,
+        selection: { anchor: targetPosition },
         extensions: [
           basicSetup, language === "sql" ? sql({ dialect: SQLite }) : python(), indentUnit.of(language === "sql" ? "  " : "    "), courseTheme, courseHighlighting,
           EditorView.contentAttributes.of({ "aria-label": label, "aria-describedby": helpId, spellcheck: "false" }),
@@ -71,6 +75,15 @@ export default function PythonEditor({
       }),
     });
     view.current = editor;
+    if (targetPosition > 0) editor.requestMeasure({
+      read: current => {
+        const position = current.state.doc.toString().indexOf(startingTarget.current ?? "");
+        if (position < 0) return null;
+        const line = current.state.doc.lineAt(position);
+        return current.lineBlockAt(current.state.doc.line(Math.max(1, line.number - 2)).from).top;
+      },
+      write: top => { if (top !== null) editor.scrollDOM.scrollTop = top; },
+    });
     return () => { view.current = null; editor.destroy(); };
   }, [helpId, label, language]);
 

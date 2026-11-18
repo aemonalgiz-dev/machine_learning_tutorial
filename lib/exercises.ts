@@ -36,6 +36,13 @@ export interface Exercise {
   starter: string;
   // Shown one at a time, on request, before the solution.
   hints?: string[];
+  editTarget?: string;
+  continuation?: {
+    lesson: string;
+    exercise: number;
+    title: string;
+    summary: string;
+  };
   solution: string;
   output: string;
   check?: NumberCheck;
@@ -130,6 +137,14 @@ python -m venv .venv
 .venv\\Scripts\\activate        # on macOS or Linux: source .venv/bin/activate
 pip install -e .`;
 
-export const NUMPY_SETUP_COMMANDS = `python -m venv .venv
-.venv\\Scripts\\activate        # on macOS or Linux: source .venv/bin/activate
+const PYTHON_ENVIRONMENT_COMMANDS = `python -m venv .venv
+.venv\\Scripts\\activate        # on macOS or Linux: source .venv/bin/activate`;
+
+export const NUMPY_SETUP_COMMANDS = `${PYTHON_ENVIRONMENT_COMMANDS}
 python -m pip install numpy`;
+
+export function localPythonSetup({ usesSdk, usesNumpy, usesPydantic }: { usesSdk: boolean; usesNumpy: boolean; usesPydantic: boolean }): string {
+  if (usesSdk) return SETUP_COMMANDS;
+  const packages = [usesNumpy ? "numpy" : "", usesPydantic ? "pydantic==2.12.5" : ""].filter(Boolean);
+  return packages.length ? `${PYTHON_ENVIRONMENT_COMMANDS}\npython -m pip install ${packages.join(" ")}` : "python solution.py";
+}
