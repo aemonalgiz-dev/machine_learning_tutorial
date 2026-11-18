@@ -1,7 +1,10 @@
 # Perceptron Lab
 
-An interactive course in machine learning, built around examples that the
-[`oop_ml`](../) library computes through its [API](../api).
+Interactive lessons in mathematics, programming, databases, machine learning
+and agents. Readers work through Botie's building-block workshops, Python and
+SQL challenges, and visual examples. Numerical playgrounds that need the
+[`oop_ml`](../) library request calculations through its [API](../api);
+workshop constructions and coding challenges run in the browser.
 
 The public site is `https://perceptronlab.dev`. Shared branding and social
 preview settings live in `lib/site.ts`.
@@ -38,8 +41,8 @@ folder for convenience, with its own Git history and remote.
 
 ## Stack
 
-Next.js App Router, React, TypeScript and Tailwind. Interactive SVG playgrounds
-request calculations from the API and render the returned results.
+Next.js App Router, React, TypeScript and Tailwind. API-backed playgrounds
+render returned calculations; local widgets and workshops run in the browser.
 
 ## Running
 
@@ -71,11 +74,9 @@ and its exercises remain accessible without an account. Free accounts save
 course progress, answers, code and workshop drafts through the existing backend.
 Saving does not require a paid membership.
 
-Practice membership is intended to cost **US$9 monthly or US$90 annually**.
-Both billing intervals unlock the same additional library. `/membership` shows
-the available billing options after the server retrieves and validates their
-Stripe prices. An unconfigured checkout stays unavailable; there is no
-client-only purchase or automatic paid-access grant.
+`/membership` retrieves and validates the configured Stripe subscription
+options before enabling checkout. An unconfigured checkout stays unavailable;
+there is no client-only purchase or automatic paid-access grant.
 
 Definitions live in `lib/practice-bank/`. The client fetches one activity at a
 time from `/practice-api`; that route verifies the backend's opaque session
@@ -257,8 +258,8 @@ the explanation: text rows, coordinate plots, pixel grids, or bars. Distinguish
 assigned illustrations from computed or trained results. The kernel lesson
 retains its custom introductory walkthrough through the `history` prop.
 
-A lesson shows one section at a time, chosen by the arrows and the dropdown
-at the top of the page and recorded in the address bar, so a link to a section
+A lesson shows one section at a time, chosen by the arrows and contents menu
+below the content and recorded in the address bar, so a link to a section
 opens the lesson on it. Revise the introduction, lesson, and widget together
 so their terminology and examples agree. Keep all calculations in separate
 blocks and never use em dashes.
@@ -277,7 +278,7 @@ memory with a warning to keep the tab open; reloading loses unsaved changes.
 Preference storage and required authentication storage remain separate.
 Legacy guest caches are discarded. A legacy account cache is considered only
 after authenticated remote hydration and cannot override a newer server
-revision. Conditional migration writes retire their old cache after acknowledgement.
+revision. Conditional migration writes retire their old cache after acknowledgment.
 Conflicting current-visit edits retain a recovery copy in memory for download.
 New activities should use `useLearnerRecord` and `useLearnerField`, with a
 stable, versioned key; write on user edits, never on mounting default values.
@@ -293,18 +294,27 @@ on, so components are written once with both palettes.
 `WhyThisWorks` and `KeepInMind` separate examples, optional derivations and
 qualifications. Add the lesson to the relevant group in `lib/curriculum.ts`.
 
-The landing page lists course sections rather than every lesson. Each section
-has a statically generated page at `/sections/<section-id>` with its own topics
-and lesson links. Curriculum data is shared by the overview, section pages,
-and lesson breadcrumbs. Explicit section and topic IDs preserve stable links;
-old homepage fragments are forwarded to their new section destinations.
+The landing page lists learning areas. Each area at `/learn/<area-id>` groups
+its sections; each section at `/sections/<section-id>` lists its topics and
+lessons. Curriculum data is shared by these pages and the lesson breadcrumbs.
+Explicit section and topic IDs preserve stable links; old homepage fragments
+are forwarded to their section destinations.
+
+The Python engineering path follows Python and NumPy. Its worksheets extend
+earlier working code through function design, type hints, validation, error
+handling and project practices. Each new requirement exposes a limitation in
+the supplied program. Continuation links identify the earlier exercise, and
+the editor opens at the function or class being changed. Supplied helpers keep
+each worksheet runnable on its own. Their authoring modules under
+`scripts/curriculum/` are `python-design.mjs`, `python-validation.mjs` and
+`python-projects.mjs`. Regenerate the curriculum artifacts after editing them.
 
 ## Modern-model lessons
 
 The section at `/sections/evaluating-and-improving-models` follows Choosing and
 Checking a Model. Its nine lessons cover residual diagnosis, precision-recall,
 evaluation slices, paired comparisons, nested validation, label audits,
-selective prediction, behavioural tests and a model revision project. Each
+selective prediction, behavioral tests and a model revision project. Each
 lesson includes a sourced history, visible examples, quiz data, a compositional
 Botie workshop and a tested NumPy challenge. The project fits baseline and
 candidate least-squares models, including a check against evaluation-label
@@ -344,7 +354,7 @@ the Agents contracts, workshop journey contracts, and browser Python checks.
 Agent Guardrails and Secure Development at
 `/sections/agent-guardrails-and-secure-development` extends that path with nine
 lessons on effect boundaries, coding-agent patches, execution sandboxes, release
-provenance, MCP discovery and authorisation, approved application actions,
+provenance, MCP discovery and authorization, approved application actions,
 memory and delegation, and end-to-end safety evaluations. Each has a Botie
 construction, a changed scenario, an independent fresh case and a runnable
 Python policy challenge. The lessons distinguish these fixture checks from
@@ -385,25 +395,28 @@ updates from derivatives. Use oop_ml when applying an already explained model
 is the objective. Do not hide the operation being taught behind SDK properties
 or a fit call. Local installation instructions follow each exercise's needs.
 
-Run code executes the program. Run tests executes it in a fresh namespace and
-then runs Python assertions for successful execution, the number of result
-lines, and each expected line's text and numerical values. Whitespace and
-rounding at the displayed precision are accepted. These are output tests,
-not source-code checks or proof against hard-coded answers. Results show
-passed and failed counters, skipped counts when applicable, and individual
-assertions with expected/actual values.
+Run code executes the program. Run tests executes it in a fresh namespace,
+checks successful execution and expected output, then runs the exercise's
+additional behavior assertions where provided. Those assertions call reusable
+functions with changed inputs and check declared failure and state-preservation
+rules. Output comparisons accept whitespace and rounding at the displayed
+precision. These checks cover the supplied cases; they are not static analysis
+or proof of correctness for every input. Results show passed, failed and skipped
+counts, with individual checks and expected/actual values where applicable.
 Reading a solution does not mark its tests as passed. Sign-in is optional for
 the existing course; its exercises have no locked steps. Sign in before work
 that needs to survive a reload.
 
 Python runs in a dedicated [Pyodide worker](https://pyodide.org/en/stable/usage/webworker.html).
-The engine is pinned to 314.0.7. It loads only on Run, downloads NumPy, and
-loads the SDK, SciPy and Pydantic only for scripts importing oop_ml. The first
-run needs network access to the pinned Pyodide package CDN. User code is never
-sent to the compute API. Stop terminates the worker; loading times out after
-three minutes, execution after one minute, and each output stream is limited
-to 20,000 characters. Variables reset between runs. Python modules and its
-temporary filesystem remain in the worker until it is stopped or the reader
+The engine is pinned to 314.0.7 and loads only on Run. Python mode loads NumPy.
+A direct Pydantic import loads that package independently; an oop_ml import
+loads the SDK with SciPy and Pydantic. SQL mode uses the same worker with its
+SQLite runner. The first run needs network access to the pinned Pyodide package
+CDN. User code is never sent to the compute API. Stop terminates the worker;
+loading times out after three minutes, execution after one minute, and each
+output stream is limited to 20,000 characters. Variables reset between runs.
+Imported modules and the temporary filesystem remain in the worker until it
+is stopped or the reader
 leaves the coding section. This is a learning workspace, not a hostile-code
 security boundary inside the reader's browser.
 
