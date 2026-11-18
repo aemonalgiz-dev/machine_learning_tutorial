@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -8,10 +9,10 @@ import { NumberTable, SubSection, WorkedExample } from "@/components/concept/Tre
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/autoencoders", {
   title: "Autoencoders · Perceptron Lab",
   description: "An autoencoder learns to reconstruct an input through an intermediate representation. Restricting that representation forces choices about which details to preserve, measured by the error in the reconstruction.",
-};
+});
 
 export default function Page() {
   return <ConceptPage

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +23,11 @@ import { CnnShiftChart } from "@/components/widgets/CnnShiftChart";
 import { CnnTrainingCurves } from "@/components/widgets/CnnTrainingCurves";
 import { CnnUnseenKind } from "@/components/widgets/CnnUnseenKind";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/convolutional-networks", {
   title: "Convolutional Networks · Perceptron Lab",
   description:
     "Convolutional networks combine local image patterns through successive layers. Training learns which combinations help predict an image's label, with later representations drawing on larger regions of the input.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

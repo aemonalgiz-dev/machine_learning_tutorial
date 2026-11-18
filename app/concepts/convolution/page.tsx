@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,11 +25,11 @@ import { SweepBackwardBlame } from "@/components/widgets/SweepBackwardBlame";
 import { SweepCostTable } from "@/components/widgets/SweepCostTable";
 import { SweepGeometryTable } from "@/components/widgets/SweepGeometryTable";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/convolution", {
   title: "Convolution · Perceptron Lab",
   description:
     "Convolution applies the same small set of weights across different positions. The resulting response map describes where a local pattern appears, using fewer independent weights than a separate rule for every position.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

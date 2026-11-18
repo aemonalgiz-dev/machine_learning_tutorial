@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -25,11 +26,11 @@ import { LeaveOutChart } from "@/components/widgets/LeaveOutChart";
 import { OobGrid } from "@/components/widgets/OobGrid";
 import { TreeStability } from "@/components/widgets/TreeStability";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/bagging", {
   title: "Bagging · Perceptron Lab",
   description:
     "Small changes to training data can produce different fitted models. Bagging fits models on resampled observations and combines their predictions, reducing the influence of variation in any one fit.",
-};
+});
 
 const linkClass =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

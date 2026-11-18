@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +23,11 @@ import { StepSizeSweep } from "@/components/widgets/StepSizeSweep";
 import { TrainingRunPlayground } from "@/components/widgets/TrainingRunPlayground";
 import { TwoLossCurves } from "@/components/widgets/TwoLossCurves";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/training-a-network", {
   title: "Training a Network · Perceptron Lab",
   description:
     "Training repeatedly calculates predictions and measures their errors. Gradients then guide parameter updates, with the update size and sequence of examples affecting how the network changes.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

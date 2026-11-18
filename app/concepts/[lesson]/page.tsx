@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { expandedLessonById } from "@/lib/lessons";
@@ -12,7 +13,7 @@ export function generateStaticParams() { return []; }
 export async function generateMetadata({ params }: { params: Promise<{ lesson: string }> }): Promise<Metadata> {
   const { lesson } = await params;
   const page = Object.hasOwn(expandedLessonById, lesson) ? expandedLessonById[lesson] : undefined;
-  return page ? { title: `${page.title} · Perceptron Lab`, description: page.blurb } : {};
+  return page ? pageMetadata("/concepts/" + lesson, { title: `${page.title} · Perceptron Lab`, description: page.blurb }) : {};
 }
 export default async function Page({ params }: { params: Promise<{ lesson: string }> }) {
   const { lesson } = await params;

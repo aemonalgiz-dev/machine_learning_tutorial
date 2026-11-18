@@ -1,8 +1,9 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Botie } from "@/components/site/Botie";
 
-export const metadata: Metadata = { title: "About Perceptron Lab", description: "Why I built Perceptron Lab, and how the lessons help you work through the ideas yourself." };
+export const metadata: Metadata = pageMetadata("/about", { title: "About Perceptron Lab", description: "Why I built Perceptron Lab, and how the lessons help you work through the ideas yourself." });
 
 const FEATURES = [
   ["History and motivation", "Every lesson is grounded in the history of the mathematics, the logic, and the needs of the time."],

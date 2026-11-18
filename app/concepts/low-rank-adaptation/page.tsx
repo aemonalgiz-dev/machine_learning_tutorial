@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -8,10 +9,10 @@ import { NumberTable, SubSection, WhyThisWorks, WorkedExample } from "@/componen
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/low-rank-adaptation", {
   title: "Low-Rank Adaptation · Perceptron Lab",
   description: "LoRA adapts a model by learning a smaller matrix-based correction while leaving the original weights fixed. This reduces the number of parameters updated and stored for a particular adaptation.",
-};
+});
 
 export default function Page() {
   return <ConceptPage

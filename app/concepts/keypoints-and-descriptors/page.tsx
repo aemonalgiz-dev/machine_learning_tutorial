@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { SuppressionLadder } from "@/components/widgets/SuppressionLadder";
 import { WhyACorner } from "@/components/widgets/WhyACorner";
 import { WithoutCorners } from "@/components/widgets/WithoutCorners";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/keypoints-and-descriptors", {
   title: "Keypoints and Descriptors · Perceptron Lab",
   description:
     "Distinctive image locations can be matched across photographs taken from different viewpoints. A descriptor gives each location a numerical account of its surroundings so candidate matches can be compared.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

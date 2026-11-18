@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,11 +25,11 @@ import { RowAxisDemo } from "@/components/widgets/RowAxisDemo";
 import { RunningFiguresChart } from "@/components/widgets/RunningFiguresChart";
 import { ScaleShiftUndo } from "@/components/widgets/ScaleShiftUndo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/normalisation-layers", {
   title: "Normalization Layers · Perceptron Lab",
   description:
     "Normalization changes the reference and scale of values passed through a network. The values grouped for that calculation distinguish methods such as batch and layer normalization and affect their behavior during training and prediction.",
-};
+});
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 

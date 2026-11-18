@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -25,11 +26,11 @@ import { ReadingCostPanel } from "@/components/widgets/ReadingCostPanel";
 import { SceneCostComparison } from "@/components/widgets/SceneCostComparison";
 import { SweepCostComparison } from "@/components/widgets/SweepCostComparison";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/haar-cascades", {
   title: "Haar Cascades · Perceptron Lab",
   description:
     "Most regions searched by an object detector contain no match. A cascade rejects unlikely regions with inexpensive checks before spending more computation on the candidates that remain.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

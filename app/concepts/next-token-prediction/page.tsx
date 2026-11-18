@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -8,10 +9,10 @@ import { KeepInMind, NumberTable, SubSection, WorkedExample } from "@/components
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/next-token-prediction", {
   title: "Next-Token Prediction · Perceptron Lab",
   description: "Text provides examples of which tokens follow earlier tokens. Training a next-token model uses those continuations as targets while restricting each prediction to the preceding context.",
-};
+});
 
 export default function Page() {
   return <ConceptPage

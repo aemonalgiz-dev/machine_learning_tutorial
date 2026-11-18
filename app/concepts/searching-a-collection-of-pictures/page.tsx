@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { PictureSearchPlayground } from "@/components/widgets/PictureSearchPlayg
 import { RecallTradeOffChart } from "@/components/widgets/RecallTradeOffChart";
 import { SearchSeedTable } from "@/components/widgets/SearchSeedTable";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/searching-a-collection-of-pictures", {
   title: "Searching a Collection of Pictures · Perceptron Lab",
   description:
     "Image vectors allow pictures to be searched by similarity. Comparing every vector provides a reference result, while approximate indexes reduce search work by accepting some missed neighbors.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

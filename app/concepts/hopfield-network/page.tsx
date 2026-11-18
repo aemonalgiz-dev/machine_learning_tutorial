@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { SelfConnectionDial } from "@/components/widgets/SelfConnectionDial";
 import { UnstoredRests } from "@/components/widgets/UnstoredRests";
 import { UpdateRuleRace } from "@/components/widgets/UpdateRuleRace";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/hopfield-network", {
   title: "Hopfield Networks · Perceptron Lab",
   description:
     "A Hopfield network uses repeated updates to settle toward a stable pattern. Its connections can store associations that help recover a familiar pattern from incomplete or noisy input, though other stable states can also occur.",
-};
+});
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 

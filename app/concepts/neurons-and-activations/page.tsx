@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { DeadUnitCensus } from "@/components/widgets/DeadUnitCensus";
 import { LogisticTwinChart } from "@/components/widgets/LogisticTwinChart";
 import { NeuronPlayground } from "@/components/widgets/NeuronPlayground";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/neurons-and-activations", {
   title: "A Neuron · Perceptron Lab",
   description:
     "An artificial neuron has weights, a bias and an activation function. The weights control each input's contribution, the bias shifts the combined value, and the activation determines how that value becomes an output.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

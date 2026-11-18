@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -8,10 +9,10 @@ import { NumberTable, SubSection, WorkedExample } from "@/components/concept/Tre
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/diffusion-models", {
   title: "Diffusion Models · Perceptron Lab",
   description: "A diffusion model learns how to reverse controlled additions of noise. Repeating a learned reverse process from a noisy starting point provides a way to generate an example.",
-};
+});
 
 export default function Page() {
   return <ConceptPage

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,11 +21,11 @@ import { RewritingCensus } from "@/components/widgets/RewritingCensus";
 import { TreebankCostPanel } from "@/components/widgets/TreebankCostPanel";
 import { TreebankPlayground } from "@/components/widgets/TreebankPlayground";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/penn-treebank-rules", {
   title: "Penn Treebank Rules · Perceptron Lab",
   description:
     "Penn Treebank tokenization applies consistent rules to English contractions and punctuation. Those conventions let text be divided into pieces that match the assumptions used in annotated datasets.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -25,11 +26,11 @@ import { MarkovShares } from "@/components/widgets/MarkovShares";
 import { MarkovSmoothingSweep } from "@/components/widgets/MarkovSmoothingSweep";
 import { MarkovTwoStep } from "@/components/widgets/MarkovTwoStep";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/markov-chains", {
   title: "Markov Chains · Perceptron Lab",
   description:
     "A Markov chain represents a process through states and the probabilities of moving between them. Its next-state prediction depends on the current state, making the choice of what a state includes important.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

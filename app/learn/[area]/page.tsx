@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { americanEnglish } from "@/lib/american-english";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -13,7 +14,7 @@ export function generateStaticParams() { return LEARNING_AREAS.map(area => ({ ar
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const area = findLearningArea((await params).area);
   if (!area) notFound();
-  return { title: `${area.title} | Perceptron Lab`, description: area.description };
+  return pageMetadata("/learn/" + area.id, { title: `${area.title} | Perceptron Lab`, description: area.description });
 }
 
 export default async function LearningAreaPage({ params }: Props) {

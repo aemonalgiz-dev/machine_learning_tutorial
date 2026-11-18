@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { SeedGapStrip } from "@/components/widgets/SeedGapStrip";
 import { StepOrderChart } from "@/components/widgets/StepOrderChart";
 import { TemplateLedger } from "@/components/widgets/TemplateLedger";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/pipelines", {
   title: "Pipelines · Perceptron Lab",
   description:
     "Data preparation can learn settings from the observations it receives. Keeping preparation and prediction in one fitting procedure helps prevent evaluation data from influencing those settings.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

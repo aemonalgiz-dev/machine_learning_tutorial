@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +23,11 @@ import { ShapeStackBuilder } from "@/components/widgets/ShapeStackBuilder";
 import { SharedLayerStep } from "@/components/widgets/SharedLayerStep";
 import { WindowPositions } from "@/components/widgets/WindowPositions";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/shapes-and-flattening", {
   title: "The Shape Guarantee · Perceptron Lab",
   description:
     "An array's shape records how values are arranged and which belong to the same example. Flattening puts each example's values into a vector, so the original spatial organization is no longer explicit.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

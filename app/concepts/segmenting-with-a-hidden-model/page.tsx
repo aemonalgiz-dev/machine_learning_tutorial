@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -23,10 +24,10 @@ import { TwinLanguages } from "@/components/widgets/TwinLanguages";
 
 
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/segmenting-with-a-hidden-model", {
   title: "Segmenting With a Hidden Model · Perceptron Lab",
   description: "Hidden states can describe which characters begin or end a word even when those labels are unobserved. A probabilistic model compares possible state sequences to infer likely word boundaries.",
-};
+});
 
 export default function SegmentingWithAHiddenModelPage() {
   return (

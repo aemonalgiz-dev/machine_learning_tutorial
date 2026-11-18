@@ -5,15 +5,14 @@ import { LegacyCourseLinks } from "@/components/course/LegacyCourseLinks";
 import { LearningAreas } from "@/components/course/LearningMap";
 import { LearningDashboard } from "@/components/site/LearningDashboard";
 import { legacyCourseDestinations } from "@/lib/course-navigation";
-import { SITE_ORIGIN, SITE_SOCIAL } from "@/lib/site";
+import { SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
+import { pageMetadata, websiteStructuredData } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  alternates: { canonical: SITE_ORIGIN },
-  openGraph: { ...SITE_SOCIAL, url: SITE_ORIGIN },
-};
+export const metadata: Metadata = pageMetadata("/", { title: SITE_TITLE, description: SITE_DESCRIPTION });
 
 export default function Home() {
   return <div className="mx-auto w-full max-w-6xl px-5 pb-16 pt-8 sm:px-8 sm:pt-10">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteStructuredData).replace(/</g, "\\u003c") }} />
     <LegacyCourseLinks destinations={legacyCourseDestinations} />
     <header className="mb-7 flex flex-wrap items-end justify-between gap-4">
       <p className="game-eyebrow">Perceptron Lab</p>

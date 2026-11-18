@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +23,11 @@ import { OptimismGrowthTable } from "@/components/widgets/OptimismGrowthTable";
 import { SearchCurveChart } from "@/components/widgets/SearchCurveChart";
 import { SpaceBuilder } from "@/components/widgets/SpaceBuilder";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/grid-search", {
   title: "Searching for a Setting · Perceptron Lab",
   description:
     "Model settings chosen before fitting affect the result. Grid search compares specified combinations using validation data, while a separate final test checks the choice after the search is complete.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

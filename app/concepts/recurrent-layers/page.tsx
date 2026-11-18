@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, NumberTable, SubSection, WorkedExample, WhyThisWorks } from "@/components/concept/Treatments";
 import { RecurrentExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Recurrent Layers · Perceptron Lab", description: "A recurrent layer retains a state as it processes a sequence, allowing earlier observations to affect later outputs. Gated variants control how information is kept or replaced." };
+export const metadata: Metadata = pageMetadata("/concepts/recurrent-layers", { title: "Recurrent Layers · Perceptron Lab", description: "A recurrent layer retains a state as it processes a sequence, allowing earlier observations to affect later outputs. Gated variants control how information is kept or replaced." });
 
 export default function RecurrentLayersPage() {
   return <ConceptPage

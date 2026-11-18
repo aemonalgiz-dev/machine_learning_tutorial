@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +23,11 @@ import { ShareTotalsChart } from "@/components/widgets/ShareTotalsChart";
 import { ShiftTolerance } from "@/components/widgets/ShiftTolerance";
 import { WindowSummaries } from "@/components/widgets/WindowSummaries";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/pooling", {
   title: "Pooling · Perceptron Lab",
   description:
     "Pooling combines nearby values into a smaller representation. It reduces spatial resolution, so the choice of operation determines which responses are retained and which positional details are lost.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

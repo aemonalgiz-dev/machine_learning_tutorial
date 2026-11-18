@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { LessonMotivation } from "@/components/concept/LessonProgression";
 import { lessonProgressions } from "@/lib/lesson-progressions";
 import type { Metadata } from "next";
@@ -18,10 +19,10 @@ import { KernelTransformationStory } from "@/components/widgets/KernelTransforma
 import { MarginView } from "@/components/widgets/MarginView";
 import { SupportVectorRefit } from "@/components/widgets/SupportVectorRefit";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/kernel-trick", {
   title: "The Kernel Trick · Perceptron Lab",
   description: "Changing the representation of data can make a complicated separation easier to describe. A kernel calculates inner-product comparisons in a transformed feature space without requiring every transformed coordinate to be constructed explicitly.",
-};
+});
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 
 // Preserve earlier top-level section URLs after reorganizing the lesson.

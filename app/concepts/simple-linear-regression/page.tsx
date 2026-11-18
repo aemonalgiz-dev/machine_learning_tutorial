@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -18,11 +19,11 @@ import { LineFitPlayground } from "@/components/widgets/LineFitPlayground";
 import { LossBowlPlayground } from "@/components/widgets/LossBowlPlayground";
 import { SquaresChart } from "@/components/widgets/SquaresChart";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/simple-linear-regression", {
   title: "Simple Linear Regression · Perceptron Lab",
   description:
     "Linear regression represents a relationship with a straight line. Fitting the line means choosing its slope and intercept according to the differences between observed and predicted values.",
-};
+});
 
 export default function SimpleLinearRegressionPage() {
   return (

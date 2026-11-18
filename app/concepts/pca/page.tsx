@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -29,11 +30,11 @@ import { SignFlip } from "@/components/widgets/SignFlip";
 import { StandardizedComparison } from "@/components/widgets/StandardizedComparison";
 import { UnitToggle } from "@/components/widgets/UnitToggle";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/pca", {
   title: "Principal Component Analysis · Perceptron Lab",
   description:
     "Measurements that vary together can repeat information. Principal component analysis finds directions that preserve the greatest variation, giving us a smaller set of coordinates with a measurable loss of detail.",
-};
+});
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 

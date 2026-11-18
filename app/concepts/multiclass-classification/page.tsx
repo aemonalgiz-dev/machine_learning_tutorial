@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -25,11 +26,11 @@ import { SeparationSweep } from "@/components/widgets/SeparationSweep";
 import { SoftmaxAssembly } from "@/components/widgets/SoftmaxAssembly";
 import { TwoClassCollapse } from "@/components/widgets/TwoClassCollapse";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/multiclass-classification", {
   title: "More Than Two Classes · Perceptron Lab",
   description:
     "Some predictions have several possible categories. Comparing a score for each category requires a consistent decision rule and a clear distinction between scores and probabilities.",
-};
+});
 
 const linkClass =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

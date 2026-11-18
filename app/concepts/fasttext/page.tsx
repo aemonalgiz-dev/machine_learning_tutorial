@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { FasttextReduction } from "@/components/widgets/FasttextReduction";
 import { FasttextSpelling } from "@/components/widgets/FasttextSpelling";
 import { FasttextUnseenWord } from "@/components/widgets/FasttextUnseenWord";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/fasttext", {
   title: "FastText · Perceptron Lab",
   description:
     "FastText represents words using character fragments as well as whole-word information. Shared fragments allow related spellings to contribute to each other's representations, including words with few observed occurrences.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

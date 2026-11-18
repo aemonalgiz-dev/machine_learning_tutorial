@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -21,10 +22,10 @@ import { ReadingsAgainstSteps } from "@/components/widgets/ReadingsAgainstSteps"
 
 
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/the-word-lattice", {
   title: "The Word Lattice · Perceptron Lab",
   description: "A word lattice retains alternative ways to divide a sequence into words. Complete paths represent different segmentations, allowing choices to be compared before committing to an early boundary.",
-};
+});
 
 export default function TheWordLatticePage() {
   return (

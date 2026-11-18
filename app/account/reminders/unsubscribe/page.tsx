@@ -1,12 +1,13 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { UnsubscribeReminders } from "@/components/site/UnsubscribeReminders";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/account/reminders/unsubscribe", {
   title: "Stop reminder emails · Perceptron Lab",
   robots: { index: false, follow: false },
   referrer: "no-referrer",
-};
+});
 
 export default function UnsubscribePage() {
   return <article className="mx-auto w-full max-w-xl space-y-5 px-6 py-12">

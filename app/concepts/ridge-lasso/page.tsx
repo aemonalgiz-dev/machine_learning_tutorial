@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,11 +25,11 @@ import { RegularisationPathDashboard } from "@/components/widgets/Regularisation
 import { ShrinkagePathChart } from "@/components/widgets/ShrinkagePathChart";
 import { SoftThresholdSlider } from "@/components/widgets/SoftThresholdSlider";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/ridge-lasso", {
   title: "Ridge & Lasso · Perceptron Lab",
   description:
     "A model can fit details in the training data that do not hold elsewhere. Ridge and lasso penalize coefficient size in different ways, changing how the fit balances prediction error against complexity.",
-};
+});
 
 const linkClass =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

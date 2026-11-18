@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { NearestEntryTable } from "@/components/widgets/NearestEntryTable";
 import { SameNumberTable } from "@/components/widgets/SameNumberTable";
 import { UnusedEntriesTable } from "@/components/widgets/UnusedEntriesTable";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/codebook-quantisation", {
   title: "Codebook Quantization · Perceptron Lab",
   description:
     "A codebook replaces a continuous vector with an ID for a nearby representative. The number and placement of representatives determine the available codes and the error introduced by that replacement.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,11 +21,11 @@ import { HandSizedSearch } from "@/components/widgets/HandSizedSearch";
 import { TemplateSearchPlayground } from "@/components/widgets/TemplateSearchPlayground";
 import { WhereEachRuleLands } from "@/components/widgets/WhereEachRuleLands";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/template-matching", {
   title: "Template Matching · Perceptron Lab",
   description:
     "A known image pattern can be compared with regions of a larger image to locate possible matches. The comparison rule determines how changes in brightness affect the match score.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

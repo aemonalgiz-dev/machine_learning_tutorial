@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,11 +21,11 @@ import { CentringPlayground } from "@/components/widgets/CentringPlayground";
 import { ShiftInvariance } from "@/components/widgets/ShiftInvariance";
 import { WalkFromTheMean } from "@/components/widgets/WalkFromTheMean";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/centring-on-the-mean", {
   title: "Centering on the Mean · Perceptron Lab",
   description:
     "Subtracting the mean expresses each measurement relative to the average. The differences between observations stay the same, while zero becomes a useful reference for their departures from that average.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

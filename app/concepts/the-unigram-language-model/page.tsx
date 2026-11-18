@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -22,11 +23,11 @@ import { SpellingLadder } from "@/components/widgets/SpellingLadder";
 import { UnigramPlayground } from "@/components/widgets/UnigramPlayground";
 import { WordLattice } from "@/components/widgets/WordLattice";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/the-unigram-language-model", {
   title: "The Unigram Language Model · Perceptron Lab",
   description:
     "A unigram tokenizer assigns probabilities to candidate pieces and compares complete segmentations. Vocabulary selection balances the available pieces against how well their combinations describe the observed text.",
-};
+});
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 

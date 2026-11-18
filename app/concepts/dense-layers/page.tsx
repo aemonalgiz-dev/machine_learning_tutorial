@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -26,11 +27,11 @@ import { RouteAgreement } from "@/components/widgets/RouteAgreement";
 import { SharedRowLedger } from "@/components/widgets/SharedRowLedger";
 import { WidthAgainstDepth } from "@/components/widgets/WidthAgainstDepth";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/dense-layers", {
   title: "A Dense Layer and the Forward Pass · Perceptron Lab",
   description:
     "A dense layer applies several neurons to the same inputs. Each neuron learns its own weighted combination, producing a collection of outputs that another layer can use.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

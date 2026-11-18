@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,11 +21,11 @@ import { MarkBetweenTable } from "@/components/widgets/MarkBetweenTable";
 import { ScriptCoveragePanel } from "@/components/widgets/ScriptCoveragePanel";
 import { WordBreakPlayground } from "@/components/widgets/WordBreakPlayground";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/unicode-word-boundaries", {
   title: "Unicode Word Boundaries · Perceptron Lab",
   description:
     "Writing systems use different kinds of characters and boundary conventions. Unicode information supports more general splitting rules than English letters and spaces alone, while some language-specific boundaries still need other methods.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

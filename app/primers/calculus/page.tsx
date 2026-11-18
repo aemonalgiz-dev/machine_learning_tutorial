@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import { presentIntuition } from "@/lib/intuition/presentation";
 import { GuidedIntuition, IntuitionConnection } from "@/components/concept/GuidedIntuition";
@@ -24,11 +25,11 @@ import { DerivativeExplorer } from "@/components/widgets/DerivativeExplorer";
 import { SlopePlayground } from "@/components/widgets/SlopePlayground";
 import { GradientDescentPlayground } from "@/components/widgets/GradientDescentPlayground";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/primers/calculus", {
   title: "Calculus Primer · Perceptron Lab",
   description:
     "Calculus describes how one quantity changes as another changes. A derivative measures the rate of that change, helping us understand a function's behavior and decide which adjustments increase or decrease its output.",
-};
+});
 
 export default function CalculusPrimerPage() {
   return (

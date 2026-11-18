@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +23,11 @@ import { PairSpacePlayground } from "@/components/widgets/PairSpacePlayground";
 import { SharedWeightsCheck } from "@/components/widgets/SharedWeightsCheck";
 import { WorkedPairBoard } from "@/components/widgets/WorkedPairBoard";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/learning-the-metric-itself", {
   title: "Learning the Metric Itself · Perceptron Lab",
   description:
     "Similarity depends on which differences matter for a task. Metric learning uses examples of matches and nonmatches to shape a representation in which distances reflect those distinctions.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,11 +25,11 @@ import { SceneUnderTwoLamps } from "@/components/widgets/SceneUnderTwoLamps";
 import { TurnedAgainstRelit } from "@/components/widgets/TurnedAgainstRelit";
 import { VoteSharingSlide } from "@/components/widgets/VoteSharingSlide";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/histogram-of-oriented-gradients", {
   title: "Histogram of Oriented Gradients · Perceptron Lab",
   description:
     "Local edge directions describe image shape without requiring every pixel value to match. Histograms of oriented gradients collect those directions into regional summaries that can support object detection.",
-};
+});
 
 export default function OrientedGradientsPage() {
   return (

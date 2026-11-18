@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { PositionExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Positional Encoding · Perceptron Lab", description: "Word order affects meaning, even when the words themselves stay the same. Positional information lets a model distinguish where tokens occur and use that order in its calculations." };
+export const metadata: Metadata = pageMetadata("/concepts/positional-encoding", { title: "Positional Encoding · Perceptron Lab", description: "Word order affects meaning, even when the words themselves stay the same. Positional information lets a model distinguish where tokens occur and use that order in its calculations." });
 
 export default function PositionalEncodingPage() {
   return <ConceptPage

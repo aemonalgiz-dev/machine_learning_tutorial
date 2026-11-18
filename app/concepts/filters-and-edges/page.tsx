@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { SweepByHand } from "@/components/widgets/SweepByHand";
 import { SweepCost } from "@/components/widgets/SweepCost";
 import { ThresholdSweep } from "@/components/widgets/ThresholdSweep";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/filters-and-edges", {
   title: "Filters and Edges · Perceptron Lab",
   description:
     "Changes in neighboring pixel values reveal boundaries and local patterns in an image. Filters calculate those changes over small regions, making image structure easier to measure.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

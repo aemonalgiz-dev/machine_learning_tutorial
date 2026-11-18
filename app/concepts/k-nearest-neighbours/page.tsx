@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -7,11 +8,11 @@ import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import { KnnPlayground } from "@/components/widgets/KnnPlayground";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/k-nearest-neighbours", {
   title: "k-Nearest Neighbors · Perceptron Lab",
   description:
     "Nearby labeled examples can provide evidence about an unfamiliar observation. The distance measure and number of neighbors determine which examples contribute and how local the resulting prediction is.",
-};
+});
 
 export default function KNearestNeighboursPage() {
   return (

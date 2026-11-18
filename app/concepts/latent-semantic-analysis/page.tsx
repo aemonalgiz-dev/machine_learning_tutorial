@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { SqueezeTradeoff } from "@/components/widgets/SqueezeTradeoff";
 import { TermDocumentTable } from "@/components/widgets/TermDocumentTable";
 import { TwoSensesOneRow } from "@/components/widgets/TwoSensesOneRow";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/latent-semantic-analysis", {
   title: "Latent Semantic Analysis · Perceptron Lab",
   description:
     "A table of word use across documents can contain shared patterns. Latent semantic analysis keeps a smaller set of those patterns, representing words and documents with fewer coordinates.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

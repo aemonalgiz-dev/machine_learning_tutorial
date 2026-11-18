@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,11 +25,11 @@ import { RateMultiples } from "@/components/widgets/RateMultiples";
 import { RateSweepTable } from "@/components/widgets/RateSweepTable";
 import { TrajectoryDashboard } from "@/components/widgets/TrajectoryDashboard";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/gradient-descent-regression", {
   title: "Fitting by Walking · Perceptron Lab",
   description:
     "A fitted rule can be improved through repeated adjustments to its coefficients. The gradient describes how the error changes near the current settings, providing a direction in which to try reducing it.",
-};
+});
 
 const linkClass =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

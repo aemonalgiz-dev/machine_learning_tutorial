@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, SubSection, WorkedExample, WhyThisWorks } from "@/components/concept/Treatments";
 import { AttentionExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Attention · Perceptron Lab", description: "Attention calculates how strongly one position should combine information from other positions. Similarity scores become normalized weights, allowing the resulting representation to depend on the available context." };
+export const metadata: Metadata = pageMetadata("/concepts/attention", { title: "Attention · Perceptron Lab", description: "Attention calculates how strongly one position should combine information from other positions. Similarity scores become normalized weights, allowing the resulting representation to depend on the available context." });
 
 export default function AttentionPage() {
   return <ConceptPage

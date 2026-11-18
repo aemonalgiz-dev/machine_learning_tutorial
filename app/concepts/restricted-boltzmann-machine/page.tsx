@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { StateScores } from "@/components/widgets/StateScores";
 import { StepLedger } from "@/components/widgets/StepLedger";
 import { WidthSweep } from "@/components/widgets/WidthSweep";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/restricted-boltzmann-machine", {
   title: "Restricted Boltzmann Machines · Perceptron Lab",
   description:
     "A restricted Boltzmann machine relates observed values to hidden variables through a probability model. Learning their interactions provides a way to represent patterns shared across the observations.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

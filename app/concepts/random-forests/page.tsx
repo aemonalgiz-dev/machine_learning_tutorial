@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -26,11 +27,11 @@ import { StrengthCorrelationSweep } from "@/components/widgets/StrengthCorrelati
 import { TradeCalculator } from "@/components/widgets/TradeCalculator";
 import { VarianceFloorChart } from "@/components/widgets/VarianceFloorChart";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/random-forests", {
   title: "Random Forests · Perceptron Lab",
   description:
     "Combining trees helps when their errors differ. Random forests vary both the sampled observations and the features available at a split, encouraging different trees to contribute different information.",
-};
+});
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 

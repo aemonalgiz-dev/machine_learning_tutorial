@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -19,11 +20,11 @@ import { TokenStripExplorer } from "@/components/widgets/TokenStripExplorer";
 import { UnknownAnswerTable } from "@/components/widgets/UnknownAnswerTable";
 import { VocabularyGrowthChart } from "@/components/widgets/VocabularyGrowthChart";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/what-a-token-is", {
   title: "What a Token Is · Perceptron Lab",
   description:
     "A token is a piece of text represented by an ID from a vocabulary. The piece may be a word or part of one; the ID identifies it without expressing its meaning or similarity to other pieces.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

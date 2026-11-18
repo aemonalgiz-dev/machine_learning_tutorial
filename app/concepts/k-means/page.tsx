@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { SeedGallery } from "@/components/widgets/SeedGallery";
 import { ShapeGallery } from "@/components/widgets/ShapeGallery";
 import { UnitSensitivity } from "@/components/widgets/UnitSensitivity";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/k-means", {
   title: "k-Means Clustering · Perceptron Lab",
   description:
     "Clustering groups observations without requiring category labels. K-means alternates between assigning points to nearby centers and moving each center to the mean of its assigned points.",
-};
+});
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 

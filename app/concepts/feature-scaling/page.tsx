@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +23,11 @@ import { QuartilePositions } from "@/components/widgets/QuartilePositions";
 import { ScalingContracts } from "@/components/widgets/ScalingContracts";
 import { UnitDistortion } from "@/components/widgets/UnitDistortion";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/feature-scaling", {
   title: "Feature Scaling · Perceptron Lab",
   description:
     "The units of a measurement can affect its influence on a calculation. Scaling changes those units or ranges, which matters when distances or parameter updates are sensitive to the size of the numbers.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

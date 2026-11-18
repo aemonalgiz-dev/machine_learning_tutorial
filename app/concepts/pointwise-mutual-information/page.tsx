@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { ReadingComparison } from "@/components/widgets/ReadingComparison";
 import { ScoreSpectrum } from "@/components/widgets/ScoreSpectrum";
 import { SmoothingTracks } from "@/components/widgets/SmoothingTracks";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/pointwise-mutual-information", {
   title: "Pointwise Mutual Information · Perceptron Lab",
   description:
     "Frequent co-occurrence can arise simply because two words are common. Pointwise mutual information compares observed co-occurrence with the level expected under independence, distinguishing frequency from relative association.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

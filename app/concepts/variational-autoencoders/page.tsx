@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -9,10 +10,10 @@ import { ModernLearningExample } from "@/components/widgets/ModernLearningExampl
 import { lessonIntuitions } from "@/lib/intuition";
 import { TinyVaeExperiment } from "@/components/widgets/TinyVaeExperiment";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/variational-autoencoders", {
   title: "Variational Autoencoders · Perceptron Lab",
   description: "A variational autoencoder learns a distribution of intermediate representations as well as a reconstruction procedure. Relating those representations to a prior distribution provides a basis for sampling codes that generate new examples.",
-};
+});
 
 export default function Page() {
   return <ConceptPage

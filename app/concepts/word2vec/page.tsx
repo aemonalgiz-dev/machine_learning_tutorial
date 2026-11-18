@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -26,11 +27,11 @@ import { Word2vecTree } from "@/components/widgets/Word2vecTree";
 import { Word2vecTwoTables } from "@/components/widgets/Word2vecTwoTables";
 import { Word2vecWindowPairs } from "@/components/widgets/Word2vecWindowPairs";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/word2vec", {
   title: "Word2vec · Perceptron Lab",
   description:
     "Word2vec learns word vectors through prediction tasks involving nearby words. Shared patterns of use shape the vectors, allowing their numerical relationships to reflect regularities in the training text.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

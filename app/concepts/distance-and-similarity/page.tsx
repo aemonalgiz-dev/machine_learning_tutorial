@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,11 +25,11 @@ import { RuleAgreement } from "@/components/widgets/RuleAgreement";
 import { ThreeWordCounts } from "@/components/widgets/ThreeWordCounts";
 import { WhereNearnessIsUndefined } from "@/components/widgets/WhereNearnessIsUndefined";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/distance-and-similarity", {
   title: "Distance and Similarity · Perceptron Lab",
   description:
     "Vectors can be compared by the differences between their coordinates or by the angle between them. Those choices treat length differently and can change which words count as similar.",
-};
+});
 
 export default function DistanceAndSimilarityPage() {
   return (

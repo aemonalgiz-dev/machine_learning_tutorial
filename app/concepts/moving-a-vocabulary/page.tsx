@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -19,11 +20,11 @@ import { MarkerLoss } from "@/components/widgets/MarkerLoss";
 import { SurvivalSweep } from "@/components/widgets/SurvivalSweep";
 import { VocabularyMovePlayground } from "@/components/widgets/VocabularyMovePlayground";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/moving-a-vocabulary", {
   title: "Moving a Vocabulary · Perceptron Lab",
   description:
     "Vocabulary entries depend on the boundary rules that produced them. Moving pieces to another tokenization scheme can remove distinctions or make several entries map to the same representation.",
-};
+});
 
 export default function MovingAVocabularyPage() {
   return (

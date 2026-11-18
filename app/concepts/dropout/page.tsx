@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { ExperimentReadout } from "@/components/widgets/ExperimentReadout";
 import { MemorisationCurves } from "@/components/widgets/MemorisationCurves";
 import { UnitLeaningChart } from "@/components/widgets/UnitLeaningChart";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/dropout", {
   title: "Dropout · Perceptron Lab",
   description:
     "Dropout randomly removes some activations during training. The network therefore trains with changing combinations of available units, which can reduce overfitting without guaranteeing better predictions on every task.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

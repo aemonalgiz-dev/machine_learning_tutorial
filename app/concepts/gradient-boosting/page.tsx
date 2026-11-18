@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -25,11 +26,11 @@ import {
   THREE_READINGS,
 } from "@/components/widgets/gradientBoostingFixtures";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/gradient-boosting", {
   title: "Gradient Boosting · Perceptron Lab",
   description:
     "Boosting builds a prediction in stages. Each additional model targets a correction to the current result, allowing a sequence of limited adjustments to describe a more complicated relationship.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

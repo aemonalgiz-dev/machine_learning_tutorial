@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { RandomIndexingPlayground } from "@/components/widgets/RandomIndexingPla
 import { ThreeReadingsOfOneCount } from "@/components/widgets/ThreeReadingsOfOneCount";
 import { WidthAgainstTheTable } from "@/components/widgets/WidthAgainstTheTable";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/random-indexing", {
   title: "Random Indexing · Perceptron Lab",
   description:
     "Random indexing accumulates fixed-size context vectors as word occurrences arrive. It summarizes relationships without storing every word-context count, with random projection affecting how precisely those relationships are preserved.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

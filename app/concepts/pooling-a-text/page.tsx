@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +23,11 @@ import { PoolingWorkbench } from "@/components/widgets/PoolingWorkbench";
 import { SeparationLadder } from "@/components/widgets/SeparationLadder";
 import { SharedDirectionProbe } from "@/components/widgets/SharedDirectionProbe";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/pooling-a-text", {
   title: "Pooling a Text · Perceptron Lab",
   description:
     "Pooling combines a sequence of token vectors into a single representation. The combination rule determines which information remains useful for comparing whole sentences and which details are lost.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,11 +25,11 @@ import { SweepChart } from "@/components/widgets/SweepChart";
 import { ThresholdMatrix } from "@/components/widgets/ThresholdMatrix";
 import { TwoReadings } from "@/components/widgets/TwoReadings";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/judging-a-classifier", {
   title: "Judging a Classifier · Perceptron Lab",
   description:
     "Correct predictions and different kinds of mistake need to be counted separately. Their consequences determine which evaluation measures tell us whether a classifier is useful.",
-};
+});
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 

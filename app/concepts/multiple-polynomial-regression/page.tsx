@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -26,11 +27,11 @@ import { PolynomialAssembler } from "@/components/widgets/PolynomialAssembler";
 import { PolynomialPlayground } from "@/components/widgets/PolynomialPlayground";
 import { ResidualPatternChart } from "@/components/widgets/ResidualPatternChart";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/multiple-polynomial-regression", {
   title: "Multiple & Polynomial Regression · Perceptron Lab",
   description:
     "A prediction may depend on several measurements and how they interact. Multiple regression combines their contributions, while polynomial terms allow curved relationships in the original inputs.",
-};
+});
 
 const linkClass =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

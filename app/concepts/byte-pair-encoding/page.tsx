@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -23,11 +24,11 @@ import { SentenceCuts } from "@/components/widgets/SentenceCuts";
 import { SuperwordMerges } from "@/components/widgets/SuperwordMerges";
 import { TieBranches } from "@/components/widgets/TieBranches";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/byte-pair-encoding", {
   title: "Byte Pair Encoding · Perceptron Lab",
   description:
     "Byte pair encoding builds reusable pieces by repeatedly merging frequent neighboring pairs. The learned merge order determines how new text is divided and which combinations share a vocabulary entry.",
-};
+});
 
 const MARKER = "</w>";
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";

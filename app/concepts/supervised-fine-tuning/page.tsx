@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -8,10 +9,10 @@ import { KeepInMind, NumberTable, SubSection } from "@/components/concept/Treatm
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/supervised-fine-tuning", {
   title: "Supervised Fine-Tuning · Perceptron Lab",
   description: "Supervised fine-tuning adapts a model using examples of prompts and desired responses. The examples determine which response patterns are reinforced, so their coverage and quality affect the resulting behavior.",
-};
+});
 
 export default function Page() {
   return <ConceptPage

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -8,10 +9,10 @@ import { NumberTable, SubSection, WhyThisWorks } from "@/components/concept/Trea
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/reinforcement-learning", {
   title: "Reinforcement Learning · Perceptron Lab",
   description: "Reinforcement learning improves a policy from the rewards associated with its actions. Delayed consequences make it necessary to consider how an action affects later states as well as its immediate result.",
-};
+});
 
 export default function Page() {
   return (

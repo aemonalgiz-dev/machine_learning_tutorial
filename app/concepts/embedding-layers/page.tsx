@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, NumberTable, SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { EmbeddingExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Embedding Layers · Perceptron Lab", description: "An embedding layer maps each ID to a row in a table of vectors. Training changes those rows according to the task, while repeated occurrences of the same ID use the same learned representation." };
+export const metadata: Metadata = pageMetadata("/concepts/embedding-layers", { title: "Embedding Layers · Perceptron Lab", description: "An embedding layer maps each ID to a row in a table of vectors. Training changes those rows according to the task, while repeated occurrences of the same ID use the same learned representation." });
 
 export default function EmbeddingLayersPage() {
   return <ConceptPage

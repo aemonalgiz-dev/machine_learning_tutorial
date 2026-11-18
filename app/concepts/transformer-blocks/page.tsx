@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -8,10 +9,10 @@ import { SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/transformer-blocks", {
   title: "Transformer Blocks · Perceptron Lab",
   description: "A transformer block combines attention with processing applied to individual positions. Residual connections and normalization regulate how those operations change the representations passed between blocks.",
-};
+});
 
 export default function Page() {
   return <ConceptPage

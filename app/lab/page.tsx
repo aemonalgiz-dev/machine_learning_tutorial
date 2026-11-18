@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CURRICULUM } from "@/lib/curriculum";
@@ -7,7 +8,7 @@ import { Botie } from "@/components/site/Botie";
 import { WorkshopDirectory } from "@/components/lab/WorkshopDirectory";
 import { JourneyResume } from "@/components/site/JourneyResume";
 
-export const metadata: Metadata = { title: "Botie's workshop | Perceptron Lab", description: "Work through machine learning problems with Botie. Try a solution, check what it does to the examples, and use the results to understand why the method works." };
+export const metadata: Metadata = pageMetadata("/lab", { title: "Botie's workshop | Perceptron Lab", description: "Work through machine learning problems with Botie. Try a solution, check what it does to the examples, and use the results to understand why the method works." });
 export default function WorkshopsPage() {
   const sections = CURRICULUM.map(s => ({ title: s.title, lessons: s.topics.flatMap(t => t.concepts.flatMap(l => { if (!l.href) return []; const id = l.href.split("/").pop()!; const build = buildById[id]; return [{ id, title: l.title, mission: id === "simple-linear-regression" ? "Predict delivery times with Botie" : build.title, href: labHref(id), draftVersion: build.draftVersion, cases: build.cases.length }]; })) }));
   const guide = buildById["workshop-guide"];

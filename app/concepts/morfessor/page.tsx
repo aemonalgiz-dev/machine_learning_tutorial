@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -21,11 +22,11 @@ import { SearchEpochs } from "@/components/widgets/SearchEpochs";
 import { UphillSplits } from "@/components/widgets/UphillSplits";
 import { WeightDial } from "@/components/widgets/WeightDial";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/morfessor", {
   title: "Morfessor · Perceptron Lab",
   description:
     "Related words often reuse stems and endings. Morfessor searches for such reusable parts by balancing the cost of a stored vocabulary against the cost of describing the words with it.",
-};
+});
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 

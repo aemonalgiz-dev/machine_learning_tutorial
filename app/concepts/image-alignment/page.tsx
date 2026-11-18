@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { PyramidLedger } from "@/components/widgets/PyramidLedger";
 import { RansacGallery } from "@/components/widgets/RansacGallery";
 import { TurnCostLedger } from "@/components/widgets/TurnCostLedger";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/image-alignment", {
   title: "Image Alignment · Perceptron Lab",
   description:
     "Corresponding points in two images provide evidence about how their coordinates relate. Estimating that transformation allows the images to be aligned, with incorrect matches affecting the result.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

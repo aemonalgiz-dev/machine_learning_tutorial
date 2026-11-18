@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { PatternCostPanel } from "@/components/widgets/PatternCostPanel";
 import { PatternPlayground } from "@/components/widgets/PatternPlayground";
 import { SpaceLedger } from "@/components/widgets/SpaceLedger";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/the-pattern-language-models-use", {
   title: "The Pattern Language Models Use · Perceptron Lab",
   description:
     "Regular expressions describe patterns of characters that should stay together or be split apart. Initial groups of letters, numbers and punctuation constrain the pieces a tokenizer can learn afterward.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

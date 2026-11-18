@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -19,11 +20,11 @@ import { CutLandingChart } from "@/components/widgets/CutLandingChart";
 import { PatchExplorer } from "@/components/widgets/PatchExplorer";
 import { UncertaintyProfile } from "@/components/widgets/UncertaintyProfile";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/patching-without-a-vocabulary", {
   title: "Patching Without a Vocabulary · Perceptron Lab",
   description:
     "Representing text as bytes avoids dependence on a learned word vocabulary. Grouping nearby bytes into patches reduces the number of positions processed by later layers, changing how local information is combined.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

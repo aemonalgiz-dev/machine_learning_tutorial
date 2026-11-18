@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -25,11 +26,11 @@ import { KernelRidgePlayground } from "@/components/widgets/KernelRidgePlaygroun
 import { MercerProbe } from "@/components/widgets/MercerProbe";
 import { PenaltySweepChart } from "@/components/widgets/PenaltySweepChart";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/kernel-ridge", {
   title: "Kernel Ridge Regression · Perceptron Lab",
   description:
     "Kernel ridge regression combines comparisons in a transformed feature space with a penalty that controls the fit. The kernel determines the relationships available to the model, while the penalty limits how closely it follows the observations.",
-};
+});
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, NumberTable, SubSection, WhyThisWorks, WorkedExample } from "@/components/concept/Treatments";
 import { RadialExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Radial Basis Networks · Perceptron Lab", description: "A radial basis network describes an input through its distance from reference points. Combining those local responses produces a prediction whose behavior depends on the locations and widths of the responses." };
+export const metadata: Metadata = pageMetadata("/concepts/radial-basis-networks", { title: "Radial Basis Networks · Perceptron Lab", description: "A radial basis network describes an input through its distance from reference points. Combining those local responses produces a prediction whose behavior depends on the locations and widths of the responses." });
 
 export default function RadialBasisNetworksPage() {
   return <ConceptPage

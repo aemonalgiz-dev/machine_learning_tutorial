@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { ProductGap } from "@/components/widgets/ProductGap";
 import { StepsAgainstACurve } from "@/components/widgets/StepsAgainstACurve";
 import { TermAssembler } from "@/components/widgets/TermAssembler";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/polynomial-features", {
   title: "Polynomial Features · Perceptron Lab",
   description:
     "Powers and products of existing measurements can describe relationships a straight line in the original inputs cannot. They add flexibility while keeping the fitted prediction linear in its coefficients.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

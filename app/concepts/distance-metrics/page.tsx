@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -28,11 +29,11 @@ import {
   COUNT_PAIRS,
 } from "@/components/widgets/distanceMetricsFixtures";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/distance-metrics", {
   title: "What Near Means · Perceptron Lab",
   description:
     "Distance depends on which differences we choose to count and how we combine them. Different measures can change which observations are nearest, affecting comparisons and the groups formed from them.",
-};
+});
 
 const linkClass =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

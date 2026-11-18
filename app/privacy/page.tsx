@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 // Keep this in step with reading analytics, account storage and membership billing.
 
 import type { Metadata } from "next";
@@ -5,10 +6,10 @@ import { ActivityOptOut } from "@/components/site/ActivityOptOut";
 import { ACTIVITY_RETENTION_DAYS } from "@/lib/activity";
 import { REPOSITORY } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/privacy", {
   title: "Privacy · Perceptron Lab",
   description: "What Perceptron Lab records about reading and saved work, how optional membership billing works, and how to switch reading analytics off.",
-};
+});
 
 export default function PrivacyPage() {
   return (

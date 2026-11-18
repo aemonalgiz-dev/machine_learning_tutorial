@@ -1,12 +1,13 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { WorkshopJourney } from "@/components/lab/WorkshopJourney";
 import { journeyFor } from "@/lib/builds/journey";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/lab/neuron", {
   title: "Build a Light-Pattern Detector | Perceptron Lab",
   description: "Build a neuron that recognizes a light pattern. Connect brightness readings, weights, a bias and an activation, then follow each contribution.",
-};
+});
 
 export default function NeuronLabPage() {
   return (

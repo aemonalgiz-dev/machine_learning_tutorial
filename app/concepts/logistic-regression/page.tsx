@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -27,11 +28,11 @@ import { OddsScales } from "@/components/widgets/OddsScales";
 import { SigmoidExplorer } from "@/components/widgets/SigmoidExplorer";
 import { ThresholdExplorer } from "@/components/widgets/ThresholdExplorer";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/logistic-regression", {
   title: "Logistic Regression · Perceptron Lab",
   description:
     "Logistic regression estimates the probability of a category from a set of measurements. A decision threshold turns that probability into a yes-or-no prediction, with different thresholds producing different kinds of mistake.",
-};
+});
 
 const linkClass =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

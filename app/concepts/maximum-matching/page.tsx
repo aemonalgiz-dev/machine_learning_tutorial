@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -19,11 +20,11 @@ import { MaximumMatchingPlayground } from "@/components/widgets/MaximumMatchingP
 import { ScanComparison } from "@/components/widgets/ScanComparison";
 import { SpacelessSentence } from "@/components/widgets/SpacelessSentence";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/maximum-matching", {
   title: "Maximum Matching · Perceptron Lab",
   description:
     "A dictionary can suggest word boundaries when spaces are absent. Maximum matching chooses the longest available word at each position, so an early local choice can affect the segmentation that follows.",
-};
+});
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 

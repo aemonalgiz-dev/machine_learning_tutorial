@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -22,11 +23,11 @@ import { LengthCeiling } from "@/components/widgets/LengthCeiling";
 import { TwoVocabularies } from "@/components/widgets/TwoVocabularies";
 import { UnitRivals } from "@/components/widgets/UnitRivals";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/greedy-coverage", {
   title: "Greedy Coverage · Perceptron Lab",
   description:
     "A limited vocabulary needs a rule for deciding which pieces deserve space. Greedy coverage selects pieces according to how much previously uncovered text they represent, producing different choices from repeated pair merging.",
-};
+});
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 

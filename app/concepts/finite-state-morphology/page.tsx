@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -21,11 +22,11 @@ import { WhatItCanRead } from "@/components/widgets/WhatItCanRead";
 import { WordsAnalysed, WordsNotRead } from "@/components/widgets/WordsAnalysed";
 import { WrittenAgainstLearned } from "@/components/widgets/WrittenAgainstLearned";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/finite-state-morphology", {
   title: "Finite-State Morphology · Perceptron Lab",
   description:
     "A word form can be described through its components and the spelling rules that connect them. Finite-state methods represent those relationships so word forms can be analyzed or generated.",
-};
+});
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 

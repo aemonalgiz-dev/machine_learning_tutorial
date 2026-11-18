@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import { presentIntuition } from "@/lib/intuition/presentation";
 import { GuidedIntuition, IntuitionConnection } from "@/components/concept/GuidedIntuition";
@@ -24,11 +25,11 @@ import { SingleVectorPlayground } from "@/components/widgets/SingleVectorPlaygro
 import { MatrixPlayground } from "@/components/widgets/MatrixPlayground";
 import { VectorPlayground } from "@/components/widgets/VectorPlayground";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/primers/linear-algebra", {
   title: "Linear Algebra Primer · Perceptron Lab",
   description:
     "A system of equations can describe several quantities that depend on each other. Vectors and matrices make those relationships easier to calculate with, while geometry helps us picture what the calculations are doing.",
-};
+});
 
 export default function LinearAlgebraPrimerPage() {
   return (

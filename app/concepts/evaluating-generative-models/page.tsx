@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -8,10 +9,10 @@ import { NumberTable, SubSection } from "@/components/concept/Treatments";
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/evaluating-generative-models", {
   title: "Evaluating Generative Models · Perceptron Lab",
   description: "Generated content needs to be judged against the task it is meant to perform. Relevant evaluation cases and explicit criteria help distinguish a plausible-looking result from one that meets the requirements.",
-};
+});
 
 export default function Page() {
   return <ConceptPage

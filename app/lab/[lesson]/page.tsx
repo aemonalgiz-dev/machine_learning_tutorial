@@ -1,8 +1,9 @@
+import { pageMetadata } from "@/lib/seo";
 import { americanEnglish } from "@/lib/american-english";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { labLessonById } from "@/lib/labs";
+import { labHref, labLessonById } from "@/lib/labs";
 import { WorkshopJourney } from "@/components/lab/WorkshopJourney";
 import { buildById } from "@/lib/builds/catalog";
 import { journeyFor } from "@/lib/builds/journey";
@@ -16,7 +17,7 @@ export function generateStaticParams() { return []; }
 export async function generateMetadata({ params }: { params: Promise<{ lesson: string }> }): Promise<Metadata> {
   const { lesson } = await params;
   const mission = Object.hasOwn(buildById, lesson) ? buildById[lesson] : undefined;
-  return { title: lesson === "simple-linear-regression" ? "Predict delivery times with Botie | Perceptron Lab" : mission ? `${americanEnglish(mission.title)} | Botie's workshop | Perceptron Lab` : "Workshop | Perceptron Lab", description: mission?.challenge };
+  return pageMetadata(labHref(lesson), { title: lesson === "simple-linear-regression" ? "Predict delivery times with Botie | Perceptron Lab" : mission ? `${americanEnglish(mission.title)} | Botie's workshop | Perceptron Lab` : "Workshop | Perceptron Lab", description: mission?.challenge });
 }
 export default async function LabPage({ params }: { params: Promise<{ lesson: string }> }) {
   const { lesson: id } = await params;

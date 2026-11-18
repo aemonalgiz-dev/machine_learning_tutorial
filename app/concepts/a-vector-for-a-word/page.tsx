@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -25,11 +26,11 @@ import { WordPositionPlayground } from "@/components/widgets/WordPositionPlaygro
 import { WordSphere } from "@/components/widgets/WordSphere";
 import { WordSpaceScatter } from "@/components/widgets/WordSpaceScatter";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/a-vector-for-a-word", {
   title: "A Vector for a Word · Perceptron Lab",
   description:
     "A token ID identifies an entry but does not describe its relationships to other entries. Learned vectors supply numerical coordinates whose comparisons can capture patterns in how words are used.",
-};
+});
 
 export default function WordVectorPage() {
   return (

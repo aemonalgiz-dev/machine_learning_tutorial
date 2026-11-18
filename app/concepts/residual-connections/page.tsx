@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { ResidualExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Residual Connections · Perceptron Lab", description: "A residual connection adds a layer's learned transformation to its input. This gives information a direct route forward and allows the layer to represent an adjustment to an existing representation." };
+export const metadata: Metadata = pageMetadata("/concepts/residual-connections", { title: "Residual Connections · Perceptron Lab", description: "A residual connection adds a layer's learned transformation to its input. This gives information a direct route forward and allows the layer to represent an adjustment to an existing representation." });
 
 export default function ResidualConnectionsPage() {
   return <ConceptPage

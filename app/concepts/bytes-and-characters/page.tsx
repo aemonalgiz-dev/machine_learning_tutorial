@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { LearnedReadingFailures } from "@/components/widgets/LearnedReadingFailu
 import { PartialByteRun } from "@/components/widgets/PartialByteRun";
 import { ScriptCostChart } from "@/components/widgets/ScriptCostChart";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/bytes-and-characters", {
   title: "Bytes and Characters · Perceptron Lab",
   description:
     "Text has several units of representation. A visible character can involve multiple code points or bytes, affecting how text is stored and how much input a model has to process.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

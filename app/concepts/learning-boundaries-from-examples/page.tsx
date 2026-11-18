@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -23,10 +24,10 @@ import { WindowReach } from "@/components/widgets/WindowReach";
 
 
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/learning-boundaries-from-examples", {
   title: "Learning Boundaries From Examples · Perceptron Lab",
   description: "Annotated boundaries provide examples of where text should be split. A supervised model uses surrounding character information to learn decisions that can be applied to new sequences.",
-};
+});
 
 export default function LearningBoundariesFromExamplesPage() {
   return (

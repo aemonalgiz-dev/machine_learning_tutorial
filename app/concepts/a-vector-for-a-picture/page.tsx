@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -19,11 +20,11 @@ import { PictureVectorEdges } from "@/components/widgets/PictureVectorEdges";
 import { PictureVectorSphere } from "@/components/widgets/PictureVectorSphere";
 import { PictureVectorWalk } from "@/components/widgets/PictureVectorWalk";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/a-vector-for-a-picture", {
   title: "A Vector for a Picture · Perceptron Lab",
   description:
     "A trained image network can represent a picture as a vector of features. Comparing those vectors can capture similarities that direct pixel comparisons miss, depending on what the network learned.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

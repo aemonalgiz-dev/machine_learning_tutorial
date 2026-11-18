@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,11 +25,11 @@ import { SeededMapGallery } from "@/components/widgets/SeededMapGallery";
 import { SelfOrganisingMapPlayground } from "@/components/widgets/SelfOrganisingMapPlayground";
 import { WhatEachCellHolds } from "@/components/widgets/WhatEachCellHolds";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/self-organising-map", {
   title: "Self-Organizing Maps · Perceptron Lab",
   description:
     "A self-organizing map places representative vectors on a grid. Nearby positions are encouraged to respond to similar observations, giving a spatial summary of data that may have many dimensions.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

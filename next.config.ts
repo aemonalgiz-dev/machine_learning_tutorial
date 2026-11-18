@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import type { NextConfig } from "next";
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 import { verifiedImageRuntime } from "./scripts/native-image-runtime.mjs";
+import { canonicalHostRedirects } from "./lib/seo-redirects";
 
 const nextConfig: NextConfig = {
   // The salt behind the anonymous visitor key in app/site-activity/route.ts.
@@ -46,7 +47,7 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     // Resolve this old workshop address before first-visit page generation.
-    return [{ source: "/lab/neurons-and-activations", destination: "/lab/neuron", permanent: false }];
+    return [...canonicalHostRedirects(), { source: "/lab/neurons-and-activations", destination: "/lab/neuron", permanent: false }];
   },
 };
 

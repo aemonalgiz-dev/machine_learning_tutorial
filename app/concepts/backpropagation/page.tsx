@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -27,11 +28,11 @@ import { ReluGate } from "@/components/widgets/ReluGate";
 import { ShapesTable } from "@/components/widgets/ShapesTable";
 import { UpdateThenReforward } from "@/components/widgets/UpdateThenReforward";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/backpropagation", {
   title: "Backpropagation · Perceptron Lab",
   description:
     "Backpropagation applies the chain rule through a network's calculations. Working backward from the loss gives the derivatives needed to determine how changes to each weight affect that loss.",
-};
+});
 
 const linkClass =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

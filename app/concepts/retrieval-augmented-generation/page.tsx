@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -8,10 +9,10 @@ import { KeepInMind, NumberTable, SubSection } from "@/components/concept/Treatm
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/retrieval-augmented-generation", {
   title: "Retrieval-Augmented Generation · Perceptron Lab",
   description: "Retrieval-augmented generation supplies source material as context for a model's answer. It can provide information absent from training, while the usefulness of the answer still depends on what was retrieved and how the model uses it.",
-};
+});
 
 export default function Page() {
   return <ConceptPage

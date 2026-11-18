@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { ShapeSurvives } from "@/components/widgets/ShapeSurvives";
 import { StandardScorePlayground } from "@/components/widgets/StandardScorePlayground";
 import { WhoNoticed } from "@/components/widgets/WhoNoticed";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/the-standard-score", {
   title: "The Standard Score · Perceptron Lab",
   description:
     "A difference from the average depends on how much the measurements normally vary. A standard score expresses that difference in units of standard deviation, allowing values on different scales to be compared.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

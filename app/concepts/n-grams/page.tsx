@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +23,11 @@ import { NGramPlayground } from "@/components/widgets/NGramPlayground";
 import { NGramSmoothingSweep } from "@/components/widgets/NGramSmoothingSweep";
 import { NGramWindows } from "@/components/widgets/NGramWindows";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/n-grams", {
   title: "N-Grams · Perceptron Lab",
   description:
     "An n-gram model estimates a continuation from counts of short sequences. Its predictions depend on the context length and how probability is assigned to sequences absent from the training data.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

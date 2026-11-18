@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,11 +21,11 @@ import { UNetExplorer } from "@/components/widgets/UNetExplorer";
 import { UNetLargerPicture } from "@/components/widgets/UNetLargerPicture";
 import { UNetTrainingCurves } from "@/components/widgets/UNetTrainingCurves";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/u-net", {
   title: "U-Net · Perceptron Lab",
   description:
     "U-Net learns from images paired with labeled masks to predict a label for each pixel. Connections from earlier layers preserve spatial detail as the network reconstructs a higher-resolution output.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

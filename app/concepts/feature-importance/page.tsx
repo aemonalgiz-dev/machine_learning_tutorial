@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -19,11 +20,11 @@ import { CreditLedger } from "@/components/widgets/CreditLedger";
 import { ImportanceBars } from "@/components/widgets/ImportanceBars";
 import { ScrambleLadder } from "@/components/widgets/ScrambleLadder";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/feature-importance", {
   title: "Which Feature Mattered · Perceptron Lab",
   description:
     "Feature importance investigates how input measurements affect a fitted model's results. Different methods answer different questions, and related measurements can complicate how their scores should be interpreted.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

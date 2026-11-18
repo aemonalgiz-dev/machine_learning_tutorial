@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -19,11 +20,11 @@ import { GridUsage } from "@/components/widgets/GridUsage";
 import { QuantiserPlayground } from "@/components/widgets/QuantiserPlayground";
 import { RungLadder } from "@/components/widgets/RungLadder";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/finite-scalar-quantisation", {
   title: "Finite Scalar Quantization · Perceptron Lab",
   description:
     "Finite scalar quantization restricts each coordinate to a small set of levels. Combining the coordinate choices produces a discrete code without selecting a whole vector from a learned codebook.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

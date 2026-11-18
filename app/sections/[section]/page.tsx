@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { americanEnglish } from "@/lib/american-english";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -26,7 +27,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const part = findCourseSection((await params).section);
   if (!part) notFound();
-  return { title: `${americanEnglish(part.title)} · Perceptron Lab`, description: part.intro };
+  return pageMetadata(courseSectionHref(part), { title: `${americanEnglish(part.title)} · Perceptron Lab`, description: part.intro });
 }
 
 export default async function CourseSectionPage({ params }: Props) {

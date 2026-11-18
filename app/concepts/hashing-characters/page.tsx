@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,11 +21,11 @@ import { SeparationChart } from "@/components/widgets/SeparationChart";
 import { TrigramFingerprints } from "@/components/widgets/TrigramFingerprints";
 import { WidthTradeChart } from "@/components/widgets/WidthTradeChart";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/hashing-characters", {
   title: "Hashing Characters · Perceptron Lab",
   description:
     "Hashing maps characters into a fixed number of storage locations. It limits the table size, while collisions require different characters to share a location and potentially lose their distinction.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

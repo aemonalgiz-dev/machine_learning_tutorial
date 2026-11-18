@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { ReachSweep } from "@/components/widgets/ReachSweep";
 import { RowCoefficients } from "@/components/widgets/RowCoefficients";
 import { ShareLadder } from "@/components/widgets/ShareLadder";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/kernel-pca", {
   title: "Kernel Principal Components · Perceptron Lab",
   description:
     "Useful variation can become easier to represent after a nonlinear transformation. Kernel PCA uses comparisons between examples to find principal directions in that transformed space.",
-};
+});
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 

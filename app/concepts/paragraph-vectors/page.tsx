@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -21,11 +22,11 @@ import { ParagraphOrderProbe } from "@/components/widgets/ParagraphOrderProbe";
 import { ParagraphRowLengths } from "@/components/widgets/ParagraphRowLengths";
 import { ParagraphVectorWorkbench } from "@/components/widgets/ParagraphVectorWorkbench";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/paragraph-vectors", {
   title: "Paragraph Vectors · Perceptron Lab",
   description:
     "Paragraph vectors learn a representation of a document by using it to help predict its words. The document vector captures information that a fixed average of word vectors may not preserve.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

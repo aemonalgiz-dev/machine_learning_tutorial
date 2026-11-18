@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -21,11 +22,11 @@ import { PairScoreScatter } from "@/components/widgets/PairScoreScatter";
 import { ShorteningCurve } from "@/components/widgets/ShorteningCurve";
 import { WordPiecePlayground } from "@/components/widgets/WordPiecePlayground";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/wordpiece", {
   title: "WordPiece · Perceptron Lab",
   description:
     "WordPiece represents text through reusable pieces and a longest-match encoding rule. The teaching implementation builds its vocabulary using pair scores, making the distinction between vocabulary learning and later encoding explicit.",
-};
+});
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 

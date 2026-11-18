@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,11 +25,11 @@ import { LeakTable } from "@/components/widgets/LeakTable";
 import { SeedFamilyStrip } from "@/components/widgets/SeedFamilyStrip";
 import { ValidationCurveChart } from "@/components/widgets/ValidationCurveChart";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/held-out-evaluation", {
   title: "Held-Out Evaluation · Perceptron Lab",
   description:
     "Performance on familiar examples can overstate how well a rule predicts new ones. Setting data aside before fitting gives us a separate check of its predictions.",
-};
+});
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,11 +21,11 @@ import { SpanRepairPanel } from "@/components/widgets/SpanRepairPanel";
 import { SplitCostPanel } from "@/components/widgets/SplitCostPanel";
 import { WhitespaceKindsTable } from "@/components/widgets/WhitespaceKindsTable";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/splitting-on-spaces", {
   title: "Splitting on Spaces · Perceptron Lab",
   description:
     "Splitting text at spaces gives a simple rule for identifying pieces. Punctuation and repeated whitespace expose its limits, as do writing systems that do not use spaces to mark word boundaries.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

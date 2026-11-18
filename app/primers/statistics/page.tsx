@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import { presentIntuition } from "@/lib/intuition/presentation";
 import { GuidedIntuition, IntuitionConnection } from "@/components/concept/GuidedIntuition";
@@ -23,11 +24,11 @@ import { MeanBalancePlayground } from "@/components/widgets/MeanBalancePlaygroun
 import { SamplingPlayground } from "@/components/widgets/SamplingPlayground";
 import { StatisticsPlayground } from "@/components/widgets/StatisticsPlayground";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/primers/statistics", {
   title: "Statistics Primer · Perceptron Lab",
   description:
     "An average describes a typical value in a collection of measurements. Measures of spread show how much those measurements vary, and probability gives us ways to reason about uncertain outcomes.",
-};
+});
 
 export default function StatisticsPrimerPage() {
   return (

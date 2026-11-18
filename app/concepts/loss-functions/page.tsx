@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -20,11 +21,11 @@ import { MislabelledRow } from "@/components/widgets/MislabelledRow";
 import { SoftmaxRow } from "@/components/widgets/SoftmaxRow";
 import { ThreeLossesOneBadRow } from "@/components/widgets/ThreeLossesOneBadRow";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/loss-functions", {
   title: "Loss Functions · Perceptron Lab",
   description:
     "A loss function assigns a numerical cost to a prediction's error. Its definition determines which mistakes contribute most strongly to the adjustments made during training.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";

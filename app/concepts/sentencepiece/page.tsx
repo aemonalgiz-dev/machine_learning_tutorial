@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
@@ -24,11 +25,11 @@ import { SizeAgainstPieces } from "@/components/widgets/SizeAgainstPieces";
 import { WhichMark } from "@/components/widgets/WhichMark";
 import { WithoutSpaces } from "@/components/widgets/WithoutSpaces";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/sentencepiece", {
   title: "SentencePiece · Perceptron Lab",
   description:
     "SentencePiece learns text pieces without requiring a separate word-splitting step first. Its explicit representation of whitespace affects how pieces join and how encoded text can be reconstructed.",
-};
+});
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 const MARK = "▁";

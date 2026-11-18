@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,11 +24,11 @@ import { GloveTableCost } from "@/components/widgets/GloveTableCost";
 import { GloveWeightingCurve } from "@/components/widgets/GloveWeightingCurve";
 import { GloveWindowSweep } from "@/components/widgets/GloveWindowSweep";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata("/concepts/glove", {
   title: "GloVe · Perceptron Lab",
   description:
     "GloVe learns vectors from word co-occurrence counts. Their comparisons are fitted to patterns in the counts, providing a compact representation of information drawn from the wider text collection.",
-};
+});
 
 const link =
   "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
