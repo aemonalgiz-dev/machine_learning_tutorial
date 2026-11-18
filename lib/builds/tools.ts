@@ -29,6 +29,9 @@ import { databricksIntroStorageTools } from './databricks-intro-storage-tools';
 import { databricksIntroWorkflowTools } from './databricks-intro-workflow-tools';
 import { modelToolContractsTools } from './model-tool-contracts-tools';
 import { mlLifecycleSecurityTools } from './ml-lifecycle-security-tools';
+import { pythonDesignTools } from './python-design-tools';
+import { pythonValidationTools } from './python-validation-tools';
+import { pythonProjectTools } from './python-project-tools';
 export function scalar(x: Data): number { if (typeof x !== "number") throw Error("This input needs one number. Inspect the connected machine to see what it produces."); return x; }
 export function vector(x: Data): number[] { if (!Array.isArray(x) || !x.every(v => typeof v === "number")) throw Error("This input needs a list of numbers."); return x as number[]; }
 export function matrix(x: Data): number[][] { if (!Array.isArray(x) || !x.length) throw Error("This input needs rows of numbers."); const rows = x.map(vector); if (rows.some(r => r.length !== rows[0].length)) throw Error("Each row must have the same number of values."); return rows; }
@@ -49,6 +52,9 @@ const define = (title: string, why: string, inputs: string[], run: Tool["run"], 
 const numeric = (key: string, label: string, initial = 0, min = -10, max = 10, step = .5) => ({ key, label, initial, min, max, step });
 import { practiceTools } from "./practice-tools";
 export const TOOLS: Record<string, Tool> = {
+  ...pythonDesignTools,
+  ...pythonValidationTools,
+  ...pythonProjectTools,
   ...appliedTools,
   ...servingDepthTools,
   ...stateEstimationTools,

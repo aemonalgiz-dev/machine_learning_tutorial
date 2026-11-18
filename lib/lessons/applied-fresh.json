@@ -1,4 +1,559 @@
 {
+  "python-readable-code": {
+    "name": "A cold reference and a fractional reading",
+    "prompt": "Convert the two supplied records while retaining the attic-then-lab order and explicit output field.",
+    "data": {
+      "records": [
+        {
+          "house": "attic",
+          "temperature_c": -40
+        },
+        {
+          "house": "lab",
+          "temperature_c": 37.5
+        }
+      ],
+      "scale": 1.8,
+      "offset": 32
+    },
+    "expected": [
+      {
+        "house": "attic",
+        "temperature_f": -40
+      },
+      {
+        "house": "lab",
+        "temperature_f": 99.5
+      }
+    ],
+    "why": "Readable names must describe the result even when an input is negative or fractional."
+  },
+  "python-function-design": {
+    "name": "A different scale and an empty alert group",
+    "prompt": "The new readings are [-5,0,8] with inclusive limit 0. Predict both fields before running the same summary construction.",
+    "data": {
+      "readings": [
+        -5,
+        0,
+        8
+      ],
+      "limit": 0
+    },
+    "expected": {
+      "count": 2,
+      "excess_c": 8
+    },
+    "why": "A zero reading remains a valid observation and can satisfy an inclusive boundary."
+  },
+  "python-dry": {
+    "name": "A limit below zero",
+    "prompt": "The shared inclusive limit is -2. Predict both named counts for the new morning and evening reports.",
+    "data": {
+      "morning": [
+        -3,
+        -2,
+        1
+      ],
+      "evening": [
+        -5,
+        -4
+      ],
+      "limit": -2
+    },
+    "expected": {
+      "morning": 2,
+      "evening": 0
+    },
+    "why": "Neither branch should assume that the safety limit is positive or that every report has an alert."
+  },
+  "python-type-hints": {
+    "name": "Different names and repeated valid values",
+    "prompt": "Separate the new records according to the same runtime measurement policy.",
+    "data": {
+      "records": [
+        {
+          "house": "east",
+          "temperature_c": 4.5
+        },
+        {
+          "house": "west",
+          "temperature_c": false
+        },
+        {
+          "house": "lab",
+          "temperature_c": 4.5
+        }
+      ]
+    },
+    "expected": {
+      "accepted": [
+        {
+          "house": "east",
+          "temperature_c": 4.5
+        },
+        {
+          "house": "lab",
+          "temperature_c": 4.5
+        }
+      ],
+      "rejected": [
+        {
+          "house": "west",
+          "temperature_c": false
+        }
+      ]
+    },
+    "why": "Validity is about each value, not its greenhouse name or whether that numerical reading appeared before."
+  },
+  "python-optional-values": {
+    "name": "A negative explicit boundary",
+    "prompt": "Apply the default only to the missing setting, preserve the explicit negative boundary and keep the disabled record off.",
+    "data": {
+      "records": [
+        {
+          "temperature_c": 5
+        },
+        {
+          "temperature_c": -2,
+          "limit": -2
+        },
+        {
+          "temperature_c": 100,
+          "limit": null
+        }
+      ],
+      "default_limit": 6
+    },
+    "expected": {
+      "limits": [
+        6,
+        -2,
+        null
+      ],
+      "alerts": [
+        0,
+        1,
+        0
+      ]
+    },
+    "why": "Equality still counts for an active numerical limit, whatever its sign."
+  },
+  "python-dataclasses": {
+    "name": "The last report receives a note",
+    "prompt": "Build three independent reports and tag only the last one. Predict the complete record list.",
+    "data": {
+      "houses": [
+        "a",
+        "b",
+        "c"
+      ],
+      "readings": [
+        0,
+        10,
+        -5
+      ],
+      "record_index": 2,
+      "note": "review",
+      "shared_empty": []
+    },
+    "expected": [
+      {
+        "house": "a",
+        "temperature_c": 0,
+        "tags": []
+      },
+      {
+        "house": "b",
+        "temperature_c": 10,
+        "tags": []
+      },
+      {
+        "house": "c",
+        "temperature_c": -5,
+        "tags": [
+          "review"
+        ]
+      }
+    ],
+    "why": "The selected owner changes, while all unrelated default lists remain empty."
+  },
+  "python-composition": {
+    "name": "A calibration reverses the raw ordering",
+    "prompt": "The supplied calibration has a negative scale. Predict the named alerts and count without changing the comparison rule.",
+    "data": {
+      "houses": [
+        "cold",
+        "lab"
+      ],
+      "readings": [
+        -3,
+        4
+      ],
+      "policy": {
+        "scale": -2,
+        "offset": 10
+      },
+      "limit": 10
+    },
+    "expected": {
+      "alerts": [
+        {
+          "house": "cold",
+          "temperature_c": 16
+        }
+      ],
+      "count": 1
+    },
+    "why": "Selection must use calibrated values; the larger raw reading is not necessarily the larger calibrated temperature."
+  },
+  "python-fail-fast": {
+    "name": "Two Different Invalid Representations",
+    "prompt": "The batch now contains a boolean and a negative measurement. Return the rejected write plan and both zero-based bad positions.",
+    "data": {
+      "values": [
+        7,
+        true,
+        3,
+        -4
+      ]
+    },
+    "expected": {
+      "status": "rejected",
+      "writes": [],
+      "badPositions": [
+        1,
+        3
+      ]
+    },
+    "why": "A plan copied from the earlier batch misses the new positions. Inspect every current item."
+  },
+  "python-pydantic-models": {
+    "name": "A Present but Wrong Note Representation",
+    "prompt": "The next record supplies note as a number. Keep the supplied unit, but reject the request because the present note is neither text nor null.",
+    "data": {
+      "request": {
+        "title": "Evening report",
+        "note": 17,
+        "unit": "celsius"
+      },
+      "required": [
+        "title",
+        "note"
+      ],
+      "noteKey": "note",
+      "defaultKey": "unit",
+      "defaultValue": "celsius"
+    },
+    "expected": {
+      "accepted": false,
+      "record": null
+    },
+    "why": "Presence alone is insufficient. The current value also needs its own declared check."
+  },
+  "python-pydantic-constraints": {
+    "name": "A Boolean Is Not a Requested Count",
+    "prompt": "The range is now negative to positive, and count is true. Reject the request under the declared integer-count policy.",
+    "data": {
+      "request": {
+        "lower": -5,
+        "upper": 5,
+        "count": true
+      },
+      "lowerKey": "lower",
+      "upperKey": "upper",
+      "countKey": "count",
+      "maximumCount": 20,
+      "allowed": [
+        "lower",
+        "upper",
+        "count"
+      ]
+    },
+    "expected": {
+      "accepted": false,
+      "record": null
+    },
+    "why": "A usable interval does not repair an unsuitable count representation."
+  },
+  "python-exceptions": {
+    "name": "The Invalid Fields Move",
+    "prompt": "A fresh import has invalid fields at different positions and a zero that is valid decimal text. Return values and original rejected positions.",
+    "data": {
+      "fields": [
+        "later",
+        "0",
+        "9",
+        "missing"
+      ]
+    },
+    "expected": {
+      "values": [
+        0,
+        9
+      ],
+      "rejected": [
+        0,
+        3
+      ]
+    },
+    "why": "A fixed rejected-position list or an invented zero for an invalid field will not describe this import."
+  },
+  "python-mutation": {
+    "name": "A Different Nested Record",
+    "prompt": "The source now has three existing tags and nested reviewer details. Add the current new tag while preserving those details in both displayed records.",
+    "data": {
+      "record": {
+        "tags": [
+          "raw",
+          "north",
+          "night"
+        ],
+        "settings": {
+          "reviewers": [
+            "Ari",
+            "Bo"
+          ]
+        }
+      },
+      "tagKey": "tags",
+      "newTag": "ready"
+    },
+    "expected": {
+      "original": {
+        "tags": [
+          "raw",
+          "north",
+          "night"
+        ],
+        "settings": {
+          "reviewers": [
+            "Ari",
+            "Bo"
+          ]
+        }
+      },
+      "edited": {
+        "tags": [
+          "raw",
+          "north",
+          "night",
+          "ready"
+        ],
+        "settings": {
+          "reviewers": [
+            "Ari",
+            "Bo"
+          ]
+        }
+      }
+    },
+    "why": "The draft must derive from the current record, with its existing tags and nested settings intact."
+  },
+  "python-context-managers": {
+    "name": "A New Resource Fails Later",
+    "prompt": "The next resource has more fields, with a later invalid value. Return the complete closed lifetime while preserving the failed-read outcome.",
+    "data": {
+      "name": "evening.txt",
+      "fields": [
+        "4",
+        "7",
+        "9",
+        "unknown"
+      ]
+    },
+    "expected": {
+      "events": [
+        "open",
+        "read",
+        "close"
+      ],
+      "closed": true,
+      "values": [],
+      "error": "invalid_reading"
+    },
+    "why": "A successful first read does not establish that cleanup works after a later parsing failure."
+  },
+  "python-testing": {
+    "name": "An ordered result changes",
+    "prompt": "Find the case whose returned ID order differs from its expectation.",
+    "data": {
+      "names": [
+        "stable tie",
+        "empty"
+      ],
+      "actual": [
+        [
+          "B",
+          "A"
+        ],
+        []
+      ],
+      "expected": [
+        [
+          "A",
+          "B"
+        ],
+        []
+      ]
+    },
+    "expected": [
+      "stable tie"
+    ],
+    "why": "Comparison must preserve the meaning of ordered results."
+  },
+  "python-test-doubles": {
+    "name": "A named-record source is requested twice",
+    "prompt": "Collect north, north and south in that order. Keep the repeated named north record, including its explicit disabled limit, instead of reducing it to an unnamed temperature.",
+    "data": {
+      "houses": [
+        "north",
+        "north",
+        "south"
+      ],
+      "batches": {
+        "north": [
+          {
+            "house": "north",
+            "temperature_c": 24,
+            "limit": null
+          }
+        ],
+        "south": []
+      }
+    },
+    "expected": [
+      {
+        "house": "north",
+        "temperature_c": 24,
+        "limit": null
+      },
+      {
+        "house": "north",
+        "temperature_c": 24,
+        "limit": null
+      }
+    ],
+    "why": "Repeated requests remain separate record positions. A later cache may reduce source calls while preserving those records and their optional settings."
+  },
+  "python-modules": {
+    "name": "No external helper is needed",
+    "prompt": "Two new modules both have empty import lists. Predict the dependency inventory.",
+    "data": {
+      "modules": [
+        {
+          "name": "conversion",
+          "imports": []
+        },
+        {
+          "name": "thresholds",
+          "imports": []
+        }
+      ]
+    },
+    "expected": [],
+    "why": "An empty dependency inventory is a valid result."
+  },
+  "python-dependencies": {
+    "name": "Versions are not decimals",
+    "prompt": "Compare the required version labels with the supplied installed labels. Return the package names whose exact text differs, without treating versions as decimal numbers.",
+    "data": {
+      "names": [
+        "adapter",
+        "writer"
+      ],
+      "actual": [
+        "1.1",
+        "3.0"
+      ],
+      "expected": [
+        "1.10",
+        "3.0"
+      ]
+    },
+    "expected": [
+      "adapter"
+    ],
+    "why": "Converting version labels to decimal numbers would erase a distinction in this exact comparison."
+  },
+  "python-configuration": {
+    "name": "A narrower deployment limit",
+    "prompt": "The raw value remains \"12\", but the range becomes 2 through 8. Predict acceptance.",
+    "data": {
+      "raw": "12",
+      "minimum": 2,
+      "maximum": 8
+    },
+    "expected": false,
+    "why": "The same construction must follow supplied limits rather than remembering the first range."
+  },
+  "python-code-checks": {
+    "name": "A later job is skipped",
+    "prompt": "The first check failed and the second never ran. Predict readiness.",
+    "data": {
+      "checks": [
+        {
+          "name": "lint",
+          "ran": true,
+          "passed": false
+        },
+        {
+          "name": "tests",
+          "ran": false,
+          "passed": false
+        }
+      ]
+    },
+    "expected": false,
+    "why": "A skipped job is missing evidence, while an earlier failure remains a failure."
+  },
+  "python-logging": {
+    "name": "More detail without token disclosure",
+    "prompt": "Use the INFO threshold to select the recorded events, then return only each selected event’s batch_id in its original order, excluding the attached token fields.",
+    "data": {
+      "events": [
+        {
+          "level": "DEBUG",
+          "batch_id": "X",
+          "token": "placeholder"
+        },
+        {
+          "level": "INFO",
+          "batch_id": "Y",
+          "token": "placeholder"
+        }
+      ],
+      "minimum": "INFO",
+      "fields": [
+        "batch_id"
+      ]
+    },
+    "expected": [
+      {
+        "batch_id": "Y"
+      }
+    ],
+    "why": "A changed event threshold still preserves the output field policy."
+  },
+  "python-profiling": {
+    "name": "Fewer calls dominate",
+    "prompt": "The remote operation runs twice at 40 ms. The local operation runs 1000 times at 0.01 ms. Predict which dominates.",
+    "data": {
+      "names": [
+        "local",
+        "remote"
+      ],
+      "calls": [
+        1000,
+        2
+      ],
+      "per_call": [
+        0.01,
+        40
+      ]
+    },
+    "expected": "remote",
+    "why": "Choosing by call count alone would identify the wrong operation."
+  },
   "software-feature-contracts": {
     "name": "Three model features arrive out of order",
     "prompt": "Botie now receives c, a and b, while the model expects a, b and c. Predict the weighted sum before connecting the new record.",

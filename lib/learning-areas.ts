@@ -15,7 +15,10 @@ export const LEARNING_AREAS: LearningArea[] = [
     title: "Mathematics and Programming",
     description: "Machine Learning, at its core, is built on mathematical principles. Learn the fundamental concepts of linear algebra, probability theory, and calculus.",
     introduction: "Before a calculation can tell us anything useful, we need to understand what the numbers represent. We will start with small examples and learn how to express calculations in Python. You can follow these sections in order or return to a particular idea when you need it.",
-    groups: [{ id: "foundations", title: "Mathematics and Programming Fundamentals", sections: ["Introductory Mathematics", "Python and NumPy"] }],
+    groups: [
+      { id: "foundations", title: "Mathematics", sections: ["Introductory Mathematics"] },
+      { id: "python-programming", title: "Python Programming", sections: ["Python and NumPy", "Python Design and Type Hints", "Python Validation and Error Handling", "Python Testing and Project Tools"] },
+    ],
   },
   {
     id: "databases",

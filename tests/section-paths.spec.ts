@@ -21,8 +21,8 @@ const displayedSections = new Set(Object.keys(sections).map(displaySectionTitle)
 const run = (name: string, ...inputs: Data[]) => TOOLS[name].run(inputs, {});
 
 test("ten new sections contain complete lessons and preserve the reinforcement introduction", () => {
-  expect(CURRICULUM).toHaveLength(46);
-  expect(lessonOrder).toHaveLength(384);
+  expect(CURRICULUM).toHaveLength(49);
+  expect(lessonOrder).toHaveLength(405);
   expect(lessons).toHaveLength(47);
   for (const [title, count] of Object.entries(sections)) {
     const section = CURRICULUM.find(part => part.title === displaySectionTitle(title))!;

@@ -3958,6 +3958,423 @@
       "For this release exercise, we need the operation records as well as the answer. The receiving service tells us whether a write actually occurred, while an application-owned scenario lists the effects that were permitted. Langfuse can organize the runs and their scores, but it cannot supply that permission policy on our behalf. The final test asks whether Botie can finish legitimate work while keeping forbidden effects out of a fresh shift."
     ]
   },
+  "python-readable-code": {
+    "title": "Python Style and Documentation Conventions",
+    "sources": [
+      {
+        "title": "PEP 8: Python style and readability",
+        "url": "https://peps.python.org/pep-0008/"
+      },
+      {
+        "title": "PEP 257: Docstring conventions",
+        "url": "https://peps.python.org/pep-0257/"
+      }
+    ],
+    "blocks": [
+      "As Python's standard library grew, programmers needed to read and maintain code written by other people. PEP 8 and PEP 257 documented shared naming, layout and documentation conventions in 2001, drawing on earlier Python style guides.",
+      "Their purpose was understandable code and consistent expectations. A descriptive name carries information into every use of a value. A docstring records behavior that a name cannot reasonably contain, such as units, an empty-input policy or an exception. The conventions still require judgment about the particular program."
+    ]
+  },
+  "python-function-design": {
+    "title": "Python Function Interfaces",
+    "sources": [
+      {
+        "title": "PEP 20: The Zen of Python",
+        "url": "https://peps.python.org/pep-0020/"
+      },
+      {
+        "title": "Python 3.14: Defining functions and arguments",
+        "url": "https://docs.python.org/3.14/tutorial/controlflow.html"
+      }
+    ],
+    "blocks": [
+      "Reusing a routine becomes difficult when calling it also changes unrelated state. The Zen of Python, recorded in PEP 20 in 2004, favors explicit and simple designs. Those principles give us a useful question for a helper: can a caller understand what it needs and what it changes?",
+      "Python's argument system lets a function make dependencies explicit, including keyword-only options. Separating a calculation from its surrounding effects is a design choice built with those language features. It allows a report writer and a web page to reuse the same result without inheriting each other's printing or storage behavior."
+    ]
+  },
+  "python-dry": {
+    "title": "DRY and The Pragmatic Programmer",
+    "sources": [
+      {
+        "title": "Hunt and Thomas: The Pragmatic Programmer tips, DRY",
+        "url": "https://pragprog.com/tips/"
+      },
+      {
+        "title": "PEP 20: The Zen of Python",
+        "url": "https://peps.python.org/pep-0020/"
+      }
+    ],
+    "blocks": [
+      "Maintaining software often meant changing a fact that had been copied into several places. Hunt and Thomas described DRY, meaning Don't Repeat Yourself, in The Pragmatic Programmer as a principle about keeping knowledge represented authoritatively within a system.",
+      "That framing matters. Two calculations can contain similar syntax while expressing different policies. Sharing a greenhouse safety limit is useful because the reports must follow the same decision. Combining an unrelated comfort limit merely because it is also a comparison would make later changes harder to understand."
+    ]
+  },
+  "python-type-hints": {
+    "title": "The Development of Python Type Hints",
+    "sources": [
+      {
+        "title": "PEP 484: Type hints",
+        "url": "https://peps.python.org/pep-0484/"
+      },
+      {
+        "title": "Python 3.14: Type hints",
+        "url": "https://docs.python.org/3.14/library/typing.html"
+      }
+    ],
+    "blocks": [
+      "Python gained function-annotation syntax before the typing system assigned a common interpretation to it. Different tools could attach different meanings to the same syntax. PEP 484 established a vocabulary for type hints for Python 3.5, allowing optional static analysis to use consistent expectations.",
+      "Static analysis follows the program before executing its normal work. Runtime validation inspects values that actually arrive. These are different tasks: a checker can flag a known string passed to a numerical function, while an external response still needs a boundary that checks its contents."
+    ]
+  },
+  "python-optional-values": {
+    "title": "None and Optional Types",
+    "sources": [
+      {
+        "title": "PEP 484: Type hints",
+        "url": "https://peps.python.org/pep-0484/"
+      },
+      {
+        "title": "Python 3.14: Defining functions and arguments",
+        "url": "https://docs.python.org/3.14/tutorial/controlflow.html"
+      },
+      {
+        "title": "Python 3.14: None",
+        "url": "https://docs.python.org/3.14/library/constants.html#None"
+      }
+    ],
+    "blocks": [
+      "Python uses None to represent absence in many interfaces, and function defaults provide behavior when an argument is omitted. As typed interfaces became common, PEP 484 made the distinction between an ordinary value and a value that may also be None explicit.",
+      "That notation did not decide what absence should mean for every application. A caller might omit a limit to request a default, or explicitly supply None to disable an optional check. Keeping those states distinct prevents a convenience expression from silently changing the policy."
+    ]
+  },
+  "python-dataclasses": {
+    "title": "Data Classes in Python 3.7",
+    "sources": [
+      {
+        "title": "PEP 557: Data Classes",
+        "url": "https://peps.python.org/pep-0557/"
+      },
+      {
+        "title": "Python 3.14: dataclasses",
+        "url": "https://docs.python.org/3.14/library/dataclasses.html"
+      },
+      {
+        "title": "Python 3.14: Classes and instances",
+        "url": "https://docs.python.org/3.14/tutorial/classes.html"
+      }
+    ],
+    "blocks": [
+      "Python programmers often wrote classes whose main job was to hold named values. Initializers, readable representations and equality methods repeated much of the field information. PEP 557 described generating those methods from declared fields, and dataclasses became part of Python 3.7.",
+      "The generated methods reduce that repetitive work while leaving an ordinary Python class. Field annotations identify the structure, but do not validate supplied values. Mutable fields still need an ownership decision, and a frozen instance restricts attribute assignment rather than freezing every object reachable through it."
+    ]
+  },
+  "python-composition": {
+    "title": "Structural Protocols in Python",
+    "sources": [
+      {
+        "title": "PEP 544: Structural protocols",
+        "url": "https://peps.python.org/pep-0544/"
+      },
+      {
+        "title": "Python 3.14: Type hints",
+        "url": "https://docs.python.org/3.14/library/typing.html"
+      }
+    ],
+    "blocks": [
+      "Python programs commonly accepted objects because they supported a needed operation, rather than because they inherited from one required base class. Adding static types raised a practical question: how could tools describe those existing collaborations without requiring every implementation to change its ancestry?",
+      "PEP 544 introduced Protocol for Python 3.8 to describe structural interfaces. An object can satisfy a protocol through its supported members without explicitly inheriting from that protocol. This documents interchangeable roles while leaving runtime validation and the real behavior of a component to the application."
+    ]
+  },
+  "python-fail-fast": {
+    "title": "Early Failure and Partial Updates",
+    "sources": [
+      {
+        "title": "The Pragmatic Programmer: contracts and early failure",
+        "url": "https://pragprog.com/tips/"
+      },
+      {
+        "title": "Python errors and exceptions",
+        "url": "https://docs.python.org/3.14/tutorial/errors.html"
+      },
+      {
+        "title": "Python assert statement",
+        "url": "https://docs.python.org/3.14/reference/simple_stmts.html#the-assert-statement"
+      }
+    ],
+    "blocks": [
+      "Programs can continue running after a mistake while producing increasingly difficult consequences. The Pragmatic Programmer discusses contracts and early failure as ways of stopping that spread. The useful idea is to expose a broken assumption close to where it first becomes visible.",
+      "Python gives us explicit exceptions for that decision. A function can reject an unsuitable value before using it, while a caller can handle the failures it expects. Our batch example adds another requirement: validate every incoming measurement before changing the saved list. An early error message alone would not repair a partial write."
+    ]
+  },
+  "python-pydantic-models": {
+    "title": "Required and Nullable Fields in Pydantic v2",
+    "sources": [
+      {
+        "title": "Pydantic v2 design discussion, 2022",
+        "url": "https://pydantic.dev/articles/pydantic-v2"
+      },
+      {
+        "title": "PEP 484: Type Hints",
+        "url": "https://peps.python.org/pep-0484/"
+      },
+      {
+        "title": "Pydantic v2 field rules",
+        "url": "https://docs.pydantic.dev/latest/concepts/fields/"
+      }
+    ],
+    "blocks": [
+      "Python’s type-hint system gave tools a common vocabulary for describing values, while leaving runtime enforcement to other tools. Pydantic uses annotations as part of a runtime data-validation interface. That lets an application check a record before passing it to code that depends on its shape.",
+      "The word optional caused a particular ambiguity. It might mean a key can be left out, or that its value can be None. Samuel Colvin’s 2022 plan for Pydantic v2 explicitly discussed separating these cases. In v2, allowing None without declaring a default does not make a field omittable. That distinction is the center of this lesson; older v1 examples can behave differently."
+    ]
+  },
+  "python-pydantic-constraints": {
+    "title": "Field and Model Validation in Pydantic v2",
+    "sources": [
+      {
+        "title": "Pydantic v2 design: validator structure",
+        "url": "https://pydantic.dev/articles/pydantic-v2"
+      },
+      {
+        "title": "Pydantic field constraints",
+        "url": "https://docs.pydantic.dev/latest/concepts/fields/"
+      },
+      {
+        "title": "Pydantic field and model validators",
+        "url": "https://docs.pydantic.dev/latest/concepts/validators/"
+      },
+      {
+        "title": "Pydantic v2 migration behavior",
+        "url": "https://docs.pydantic.dev/latest/migration/"
+      }
+    ],
+    "blocks": [
+      "A handwritten record check can begin with a few conditions, then grow as records acquire nested fields and relationships. The same rules are easy to scatter across constructors and handlers. A schema-based validator keeps that declared contract together while reporting where an input failed.",
+      "Pydantic’s 2022 v2 design described a tree of validators and separate ways to apply custom checks. The resulting v2 interfaces distinguish checks on one field from checks on a completed model. This is a useful engineering distinction even without the library: a rule about one count needs that count, while a rule comparing two endpoints needs both endpoints."
+    ]
+  },
+  "python-exceptions": {
+    "title": "Exception Chaining in Python",
+    "sources": [
+      {
+        "title": "Python errors and exception handling",
+        "url": "https://docs.python.org/3.14/tutorial/errors.html"
+      },
+      {
+        "title": "PEP 3134: Exception Chaining and Embedded Tracebacks",
+        "url": "https://peps.python.org/pep-3134/"
+      }
+    ],
+    "blocks": [
+      "A low-level failure can need a higher-level explanation. An integer conversion might fail while reading an application setting, so the caller needs to know which setting failed as well as what the conversion reported. Throwing away the earlier failure makes that harder to diagnose.",
+      "PEP 3134, created in 2005 for Python 3.0, addressed lost exception information and explicit exception chaining. Python’s raise ... from ... form can attach the original exception as the cause of a new one. It lets a layer explain its own operation while preserving the failure beneath it."
+    ]
+  },
+  "python-mutation": {
+    "title": "Shared State and Default Factories",
+    "sources": [
+      {
+        "title": "Python names and objects",
+        "url": "https://docs.python.org/3.14/tutorial/classes.html#a-word-about-names-and-objects"
+      },
+      {
+        "title": "Python copying operations",
+        "url": "https://docs.python.org/3.14/library/copy.html"
+      },
+      {
+        "title": "PEP 557: Data Classes",
+        "url": "https://peps.python.org/pep-0557/"
+      }
+    ],
+    "blocks": [
+      "Python’s object model lets several names refer to one object. Sharing can be useful: passing a list to a function does not require copying the entire list. The same behavior makes an unexpected mutation visible to every other name that refers to it.",
+      "Record helpers need to account for that sharing too. PEP 557, proposed in 2017 for the dataclass feature, discusses the problem of mutable defaults and provides default_factory for creating values per instance. The underlying issue is ownership: a collection intended for one record must not accidentally become state shared by unrelated records."
+    ]
+  },
+  "python-context-managers": {
+    "title": "The with Statement and Resource Lifetimes",
+    "sources": [
+      {
+        "title": "PEP 343: The with Statement",
+        "url": "https://peps.python.org/pep-0343/"
+      },
+      {
+        "title": "contextlib and generator-based context managers",
+        "url": "https://docs.python.org/3.14/library/contextlib.html"
+      },
+      {
+        "title": "Python file and text I/O",
+        "url": "https://docs.python.org/3.14/library/io.html"
+      }
+    ],
+    "blocks": [
+      "Opening and closing a resource creates a paired obligation. Repeating the same cleanup structure throughout a program makes it easy to omit a failure path. Python’s try/finally can express that obligation, but every caller would still need to write the pattern correctly.",
+      "PEP 343, created in 2005 for Python 2.5, introduced the with statement to factor out common try/finally patterns. A context manager supplies the entry and exit behavior, while the body still contains the work being performed. The resource-lifetime rules become visible at the place where the resource is used."
+    ]
+  },
+  "python-testing": {
+    "title": "Python unittest and xUnit Testing",
+    "sources": [
+      {
+        "title": "Python unittest introduction",
+        "url": "https://docs.python.org/3.14/library/unittest.html"
+      },
+      {
+        "title": "Kent Beck: Simple Smalltalk Testing",
+        "url": "https://web.archive.org/web/20150315073817/http://www.xprogramming.com/testfram.htm"
+      },
+      {
+        "title": "pytest parameterization",
+        "url": "https://docs.pytest.org/en/stable/how-to/parametrize.html"
+      }
+    ],
+    "blocks": [
+      "Repeated manual checks become difficult to keep consistent as a program changes. Kent Beck's Smalltalk testing framework organized checks around preparation, an action and an expected result. That approach influenced other testing frameworks.",
+      "Python's unittest documentation identifies its connection to JUnit. A runner can execute a collection of tests and report failures separately. We use that organization to preserve the alert rule while its implementation changes. Passing a finite case set remains evidence about those cases, rather than proof about every possible input."
+    ]
+  },
+  "python-test-doubles": {
+    "title": "unittest.mock and Controlled Dependencies",
+    "sources": [
+      {
+        "title": "Python unittest.mock",
+        "url": "https://docs.python.org/3.14/library/unittest.mock.html"
+      },
+      {
+        "title": "Martin Fowler: Mocks Are Not Stubs, 2007",
+        "url": "https://martinfowler.com/articles/mocksArentStubs.html"
+      }
+    ],
+    "blocks": [
+      "A test inherits the changing behavior of any real clock, database or remote service it uses. Testing terminology developed to distinguish stand-ins with different roles. Fowler's 2007 account separates checks on resulting state from expectations about how collaborators were called.",
+      "Python added unittest.mock to the standard library in version 3.3. It can record calls and supply controlled responses. An explicit callable parameter also makes that boundary visible without a mocking library. The resulting test still needs a clear account of what it establishes and which real integrations remain unchecked."
+    ]
+  },
+  "python-modules": {
+    "title": "Python Module Namespaces and PEP 328",
+    "sources": [
+      {
+        "title": "Python modules tutorial",
+        "url": "https://docs.python.org/3.14/tutorial/modules.html"
+      },
+      {
+        "title": "PEP 328: imports",
+        "url": "https://peps.python.org/pep-0328/"
+      },
+      {
+        "title": "PyPA: src layout versus flat layout",
+        "url": "https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/"
+      }
+    ],
+    "blocks": [
+      "Splitting a program into files creates a naming problem: which module does an import identify, and which names should it expose? Python's module system gives each module its own namespace while allowing another module to import the behavior it needs.",
+      "PEP 328, created in 2003, addressed ambiguity between modules within a package and modules elsewhere on the import path. Absolute imports and explicit relative imports express different relationships. This was a documented development in Python's import rules, rather than an invention of modular programming."
+    ]
+  },
+  "python-dependencies": {
+    "title": "Virtual Environments and pyproject.toml",
+    "sources": [
+      {
+        "title": "PEP 405: virtual environments",
+        "url": "https://peps.python.org/pep-0405/"
+      },
+      {
+        "title": "PEP 518: build requirements",
+        "url": "https://peps.python.org/pep-0518/"
+      },
+      {
+        "title": "PyPA environment guide",
+        "url": "https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/"
+      }
+    ],
+    "blocks": [
+      "Third-party virtual environment tools already helped projects retain separate installed packages. PEP 405, created in 2011 for Python 3.3, proposed built-in support that would avoid reproducing fragile interpreter-startup behavior in external tools.",
+      "Builds had another dependency problem: a tool could need packages before it could execute the script that described them. PEP 518 introduced pyproject.toml build-system requirements in 2016 so tools could read that setup without first running its build script. Package isolation and declarative build requirements address different parts of reproducibility."
+    ]
+  },
+  "python-configuration": {
+    "title": "Deployment Configuration and Twelve-Factor Config",
+    "sources": [
+      {
+        "title": "The Twelve-Factor App: Config",
+        "url": "https://12factor.net/config"
+      },
+      {
+        "title": "Python process environment",
+        "url": "https://docs.python.org/3.14/library/os.html#os.environ"
+      },
+      {
+        "title": "Python configparser",
+        "url": "https://docs.python.org/3.14/library/configparser.html"
+      }
+    ],
+    "blocks": [
+      "Applications needed different connection locations and operating settings across deployments while retaining the same source. Process environments and configuration files provided ways to supply those values separately. The Twelve-Factor App described this distinction and advocated keeping deploy-varying configuration out of application code.",
+      "Separating storage does not validate the values or make them secret. A setting still needs a defined representation and a suitable access policy. The examples model this boundary with supplied dictionaries, so they never inspect the reader's actual environment."
+    ]
+  },
+  "python-code-checks": {
+    "title": "Python Style Checks and Static Analysis",
+    "sources": [
+      {
+        "title": "PEP 8: Python style",
+        "url": "https://peps.python.org/pep-0008/"
+      },
+      {
+        "title": "PEP 484: type hints",
+        "url": "https://peps.python.org/pep-0484/"
+      },
+      {
+        "title": "Ruff linter",
+        "url": "https://docs.astral.sh/ruff/linter/"
+      },
+      {
+        "title": "Running mypy",
+        "url": "https://mypy.readthedocs.io/en/stable/running_mypy.html"
+      }
+    ],
+    "blocks": [
+      "PEP 8, created in 2001, documented conventions intended to make Python readable and consistent. Rechecking routine conventions manually consumes reviewer attention. Formatters and linters automate selected parts of that repeated work, while projects still choose which conventions suit their code.",
+      "PEP 484, proposed in 2014 for Python 3.5, standardized a vocabulary for optional static type analysis. A checker can follow those declarations without executing the application. This adds evidence about interfaces, while behavior tests still check requirements on actual executions. The tools have complementary scopes, rather than interchangeable definitions of correctness."
+    ]
+  },
+  "python-logging": {
+    "title": "Python Logging and PEP 282",
+    "sources": [
+      {
+        "title": "PEP 282: A Logging System",
+        "url": "https://peps.python.org/pep-0282/"
+      },
+      {
+        "title": "Python Logging HOWTO",
+        "url": "https://docs.python.org/3.14/howto/logging.html"
+      },
+      {
+        "title": "Python traceback",
+        "url": "https://docs.python.org/3.14/library/traceback.html"
+      }
+    ],
+    "blocks": [
+      "Programs needed event reporting that could be configured without editing every function that produced a message. PEP 282, created in 2002, proposed named loggers, importance levels and configurable handlers for a shared logging system. Python added logging in version 2.3.",
+      "The application can then choose an event destination and detail level while library code describes what happened. A traceback provides different evidence: an exception type and call path. More recorded text does not automatically make either form more useful; the context must explain the operation."
+    ]
+  },
+  "python-profiling": {
+    "title": "Python Profilers and timeit",
+    "sources": [
+      {
+        "title": "Python profilers",
+        "url": "https://docs.python.org/3.14/library/profile.html"
+      },
+      {
+        "title": "Python timeit",
+        "url": "https://docs.python.org/3.14/library/timeit.html"
+      }
+    ],
+    "blocks": [
+      "Source alone does not reliably reveal which operation dominates a complete run. Profilers record execution costs so expensive or repeated work can be investigated. Python's documentation distinguishes its original profile implementation from cProfile, a lower-overhead C implementation based on lsprof.",
+      "The documentation also separates profiling from benchmarking. A profiler instruments a program to locate costs; timeit supports focused timing experiments. The tools address different questions. Neither makes one workload or machine representative of every deployment."
+    ]
+  },
   "software-feature-contracts": {
     "title": "A Model Can Depend on More Than Its Code",
     "sources": [

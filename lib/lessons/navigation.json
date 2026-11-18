@@ -1498,6 +1498,153 @@
     "blurb": "An agent's final answer may hide an unauthorized action taken earlier in the run. Testing the recorded effects against the intended permissions helps reveal those failures, along with legitimate work the controls prevented."
   },
   {
+    "id": "python-readable-code",
+    "title": "Names, Units, and Readable Code",
+    "section": "Python Design and Type Hints",
+    "topic": "Functions and shared rules",
+    "blurb": "A calculation can run correctly while leaving its meaning difficult to follow. Names, explicit units and useful documentation help another reader understand the assumptions they need to preserve."
+  },
+  {
+    "id": "python-function-design",
+    "title": "Functions with Clear Responsibilities",
+    "section": "Python Design and Type Hints",
+    "topic": "Functions and shared rules",
+    "blurb": "A function is easier to reuse when its inputs and result describe one coherent job. Keeping calculations separate from display and external effects makes changes easier to reason about and test."
+  },
+  {
+    "id": "python-dry",
+    "title": "DRY and Shared Rules",
+    "section": "Python Design and Type Hints",
+    "topic": "Functions and shared rules",
+    "blurb": "Copies of the same rule can drift apart as requirements change. DRY keeps that knowledge in one place, while leaving unrelated operations separate when their reasons for changing differ."
+  },
+  {
+    "id": "python-type-hints",
+    "title": "Type Hints and Function Contracts",
+    "section": "Python Design and Type Hints",
+    "topic": "Types and data boundaries",
+    "blurb": "Type hints describe the values an interface expects and returns. Static tools can use that information to find incompatible uses, while runtime checks still decide whether external data is acceptable."
+  },
+  {
+    "id": "python-optional-values",
+    "title": "Missing Values, Defaults, and None",
+    "section": "Python Design and Type Hints",
+    "topic": "Types and data boundaries",
+    "blurb": "An absent setting, an explicit None and a measured zero can mean different things. Defaults and optional types need to preserve those distinctions so the program applies the intended policy."
+  },
+  {
+    "id": "python-dataclasses",
+    "title": "Dataclasses and Record Ownership",
+    "section": "Python Design and Type Hints",
+    "topic": "Objects and interchangeable components",
+    "blurb": "A dataclass gives a recurring record a named Python type and generates common methods. Validation and ownership of mutable fields remain explicit design decisions."
+  },
+  {
+    "id": "python-composition",
+    "title": "Composition and Interchangeable Components",
+    "section": "Python Design and Type Hints",
+    "topic": "Objects and interchangeable components",
+    "blurb": "A program can combine small components through clear interfaces. Passing a dependency explicitly lets callers replace where data comes from or where results go without rewriting the calculation."
+  },
+  {
+    "id": "python-fail-fast",
+    "title": "Fail Fast, Fail Early",
+    "section": "Python Validation and Error Handling",
+    "topic": "Validation and Failure Handling",
+    "blurb": "A failure is easier to understand before invalid data produces a misleading result or changes saved records. Validate the contract at the boundary, then decide which failures the caller can recover from."
+  },
+  {
+    "id": "python-pydantic-models",
+    "title": "Pydantic Models and Optional Fields",
+    "section": "Python Validation and Error Handling",
+    "topic": "Validation and Failure Handling",
+    "blurb": "A record can require a field, allow None as its value, or provide a default when the field is omitted. Pydantic turns those declared rules into runtime validation, so the difference stays explicit at a program boundary."
+  },
+  {
+    "id": "python-pydantic-constraints",
+    "title": "Pydantic Constraints and Validators",
+    "section": "Python Validation and Error Handling",
+    "topic": "Validation and Failure Handling",
+    "blurb": "A correctly typed request can still ask for an impossible range or an unsuitable count. Express field limits, relationships and normalization explicitly, then route validation errors without hiding defects in the program."
+  },
+  {
+    "id": "python-exceptions",
+    "title": "Python Exceptions",
+    "section": "Python Validation and Error Handling",
+    "topic": "Validation and Failure Handling",
+    "blurb": "An exception carries a failed operation back to a caller that may be able to handle it. Keep recovery specific, preserve the useful cause, and avoid disguising a defect as a successful result."
+  },
+  {
+    "id": "python-mutation",
+    "title": "Mutation and Copies",
+    "section": "Python Validation and Error Handling",
+    "topic": "Validation and Failure Handling",
+    "blurb": "Two names can refer to the same mutable object. Make ownership and copying explicit so an edit does not change another caller’s data or leak into a later function call."
+  },
+  {
+    "id": "python-context-managers",
+    "title": "Context Managers and Resource Cleanup",
+    "section": "Python Validation and Error Handling",
+    "topic": "Validation and Failure Handling",
+    "blurb": "A file or connection needs a defined lifetime even when processing fails. Use with and context managers to keep acquisition and cleanup together without hiding the original error."
+  },
+  {
+    "id": "python-testing",
+    "title": "Testing Python Functions",
+    "section": "Python Testing and Project Tools",
+    "topic": "Checking behavior",
+    "blurb": "A program can run without producing the right result. Tests preserve expectations about its behavior, including boundaries and earlier mistakes, so a change can be checked against those expectations."
+  },
+  {
+    "id": "python-test-doubles",
+    "title": "Dependency Injection and Test Doubles",
+    "section": "Python Testing and Project Tools",
+    "topic": "Checking behavior",
+    "blurb": "A report test is easier to repeat when its reading source is explicit. Controlled source and sink objects let us inspect data and calls locally, while separate integration checks exercise actual devices or services."
+  },
+  {
+    "id": "python-modules",
+    "title": "Modules and Project Structure",
+    "section": "Python Testing and Project Tools",
+    "topic": "Organizing a project",
+    "blurb": "Modules give related code a clear home. Explicit imports and a separate entry point let us reuse a calculation without also starting file reads or service connections."
+  },
+  {
+    "id": "python-dependencies",
+    "title": "Python Environments and Dependencies",
+    "section": "Python Testing and Project Tools",
+    "topic": "Organizing a project",
+    "blurb": "A program depends on its Python version and installed packages as well as its source. Separate environments and recorded dependencies help recreate a working setup without making unrelated projects share every package change."
+  },
+  {
+    "id": "python-configuration",
+    "title": "Configuration and Secrets",
+    "section": "Python Testing and Project Tools",
+    "topic": "Organizing a project",
+    "blurb": "Configuration lets the same program run with different settings. Reading those values at a clear boundary and validating their meaning prevents malformed settings from reaching calculations or leaking into diagnostic output."
+  },
+  {
+    "id": "python-code-checks",
+    "title": "Formatting, Linting, and Type Checks",
+    "section": "Python Testing and Project Tools",
+    "topic": "Checking a project",
+    "blurb": "Formatting, linting, static type analysis and behavior tests answer different questions. Automating them catches routine problems while leaving design decisions and application requirements visible."
+  },
+  {
+    "id": "python-logging",
+    "title": "Logging and Debugging",
+    "section": "Python Testing and Project Tools",
+    "topic": "Observing a running program",
+    "blurb": "A traceback shows where an exception traveled. Logging records selected events while a program runs. Appropriate context helps diagnose failures without flooding output or exposing unrelated private data."
+  },
+  {
+    "id": "python-profiling",
+    "title": "Profiling and Optimization",
+    "section": "Python Testing and Project Tools",
+    "topic": "Observing a running program",
+    "blurb": "Optimization needs a specific cost to reduce and evidence of where it occurs. Profiling locates expensive work, focused benchmarks compare alternatives, and tests protect the behavior a change must preserve."
+  },
+  {
     "id": "software-feature-contracts",
     "title": "The Right Numbers in the Wrong Columns",
     "section": "Software for Models and Agents",

@@ -870,6 +870,14 @@ const existingCurriculum: Part[] = [
 ];
 
 const topicIntroductions: Record<string, string> = {
+  "Functions and shared rules": "A function needs a clear purpose and an agreement with its callers. Descriptive names make that agreement easier to follow. When several operations depend on the same rule, keeping one definition prevents their behavior from drifting apart.",
+  "Types and data boundaries": "Type hints describe the values a program expects. Missing information still needs a deliberate representation, and an annotation does not check incoming data by itself. Distinguish the agreement written for readers and tools from the validation that actually runs.",
+  "Objects and interchangeable components": "A named record keeps related values together. An interface describes the behavior another part of the program needs. Combining small components can let us change one implementation without making its callers depend on its internal details.",
+  "Validation and Failure Handling": "An invalid record should be identified before later work depends on it. Define what each field permits, then handle a rejected value where there is a useful response. Changes to shared objects and unfinished cleanup need the same care because their effects can outlast the failed operation.",
+  "Checking behavior": "Tests need an expected result that comes from the problem rather than a copy of the implementation. Changed inputs and regression cases check what must remain true. Substitutes give tests control over an external dependency, while separate integration checks establish whether the real connection works.",
+  "Organizing a project": "A program needs to run outside the directory and environment where it was first written. Explicit module boundaries and dependency records make its requirements visible. Keep configuration separate from the calculation so it can change without rewriting that calculation or embedding credentials in source.",
+  "Checking a project": "Formatting and linting catch different problems from type checking and behavioral tests. Run the checks together while keeping their results distinct. A clean tool report is useful evidence about the properties that tool checks, not a guarantee that the program solves the right problem.",
+  "Observing a running program": "A failed operation needs enough context to investigate without exposing the data it processed. Logs record those events. When a program is slow, a profile helps locate where the work is happening before we choose a change to measure.",
   "Databricks Fundamentals": "Databricks brings data processing and shared development into a managed platform. Understand where the data lives, how calculations run, and how tables and jobs connect that work. Then use those foundations to record a model experiment.",
   "Describing a model request": "Two programs need a shared agreement about the values they exchange. A model request must distinguish omitted information from an explicit null and retain the meaning of numerical fields. Changes to that agreement also need to account for older callers.",
   "Handling and testing tool outcomes": "A failed connection can leave the caller uncertain whether an operation happened. Error types and retry rules need to preserve that distinction. Interface tests should also check expected relationships between requests, beyond one successful example.",
@@ -1030,6 +1038,11 @@ const foundationCurriculum: Part[] = existingCurriculum.flatMap(part => {
 });
 
 const newSection = (title: string, intro: string): Part => ({ title, intro, topics: addedTopics(title) });
+const pythonPracticeSections = [
+  newSection("Python Design and Type Hints", "A program becomes harder to change when its rules are scattered or its inputs are unclear. Learn how names, function boundaries and type hints make those decisions explicit. Reuse a rule when it needs to stay consistent, and keep different responsibilities separate."),
+  newSection("Python Validation and Error Handling", "Data arriving from a file or another program may not satisfy the assumptions in our code. Define what is required, validate it before processing and decide which failures the caller can handle. Pydantic checks structured records at runtime; explicit exceptions and resource cleanup control what happens when a check fails."),
+  newSection("Python Testing and Project Tools", "A working example does not tell us how a program behaves when its inputs or dependencies change. Use tests to preserve that behavior, then organize the project so it can be run and checked elsewhere. Logging and profiling help investigate failures and performance problems with evidence."),
+];
 const databaseSections = [
   newSection("SQL", "SQL expresses questions about records stored in tables. Filtering and grouping describe which records matter, while joins connect information across tables. Reliable answers also depend on how the data is structured and how updates are kept consistent."),
   newSection("NoSQL", "Different ways of storing data make different questions easier to answer. Documents keep related details together, while key-based storage supports direct lookups. Dividing records across machines or maintaining several copies introduces further decisions about consistency and failure."),
@@ -1043,7 +1056,7 @@ const reinforcementIntro = existingCurriculum.flatMap(part => part.topics).flatM
 reinforcementSection.topics[0].concepts.unshift(reinforcementIntro);
 
 const canonicalCurriculum: Part[] = [
-  ...foundationCurriculum.flatMap(part => part.title === "Python and NumPy" ? [part, ...databaseSections] : part.title === "Choosing and Checking a Model" ? [part, modelEvaluationSection, probabilitySection] : part.title === "Neural Networks" ? [part, optimisationSection] : [part]),
+  ...foundationCurriculum.flatMap(part => part.title === "Python and NumPy" ? [part, ...pythonPracticeSections, ...databaseSections] : part.title === "Choosing and Checking a Model" ? [part, modelEvaluationSection, probabilitySection] : part.title === "Neural Networks" ? [part, optimisationSection] : [part]),
   newSection("Time Series and Forecasting", "Observations collected over time can contain trends and repeating patterns. Forecasts use the history available at a particular moment to estimate what comes next. A fair comparison must preserve that order and account for changes in the process being observed."),
   reinforcementSection,
   newSection("Recommendations and Ranking", "A recommendation system chooses which items someone is likely to find useful and in what order to show them. Item descriptions and patterns of interaction provide different kinds of evidence. Evaluation needs to consider the short list people actually see, including users and items with little history."),

@@ -20,9 +20,9 @@ test.beforeAll(async () => {
 
 test("every published lesson has exact canonical reward metadata and nonempty graded groups", () => {
   expect(catalog.version).toBe(1);
-  expect(catalog.lessons).toHaveLength(384);
+  expect(catalog.lessons).toHaveLength(405);
   expect(catalog.lessons.map(lesson => lesson.href)).toEqual(lessonOrder);
-  expect(new Set(catalog.lessons.map(lesson => lesson.id)).size).toBe(384);
+  expect(new Set(catalog.lessons.map(lesson => lesson.id)).size).toBe(405);
   for (const lesson of catalog.lessons) {
     const location = lessonLocations[lesson.href];
     expect(lesson.id).toBe(lesson.href.split("/").at(-1));
@@ -44,13 +44,13 @@ test("every published lesson has exact canonical reward metadata and nonempty gr
   expect(catalog.lessons.some(lesson => lesson.id === "workshop-guide" || lesson.href.startsWith("/practice/"))).toBe(false);
 });
 
-test("the catalog is reproducible from all 108 native and 276 expanded render declarations", async () => {
+test("the catalog is reproducible from all 108 native and 297 expanded render declarations", async () => {
   const { catalog: current, facts } = await rewards.buildRewardsCatalog();
   expect(current).toEqual(catalog);
   expect(facts.filter(lesson => lesson.native)).toHaveLength(108);
-  expect(facts.filter(lesson => !lesson.native)).toHaveLength(276);
-  expect(facts.reduce((sum, lesson) => sum + lesson.quizSections, 0)).toBe(776);
-  expect(facts.reduce((sum, lesson) => sum + lesson.practiceSections, 0)).toBe(384);
+  expect(facts.filter(lesson => !lesson.native)).toHaveLength(297);
+  expect(facts.reduce((sum, lesson) => sum + lesson.quizSections, 0)).toBe(818);
+  expect(facts.reduce((sum, lesson) => sum + lesson.practiceSections, 0)).toBe(405);
   expect(facts.every(lesson => lesson.questions > 0 && lesson.challenges > 0)).toBe(true);
   // Independently compare the real exercise collector, including supplements,
   // rather than inferring programming credit from the presence of a heading.
@@ -71,8 +71,8 @@ test("expanded milestones follow rendered checkpoint placement and SQL versus Py
       .map(checkpoint => checkpoint.id ?? sectionId(checkpoint.title)));
     const final = lesson.quizId ?? sectionId(`Questions on Parts 1 to ${lesson.parts.length}`);
     expect(reward.quizzes, lesson.id).toEqual([...checkpoints, ...(lesson.quiz.length ? [final] : [])]);
-    const practice = lesson.section === "SQL" ? "practice-write-the-query"
-      : ["NoSQL", "Graph Databases"].includes(lesson.section) ? "practice" : "practice-work-through-the-problem-with-numpy";
+    const practice = lesson.practiceId ?? (lesson.section === "SQL" ? "practice-write-the-query"
+      : ["NoSQL", "Graph Databases"].includes(lesson.section) ? "practice" : "practice-work-through-the-problem-with-numpy");
     expect(reward.practice, lesson.id).toEqual([practice]);
   }
 });
@@ -143,7 +143,7 @@ test("check mode validates exact bytes without rewriting the client-safe manifes
   const filename = path.join(websiteRoot, "lib/rewards/catalog.json");
   const before = await readFile(filename, "utf8"), beforeStat = await stat(filename);
   const output = execFileSync(process.execPath, ["scripts/build-rewards-catalog.mjs", "--check"], { cwd: websiteRoot, encoding: "utf8" });
-  expect(JSON.parse(output)).toMatchObject({ checked: true, lessons: 384, native: 108, expanded: 276 });
+  expect(JSON.parse(output)).toMatchObject({ checked: true, lessons: 405, native: 108, expanded: 297 });
   expect(await readFile(filename, "utf8")).toBe(before);
   expect((await stat(filename)).mtimeMs).toBe(beforeStat.mtimeMs);
   expect(Buffer.byteLength(before)).toBeLessThan(256 * 1024);

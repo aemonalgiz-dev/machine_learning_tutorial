@@ -300,6 +300,342 @@
       ]
     },
     {
+      "id": "python-readable-code",
+      "href": "/concepts/python-readable-code",
+      "title": "Names, Units, and Readable Code",
+      "sectionId": "python-design-and-type-hints",
+      "sectionTitle": "Python Design and Type Hints",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-to-2",
+        "questions-on-parts-1-to-4"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-function-design",
+      "href": "/concepts/python-function-design",
+      "title": "Functions with Clear Responsibilities",
+      "sectionId": "python-design-and-type-hints",
+      "sectionTitle": "Python Design and Type Hints",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-to-2",
+        "questions-on-parts-1-to-5"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-dry",
+      "href": "/concepts/python-dry",
+      "title": "DRY and Shared Rules",
+      "sectionId": "python-design-and-type-hints",
+      "sectionTitle": "Python Design and Type Hints",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-to-2",
+        "questions-on-parts-1-to-4"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-type-hints",
+      "href": "/concepts/python-type-hints",
+      "title": "Type Hints and Function Contracts",
+      "sectionId": "python-design-and-type-hints",
+      "sectionTitle": "Python Design and Type Hints",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-to-2",
+        "questions-on-parts-1-to-5"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-optional-values",
+      "href": "/concepts/python-optional-values",
+      "title": "Missing Values, Defaults, and None",
+      "sectionId": "python-design-and-type-hints",
+      "sectionTitle": "Python Design and Type Hints",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-to-2",
+        "questions-on-parts-1-to-5"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-dataclasses",
+      "href": "/concepts/python-dataclasses",
+      "title": "Dataclasses and Record Ownership",
+      "sectionId": "python-design-and-type-hints",
+      "sectionTitle": "Python Design and Type Hints",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-to-2",
+        "questions-on-parts-1-to-5"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-composition",
+      "href": "/concepts/python-composition",
+      "title": "Composition and Interchangeable Components",
+      "sectionId": "python-design-and-type-hints",
+      "sectionTitle": "Python Design and Type Hints",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-to-2",
+        "questions-on-parts-1-to-5"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-fail-fast",
+      "href": "/concepts/python-fail-fast",
+      "title": "Fail Fast, Fail Early",
+      "sectionId": "python-validation-and-error-handling",
+      "sectionTitle": "Python Validation and Error Handling",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-7"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-pydantic-models",
+      "href": "/concepts/python-pydantic-models",
+      "title": "Pydantic Models and Optional Fields",
+      "sectionId": "python-validation-and-error-handling",
+      "sectionTitle": "Python Validation and Error Handling",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-9"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-pydantic-constraints",
+      "href": "/concepts/python-pydantic-constraints",
+      "title": "Pydantic Constraints and Validators",
+      "sectionId": "python-validation-and-error-handling",
+      "sectionTitle": "Python Validation and Error Handling",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-8"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-exceptions",
+      "href": "/concepts/python-exceptions",
+      "title": "Python Exceptions",
+      "sectionId": "python-validation-and-error-handling",
+      "sectionTitle": "Python Validation and Error Handling",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-7"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-mutation",
+      "href": "/concepts/python-mutation",
+      "title": "Mutation and Copies",
+      "sectionId": "python-validation-and-error-handling",
+      "sectionTitle": "Python Validation and Error Handling",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-7"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-context-managers",
+      "href": "/concepts/python-context-managers",
+      "title": "Context Managers and Resource Cleanup",
+      "sectionId": "python-validation-and-error-handling",
+      "sectionTitle": "Python Validation and Error Handling",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-7"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-testing",
+      "href": "/concepts/python-testing",
+      "title": "Testing Python Functions",
+      "sectionId": "python-testing-and-project-tools",
+      "sectionTitle": "Python Testing and Project Tools",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-4"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-test-doubles",
+      "href": "/concepts/python-test-doubles",
+      "title": "Dependency Injection and Test Doubles",
+      "sectionId": "python-testing-and-project-tools",
+      "sectionTitle": "Python Testing and Project Tools",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-4"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-modules",
+      "href": "/concepts/python-modules",
+      "title": "Modules and Project Structure",
+      "sectionId": "python-testing-and-project-tools",
+      "sectionTitle": "Python Testing and Project Tools",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-5"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-dependencies",
+      "href": "/concepts/python-dependencies",
+      "title": "Python Environments and Dependencies",
+      "sectionId": "python-testing-and-project-tools",
+      "sectionTitle": "Python Testing and Project Tools",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-4"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-configuration",
+      "href": "/concepts/python-configuration",
+      "title": "Configuration and Secrets",
+      "sectionId": "python-testing-and-project-tools",
+      "sectionTitle": "Python Testing and Project Tools",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-5"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-code-checks",
+      "href": "/concepts/python-code-checks",
+      "title": "Formatting, Linting, and Type Checks",
+      "sectionId": "python-testing-and-project-tools",
+      "sectionTitle": "Python Testing and Project Tools",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-4"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-logging",
+      "href": "/concepts/python-logging",
+      "title": "Logging and Debugging",
+      "sectionId": "python-testing-and-project-tools",
+      "sectionTitle": "Python Testing and Project Tools",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-4"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
+      "id": "python-profiling",
+      "href": "/concepts/python-profiling",
+      "title": "Profiling and Optimization",
+      "sectionId": "python-testing-and-project-tools",
+      "sectionTitle": "Python Testing and Project Tools",
+      "areaId": "mathematics-and-programming",
+      "areaTitle": "Mathematics and Programming",
+      "quizzes": [
+        "questions-on-parts-1-and-2",
+        "questions-on-parts-1-to-5"
+      ],
+      "practice": [
+        "practice"
+      ]
+    },
+    {
       "id": "sql-tables",
       "href": "/concepts/sql-tables",
       "title": "What Does One Row Actually Describe?",

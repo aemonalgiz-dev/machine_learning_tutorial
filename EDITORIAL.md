@@ -13,6 +13,25 @@ the current learning area. Mark areas without published lessons as being in
 preparation. Run the navigation contracts in `tests/learning-areas.spec.ts`
 when adding or moving sections.
 
+The Python engineering sections follow Python and NumPy. Teach a practice through
+a change that makes the earlier program inadequate, then show how the repair
+affects its callers and tests. DRY concerns shared knowledge, not every similar
+line of code. Explain when a new abstraction would make the program harder to
+understand. Keep these principles useful beyond machine learning.
+
+Distinguish type hints from runtime validation. In Pydantic, a required field,
+a nullable field and a field with a default have different contracts. An
+annotation allowing `None` does not supply a default. Explain coercion and strict
+validation using the actual input mode, and show how callers handle expected
+validation failures without hiding programming defects. A validated structure
+still needs checks for the meaning of its data.
+
+Project tools that require a local environment need explicit setup instructions.
+Browser exercises must run in the pinned Python environment without pretending
+to install packages, contact a service or execute a static checker. A workshop
+can make an interface or failure path visible; its teaching model is not a full
+implementation of Python's type system, Pydantic or a project tool.
+
 Learning-area pages open with a short description followed by the section cards.
 Avoid repeated "with Botie" buttons and a second navigation menu that repeats
 those cards. Use group headings only when they distinguish several sections.

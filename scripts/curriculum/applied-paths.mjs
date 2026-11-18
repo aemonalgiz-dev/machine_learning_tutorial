@@ -1,4 +1,7 @@
 import software from './applied-software.mjs';
+import pythonDesign from './python-design.mjs';
+import pythonValidation from './python-validation.mjs';
+import pythonProjects from './python-projects.mjs';
 import modelToolContracts from './model-tool-contracts.mjs';
 import data from './applied-data.mjs';
 import { databricksRecords } from './databricks-path.mjs';
@@ -13,11 +16,13 @@ import stateEstimation from './state-estimation.mjs';
 import numericalLearning from './numerical-learning.mjs';
 import { appliedExamples, appliedDepth } from './applied-examples.mjs';
 
-const additions = [...modelToolContracts, ...databricksIntroductionRecords, ...databricksRecords, ...servingDepth, ...stateEstimation, ...mlLifecycleSecurity, ...numericalLearning];
+const pythonPractices = [...pythonDesign, ...pythonValidation, ...pythonProjects];
+for (const record of pythonPractices) record.practiceId = 'practice';
+const additions = [...pythonPractices, ...modelToolContracts, ...databricksIntroductionRecords, ...databricksRecords, ...servingDepth, ...stateEstimation, ...mlLifecycleSecurity, ...numericalLearning];
 for (const record of additions) {
   if (!record.reading.practiceTitle.startsWith('Practice.')) record.reading.practiceTitle = `Practice. ${record.reading.practiceTitle}`;
 }
-const records = [...software, ...modelToolContracts, ...data, ...databricksIntroductionRecords, ...databricksRecords, ...infrastructure, ...servingDepth, ...robotics, ...stateEstimation, ...security, ...mlLifecycleSecurity, ...simulation, ...numericalLearning];
+const records = [...pythonPractices, ...software, ...modelToolContracts, ...data, ...databricksIntroductionRecords, ...databricksRecords, ...infrastructure, ...servingDepth, ...robotics, ...stateEstimation, ...security, ...mlLifecycleSecurity, ...simulation, ...numericalLearning];
 for (const record of records) {
   const example = appliedExamples[record.id];
   if (example) record.parts[1].examples = [...record.parts[1].examples ?? [], example];

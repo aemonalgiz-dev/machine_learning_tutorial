@@ -29566,6 +29566,2915 @@
     "draftVersion": 1
   },
   {
+    "id": "python-readable-code",
+    "title": "Keep greenhouse names through a conversion",
+    "problem": "A converted temperature without its unit or greenhouse name can be used incorrectly by the next report.",
+    "challenge": "Extract house and temperature_c separately. Scale the temperatures, add the offset, and pair the results with their original house names under temperature_f.",
+    "sources": {
+      "records": "Named Celsius records",
+      "scale": "Fahrenheit scale",
+      "offset": "Fahrenheit offset"
+    },
+    "cases": [
+      {
+        "name": "Two greenhouses",
+        "data": {
+          "records": [
+            {
+              "house": "north",
+              "temperature_c": 0
+            },
+            {
+              "house": "south",
+              "temperature_c": 20
+            }
+          ],
+          "scale": 1.8,
+          "offset": 32
+        },
+        "expected": [
+          {
+            "house": "north",
+            "temperature_f": 32
+          },
+          {
+            "house": "south",
+            "temperature_f": 68
+          }
+        ]
+      },
+      {
+        "name": "A different order",
+        "data": {
+          "records": [
+            {
+              "house": "roof",
+              "temperature_c": 30
+            },
+            {
+              "house": "west",
+              "temperature_c": 5
+            }
+          ],
+          "scale": 1.8,
+          "offset": 32
+        },
+        "expected": [
+          {
+            "house": "roof",
+            "temperature_f": 86
+          },
+          {
+            "house": "west",
+            "temperature_f": 41
+          }
+        ]
+      },
+      {
+        "name": "A below-freezing reading",
+        "data": {
+          "records": [
+            {
+              "house": "cold",
+              "temperature_c": -10
+            }
+          ],
+          "scale": 1.8,
+          "offset": 32
+        },
+        "expected": [
+          {
+            "house": "cold",
+            "temperature_f": 14
+          }
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "pyDesignNamedRows",
+      "inputs": [
+        {
+          "op": "pyDesignColumn",
+          "inputs": [
+            {
+              "source": "records"
+            }
+          ],
+          "settings": {
+            "field": "house"
+          }
+        },
+        {
+          "op": "pyDesignOffset",
+          "inputs": [
+            {
+              "op": "pyDesignScale",
+              "inputs": [
+                {
+                  "op": "pyDesignColumn",
+                  "inputs": [
+                    {
+                      "source": "records"
+                    }
+                  ],
+                  "settings": {
+                    "field": "temperature_c"
+                  }
+                },
+                {
+                  "source": "scale"
+                }
+              ]
+            },
+            {
+              "source": "offset"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "nameField": "house",
+        "valueField": "temperature_f"
+      }
+    },
+    "why": "The field selection and result names make the conversion direction visible.",
+    "limitation": "The floor uses finite validated records. Field names document units; they cannot independently verify the thermometer convention.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-function-design",
+    "title": "Return alert data before formatting a report",
+    "problem": "The daily report and web page need the same alert calculation with different presentations.",
+    "challenge": "Select readings at least the supplied limit. Count those readings and total their departures above the limit. Return a record with count and excess_c.",
+    "sources": {
+      "readings": "Celsius readings",
+      "limit": "Inclusive alert limit in Celsius"
+    },
+    "cases": [
+      {
+        "name": "One reading meets the limit exactly",
+        "data": {
+          "readings": [
+            20,
+            25,
+            30
+          ],
+          "limit": 25
+        },
+        "expected": {
+          "count": 2,
+          "excess_c": 5
+        }
+      },
+      {
+        "name": "A changed limit",
+        "data": {
+          "readings": [
+            20,
+            25,
+            30
+          ],
+          "limit": 20
+        },
+        "expected": {
+          "count": 3,
+          "excess_c": 15
+        }
+      },
+      {
+        "name": "No alerts",
+        "data": {
+          "readings": [
+            10,
+            15
+          ],
+          "limit": 20
+        },
+        "expected": {
+          "count": 0,
+          "excess_c": 0
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyDesignRecordPair",
+      "inputs": [
+        {
+          "op": "pyDesignCount",
+          "inputs": [
+            {
+              "op": "pyDesignMask",
+              "inputs": [
+                {
+                  "source": "readings"
+                },
+                {
+                  "op": "pyDesignAtLeast",
+                  "inputs": [
+                    {
+                      "source": "readings"
+                    },
+                    {
+                      "source": "limit"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "pyDesignSum",
+          "inputs": [
+            {
+              "op": "pyDesignDifferences",
+              "inputs": [
+                {
+                  "op": "pyDesignMask",
+                  "inputs": [
+                    {
+                      "source": "readings"
+                    },
+                    {
+                      "op": "pyDesignAtLeast",
+                      "inputs": [
+                        {
+                          "source": "readings"
+                        },
+                        {
+                          "source": "limit"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "source": "limit"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "firstField": "count",
+        "secondField": "excess_c"
+      }
+    },
+    "why": "Both outputs come from the same selected readings, and the result contains no display-specific text.",
+    "limitation": "The floor models a pure calculation. Publishing, file writes and other effects belong to explicit callers.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-dry",
+    "title": "Share the safety limit between reports",
+    "problem": "One report was repaired while another retained the old safety policy.",
+    "challenge": "Compare each report with the same supplied inclusive limit. Count the matching readings on each branch, then return morning and evening counts under those names.",
+    "sources": {
+      "morning": "Morning Celsius readings",
+      "evening": "Evening Celsius readings",
+      "limit": "One shared inclusive safety limit"
+    },
+    "cases": [
+      {
+        "name": "Original safety limit",
+        "data": {
+          "morning": [
+            18,
+            24,
+            27
+          ],
+          "evening": [
+            24,
+            28
+          ],
+          "limit": 24
+        },
+        "expected": {
+          "morning": 2,
+          "evening": 2
+        }
+      },
+      {
+        "name": "The shared limit changes",
+        "data": {
+          "morning": [
+            18,
+            24,
+            27
+          ],
+          "evening": [
+            24,
+            28
+          ],
+          "limit": 27
+        },
+        "expected": {
+          "morning": 1,
+          "evening": 1
+        }
+      },
+      {
+        "name": "An empty morning report",
+        "data": {
+          "morning": [],
+          "evening": [
+            10,
+            20
+          ],
+          "limit": 15
+        },
+        "expected": {
+          "morning": 0,
+          "evening": 1
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyDesignRecordPair",
+      "inputs": [
+        {
+          "op": "pyDesignSum",
+          "inputs": [
+            {
+              "op": "pyDesignAtLeast",
+              "inputs": [
+                {
+                  "source": "morning"
+                },
+                {
+                  "source": "limit"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "pyDesignSum",
+          "inputs": [
+            {
+              "op": "pyDesignAtLeast",
+              "inputs": [
+                {
+                  "source": "evening"
+                },
+                {
+                  "source": "limit"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "firstField": "morning",
+        "secondField": "evening"
+      }
+    },
+    "why": "Both comparisons receive the same policy input, while the reports keep separate observations.",
+    "limitation": "The floor makes a shared setting visible. Reviewing Python is still necessary to establish whether its implementation duplicates a rule.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-type-hints",
+    "title": "Validate the records behind a numerical interface",
+    "problem": "A field expected to contain a temperature arrives as text in some records.",
+    "challenge": "Read temperature_c and check the actual values. Route whole records with finite numerical readings to accepted, and the others to rejected. Keep record order in both lists.",
+    "sources": {
+      "records": "Records arriving at the numerical boundary"
+    },
+    "cases": [
+      {
+        "name": "A string among numbers",
+        "data": {
+          "records": [
+            {
+              "house": "north",
+              "temperature_c": 12
+            },
+            {
+              "house": "south",
+              "temperature_c": "18"
+            },
+            {
+              "house": "roof",
+              "temperature_c": 0
+            }
+          ]
+        },
+        "expected": {
+          "accepted": [
+            {
+              "house": "north",
+              "temperature_c": 12
+            },
+            {
+              "house": "roof",
+              "temperature_c": 0
+            }
+          ],
+          "rejected": [
+            {
+              "house": "south",
+              "temperature_c": "18"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Booleans and absence",
+        "data": {
+          "records": [
+            {
+              "house": "a",
+              "temperature_c": true
+            },
+            {
+              "house": "b",
+              "temperature_c": null
+            },
+            {
+              "house": "c",
+              "temperature_c": -2
+            }
+          ]
+        },
+        "expected": {
+          "accepted": [
+            {
+              "house": "c",
+              "temperature_c": -2
+            }
+          ],
+          "rejected": [
+            {
+              "house": "a",
+              "temperature_c": true
+            },
+            {
+              "house": "b",
+              "temperature_c": null
+            }
+          ]
+        }
+      },
+      {
+        "name": "No incoming records",
+        "data": {
+          "records": []
+        },
+        "expected": {
+          "accepted": [],
+          "rejected": []
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyDesignRecordPair",
+      "inputs": [
+        {
+          "op": "pyDesignMask",
+          "inputs": [
+            {
+              "source": "records"
+            },
+            {
+              "op": "pyDesignNumberFlags",
+              "inputs": [
+                {
+                  "op": "pyDesignColumn",
+                  "inputs": [
+                    {
+                      "source": "records"
+                    }
+                  ],
+                  "settings": {
+                    "field": "temperature_c"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "pyDesignMask",
+          "inputs": [
+            {
+              "source": "records"
+            },
+            {
+              "op": "pyDesignInvert",
+              "inputs": [
+                {
+                  "op": "pyDesignNumberFlags",
+                  "inputs": [
+                    {
+                      "op": "pyDesignColumn",
+                      "inputs": [
+                        {
+                          "source": "records"
+                        }
+                      ],
+                      "settings": {
+                        "field": "temperature_c"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "firstField": "accepted",
+        "secondField": "rejected"
+      }
+    },
+    "why": "A runtime check establishes the accepted values; the annotation alone could not make that decision.",
+    "limitation": "This floor checks actual field values. It is not a static type checker, and these fixtures all contain the named field.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-optional-values",
+    "title": "Resolve each greenhouse’s alert setting",
+    "problem": "A truthiness fallback replaced both a valid zero and an explicit disabled alert.",
+    "challenge": "Default only an absent limit key. Compare temperature_c with the matching resolved limit, treating null as disabled. Return limits and alerts in original record order.",
+    "sources": {
+      "records": "Temperature records with optional limit",
+      "default_limit": "Default for an absent limit key"
+    },
+    "cases": [
+      {
+        "name": "Three different setting states",
+        "data": {
+          "records": [
+            {
+              "house": "north",
+              "temperature_c": 21
+            },
+            {
+              "house": "south",
+              "temperature_c": 0,
+              "limit": 0
+            },
+            {
+              "house": "roof",
+              "temperature_c": 50,
+              "limit": null
+            }
+          ],
+          "default_limit": 25
+        },
+        "expected": {
+          "limits": [
+            25,
+            0,
+            null
+          ],
+          "alerts": [
+            0,
+            1,
+            0
+          ]
+        }
+      },
+      {
+        "name": "The default changes",
+        "data": {
+          "records": [
+            {
+              "house": "north",
+              "temperature_c": 21
+            },
+            {
+              "house": "south",
+              "temperature_c": 0,
+              "limit": 0
+            },
+            {
+              "house": "roof",
+              "temperature_c": 50,
+              "limit": null
+            }
+          ],
+          "default_limit": 20
+        },
+        "expected": {
+          "limits": [
+            20,
+            0,
+            null
+          ],
+          "alerts": [
+            1,
+            1,
+            0
+          ]
+        }
+      },
+      {
+        "name": "An explicit negative limit",
+        "data": {
+          "records": [
+            {
+              "house": "cold",
+              "temperature_c": -2,
+              "limit": -3
+            },
+            {
+              "house": "west",
+              "temperature_c": 8
+            }
+          ],
+          "default_limit": 10
+        },
+        "expected": {
+          "limits": [
+            -3,
+            10
+          ],
+          "alerts": [
+            1,
+            0
+          ]
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyDesignRecordPair",
+      "inputs": [
+        {
+          "op": "pyDesignMissingDefault",
+          "inputs": [
+            {
+              "source": "records"
+            },
+            {
+              "source": "default_limit"
+            }
+          ],
+          "settings": {
+            "field": "limit"
+          }
+        },
+        {
+          "op": "pyDesignAtLeastEach",
+          "inputs": [
+            {
+              "op": "pyDesignColumn",
+              "inputs": [
+                {
+                  "source": "records"
+                }
+              ],
+              "settings": {
+                "field": "temperature_c"
+              }
+            },
+            {
+              "op": "pyDesignMissingDefault",
+              "inputs": [
+                {
+                  "source": "records"
+                },
+                {
+                  "source": "default_limit"
+                }
+              ],
+              "settings": {
+                "field": "limit"
+              }
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "firstField": "limits",
+        "secondField": "alerts"
+      }
+    },
+    "why": "The missing-only default preserves supplied zero and disabled states before any comparison.",
+    "limitation": "The floor uses null for the None state and validated setting values. Python code establishes the input contract and can also distinguish an omitted function argument with a sentinel.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-dataclasses",
+    "title": "Give each greenhouse an independent notes list",
+    "problem": "Adding a note through a shared default list changed more than one greenhouse report.",
+    "challenge": "Build named records from house names and temperature_c values. Create a separate empty list for each record, attach it as tags, then add the supplied note to only the selected record.",
+    "sources": {
+      "houses": "Greenhouse names",
+      "readings": "Matching Celsius readings",
+      "record_index": "Record to tag, starting at zero",
+      "note": "Note for that one report",
+      "shared_empty": "One list available for the shared-default alternative"
+    },
+    "cases": [
+      {
+        "name": "Tag the north report",
+        "data": {
+          "houses": [
+            "north",
+            "south"
+          ],
+          "readings": [
+            12,
+            18
+          ],
+          "record_index": 0,
+          "note": "checked",
+          "shared_empty": []
+        },
+        "expected": [
+          {
+            "house": "north",
+            "temperature_c": 12,
+            "tags": [
+              "checked"
+            ]
+          },
+          {
+            "house": "south",
+            "temperature_c": 18,
+            "tags": []
+          }
+        ]
+      },
+      {
+        "name": "A new note belongs to the middle report",
+        "data": {
+          "houses": [
+            "east",
+            "west",
+            "roof"
+          ],
+          "readings": [
+            5,
+            15,
+            25
+          ],
+          "record_index": 1,
+          "note": "recalibrated",
+          "shared_empty": []
+        },
+        "expected": [
+          {
+            "house": "east",
+            "temperature_c": 5,
+            "tags": []
+          },
+          {
+            "house": "west",
+            "temperature_c": 15,
+            "tags": [
+              "recalibrated"
+            ]
+          },
+          {
+            "house": "roof",
+            "temperature_c": 25,
+            "tags": []
+          }
+        ]
+      },
+      {
+        "name": "One report still owns a list",
+        "data": {
+          "houses": [
+            "lab"
+          ],
+          "readings": [
+            0
+          ],
+          "record_index": 0,
+          "note": "review",
+          "shared_empty": []
+        },
+        "expected": [
+          {
+            "house": "lab",
+            "temperature_c": 0,
+            "tags": [
+              "review"
+            ]
+          }
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "pyDesignAppendRowList",
+      "inputs": [
+        {
+          "op": "pyDesignAttachLists",
+          "inputs": [
+            {
+              "op": "pyDesignNamedRows",
+              "inputs": [
+                {
+                  "source": "houses"
+                },
+                {
+                  "source": "readings"
+                }
+              ],
+              "settings": {
+                "nameField": "house",
+                "valueField": "temperature_c"
+              }
+            },
+            {
+              "op": "pyDesignFreshLists",
+              "inputs": [
+                {
+                  "op": "pyDesignCount",
+                  "inputs": [
+                    {
+                      "source": "houses"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "settings": {
+            "field": "tags"
+          }
+        },
+        {
+          "source": "record_index"
+        },
+        {
+          "source": "note"
+        }
+      ],
+      "settings": {
+        "field": "tags"
+      }
+    },
+    "why": "Separate default containers prevent a note assigned to one report from appearing in its neighbors.",
+    "limitation": "These are ordinary teaching records, not Python dataclass instances. The floor returns a private new state to display alias behavior without changing the supplied fixtures.",
+    "extras": [
+      "pyDesignRepeatList"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-composition",
+    "title": "Replace calibration without rebuilding the alert rule",
+    "problem": "A new reading source needs a different calibration, but greenhouse identity and the alert agreement must stay intact.",
+    "challenge": "Read scale and offset from the supplied policy. Calibrate the readings, compare them with the inclusive limit, and return accepted named records as alerts plus their count.",
+    "sources": {
+      "houses": "House names in reading order",
+      "readings": "Uncalibrated numerical readings",
+      "policy": "Calibration record with scale and offset",
+      "limit": "Inclusive calibrated Celsius limit"
+    },
+    "cases": [
+      {
+        "name": "Original calibration",
+        "data": {
+          "houses": [
+            "north",
+            "south",
+            "roof"
+          ],
+          "readings": [
+            10,
+            14,
+            18
+          ],
+          "policy": {
+            "scale": 1,
+            "offset": 0
+          },
+          "limit": 15
+        },
+        "expected": {
+          "alerts": [
+            {
+              "house": "roof",
+              "temperature_c": 18
+            }
+          ],
+          "count": 1
+        }
+      },
+      {
+        "name": "The calibration component changes",
+        "data": {
+          "houses": [
+            "north",
+            "south",
+            "roof"
+          ],
+          "readings": [
+            10,
+            14,
+            18
+          ],
+          "policy": {
+            "scale": 2,
+            "offset": -5
+          },
+          "limit": 15
+        },
+        "expected": {
+          "alerts": [
+            {
+              "house": "north",
+              "temperature_c": 15
+            },
+            {
+              "house": "south",
+              "temperature_c": 23
+            },
+            {
+              "house": "roof",
+              "temperature_c": 31
+            }
+          ],
+          "count": 3
+        }
+      },
+      {
+        "name": "No accepted alerts",
+        "data": {
+          "houses": [
+            "west"
+          ],
+          "readings": [
+            2
+          ],
+          "policy": {
+            "scale": 1,
+            "offset": 0
+          },
+          "limit": 15
+        },
+        "expected": {
+          "alerts": [],
+          "count": 0
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyDesignRecordPair",
+      "inputs": [
+        {
+          "op": "pyDesignMask",
+          "inputs": [
+            {
+              "op": "pyDesignNamedRows",
+              "inputs": [
+                {
+                  "source": "houses"
+                },
+                {
+                  "op": "pyDesignOffset",
+                  "inputs": [
+                    {
+                      "op": "pyDesignScale",
+                      "inputs": [
+                        {
+                          "source": "readings"
+                        },
+                        {
+                          "op": "pyDesignField",
+                          "inputs": [
+                            {
+                              "source": "policy"
+                            }
+                          ],
+                          "settings": {
+                            "field": "scale"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "op": "pyDesignField",
+                      "inputs": [
+                        {
+                          "source": "policy"
+                        }
+                      ],
+                      "settings": {
+                        "field": "offset"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "settings": {
+                "nameField": "house",
+                "valueField": "temperature_c"
+              }
+            },
+            {
+              "op": "pyDesignAtLeast",
+              "inputs": [
+                {
+                  "op": "pyDesignOffset",
+                  "inputs": [
+                    {
+                      "op": "pyDesignScale",
+                      "inputs": [
+                        {
+                          "source": "readings"
+                        },
+                        {
+                          "op": "pyDesignField",
+                          "inputs": [
+                            {
+                              "source": "policy"
+                            }
+                          ],
+                          "settings": {
+                            "field": "scale"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "op": "pyDesignField",
+                      "inputs": [
+                        {
+                          "source": "policy"
+                        }
+                      ],
+                      "settings": {
+                        "field": "offset"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "source": "limit"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "pyDesignCount",
+          "inputs": [
+            {
+              "op": "pyDesignMask",
+              "inputs": [
+                {
+                  "op": "pyDesignNamedRows",
+                  "inputs": [
+                    {
+                      "source": "houses"
+                    },
+                    {
+                      "op": "pyDesignOffset",
+                      "inputs": [
+                        {
+                          "op": "pyDesignScale",
+                          "inputs": [
+                            {
+                              "source": "readings"
+                            },
+                            {
+                              "op": "pyDesignField",
+                              "inputs": [
+                                {
+                                  "source": "policy"
+                                }
+                              ],
+                              "settings": {
+                                "field": "scale"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "op": "pyDesignField",
+                          "inputs": [
+                            {
+                              "source": "policy"
+                            }
+                          ],
+                          "settings": {
+                            "field": "offset"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "settings": {
+                    "nameField": "house",
+                    "valueField": "temperature_c"
+                  }
+                },
+                {
+                  "op": "pyDesignAtLeast",
+                  "inputs": [
+                    {
+                      "op": "pyDesignOffset",
+                      "inputs": [
+                        {
+                          "op": "pyDesignScale",
+                          "inputs": [
+                            {
+                              "source": "readings"
+                            },
+                            {
+                              "op": "pyDesignField",
+                              "inputs": [
+                                {
+                                  "source": "policy"
+                                }
+                              ],
+                              "settings": {
+                                "field": "scale"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "op": "pyDesignField",
+                          "inputs": [
+                            {
+                              "source": "policy"
+                            }
+                          ],
+                          "settings": {
+                            "field": "offset"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "source": "limit"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "firstField": "alerts",
+        "secondField": "count"
+      }
+    },
+    "why": "Independent components keep the policy, numerical transformation and named report connected through explicit inputs.",
+    "limitation": "The floor composes pure data operations. Python objects provide source and sink interfaces; no real device or external delivery is simulated here.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-fail-fast",
+    "title": "Check the Whole Batch Before Writing",
+    "problem": "Botie receives measurements for one all-or-nothing save. A late invalid item must prevent every planned write.",
+    "challenge": "Check each representation and positive value, combine the aligned flags, and connect the complete decision before the planned write. Return status, writes and badPositions. Positions start at zero.",
+    "sources": {
+      "values": "Incoming measurements"
+    },
+    "cases": [
+      {
+        "name": "A valid batch",
+        "data": {
+          "values": [
+            5,
+            8,
+            2
+          ]
+        },
+        "expected": {
+          "status": "accepted",
+          "writes": [
+            5,
+            8,
+            2
+          ],
+          "badPositions": []
+        }
+      },
+      {
+        "name": "The final item is invalid",
+        "data": {
+          "values": [
+            5,
+            8,
+            "two"
+          ]
+        },
+        "expected": {
+          "status": "rejected",
+          "writes": [],
+          "badPositions": [
+            2
+          ]
+        }
+      },
+      {
+        "name": "A nonpositive measurement",
+        "data": {
+          "values": [
+            4,
+            0,
+            6
+          ]
+        },
+        "expected": {
+          "status": "rejected",
+          "writes": [],
+          "badPositions": [
+            1
+          ]
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyValidationGateWrite",
+      "inputs": [
+        {
+          "op": "pyValidationMaskAnd",
+          "inputs": [
+            {
+              "op": "pyValidationNumberFlags",
+              "inputs": [
+                {
+                  "source": "values"
+                }
+              ]
+            },
+            {
+              "op": "pyValidationPositiveFlags",
+              "inputs": [
+                {
+                  "source": "values"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source": "values"
+        }
+      ]
+    },
+    "why": "Each input reaches its checks before the write decision. A rejected late item leaves the planned write list empty.",
+    "limitation": "This workshop plans an in-memory write. It does not save data, implement a transaction, run Python, or distinguish JSON numeric spellings such as 3 and 3.0.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-pydantic-models",
+    "title": "Separate Omission from a Nullable Value",
+    "problem": "Botie receives a report record. The title and note keys are required; note may contain text or null. The unit field defaults to celsius only when its key is absent.",
+    "challenge": "Check required-key presence and the nullable note independently. Add the unit omission default, then return accepted and record. A rejected request has record:null. This small workshop checks only the stated presence and note rules.",
+    "sources": {
+      "request": "Report record",
+      "required": "Required keys",
+      "noteKey": "Nullable note key",
+      "defaultKey": "Field with an omission default",
+      "defaultValue": "Omission default"
+    },
+    "cases": [
+      {
+        "name": "A supplied null note",
+        "data": {
+          "request": {
+            "title": "North report",
+            "note": null
+          },
+          "required": [
+            "title",
+            "note"
+          ],
+          "noteKey": "note",
+          "defaultKey": "unit",
+          "defaultValue": "celsius"
+        },
+        "expected": {
+          "accepted": true,
+          "record": {
+            "title": "North report",
+            "note": null,
+            "unit": "celsius"
+          }
+        }
+      },
+      {
+        "name": "A note key is absent",
+        "data": {
+          "request": {
+            "title": "North report"
+          },
+          "required": [
+            "title",
+            "note"
+          ],
+          "noteKey": "note",
+          "defaultKey": "unit",
+          "defaultValue": "celsius"
+        },
+        "expected": {
+          "accepted": false,
+          "record": null
+        }
+      },
+      {
+        "name": "An explicit unit is retained",
+        "data": {
+          "request": {
+            "title": "South report",
+            "note": "Check later",
+            "unit": "kelvin"
+          },
+          "required": [
+            "title",
+            "note"
+          ],
+          "noteKey": "note",
+          "defaultKey": "unit",
+          "defaultValue": "celsius"
+        },
+        "expected": {
+          "accepted": true,
+          "record": {
+            "title": "South report",
+            "note": "Check later",
+            "unit": "kelvin"
+          }
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyValidationReport",
+      "inputs": [
+        {
+          "op": "pyValidationDefaultField",
+          "inputs": [
+            {
+              "source": "request"
+            },
+            {
+              "source": "defaultKey"
+            },
+            {
+              "source": "defaultValue"
+            }
+          ]
+        },
+        {
+          "op": "pyValidationAll",
+          "inputs": [
+            {
+              "op": "pyValidationPresence",
+              "inputs": [
+                {
+                  "source": "request"
+                },
+                {
+                  "source": "required"
+                }
+              ]
+            },
+            {
+              "op": "pyValidationNullableText",
+              "inputs": [
+                {
+                  "source": "request"
+                },
+                {
+                  "source": "noteKey"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Presence is checked on the incoming record. The nullable-value check does not turn a missing key into a supplied null.",
+    "limitation": "These components expose presence, nullability and omission defaults. They do not execute Pydantic, reproduce all its type rules, or verify the title’s business meaning. JSON null represents Python None here.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-pydantic-constraints",
+    "title": "Check a Capture Range before Accepting It",
+    "problem": "Botie receives endpoints and a requested count. Every local rule must pass: finite endpoints in increasing order, a positive integer count at most the supplied maximum, and no unknown keys.",
+    "challenge": "Read the named fields, check their range and count rules, and combine those checks with the allowed-key check. Return accepted and record, using record:null on rejection. All sample records contain the named endpoint and count fields.",
+    "sources": {
+      "request": "Capture request",
+      "lowerKey": "Lower endpoint key",
+      "upperKey": "Upper endpoint key",
+      "countKey": "Requested-count key",
+      "maximumCount": "Maximum count",
+      "allowed": "Allowed field names"
+    },
+    "cases": [
+      {
+        "name": "An ordinary capture",
+        "data": {
+          "request": {
+            "lower": 2,
+            "upper": 9,
+            "count": 4
+          },
+          "lowerKey": "lower",
+          "upperKey": "upper",
+          "countKey": "count",
+          "maximumCount": 20,
+          "allowed": [
+            "lower",
+            "upper",
+            "count"
+          ]
+        },
+        "expected": {
+          "accepted": true,
+          "record": {
+            "lower": 2,
+            "upper": 9,
+            "count": 4
+          }
+        }
+      },
+      {
+        "name": "The endpoints reverse",
+        "data": {
+          "request": {
+            "lower": 9,
+            "upper": 2,
+            "count": 4
+          },
+          "lowerKey": "lower",
+          "upperKey": "upper",
+          "countKey": "count",
+          "maximumCount": 20,
+          "allowed": [
+            "lower",
+            "upper",
+            "count"
+          ]
+        },
+        "expected": {
+          "accepted": false,
+          "record": null
+        }
+      },
+      {
+        "name": "An unknown field arrives",
+        "data": {
+          "request": {
+            "lower": -2,
+            "upper": 5,
+            "count": 8,
+            "counts": 3
+          },
+          "lowerKey": "lower",
+          "upperKey": "upper",
+          "countKey": "count",
+          "maximumCount": 20,
+          "allowed": [
+            "lower",
+            "upper",
+            "count"
+          ]
+        },
+        "expected": {
+          "accepted": false,
+          "record": null
+        }
+      },
+      {
+        "name": "The inclusive count limit",
+        "data": {
+          "request": {
+            "lower": 0,
+            "upper": 1,
+            "count": 20
+          },
+          "lowerKey": "lower",
+          "upperKey": "upper",
+          "countKey": "count",
+          "maximumCount": 20,
+          "allowed": [
+            "lower",
+            "upper",
+            "count"
+          ]
+        },
+        "expected": {
+          "accepted": true,
+          "record": {
+            "lower": 0,
+            "upper": 1,
+            "count": 20
+          }
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyValidationReport",
+      "inputs": [
+        {
+          "source": "request"
+        },
+        {
+          "op": "pyValidationAll",
+          "inputs": [
+            {
+              "op": "pyValidationAll",
+              "inputs": [
+                {
+                  "op": "pyValidationOrdered",
+                  "inputs": [
+                    {
+                      "op": "pyValidationGetField",
+                      "inputs": [
+                        {
+                          "source": "request"
+                        },
+                        {
+                          "source": "lowerKey"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "pyValidationGetField",
+                      "inputs": [
+                        {
+                          "source": "request"
+                        },
+                        {
+                          "source": "upperKey"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "pyValidationBoundedInteger",
+                  "inputs": [
+                    {
+                      "op": "pyValidationGetField",
+                      "inputs": [
+                        {
+                          "source": "request"
+                        },
+                        {
+                          "source": "countKey"
+                        }
+                      ]
+                    },
+                    {
+                      "source": "maximumCount"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "pyValidationKnownFields",
+              "inputs": [
+                {
+                  "source": "request"
+                },
+                {
+                  "source": "allowed"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The ordering check needs both endpoints. The count check and the allowed-key check are separate requirements; passing one cannot substitute for the others.",
+    "limitation": "This is a local contract-checking construction, not Pydantic. JSON numbers cannot distinguish Python 3 from 3.0. The real strict-integer representation tests run in the Python exercises.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-exceptions",
+    "title": "Keep Parsed Counts beside Their Rejections",
+    "problem": "Botie imports count fields as text. The declared local parser accepts small signed decimal strings and keeps an outcome for every original position.",
+    "challenge": "Parse the text fields, reject negative parsed counts, then collect successful values on one branch and rejected positions on another. Return {\"values\":[...],\"rejected\":[...]}. Keep the original order in both lists. Zero is an allowed count.",
+    "sources": {
+      "fields": "Incoming text count fields"
+    },
+    "cases": [
+      {
+        "name": "All fields parse",
+        "data": {
+          "fields": [
+            "8",
+            "3",
+            "5"
+          ]
+        },
+        "expected": {
+          "values": [
+            8,
+            3,
+            5
+          ],
+          "rejected": []
+        }
+      },
+      {
+        "name": "A middle field needs correction",
+        "data": {
+          "fields": [
+            "8",
+            "unknown",
+            "5"
+          ]
+        },
+        "expected": {
+          "values": [
+            8,
+            5
+          ],
+          "rejected": [
+            1
+          ]
+        }
+      },
+      {
+        "name": "More than one rejected position",
+        "data": {
+          "fields": [
+            "bad",
+            " 2 ",
+            "later",
+            "4"
+          ]
+        },
+        "expected": {
+          "values": [
+            2,
+            4
+          ],
+          "rejected": [
+            0,
+            2
+          ]
+        }
+      },
+      {
+        "name": "A parsed negative count is rejected",
+        "data": {
+          "fields": [
+            "4",
+            "-1",
+            "7"
+          ]
+        },
+        "expected": {
+          "values": [
+            4,
+            7
+          ],
+          "rejected": [
+            1
+          ]
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyValidationParseReport",
+      "inputs": [
+        {
+          "op": "pyValidationSuccessfulValues",
+          "inputs": [
+            {
+              "op": "pyValidationNonnegativeOutcomes",
+              "inputs": [
+                {
+                  "op": "pyValidationParseIntegers",
+                  "inputs": [
+                    {
+                      "source": "fields"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "pyValidationFailurePositions",
+          "inputs": [
+            {
+              "op": "pyValidationNonnegativeOutcomes",
+              "inputs": [
+                {
+                  "op": "pyValidationParseIntegers",
+                  "inputs": [
+                    {
+                      "source": "fields"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Both branches come from the same checked outcomes. Conversion failures and negative counts retain their original positions.",
+    "limitation": "These are real local decimal-parsing outcomes, not Python exceptions. The workshop grammar is deliberately narrower than int(), uses safe-sized JS numbers, and does not model exception inheritance or tracebacks.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-mutation",
+    "title": "Edit the Draft while Preserving Its Source",
+    "problem": "Botie needs a new tagged draft while keeping the original record available for comparison.",
+    "challenge": "Read the tag list, append into a new list, and replace tags in a new record. Return {\"original\":...,\"edited\":...}. Preserve the original and every other nested field.",
+    "sources": {
+      "record": "Original record",
+      "tagKey": "Tag-list field name",
+      "newTag": "Tag to add"
+    },
+    "cases": [
+      {
+        "name": "Add one draft tag",
+        "data": {
+          "record": {
+            "tags": [
+              "raw"
+            ],
+            "settings": {
+              "reviewed": false
+            }
+          },
+          "tagKey": "tags",
+          "newTag": "checked"
+        },
+        "expected": {
+          "original": {
+            "tags": [
+              "raw"
+            ],
+            "settings": {
+              "reviewed": false
+            }
+          },
+          "edited": {
+            "tags": [
+              "raw",
+              "checked"
+            ],
+            "settings": {
+              "reviewed": false
+            }
+          }
+        }
+      },
+      {
+        "name": "The next draft has different tags",
+        "data": {
+          "record": {
+            "tags": [
+              "daily",
+              "north"
+            ],
+            "settings": {
+              "reviewed": true
+            }
+          },
+          "tagKey": "tags",
+          "newTag": "archived"
+        },
+        "expected": {
+          "original": {
+            "tags": [
+              "daily",
+              "north"
+            ],
+            "settings": {
+              "reviewed": true
+            }
+          },
+          "edited": {
+            "tags": [
+              "daily",
+              "north",
+              "archived"
+            ],
+            "settings": {
+              "reviewed": true
+            }
+          }
+        }
+      },
+      {
+        "name": "Start from no tags",
+        "data": {
+          "record": {
+            "tags": [],
+            "settings": {
+              "owner": "Ari"
+            }
+          },
+          "tagKey": "tags",
+          "newTag": "new"
+        },
+        "expected": {
+          "original": {
+            "tags": [],
+            "settings": {
+              "owner": "Ari"
+            }
+          },
+          "edited": {
+            "tags": [
+              "new"
+            ],
+            "settings": {
+              "owner": "Ari"
+            }
+          }
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyValidationCopiesReport",
+      "inputs": [
+        {
+          "source": "record"
+        },
+        {
+          "op": "pyValidationPutField",
+          "inputs": [
+            {
+              "source": "record"
+            },
+            {
+              "source": "tagKey"
+            },
+            {
+              "op": "pyValidationAppend",
+              "inputs": [
+                {
+                  "op": "pyValidationGetField",
+                  "inputs": [
+                    {
+                      "source": "record"
+                    },
+                    {
+                      "source": "tagKey"
+                    }
+                  ]
+                },
+                {
+                  "source": "newTag"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The edited tag list is constructed from the current source. Both records remain visible in the final result.",
+    "limitation": "The components implement explicit copies of JSON-compatible data. They do not expose Python object identity, aliasing or arbitrary deepcopy behavior; the Python exercises test those actual semantics.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-context-managers",
+    "title": "Close after Either Read Outcome",
+    "problem": "Botie opens a teaching resource and reads its decimal fields. A later field can fail, but the resource must still reach cleanup.",
+    "challenge": "Open the resource, attempt the read, close it, and return events, closed, values and error. A failed read returns values:[] and error:\"invalid_reading\"; it must still include the close event and closed:true.",
+    "sources": {
+      "name": "Resource name",
+      "fields": "Text fields to read"
+    },
+    "cases": [
+      {
+        "name": "A successful read",
+        "data": {
+          "name": "north.txt",
+          "fields": [
+            "2",
+            "5"
+          ]
+        },
+        "expected": {
+          "events": [
+            "open",
+            "read",
+            "close"
+          ],
+          "closed": true,
+          "values": [
+            2,
+            5
+          ],
+          "error": null
+        }
+      },
+      {
+        "name": "A field cannot be read",
+        "data": {
+          "name": "south.txt",
+          "fields": [
+            "2",
+            "bad",
+            "5"
+          ]
+        },
+        "expected": {
+          "events": [
+            "open",
+            "read",
+            "close"
+          ],
+          "closed": true,
+          "values": [],
+          "error": "invalid_reading"
+        }
+      },
+      {
+        "name": "An empty resource",
+        "data": {
+          "name": "empty.txt",
+          "fields": []
+        },
+        "expected": {
+          "events": [
+            "open",
+            "read",
+            "close"
+          ],
+          "closed": true,
+          "values": [],
+          "error": null
+        }
+      }
+    ],
+    "recipe": {
+      "op": "pyValidationResourceReport",
+      "inputs": [
+        {
+          "op": "pyValidationCloseResource",
+          "inputs": [
+            {
+              "op": "pyValidationReadResource",
+              "inputs": [
+                {
+                  "op": "pyValidationOpenResource",
+                  "inputs": [
+                    {
+                      "source": "name"
+                    }
+                  ]
+                },
+                {
+                  "source": "fields"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The read outcome passes through the same cleanup component on both paths. An error remains visible after the resource is marked closed.",
+    "limitation": "This is an explicit local lifetime record, not a filesystem or a simulation of Python exception unwinding. The decimal grammar and JS numbers are limited; real with/contextmanager behavior is exercised in Python.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-testing",
+    "title": "Find the failing alert cases",
+    "problem": "Botie has case names, observed results and independent expectations in matching order.",
+    "challenge": "Compare actual and expected results, then use mismatch decisions to retain failing names.",
+    "sources": {
+      "names": "Case names",
+      "actual": "Observed results",
+      "expected": "Independent expectations"
+    },
+    "cases": [
+      {
+        "name": "Boundary regression",
+        "data": {
+          "names": [
+            "below",
+            "boundary",
+            "above"
+          ],
+          "actual": [
+            0,
+            0,
+            1
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ]
+        },
+        "expected": [
+          "boundary"
+        ]
+      },
+      {
+        "name": "Two behaviors break",
+        "data": {
+          "names": [
+            "empty",
+            "boundary",
+            "above"
+          ],
+          "actual": [
+            1,
+            1,
+            0
+          ],
+          "expected": [
+            0,
+            1,
+            1
+          ]
+        },
+        "expected": [
+          "empty",
+          "above"
+        ]
+      },
+      {
+        "name": "All agree",
+        "data": {
+          "names": [
+            "below",
+            "boundary"
+          ],
+          "actual": [
+            0,
+            1
+          ],
+          "expected": [
+            0,
+            1
+          ]
+        },
+        "expected": []
+      }
+    ],
+    "recipe": {
+      "op": "pyProjectKeep",
+      "inputs": [
+        {
+          "source": "names"
+        },
+        {
+          "op": "pyProjectMismatch",
+          "inputs": [
+            {
+              "source": "actual"
+            },
+            {
+              "source": "expected"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Failed names come from observed differences rather than whether execution completed.",
+    "limitation": "The workshop compares supplied results. It does not execute Python or prove that the cases are sufficient.",
+    "extras": [
+      "constant",
+      "add",
+      "multiply",
+      "total",
+      "count"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-test-doubles",
+    "title": "Collect the requested named-record batches",
+    "problem": "Botie's supplied source fixtures return named Celsius records, including any per-record limit field.",
+    "challenge": "Look up each requested source batch and combine them in request order. Keep every record field and repeated request intact.",
+    "sources": {
+      "houses": "Requested source names",
+      "batches": "Controlled named-record batches"
+    },
+    "cases": [
+      {
+        "name": "Two recorded sources",
+        "data": {
+          "houses": [
+            "north",
+            "south"
+          ],
+          "batches": {
+            "north": [
+              {
+                "house": "north",
+                "temperature_c": 18
+              }
+            ],
+            "south": [
+              {
+                "house": "south",
+                "temperature_c": 25,
+                "limit": null
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "house": "north",
+            "temperature_c": 18
+          },
+          {
+            "house": "south",
+            "temperature_c": 25,
+            "limit": null
+          }
+        ]
+      },
+      {
+        "name": "Request order changes",
+        "data": {
+          "houses": [
+            "south",
+            "north"
+          ],
+          "batches": {
+            "north": [
+              {
+                "house": "north",
+                "temperature_c": 0
+              }
+            ],
+            "south": [
+              {
+                "house": "south",
+                "temperature_c": 5
+              },
+              {
+                "house": "south",
+                "temperature_c": 5
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "house": "south",
+            "temperature_c": 5
+          },
+          {
+            "house": "south",
+            "temperature_c": 5
+          },
+          {
+            "house": "north",
+            "temperature_c": 0
+          }
+        ]
+      },
+      {
+        "name": "No requested source",
+        "data": {
+          "houses": [],
+          "batches": {}
+        },
+        "expected": []
+      }
+    ],
+    "recipe": {
+      "op": "pyProjectFlatten",
+      "inputs": [
+        {
+          "op": "pyProjectLookup",
+          "inputs": [
+            {
+              "source": "houses"
+            },
+            {
+              "source": "batches"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The source preparation preserves the records the actual collector expects, rather than stripping names or optional settings.",
+    "limitation": "The lookup is a controlled input fixture. The floor does not execute collect_report, contact a device or promise complete-report delivery.",
+    "extras": [
+      "constant",
+      "add",
+      "multiply",
+      "total",
+      "count"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-modules",
+    "title": "List dependencies for a package",
+    "problem": "Botie has direct-import lists for a group of related modules.",
+    "challenge": "Read each imports field, combine those lists and retain each dependency's first occurrence.",
+    "sources": {
+      "modules": "Module records and direct imports"
+    },
+    "cases": [
+      {
+        "name": "Report modules",
+        "data": {
+          "modules": [
+            {
+              "name": "cli",
+              "imports": [
+                "io",
+                "summary"
+              ]
+            },
+            {
+              "name": "io",
+              "imports": [
+                "csv"
+              ]
+            },
+            {
+              "name": "summary",
+              "imports": [
+                "statistics"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          "io",
+          "summary",
+          "csv",
+          "statistics"
+        ]
+      },
+      {
+        "name": "Shared helper",
+        "data": {
+          "modules": [
+            {
+              "name": "a",
+              "imports": [
+                "shared",
+                "json"
+              ]
+            },
+            {
+              "name": "b",
+              "imports": [
+                "shared"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          "shared",
+          "json"
+        ]
+      },
+      {
+        "name": "No imports",
+        "data": {
+          "modules": [
+            {
+              "name": "core",
+              "imports": []
+            }
+          ]
+        },
+        "expected": []
+      }
+    ],
+    "recipe": {
+      "op": "pyProjectUnique",
+      "inputs": [
+        {
+          "op": "pyProjectFlatten",
+          "inputs": [
+            {
+              "op": "pyProjectField",
+              "inputs": [
+                {
+                  "source": "modules"
+                }
+              ],
+              "settings": {
+                "field": "imports"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Repeated use does not create another dependency identity.",
+    "limitation": "This inspects an authored description. It neither parses Python nor detects every circular import.",
+    "extras": [
+      "constant",
+      "add",
+      "multiply",
+      "total",
+      "count"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-dependencies",
+    "title": "Compare a reviewed dependency snapshot",
+    "problem": "Botie has package names, reviewed versions and installed versions in matching order.",
+    "challenge": "Compare the version entries, then keep package names at differing positions.",
+    "sources": {
+      "names": "Requested packages",
+      "actual": "Installed snapshot",
+      "expected": "Reviewed versions"
+    },
+    "cases": [
+      {
+        "name": "One package changed",
+        "data": {
+          "names": [
+            "parser",
+            "writer"
+          ],
+          "actual": [
+            "2.2",
+            "1.0"
+          ],
+          "expected": [
+            "2.1",
+            "1.0"
+          ]
+        },
+        "expected": [
+          "parser"
+        ]
+      },
+      {
+        "name": "A package is absent",
+        "data": {
+          "names": [
+            "writer",
+            "parser"
+          ],
+          "actual": [
+            null,
+            "2.1"
+          ],
+          "expected": [
+            "1.0",
+            "2.1"
+          ]
+        },
+        "expected": [
+          "writer"
+        ]
+      },
+      {
+        "name": "The snapshot agrees",
+        "data": {
+          "names": [
+            "parser"
+          ],
+          "actual": [
+            "2.1"
+          ],
+          "expected": [
+            "2.1"
+          ]
+        },
+        "expected": []
+      }
+    ],
+    "recipe": {
+      "op": "pyProjectKeep",
+      "inputs": [
+        {
+          "source": "names"
+        },
+        {
+          "op": "pyProjectMismatch",
+          "inputs": [
+            {
+              "source": "actual"
+            },
+            {
+              "source": "expected"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The inventory identifies exact drift before behavior is retested.",
+    "limitation": "Snapshot equality does not establish compatibility, trustworthiness or target-platform execution.",
+    "extras": [
+      "constant",
+      "add",
+      "multiply",
+      "total",
+      "count"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-configuration",
+    "title": "Check a timeout before use",
+    "problem": "Botie receives raw timeout text and explicit allowed limits.",
+    "challenge": "Parse the integer, then require it to lie within the supplied inclusive range. An unparsed value must fail.",
+    "sources": {
+      "raw": "Raw timeout",
+      "minimum": "Minimum seconds",
+      "maximum": "Maximum seconds"
+    },
+    "cases": [
+      {
+        "name": "Valid text",
+        "data": {
+          "raw": "12",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "expected": true
+      },
+      {
+        "name": "Too small",
+        "data": {
+          "raw": "0",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "expected": false
+      },
+      {
+        "name": "Not integer text",
+        "data": {
+          "raw": "fast",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "expected": false
+      },
+      {
+        "name": "Upper boundary",
+        "data": {
+          "raw": "60",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "expected": true
+      }
+    ],
+    "recipe": {
+      "op": "pyProjectInRange",
+      "inputs": [
+        {
+          "op": "pyProjectParseInteger",
+          "inputs": [
+            {
+              "source": "raw"
+            }
+          ]
+        },
+        {
+          "source": "minimum"
+        },
+        {
+          "source": "maximum"
+        }
+      ]
+    },
+    "why": "Parsing and the permitted range answer separate questions.",
+    "limitation": "The workshop parser is a small decimal-integer teaching model and returns null on failure. It is not Python's full parser or Pydantic. The coding task has a narrower ASCII-digit contract.",
+    "extras": [
+      "constant",
+      "add",
+      "multiply",
+      "total",
+      "count"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-code-checks",
+    "title": "Keep execution and success separate",
+    "problem": "Botie receives every mandatory check record for one source revision.",
+    "challenge": "Read ran and passed on separate branches. Require both per position, then accept only a nonempty set of passing decisions.",
+    "sources": {
+      "checks": "Mandatory check records"
+    },
+    "cases": [
+      {
+        "name": "One check skipped",
+        "data": {
+          "checks": [
+            {
+              "name": "format",
+              "ran": true,
+              "passed": true
+            },
+            {
+              "name": "tests",
+              "ran": false,
+              "passed": true
+            }
+          ]
+        },
+        "expected": false
+      },
+      {
+        "name": "A check failed",
+        "data": {
+          "checks": [
+            {
+              "name": "format",
+              "ran": true,
+              "passed": true
+            },
+            {
+              "name": "tests",
+              "ran": true,
+              "passed": false
+            }
+          ]
+        },
+        "expected": false
+      },
+      {
+        "name": "All required checks passed",
+        "data": {
+          "checks": [
+            {
+              "name": "typing",
+              "ran": true,
+              "passed": true
+            },
+            {
+              "name": "tests",
+              "ran": true,
+              "passed": true
+            }
+          ]
+        },
+        "expected": true
+      },
+      {
+        "name": "No evidence",
+        "data": {
+          "checks": []
+        },
+        "expected": false
+      }
+    ],
+    "recipe": {
+      "op": "pyProjectAll",
+      "inputs": [
+        {
+          "op": "pyProjectAnd",
+          "inputs": [
+            {
+              "op": "pyProjectField",
+              "inputs": [
+                {
+                  "source": "checks"
+                }
+              ],
+              "settings": {
+                "field": "ran"
+              }
+            },
+            {
+              "op": "pyProjectField",
+              "inputs": [
+                {
+                  "source": "checks"
+                }
+              ],
+              "settings": {
+                "field": "passed"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Running and passing are separate conditions before checks are combined.",
+    "limitation": "The fixture is the complete required set for one revision. A real build system must establish required names and revision identity.",
+    "extras": [
+      "constant",
+      "add",
+      "multiply",
+      "total",
+      "count"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-logging",
+    "title": "Choose diagnostic events and fields",
+    "problem": "Botie receives event records with severity, batch IDs and private placeholder fields.",
+    "challenge": "Apply severity decisions to keep events, then produce records with only the supplied allowed fields.",
+    "sources": {
+      "events": "Operational events",
+      "minimum": "Minimum level",
+      "fields": "Allowed field names"
+    },
+    "cases": [
+      {
+        "name": "Warnings and errors",
+        "data": {
+          "events": [
+            {
+              "level": "INFO",
+              "batch_id": "A",
+              "token": "placeholder"
+            },
+            {
+              "level": "WARNING",
+              "batch_id": "B",
+              "token": "placeholder"
+            },
+            {
+              "level": "ERROR",
+              "batch_id": "C",
+              "token": "placeholder"
+            }
+          ],
+          "minimum": "WARNING",
+          "fields": [
+            "level",
+            "batch_id"
+          ]
+        },
+        "expected": [
+          {
+            "level": "WARNING",
+            "batch_id": "B"
+          },
+          {
+            "level": "ERROR",
+            "batch_id": "C"
+          }
+        ]
+      },
+      {
+        "name": "Only errors",
+        "data": {
+          "events": [
+            {
+              "level": "WARNING",
+              "batch_id": "B",
+              "token": "placeholder"
+            },
+            {
+              "level": "ERROR",
+              "batch_id": "C",
+              "token": "placeholder"
+            }
+          ],
+          "minimum": "ERROR",
+          "fields": [
+            "batch_id"
+          ]
+        },
+        "expected": [
+          {
+            "batch_id": "C"
+          }
+        ]
+      },
+      {
+        "name": "No matching event",
+        "data": {
+          "events": [
+            {
+              "level": "DEBUG",
+              "batch_id": "D",
+              "token": "placeholder"
+            }
+          ],
+          "minimum": "CRITICAL",
+          "fields": [
+            "level"
+          ]
+        },
+        "expected": []
+      }
+    ],
+    "recipe": {
+      "op": "pyProjectSelectFields",
+      "inputs": [
+        {
+          "op": "pyProjectKeep",
+          "inputs": [
+            {
+              "source": "events"
+            },
+            {
+              "op": "pyProjectSeverityMask",
+              "inputs": [
+                {
+                  "source": "events"
+                },
+                {
+                  "source": "minimum"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source": "fields"
+        }
+      ]
+    },
+    "why": "A selected event need not copy its attached private fields.",
+    "limitation": "These operations inspect invented records locally. They do not send logs or reproduce the full logger and handler hierarchy.",
+    "extras": [
+      "constant",
+      "add",
+      "multiply",
+      "total",
+      "count"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "python-profiling",
+    "title": "Find expensive repeated work",
+    "problem": "Botie has operation names, counts and mean self milliseconds per call from an invented profile.",
+    "challenge": "Multiply aligned counts and mean self costs. Find the largest product's position, then retrieve its operation name.",
+    "sources": {
+      "names": "Operation names",
+      "calls": "Calls per operation",
+      "per_call": "Mean self milliseconds per call"
+    },
+    "cases": [
+      {
+        "name": "Repeated lookup dominates",
+        "data": {
+          "names": [
+            "parse",
+            "lookup",
+            "format"
+          ],
+          "calls": [
+            100,
+            1000,
+            1
+          ],
+          "per_call": [
+            0.1,
+            0.02,
+            5
+          ]
+        },
+        "expected": "lookup"
+      },
+      {
+        "name": "One call becomes expensive",
+        "data": {
+          "names": [
+            "parse",
+            "lookup",
+            "format"
+          ],
+          "calls": [
+            100,
+            1000,
+            1
+          ],
+          "per_call": [
+            0.1,
+            0.002,
+            15
+          ]
+        },
+        "expected": "format"
+      },
+      {
+        "name": "Ties preserve order",
+        "data": {
+          "names": [
+            "first",
+            "second"
+          ],
+          "calls": [
+            2,
+            1
+          ],
+          "per_call": [
+            1,
+            2
+          ]
+        },
+        "expected": "first"
+      }
+    ],
+    "recipe": {
+      "op": "pyProjectAt",
+      "inputs": [
+        {
+          "source": "names"
+        },
+        {
+          "op": "pyProjectArgMax",
+          "inputs": [
+            {
+              "op": "multiply",
+              "inputs": [
+                {
+                  "source": "calls"
+                },
+                {
+                  "source": "per_call"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The name follows total estimated cost rather than call count alone.",
+    "limitation": "Supplied self-cost fixtures do not measure a real execution or establish that the selected operation can be improved.",
+    "extras": [
+      "constant",
+      "add",
+      "multiply",
+      "total",
+      "count"
+    ],
+    "draftVersion": 1
+  },
+  {
     "id": "software-feature-contracts",
     "title": "Reconnect the feature adapter",
     "problem": "A reordered sensor response changes Botie’s prediction.",
